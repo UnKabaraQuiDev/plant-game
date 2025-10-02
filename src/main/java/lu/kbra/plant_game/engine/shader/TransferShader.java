@@ -8,7 +8,7 @@ import lu.kbra.standalone.gameengine.graph.shader.RenderShader;
 import lu.kbra.standalone.gameengine.graph.shader.annotation.AssociatedShader;
 import lu.kbra.standalone.gameengine.graph.shader.part.AbstractShaderPart;
 import lu.kbra.standalone.gameengine.impl.Renderable;
-import lu.kbra.standalone.gameengine.utils.consts.FaceMode;
+import lu.kbra.standalone.gameengine.utils.gl.consts.FaceMode;
 
 public class TransferShader extends RenderShader {
 

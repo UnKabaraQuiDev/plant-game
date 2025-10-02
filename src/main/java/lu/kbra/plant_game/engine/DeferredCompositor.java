@@ -1,8 +1,6 @@
 package lu.kbra.plant_game.engine;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
@@ -12,6 +10,8 @@ import org.joml.Vector4f;
 
 import lu.pcy113.pclib.logger.GlobalLogger;
 
+import lu.kbra.plant_game.engine.shader.BlitShader.BlitMaterial;
+import lu.kbra.plant_game.engine.shader.MaskComputeShader;
 import lu.kbra.plant_game.engine.shader.TransferShader;
 import lu.kbra.plant_game.engine.shader.TransferShader.TransferMaterial;
 import lu.kbra.standalone.gameengine.GameEngine;
@@ -23,8 +23,8 @@ import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.graph.MaterialFactory;
 import lu.kbra.standalone.gameengine.graph.composition.buffer.Framebuffer;
 import lu.kbra.standalone.gameengine.graph.composition.buffer.RenderBuffer;
-import lu.kbra.standalone.gameengine.graph.composition.layer.PassRenderLayer;
 import lu.kbra.standalone.gameengine.graph.render.Scene3DRenderer;
+import lu.kbra.standalone.gameengine.graph.shader.ComputeShader;
 import lu.kbra.standalone.gameengine.graph.shader.RenderShader;
 import lu.kbra.standalone.gameengine.graph.texture.SingleTexture;
 import lu.kbra.standalone.gameengine.impl.Cleanupable;
@@ -36,14 +36,15 @@ import lu.kbra.standalone.gameengine.objs.entity.components.TransformComponent;
 import lu.kbra.standalone.gameengine.scene.Scene2D;
 import lu.kbra.standalone.gameengine.scene.Scene3D;
 import lu.kbra.standalone.gameengine.scene.camera.Camera3D;
-import lu.kbra.standalone.gameengine.utils.consts.DataType;
-import lu.kbra.standalone.gameengine.utils.consts.FrameBufferAttachment;
-import lu.kbra.standalone.gameengine.utils.consts.TexelFormat;
-import lu.kbra.standalone.gameengine.utils.consts.TexelInternalFormat;
-import lu.kbra.standalone.gameengine.utils.consts.TextureFilter;
+import lu.kbra.standalone.gameengine.utils.gl.consts.DataType;
+import lu.kbra.standalone.gameengine.utils.gl.consts.FrameBufferAttachment;
+import lu.kbra.standalone.gameengine.utils.gl.consts.TexelFormat;
+import lu.kbra.standalone.gameengine.utils.gl.consts.TexelInternalFormat;
+import lu.kbra.standalone.gameengine.utils.gl.consts.TextureFilter;
+import lu.kbra.standalone.gameengine.utils.gl.consts.TextureWrap;
 import lu.kbra.standalone.gameengine.utils.gl.wrapper.GL_W;
 
-public class SimpleCompositor implements Cleanupable {
+public class DeferredCompositor implements Cleanupable {
 
 	private static final String WORLD_FRAMEBUFFER_NAME = "_WORLD_FRAMEBUFFER";
 	private static final int WORLD_FRAMEBUFFER_POS_IDX = 0;
@@ -65,7 +66,10 @@ public class SimpleCompositor implements Cleanupable {
 
 	protected Framebuffer worldFramebuffer;
 	protected TransferMaterial transferMaterial;
-	protected List<PassRenderLayer> layers = new ArrayList<>();
+
+	protected SingleTexture outputTxt;
+	protected MaskComputeShader maskComputeShader;
+	protected BlitMaterial blitMaterial;
 
 	protected Vector2i resolution = new Vector2i(0, 0);
 	protected int samples = 1;
@@ -80,23 +84,82 @@ public class SimpleCompositor implements Cleanupable {
 		if (needRegen) {
 			resolution = new Vector2i(width, height);
 		}
+		if (maskComputeShader == null) {
+			maskComputeShader = new MaskComputeShader();
+			cache.addAbstractShader(maskComputeShader);
+		}
 
 		renderWorldScene(cache, worldScene, worldCache, width, height, needRegen);
 
-		GL_W.glClear(GL_W.GL_COLOR_BUFFER_BIT | GL_W.GL_DEPTH_BUFFER_BIT);
-		GL_W.checkError();
-
 		GL_W.glViewport(0, 0, width, height);
-		worldFramebuffer.bind(GL_W.GL_READ_FRAMEBUFFER);
-		GL_W.glBindFramebuffer(GL_W.GL_DRAW_FRAMEBUFFER, 0);
-		GL_W.checkError();
-		GL_W.glReadBuffer(FrameBufferAttachment.COLOR_FIRST.getGlId() + 1);
-		GL_W.checkError();
-		GL_W.glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_W.GL_COLOR_BUFFER_BIT, GL_W.GL_NEAREST);
-		GL_W.checkError();
-		GL_W.glBindFramebuffer(GL_W.GL_FRAMEBUFFER, 0);
-		GL_W.checkError();
+		GL_W.checkError("Viewport(" + resolution + ")");
+		GL_W.glClear(GL_W.GL_COLOR_BUFFER_BIT | GL_W.GL_DEPTH_BUFFER_BIT);
+		GL_W.checkError("Clear(COLOR | DEPTH)");
 
+		/*
+		 * worldFramebuffer.bind(GL_W.GL_READ_FRAMEBUFFER); GL_W.glBindFramebuffer(GL_W.GL_DRAW_FRAMEBUFFER,
+		 * 0); GL_W.checkError("BindFramebuffer(0)");
+		 * GL_W.glReadBuffer(FrameBufferAttachment.COLOR_FIRST.getGlId() + 1);
+		 * GL_W.checkError("ReadBuffer(COLOR1)"); GL_W.glBlitFramebuffer(0, 0, width, height, 0, 0, width,
+		 * height, GL_W.GL_COLOR_BUFFER_BIT, GL_W.GL_NEAREST); GL_W.checkError("BlitFramebuffer(" + width +
+		 * "x" + height + ", COLOR_BUFFER_BIT, NEAREST)"); GL_W.glBindFramebuffer(GL_W.GL_FRAMEBUFFER, 0);
+		 * GL_W.checkError("BindFramebuffer(0)");
+		 */
+
+		if (outputTxt == null) {
+			outputTxt = new SingleTexture("output", width, height);
+			outputTxt.setDataType(DataType.UBYTE);
+			outputTxt.setFormat(TexelFormat.RGBA);
+			outputTxt.setInternalFormat(TexelInternalFormat.RGBA8);
+			outputTxt.setFilters(TextureFilter.NEAREST);
+			outputTxt.setGenerateMipmaps(false);
+			outputTxt.setup();
+			cache.addTexture(outputTxt);
+		}
+
+		maskComputeShader.bind();
+
+		final SingleTexture posTxt = (SingleTexture) worldFramebuffer
+				.getAttachment(FrameBufferAttachment.COLOR_FIRST, WORLD_FRAMEBUFFER_POS_IDX);
+		final SingleTexture depthRb = (SingleTexture) worldFramebuffer.getAttachment(FrameBufferAttachment.DEPTH);
+
+		GL_W.glBindImageTexture(0, outputTxt.getTid(), 0, false, 0, GL_W.GL_WRITE_ONLY, TexelInternalFormat.RGBA8.getGlId());
+
+		posTxt.bind(0);
+		maskComputeShader.setUniform("uColorTex", posTxt.getTid());
+
+		depthRb.bind(1);
+		maskComputeShader.setUniform("uDepthTex", depthRb.getTid());
+
+		maskComputeShader.setUniform(ComputeShader.SCREEN_SIZE, resolution);
+
+		int groupsX = (width + 15) / 16;
+		int groupsY = (height + 15) / 16;
+		GL_W.glDispatchCompute(groupsX, groupsY, 1);
+		GL_W.glMemoryBarrier(GL_W.GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
+		maskComputeShader.unbind();
+
+		// blit to the screen
+
+		if (blitMaterial == null) {
+			blitMaterial = MaterialFactory.newMaterial(BlitMaterial.class, outputTxt);
+		}
+
+		blitMaterial.getRenderShader().bind();
+		blitMaterial.setScreenSize(resolution);
+		blitMaterial.bindProperties(cache, worldScene);
+
+		SCREEN.bind();
+
+		GL_W.glDisable(GL_W.GL_DEPTH_TEST);
+		GL_W.glBindFramebuffer(GL_W.GL_FRAMEBUFFER, 0);
+		GL_W.glDrawElements(GL_W.GL_TRIANGLES, SCREEN.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
+		GL_W.glEnable(GL_W.GL_DEPTH_TEST);
+
+		SCREEN.unbind();
+
+		blitMaterial.getRenderShader().unbind();
 	}
 
 	private void renderWorldScene(
@@ -219,10 +282,16 @@ public class SimpleCompositor implements Cleanupable {
 		framebuffer.gen();
 		framebuffer.bind();
 
-		final RenderBuffer rbDepth = new RenderBuffer(WORLD_FRAMEBUFFER_NAME + ".depth", width, height);
-		rbDepth.setTexelInternalFormat(TexelInternalFormat.DEPTH_COMPONENT24);
-		rbDepth.setup();
-		framebuffer.attachRenderBuffer(FrameBufferAttachment.DEPTH, 0, rbDepth);
+		final SingleTexture txtDepth = new SingleTexture(WORLD_FRAMEBUFFER_NAME + ".depth", width, height);
+		txtDepth.setDataType(DataType.FLOAT);
+		txtDepth.setFormat(TexelFormat.DEPTH);
+		txtDepth.setInternalFormat(TexelInternalFormat.DEPTH_COMPONENT24);
+		txtDepth.setFilters(TextureFilter.NEAREST);
+		txtDepth.setWraps(TextureWrap.CLAMP_TO_EDGE);
+		txtDepth.setGenerateMipmaps(false);
+		txtDepth.setup();
+		cache.addTexture(txtDepth);
+		framebuffer.attachTexture(FrameBufferAttachment.DEPTH, txtDepth);
 
 		final SingleTexture txtPos = new SingleTexture(WORLD_FRAMEBUFFER_NAME + ".pos", width, height);
 		txtPos.setDataType(DataType.FLOAT);

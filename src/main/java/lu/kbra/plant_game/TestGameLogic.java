@@ -4,7 +4,7 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
-import lu.kbra.plant_game.engine.SimpleCompositor;
+import lu.kbra.plant_game.engine.DeferredCompositor;
 import lu.kbra.standalone.gameengine.GameEngine;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.geom.CubeMesh;
@@ -23,7 +23,7 @@ public class TestGameLogic extends GameLogic {
 	private Scene2D uiScene;
 	private CacheManager worldCache;
 	private CacheManager uiCache;
-	private SimpleCompositor simpleCompositor;
+	private DeferredCompositor simpleCompositor;
 	private TextEmitter textEmitter;
 
 	@Override
@@ -31,7 +31,7 @@ public class TestGameLogic extends GameLogic {
 		worldCache = new CacheManager("world", cache);
 		worldScene.getCamera().lookAt(new Vector3f(2, 2, 0), new Vector3f(0, 0, 0)).updateMatrix();
 
-		simpleCompositor = new SimpleCompositor();
+		simpleCompositor = new DeferredCompositor();
 
 		final CubeMesh cubeMesh = new CubeMesh("cubeMesh", null, new Vector3f(0.5f));
 		worldCache.addMesh(cubeMesh);
