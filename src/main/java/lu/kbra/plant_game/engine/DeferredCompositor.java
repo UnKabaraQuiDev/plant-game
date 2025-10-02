@@ -10,7 +10,7 @@ import org.joml.Vector4f;
 
 import lu.pcy113.pclib.logger.GlobalLogger;
 
-import lu.kbra.plant_game.engine.shader.BlitShader.BlitMaterial;
+import lu.kbra.plant_game.engine.shader.BlitShader;
 import lu.kbra.plant_game.engine.shader.MaskComputeShader;
 import lu.kbra.plant_game.engine.shader.TransferShader;
 import lu.kbra.plant_game.engine.shader.TransferShader.TransferMaterial;
@@ -64,15 +64,15 @@ public class DeferredCompositor implements Cleanupable {
 
 	protected Vector4f background = new Vector4f(0);
 
+	protected SingleTexture depthTexture, posTexture, normalTexture, uvTexture, idsTexture;
 	protected Framebuffer worldFramebuffer;
 	protected TransferMaterial transferMaterial;
 
 	protected SingleTexture outputTxt;
 	protected MaskComputeShader maskComputeShader;
-	protected BlitMaterial blitMaterial;
+	protected BlitShader blitShader;
 
 	protected Vector2i resolution = new Vector2i(0, 0);
-	protected int samples = 1;
 
 	public void render(GameEngine engine, Scene3D worldScene, Scene2D uiScene, CacheManager worldCache, CacheManager uiCache) {
 		final int width = engine.getWindow().getWidth();
@@ -91,21 +91,10 @@ public class DeferredCompositor implements Cleanupable {
 
 		renderWorldScene(cache, worldScene, worldCache, width, height, needRegen);
 
-		GL_W.glViewport(0, 0, width, height);
-		GL_W.checkError("Viewport(" + resolution + ")");
-		GL_W.glClear(GL_W.GL_COLOR_BUFFER_BIT | GL_W.GL_DEPTH_BUFFER_BIT);
-		GL_W.checkError("Clear(COLOR | DEPTH)");
+		renderMaterials(cache, width, height, needRegen);
+	}
 
-		/*
-		 * worldFramebuffer.bind(GL_W.GL_READ_FRAMEBUFFER); GL_W.glBindFramebuffer(GL_W.GL_DRAW_FRAMEBUFFER,
-		 * 0); GL_W.checkError("BindFramebuffer(0)");
-		 * GL_W.glReadBuffer(FrameBufferAttachment.COLOR_FIRST.getGlId() + 1);
-		 * GL_W.checkError("ReadBuffer(COLOR1)"); GL_W.glBlitFramebuffer(0, 0, width, height, 0, 0, width,
-		 * height, GL_W.GL_COLOR_BUFFER_BIT, GL_W.GL_NEAREST); GL_W.checkError("BlitFramebuffer(" + width +
-		 * "x" + height + ", COLOR_BUFFER_BIT, NEAREST)"); GL_W.glBindFramebuffer(GL_W.GL_FRAMEBUFFER, 0);
-		 * GL_W.checkError("BindFramebuffer(0)");
-		 */
-
+	private void renderMaterials(CacheManager cache, int width, int height, boolean needRegen) {
 		if (outputTxt == null) {
 			outputTxt = new SingleTexture("output", width, height);
 			outputTxt.setDataType(DataType.UBYTE);
@@ -115,51 +104,74 @@ public class DeferredCompositor implements Cleanupable {
 			outputTxt.setGenerateMipmaps(false);
 			outputTxt.setup();
 			cache.addTexture(outputTxt);
+
+			maskComputeShader.bind();
+
+			GL_W.glBindImageTexture(0, outputTxt.getTid(), 0, false, 0, GL_W.GL_WRITE_ONLY, outputTxt.getInternalFormat().getGlId());
+
+			posTexture.bind(0);
+			maskComputeShader.createUniform("uColorTex");
+			maskComputeShader.setUniform("uColorTex", posTexture.getTid());
+
+			depthTexture.bind(1);
+			maskComputeShader.createUniform("uDepthTex");
+			maskComputeShader.setUniform("uDepthTex", depthTexture.getTid());
+		} else {
+			outputTxt.setSize(width, height);
+			outputTxt.bind();
+			outputTxt.resize();
+			outputTxt.unbind();
+
+			maskComputeShader.bind();
 		}
 
-		maskComputeShader.bind();
+		if (needRegen) {
+			maskComputeShader.createUniform(ComputeShader.SCREEN_SIZE);
+			maskComputeShader.setUniform(ComputeShader.SCREEN_SIZE, resolution);
+		}
 
-		final SingleTexture posTxt = (SingleTexture) worldFramebuffer
-				.getAttachment(FrameBufferAttachment.COLOR_FIRST, WORLD_FRAMEBUFFER_POS_IDX);
-		final SingleTexture depthRb = (SingleTexture) worldFramebuffer.getAttachment(FrameBufferAttachment.DEPTH);
-
-		GL_W.glBindImageTexture(0, outputTxt.getTid(), 0, false, 0, GL_W.GL_WRITE_ONLY, TexelInternalFormat.RGBA8.getGlId());
-
-		posTxt.bind(0);
-		maskComputeShader.setUniform("uColorTex", posTxt.getTid());
-
-		depthRb.bind(1);
-		maskComputeShader.setUniform("uDepthTex", depthRb.getTid());
-
-		maskComputeShader.setUniform(ComputeShader.SCREEN_SIZE, resolution);
-
-		int groupsX = (width + 15) / 16;
-		int groupsY = (height + 15) / 16;
+		final int groupsX = (width + 15) / 16;
+		final int groupsY = (height + 15) / 16;
 		GL_W.glDispatchCompute(groupsX, groupsY, 1);
+		assert GL_W.checkError("DispatchCompute(" + groupsX + "," + groupsY + ",1)");
 		GL_W.glMemoryBarrier(GL_W.GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+		assert GL_W.checkError("MemoryBarrier(SHADER_IMAGE_ACCESS_BARRIER_BIT)");
 
 		maskComputeShader.unbind();
 
 		// blit to the screen
 
-		if (blitMaterial == null) {
-			blitMaterial = MaterialFactory.newMaterial(BlitMaterial.class, outputTxt);
+		if (blitShader == null) {
+			blitShader = new BlitShader();
+			cache.addAbstractShader(blitShader);
 		}
 
-		blitMaterial.getRenderShader().bind();
-		blitMaterial.setScreenSize(resolution);
-		blitMaterial.bindProperties(cache, worldScene);
+		blitShader.bind();
+		if (needRegen) {
+			blitShader.createUniform(ComputeShader.SCREEN_SIZE);
+			blitShader.setUniform(ComputeShader.SCREEN_SIZE, resolution);
+			outputTxt.bind(height);
+			outputTxt.bindUniform(blitShader.getUniformLocation(BlitShader.TXT0), 0);
+		}
 
 		SCREEN.bind();
 
 		GL_W.glDisable(GL_W.GL_DEPTH_TEST);
+		assert GL_W.checkError("Disable(DEPTH_TEST)");
 		GL_W.glBindFramebuffer(GL_W.GL_FRAMEBUFFER, 0);
+		assert GL_W.checkError("BindFramebuffer(0)");
+		GL_W.glViewport(0, 0, width, height);
+		assert GL_W.checkError("Viewport(" + resolution + ")");
+		GL_W.glClear(GL_W.GL_COLOR_BUFFER_BIT | GL_W.GL_DEPTH_BUFFER_BIT);
+		assert GL_W.checkError("Clear(COLOR | DEPTH)");
 		GL_W.glDrawElements(GL_W.GL_TRIANGLES, SCREEN.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
+		assert GL_W.checkError("DrawElements()");
 		GL_W.glEnable(GL_W.GL_DEPTH_TEST);
+		assert GL_W.checkError("Enable(DEPTH_TEST)");
 
 		SCREEN.unbind();
 
-		blitMaterial.getRenderShader().unbind();
+		blitShader.unbind();
 	}
 
 	private void renderWorldScene(
@@ -175,24 +187,24 @@ public class DeferredCompositor implements Cleanupable {
 		}
 
 		if (worldFramebuffer == null) {
-			this.worldFramebuffer = genFramebuffer(cache, width, height);
+			genFramebuffer(cache, width, height);
 		} else if (needRegen) {
-			resizeFramebuffer(this.worldFramebuffer, width, height);
+			resizeFramebuffer(width, height);
 
 			worldFramebuffer.bind();
 			GL_W.glViewport(0, 0, width, height);
-			GL_W.checkError("Viewport(" + resolution + ")");
+			assert GL_W.checkError("Viewport(" + resolution + ")");
 		} else {
 			worldFramebuffer.bind();
 		}
 
 		GL_W.glEnable(GL_W.GL_DEPTH_TEST);
-		GL_W.checkError("Enable(DEPTH_TEST)");
+		assert GL_W.checkError("Enable(DEPTH_TEST)");
 
 		GL_W.glClearColor(background.x, background.y, background.z, background.w);
-		GL_W.checkError("ClearColor(" + background + ")");
+		assert GL_W.checkError("ClearColor(" + background + ")");
 		GL_W.glClear(GL_W.GL_COLOR_BUFFER_BIT | GL_W.GL_DEPTH_BUFFER_BIT);
-		GL_W.checkError("Clear(COLOR | DEPTH)");
+		assert GL_W.checkError("Clear(COLOR | DEPTH)");
 
 		final TransferShader shader = (TransferShader) transferMaterial.getRenderShader();
 		shader.bind();
@@ -258,9 +270,9 @@ public class DeferredCompositor implements Cleanupable {
 		worldFramebuffer.unbind();
 	}
 
-	private void resizeFramebuffer(Framebuffer framebuffer, int width, int height) {
-		framebuffer.bind();
-		for (FramebufferAttachment fa : framebuffer.getAttachments().values()) {
+	private void resizeFramebuffer(int width, int height) {
+		worldFramebuffer.bind();
+		for (FramebufferAttachment fa : worldFramebuffer.getAttachments().values()) {
 			if (fa instanceof SingleTexture txt) {
 				txt.setSize(width, height);
 				txt.bind();
@@ -271,74 +283,74 @@ public class DeferredCompositor implements Cleanupable {
 				rb.resize();
 			}
 		}
-		framebuffer.unbind();
+		worldFramebuffer.unbind();
 
-		GlobalLogger.log("Resized framebuffer: " + framebuffer.getId() + " (" + width + "x" + height + ")");
+		GlobalLogger.log("Resized framebuffer: " + worldFramebuffer.getId() + " (" + width + "x" + height + ")");
 	}
 
 	private Framebuffer genFramebuffer(final CacheManager cache, final int width, final int height) {
-		final Framebuffer framebuffer = new Framebuffer(WORLD_FRAMEBUFFER_NAME);
-		cache.addFramebuffer(framebuffer);
-		framebuffer.gen();
-		framebuffer.bind();
+		worldFramebuffer = new Framebuffer(WORLD_FRAMEBUFFER_NAME);
+		cache.addFramebuffer(worldFramebuffer);
+		worldFramebuffer.gen();
+		worldFramebuffer.bind();
 
-		final SingleTexture txtDepth = new SingleTexture(WORLD_FRAMEBUFFER_NAME + ".depth", width, height);
-		txtDepth.setDataType(DataType.FLOAT);
-		txtDepth.setFormat(TexelFormat.DEPTH);
-		txtDepth.setInternalFormat(TexelInternalFormat.DEPTH_COMPONENT24);
-		txtDepth.setFilters(TextureFilter.NEAREST);
-		txtDepth.setWraps(TextureWrap.CLAMP_TO_EDGE);
-		txtDepth.setGenerateMipmaps(false);
-		txtDepth.setup();
-		cache.addTexture(txtDepth);
-		framebuffer.attachTexture(FrameBufferAttachment.DEPTH, txtDepth);
+		depthTexture = new SingleTexture(WORLD_FRAMEBUFFER_NAME + ".depth", width, height);
+		depthTexture.setDataType(DataType.FLOAT);
+		depthTexture.setFormat(TexelFormat.DEPTH);
+		depthTexture.setInternalFormat(TexelInternalFormat.DEPTH_COMPONENT24);
+		depthTexture.setFilters(TextureFilter.NEAREST);
+		depthTexture.setWraps(TextureWrap.CLAMP_TO_EDGE);
+		depthTexture.setGenerateMipmaps(false);
+		depthTexture.setup();
+		cache.addTexture(depthTexture);
+		worldFramebuffer.attachTexture(FrameBufferAttachment.DEPTH, depthTexture);
 
-		final SingleTexture txtPos = new SingleTexture(WORLD_FRAMEBUFFER_NAME + ".pos", width, height);
-		txtPos.setDataType(DataType.FLOAT);
-		txtPos.setFormat(TexelFormat.RGB);
-		txtPos.setInternalFormat(TexelInternalFormat.RGB32F);
-		txtPos.setFilters(TextureFilter.NEAREST);
-		txtPos.setGenerateMipmaps(false);
-		txtPos.setup();
-		cache.addTexture(txtPos);
-		framebuffer.attachTexture(FrameBufferAttachment.COLOR_FIRST, WORLD_FRAMEBUFFER_POS_IDX, txtPos);
+		posTexture = new SingleTexture(WORLD_FRAMEBUFFER_NAME + ".pos", width, height);
+		posTexture.setDataType(DataType.FLOAT);
+		posTexture.setFormat(TexelFormat.RGB);
+		posTexture.setInternalFormat(TexelInternalFormat.RGB32F);
+		posTexture.setFilters(TextureFilter.NEAREST);
+		posTexture.setGenerateMipmaps(false);
+		posTexture.setup();
+		cache.addTexture(posTexture);
+		worldFramebuffer.attachTexture(FrameBufferAttachment.COLOR_FIRST, WORLD_FRAMEBUFFER_POS_IDX, posTexture);
 
-		final SingleTexture txtNormal = new SingleTexture(WORLD_FRAMEBUFFER_NAME + ".normal", width, height);
-		txtNormal.setDataType(DataType.FLOAT);
-		txtNormal.setFormat(TexelFormat.RGB);
-		txtNormal.setInternalFormat(TexelInternalFormat.RGB16F);
-		txtNormal.setFilters(TextureFilter.NEAREST);
-		txtNormal.setGenerateMipmaps(false);
-		txtNormal.setup();
-		cache.addTexture(txtNormal);
-		framebuffer.attachTexture(FrameBufferAttachment.COLOR_FIRST, WORLD_FRAMEBUFFER_NORMAL_IDX, txtNormal);
+		normalTexture = new SingleTexture(WORLD_FRAMEBUFFER_NAME + ".normal", width, height);
+		normalTexture.setDataType(DataType.FLOAT);
+		normalTexture.setFormat(TexelFormat.RGB);
+		normalTexture.setInternalFormat(TexelInternalFormat.RGB16F);
+		normalTexture.setFilters(TextureFilter.NEAREST);
+		normalTexture.setGenerateMipmaps(false);
+		normalTexture.setup();
+		cache.addTexture(normalTexture);
+		worldFramebuffer.attachTexture(FrameBufferAttachment.COLOR_FIRST, WORLD_FRAMEBUFFER_NORMAL_IDX, normalTexture);
 
-		final SingleTexture txtUV = new SingleTexture(WORLD_FRAMEBUFFER_NAME + ".uv", width, height);
-		txtUV.setDataType(DataType.FLOAT);
-		txtUV.setFormat(TexelFormat.RG);
-		txtUV.setInternalFormat(TexelInternalFormat.RG16F);
-		txtUV.setFilters(TextureFilter.NEAREST);
-		txtUV.setGenerateMipmaps(false);
-		txtUV.setup();
-		cache.addTexture(txtUV);
-		framebuffer.attachTexture(FrameBufferAttachment.COLOR_FIRST, WORLD_FRAMEBUFFER_UV_IDX, txtUV);
+		uvTexture = new SingleTexture(WORLD_FRAMEBUFFER_NAME + ".uv", width, height);
+		uvTexture.setDataType(DataType.FLOAT);
+		uvTexture.setFormat(TexelFormat.RG);
+		uvTexture.setInternalFormat(TexelInternalFormat.RG16F);
+		uvTexture.setFilters(TextureFilter.NEAREST);
+		uvTexture.setGenerateMipmaps(false);
+		uvTexture.setup();
+		cache.addTexture(uvTexture);
+		worldFramebuffer.attachTexture(FrameBufferAttachment.COLOR_FIRST, WORLD_FRAMEBUFFER_UV_IDX, uvTexture);
 
-		final SingleTexture txtIDS = new SingleTexture(WORLD_FRAMEBUFFER_NAME + ".ids", width, height);
-		txtIDS.setDataType(DataType.FLOAT);
-		txtIDS.setFormat(TexelFormat.RGBA);
-		txtIDS.setInternalFormat(TexelInternalFormat.RGBA16F);
-		txtIDS.setFilters(TextureFilter.NEAREST);
-		txtIDS.setGenerateMipmaps(false);
-		txtIDS.setup();
-		cache.addTexture(txtIDS);
-		framebuffer.attachTexture(FrameBufferAttachment.COLOR_FIRST, WORLD_FRAMEBUFFER_IDS_IDX, txtIDS);
+		idsTexture = new SingleTexture(WORLD_FRAMEBUFFER_NAME + ".ids", width, height);
+		idsTexture.setDataType(DataType.FLOAT);
+		idsTexture.setFormat(TexelFormat.RGBA);
+		idsTexture.setInternalFormat(TexelInternalFormat.RGBA16F);
+		idsTexture.setFilters(TextureFilter.NEAREST);
+		idsTexture.setGenerateMipmaps(false);
+		idsTexture.setup();
+		cache.addTexture(idsTexture);
+		worldFramebuffer.attachTexture(FrameBufferAttachment.COLOR_FIRST, WORLD_FRAMEBUFFER_IDS_IDX, idsTexture);
 
-		framebuffer.setup();
-		framebuffer.unbind();
+		worldFramebuffer.setup();
+		worldFramebuffer.unbind();
 
-		GlobalLogger.log("Created framebuffer: " + framebuffer.getId() + " (" + width + "x" + height + ")");
+		GlobalLogger.log("Created framebuffer: " + worldFramebuffer.getId() + " (" + width + "x" + height + ")");
 
-		return framebuffer;
+		return worldFramebuffer;
 	}
 
 	@Override
