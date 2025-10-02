@@ -22,24 +22,25 @@ import lu.kbra.standalone.gameengine.cache.attrib.Vec3fAttribArray;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.graph.MaterialFactory;
 import lu.kbra.standalone.gameengine.graph.composition.buffer.Framebuffer;
+import lu.kbra.standalone.gameengine.graph.composition.buffer.RenderBuffer;
 import lu.kbra.standalone.gameengine.graph.composition.layer.PassRenderLayer;
-import lu.kbra.standalone.gameengine.graph.composition.layer.RenderLayer;
 import lu.kbra.standalone.gameengine.graph.render.Scene3DRenderer;
 import lu.kbra.standalone.gameengine.graph.shader.RenderShader;
 import lu.kbra.standalone.gameengine.graph.texture.SingleTexture;
 import lu.kbra.standalone.gameengine.impl.Cleanupable;
+import lu.kbra.standalone.gameengine.impl.FramebufferAttachment;
 import lu.kbra.standalone.gameengine.objs.entity.Entity;
 import lu.kbra.standalone.gameengine.objs.entity.components.MeshComponent;
 import lu.kbra.standalone.gameengine.objs.entity.components.RenderConditionComponent;
 import lu.kbra.standalone.gameengine.objs.entity.components.TransformComponent;
 import lu.kbra.standalone.gameengine.scene.Scene2D;
 import lu.kbra.standalone.gameengine.scene.Scene3D;
-import lu.kbra.standalone.gameengine.scene.camera.Camera;
 import lu.kbra.standalone.gameengine.scene.camera.Camera3D;
 import lu.kbra.standalone.gameengine.utils.consts.DataType;
 import lu.kbra.standalone.gameengine.utils.consts.FrameBufferAttachment;
 import lu.kbra.standalone.gameengine.utils.consts.TexelFormat;
 import lu.kbra.standalone.gameengine.utils.consts.TexelInternalFormat;
+import lu.kbra.standalone.gameengine.utils.consts.TextureFilter;
 import lu.kbra.standalone.gameengine.utils.gl.wrapper.GL_W;
 
 public class SimpleCompositor implements Cleanupable {
@@ -48,6 +49,7 @@ public class SimpleCompositor implements Cleanupable {
 	private static final int WORLD_FRAMEBUFFER_POS_IDX = 0;
 	private static final int WORLD_FRAMEBUFFER_NORMAL_IDX = 1;
 	private static final int WORLD_FRAMEBUFFER_UV_IDX = 2;
+	private static final int WORLD_FRAMEBUFFER_IDS_IDX = 3;
 	private static final String PASS_SCREEN = "PASS_SCREEN";
 
 	public static final String SCREEN_WIDTH = "screen_width";
@@ -55,22 +57,20 @@ public class SimpleCompositor implements Cleanupable {
 
 	private static Mesh SCREEN = new Mesh(PASS_SCREEN, null,
 			new Vec3fAttribArray("pos", 0, 1,
-					new Vector3f[] { new Vector3f(-1, 1, 0), new Vector3f(1, 1, 0), new Vector3f(1, -1, 0),
-							new Vector3f(-1, -1, 0) }),
-			new UIntAttribArray("ind", -1, 1, new int[] { 0, 1, 2, 0, 2, 3 }, GL_W.GL_ELEMENT_ARRAY_BUFFER),
-			new Vec2fAttribArray("uv", 1, 1,
-					new Vector2f[] { new Vector2f(0, 1), new Vector2f(1, 1), new Vector2f(1, 0), new Vector2f(0, 0) }));
+					new Vector3f[] { new Vector3f(-1, 1, 0), new Vector3f(1, 1, 0), new Vector3f(1, -1, 0), new Vector3f(-1, -1, 0) }),
+			new UIntAttribArray("ind", -1, 1, new int[] { 0, 1, 2, 0, 2, 3 }, GL_W.GL_ELEMENT_ARRAY_BUFFER), new Vec2fAttribArray("uv", 1,
+					1, new Vector2f[] { new Vector2f(0, 1), new Vector2f(1, 1), new Vector2f(1, 0), new Vector2f(0, 0) }));
 
 	protected Vector4f background = new Vector4f(0);
 
+	protected Framebuffer worldFramebuffer;
 	protected TransferMaterial transferMaterial;
 	protected List<PassRenderLayer> layers = new ArrayList<>();
 
 	protected Vector2i resolution = new Vector2i(0, 0);
 	protected int samples = 1;
 
-	public void render(GameEngine engine, Scene3D worldScene, Scene2D uiScene, CacheManager worldCache,
-			CacheManager uiCache) {
+	public void render(GameEngine engine, Scene3D worldScene, Scene2D uiScene, CacheManager worldCache, CacheManager uiCache) {
 		final int width = engine.getWindow().getWidth();
 		final int height = engine.getWindow().getHeight();
 
@@ -79,11 +79,48 @@ public class SimpleCompositor implements Cleanupable {
 
 		if (needRegen) {
 			resolution = new Vector2i(width, height);
-			GL_W.glViewport(0, 0, width, height);
 		}
 
+		renderWorldScene(cache, worldScene, worldCache, width, height, needRegen);
+
+		GL_W.glClear(GL_W.GL_COLOR_BUFFER_BIT | GL_W.GL_DEPTH_BUFFER_BIT);
+		GL_W.checkError();
+
+		GL_W.glViewport(0, 0, width, height);
+		worldFramebuffer.bind(GL_W.GL_READ_FRAMEBUFFER);
+		GL_W.glBindFramebuffer(GL_W.GL_DRAW_FRAMEBUFFER, 0);
+		GL_W.checkError();
+		GL_W.glReadBuffer(FrameBufferAttachment.COLOR_FIRST.getGlId() + 1);
+		GL_W.checkError();
+		GL_W.glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_W.GL_COLOR_BUFFER_BIT, GL_W.GL_NEAREST);
+		GL_W.checkError();
+		GL_W.glBindFramebuffer(GL_W.GL_FRAMEBUFFER, 0);
+		GL_W.checkError();
+
+	}
+
+	private void renderWorldScene(
+			CacheManager cache,
+			Scene3D worldScene,
+			CacheManager worldCache,
+			int width,
+			int height,
+			boolean needRegen) {
+
 		if (transferMaterial == null) {
-			transferMaterial = MaterialFactory.INSTANCE.newMaterial(TransferMaterial.class);
+			transferMaterial = MaterialFactory.newMaterial(TransferMaterial.class);
+		}
+
+		if (worldFramebuffer == null) {
+			this.worldFramebuffer = genFramebuffer(cache, width, height);
+		} else if (needRegen) {
+			resizeFramebuffer(this.worldFramebuffer, width, height);
+
+			worldFramebuffer.bind();
+			GL_W.glViewport(0, 0, width, height);
+			GL_W.checkError("Viewport(" + resolution + ")");
+		} else {
+			worldFramebuffer.bind();
 		}
 
 		GL_W.glEnable(GL_W.GL_DEPTH_TEST);
@@ -94,11 +131,11 @@ public class SimpleCompositor implements Cleanupable {
 		GL_W.glClear(GL_W.GL_COLOR_BUFFER_BIT | GL_W.GL_DEPTH_BUFFER_BIT);
 		GL_W.checkError("Clear(COLOR | DEPTH)");
 
-		regenFramebuffer(cache);
-
 		final TransferShader shader = (TransferShader) transferMaterial.getRenderShader();
+		shader.bind();
+		GL_W.glCullFace(shader.getFaceMode().getGlId());
 
-		final Camera camera = worldScene.getCamera();
+		final Camera3D camera = worldScene.getCamera();
 		final Matrix4f projectionMatrix = camera.getProjection().getProjectionMatrix();
 		final Matrix4f viewMatrix = camera.getViewMatrix();
 
@@ -108,20 +145,22 @@ public class SimpleCompositor implements Cleanupable {
 			transferMaterial.setPropertyIfPresent(RenderShader.VIEW_POSITION, ((Camera3D) camera).getPosition());
 		}
 
-		transferMaterial.getRenderShader().bind();
-		// material.bindProperties(worldCache, worldScene, material.getRenderShader());
-
 		// TODO: this is not threadsafe
-		final LinkedHashMap<String, Entity> sortedMap = worldScene.getEntities().entrySet().stream()
-				.sorted(Scene3DRenderer.PRIORITY_COMPARATOR).collect(LinkedHashMap::new,
+		final LinkedHashMap<String, Entity> sortedMap = worldScene
+				.getEntities()
+				.entrySet()
+				.stream()
+				.sorted(Scene3DRenderer.PRIORITY_COMPARATOR)
+				.collect(LinkedHashMap::new,
 						(linkedHashMap, entry) -> linkedHashMap.put(entry.getKey(), entry.getValue()),
 						LinkedHashMap::putAll);
 		worldScene.setEntities(sortedMap);
 
 		worldScene.getEntities().forEach((name, entity) -> {
-			if (entity.hasComponentMatching(RenderConditionComponent.class)
-					&& entity.getComponentsMatching(RenderConditionComponent.class).parallelStream()
-							.allMatch(RenderConditionComponent::get)) {
+			if (entity.hasComponentMatching(RenderConditionComponent.class) && entity
+					.getComponentsMatching(RenderConditionComponent.class)
+					.parallelStream()
+					.allMatch(RenderConditionComponent::get)) {
 				return;
 			}
 
@@ -133,65 +172,104 @@ public class SimpleCompositor implements Cleanupable {
 
 				if (transferMaterial.hasProperty(RenderShader.TRANSFORMATION_MATRIX)
 						&& entity.hasComponentMatching(TransformComponent.class)) {
-					final TransformComponent transform = (TransformComponent) entity
-							.getComponentMatching(TransformComponent.class);
+					final TransformComponent transform = (TransformComponent) entity.getComponentMatching(TransformComponent.class);
 					if (transform != null) {
 						transformationMatrix = transform.getTransform().getMatrix();
 					}
 					transferMaterial.setProperty(RenderShader.TRANSFORMATION_MATRIX, transformationMatrix);
 				}
 
-				transferMaterial.bindProperties(cache, uiScene, shader);
+				transferMaterial.bindProperties(cache, worldScene);
 
 				GL_W.glDrawElements(shader.getBeginMode().getGlId(), mesh.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
-				// GL_W.glDisable(GL_W.GL_BLEND);
 
-				GameEngine.DEBUG.wireframe(cache, worldScene, mesh, projectionMatrix, viewMatrix, transformationMatrix);
+				// GameEngine.DEBUG.wireframe(cache, worldScene, mesh, projectionMatrix, viewMatrix,
+				// transformationMatrix);
 
 				mesh.unbind();
 
-				GameEngine.DEBUG.gizmos(cache, worldScene, projectionMatrix, viewMatrix, transformationMatrix);
+				// GameEngine.DEBUG.gizmos(cache, worldScene, projectionMatrix, viewMatrix, transformationMatrix);
 			}
 		});
-		transferMaterial.getRenderShader().unbind();
+		shader.unbind();
+		worldFramebuffer.unbind();
 	}
 
-	private void regenFramebuffer(final CacheManager cache, final int width, final int height) {
+	private void resizeFramebuffer(Framebuffer framebuffer, int width, int height) {
+		framebuffer.bind();
+		for (FramebufferAttachment fa : framebuffer.getAttachments().values()) {
+			if (fa instanceof SingleTexture txt) {
+				txt.setSize(width, height);
+				txt.bind();
+				txt.resize();
+			} else if (fa instanceof RenderBuffer rb) {
+				rb.setSize(width, height);
+				rb.bind();
+				rb.resize();
+			}
+		}
+		framebuffer.unbind();
+
+		GlobalLogger.log("Resized framebuffer: " + framebuffer.getId() + " (" + width + "x" + height + ")");
+	}
+
+	private Framebuffer genFramebuffer(final CacheManager cache, final int width, final int height) {
 		final Framebuffer framebuffer = new Framebuffer(WORLD_FRAMEBUFFER_NAME);
 		cache.addFramebuffer(framebuffer);
+		framebuffer.gen();
 		framebuffer.bind();
 
-		final SingleTexture txtDepth = new SingleTexture(WORLD_FRAMEBUFFER_NAME + ".depth", width, height);
-		txtDepth.setDataType(DataType.FLOAT);
-		txtDepth.setFormat(TexelFormat.DEPTH);
-		txtDepth.setInternalFormat(TexelInternalFormat.DEPTH_COMPONENT);
-		txtDepth.setup();
-		cache.addTexture(txtDepth);
-		framebuffer.attachRenderBuffer(FrameBufferAttachment.DEPTH, 0, txtDepth);
+		final RenderBuffer rbDepth = new RenderBuffer(WORLD_FRAMEBUFFER_NAME + ".depth", width, height);
+		rbDepth.setTexelInternalFormat(TexelInternalFormat.DEPTH_COMPONENT24);
+		rbDepth.setup();
+		framebuffer.attachRenderBuffer(FrameBufferAttachment.DEPTH, 0, rbDepth);
 
 		final SingleTexture txtPos = new SingleTexture(WORLD_FRAMEBUFFER_NAME + ".pos", width, height);
 		txtPos.setDataType(DataType.FLOAT);
 		txtPos.setFormat(TexelFormat.RGB);
 		txtPos.setInternalFormat(TexelInternalFormat.RGB32F);
+		txtPos.setFilters(TextureFilter.NEAREST);
+		txtPos.setGenerateMipmaps(false);
 		txtPos.setup();
 		cache.addTexture(txtPos);
 		framebuffer.attachTexture(FrameBufferAttachment.COLOR_FIRST, WORLD_FRAMEBUFFER_POS_IDX, txtPos);
-		
+
 		final SingleTexture txtNormal = new SingleTexture(WORLD_FRAMEBUFFER_NAME + ".normal", width, height);
 		txtNormal.setDataType(DataType.FLOAT);
 		txtNormal.setFormat(TexelFormat.RGB);
 		txtNormal.setInternalFormat(TexelInternalFormat.RGB16F);
+		txtNormal.setFilters(TextureFilter.NEAREST);
+		txtNormal.setGenerateMipmaps(false);
 		txtNormal.setup();
 		cache.addTexture(txtNormal);
 		framebuffer.attachTexture(FrameBufferAttachment.COLOR_FIRST, WORLD_FRAMEBUFFER_NORMAL_IDX, txtNormal);
-		
+
 		final SingleTexture txtUV = new SingleTexture(WORLD_FRAMEBUFFER_NAME + ".uv", width, height);
 		txtUV.setDataType(DataType.FLOAT);
 		txtUV.setFormat(TexelFormat.RG);
 		txtUV.setInternalFormat(TexelInternalFormat.RG16F);
+		txtUV.setFilters(TextureFilter.NEAREST);
+		txtUV.setGenerateMipmaps(false);
 		txtUV.setup();
 		cache.addTexture(txtUV);
 		framebuffer.attachTexture(FrameBufferAttachment.COLOR_FIRST, WORLD_FRAMEBUFFER_UV_IDX, txtUV);
+
+		final SingleTexture txtIDS = new SingleTexture(WORLD_FRAMEBUFFER_NAME + ".ids", width, height);
+		txtIDS.setDataType(DataType.FLOAT);
+		txtIDS.setFormat(TexelFormat.RGBA);
+		txtIDS.setInternalFormat(TexelInternalFormat.RGBA16F);
+		txtIDS.setFilters(TextureFilter.NEAREST);
+		txtIDS.setGenerateMipmaps(false);
+		txtIDS.setup();
+		cache.addTexture(txtIDS);
+		framebuffer.attachTexture(FrameBufferAttachment.COLOR_FIRST, WORLD_FRAMEBUFFER_IDS_IDX, txtIDS);
+
+		framebuffer.setup();
+		framebuffer.unbind();
+
+		GlobalLogger.log("Created framebuffer: " + framebuffer.getId() + " (" + width + "x" + height + ")");
+
+		return framebuffer;
 	}
 
 	@Override

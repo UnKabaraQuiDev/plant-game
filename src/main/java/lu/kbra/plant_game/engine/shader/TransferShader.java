@@ -4,11 +4,11 @@ import org.joml.Vector3f;
 
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.graph.material.Material;
-import lu.kbra.standalone.gameengine.graph.material.text.TextShader;
 import lu.kbra.standalone.gameengine.graph.shader.RenderShader;
 import lu.kbra.standalone.gameengine.graph.shader.annotation.AssociatedShader;
 import lu.kbra.standalone.gameengine.graph.shader.part.AbstractShaderPart;
 import lu.kbra.standalone.gameengine.impl.Renderable;
+import lu.kbra.standalone.gameengine.utils.consts.FaceMode;
 
 public class TransferShader extends RenderShader {
 
@@ -16,8 +16,9 @@ public class TransferShader extends RenderShader {
 	public static final String OBJECT_ID = "objectId";
 
 	public TransferShader() {
-		super(TextShader.class.getName(), true, AbstractShaderPart.load("classpath:/shaders/gbuffer.vert"),
+		super(true, AbstractShaderPart.load("classpath:/shaders/gbuffer.vert"),
 				AbstractShaderPart.load("classpath:/shaders/gbuffer.frag"));
+		setFaceMode(FaceMode.FRONT_AND_BACK);
 	}
 
 	@Override
@@ -34,16 +35,20 @@ public class TransferShader extends RenderShader {
 		private int materialId;
 		private Vector3f objectId;
 
+		public TransferMaterial(RenderShader shader) {
+			super(TransferMaterial.class.getName(), shader);
+		}
+
 		public TransferMaterial(String name, RenderShader shader) {
 			super(name, shader);
 		}
 
 		@Override
-		public void bindProperties(CacheManager cache, Renderable scene, RenderShader shader) {
+		public void bindProperties(CacheManager cache, Renderable scene) {
 			setProperty(MATERIAL_ID, materialId);
 			setProperty(OBJECT_ID, objectId);
 
-			super.bindProperties(cache, scene, shader);
+			super.bindProperties(cache, scene);
 		}
 
 		public int getMaterialId() {

@@ -1,25 +1,25 @@
-#version {version}
+#version 420 core
 
-layout(location = 0) in vec3 inPosition;
-layout(location = 1) in vec3 inNormal;
-layout(location = 2) in vec2 inUV;
+layout(location = 0) in vec3 in_Position;
+layout(location = 1) in vec3 in_Normal;
+layout(location = 2) in vec2 in_UV;
 
 uniform mat4 transformationMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 
-out vec3 vWorldPos;
-out vec3 vWorldNormal;
-out vec2 vUV;
+out vec3 bet_WorldPos;
+out vec3 bet_WorldNormal;
+out vec2 bet_UV;
 
 void main() {
-    vec4 worldPos4 = uModel * vec4(inPosition, 1.0);
-    vWorldPos = worldPos4.xyz;
-    // normal matrix: transpose(inverse(mat3(uModel)))
-    vWorldNormal = normalize(mat3(uModel) * inNormal);
-    vUV = inUV;
-    vMaterialId = uMaterialId;
-    vObjectId = uObjectId;
-    
-    gl_Position = uProjection * uView * worldPos4;
+    vec4 worldPos4 = transformationMatrix * vec4(in_Position, 1.0);
+    bet_WorldPos = worldPos4.xyz;
+
+    mat3 normalMatrix = transpose(inverse(mat3(transformationMatrix)));
+    bet_WorldNormal = normalize(normalMatrix * in_Normal);
+
+    bet_UV = in_UV;
+
+    gl_Position = projectionMatrix * viewMatrix * worldPos4;
 }

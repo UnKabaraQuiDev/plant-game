@@ -1,22 +1,21 @@
 package lu.kbra.plant_game;
 
-import java.io.File;
-
 import org.joml.Vector2f;
+import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 import lu.kbra.plant_game.engine.SimpleCompositor;
 import lu.kbra.standalone.gameengine.GameEngine;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
-import lu.kbra.standalone.gameengine.graph.material.text.TextShader;
-import lu.kbra.standalone.gameengine.graph.material.text.TextShader.TextMaterial;
-import lu.kbra.standalone.gameengine.graph.texture.SingleTexture;
+import lu.kbra.standalone.gameengine.geom.CubeMesh;
+import lu.kbra.standalone.gameengine.geom.QuadMesh;
 import lu.kbra.standalone.gameengine.impl.GameLogic;
-import lu.kbra.standalone.gameengine.objs.entity.components.TextEmitterComponent;
+import lu.kbra.standalone.gameengine.objs.entity.components.MeshComponent;
+import lu.kbra.standalone.gameengine.objs.entity.components.RenderComponent;
 import lu.kbra.standalone.gameengine.objs.entity.components.Transform3DComponent;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
 import lu.kbra.standalone.gameengine.scene.Scene2D;
 import lu.kbra.standalone.gameengine.scene.Scene3D;
-import lu.kbra.standalone.gameengine.utils.consts.Consts;
 
 public class TestGameLogic extends GameLogic {
 
@@ -29,17 +28,18 @@ public class TestGameLogic extends GameLogic {
 
 	@Override
 	public void init(GameEngine e) {
+		worldCache = new CacheManager("world", cache);
+		worldScene.getCamera().lookAt(new Vector3f(2, 2, 0), new Vector3f(0, 0, 0)).updateMatrix();
+
 		simpleCompositor = new SimpleCompositor();
 
-		SingleTexture txt1 = new SingleTexture("text", new File(Consts.BAKES_RES_DIR, "QuinqueFive.ttf"));
-		TextShader shader = new TextShader();
-		TextMaterial material = new TextMaterial(shader, txt1);
-		textEmitter = new TextEmitter("text", material, 12, "hellow orld", new Vector2f(1));
-		cache.addRenderShader(shader);
-		cache.addMaterial(material);
-		cache.addTextEmitter(textEmitter);
+		final CubeMesh cubeMesh = new CubeMesh("cubeMesh", null, new Vector3f(0.5f));
+		worldCache.addMesh(cubeMesh);
+		worldScene.addEntity("cubeEntity", new RenderComponent(10), new MeshComponent(cubeMesh), new Transform3DComponent(new Vector3f(0)));
 
-		worldScene.addEntity("entity text", new TextEmitterComponent(textEmitter), new Transform3DComponent());
+		final QuadMesh planeMesh = new QuadMesh("planeMesh", null, new Vector2f(0.5f));
+		worldCache.addMesh(planeMesh);
+		worldScene.addEntity("planeMesh", new RenderComponent(10), new MeshComponent(planeMesh), new Transform3DComponent(new Vector3f(0)));
 	}
 
 	@Override
@@ -54,6 +54,8 @@ public class TestGameLogic extends GameLogic {
 
 	@Override
 	public void render(float dTime) {
+		worldScene.getCamera().getProjection().update(window.getWidth(), window.getHeight());
+		simpleCompositor.setBackground(new Vector4f(1, 0.5f, 0, 1));
 		simpleCompositor.render(engine, worldScene, uiScene, worldCache, uiCache);
 	}
 
