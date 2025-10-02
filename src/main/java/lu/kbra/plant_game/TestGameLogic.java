@@ -20,7 +20,7 @@ import lu.kbra.standalone.gameengine.utils.consts.Consts;
 
 public class TestGameLogic extends GameLogic {
 
-	private Scene3D worldScene;
+	private Scene3D worldScene = new Scene3D("world");
 	private Scene2D uiScene;
 	private CacheManager worldCache;
 	private CacheManager uiCache;
