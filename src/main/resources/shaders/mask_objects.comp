@@ -2,35 +2,27 @@
 
 layout(local_size_x = 16, local_size_y = 16) in;
 
-// Input G-buffer textures
 layout(binding = 0) uniform sampler2D uColorTex;
 layout(binding = 1) uniform sampler2D uDepthTex;
 
-// Output texture (RGBA)
 layout(rgba8, binding = 0) uniform writeonly image2D uOutputTex;
 
-// Sizes
 uniform ivec2 inputSize;
 uniform ivec2 outputSize;
 
 void main() {
     ivec2 outPixel = ivec2(gl_GlobalInvocationID.xy);
 
-    // Bounds check
     if (outPixel.x >= outputSize.x || outPixel.y >= outputSize.y)
         return;
 
-    // Map output pixel into input pixel space
     vec2 uv = (vec2(outPixel) + 0.5) / vec2(outputSize); // normalized coords
     ivec2 inPixel = ivec2(uv * vec2(inputSize));
 
-    // Fetch input
     vec4 color = texelFetch(uColorTex, inPixel, 0);
     float depth = texelFetch(uDepthTex, inPixel, 0).r;
 
-    // Simple background/object test
     vec4 outColor = (depth < 1.0) ? color : vec4(0.0, 0.0, 0.0, 1.0);
 
-    // Store
     imageStore(uOutputTex, outPixel, outColor);
 }

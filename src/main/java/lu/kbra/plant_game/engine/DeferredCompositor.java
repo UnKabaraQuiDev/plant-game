@@ -114,6 +114,7 @@ public class DeferredCompositor implements Cleanupable {
 		maskComputeShader.bind();
 
 		GL_W.glBindImageTexture(0, outputTxt.getTid(), 0, false, 0, GL_W.GL_WRITE_ONLY, outputTxt.getInternalFormat().getGlId());
+		assert GL_W.checkError("BindImageTexture(0," + outputTxt.getTid() + ",WRITE_ONLY)");
 
 		posTexture.bind(0);
 		depthTexture.bind(1);
@@ -149,6 +150,8 @@ public class DeferredCompositor implements Cleanupable {
 
 		SCREEN.bind();
 
+		GL_W.glDisable(GL_W.GL_CULL_FACE);
+		assert GL_W.checkError("Disable(CULL_FACE)");
 		GL_W.glDisable(GL_W.GL_DEPTH_TEST);
 		assert GL_W.checkError("Disable(DEPTH_TEST)");
 		GL_W.glBindFramebuffer(GL_W.GL_FRAMEBUFFER, 0);
@@ -201,7 +204,6 @@ public class DeferredCompositor implements Cleanupable {
 
 		final TransferShader shader = (TransferShader) transferMaterial.getRenderShader();
 		shader.bind();
-		GL_W.glCullFace(FaceMode.FRONT_AND_BACK.getGlId());
 
 		final Camera3D camera = worldScene.getCamera();
 		final Matrix4f projectionMatrix = camera.getProjection().getProjectionMatrix();
@@ -209,14 +211,6 @@ public class DeferredCompositor implements Cleanupable {
 
 		shader.setUniform(RenderShader.PROJECTION_MATRIX, projectionMatrix);
 		shader.setUniform(RenderShader.VIEW_MATRIX, viewMatrix);
-
-		// TODO: this is not threadsafe
-		/*
-		 * final LinkedHashMap<String, Entity> sortedMap = worldScene .getEntities() .entrySet() .stream()
-		 * .sorted(Scene3DRenderer.PRIORITY_COMPARATOR) .collect(LinkedHashMap::new, (linkedHashMap, entry)
-		 * -> linkedHashMap.put(entry.getKey(), entry.getValue()), LinkedHashMap::putAll);
-		 */
-		// worldScene.setEntities(Collections.synchronizedMap(sortedMap));
 
 		for (Entity entity : worldScene.getEntities().values()) {
 
@@ -244,14 +238,14 @@ public class DeferredCompositor implements Cleanupable {
 
 				transferMaterial.bindProperties(cache, worldScene);
 
+				// GL_W.glEnable(GL_W.GL_CULL_FACE);
+				// GL_W.glCullFace(FaceMode.BACK.getGlId());
+				GL_W.glDisable(GL_W.GL_CULL_FACE);
+				assert GL_W.checkError("Enable(CULL_FACE)");
 				GL_W.glDrawElements(shader.getBeginMode().getGlId(), mesh.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
-
-				// GameEngine.DEBUG.wireframe(cache, worldScene, mesh, projectionMatrix, viewMatrix,
-				// transformationMatrix);
+				assert GL_W.checkError("DrawElements(" + mesh.getId() + ")");
 
 				mesh.unbind();
-
-				// GameEngine.DEBUG.gizmos(cache, worldScene, projectionMatrix, viewMatrix, transformationMatrix);
 			}
 		}
 
