@@ -1,7 +1,5 @@
 package lu.kbra.plant_game.engine;
 
-import java.util.LinkedHashMap;
-
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
@@ -23,7 +21,6 @@ import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.graph.MaterialFactory;
 import lu.kbra.standalone.gameengine.graph.composition.buffer.Framebuffer;
 import lu.kbra.standalone.gameengine.graph.composition.buffer.RenderBuffer;
-import lu.kbra.standalone.gameengine.graph.render.Scene3DRenderer;
 import lu.kbra.standalone.gameengine.graph.shader.ComputeShader;
 import lu.kbra.standalone.gameengine.graph.shader.RenderShader;
 import lu.kbra.standalone.gameengine.graph.texture.SingleTexture;
@@ -36,7 +33,9 @@ import lu.kbra.standalone.gameengine.objs.entity.components.TransformComponent;
 import lu.kbra.standalone.gameengine.scene.Scene2D;
 import lu.kbra.standalone.gameengine.scene.Scene3D;
 import lu.kbra.standalone.gameengine.scene.camera.Camera3D;
+import lu.kbra.standalone.gameengine.utils.gl.consts.BufferType;
 import lu.kbra.standalone.gameengine.utils.gl.consts.DataType;
+import lu.kbra.standalone.gameengine.utils.gl.consts.FaceMode;
 import lu.kbra.standalone.gameengine.utils.gl.consts.FrameBufferAttachment;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TexelFormat;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TexelInternalFormat;
@@ -59,8 +58,8 @@ public class DeferredCompositor implements Cleanupable {
 	private static Mesh SCREEN = new Mesh(PASS_SCREEN, null,
 			new Vec3fAttribArray("pos", 0, 1,
 					new Vector3f[] { new Vector3f(-1, 1, 0), new Vector3f(1, 1, 0), new Vector3f(1, -1, 0), new Vector3f(-1, -1, 0) }),
-			new UIntAttribArray("ind", -1, 1, new int[] { 0, 1, 2, 0, 2, 3 }, GL_W.GL_ELEMENT_ARRAY_BUFFER), new Vec2fAttribArray("uv", 1,
-					1, new Vector2f[] { new Vector2f(0, 1), new Vector2f(1, 1), new Vector2f(1, 0), new Vector2f(0, 0) }));
+			new UIntAttribArray("ind", -1, 1, new int[] { 0, 1, 2, 0, 2, 3 }, BufferType.ELEMENT_ARRAY), new Vec2fAttribArray("uv", 1, 1,
+					new Vector2f[] { new Vector2f(0, 1), new Vector2f(1, 1), new Vector2f(1, 0), new Vector2f(0, 0) }));
 
 	protected Vector4f background = new Vector4f(0);
 
@@ -202,7 +201,7 @@ public class DeferredCompositor implements Cleanupable {
 
 		final TransferShader shader = (TransferShader) transferMaterial.getRenderShader();
 		shader.bind();
-		GL_W.glCullFace(shader.getFaceMode().getGlId());
+		GL_W.glCullFace(FaceMode.FRONT_AND_BACK.getGlId());
 
 		final Camera3D camera = worldScene.getCamera();
 		final Matrix4f projectionMatrix = camera.getProjection().getProjectionMatrix();
@@ -212,15 +211,12 @@ public class DeferredCompositor implements Cleanupable {
 		shader.setUniform(RenderShader.VIEW_MATRIX, viewMatrix);
 
 		// TODO: this is not threadsafe
-		final LinkedHashMap<String, Entity> sortedMap = worldScene
-				.getEntities()
-				.entrySet()
-				.stream()
-				.sorted(Scene3DRenderer.PRIORITY_COMPARATOR)
-				.collect(LinkedHashMap::new,
-						(linkedHashMap, entry) -> linkedHashMap.put(entry.getKey(), entry.getValue()),
-						LinkedHashMap::putAll);
-		worldScene.setEntities(sortedMap);
+		/*
+		 * final LinkedHashMap<String, Entity> sortedMap = worldScene .getEntities() .entrySet() .stream()
+		 * .sorted(Scene3DRenderer.PRIORITY_COMPARATOR) .collect(LinkedHashMap::new, (linkedHashMap, entry)
+		 * -> linkedHashMap.put(entry.getKey(), entry.getValue()), LinkedHashMap::putAll);
+		 */
+		// worldScene.setEntities(Collections.synchronizedMap(sortedMap));
 
 		for (Entity entity : worldScene.getEntities().values()) {
 

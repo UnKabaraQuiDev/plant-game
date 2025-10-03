@@ -29,7 +29,7 @@ void main() {
     float depth = texelFetch(uDepthTex, inPixel, 0).r;
 
     // Simple background/object test
-    vec4 outColor = (depth < 1.0) ? vec4(1) : vec4(0.0, 0.0, 0.0, 1.0);
+    vec4 outColor = (depth < 1.0) ? color : vec4(0.0, 0.0, 0.0, 1.0);
 
     // Store
     imageStore(uOutputTex, outPixel, outColor);
