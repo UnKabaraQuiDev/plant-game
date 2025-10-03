@@ -9,23 +9,28 @@ layout(binding = 1) uniform sampler2D uDepthTex;
 // Output texture (RGBA)
 layout(rgba8, binding = 0) uniform writeonly image2D uOutputTex;
 
-// Screen size (in pixels)
-uniform ivec2 screenSize;
+// Sizes
+uniform ivec2 inputSize;
+uniform ivec2 outputSize;
 
 void main() {
-    ivec2 pixel = ivec2(gl_GlobalInvocationID.xy);
+    ivec2 outPixel = ivec2(gl_GlobalInvocationID.xy);
 
-    // Check bounds
-    if (pixel.x >= screenSize.x || pixel.y >= screenSize.y)
+    // Bounds check
+    if (outPixel.x >= outputSize.x || outPixel.y >= outputSize.y)
         return;
 
-    // Sample color and depth
-    vec4 color = texelFetch(uColorTex, pixel, 0);
-    float depth = texelFetch(uDepthTex, pixel, 0).r;
+    // Map output pixel into input pixel space
+    vec2 uv = (vec2(outPixel) + 0.5) / vec2(outputSize); // normalized coords
+    ivec2 inPixel = ivec2(uv * vec2(inputSize));
 
-    // If depth is at far plane (1.0) → background, otherwise object
+    // Fetch input
+    vec4 color = texelFetch(uColorTex, inPixel, 0);
+    float depth = texelFetch(uDepthTex, inPixel, 0).r;
+
+    // Simple background/object test
     vec4 outColor = (depth < 1.0) ? vec4(1) : vec4(0.0, 0.0, 0.0, 1.0);
 
-    // Write output
-    imageStore(uOutputTex, pixel, outColor);
+    // Store
+    imageStore(uOutputTex, outPixel, outColor);
 }

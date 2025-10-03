@@ -72,7 +72,7 @@ public class DeferredCompositor implements Cleanupable {
 	protected MaskComputeShader maskComputeShader;
 	protected BlitShader blitShader;
 
-	protected Vector2i resolution = new Vector2i(0, 0);
+	protected Vector2i resolution = new Vector2i(0), outputResolution = new Vector2i(0);
 
 	public void render(GameEngine engine, Scene3D worldScene, Scene2D uiScene, CacheManager worldCache, CacheManager uiCache) {
 		final int width = engine.getWindow().getWidth();
@@ -83,6 +83,7 @@ public class DeferredCompositor implements Cleanupable {
 
 		if (needRegen) {
 			resolution = new Vector2i(width, height);
+			outputResolution = new Vector2i(width, height).div(4);
 		}
 		if (maskComputeShader == null) {
 			maskComputeShader = new MaskComputeShader();
@@ -96,7 +97,7 @@ public class DeferredCompositor implements Cleanupable {
 
 	private void renderMaterials(CacheManager cache, int width, int height, boolean needRegen) {
 		if (outputTxt == null) {
-			outputTxt = new SingleTexture("output", width, height);
+			outputTxt = new SingleTexture("output", outputResolution);
 			outputTxt.setDataType(DataType.UBYTE);
 			outputTxt.setFormat(TexelFormat.RGBA);
 			outputTxt.setInternalFormat(TexelInternalFormat.RGBA8);
@@ -104,32 +105,26 @@ public class DeferredCompositor implements Cleanupable {
 			outputTxt.setGenerateMipmaps(false);
 			outputTxt.setup();
 			cache.addTexture(outputTxt);
-
-			maskComputeShader.bind();
-
-			GL_W.glBindImageTexture(0, outputTxt.getTid(), 0, false, 0, GL_W.GL_WRITE_ONLY, outputTxt.getInternalFormat().getGlId());
-
-			posTexture.bind(0);
-			maskComputeShader.createUniform("uColorTex");
-			maskComputeShader.setUniform("uColorTex", posTexture.getTid());
-
-			depthTexture.bind(1);
-			maskComputeShader.createUniform("uDepthTex");
-			maskComputeShader.setUniform("uDepthTex", depthTexture.getTid());
 		} else {
-			outputTxt.setSize(width, height);
+			outputTxt.setSize(outputResolution);
 			outputTxt.bind();
 			outputTxt.resize();
 			outputTxt.unbind();
-
-			maskComputeShader.bind();
 		}
+
+		maskComputeShader.bind();
+
+		GL_W.glBindImageTexture(0, outputTxt.getTid(), 0, false, 0, GL_W.GL_WRITE_ONLY, outputTxt.getInternalFormat().getGlId());
+
+		posTexture.bind(0);
+		depthTexture.bind(1);
 
 		if (needRegen) {
-			maskComputeShader.createUniform(ComputeShader.SCREEN_SIZE);
-			maskComputeShader.setUniform(ComputeShader.SCREEN_SIZE, resolution);
+			posTexture.bindUniform(maskComputeShader.getUniformLocation("uColorText"), 0);
+			depthTexture.bindUniform(maskComputeShader.getUniformLocation("uDepthTex"), 1);
+			maskComputeShader.setUniform(MaskComputeShader.INPUT_SIZE, resolution);
+			maskComputeShader.setUniform(MaskComputeShader.OUTPUT_SIZE, outputResolution);
 		}
-
 		final int groupsX = (width + 15) / 16;
 		final int groupsY = (height + 15) / 16;
 		GL_W.glDispatchCompute(groupsX, groupsY, 1);
@@ -147,11 +142,10 @@ public class DeferredCompositor implements Cleanupable {
 		}
 
 		blitShader.bind();
+		outputTxt.bind(0);
 		if (needRegen) {
-			blitShader.createUniform(ComputeShader.SCREEN_SIZE);
-			blitShader.setUniform(ComputeShader.SCREEN_SIZE, resolution);
-			outputTxt.bind(height);
 			outputTxt.bindUniform(blitShader.getUniformLocation(BlitShader.TXT0), 0);
+			blitShader.setUniform(ComputeShader.SCREEN_SIZE, outputResolution);
 		}
 
 		SCREEN.bind();
@@ -216,9 +210,6 @@ public class DeferredCompositor implements Cleanupable {
 
 		shader.setUniform(RenderShader.PROJECTION_MATRIX, projectionMatrix);
 		shader.setUniform(RenderShader.VIEW_MATRIX, viewMatrix);
-		if (camera instanceof Camera3D) {
-			transferMaterial.setPropertyIfPresent(RenderShader.VIEW_POSITION, ((Camera3D) camera).getPosition());
-		}
 
 		// TODO: this is not threadsafe
 		final LinkedHashMap<String, Entity> sortedMap = worldScene
@@ -231,7 +222,8 @@ public class DeferredCompositor implements Cleanupable {
 						LinkedHashMap::putAll);
 		worldScene.setEntities(sortedMap);
 
-		worldScene.getEntities().forEach((name, entity) -> {
+		for (Entity entity : worldScene.getEntities().values()) {
+
 			if (entity.hasComponentMatching(RenderConditionComponent.class) && entity
 					.getComponentsMatching(RenderConditionComponent.class)
 					.parallelStream()
@@ -240,7 +232,7 @@ public class DeferredCompositor implements Cleanupable {
 			}
 
 			if (entity.hasComponentMatching(MeshComponent.class)) {
-				final Mesh mesh = entity.getComponent(MeshComponent.class).getMesh(worldCache);
+				final Mesh mesh = entity.getComponent(MeshComponent.class).getMesh();
 				mesh.bind();
 
 				Matrix4f transformationMatrix = null;
@@ -265,7 +257,8 @@ public class DeferredCompositor implements Cleanupable {
 
 				// GameEngine.DEBUG.gizmos(cache, worldScene, projectionMatrix, viewMatrix, transformationMatrix);
 			}
-		});
+		}
+
 		shader.unbind();
 		worldFramebuffer.unbind();
 	}
