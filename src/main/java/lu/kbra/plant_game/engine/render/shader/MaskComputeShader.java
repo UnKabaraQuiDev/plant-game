@@ -1,4 +1,4 @@
-package lu.kbra.plant_game.engine.shader;
+package lu.kbra.plant_game.engine.render.shader;
 
 import lu.kbra.standalone.gameengine.graph.shader.ComputeShader;
 import lu.kbra.standalone.gameengine.graph.shader.part.AbstractShaderPart;

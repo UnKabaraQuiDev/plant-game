@@ -1,4 +1,4 @@
-package lu.kbra.plant_game.engine.shader;
+package lu.kbra.plant_game.engine.render.shader;
 
 import java.util.HashMap;
 

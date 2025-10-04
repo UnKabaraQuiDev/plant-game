@@ -1,24 +1,24 @@
-package lu.kbra.plant_game.engine;
+package lu.kbra.plant_game.engine.render;
 
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
-import org.joml.Vector4f;
+import org.joml.Vector3i;
 
 import lu.pcy113.pclib.logger.GlobalLogger;
 
-import lu.kbra.plant_game.engine.shader.BlitShader;
-import lu.kbra.plant_game.engine.shader.MaskComputeShader;
-import lu.kbra.plant_game.engine.shader.TransferShader;
-import lu.kbra.plant_game.engine.shader.TransferShader.TransferMaterial;
+import lu.kbra.plant_game.engine.entity.GameObject;
+import lu.kbra.plant_game.engine.entity.WorldLevelScene;
+import lu.kbra.plant_game.engine.render.shader.BlitShader;
+import lu.kbra.plant_game.engine.render.shader.MaterialComputeShader;
+import lu.kbra.plant_game.engine.render.shader.TransferShader;
 import lu.kbra.standalone.gameengine.GameEngine;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.cache.attrib.UIntAttribArray;
 import lu.kbra.standalone.gameengine.cache.attrib.Vec2fAttribArray;
 import lu.kbra.standalone.gameengine.cache.attrib.Vec3fAttribArray;
 import lu.kbra.standalone.gameengine.geom.Mesh;
-import lu.kbra.standalone.gameengine.graph.MaterialFactory;
 import lu.kbra.standalone.gameengine.graph.composition.buffer.Framebuffer;
 import lu.kbra.standalone.gameengine.graph.composition.buffer.RenderBuffer;
 import lu.kbra.standalone.gameengine.graph.shader.ComputeShader;
@@ -31,11 +31,9 @@ import lu.kbra.standalone.gameengine.objs.entity.components.MeshComponent;
 import lu.kbra.standalone.gameengine.objs.entity.components.RenderConditionComponent;
 import lu.kbra.standalone.gameengine.objs.entity.components.TransformComponent;
 import lu.kbra.standalone.gameengine.scene.Scene2D;
-import lu.kbra.standalone.gameengine.scene.Scene3D;
 import lu.kbra.standalone.gameengine.scene.camera.Camera3D;
 import lu.kbra.standalone.gameengine.utils.gl.consts.BufferType;
 import lu.kbra.standalone.gameengine.utils.gl.consts.DataType;
-import lu.kbra.standalone.gameengine.utils.gl.consts.FaceMode;
 import lu.kbra.standalone.gameengine.utils.gl.consts.FrameBufferAttachment;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TexelFormat;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TexelInternalFormat;
@@ -61,19 +59,17 @@ public class DeferredCompositor implements Cleanupable {
 			new UIntAttribArray("ind", -1, 1, new int[] { 0, 1, 2, 0, 2, 3 }, BufferType.ELEMENT_ARRAY), new Vec2fAttribArray("uv", 1, 1,
 					new Vector2f[] { new Vector2f(0, 1), new Vector2f(1, 1), new Vector2f(1, 0), new Vector2f(0, 0) }));
 
-	protected Vector4f background = new Vector4f(0);
-
 	protected SingleTexture depthTexture, posTexture, normalTexture, uvTexture, idsTexture;
 	protected Framebuffer worldFramebuffer;
-	protected TransferMaterial transferMaterial;
+	protected TransferShader transferShader;
 
 	protected SingleTexture outputTxt;
-	protected MaskComputeShader maskComputeShader;
+	protected MaterialComputeShader materialComputeShader;
 	protected BlitShader blitShader;
 
 	protected Vector2i resolution = new Vector2i(0), outputResolution = new Vector2i(0);
 
-	public void render(GameEngine engine, Scene3D worldScene, Scene2D uiScene, CacheManager worldCache, CacheManager uiCache) {
+	public void render(GameEngine engine, WorldLevelScene worldScene, Scene2D uiScene, CacheManager worldCache, CacheManager uiCache) {
 		final int width = engine.getWindow().getWidth();
 		final int height = engine.getWindow().getHeight();
 
@@ -84,58 +80,19 @@ public class DeferredCompositor implements Cleanupable {
 			resolution = new Vector2i(width, height);
 			outputResolution = new Vector2i(width, height).div(4);
 		}
-		if (maskComputeShader == null) {
-			maskComputeShader = new MaskComputeShader();
-			cache.addAbstractShader(maskComputeShader);
+		if (materialComputeShader == null) {
+			materialComputeShader = new MaterialComputeShader();
+			cache.addAbstractShader(materialComputeShader);
 		}
 
 		renderWorldScene(cache, worldScene, worldCache, width, height, needRegen);
 
 		renderMaterials(cache, width, height, needRegen);
+
+		blitToScreen(cache, width, height, needRegen);
 	}
 
-	private void renderMaterials(CacheManager cache, int width, int height, boolean needRegen) {
-		if (outputTxt == null) {
-			outputTxt = new SingleTexture("output", outputResolution);
-			outputTxt.setDataType(DataType.UBYTE);
-			outputTxt.setFormat(TexelFormat.RGBA);
-			outputTxt.setInternalFormat(TexelInternalFormat.RGBA8);
-			outputTxt.setFilters(TextureFilter.NEAREST);
-			outputTxt.setGenerateMipmaps(false);
-			outputTxt.setup();
-			cache.addTexture(outputTxt);
-		} else {
-			outputTxt.setSize(outputResolution);
-			outputTxt.bind();
-			outputTxt.resize();
-			outputTxt.unbind();
-		}
-
-		maskComputeShader.bind();
-
-		GL_W.glBindImageTexture(0, outputTxt.getTid(), 0, false, 0, GL_W.GL_WRITE_ONLY, outputTxt.getInternalFormat().getGlId());
-		assert GL_W.checkError("BindImageTexture(0," + outputTxt.getTid() + ",WRITE_ONLY)");
-
-		posTexture.bind(0);
-		depthTexture.bind(1);
-
-		if (needRegen) {
-			posTexture.bindUniform(maskComputeShader.getUniformLocation("uColorText"), 0);
-			depthTexture.bindUniform(maskComputeShader.getUniformLocation("uDepthTex"), 1);
-			maskComputeShader.setUniform(MaskComputeShader.INPUT_SIZE, resolution);
-			maskComputeShader.setUniform(MaskComputeShader.OUTPUT_SIZE, outputResolution);
-		}
-		final int groupsX = (width + 15) / 16;
-		final int groupsY = (height + 15) / 16;
-		GL_W.glDispatchCompute(groupsX, groupsY, 1);
-		assert GL_W.checkError("DispatchCompute(" + groupsX + "," + groupsY + ",1)");
-		GL_W.glMemoryBarrier(GL_W.GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-		assert GL_W.checkError("MemoryBarrier(SHADER_IMAGE_ACCESS_BARRIER_BIT)");
-
-		maskComputeShader.unbind();
-
-		// blit to the screen
-
+	private void blitToScreen(CacheManager cache, int width, int height, boolean needRegen) {
 		if (blitShader == null) {
 			blitShader = new BlitShader();
 			cache.addAbstractShader(blitShader);
@@ -156,8 +113,10 @@ public class DeferredCompositor implements Cleanupable {
 		assert GL_W.checkError("Disable(DEPTH_TEST)");
 		GL_W.glBindFramebuffer(GL_W.GL_FRAMEBUFFER, 0);
 		assert GL_W.checkError("BindFramebuffer(0)");
-		GL_W.glViewport(0, 0, width, height);
-		assert GL_W.checkError("Viewport(" + resolution + ")");
+		if (needRegen) {
+			GL_W.glViewport(0, 0, width, height);
+			assert GL_W.checkError("Viewport(" + resolution + ")");
+		}
 		GL_W.glClear(GL_W.GL_COLOR_BUFFER_BIT | GL_W.GL_DEPTH_BUFFER_BIT);
 		assert GL_W.checkError("Clear(COLOR | DEPTH)");
 		GL_W.glDrawElements(GL_W.GL_TRIANGLES, SCREEN.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
@@ -170,16 +129,64 @@ public class DeferredCompositor implements Cleanupable {
 		blitShader.unbind();
 	}
 
+	private void renderMaterials(CacheManager cache, int width, int height, boolean needRegen) {
+		if (outputTxt == null) {
+			outputTxt = new SingleTexture("output", outputResolution);
+			outputTxt.setDataType(DataType.UBYTE);
+			outputTxt.setFormat(TexelFormat.RGBA);
+			outputTxt.setInternalFormat(TexelInternalFormat.RGBA8);
+			outputTxt.setFilters(TextureFilter.NEAREST);
+			outputTxt.setGenerateMipmaps(false);
+			outputTxt.setup();
+			cache.addTexture(outputTxt);
+		} else {
+			outputTxt.setSize(outputResolution);
+			outputTxt.bind();
+			outputTxt.resize();
+			outputTxt.unbind();
+		}
+
+		materialComputeShader.bind();
+
+		GL_W.glBindImageTexture(0, outputTxt.getTid(), 0, false, 0, GL_W.GL_WRITE_ONLY, outputTxt.getInternalFormat().getGlId());
+		assert GL_W.checkError("BindImageTexture(0," + outputTxt.getTid() + ",WRITE_ONLY)");
+
+		posTexture.bind(0);
+		normalTexture.bind(1);
+		uvTexture.bind(2);
+		idsTexture.bind(3);
+		depthTexture.bind(4);
+
+		if (needRegen) {
+			posTexture.bindUniform(materialComputeShader.getUniformLocation("uPosTex"), 0);
+			normalTexture.bindUniform(materialComputeShader.getUniformLocation("uNormalTex"), 1);
+			uvTexture.bindUniform(materialComputeShader.getUniformLocation("uUvTex"), 2);
+			idsTexture.bindUniform(materialComputeShader.getUniformLocation("uIdsTex"), 3);
+			depthTexture.bindUniform(materialComputeShader.getUniformLocation("uDepthTex"), 4);
+
+			materialComputeShader.setUniform(MaterialComputeShader.INPUT_SIZE, resolution);
+			materialComputeShader.setUniform(MaterialComputeShader.OUTPUT_SIZE, outputResolution);
+		}
+		final int groupsX = (width + 15) / 16;
+		final int groupsY = (height + 15) / 16;
+		GL_W.glDispatchCompute(groupsX, groupsY, 1);
+		assert GL_W.checkError("DispatchCompute(" + groupsX + "," + groupsY + ",1)");
+		GL_W.glMemoryBarrier(GL_W.GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+		assert GL_W.checkError("MemoryBarrier(SHADER_IMAGE_ACCESS_BARRIER_BIT)");
+
+		materialComputeShader.unbind();
+	}
+
 	private void renderWorldScene(
 			CacheManager cache,
-			Scene3D worldScene,
+			WorldLevelScene worldScene,
 			CacheManager worldCache,
 			int width,
 			int height,
 			boolean needRegen) {
 
-		if (transferMaterial == null) {
-			transferMaterial = MaterialFactory.newMaterial(TransferMaterial.class);
+		if (transferShader == null) {
+			transferShader = new TransferShader();
 		}
 
 		if (worldFramebuffer == null) {
@@ -196,60 +203,81 @@ public class DeferredCompositor implements Cleanupable {
 
 		GL_W.glEnable(GL_W.GL_DEPTH_TEST);
 		assert GL_W.checkError("Enable(DEPTH_TEST)");
+		GL_W.glDisable(GL_W.GL_CULL_FACE);
+		assert GL_W.checkError("Disable(CULL_FACE)");
+		GL_W.glCullFace(GL_W.GL_BACK);
+		assert GL_W.checkError("CullFace(BACK)");
 
-		GL_W.glClearColor(background.x, background.y, background.z, background.w);
-		assert GL_W.checkError("ClearColor(" + background + ")");
+		GL_W.glClearColor(0, 0, 0, 1);
+		assert GL_W.checkError("ClearColor(0, 0, 0, 1)");
 		GL_W.glClear(GL_W.GL_COLOR_BUFFER_BIT | GL_W.GL_DEPTH_BUFFER_BIT);
 		assert GL_W.checkError("Clear(COLOR | DEPTH)");
 
-		final TransferShader shader = (TransferShader) transferMaterial.getRenderShader();
-		shader.bind();
+		transferShader.bind();
 
 		final Camera3D camera = worldScene.getCamera();
 		final Matrix4f projectionMatrix = camera.getProjection().getProjectionMatrix();
 		final Matrix4f viewMatrix = camera.getViewMatrix();
 
-		shader.setUniform(RenderShader.PROJECTION_MATRIX, projectionMatrix);
-		shader.setUniform(RenderShader.VIEW_MATRIX, viewMatrix);
+		transferShader.setUniform(RenderShader.PROJECTION_MATRIX, projectionMatrix);
+		transferShader.setUniform(RenderShader.VIEW_MATRIX, viewMatrix);
 
-		for (Entity entity : worldScene.getEntities().values()) {
+		synchronized (worldScene.getEntitiesLock()) {
+			for (Entity entity : worldScene.getEntities().values()) {
 
-			if (entity.hasComponentMatching(RenderConditionComponent.class) && entity
-					.getComponentsMatching(RenderConditionComponent.class)
-					.parallelStream()
-					.allMatch(RenderConditionComponent::get)) {
-				return;
-			}
-
-			if (entity.hasComponentMatching(MeshComponent.class)) {
-				final Mesh mesh = entity.getComponent(MeshComponent.class).getMesh();
-				mesh.bind();
-
-				Matrix4f transformationMatrix = null;
-
-				if (transferMaterial.hasProperty(RenderShader.TRANSFORMATION_MATRIX)
-						&& entity.hasComponentMatching(TransformComponent.class)) {
-					final TransformComponent transform = (TransformComponent) entity.getComponentMatching(TransformComponent.class);
-					if (transform != null) {
-						transformationMatrix = transform.getTransform().getMatrix();
-					}
-					transferMaterial.setProperty(RenderShader.TRANSFORMATION_MATRIX, transformationMatrix);
+				if (!entity.isActive()) {
+					continue;
 				}
 
-				transferMaterial.bindProperties(cache, worldScene);
+				if (entity.hasComponentMatching(RenderConditionComponent.class) && entity
+						.getComponentsMatching(RenderConditionComponent.class)
+						.parallelStream()
+						.allMatch(RenderConditionComponent::get)) {
+					return;
+				}
 
-				// GL_W.glEnable(GL_W.GL_CULL_FACE);
-				// GL_W.glCullFace(FaceMode.BACK.getGlId());
-				GL_W.glDisable(GL_W.GL_CULL_FACE);
-				assert GL_W.checkError("Enable(CULL_FACE)");
-				GL_W.glDrawElements(shader.getBeginMode().getGlId(), mesh.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
-				assert GL_W.checkError("DrawElements(" + mesh.getId() + ")");
+				if (entity.hasComponentMatching(MeshComponent.class)) {
+					final Mesh mesh = entity.getComponent(MeshComponent.class).getMesh();
+					mesh.bind();
 
-				mesh.unbind();
+					Matrix4f transformationMatrix = GameEngine.IDENTITY_MATRIX4F;
+
+					if (transferShader.createUniform(RenderShader.TRANSFORMATION_MATRIX)
+							&& entity.hasComponentMatching(TransformComponent.class)) {
+						final TransformComponent transform = (TransformComponent) entity.getComponentMatching(TransformComponent.class);
+						if (transform != null) {
+							transformationMatrix = transform.getTransform().getMatrix();
+						}
+						transferShader.setUniform(RenderShader.TRANSFORMATION_MATRIX, transformationMatrix);
+					}
+
+					if (entity instanceof GameObject go) {
+						if (!go.isCompositeMaterialId()) {
+							GL_W.glDisableVertexAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_ID);
+							assert GL_W.checkError("DisableVertexAttribArray(" + GameObject.MESH_ATTRIB_MATERIAL_ID_ID + ")");
+							GL_W.glVertexAttribI1ui(GameObject.MESH_ATTRIB_MATERIAL_ID_ID, go.getMaterialId());
+							assert GL_W
+									.checkError("VertexAttrib1f(" + GameObject.MESH_ATTRIB_MATERIAL_ID_ID + "," + go.getMaterialId() + ")");
+						}
+
+						if (!go.isCompositeObjectId()) {
+							final Vector3i objId = go.getObjectId();
+							GL_W.glDisableVertexAttribArray(GameObject.MESH_ATTRIB_OBJECT_ID_ID);
+							assert GL_W.checkError("DisableVertexAttribArray(" + GameObject.MESH_ATTRIB_OBJECT_ID_ID + ")");
+							GL_W.glVertexAttribI3ui(GameObject.MESH_ATTRIB_OBJECT_ID_ID, objId.x, objId.y, objId.z);
+							assert GL_W.checkError("VertexAttrib3f(" + GameObject.MESH_ATTRIB_OBJECT_ID_ID + "," + objId + ")");
+						}
+					}
+
+					GL_W.glDrawElements(transferShader.getBeginMode().getGlId(), mesh.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
+					assert GL_W.checkError("DrawElements(" + mesh.getId() + ")");
+
+					mesh.unbind();
+				}
 			}
 		}
 
-		shader.unbind();
+		transferShader.unbind();
 		worldFramebuffer.unbind();
 	}
 
@@ -319,9 +347,9 @@ public class DeferredCompositor implements Cleanupable {
 		worldFramebuffer.attachTexture(FrameBufferAttachment.COLOR_FIRST, WORLD_FRAMEBUFFER_UV_IDX, uvTexture);
 
 		idsTexture = new SingleTexture(WORLD_FRAMEBUFFER_NAME + ".ids", width, height);
-		idsTexture.setDataType(DataType.FLOAT);
-		idsTexture.setFormat(TexelFormat.RGBA);
-		idsTexture.setInternalFormat(TexelInternalFormat.RGBA16F);
+		idsTexture.setDataType(DataType.UINT);
+		idsTexture.setFormat(TexelFormat.RGBA_INTEGER);
+		idsTexture.setInternalFormat(TexelInternalFormat.RGBA32UI);
 		idsTexture.setFilters(TextureFilter.NEAREST);
 		idsTexture.setGenerateMipmaps(false);
 		idsTexture.setup();
@@ -344,10 +372,6 @@ public class DeferredCompositor implements Cleanupable {
 			SCREEN.cleanup();
 			SCREEN = null;
 		}
-	}
-
-	public void setBackground(Vector4f background) {
-		this.background = background;
 	}
 
 }

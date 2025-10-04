@@ -1,4 +1,4 @@
-package lu.kbra.plant_game.engine.shader;
+package lu.kbra.plant_game.engine.render.shader;
 
 import org.joml.Vector3f;
 
@@ -12,12 +12,17 @@ import lu.kbra.standalone.gameengine.utils.gl.consts.FaceMode;
 
 public class TransferShader extends RenderShader {
 
+	@Deprecated
 	public static final String MATERIAL_ID = "materialId";
+	@Deprecated
 	public static final String OBJECT_ID = "objectId";
+	@Deprecated
+	public static final String COMPOSITE_MATERIAL_ID = "compositeMaterialId";
+	@Deprecated
+	public static final String COMPOSITE_OBJECT_ID = "compositeObjectId";
 
 	public TransferShader() {
-		super(true, AbstractShaderPart.load("classpath:/shaders/gbuffer.vert"),
-				AbstractShaderPart.load("classpath:/shaders/gbuffer.frag"));
+		super(true, AbstractShaderPart.load("classpath:/shaders/gbuffer.vert"), AbstractShaderPart.load("classpath:/shaders/gbuffer.frag"));
 		setFaceMode(FaceMode.FRONT_AND_BACK);
 	}
 
@@ -27,9 +32,13 @@ public class TransferShader extends RenderShader {
 
 		createUniform(MATERIAL_ID);
 		createUniform(OBJECT_ID);
+
+		createUniform(COMPOSITE_MATERIAL_ID);
+		createUniform(COMPOSITE_OBJECT_ID);
 	}
 
 	@AssociatedShader(TransferShader.class)
+	@Deprecated
 	public static class TransferMaterial extends Material {
 
 		private int materialId;
