@@ -27,7 +27,6 @@ import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.geom.CubeMesh;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.geom.QuadMesh;
-import lu.kbra.standalone.gameengine.graph.window.Window;
 import lu.kbra.standalone.gameengine.impl.GameLogic;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
@@ -58,7 +57,15 @@ public class TestGameLogic extends GameLogic {
 		simpleCompositor = new DeferredCompositor();
 
 		worldScene = new WorldLevelScene("world", cache);
-		worldScene.getCamera().lookAt(new Vector3f(0, 10, 10), new Vector3f(0, 0, 0)).updateMatrix();
+		// worldScene.getCamera().getProjection().setFov((float) Math.toRadians(80)).update();
+		// worldScene.getCamera().lookAt(new Vector3f(0, 10, 10), new Vector3f(0, 0, 0)).updateMatrix();
+		worldScene.getCamera().setPosition(new Vector3f(-20, 25, 20).mul(1.5f));
+		worldScene.getCamera().lookAt(worldScene.getCamera().getPosition(), new Vector3f(0, 0, 0)).updateMatrix();
+		worldScene.getCamera().getProjection().setFov((float) Math.toRadians(40));
+		// worldScene.getCamera().setRotation(new Quaternionf().rotationXYZ((float) Math.toRadians(45),
+		// (float) Math.toRadians(-45), 0));
+		// worldScene.getCamera().updateMatrix();
+		worldScene.getLightDirection().set(new Vector3f(0.5f, 0.5f, 0.5f).normalize());
 
 		GameObjectFactory.INSTANCE = new GameObjectFactory(worldScene.getCache(), WORKERS, RENDER_DISPATCHER);
 
@@ -78,7 +85,8 @@ public class TestGameLogic extends GameLogic {
 
 	@Override
 	public void input(float dTime) {
-
+		final Camera3D camera = worldScene.getCamera();
+		camera.getProjection().setFov((float) (camera.getProjection().getFov() + window.getScroll().y * 0.05f));
 	}
 
 	@Override
@@ -121,14 +129,13 @@ public class TestGameLogic extends GameLogic {
 				GlobalLogger.info("Entity created in " + (time / 1e6) + " ms");
 			}).push();
 
-			GameObjectFactory.create(WaterTowerObject.class, worldScene).push();
+			GameObjectFactory.create(WaterTowerObject.class, worldScene, new Transform3D()).push();
 		}
 
 		final Transform3DComponent transform3DComponent = cubeEntity.getComponent(Transform3DComponent.class);
 		transform3DComponent.getTransform().getRotation().rotateY(dTime);
 		transform3DComponent.getTransform().updateMatrix();
 
-		final Window window = engine.getWindow();
 		final Camera3D camera = worldScene.getCamera();
 
 		final Vector3f posAdd = new Vector3f();
@@ -152,7 +159,7 @@ public class TestGameLogic extends GameLogic {
 			rotation += 1;
 		}
 
-		camera.getPosition().fma(dTime, posAdd);
+		camera.getPosition().fma(dTime * 10, posAdd);
 		camera.getRotation().rotateY((float) Math.toRadians(rotation * 50 * dTime));
 		camera.updateMatrix();
 	}

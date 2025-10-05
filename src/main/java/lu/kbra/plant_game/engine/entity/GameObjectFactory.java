@@ -1,9 +1,11 @@
 package lu.kbra.plant_game.engine.entity;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import lu.pcy113.pclib.PCUtils;
 import lu.pcy113.pclib.impl.ExceptionFunction;
 
 import lu.kbra.plant_game.engine.entity.impl.AnimatedObject;
@@ -31,7 +33,7 @@ public class GameObjectFactory {
 		this.render = render;
 	}
 
-	public <T extends GameObject> TaskFuture<?, T> create_(Class<T> clazz) {
+	public <T extends GameObject> TaskFuture<?, T> create_(Class<T> clazz, Object... args) {
 		animatedMesh.computeIfAbsent(clazz, k -> AnimatedObject.class.isAssignableFrom(k));
 		dataPath.computeIfAbsent(clazz, k -> {
 			if (!k.isAnnotationPresent(DataPath.class))
@@ -46,9 +48,13 @@ public class GameObjectFactory {
 			return StaticObjectLoader
 					.getStaticFuture(cache, clazz.getName(), dataPath.get(clazz), loader, render)
 					.then(loader, (ExceptionFunction<Mesh, T>) (mesh) -> {
-						final T instance = clazz
-								.getConstructor(String.class, Mesh.class)
-								.newInstance(clazz.getSimpleName() + "#" + System.nanoTime(), mesh);
+						final T instance = PCUtils
+								.findCompatibleConstructor(clazz,
+										PCUtils
+												.combineArrays(new Class[] { String.class, Mesh.class },
+														Arrays.stream(args).map(Object::getClass).toArray(Class[]::new)))
+								.newInstance(PCUtils
+										.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), mesh }, args));
 						instance.setMaterialId((short) (mesh instanceof TexturedMesh ? ((TexturedMesh) mesh).getTexture().getTid() : -1));
 						return instance;
 					});
@@ -56,16 +62,16 @@ public class GameObjectFactory {
 		}
 	}
 
-	public <T extends GameObject> TaskFuture<?, T> create_(Class<T> clazz, Scene3D scene) {
-		return create_(clazz).then(loader, (Function<T, T>) scene::addEntity);
+	public <T extends GameObject> TaskFuture<?, T> create_(Class<T> clazz, Scene3D scene, Object... args) {
+		return create_(clazz, args).then(loader, (Function<T, T>) scene::addEntity);
 	}
 
-	public static <T extends GameObject> TaskFuture<?, T> create(Class<T> clazz) {
-		return INSTANCE.create_(clazz);
+	public static <T extends GameObject> TaskFuture<?, T> create(Class<T> clazz, Object... args) {
+		return INSTANCE.create_(clazz, args);
 	}
 
-	public static <T extends GameObject> TaskFuture<?, T> create(Class<T> clazz, Scene3D scene) {
-		return INSTANCE.create_(clazz, scene);
+	public static <T extends GameObject> TaskFuture<?, T> create(Class<T> clazz, Scene3D scene, Object... args) {
+		return INSTANCE.create_(clazz, scene, args);
 	}
 
 }

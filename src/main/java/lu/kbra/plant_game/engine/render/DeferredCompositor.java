@@ -185,6 +185,9 @@ public class DeferredCompositor implements Cleanupable {
 		textureMaterialComputeShader.bind();
 
 		setupMaterialInputs(textureMaterialComputeShader, needRegen);
+		textureMaterialComputeShader.setUniform(TextureMaterialComputeShader.LIGHT_COLOR, worldScene.getLightColor());
+		textureMaterialComputeShader.setUniform(TextureMaterialComputeShader.LIGHT_DIR, worldScene.getLightDirection());
+		textureMaterialComputeShader.setUniform(TextureMaterialComputeShader.AMBIENT_LIGHT, worldScene.getAmbientLight());
 		final int txt0UniformLoc = textureMaterialComputeShader.getUniformLocation(TextureMaterialComputeShader.TXT0);
 		final int currentMaterialIdLoc = textureMaterialComputeShader.getUniformLocation(TextureMaterialComputeShader.CURRENT_MATERIAL_ID);
 
