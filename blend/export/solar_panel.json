@@ -1,0 +1,16 @@
+{
+    "collection_name": "solar_panel",
+    "exports": [
+        {
+            "type": "static",
+            "file": "models/solar_panel_static.obj",
+            "offset_from_origin": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "texture_material": true,
+            "texture_path": "txt0.png"
+        }
+    ]
+}
