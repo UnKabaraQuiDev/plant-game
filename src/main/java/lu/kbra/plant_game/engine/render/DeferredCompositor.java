@@ -8,9 +8,12 @@ import org.joml.Vector3i;
 
 import lu.pcy113.pclib.logger.GlobalLogger;
 
-import lu.kbra.plant_game.engine.entity.GameObject;
+import lu.kbra.plant_game.engine.entity.impl.AttributeLocation;
+import lu.kbra.plant_game.engine.entity.impl.GameObject;
+import lu.kbra.plant_game.engine.entity.impl.TexturedMesh;
 import lu.kbra.plant_game.engine.render.shader.BlitShader;
 import lu.kbra.plant_game.engine.render.shader.MaterialComputeShader;
+import lu.kbra.plant_game.engine.render.shader.TextureMaterialComputeShader;
 import lu.kbra.plant_game.engine.render.shader.TransferShader;
 import lu.kbra.plant_game.engine.scene.WorldLevelScene;
 import lu.kbra.standalone.gameengine.GameEngine;
@@ -65,6 +68,7 @@ public class DeferredCompositor implements Cleanupable {
 
 	protected SingleTexture outputTxt;
 	protected MaterialComputeShader materialComputeShader;
+	protected TextureMaterialComputeShader textureMaterialComputeShader;
 	protected BlitShader blitShader;
 
 	protected Vector2i resolution = new Vector2i(0), outputResolution = new Vector2i(0);
@@ -80,14 +84,10 @@ public class DeferredCompositor implements Cleanupable {
 			resolution = new Vector2i(width, height);
 			outputResolution = new Vector2i(width, height).div(4);
 		}
-		if (materialComputeShader == null) {
-			materialComputeShader = new MaterialComputeShader();
-			cache.addAbstractShader(materialComputeShader);
-		}
 
 		renderWorldScene(cache, worldScene, worldCache, width, height, needRegen);
 
-		renderMaterials(cache, width, height, needRegen);
+		renderMaterials(cache, worldScene, worldCache, width, height, needRegen);
 
 		blitToScreen(cache, width, height, needRegen);
 	}
@@ -129,7 +129,26 @@ public class DeferredCompositor implements Cleanupable {
 		blitShader.unbind();
 	}
 
-	private void renderMaterials(CacheManager cache, int width, int height, boolean needRegen) {
+	private void renderMaterials(
+			CacheManager cache,
+			WorldLevelScene worldScene,
+			CacheManager worldCache,
+			int width,
+			int height,
+			boolean needRegen) {
+		if (materialComputeShader == null) {
+			materialComputeShader = cache.hasAbstractShader(MaterialComputeShader.class.getName())
+					? (MaterialComputeShader) cache.getAbstractShader(MaterialComputeShader.class.getName())
+					: new MaterialComputeShader();
+			cache.addAbstractShader(materialComputeShader);
+		}
+		if (textureMaterialComputeShader == null) {
+			textureMaterialComputeShader = cache.hasAbstractShader(TextureMaterialComputeShader.class.getName())
+					? (TextureMaterialComputeShader) cache.getAbstractShader(TextureMaterialComputeShader.class.getName())
+					: new TextureMaterialComputeShader();
+			cache.addAbstractShader(textureMaterialComputeShader);
+		}
+
 		if (outputTxt == null) {
 			outputTxt = new SingleTexture("output", outputResolution);
 			outputTxt.setDataType(DataType.UBYTE);
@@ -146,35 +165,81 @@ public class DeferredCompositor implements Cleanupable {
 			outputTxt.unbind();
 		}
 
-		materialComputeShader.bind();
-
-		GL_W.glBindImageTexture(0, outputTxt.getTid(), 0, false, 0, GL_W.GL_WRITE_ONLY, outputTxt.getInternalFormat().getGlId());
-		assert GL_W.checkError("BindImageTexture(0," + outputTxt.getTid() + ",WRITE_ONLY)");
-
-		posTexture.bind(0);
-		normalTexture.bind(1);
-		uvTexture.bind(2);
-		idsTexture.bind(3);
-		depthTexture.bind(4);
-
-		if (needRegen) {
-			posTexture.bindUniform(materialComputeShader.getUniformLocation("uPosTex"), 0);
-			normalTexture.bindUniform(materialComputeShader.getUniformLocation("uNormalTex"), 1);
-			uvTexture.bindUniform(materialComputeShader.getUniformLocation("uUvTex"), 2);
-			idsTexture.bindUniform(materialComputeShader.getUniformLocation("uIdsTex"), 3);
-			depthTexture.bindUniform(materialComputeShader.getUniformLocation("uDepthTex"), 4);
-
-			materialComputeShader.setUniform(MaterialComputeShader.INPUT_SIZE, resolution);
-			materialComputeShader.setUniform(MaterialComputeShader.OUTPUT_SIZE, outputResolution);
-		}
 		final int groupsX = (width + 15) / 16;
 		final int groupsY = (height + 15) / 16;
+
+		materialComputeShader.bind();
+
+		setupMaterialInputs(materialComputeShader, needRegen);
+
 		GL_W.glDispatchCompute(groupsX, groupsY, 1);
 		assert GL_W.checkError("DispatchCompute(" + groupsX + "," + groupsY + ",1)");
+
 		GL_W.glMemoryBarrier(GL_W.GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 		assert GL_W.checkError("MemoryBarrier(SHADER_IMAGE_ACCESS_BARRIER_BIT)");
 
 		materialComputeShader.unbind();
+
+		// txt materials
+
+		textureMaterialComputeShader.bind();
+
+		setupMaterialInputs(textureMaterialComputeShader, needRegen);
+		final int txt0UniformLoc = textureMaterialComputeShader.getUniformLocation(TextureMaterialComputeShader.TXT0);
+		final int currentMaterialIdLoc = textureMaterialComputeShader.getUniformLocation(TextureMaterialComputeShader.CURRENT_MATERIAL_ID);
+
+		synchronized (worldScene.getEntitiesLock()) {
+
+			for (Entity e : worldScene.getEntities().values()) {
+				if (e instanceof GameObject obj) {
+					if (obj.getMaterialIdLocation() != AttributeLocation.TEXTURE)
+						continue;
+
+					final TexturedMesh mesh = (TexturedMesh) obj.getMesh();
+					mesh.getTexture().bind(0);
+					mesh.getTexture().bindUniform(txt0UniformLoc, 0);
+					System.err.println("binding: " + mesh);
+					System.err.println("uniform: " + obj.getMaterialId());
+					System.err.println("tid: " + mesh.getTexture().getTid());
+
+					GL_W.glUniform1ui(currentMaterialIdLoc, obj.getMaterialId());
+
+					GL_W.glDispatchCompute(groupsX, groupsY, 1);
+					assert GL_W.checkError("DispatchCompute(" + groupsX + "," + groupsY + ",1)");
+
+					GL_W.glMemoryBarrier(GL_W.GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+					assert GL_W.checkError("MemoryBarrier(SHADER_IMAGE_ACCESS_BARRIER_BIT)");
+				}
+			}
+
+		}
+
+		textureMaterialComputeShader.unbind();
+	}
+
+	private void setupMaterialInputs(ComputeShader computeShader, boolean needRegen) {
+		posTexture.bind(0);
+		normalTexture.bind(1);
+		uvTexture.bind(2);
+		// GL_W.glTexImage2D(idsTexture.getTextureType().getGlId(), 0,
+		// idsTexture.getInternalFormat().getGlId(), idsTexture.getWidth(), idsTexture.getHeight(), 0,
+		// idsTexture.getFormat().getGlId(), idsTexture.getDataType().getGlId(), data);
+		idsTexture.bind(3);
+		depthTexture.bind(4);
+
+		if (needRegen) {
+			GL_W.glBindImageTexture(0, outputTxt.getTid(), 0, false, 0, GL_W.GL_WRITE_ONLY, outputTxt.getInternalFormat().getGlId());
+			assert GL_W.checkError("BindImageTexture(0," + outputTxt.getTid() + ",WRITE_ONLY)");
+
+			posTexture.bindUniform(computeShader.getUniformLocation("uPosTex"), 0);
+			normalTexture.bindUniform(computeShader.getUniformLocation("uNormalTex"), 1);
+			uvTexture.bindUniform(computeShader.getUniformLocation("uUvTex"), 2);
+			idsTexture.bindUniform(computeShader.getUniformLocation("uIdsTex"), 3);
+			depthTexture.bindUniform(computeShader.getUniformLocation("uDepthTex"), 4);
+
+			computeShader.setUniform(ComputeShader.INPUT_SIZE, resolution);
+			computeShader.setUniform(ComputeShader.OUTPUT_SIZE, outputResolution);
+		}
 	}
 
 	private void renderWorldScene(
@@ -186,7 +251,10 @@ public class DeferredCompositor implements Cleanupable {
 			boolean needRegen) {
 
 		if (transferShader == null) {
-			transferShader = new TransferShader();
+			transferShader = cache.hasAbstractShader(TransferShader.class.getName())
+					? (TransferShader) cache.getAbstractShader(TransferShader.class.getName())
+					: new TransferShader();
+			cache.addAbstractShader(transferShader);
 		}
 
 		if (worldFramebuffer == null) {
@@ -245,14 +313,15 @@ public class DeferredCompositor implements Cleanupable {
 					if (transferShader.createUniform(RenderShader.TRANSFORMATION_MATRIX)
 							&& entity.hasComponentMatching(TransformComponent.class)) {
 						final TransformComponent transform = (TransformComponent) entity.getComponentMatching(TransformComponent.class);
-						if (transform != null) {
+						if (transform != null && transform.getTransform() != null) {
 							transformationMatrix = transform.getTransform().getMatrix();
 						}
-						transferShader.setUniform(RenderShader.TRANSFORMATION_MATRIX, transformationMatrix);
 					}
 
+					transferShader.setUniform(RenderShader.TRANSFORMATION_MATRIX, transformationMatrix);
+
 					if (entity instanceof GameObject go) {
-						if (!go.isCompositeMaterialId()) {
+						if (go.getMaterialIdLocation() != AttributeLocation.MESH) {
 							GL_W.glDisableVertexAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_ID);
 							assert GL_W.checkError("DisableVertexAttribArray(" + GameObject.MESH_ATTRIB_MATERIAL_ID_ID + ")");
 							GL_W.glVertexAttribI1ui(GameObject.MESH_ATTRIB_MATERIAL_ID_ID, go.getMaterialId());
@@ -260,7 +329,7 @@ public class DeferredCompositor implements Cleanupable {
 									.checkError("VertexAttrib1f(" + GameObject.MESH_ATTRIB_MATERIAL_ID_ID + "," + go.getMaterialId() + ")");
 						}
 
-						if (!go.isCompositeObjectId()) {
+						if (go.getObjectIdLocation() != AttributeLocation.MESH) {
 							final Vector3i objId = go.getObjectId();
 							GL_W.glDisableVertexAttribArray(GameObject.MESH_ATTRIB_OBJECT_ID_ID);
 							assert GL_W.checkError("DisableVertexAttribArray(" + GameObject.MESH_ATTRIB_OBJECT_ID_ID + ")");
@@ -347,7 +416,7 @@ public class DeferredCompositor implements Cleanupable {
 		worldFramebuffer.attachTexture(FrameBufferAttachment.COLOR_FIRST, WORLD_FRAMEBUFFER_UV_IDX, uvTexture);
 
 		idsTexture = new SingleTexture(WORLD_FRAMEBUFFER_NAME + ".ids", width, height);
-		idsTexture.setDataType(DataType.UINT);
+		idsTexture.setDataType(DataType.UBYTE);
 		idsTexture.setFormat(TexelFormat.RGBA_INTEGER);
 		idsTexture.setInternalFormat(TexelInternalFormat.RGBA32UI);
 		idsTexture.setFilters(TextureFilter.NEAREST);

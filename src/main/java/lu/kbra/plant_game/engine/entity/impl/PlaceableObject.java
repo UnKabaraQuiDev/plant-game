@@ -1,7 +1,8 @@
-package lu.kbra.plant_game.engine.entity;
+package lu.kbra.plant_game.engine.entity.impl;
 
 import org.joml.Vector2i;
 
+import lu.kbra.plant_game.engine.entity.terrain.TerrainMesh;
 import lu.kbra.plant_game.engine.scene.WorldLevelScene;
 import lu.kbra.standalone.gameengine.utils.gl.consts.Direction;
 

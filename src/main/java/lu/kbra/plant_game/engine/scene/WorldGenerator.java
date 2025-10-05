@@ -8,8 +8,8 @@ import org.joml.SimplexNoise;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 
-import lu.kbra.plant_game.engine.entity.GameObject;
-import lu.kbra.plant_game.engine.entity.TerrainMesh;
+import lu.kbra.plant_game.engine.entity.impl.GameObject;
+import lu.kbra.plant_game.engine.entity.terrain.TerrainMesh;
 import lu.kbra.standalone.gameengine.GameEngine;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.cache.attrib.UByteAttribArray;

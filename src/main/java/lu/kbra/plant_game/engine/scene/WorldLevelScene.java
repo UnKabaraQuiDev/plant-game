@@ -1,7 +1,7 @@
 package lu.kbra.plant_game.engine.scene;
 
-import lu.kbra.plant_game.engine.entity.GameObject;
-import lu.kbra.plant_game.engine.entity.TerrainObject;
+import lu.kbra.plant_game.engine.entity.impl.GameObject;
+import lu.kbra.plant_game.engine.entity.terrain.TerrainObject;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.scene.Scene3D;
 

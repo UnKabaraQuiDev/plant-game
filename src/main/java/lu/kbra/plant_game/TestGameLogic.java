@@ -12,10 +12,11 @@ import lu.pcy113.pclib.PCUtils;
 import lu.pcy113.pclib.datastructure.pair.Pair;
 import lu.pcy113.pclib.logger.GlobalLogger;
 
-import lu.kbra.plant_game.engine.entity.GameObject;
-import lu.kbra.plant_game.engine.entity.TerrainMesh;
-import lu.kbra.plant_game.engine.entity.TerrainObject;
-import lu.kbra.plant_game.engine.entity.water.GameObjectFactory;
+import lu.kbra.plant_game.engine.entity.GameObjectFactory;
+import lu.kbra.plant_game.engine.entity.impl.AttributeLocation;
+import lu.kbra.plant_game.engine.entity.impl.GameObject;
+import lu.kbra.plant_game.engine.entity.terrain.TerrainMesh;
+import lu.kbra.plant_game.engine.entity.terrain.TerrainObject;
 import lu.kbra.plant_game.engine.entity.water.WaterTowerObject;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.scene.WorldGenerator;
@@ -113,7 +114,7 @@ public class TestGameLogic extends GameLogic {
 				GlobalLogger.info("Creating entity...");
 				final long time = PCUtils.nanoTime((Runnable) () -> {
 					final TerrainObject terrainEntity = new TerrainObject("terrain", mesh);
-					terrainEntity.setCompositeMaterialId(true);
+					terrainEntity.setMaterialIdLocation(AttributeLocation.MESH);
 					terrainEntity.setActive(false);
 					worldScene.setTerrain(terrainEntity);
 				});

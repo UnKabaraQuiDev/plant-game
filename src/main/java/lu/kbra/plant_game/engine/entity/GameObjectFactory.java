@@ -1,4 +1,4 @@
-package lu.kbra.plant_game.engine.entity.water;
+package lu.kbra.plant_game.engine.entity;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -6,7 +6,9 @@ import java.util.function.Function;
 
 import lu.pcy113.pclib.impl.ExceptionFunction;
 
-import lu.kbra.plant_game.engine.entity.GameObject;
+import lu.kbra.plant_game.engine.entity.impl.AnimatedObject;
+import lu.kbra.plant_game.engine.entity.impl.GameObject;
+import lu.kbra.plant_game.engine.entity.impl.TexturedMesh;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
@@ -43,10 +45,13 @@ public class GameObjectFactory {
 
 			return StaticObjectLoader
 					.getStaticFuture(cache, clazz.getName(), dataPath.get(clazz), loader, render)
-					.then(loader,
-							(ExceptionFunction<Mesh, T>) (mesh) -> clazz
-									.getConstructor(String.class, Mesh.class)
-									.newInstance(clazz.getSimpleName() + "#" + System.nanoTime(), mesh));
+					.then(loader, (ExceptionFunction<Mesh, T>) (mesh) -> {
+						final T instance = clazz
+								.getConstructor(String.class, Mesh.class)
+								.newInstance(clazz.getSimpleName() + "#" + System.nanoTime(), mesh);
+						instance.setMaterialId((short) (mesh instanceof TexturedMesh ? ((TexturedMesh) mesh).getTexture().getTid() : -1));
+						return instance;
+					});
 
 		}
 	}

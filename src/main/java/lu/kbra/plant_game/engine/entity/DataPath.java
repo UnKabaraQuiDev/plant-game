@@ -1,4 +1,4 @@
-package lu.kbra.plant_game.engine.entity.water;
+package lu.kbra.plant_game.engine.entity;
 
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;

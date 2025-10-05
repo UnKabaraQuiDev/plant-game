@@ -1,4 +1,4 @@
-package lu.kbra.plant_game.engine.entity;
+package lu.kbra.plant_game.engine.entity.impl;
 
 import org.joml.Vector3i;
 
@@ -15,56 +15,65 @@ public class GameObject extends Entity {
 	public static final String MESH_ATTRIB_MATERIAL_ID_NAME = "materialId";
 	public static final String MESH_ATTRIB_OBJECT_ID_NAME = "objectId";
 
-	private byte materialId = -1;
-	private boolean compositeMaterialId = false; // material in mesh data
-	private Vector3i objectId = new Vector3i((int) System.nanoTime(), (int) System.nanoTime() % 20056, (int) System.nanoTime() % 255);
-	private boolean compositeObjectId = false; // object id in mesh data
+	private short materialId = -1;
+	private AttributeLocation materialIdLocation = AttributeLocation.STATIC;
+	private Vector3i objectId;
+	private AttributeLocation objectIdLocation = AttributeLocation.STATIC; // object id in mesh data
 	private MeshComponent meshComponent;
 	private Transform3DComponent transformComponent;
 	private boolean transparent = false;
 
 	public GameObject(String str, Mesh mesh) {
-		super(str, new MeshComponent(mesh));
+		this(str, mesh, null);
 	}
 
 	public GameObject(String str, Mesh mesh, Transform3D transform) {
-		super(str, new MeshComponent(mesh), new Transform3DComponent(transform));
+		this(str, mesh, transform, false);
 	}
 
 	public GameObject(String str, Mesh mesh, Transform3D transform, boolean transparent) {
-		super(str, new MeshComponent(mesh), new Transform3DComponent(transform));
-		this.transparent = transparent;
+		this(str, mesh, transform, transparent,
+				new Vector3i((int) System.nanoTime(), (int) System.nanoTime() % 20056, (int) System.nanoTime() % 255));
 	}
 
-	public GameObject(String str, Mesh mesh, Transform3D transform, boolean transparent, Vector3i objectId, byte materialId) {
-		super(str, new MeshComponent(mesh), new Transform3DComponent(transform));
+	public GameObject(String str, Mesh mesh, Transform3D transform, boolean transparent, Vector3i objectId) {
+		this(str, mesh, transform, transparent, objectId, (short) -1);
+	}
+
+	public GameObject(String str, Mesh mesh, Transform3D transform, boolean transparent, Vector3i objectId, short materialId) {
+		super(str, new MeshComponent(mesh), transform != null ? new Transform3DComponent(transform) : null);
+		if (mesh instanceof TexturedMesh) {
+			materialIdLocation = AttributeLocation.TEXTURE;
+		}
+		this.meshComponent = super.getComponent(MeshComponent.class);
+		this.transformComponent = super.getComponent(Transform3DComponent.class);
 		this.transparent = transparent;
 		this.objectId = objectId;
 		this.materialId = materialId;
 	}
 
-	public boolean isCompositeMaterialId() {
-		return compositeMaterialId;
-	}
-
-	public void setCompositeMaterialId(boolean compositeMaterial) {
-		this.compositeMaterialId = compositeMaterial;
-	}
-
-	public boolean isCompositeObjectId() {
-		return compositeObjectId;
-	}
-
-	public void setCompositeObjectId(boolean compositeObjectId) {
-		this.compositeObjectId = compositeObjectId;
-	}
-
-	public byte getMaterialId() {
+	public short getMaterialId() {
 		return materialId;
 	}
 
-	public void setMaterialId(byte materialId) {
+	public void setMaterialId(short materialId) {
 		this.materialId = materialId;
+	}
+
+	public AttributeLocation getObjectIdLocation() {
+		return objectIdLocation;
+	}
+
+	public void setObjectIdLocation(AttributeLocation objectIdLocation) {
+		this.objectIdLocation = objectIdLocation;
+	}
+
+	public AttributeLocation getMaterialIdLocation() {
+		return materialIdLocation;
+	}
+
+	public void setMaterialIdLocation(AttributeLocation materialIdLocation) {
+		this.materialIdLocation = materialIdLocation;
 	}
 
 	public Vector3i getObjectId() {

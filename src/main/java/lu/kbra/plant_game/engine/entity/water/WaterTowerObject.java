@@ -3,10 +3,11 @@ package lu.kbra.plant_game.engine.entity.water;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
 
-import lu.kbra.plant_game.engine.entity.GameObject;
-import lu.kbra.plant_game.engine.entity.PlaceableObject;
-import lu.kbra.plant_game.engine.entity.TerrainMesh;
-import lu.kbra.plant_game.engine.entity.WaterContainer;
+import lu.kbra.plant_game.engine.entity.DataPath;
+import lu.kbra.plant_game.engine.entity.impl.GameObject;
+import lu.kbra.plant_game.engine.entity.impl.PlaceableObject;
+import lu.kbra.plant_game.engine.entity.impl.WaterContainer;
+import lu.kbra.plant_game.engine.entity.terrain.TerrainMesh;
 import lu.kbra.plant_game.engine.scene.WorldLevelScene;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.utils.gl.consts.Direction;
@@ -17,8 +18,8 @@ public class WaterTowerObject extends GameObject implements PlaceableObject, Wat
 
 	protected long waterLevel;
 
-	public WaterTowerObject(String str, Mesh mesh, Transform3D transform, boolean transparent, Vector3i objectId, byte materialId) {
-		super(str, mesh, transform, transparent, objectId, materialId);
+	public WaterTowerObject(String str, Mesh mesh, Transform3D transform, boolean transparent, Vector3i objectId) {
+		super(str, mesh, transform, transparent, objectId);
 	}
 
 	public WaterTowerObject(String str, Mesh mesh, Transform3D transform, boolean transparent) {

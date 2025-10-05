@@ -1,4 +1,4 @@
-package lu.kbra.plant_game.engine.entity;
+package lu.kbra.plant_game.engine.entity.terrain;
 
 import lu.kbra.plant_game.engine.scene.WorldGenerator.TerrainMaterialType;
 import lu.kbra.standalone.gameengine.cache.attrib.AttribArray;

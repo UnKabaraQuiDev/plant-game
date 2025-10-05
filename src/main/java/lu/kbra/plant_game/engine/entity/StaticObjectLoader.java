@@ -1,4 +1,4 @@
-package lu.kbra.plant_game.engine.entity.water;
+package lu.kbra.plant_game.engine.entity;
 
 import java.net.URI;
 import java.util.function.Function;
@@ -11,12 +11,17 @@ import lu.pcy113.pclib.PCUtils;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.geom.utils.ObjLoader;
+import lu.kbra.standalone.gameengine.graph.texture.SingleTexture;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
 
 public class StaticObjectLoader {
 
-	public static String getStaticFile(String path) {
+	public record MeshData(String filePath, boolean textureMaterial, String texturePath) {
+
+	}
+
+	public static MeshData getStaticMeshData(String path) {
 		try {
 			final URI baseURI = URI.create(path);
 
@@ -31,7 +36,12 @@ public class StaticObjectLoader {
 
 				final String filePath = jsonObj.getString("file");
 
-				return baseURI.resolve(filePath).getPath();
+				final String meshFilePath = baseURI.resolve(filePath).toString();
+				final boolean textureMaterial = jsonObj.getBoolean("texture_material");
+				final String texturePath = textureMaterial ? baseURI.resolve(jsonObj.optString("texture_path")).toString()
+						: jsonObj.optString("texture_path");
+
+				return new MeshData(meshFilePath, textureMaterial, texturePath);
 			}
 		} catch (Exception e) {
 			throw new RuntimeException("Error while getting static mesh file from: " + path, e);
@@ -45,9 +55,9 @@ public class StaticObjectLoader {
 			return cache.getMesh(meshName);
 		}
 
-		final String filePath = getStaticFile(path);
+		final MeshData meshData = getStaticMeshData(path);
 
-		final Mesh staticMesh = ObjLoader.loadMesh(meshName, null, filePath);
+		final Mesh staticMesh = ObjLoader.loadMesh(meshName, null, meshData.filePath);
 		cache.addMesh(staticMesh);
 
 		return staticMesh;
@@ -63,8 +73,15 @@ public class StaticObjectLoader {
 			return new TaskFuture<>(loader, () -> cache.getMesh(meshName));
 		}
 
-		return new TaskFuture<>(loader, () -> getStaticFile(path)).then(render, (Function<String, Mesh>) (filePath) -> {
-			final Mesh staticMesh = ObjLoader.loadMesh(meshName, null, filePath);
+		return new TaskFuture<>(loader, () -> getStaticMeshData(path)).then(render, (Function<MeshData, Mesh>) (meshData) -> {
+			final Mesh staticMesh;
+			if (meshData.textureMaterial) {
+				final SingleTexture txt0 = cache.hasTexture(meshData.texturePath) ? (SingleTexture) cache.getTexture(meshData.texturePath)
+						: SingleTexture.loadSingleTexture(cache, meshData.texturePath, meshData.texturePath);
+				staticMesh = TexturedObjLoader.loadMesh(meshName, null, meshData.filePath, txt0);
+			} else {
+				staticMesh = ObjLoader.loadMesh(meshName, null, meshData.filePath);
+			}
 			cache.addMesh(staticMesh);
 			return staticMesh;
 		});

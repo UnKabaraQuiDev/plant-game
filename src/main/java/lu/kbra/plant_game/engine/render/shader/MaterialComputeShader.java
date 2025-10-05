@@ -13,4 +13,10 @@ public class MaterialComputeShader extends ComputeShader {
 		super((ComputeShaderPart) AbstractShaderPart.load("classpath:/shaders/material.comp"));
 	}
 
+	@Override
+	public void createUniforms() {
+		createUniform(INPUT_SIZE);
+		createUniform(OUTPUT_SIZE);
+	}
+
 }
