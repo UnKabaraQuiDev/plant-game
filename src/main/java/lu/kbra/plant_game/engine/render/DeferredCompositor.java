@@ -198,11 +198,9 @@ public class DeferredCompositor implements Cleanupable {
 					final TexturedMesh mesh = (TexturedMesh) obj.getMesh();
 					mesh.getTexture().bind(0);
 					mesh.getTexture().bindUniform(txt0UniformLoc, 0);
-					System.err.println("binding: " + mesh);
-					System.err.println("uniform: " + obj.getMaterialId());
-					System.err.println("tid: " + mesh.getTexture().getTid());
 
 					GL_W.glUniform1ui(currentMaterialIdLoc, obj.getMaterialId());
+					assert GL_W.checkError("Uniform1ui(" + currentMaterialIdLoc + "," + obj.getMaterialId() + ")");
 
 					GL_W.glDispatchCompute(groupsX, groupsY, 1);
 					assert GL_W.checkError("DispatchCompute(" + groupsX + "," + groupsY + ",1)");
