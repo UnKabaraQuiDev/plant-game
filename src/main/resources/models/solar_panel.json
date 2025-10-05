@@ -1,0 +1,14 @@
+{
+    "collection_name": "solar_panel",
+    "exports": [
+        {
+            "type": "static",
+            "file": "solar_panel_static.obj",
+            "offset_from_origin": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        }
+    ]
+}

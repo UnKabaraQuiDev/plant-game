@@ -1,4 +1,4 @@
-package lu.kbra.plant_game;
+package lu.kbra.plant_game.engine.scene;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,6 +9,7 @@ import org.joml.Vector3f;
 import org.joml.Vector3i;
 
 import lu.kbra.plant_game.engine.entity.GameObject;
+import lu.kbra.plant_game.engine.entity.TerrainMesh;
 import lu.kbra.standalone.gameengine.GameEngine;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.cache.attrib.UByteAttribArray;
@@ -29,6 +30,7 @@ public class WorldGenerator {
 	private byte[] materialIds;
 	private Vector3i[] objectIds;
 
+	private TerrainMaterialType[][] materialType;
 	private Integer[][] noiseCompute;
 
 	public WorldGenerator(int width, int length) {
@@ -42,8 +44,9 @@ public class WorldGenerator {
 		generateVerts();
 	}
 
-	public Mesh generateMesh(CacheManager cache) {
-		final Mesh mesh = new Mesh("terrain", null, new Vec3fAttribArray(Mesh.ATTRIB_VERTICES_NAME, Mesh.ATTRIB_VERTICES_ID, 1, verts),
+	public TerrainMesh generateMesh(CacheManager cache) {
+		final TerrainMesh mesh = new TerrainMesh("terrain-" + width + "x" + length + "@" + System.identityHashCode(this), noiseCompute,
+				materialType, new Vec3fAttribArray(Mesh.ATTRIB_VERTICES_NAME, Mesh.ATTRIB_VERTICES_ID, 1, verts),
 				new UIntAttribArray(Mesh.ATTRIB_INDICES_NAME, Mesh.ATTRIB_INDICES_ID, 1, indices, BufferType.ELEMENT_ARRAY),
 				new Vec3fAttribArray(Mesh.ATTRIB_NORMALS_NAME, Mesh.ATTRIB_NORMALS_ID, 1, normals),
 				new UByteAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_NAME, GameObject.MESH_ATTRIB_MATERIAL_ID_ID, 1, materialIds),
@@ -53,20 +56,24 @@ public class WorldGenerator {
 	}
 
 	protected void generateFaces() {
+		this.materialType = new TerrainMaterialType[width][length];
+		
 		for (int x = 0; x < width; x++) {
 			for (int z = 0; z < length; z++) {
 				final int cellHeight = getCellHeight(x, z);
 
 				faces
 						.add(new SquareFace(new Vector3f(x, cellHeight, z), new Vector3f(x + 1, cellHeight, z + 1), GameEngine.Y_POS,
-								cellHeight < 0 ? MaterialType.STONE : MaterialType.GRASS));
+								cellHeight < 0 ? TerrainMaterialType.STONE : TerrainMaterialType.GRASS));
+
+				materialType[x][z] = cellHeight < 0 ? TerrainMaterialType.WATER : TerrainMaterialType.GRASS;
 
 				final int cellHeightXPos = getCellHeight(x + 1, z);
 				if (cellHeight > cellHeightXPos) {
 					for (int y = cellHeightXPos; y < cellHeight; y++) {
 						faces
 								.add(new SquareFace(new Vector3f(x + 1, y, z), new Vector3f(x + 1, y + 1, z + 1), GameEngine.X_POS,
-										MaterialType.DIRT));
+										TerrainMaterialType.DIRT));
 					}
 				}
 
@@ -75,7 +82,7 @@ public class WorldGenerator {
 					for (int y = cellHeightZPos; y < cellHeight; y++) {
 						faces
 								.add(new SquareFace(new Vector3f(x, y, z + 1), new Vector3f(x + 1, y + 1, z + 1), GameEngine.Z_POS,
-										MaterialType.DIRT));
+										TerrainMaterialType.DIRT));
 					}
 				}
 
@@ -84,7 +91,7 @@ public class WorldGenerator {
 					for (int y = cellHeightXNeg; y < cellHeight; y++) {
 						faces
 								.add(new SquareFace(new Vector3f(x, y, z), new Vector3f(x, y + 1, z + 1), GameEngine.X_NEG,
-										MaterialType.DIRT));
+										TerrainMaterialType.DIRT));
 					}
 				}
 
@@ -93,7 +100,7 @@ public class WorldGenerator {
 					for (int y = cellHeightZNeg; y < cellHeight; y++) {
 						faces
 								.add(new SquareFace(new Vector3f(x, y, z), new Vector3f(x + 1, y + 1, z), GameEngine.Z_NEG,
-										MaterialType.DIRT));
+										TerrainMaterialType.DIRT));
 					}
 				}
 			}
@@ -133,12 +140,12 @@ public class WorldGenerator {
 		return Math.round(SimplexNoise.noise(x + 0.5f, z + 0.5f));
 	}
 
-	public enum MaterialType {
+	public enum TerrainMaterialType {
 		GRASS((byte) 1), DIRT((byte) 2), STONE((byte) 3), WATER((byte) 4);
 
 		private final byte id;
 
-		private MaterialType(byte id) {
+		private TerrainMaterialType(byte id) {
 			this.id = id;
 		}
 
@@ -147,7 +154,7 @@ public class WorldGenerator {
 		}
 	}
 
-	public record SquareFace(Vector3f corner1, Vector3f corner2, Vector3f normal, MaterialType material) {
+	public record SquareFace(Vector3f corner1, Vector3f corner2, Vector3f normal, TerrainMaterialType material) {
 		public Vector3f[] corners() {
 			// Extract coordinates
 			final float x1 = corner1.x, y1 = corner1.y, z1 = corner1.z;

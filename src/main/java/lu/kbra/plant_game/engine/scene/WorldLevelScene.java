@@ -1,14 +1,18 @@
-package lu.kbra.plant_game.engine.entity;
+package lu.kbra.plant_game.engine.scene;
 
+import lu.kbra.plant_game.engine.entity.GameObject;
+import lu.kbra.plant_game.engine.entity.TerrainObject;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.scene.Scene3D;
 
 public class WorldLevelScene extends Scene3D {
 
+	private LevelData levelData;
+	
 	private CacheManager worldCache;
 
 	private GameObject waterLevel;
-	private GameObject terrain;
+	private TerrainObject terrain;
 
 	public WorldLevelScene(String name, CacheManager parent) {
 		super(name);
@@ -28,12 +32,12 @@ public class WorldLevelScene extends Scene3D {
 		return terrain;
 	}
 
-	public void setTerrain(GameObject terrain) {
+	public void setTerrain(TerrainObject terrain) {
 		this.terrain = terrain;
 		super.addEntity(terrain);
 	}
 
-	public CacheManager getWorldCache() {
+	public CacheManager getCache() {
 		return worldCache;
 	}
 

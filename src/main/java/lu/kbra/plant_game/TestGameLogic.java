@@ -12,10 +12,15 @@ import lu.pcy113.pclib.PCUtils;
 import lu.pcy113.pclib.datastructure.pair.Pair;
 import lu.pcy113.pclib.logger.GlobalLogger;
 
-import lu.kbra.plant_game.WorldGenerator.MaterialType;
 import lu.kbra.plant_game.engine.entity.GameObject;
-import lu.kbra.plant_game.engine.entity.WorldLevelScene;
+import lu.kbra.plant_game.engine.entity.TerrainMesh;
+import lu.kbra.plant_game.engine.entity.TerrainObject;
+import lu.kbra.plant_game.engine.entity.water.GameObjectFactory;
+import lu.kbra.plant_game.engine.entity.water.WaterTowerObject;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
+import lu.kbra.plant_game.engine.scene.WorldGenerator;
+import lu.kbra.plant_game.engine.scene.WorldGenerator.TerrainMaterialType;
+import lu.kbra.plant_game.engine.scene.WorldLevelScene;
 import lu.kbra.standalone.gameengine.GameEngine;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.geom.CubeMesh;
@@ -54,18 +59,20 @@ public class TestGameLogic extends GameLogic {
 		worldScene = new WorldLevelScene("world", cache);
 		worldScene.getCamera().lookAt(new Vector3f(0, 10, 10), new Vector3f(0, 0, 0)).updateMatrix();
 
+		GameObjectFactory.INSTANCE = new GameObjectFactory(worldScene.getCache(), WORKERS, RENDER_DISPATCHER);
+
 		final Mesh waterLevelMesh = new QuadMesh("water", null, new Vector2f(15, 15));
-		worldScene.getWorldCache().addMesh(waterLevelMesh);
+		worldScene.getCache().addMesh(waterLevelMesh);
 		worldScene
 				.addEntity(new GameObject("water", waterLevelMesh,
 						new Transform3D(new Vector3f(0, -0.1f, 0), new Quaternionf().rotateX((float) Math.toRadians(-90))), true,
-						new Vector3i(2, 0, 0), MaterialType.WATER.getId()));
+						new Vector3i(2, 0, 0), TerrainMaterialType.WATER.getId()));
 
 		final CubeMesh cubeMesh = new CubeMesh("cubeMesh", null, new Vector3f(0.5f));
-		worldScene.getWorldCache().addMesh(cubeMesh);
+		worldScene.getCache().addMesh(cubeMesh);
 		cubeEntity = worldScene
 				.addEntity(new GameObject("cubeEntity", cubeMesh, new Transform3D(), false, new Vector3i(1, 0, 255),
-						MaterialType.GRASS.getId()));
+						TerrainMaterialType.GRASS.getId()));
 	}
 
 	@Override
@@ -85,7 +92,11 @@ public class TestGameLogic extends GameLogic {
 						final float oct1 = MathUtils.map(Interpolators.SINE_OUT.evaluate(noise.noise(x + 0.5f, z + 0.5f)), 0, 1, 0, 1);
 						final float oct2 = MathUtils
 								.map(Interpolators.BOUNCE_OUT
-										.evaluate(noise.noise(MathUtils.rotate(new Vector2f(x + 0.5f, (z + 0.5f) * 0.5f), 45))), 0, 1, -1, 1);
+										.evaluate(noise.noise(MathUtils.rotate(new Vector2f(x + 0.5f, (z + 0.5f) * 0.5f), 45))),
+										0,
+										1,
+										-1,
+										1);
 						return (int) Math.floor(Math.max(-1, Math.pow(oct1 * 2 + oct2 * 3, 1.2) + 3));
 					}
 				};
@@ -93,21 +104,23 @@ public class TestGameLogic extends GameLogic {
 				final long time = PCUtils.nanoTime(() -> worldGenerator.compute());
 				GlobalLogger.info("World generated in " + (time / 1e6) + " ms");
 				return worldGenerator;
-			}).then(RENDER_DISPATCHER, (Function<WorldGenerator, Mesh>) (worldGenerator) -> {
+			}).then(RENDER_DISPATCHER, (Function<WorldGenerator, TerrainMesh>) (worldGenerator) -> {
 				GlobalLogger.info("Generating mesh...");
-				final Pair<Mesh, Long> mesh = PCUtils.nanoTime(() -> worldGenerator.generateMesh(worldScene.getWorldCache()));
+				final Pair<TerrainMesh, Long> mesh = PCUtils.nanoTime(() -> worldGenerator.generateMesh(worldScene.getCache()));
 				GlobalLogger.info("Mesh generated in " + (mesh.getValue() / 1e6) + " ms");
 				return mesh.getKey();
 			}, 0).then(WORKERS, (mesh) -> {
 				GlobalLogger.info("Creating entity...");
 				final long time = PCUtils.nanoTime((Runnable) () -> {
-					final GameObject terrainEntity = new GameObject("terrain", mesh, new Transform3D(), false, new Vector3i(0, 255, 0),
-							(byte) 2);
+					final TerrainObject terrainEntity = new TerrainObject("terrain", mesh);
 					terrainEntity.setCompositeMaterialId(true);
+					terrainEntity.setActive(false);
 					worldScene.setTerrain(terrainEntity);
 				});
 				GlobalLogger.info("Entity created in " + (time / 1e6) + " ms");
 			}).push();
+
+			GameObjectFactory.create(WaterTowerObject.class, worldScene).push();
 		}
 
 		final Transform3DComponent transform3DComponent = cubeEntity.getComponent(Transform3DComponent.class);
@@ -146,7 +159,7 @@ public class TestGameLogic extends GameLogic {
 	@Override
 	public void render(float dTime) {
 		worldScene.getCamera().getProjection().update(window.getWidth(), window.getHeight());
-		simpleCompositor.render(engine, worldScene, uiScene, worldScene.getWorldCache(), uiCache);
+		simpleCompositor.render(engine, worldScene, uiScene, worldScene.getCache(), uiCache);
 	}
 
 }

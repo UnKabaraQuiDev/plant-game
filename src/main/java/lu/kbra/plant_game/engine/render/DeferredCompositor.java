@@ -9,10 +9,10 @@ import org.joml.Vector3i;
 import lu.pcy113.pclib.logger.GlobalLogger;
 
 import lu.kbra.plant_game.engine.entity.GameObject;
-import lu.kbra.plant_game.engine.entity.WorldLevelScene;
 import lu.kbra.plant_game.engine.render.shader.BlitShader;
 import lu.kbra.plant_game.engine.render.shader.MaterialComputeShader;
 import lu.kbra.plant_game.engine.render.shader.TransferShader;
+import lu.kbra.plant_game.engine.scene.WorldLevelScene;
 import lu.kbra.standalone.gameengine.GameEngine;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.cache.attrib.UIntAttribArray;

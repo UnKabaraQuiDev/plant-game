@@ -3,7 +3,6 @@ package lu.kbra.plant_game.engine.entity;
 import org.joml.Vector3i;
 
 import lu.kbra.standalone.gameengine.geom.Mesh;
-import lu.kbra.standalone.gameengine.objs.entity.Component;
 import lu.kbra.standalone.gameengine.objs.entity.Entity;
 import lu.kbra.standalone.gameengine.objs.entity.components.MeshComponent;
 import lu.kbra.standalone.gameengine.objs.entity.components.Transform3DComponent;
@@ -23,10 +22,6 @@ public class GameObject extends Entity {
 	private MeshComponent meshComponent;
 	private Transform3DComponent transformComponent;
 	private boolean transparent = false;
-
-	public GameObject(String str, Component... cs) {
-		super(str, cs);
-	}
 
 	public GameObject(String str, Mesh mesh) {
 		super(str, new MeshComponent(mesh));
@@ -94,6 +89,14 @@ public class GameObject extends Entity {
 
 	public Transform3DComponent getTransformComponent() {
 		return transformComponent;
+	}
+
+	public Mesh getMesh() {
+		return meshComponent == null ? null : meshComponent.getMesh();
+	}
+
+	public Transform3D getTransform() {
+		return transformComponent == null ? null : transformComponent.getTransform();
 	}
 
 }
