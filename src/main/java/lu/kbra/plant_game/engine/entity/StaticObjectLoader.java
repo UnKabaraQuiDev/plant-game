@@ -1,12 +1,12 @@
 package lu.kbra.plant_game.engine.entity;
 
 import java.net.URI;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.function.Function;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-
-import lu.pcy113.pclib.PCUtils;
 
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.geom.Mesh;
@@ -14,6 +14,7 @@ import lu.kbra.standalone.gameengine.geom.utils.ObjLoader;
 import lu.kbra.standalone.gameengine.graph.texture.SingleTexture;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
+import lu.pcy113.pclib.PCUtils;
 
 public class StaticObjectLoader {
 
@@ -40,7 +41,7 @@ public class StaticObjectLoader {
 				final boolean textureMaterial = jsonObj.getBoolean("texture_material");
 				final String texturePath = textureMaterial ? baseURI.resolve(jsonObj.optString("texture_path")).toString()
 						: jsonObj.optString("texture_path");
-
+				
 				return new MeshData(meshFilePath, textureMaterial, texturePath);
 			}
 		} catch (Exception e) {
