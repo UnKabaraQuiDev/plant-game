@@ -9,8 +9,8 @@
                 0.0,
                 0.0
             ],
-            "texture_material": true,
-            "texture_path": "txt0.png"
+            "texture_material": false,
+            "texture_path": null
         }
     ]
 }

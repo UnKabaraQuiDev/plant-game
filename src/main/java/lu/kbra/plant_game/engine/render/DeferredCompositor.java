@@ -58,8 +58,10 @@ public class DeferredCompositor implements Cleanupable {
 
 	private static Mesh SCREEN = new Mesh(PASS_SCREEN, null,
 			new Vec3fAttribArray("pos", 0, 1,
-					new Vector3f[] { new Vector3f(-1, 1, 0), new Vector3f(1, 1, 0), new Vector3f(1, -1, 0), new Vector3f(-1, -1, 0) }),
-			new UIntAttribArray("ind", -1, 1, new int[] { 0, 1, 2, 0, 2, 3 }, BufferType.ELEMENT_ARRAY), new Vec2fAttribArray("uv", 1, 1,
+					new Vector3f[] { new Vector3f(-1, 1, 0), new Vector3f(1, 1, 0), new Vector3f(1, -1, 0),
+							new Vector3f(-1, -1, 0) }),
+			new UIntAttribArray("ind", -1, 1, new int[] { 0, 1, 2, 0, 2, 3 }, BufferType.ELEMENT_ARRAY),
+			new Vec2fAttribArray("uv", 1, 1,
 					new Vector2f[] { new Vector2f(0, 1), new Vector2f(1, 1), new Vector2f(1, 0), new Vector2f(0, 0) }));
 
 	protected SingleTexture depthTexture, posTexture, normalTexture, uvTexture, idsTexture;
@@ -73,7 +75,8 @@ public class DeferredCompositor implements Cleanupable {
 
 	protected Vector2i resolution = new Vector2i(0), outputResolution = new Vector2i(0);
 
-	public void render(GameEngine engine, WorldLevelScene worldScene, Scene2D uiScene, CacheManager worldCache, CacheManager uiCache) {
+	public void render(GameEngine engine, WorldLevelScene worldScene, Scene2D uiScene, CacheManager worldCache,
+			CacheManager uiCache) {
 		final int width = engine.getWindow().getWidth();
 		final int height = engine.getWindow().getHeight();
 
@@ -129,13 +132,8 @@ public class DeferredCompositor implements Cleanupable {
 		blitShader.unbind();
 	}
 
-	private void renderMaterials(
-			CacheManager cache,
-			WorldLevelScene worldScene,
-			CacheManager worldCache,
-			int width,
-			int height,
-			boolean needRegen) {
+	private void renderMaterials(CacheManager cache, WorldLevelScene worldScene, CacheManager worldCache, int width,
+			int height, boolean needRegen) {
 		if (materialComputeShader == null) {
 			materialComputeShader = cache.hasAbstractShader(MaterialComputeShader.class.getName())
 					? (MaterialComputeShader) cache.getAbstractShader(MaterialComputeShader.class.getName())
@@ -144,7 +142,8 @@ public class DeferredCompositor implements Cleanupable {
 		}
 		if (textureMaterialComputeShader == null) {
 			textureMaterialComputeShader = cache.hasAbstractShader(TextureMaterialComputeShader.class.getName())
-					? (TextureMaterialComputeShader) cache.getAbstractShader(TextureMaterialComputeShader.class.getName())
+					? (TextureMaterialComputeShader) cache
+							.getAbstractShader(TextureMaterialComputeShader.class.getName())
 					: new TextureMaterialComputeShader();
 			cache.addAbstractShader(textureMaterialComputeShader);
 		}
@@ -158,11 +157,15 @@ public class DeferredCompositor implements Cleanupable {
 			outputTxt.setGenerateMipmaps(false);
 			outputTxt.setup();
 			cache.addTexture(outputTxt);
-		} else {
+		} else if (needRegen) {
 			outputTxt.setSize(outputResolution);
 			outputTxt.bind();
 			outputTxt.resize();
 			outputTxt.unbind();
+		} else {
+			GL_W.glClearTexImage(outputTxt.getTid(), 0, outputTxt.getFormat().getGlId(),
+					outputTxt.getDataType().getGlId(), new float[] { 0, 0, 0, 0 });
+			assert GL_W.checkError("ClearTexImage(" + outputTxt.getTid() + ")");
 		}
 
 		final int groupsX = (width + 15) / 16;
@@ -187,9 +190,11 @@ public class DeferredCompositor implements Cleanupable {
 		setupMaterialInputs(textureMaterialComputeShader, needRegen);
 		textureMaterialComputeShader.setUniform(TextureMaterialComputeShader.LIGHT_COLOR, worldScene.getLightColor());
 		textureMaterialComputeShader.setUniform(TextureMaterialComputeShader.LIGHT_DIR, worldScene.getLightDirection());
-		textureMaterialComputeShader.setUniform(TextureMaterialComputeShader.AMBIENT_LIGHT, worldScene.getAmbientLight());
+		textureMaterialComputeShader.setUniform(TextureMaterialComputeShader.AMBIENT_LIGHT,
+				worldScene.getAmbientLight());
 		final int txt0UniformLoc = textureMaterialComputeShader.getUniformLocation(TextureMaterialComputeShader.TXT0);
-		final int currentMaterialIdLoc = textureMaterialComputeShader.getUniformLocation(TextureMaterialComputeShader.CURRENT_MATERIAL_ID);
+		final int currentMaterialIdLoc = textureMaterialComputeShader
+				.getUniformLocation(TextureMaterialComputeShader.CURRENT_MATERIAL_ID);
 
 		synchronized (worldScene.getEntitiesLock()) {
 
@@ -199,6 +204,7 @@ public class DeferredCompositor implements Cleanupable {
 						continue;
 
 					final TexturedMesh mesh = (TexturedMesh) obj.getMesh();
+					System.out.println(mesh.getTexture());
 					mesh.getTexture().bind(0);
 					mesh.getTexture().bindUniform(txt0UniformLoc, 0);
 
@@ -223,13 +229,15 @@ public class DeferredCompositor implements Cleanupable {
 		normalTexture.bind(1);
 		uvTexture.bind(2);
 		// GL_W.glTexImage2D(idsTexture.getTextureType().getGlId(), 0,
-		// idsTexture.getInternalFormat().getGlId(), idsTexture.getWidth(), idsTexture.getHeight(), 0,
+		// idsTexture.getInternalFormat().getGlId(), idsTexture.getWidth(),
+		// idsTexture.getHeight(), 0,
 		// idsTexture.getFormat().getGlId(), idsTexture.getDataType().getGlId(), data);
 		idsTexture.bind(3);
 		depthTexture.bind(4);
 
 		if (needRegen) {
-			GL_W.glBindImageTexture(0, outputTxt.getTid(), 0, false, 0, GL_W.GL_WRITE_ONLY, outputTxt.getInternalFormat().getGlId());
+			GL_W.glBindImageTexture(0, outputTxt.getTid(), 0, false, 0, GL_W.GL_WRITE_ONLY,
+					outputTxt.getInternalFormat().getGlId());
 			assert GL_W.checkError("BindImageTexture(0," + outputTxt.getTid() + ",WRITE_ONLY)");
 
 			posTexture.bindUniform(computeShader.getUniformLocation("uPosTex"), 0);
@@ -243,13 +251,8 @@ public class DeferredCompositor implements Cleanupable {
 		}
 	}
 
-	private void renderWorldScene(
-			CacheManager cache,
-			WorldLevelScene worldScene,
-			CacheManager worldCache,
-			int width,
-			int height,
-			boolean needRegen) {
+	private void renderWorldScene(CacheManager cache, WorldLevelScene worldScene, CacheManager worldCache, int width,
+			int height, boolean needRegen) {
 
 		if (transferShader == null) {
 			transferShader = cache.hasAbstractShader(TransferShader.class.getName())
@@ -298,10 +301,9 @@ public class DeferredCompositor implements Cleanupable {
 					continue;
 				}
 
-				if (entity.hasComponentMatching(RenderConditionComponent.class) && entity
-						.getComponentsMatching(RenderConditionComponent.class)
-						.parallelStream()
-						.allMatch(RenderConditionComponent::get)) {
+				if (entity.hasComponentMatching(RenderConditionComponent.class)
+						&& entity.getComponentsMatching(RenderConditionComponent.class).parallelStream()
+								.allMatch(RenderConditionComponent::get)) {
 					return;
 				}
 
@@ -313,7 +315,8 @@ public class DeferredCompositor implements Cleanupable {
 
 					if (transferShader.createUniform(RenderShader.TRANSFORMATION_MATRIX)
 							&& entity.hasComponentMatching(TransformComponent.class)) {
-						final TransformComponent transform = (TransformComponent) entity.getComponentMatching(TransformComponent.class);
+						final TransformComponent transform = (TransformComponent) entity
+								.getComponentMatching(TransformComponent.class);
 						if (transform != null && transform.getTransform() != null) {
 							transformationMatrix = transform.getTransform().getMatrix();
 						}
@@ -324,22 +327,26 @@ public class DeferredCompositor implements Cleanupable {
 					if (entity instanceof GameObject go) {
 						if (go.getMaterialIdLocation() != AttributeLocation.MESH) {
 							GL_W.glDisableVertexAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_ID);
-							assert GL_W.checkError("DisableVertexAttribArray(" + GameObject.MESH_ATTRIB_MATERIAL_ID_ID + ")");
+							assert GL_W.checkError(
+									"DisableVertexAttribArray(" + GameObject.MESH_ATTRIB_MATERIAL_ID_ID + ")");
 							GL_W.glVertexAttribI1ui(GameObject.MESH_ATTRIB_MATERIAL_ID_ID, go.getMaterialId());
-							assert GL_W
-									.checkError("VertexAttrib1f(" + GameObject.MESH_ATTRIB_MATERIAL_ID_ID + "," + go.getMaterialId() + ")");
+							assert GL_W.checkError("VertexAttrib1f(" + GameObject.MESH_ATTRIB_MATERIAL_ID_ID + ","
+									+ go.getMaterialId() + ")");
 						}
 
 						if (go.getObjectIdLocation() != AttributeLocation.MESH) {
 							final Vector3i objId = go.getObjectId();
 							GL_W.glDisableVertexAttribArray(GameObject.MESH_ATTRIB_OBJECT_ID_ID);
-							assert GL_W.checkError("DisableVertexAttribArray(" + GameObject.MESH_ATTRIB_OBJECT_ID_ID + ")");
+							assert GL_W.checkError(
+									"DisableVertexAttribArray(" + GameObject.MESH_ATTRIB_OBJECT_ID_ID + ")");
 							GL_W.glVertexAttribI3ui(GameObject.MESH_ATTRIB_OBJECT_ID_ID, objId.x, objId.y, objId.z);
-							assert GL_W.checkError("VertexAttrib3f(" + GameObject.MESH_ATTRIB_OBJECT_ID_ID + "," + objId + ")");
+							assert GL_W.checkError(
+									"VertexAttrib3f(" + GameObject.MESH_ATTRIB_OBJECT_ID_ID + "," + objId + ")");
 						}
 					}
 
-					GL_W.glDrawElements(transferShader.getBeginMode().getGlId(), mesh.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
+					GL_W.glDrawElements(transferShader.getBeginMode().getGlId(), mesh.getIndicesCount(),
+							GL_W.GL_UNSIGNED_INT, 0);
 					assert GL_W.checkError("DrawElements(" + mesh.getId() + ")");
 
 					mesh.unbind();

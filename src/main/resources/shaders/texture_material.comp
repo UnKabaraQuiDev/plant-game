@@ -40,6 +40,8 @@ void main() {
         vec3 color = texture(txt0, uv).rgb;
         color = ambientLight * color + color * lightColor * diff;
         objectColor = vec4(color, 1);
+    }else {
+    	return;
     }
 
     imageStore(uOutputTex, outPixel, objectColor);

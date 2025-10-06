@@ -1,5 +1,6 @@
 package lu.kbra.plant_game;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.joml.Quaternionf;
@@ -8,11 +9,8 @@ import org.joml.Vector3f;
 import org.joml.Vector3i;
 import org.lwjgl.glfw.GLFW;
 
-import lu.pcy113.pclib.PCUtils;
-import lu.pcy113.pclib.datastructure.pair.Pair;
-import lu.pcy113.pclib.logger.GlobalLogger;
-
 import lu.kbra.plant_game.engine.entity.GameObjectFactory;
+import lu.kbra.plant_game.engine.entity.electric.SolarPanelObject;
 import lu.kbra.plant_game.engine.entity.impl.AttributeLocation;
 import lu.kbra.plant_game.engine.entity.impl.GameObject;
 import lu.kbra.plant_game.engine.entity.terrain.TerrainMesh;
@@ -39,6 +37,9 @@ import lu.kbra.standalone.gameengine.utils.MathUtils;
 import lu.kbra.standalone.gameengine.utils.interpolation.Interpolators;
 import lu.kbra.standalone.gameengine.utils.noise.NoiseGenerator;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
+import lu.pcy113.pclib.PCUtils;
+import lu.pcy113.pclib.datastructure.pair.Pair;
+import lu.pcy113.pclib.logger.GlobalLogger;
 
 public class TestGameLogic extends GameLogic {
 
@@ -57,12 +58,15 @@ public class TestGameLogic extends GameLogic {
 		simpleCompositor = new DeferredCompositor();
 
 		worldScene = new WorldLevelScene("world", cache);
-		// worldScene.getCamera().getProjection().setFov((float) Math.toRadians(80)).update();
-		// worldScene.getCamera().lookAt(new Vector3f(0, 10, 10), new Vector3f(0, 0, 0)).updateMatrix();
+		// worldScene.getCamera().getProjection().setFov((float)
+		// Math.toRadians(80)).update();
+		// worldScene.getCamera().lookAt(new Vector3f(0, 10, 10), new Vector3f(0, 0,
+		// 0)).updateMatrix();
 		worldScene.getCamera().setPosition(new Vector3f(-20, 25, 20).mul(1.5f));
 		worldScene.getCamera().lookAt(worldScene.getCamera().getPosition(), new Vector3f(0, 0, 0)).updateMatrix();
 		worldScene.getCamera().getProjection().setFov((float) Math.toRadians(40));
-		// worldScene.getCamera().setRotation(new Quaternionf().rotationXYZ((float) Math.toRadians(45),
+		// worldScene.getCamera().setRotation(new Quaternionf().rotationXYZ((float)
+		// Math.toRadians(45),
 		// (float) Math.toRadians(-45), 0));
 		// worldScene.getCamera().updateMatrix();
 		worldScene.getLightDirection().set(new Vector3f(0.5f, 0.5f, 0.5f).normalize());
@@ -71,16 +75,14 @@ public class TestGameLogic extends GameLogic {
 
 		final Mesh waterLevelMesh = new QuadMesh("water", null, new Vector2f(15, 15));
 		worldScene.getCache().addMesh(waterLevelMesh);
-		worldScene
-				.addEntity(new GameObject("water", waterLevelMesh,
-						new Transform3D(new Vector3f(0, -0.1f, 0), new Quaternionf().rotateX((float) Math.toRadians(-90))), true,
-						new Vector3i(2, 0, 0), TerrainMaterialType.WATER.getId()));
+		worldScene.addEntity(new GameObject("water", waterLevelMesh,
+				new Transform3D(new Vector3f(0, -0.1f, 0), new Quaternionf().rotateX((float) Math.toRadians(-90))),
+				true, new Vector3i(2, 0, 0), TerrainMaterialType.WATER.getId()));
 
 		final CubeMesh cubeMesh = new CubeMesh("cubeMesh", null, new Vector3f(0.5f));
 		worldScene.getCache().addMesh(cubeMesh);
-		cubeEntity = worldScene
-				.addEntity(new GameObject("cubeEntity", cubeMesh, new Transform3D(), false, new Vector3i(1, 0, 255),
-						TerrainMaterialType.GRASS.getId()));
+		cubeEntity = worldScene.addEntity(new GameObject("cubeEntity", cubeMesh, new Transform3D(), false,
+				new Vector3i(1, 0, 255), TerrainMaterialType.GRASS.getId()));
 	}
 
 	@Override
@@ -98,14 +100,12 @@ public class TestGameLogic extends GameLogic {
 
 					@Override
 					protected Integer genNoise(int x, int z) {
-						final float oct1 = MathUtils.map(Interpolators.SINE_OUT.evaluate(noise.noise(x + 0.5f, z + 0.5f)), 0, 1, 0, 1);
-						final float oct2 = MathUtils
-								.map(Interpolators.BOUNCE_OUT
-										.evaluate(noise.noise(MathUtils.rotate(new Vector2f(x + 0.5f, (z + 0.5f) * 0.5f), 45))),
-										0,
-										1,
-										-1,
-										1);
+						final float oct1 = MathUtils
+								.map(Interpolators.SINE_OUT.evaluate(noise.noise(x + 0.5f, z + 0.5f)), 0, 1, 0, 1);
+						final float oct2 = MathUtils.map(
+								Interpolators.BOUNCE_OUT.evaluate(
+										noise.noise(MathUtils.rotate(new Vector2f(x + 0.5f, (z + 0.5f) * 0.5f), 45))),
+								0, 1, -1, 1);
 						return (int) Math.floor(Math.max(-1, Math.pow(oct1 * 2 + oct2 * 3, 1.2) + 3));
 					}
 				};
@@ -115,7 +115,8 @@ public class TestGameLogic extends GameLogic {
 				return worldGenerator;
 			}).then(RENDER_DISPATCHER, (Function<WorldGenerator, TerrainMesh>) (worldGenerator) -> {
 				GlobalLogger.info("Generating mesh...");
-				final Pair<TerrainMesh, Long> mesh = PCUtils.nanoTime(() -> worldGenerator.generateMesh(worldScene.getCache()));
+				final Pair<TerrainMesh, Long> mesh = PCUtils
+						.nanoTime(() -> worldGenerator.generateMesh(worldScene.getCache()));
 				GlobalLogger.info("Mesh generated in " + (mesh.getValue() / 1e6) + " ms");
 				return mesh.getKey();
 			}, 0).then(WORKERS, (mesh) -> {
@@ -130,6 +131,9 @@ public class TestGameLogic extends GameLogic {
 			}).push();
 
 			GameObjectFactory.create(WaterTowerObject.class, worldScene, new Transform3D()).push();
+			GameObjectFactory.create(SolarPanelObject.class, worldScene, new Transform3D())
+					.then(WORKERS, (Consumer<SolarPanelObject>) (obj) -> obj.getTransform().setTranslation(new Vector3f(5, 0, 0)).updateMatrix())
+					.push();
 		}
 
 		final Transform3DComponent transform3DComponent = cubeEntity.getComponent(Transform3DComponent.class);
