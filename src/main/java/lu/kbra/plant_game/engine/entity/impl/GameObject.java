@@ -8,7 +8,7 @@ import lu.kbra.standalone.gameengine.objs.entity.components.MeshComponent;
 import lu.kbra.standalone.gameengine.objs.entity.components.Transform3DComponent;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-public class GameObject extends Entity {
+public class GameObject extends Entity implements Transform3Deable {
 
 	public static final int MESH_ATTRIB_MATERIAL_ID_ID = 3;
 	public static final int MESH_ATTRIB_OBJECT_ID_ID = 4;
@@ -40,7 +40,8 @@ public class GameObject extends Entity {
 		this(str, mesh, transform, transparent, objectId, (short) -1);
 	}
 
-	public GameObject(String str, Mesh mesh, Transform3D transform, boolean transparent, Vector3i objectId, short materialId) {
+	public GameObject(String str, Mesh mesh, Transform3D transform, boolean transparent, Vector3i objectId,
+			short materialId) {
 		super(str, new MeshComponent(mesh), transform != null ? new Transform3DComponent(transform) : null);
 		if (mesh instanceof TexturedMesh) {
 			materialIdLocation = AttributeLocation.TEXTURE;
@@ -104,6 +105,7 @@ public class GameObject extends Entity {
 		return meshComponent == null ? null : meshComponent.getMesh();
 	}
 
+	@Override
 	public Transform3D getTransform() {
 		return transformComponent == null ? null : transformComponent.getTransform();
 	}

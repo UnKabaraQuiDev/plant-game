@@ -23,7 +23,14 @@ public class TerrainMesh extends Mesh {
 	}
 
 	public int getCellHeight(int x, int z) {
-		return cellHeight[x][z];
+		if (isInBounds(x, z))
+			return cellHeight[x][z];
+
+		return Integer.MIN_VALUE;
+	}
+
+	public boolean isInBounds(int x, int z) {
+		return x >= 0 && x < width && z >= 0 && z < length;
 	}
 
 	public Integer[][] getCellHeights() {

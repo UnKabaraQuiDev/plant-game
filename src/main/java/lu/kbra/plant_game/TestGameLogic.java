@@ -122,20 +122,31 @@ public class TestGameLogic extends GameLogic {
 					GlobalLogger.info("Water mesh generated in " + (meshTime.getValue() / 1e6) + " ms");
 					return meshTime.getKey();
 				}).then(WORKERS,
-						(Function<Mesh, GameObject>) (mesh) -> worldScene.addEntity(new GameObject("water", mesh,
+						(Function<Mesh, GameObject>) (mesh) -> worldScene.setWaterLevel(new GameObject("water", mesh,
 								new Transform3D(new Vector3f(0, 0.9f, 0),
 										new Quaternionf().rotateX((float) Math.toRadians(-90))),
 								true, new Vector3i(2, 0, 0), TerrainMaterialType.WATER.getId())))
 						.push();
 
 				GameObjectFactory.create(WaterTowerObject.class, worldScene, new Transform3D())
-						.then(WORKERS, (Consumer<WaterTowerObject>) (obj) -> obj.placeDown(worldScene,
-								new Vector2i(5, 5), Direction.NONE))
-						.push();
+						.then(WORKERS, (Consumer<WaterTowerObject>) (obj) -> {
+							final Vector2i pos = new Vector2i(0, 0);
+							while (!obj.isPlaceable(worldScene, pos, Direction.NONE)) {
+								pos.x++;
+								if (pos.x >= worldScene.getTerrain().getMesh().getWidth()) {
+									pos.x = 0;
+									pos.y++;
+								}
+								if (pos.y >= worldScene.getTerrain().getMesh().getLength()) {
+									break;
+								}
+							}
+							obj.placeDown(worldScene, pos, Direction.NONE);
+						}).push();
 
 				GameObjectFactory.create(SolarPanelObject.class, worldScene, new Transform3D())
-						.then(WORKERS, (Consumer<SolarPanelObject>) (obj) -> obj.getTransform()
-								.setTranslation(new Vector3f(5, 0, 0)).updateMatrix())
+						.then(WORKERS, (Consumer<SolarPanelObject>) (obj) -> obj.placeDown(worldScene,
+								new Vector2i(15, 5), Direction.NONE))
 						.push();
 			}).push();
 		}

@@ -28,12 +28,12 @@ public class WorldLevelScene extends Scene3D {
 		return waterLevel;
 	}
 
-	public void setWaterLevel(GameObject waterLevel) {
+	public <T extends GameObject> T setWaterLevel(T waterLevel) {
 		this.waterLevel = waterLevel;
-		super.addEntity(waterLevel);
+		return super.addEntity(waterLevel);
 	}
 
-	public GameObject getTerrain() {
+	public TerrainObject getTerrain() {
 		return terrain;
 	}
 

@@ -27,10 +27,6 @@ public class ImageWorldGenerator extends WorldGenerator {
 
 	@Override
 	protected Integer genNoise(int x, int z) {
-		System.out.println(image.getRGB(x, z));
-		System.out.println((image.getRGB(x, z) & 0xff));
-		System.out.println((float) (image.getRGB(x, z) & 0xff) * scale);
-
 		return (int) Math.round((image.getRGB(x, z) & 0xff) * scale);
 	}
 
