@@ -30,12 +30,23 @@ public class WorldGenerator {
 	private byte[] materialIds;
 	private Vector3i[] objectIds;
 
-	private TerrainMaterialType[][] materialType;
-	private Integer[][] noiseCompute;
+	protected TerrainMaterialType[][] materialType;
+	protected Integer[][] noiseCompute;
 
 	public WorldGenerator(int width, int length) {
 		this.width = width;
 		this.length = length;
+
+		noiseCompute = new Integer[width][length];
+	}
+
+	protected WorldGenerator() {
+	}
+
+	protected void setSize(int width, int length) {
+		this.width = width;
+		this.length = length;
+
 		noiseCompute = new Integer[width][length];
 	}
 
@@ -45,62 +56,61 @@ public class WorldGenerator {
 	}
 
 	public TerrainMesh generateMesh(CacheManager cache) {
-		final TerrainMesh mesh = new TerrainMesh("terrain-" + width + "x" + length + "@" + System.identityHashCode(this), noiseCompute,
+		final TerrainMesh mesh = new TerrainMesh(
+				"terrain-" + width + "x" + length + "@" + System.identityHashCode(this), width, length, noiseCompute,
 				materialType, new Vec3fAttribArray(Mesh.ATTRIB_VERTICES_NAME, Mesh.ATTRIB_VERTICES_ID, 1, verts),
-				new UIntAttribArray(Mesh.ATTRIB_INDICES_NAME, Mesh.ATTRIB_INDICES_ID, 1, indices, BufferType.ELEMENT_ARRAY),
+				new UIntAttribArray(Mesh.ATTRIB_INDICES_NAME, Mesh.ATTRIB_INDICES_ID, 1, indices,
+						BufferType.ELEMENT_ARRAY),
 				new Vec3fAttribArray(Mesh.ATTRIB_NORMALS_NAME, Mesh.ATTRIB_NORMALS_ID, 1, normals),
-				new UByteAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_NAME, GameObject.MESH_ATTRIB_MATERIAL_ID_ID, 1, materialIds),
-				new Vec3iAttribArray(GameObject.MESH_ATTRIB_OBJECT_ID_NAME, GameObject.MESH_ATTRIB_OBJECT_ID_ID, 1, objectIds));
+				new UByteAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_NAME, GameObject.MESH_ATTRIB_MATERIAL_ID_ID, 1,
+						materialIds),
+				new Vec3iAttribArray(GameObject.MESH_ATTRIB_OBJECT_ID_NAME, GameObject.MESH_ATTRIB_OBJECT_ID_ID, 1,
+						objectIds));
 		cache.addMesh(mesh);
 		return mesh;
 	}
 
 	protected void generateFaces() {
 		this.materialType = new TerrainMaterialType[width][length];
-		
+
 		for (int x = 0; x < width; x++) {
 			for (int z = 0; z < length; z++) {
 				final int cellHeight = getCellHeight(x, z);
 
-				faces
-						.add(new SquareFace(new Vector3f(x, cellHeight, z), new Vector3f(x + 1, cellHeight, z + 1), GameEngine.Y_POS,
-								cellHeight < 0 ? TerrainMaterialType.STONE : TerrainMaterialType.GRASS));
+				faces.add(new SquareFace(new Vector3f(x, cellHeight, z), new Vector3f(x + 1, cellHeight, z + 1),
+						GameEngine.Y_POS, cellHeight < 0 ? TerrainMaterialType.STONE : TerrainMaterialType.GRASS));
 
 				materialType[x][z] = cellHeight < 0 ? TerrainMaterialType.WATER : TerrainMaterialType.GRASS;
 
 				final int cellHeightXPos = getCellHeight(x + 1, z);
 				if (cellHeight > cellHeightXPos) {
 					for (int y = cellHeightXPos; y < cellHeight; y++) {
-						faces
-								.add(new SquareFace(new Vector3f(x + 1, y, z), new Vector3f(x + 1, y + 1, z + 1), GameEngine.X_POS,
-										TerrainMaterialType.DIRT));
+						faces.add(new SquareFace(new Vector3f(x + 1, y, z), new Vector3f(x + 1, y + 1, z + 1),
+								GameEngine.X_POS, TerrainMaterialType.DIRT));
 					}
 				}
 
 				final int cellHeightZPos = getCellHeight(x, z + 1);
 				if (cellHeight > cellHeightZPos) {
 					for (int y = cellHeightZPos; y < cellHeight; y++) {
-						faces
-								.add(new SquareFace(new Vector3f(x, y, z + 1), new Vector3f(x + 1, y + 1, z + 1), GameEngine.Z_POS,
-										TerrainMaterialType.DIRT));
+						faces.add(new SquareFace(new Vector3f(x, y, z + 1), new Vector3f(x + 1, y + 1, z + 1),
+								GameEngine.Z_POS, TerrainMaterialType.DIRT));
 					}
 				}
 
 				final int cellHeightXNeg = getCellHeight(x - 1, z);
 				if (cellHeight > cellHeightXNeg) {
 					for (int y = cellHeightXNeg; y < cellHeight; y++) {
-						faces
-								.add(new SquareFace(new Vector3f(x, y, z), new Vector3f(x, y + 1, z + 1), GameEngine.X_NEG,
-										TerrainMaterialType.DIRT));
+						faces.add(new SquareFace(new Vector3f(x, y, z), new Vector3f(x, y + 1, z + 1), GameEngine.X_NEG,
+								TerrainMaterialType.DIRT));
 					}
 				}
 
 				final int cellHeightZNeg = getCellHeight(x, z - 1);
 				if (cellHeight > cellHeightZNeg) {
 					for (int y = cellHeightZNeg; y < cellHeight; y++) {
-						faces
-								.add(new SquareFace(new Vector3f(x, y, z), new Vector3f(x + 1, y + 1, z), GameEngine.Z_NEG,
-										TerrainMaterialType.DIRT));
+						faces.add(new SquareFace(new Vector3f(x, y, z), new Vector3f(x + 1, y + 1, z), GameEngine.Z_NEG,
+								TerrainMaterialType.DIRT));
 					}
 				}
 			}

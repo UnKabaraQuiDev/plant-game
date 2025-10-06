@@ -8,12 +8,16 @@ import lu.kbra.standalone.gameengine.geom.Mesh;
 
 public class TerrainMesh extends Mesh {
 
+	private int width, length;
+
 	private Integer[][] cellHeight;
 	private TerrainMaterialType[][] materialType;
 
-	public TerrainMesh(String name, Integer[][] cellHeight, TerrainMaterialType[][] materialType, Vec3fAttribArray vertices,
-			UIntAttribArray indices, AttribArray... attribs) {
+	public TerrainMesh(String name, int width, int length, Integer[][] cellHeight, TerrainMaterialType[][] materialType,
+			Vec3fAttribArray vertices, UIntAttribArray indices, AttribArray... attribs) {
 		super(name, null, vertices, indices, attribs);
+		this.width = width;
+		this.length = length;
 		this.cellHeight = cellHeight;
 		this.materialType = materialType;
 	}
@@ -22,15 +26,23 @@ public class TerrainMesh extends Mesh {
 		return cellHeight[x][z];
 	}
 
-	public Integer[][] getCellHeight() {
+	public Integer[][] getCellHeights() {
 		return cellHeight;
+	}
+
+	public int getWidth() {
+		return width;
+	}
+
+	public int getLength() {
+		return length;
 	}
 
 	public TerrainMaterialType getCellMaterial(int x, int z) {
 		return materialType[x][z];
 	}
 
-	public TerrainMaterialType[][] getMaterialType() {
+	public TerrainMaterialType[][] getMaterialTypes() {
 		return materialType;
 	}
 

@@ -8,9 +8,6 @@ public class TextureMaterialComputeShader extends ComputeShader {
 
 	public static final String TXT0 = "txt0";
 	public static final String CURRENT_MATERIAL_ID = "currentMaterialId";
-	public static final String LIGHT_DIR = "lightDir";
-	public static final String LIGHT_COLOR = "lightColor";
-	public static final String AMBIENT_LIGHT = "ambientLight";
 
 	public TextureMaterialComputeShader() {
 		super((ComputeShaderPart) AbstractShaderPart.load("classpath:/shaders/texture_material.comp"));
@@ -23,9 +20,9 @@ public class TextureMaterialComputeShader extends ComputeShader {
 
 		createUniform(TXT0);
 		createUniform(CURRENT_MATERIAL_ID);
-		createUniform(LIGHT_DIR);
-		createUniform(LIGHT_COLOR);
-		createUniform(AMBIENT_LIGHT);
+		createUniform(MaterialComputeShader.LIGHT_DIR);
+		createUniform(MaterialComputeShader.LIGHT_COLOR);
+		createUniform(MaterialComputeShader.AMBIENT_LIGHT);
 	}
 
 }

@@ -8,6 +8,10 @@ public class MaterialComputeShader extends ComputeShader {
 
 	public static final String INPUT_SIZE = "inputSize";
 	public static final String OUTPUT_SIZE = "outputSize";
+	
+	public static final String LIGHT_DIR = "lightDir";
+	public static final String LIGHT_COLOR = "lightColor";
+	public static final String AMBIENT_LIGHT = "ambientLight";
 
 	public MaterialComputeShader() {
 		super((ComputeShaderPart) AbstractShaderPart.load("classpath:/shaders/material.comp"));
@@ -17,6 +21,10 @@ public class MaterialComputeShader extends ComputeShader {
 	public void createUniforms() {
 		createUniform(INPUT_SIZE);
 		createUniform(OUTPUT_SIZE);
+
+		createUniform(MaterialComputeShader.LIGHT_DIR);
+		createUniform(MaterialComputeShader.LIGHT_COLOR);
+		createUniform(MaterialComputeShader.AMBIENT_LIGHT);
 	}
 
 }

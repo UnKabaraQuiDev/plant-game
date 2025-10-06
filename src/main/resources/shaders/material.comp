@@ -13,9 +13,12 @@ layout(rgba8, binding = 0) uniform writeonly image2D uOutputTex;
 uniform ivec2 inputSize;
 uniform ivec2 outputSize;
 
+uniform vec3 lightDir;
+uniform vec3 lightColor;
+uniform float ambientLight;
+
 void main() {
     ivec2 outPixel = ivec2(gl_GlobalInvocationID.xy);
-
     if (outPixel.x >= outputSize.x || outPixel.y >= outputSize.y)
         return;
 
@@ -28,19 +31,23 @@ void main() {
     uvec4 ids = texelFetch(uIdsTex, screenCoord, 0);
     float depth = texelFetch(uDepthTex, screenCoord, 0).r;
 
-	vec4 color = vec4(0);
+	vec3 color = vec3(0);
 	
 	if (ids.r == 1) {
-		color = vec4(0, 1, 0, 1);
+		color = vec3(0, 1, 0);
 	} else if (ids.r == 2) {
-		color = vec4(0.4, 0.2, 0.02, 1);
+		color = vec3(0.4, 0.2, 0.02);
 	} else if (ids.r == 3) {
-		color = vec4(0.3, 0.3, 0.3, 1);
+		color = vec3(0.3, 0.3, 0.3);
 	} else if (ids.r == 4) { // water
-		color = vec4(0.05, 0.05, 0.23, 1);
+		color = vec3(0.05, 0.05, 0.23);
 	} else {
 		return;
 	}
+	
+	float diff = max(dot(normal, normalize(lightDir)), 0.0);
+    color = ambientLight * color + color * lightColor * diff;
+    vec4 outColor = vec4(color, 1);
 
-	imageStore(uOutputTex, outPixel, vec4(ids.r, ids.g, ids.b, 1));
+	imageStore(uOutputTex, outPixel, outColor);
 }

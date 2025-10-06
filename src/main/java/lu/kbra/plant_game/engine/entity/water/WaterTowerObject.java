@@ -1,6 +1,7 @@
 package lu.kbra.plant_game.engine.entity.water;
 
 import org.joml.Vector2i;
+import org.joml.Vector3f;
 import org.joml.Vector3i;
 
 import lu.kbra.plant_game.engine.entity.DataPath;
@@ -40,7 +41,8 @@ public class WaterTowerObject extends GameObject implements PlaceableObject, Wat
 	}
 
 	@Override
-	public boolean isPlaceable(WorldLevelScene scene, TerrainMesh mesh, Vector2i tile, Direction rotation) {
+	public boolean isPlaceable(WorldLevelScene scene, Vector2i tile, Direction rotation) {
+		final TerrainMesh mesh = (TerrainMesh) scene.getTerrain().getMesh();
 		final int firstLevel = mesh.getCellHeight(tile.x, tile.y);
 
 		for (int x = -1; x <= 1; x++) {
@@ -55,8 +57,17 @@ public class WaterTowerObject extends GameObject implements PlaceableObject, Wat
 	}
 
 	@Override
-	public void placeDown(WorldLevelScene scene, TerrainMesh mesh, Vector2i tile, Direction rotation) {
+	public void placeDown(WorldLevelScene scene, Vector2i tile, Direction rotation) {
+		rotation.rotate(super.getTransform().getRotation());
 
+		final TerrainMesh mesh = (TerrainMesh) scene.getTerrain().getMesh();
+		final int cellHeight = mesh.getCellHeight(tile.x, tile.y);
+
+		super.getTransform().getTranslation().set(tile.x + 0.5f, cellHeight, tile.y + 0.5f);
+
+		System.err.println("placing down at: " + super.getTransform().getTranslation());
+
+		super.getTransform().updateMatrix();
 	}
 
 	@Override

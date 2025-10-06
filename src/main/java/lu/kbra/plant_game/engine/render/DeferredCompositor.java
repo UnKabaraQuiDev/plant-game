@@ -173,7 +173,7 @@ public class DeferredCompositor implements Cleanupable {
 
 		materialComputeShader.bind();
 
-		setupMaterialInputs(materialComputeShader, needRegen);
+		setupMaterialInputs(materialComputeShader, worldScene, needRegen);
 
 		GL_W.glDispatchCompute(groupsX, groupsY, 1);
 		assert GL_W.checkError("DispatchCompute(" + groupsX + "," + groupsY + ",1)");
@@ -187,11 +187,7 @@ public class DeferredCompositor implements Cleanupable {
 
 		textureMaterialComputeShader.bind();
 
-		setupMaterialInputs(textureMaterialComputeShader, needRegen);
-		textureMaterialComputeShader.setUniform(TextureMaterialComputeShader.LIGHT_COLOR, worldScene.getLightColor());
-		textureMaterialComputeShader.setUniform(TextureMaterialComputeShader.LIGHT_DIR, worldScene.getLightDirection());
-		textureMaterialComputeShader.setUniform(TextureMaterialComputeShader.AMBIENT_LIGHT,
-				worldScene.getAmbientLight());
+		setupMaterialInputs(textureMaterialComputeShader, worldScene, needRegen);
 		final int txt0UniformLoc = textureMaterialComputeShader.getUniformLocation(TextureMaterialComputeShader.TXT0);
 		final int currentMaterialIdLoc = textureMaterialComputeShader
 				.getUniformLocation(TextureMaterialComputeShader.CURRENT_MATERIAL_ID);
@@ -204,7 +200,6 @@ public class DeferredCompositor implements Cleanupable {
 						continue;
 
 					final TexturedMesh mesh = (TexturedMesh) obj.getMesh();
-					System.out.println(mesh.getTexture());
 					mesh.getTexture().bind(0);
 					mesh.getTexture().bindUniform(txt0UniformLoc, 0);
 
@@ -224,16 +219,16 @@ public class DeferredCompositor implements Cleanupable {
 		textureMaterialComputeShader.unbind();
 	}
 
-	private void setupMaterialInputs(ComputeShader computeShader, boolean needRegen) {
+	private void setupMaterialInputs(ComputeShader computeShader, WorldLevelScene worldScene, boolean needRegen) {
 		posTexture.bind(0);
 		normalTexture.bind(1);
 		uvTexture.bind(2);
-		// GL_W.glTexImage2D(idsTexture.getTextureType().getGlId(), 0,
-		// idsTexture.getInternalFormat().getGlId(), idsTexture.getWidth(),
-		// idsTexture.getHeight(), 0,
-		// idsTexture.getFormat().getGlId(), idsTexture.getDataType().getGlId(), data);
 		idsTexture.bind(3);
 		depthTexture.bind(4);
+
+		computeShader.setUniform(MaterialComputeShader.LIGHT_COLOR, worldScene.getLightColor());
+		computeShader.setUniform(MaterialComputeShader.LIGHT_DIR, worldScene.getLightDirection());
+		computeShader.setUniform(MaterialComputeShader.AMBIENT_LIGHT, worldScene.getAmbientLight());
 
 		if (needRegen) {
 			GL_W.glBindImageTexture(0, outputTxt.getTid(), 0, false, 0, GL_W.GL_WRITE_ONLY,
