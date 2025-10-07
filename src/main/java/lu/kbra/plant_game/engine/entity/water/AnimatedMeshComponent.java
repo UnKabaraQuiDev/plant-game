@@ -1,6 +1,6 @@
 package lu.kbra.plant_game.engine.entity.water;
 
-import lu.kbra.plant_game.engine.entity.AnimatedMesh;
+import lu.kbra.plant_game.engine.mesh.AnimatedMesh;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.objs.entity.components.MeshComponent;
 

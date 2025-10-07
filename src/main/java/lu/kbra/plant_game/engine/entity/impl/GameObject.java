@@ -2,6 +2,9 @@ package lu.kbra.plant_game.engine.entity.impl;
 
 import org.joml.Vector3i;
 
+import lu.kbra.plant_game.engine.mesh.AttributeLocation;
+import lu.kbra.plant_game.engine.mesh.MaterialMesh;
+import lu.kbra.plant_game.engine.mesh.TexturedMesh;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.objs.entity.Entity;
 import lu.kbra.standalone.gameengine.objs.entity.components.MeshComponent;
@@ -16,9 +19,9 @@ public class GameObject extends Entity implements Transform3Deable {
 	public static final String MESH_ATTRIB_OBJECT_ID_NAME = "objectId";
 
 	protected short materialId = -1;
-	protected AttributeLocation materialIdLocation = AttributeLocation.STATIC;
+	protected boolean entityMaterialId = false;
 	protected Vector3i objectId;
-	protected AttributeLocation objectIdLocation = AttributeLocation.STATIC; // object id in mesh data
+	protected AttributeLocation objectIdLocation = AttributeLocation.ENTITY; // object id in mesh data
 	protected MeshComponent meshComponent;
 	protected Transform3DComponent transformComponent;
 	protected boolean transparent = false;
@@ -43,8 +46,10 @@ public class GameObject extends Entity implements Transform3Deable {
 	public GameObject(String str, Mesh mesh, Transform3D transform, boolean transparent, Vector3i objectId,
 			short materialId) {
 		super(str, new MeshComponent(mesh), transform != null ? new Transform3DComponent(transform) : null);
-		if (mesh instanceof TexturedMesh) {
-			materialIdLocation = AttributeLocation.TEXTURE;
+		if (mesh instanceof TexturedMesh || mesh instanceof MaterialMesh) {
+			entityMaterialId = false;
+		} else if (materialId != -1) {
+			entityMaterialId = true;
 		}
 		this.meshComponent = super.getComponent(MeshComponent.class);
 		this.transformComponent = super.getComponent(Transform3DComponent.class);
@@ -69,12 +74,12 @@ public class GameObject extends Entity implements Transform3Deable {
 		this.objectIdLocation = objectIdLocation;
 	}
 
-	public AttributeLocation getMaterialIdLocation() {
-		return materialIdLocation;
+	public boolean isEntityMaterialId() {
+		return entityMaterialId;
 	}
 
-	public void setMaterialIdLocation(AttributeLocation materialIdLocation) {
-		this.materialIdLocation = materialIdLocation;
+	public void setEntityMaterialId(boolean entityMaterialIdLocation) {
+		this.entityMaterialId = entityMaterialIdLocation;
 	}
 
 	public Vector3i getObjectId() {

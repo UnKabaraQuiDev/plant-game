@@ -1,20 +1,20 @@
-package lu.kbra.plant_game.engine.entity;
+package lu.kbra.plant_game.engine.mesh;
 
-import lu.kbra.plant_game.engine.entity.impl.TexturedMesh;
+import org.joml.Vector3f;
+
 import lu.kbra.standalone.gameengine.cache.attrib.AttribArray;
 import lu.kbra.standalone.gameengine.cache.attrib.UIntAttribArray;
 import lu.kbra.standalone.gameengine.cache.attrib.Vec3fAttribArray;
-import lu.kbra.standalone.gameengine.geom.LoadedMesh;
 import lu.kbra.standalone.gameengine.graph.material.Material;
 import lu.kbra.standalone.gameengine.graph.texture.SingleTexture;
 
-public class TexturedLoadedMesh extends LoadedMesh implements TexturedMesh {
+public class TexturedLoadedMesh extends OffsetMesh implements TexturedMesh {
 
 	protected SingleTexture texture;
 
-	public TexturedLoadedMesh(String name, Material material, SingleTexture texture, Vec3fAttribArray vertices,
-			UIntAttribArray indices, AttribArray... attribs) {
-		super(name, material, vertices, indices, attribs);
+	public TexturedLoadedMesh(String name, Material material, Vector3f origin, SingleTexture texture,
+			Vec3fAttribArray vertices, UIntAttribArray indices, AttribArray... attribs) {
+		super(name, material, origin, vertices, indices, attribs);
 		this.texture = texture;
 	}
 

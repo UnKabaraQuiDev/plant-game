@@ -3,18 +3,21 @@ package lu.kbra.plant_game.engine.entity;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
 
+import lu.pcy113.pclib.PCUtils;
+import lu.pcy113.pclib.impl.ExceptionFunction;
+
+import lu.kbra.plant_game.engine.entity.AnimatedMeshLoader.AnimatedMeshes;
 import lu.kbra.plant_game.engine.entity.impl.GameObject;
-import lu.kbra.plant_game.engine.entity.impl.TexturedMesh;
 import lu.kbra.plant_game.engine.entity.water.AnimatedGameObject;
+import lu.kbra.plant_game.engine.mesh.AnimatedMesh;
+import lu.kbra.plant_game.engine.mesh.TexturedMesh;
+import lu.kbra.plant_game.engine.util.DataPath;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
 import lu.kbra.standalone.gameengine.scene.Scene3D;
-import lu.pcy113.pclib.PCUtils;
-import lu.pcy113.pclib.impl.ExceptionFunction;
 
 public class GameObjectFactory {
 
@@ -42,32 +45,29 @@ public class GameObjectFactory {
 
 		if (animatedMesh.get(clazz)) {
 
-			return AnimatedObjectLoader
-					.getAnimatedFuture(cache, clazz.getName(), dataPath.get(clazz), loader, render)
-					.then(loader, (ExceptionFunction<Mesh, T>) (mesh) -> {
-						final T instance = PCUtils
-								.findCompatibleConstructor(clazz,
-										PCUtils
-												.combineArrays(new Class[] { String.class, Mesh.class },
-														Arrays.stream(args).map(Object::getClass).toArray(Class[]::new)))
+			return AnimatedMeshLoader.getAnimatedFuture(cache, clazz.getName(), dataPath.get(clazz), loader, render)
+					.then(loader, (ExceptionFunction<AnimatedMeshes, T>) (meshes) -> {
+						final T instance = PCUtils.findCompatibleConstructor(clazz,
+								PCUtils.combineArrays(new Class[] { String.class, Mesh.class, AnimatedMesh.class },
+										Arrays.stream(args).map(Object::getClass).toArray(Class[]::new)))
 								.newInstance(PCUtils
-										.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), mesh }, args));
-						instance.setMaterialId((short) (mesh instanceof TexturedMesh ? ((TexturedMesh) mesh).getTexture().getTid() : -1));
+										.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(),
+												meshes.staticMesh(), meshes.animatedMesh() }, args));
 						return instance;
 					});
 		} else {
 
-			return StaticObjectLoader
-					.getStaticFuture(cache, clazz.getName(), dataPath.get(clazz), loader, render)
+			return StaticMeshLoader.getStaticFuture(cache, clazz.getName(), dataPath.get(clazz), loader, render)
 					.then(loader, (ExceptionFunction<Mesh, T>) (mesh) -> {
 						final T instance = PCUtils
 								.findCompatibleConstructor(clazz,
-										PCUtils
-												.combineArrays(new Class[] { String.class, Mesh.class },
-														Arrays.stream(args).map(Object::getClass).toArray(Class[]::new)))
-								.newInstance(PCUtils
-										.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), mesh }, args));
-						instance.setMaterialId((short) (mesh instanceof TexturedMesh ? ((TexturedMesh) mesh).getTexture().getTid() : -1));
+										PCUtils.combineArrays(new Class[] { String.class, Mesh.class },
+												Arrays.stream(args).map(Object::getClass).toArray(Class[]::new)))
+								.newInstance(PCUtils.combineArrays(
+										new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), mesh }, args));
+						instance.setMaterialId(
+								(short) (mesh instanceof TexturedMesh ? ((TexturedMesh) mesh).getTexture().getTid()
+										: -1));
 						return instance;
 					});
 
@@ -75,7 +75,7 @@ public class GameObjectFactory {
 	}
 
 	public <T extends GameObject> TaskFuture<?, T> create_(Class<T> clazz, Scene3D scene, Object... args) {
-		return create_(clazz, args).then(loader, (Function<T, T>) scene::addEntity);
+		return create_(clazz, args).then(loader, (ExceptionFunction<T, T>) scene::addEntity);
 	}
 
 	public static <T extends GameObject> TaskFuture<?, T> create(Class<T> clazz, Object... args) {

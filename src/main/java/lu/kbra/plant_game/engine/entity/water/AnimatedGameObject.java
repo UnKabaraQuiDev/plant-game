@@ -1,18 +1,16 @@
 package lu.kbra.plant_game.engine.entity.water;
 
+import org.joml.Matrix4f;
 import org.joml.Vector3i;
 
-import lu.kbra.plant_game.engine.entity.AnimatedMesh;
-import lu.kbra.plant_game.engine.entity.impl.AttributeLocation;
 import lu.kbra.plant_game.engine.entity.impl.GameObject;
-import lu.kbra.plant_game.engine.entity.impl.TexturedMesh;
+import lu.kbra.plant_game.engine.mesh.AnimatedMesh;
 import lu.kbra.standalone.gameengine.geom.Mesh;
-import lu.kbra.standalone.gameengine.objs.entity.components.MeshComponent;
-import lu.kbra.standalone.gameengine.objs.entity.components.Transform3DComponent;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 public class AnimatedGameObject extends GameObject {
 
+	protected Matrix4f animatedTransform = new Matrix4f().identity();
 	protected AnimatedMeshComponent animatedMeshComponent;
 
 	public AnimatedGameObject(String str, Mesh mesh, AnimatedMesh animatedMesh) {
@@ -39,10 +37,27 @@ public class AnimatedGameObject extends GameObject {
 		super(str, mesh, transform, transparent, objectId, materialId);
 		super.addComponent(new AnimatedMeshComponent(animatedMesh));
 		this.animatedMeshComponent = super.getComponent(AnimatedMeshComponent.class);
+	}
 
-		if (animatedMesh instanceof TexturedMesh) {
-			materialIdLocation = AttributeLocation.TEXTURE;
-		}
+	public void computeAnimatedTransform(float t) {
+		final AnimatedMesh animatedMesh = getAnimatedMesh();
+		getTransform().getMatrix().mul(animatedMesh.computeTransform(animatedTransform, t), animatedTransform);
+	}
+
+	public void setAnimatedTransform(Matrix4f animatedTransform) {
+		this.animatedTransform = animatedTransform;
+	}
+
+	public Matrix4f getAnimatedTransform() {
+		return animatedTransform;
+	}
+
+	public AnimatedMesh getAnimatedMesh() {
+		return animatedMeshComponent == null ? null : animatedMeshComponent.getMesh();
+	}
+
+	public AnimatedMeshComponent getAnimatedMeshComponent() {
+		return animatedMeshComponent;
 	}
 
 }

@@ -3,10 +3,10 @@ package lu.kbra.plant_game.engine.entity.water;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
 
-import lu.kbra.plant_game.engine.entity.AnimatedMesh;
-import lu.kbra.plant_game.engine.entity.DataPath;
 import lu.kbra.plant_game.engine.entity.impl.PlaceableObject;
 import lu.kbra.plant_game.engine.entity.impl.WaterContainer;
+import lu.kbra.plant_game.engine.mesh.AnimatedMesh;
+import lu.kbra.plant_game.engine.util.DataPath;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
@@ -36,6 +36,12 @@ public class WaterWheelObject extends AnimatedGameObject implements PlaceableObj
 
 	public WaterWheelObject(String str, Mesh mesh, AnimatedMesh animatedMesh) {
 		super(str, mesh, animatedMesh);
+	}
+
+	@Override
+	public void computeAnimatedTransform(float t) {
+		getTransform().getMatrix().mul(animatedTransform.identity().rotateZ((float) Math.toRadians(t * 5)),
+				animatedTransform);
 	}
 
 	@Override
