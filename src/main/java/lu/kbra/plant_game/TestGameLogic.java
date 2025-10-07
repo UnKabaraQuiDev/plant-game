@@ -21,6 +21,7 @@ import lu.kbra.plant_game.engine.entity.impl.GameObject;
 import lu.kbra.plant_game.engine.entity.terrain.TerrainMesh;
 import lu.kbra.plant_game.engine.entity.terrain.TerrainObject;
 import lu.kbra.plant_game.engine.entity.water.WaterTowerObject;
+import lu.kbra.plant_game.engine.entity.water.WaterWheelObject;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.scene.ImageWorldGenerator;
 import lu.kbra.plant_game.engine.scene.WorldGenerator;
@@ -147,6 +148,11 @@ public class TestGameLogic extends GameLogic {
 				GameObjectFactory.create(SolarPanelObject.class, worldScene, new Transform3D())
 						.then(WORKERS, (Consumer<SolarPanelObject>) (obj) -> obj.placeDown(worldScene,
 								new Vector2i(15, 5), Direction.NONE))
+						.push();
+
+				GameObjectFactory.create(WaterWheelObject.class, worldScene, new Transform3D())
+						.then(WORKERS, (Consumer<WaterWheelObject>) (obj) -> obj.placeDown(worldScene,
+								new Vector2i(15, 15), Direction.NONE))
 						.push();
 			}).push();
 		}

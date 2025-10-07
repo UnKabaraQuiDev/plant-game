@@ -5,17 +5,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-import lu.pcy113.pclib.PCUtils;
-import lu.pcy113.pclib.impl.ExceptionFunction;
-
-import lu.kbra.plant_game.engine.entity.impl.AnimatedObject;
 import lu.kbra.plant_game.engine.entity.impl.GameObject;
 import lu.kbra.plant_game.engine.entity.impl.TexturedMesh;
+import lu.kbra.plant_game.engine.entity.water.AnimatedGameObject;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
 import lu.kbra.standalone.gameengine.scene.Scene3D;
+import lu.pcy113.pclib.PCUtils;
+import lu.pcy113.pclib.impl.ExceptionFunction;
 
 public class GameObjectFactory {
 
@@ -34,7 +33,7 @@ public class GameObjectFactory {
 	}
 
 	public <T extends GameObject> TaskFuture<?, T> create_(Class<T> clazz, Object... args) {
-		animatedMesh.computeIfAbsent(clazz, k -> AnimatedObject.class.isAssignableFrom(k));
+		animatedMesh.computeIfAbsent(clazz, k -> AnimatedGameObject.class.isAssignableFrom(k));
 		dataPath.computeIfAbsent(clazz, k -> {
 			if (!k.isAnnotationPresent(DataPath.class))
 				throw new IllegalArgumentException(clazz.getName() + " doesn't have @DataPath.");
@@ -42,7 +41,20 @@ public class GameObjectFactory {
 		});
 
 		if (animatedMesh.get(clazz)) {
-			throw new UnsupportedOperationException();
+
+			return AnimatedObjectLoader
+					.getAnimatedFuture(cache, clazz.getName(), dataPath.get(clazz), loader, render)
+					.then(loader, (ExceptionFunction<Mesh, T>) (mesh) -> {
+						final T instance = PCUtils
+								.findCompatibleConstructor(clazz,
+										PCUtils
+												.combineArrays(new Class[] { String.class, Mesh.class },
+														Arrays.stream(args).map(Object::getClass).toArray(Class[]::new)))
+								.newInstance(PCUtils
+										.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), mesh }, args));
+						instance.setMaterialId((short) (mesh instanceof TexturedMesh ? ((TexturedMesh) mesh).getTexture().getTid() : -1));
+						return instance;
+					});
 		} else {
 
 			return StaticObjectLoader

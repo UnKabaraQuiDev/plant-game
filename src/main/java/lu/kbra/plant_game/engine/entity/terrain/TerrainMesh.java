@@ -4,9 +4,9 @@ import lu.kbra.plant_game.engine.scene.WorldGenerator.TerrainMaterialType;
 import lu.kbra.standalone.gameengine.cache.attrib.AttribArray;
 import lu.kbra.standalone.gameengine.cache.attrib.UIntAttribArray;
 import lu.kbra.standalone.gameengine.cache.attrib.Vec3fAttribArray;
-import lu.kbra.standalone.gameengine.geom.Mesh;
+import lu.kbra.standalone.gameengine.geom.LoadedMesh;
 
-public class TerrainMesh extends Mesh {
+public class TerrainMesh extends LoadedMesh {
 
 	private int width, length;
 

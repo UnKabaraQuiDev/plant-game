@@ -6,12 +6,17 @@ import lu.kbra.standalone.gameengine.geom.utils.ObjLoader;
 import lu.kbra.standalone.gameengine.graph.material.Material;
 import lu.kbra.standalone.gameengine.graph.texture.SingleTexture;
 
-public class AnimatedTexturedObjLoader {
+public class AdvObjLoader {
+
+	public static Mesh loadMesh(String name, Material material, String path, SingleTexture texture) {
+		return ObjLoader.loadMesh(name, material, path,
+				(t) -> new TexturedLoadedMesh(t.name(), null, texture, t.vertices(), t.indices(), t.attribs()));
+	}
 
 	public static Mesh loadMesh(String name, Material material, String path, SingleTexture texture,
-			AnimationData animData) {
+			AnimationData animationData) {
 		return ObjLoader.loadMesh(name, material, path, (t) -> new AnimatedTexturedMesh(t.name(), null, texture,
-				animData, t.vertices(), t.indices(), t.attribs()));
+				animationData, t.vertices(), t.indices(), t.attribs()));
 	}
 
 }

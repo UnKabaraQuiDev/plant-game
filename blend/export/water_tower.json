@@ -1,8 +1,8 @@
 {
     "collection_name": "water_tower",
-    "exports": [
-        {
-            "type": "static",
+    "animated": false,
+    "meshes": {
+        "static": {
             "file": "models/water_tower_static.obj",
             "offset_from_origin": [
                 0.0,
@@ -12,5 +12,5 @@
             "texture_material": true,
             "texture_path": "textures/water_tower_base.png"
         }
-    ]
+    }
 }

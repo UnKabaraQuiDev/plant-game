@@ -1,8 +1,8 @@
 {
     "collection_name": "solar_panel_ground",
-    "exports": [
-        {
-            "type": "static",
+    "animated": false,
+    "meshes": {
+        "static": {
             "file": "models/solar_panel_ground_static.obj",
             "offset_from_origin": [
                 0.0,
@@ -12,5 +12,5 @@
             "texture_material": false,
             "texture_path": null
         }
-    ]
+    }
 }

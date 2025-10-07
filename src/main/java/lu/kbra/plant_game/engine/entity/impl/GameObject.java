@@ -15,13 +15,13 @@ public class GameObject extends Entity implements Transform3Deable {
 	public static final String MESH_ATTRIB_MATERIAL_ID_NAME = "materialId";
 	public static final String MESH_ATTRIB_OBJECT_ID_NAME = "objectId";
 
-	private short materialId = -1;
-	private AttributeLocation materialIdLocation = AttributeLocation.STATIC;
-	private Vector3i objectId;
-	private AttributeLocation objectIdLocation = AttributeLocation.STATIC; // object id in mesh data
-	private MeshComponent meshComponent;
-	private Transform3DComponent transformComponent;
-	private boolean transparent = false;
+	protected short materialId = -1;
+	protected AttributeLocation materialIdLocation = AttributeLocation.STATIC;
+	protected Vector3i objectId;
+	protected AttributeLocation objectIdLocation = AttributeLocation.STATIC; // object id in mesh data
+	protected MeshComponent meshComponent;
+	protected Transform3DComponent transformComponent;
+	protected boolean transparent = false;
 
 	public GameObject(String str, Mesh mesh) {
 		this(str, mesh, null);

@@ -39,9 +39,10 @@ public class StaticObjectLoader {
 
 				final String meshFilePath = baseURI.resolve(filePath).toString();
 				final boolean textureMaterial = jsonObj.getBoolean("texture_material");
-				final String texturePath = textureMaterial ? baseURI.resolve(jsonObj.optString("texture_path")).toString()
+				final String texturePath = textureMaterial
+						? baseURI.resolve(jsonObj.optString("texture_path")).toString()
 						: jsonObj.optString("texture_path");
-				
+
 				return new MeshData(meshFilePath, textureMaterial, texturePath);
 			}
 		} catch (Exception e) {
@@ -51,41 +52,26 @@ public class StaticObjectLoader {
 		throw new RuntimeException("No static mesh in: " + path);
 	}
 
-	public static Mesh getStaticDirect(CacheManager cache, String meshName, String path) {
-		if (cache.hasMesh(meshName)) {
-			return cache.getMesh(meshName);
-		}
-
-		final MeshData meshData = getStaticMeshData(path);
-
-		final Mesh staticMesh = ObjLoader.loadMesh(meshName, null, meshData.filePath);
-		cache.addMesh(staticMesh);
-
-		return staticMesh;
-	}
-
-	public static TaskFuture<?, Mesh> getStaticFuture(
-			CacheManager cache,
-			String meshName,
-			String path,
-			Dispatcher loader,
-			Dispatcher render) {
+	public static TaskFuture<?, Mesh> getStaticFuture(CacheManager cache, String meshName, String path,
+			Dispatcher loader, Dispatcher render) {
 		if (cache.hasMesh(meshName)) {
 			return new TaskFuture<>(loader, () -> cache.getMesh(meshName));
 		}
 
-		return new TaskFuture<>(loader, () -> getStaticMeshData(path)).then(render, (Function<MeshData, Mesh>) (meshData) -> {
-			final Mesh staticMesh;
-			if (meshData.textureMaterial) {
-				final SingleTexture txt0 = cache.hasTexture(meshData.texturePath) ? (SingleTexture) cache.getTexture(meshData.texturePath)
-						: SingleTexture.loadSingleTexture(cache, meshData.texturePath, meshData.texturePath);
-				staticMesh = TexturedObjLoader.loadMesh(meshName, null, meshData.filePath, txt0);
-			} else {
-				staticMesh = ObjLoader.loadMesh(meshName, null, meshData.filePath);
-			}
-			cache.addMesh(staticMesh);
-			return staticMesh;
-		});
+		return new TaskFuture<>(loader, () -> getStaticMeshData(path)).then(render,
+				(Function<MeshData, Mesh>) (meshData) -> {
+					final Mesh staticMesh;
+					if (meshData.textureMaterial) {
+						final SingleTexture txt0 = cache.hasTexture(meshData.texturePath)
+								? (SingleTexture) cache.getTexture(meshData.texturePath)
+								: SingleTexture.loadSingleTexture(cache, meshData.texturePath, meshData.texturePath);
+						staticMesh = AdvObjLoader.loadMesh(meshName, null, meshData.filePath, txt0);
+					} else {
+						staticMesh = ObjLoader.loadMesh(meshName, null, meshData.filePath);
+					}
+					cache.addMesh(staticMesh);
+					return staticMesh;
+				});
 	}
 
 }

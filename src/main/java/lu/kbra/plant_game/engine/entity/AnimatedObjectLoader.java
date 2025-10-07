@@ -18,7 +18,8 @@ import lu.pcy113.pclib.PCUtils;
 
 public class AnimatedObjectLoader {
 
-	public record AnimatedMeshData(String filePath, boolean textureMaterial, String texturePath, AnimationData animData) {
+	public record AnimatedMeshData(String filePath, boolean textureMaterial, String texturePath,
+			AnimationData animData) {
 
 	}
 
@@ -46,7 +47,7 @@ public class AnimatedObjectLoader {
 				final String texturePath = textureMaterial
 						? baseURI.resolve(jsonObj.optString("texture_path")).toString()
 						: jsonObj.optString("texture_path");
-				
+
 				final AnimationData animData = new AnimationData(null, null, null, null, null, null, null);
 
 				return new AnimatedMeshData(meshFilePath, textureMaterial, texturePath, animData);
@@ -58,20 +59,7 @@ public class AnimatedObjectLoader {
 		throw new RuntimeException("No animated mesh in: " + path);
 	}
 
-	public static Mesh getStaticDirect(CacheManager cache, String meshName, String path) {
-		if (cache.hasMesh(meshName)) {
-			return cache.getMesh(meshName);
-		}
-
-		final AnimatedMeshData meshData = getAnimatedMeshData(path);
-
-		final Mesh staticMesh = ObjLoader.loadMesh(meshName, null, meshData.filePath());
-		cache.addMesh(staticMesh);
-
-		return staticMesh;
-	}
-
-	public static TaskFuture<?, Mesh> getStaticFuture(CacheManager cache, String meshName, String path,
+	public static TaskFuture<?, Mesh> getAnimatedFuture(CacheManager cache, String meshName, String path,
 			Dispatcher loader, Dispatcher render) {
 		if (cache.hasMesh(meshName)) {
 			return new TaskFuture<>(loader, () -> cache.getMesh(meshName));
@@ -85,7 +73,8 @@ public class AnimatedObjectLoader {
 								? (SingleTexture) cache.getTexture(meshData.texturePath())
 								: SingleTexture.loadSingleTexture(cache, meshData.texturePath(),
 										meshData.texturePath());
-						staticMesh = AnimatedTexturedObjLoader.loadMesh(meshName, null, meshData.filePath(), txt0, meshData.animData());
+						staticMesh = AnimatedTexturedObjLoader.loadMesh(meshName, null, meshData.filePath(), txt0,
+								meshData.animData());
 					} else {
 						staticMesh = ObjLoader.loadMesh(meshName, null, meshData.filePath());
 					}

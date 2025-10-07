@@ -6,8 +6,6 @@ import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 
-import lu.pcy113.pclib.logger.GlobalLogger;
-
 import lu.kbra.plant_game.engine.entity.impl.AttributeLocation;
 import lu.kbra.plant_game.engine.entity.impl.GameObject;
 import lu.kbra.plant_game.engine.entity.impl.TexturedMesh;
@@ -21,6 +19,7 @@ import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.cache.attrib.UIntAttribArray;
 import lu.kbra.standalone.gameengine.cache.attrib.Vec2fAttribArray;
 import lu.kbra.standalone.gameengine.cache.attrib.Vec3fAttribArray;
+import lu.kbra.standalone.gameengine.geom.LoadedMesh;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.graph.composition.buffer.Framebuffer;
 import lu.kbra.standalone.gameengine.graph.composition.buffer.RenderBuffer;
@@ -43,6 +42,7 @@ import lu.kbra.standalone.gameengine.utils.gl.consts.TexelInternalFormat;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextureFilter;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextureWrap;
 import lu.kbra.standalone.gameengine.utils.gl.wrapper.GL_W;
+import lu.pcy113.pclib.logger.GlobalLogger;
 
 public class DeferredCompositor implements Cleanupable {
 
@@ -56,7 +56,7 @@ public class DeferredCompositor implements Cleanupable {
 	public static final String SCREEN_WIDTH = "screen_width";
 	public static final String SCREEN_HEIGHT = "screen_height";
 
-	private static Mesh SCREEN = new Mesh(PASS_SCREEN, null,
+	private static Mesh SCREEN = new LoadedMesh(PASS_SCREEN, null,
 			new Vec3fAttribArray("pos", 0, 1,
 					new Vector3f[] { new Vector3f(-1, 1, 0), new Vector3f(1, 1, 0), new Vector3f(1, -1, 0),
 							new Vector3f(-1, -1, 0) }),
