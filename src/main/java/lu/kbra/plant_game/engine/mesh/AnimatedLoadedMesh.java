@@ -1,10 +1,8 @@
-package lu.kbra.plant_game.engine.util;
+package lu.kbra.plant_game.engine.mesh;
 
 import org.joml.Vector3f;
 
 import lu.kbra.plant_game.engine.entity.AnimatedMeshLoader.AnimationData;
-import lu.kbra.plant_game.engine.mesh.AnimatedMesh;
-import lu.kbra.plant_game.engine.mesh.OffsetMesh;
 import lu.kbra.standalone.gameengine.cache.attrib.AttribArray;
 import lu.kbra.standalone.gameengine.cache.attrib.UIntAttribArray;
 import lu.kbra.standalone.gameengine.cache.attrib.Vec3fAttribArray;

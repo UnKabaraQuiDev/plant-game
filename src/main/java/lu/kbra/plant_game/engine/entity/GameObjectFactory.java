@@ -4,9 +4,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import lu.pcy113.pclib.PCUtils;
-import lu.pcy113.pclib.impl.ExceptionFunction;
-
 import lu.kbra.plant_game.engine.entity.AnimatedMeshLoader.AnimatedMeshes;
 import lu.kbra.plant_game.engine.entity.impl.GameObject;
 import lu.kbra.plant_game.engine.entity.water.AnimatedGameObject;
@@ -18,8 +15,12 @@ import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
 import lu.kbra.standalone.gameengine.scene.Scene3D;
+import lu.pcy113.pclib.PCUtils;
+import lu.pcy113.pclib.impl.ExceptionFunction;
 
 public class GameObjectFactory {
+
+	private static final long LOCK_WAIT_TIMEOUT = 1000;
 
 	public static GameObjectFactory INSTANCE;
 

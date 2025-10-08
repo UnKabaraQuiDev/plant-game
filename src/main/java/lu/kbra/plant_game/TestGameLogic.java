@@ -7,12 +7,6 @@ import org.joml.Vector3f;
 import org.joml.Vector3i;
 import org.lwjgl.glfw.GLFW;
 
-import lu.pcy113.pclib.PCUtils;
-import lu.pcy113.pclib.datastructure.pair.Pair;
-import lu.pcy113.pclib.impl.ExceptionConsumer;
-import lu.pcy113.pclib.impl.ExceptionFunction;
-import lu.pcy113.pclib.logger.GlobalLogger;
-
 import lu.kbra.plant_game.engine.entity.GameObjectFactory;
 import lu.kbra.plant_game.engine.entity.electric.SolarPanelObject;
 import lu.kbra.plant_game.engine.entity.impl.GameObject;
@@ -41,12 +35,16 @@ import lu.kbra.standalone.gameengine.scene.Scene2D;
 import lu.kbra.standalone.gameengine.scene.camera.Camera3D;
 import lu.kbra.standalone.gameengine.utils.gl.consts.Direction;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
+import lu.pcy113.pclib.PCUtils;
+import lu.pcy113.pclib.datastructure.pair.Pair;
+import lu.pcy113.pclib.impl.ExceptionConsumer;
+import lu.pcy113.pclib.impl.ExceptionFunction;
+import lu.pcy113.pclib.logger.GlobalLogger;
 
 public class TestGameLogic extends GameLogic {
 
 	private float TOTAL_TIME = 0;
 
-	private Dispatcher MESH_LOAD = new StandaloneDispatcher("MESH LOAD");
 	private Dispatcher WORKERS = new WorkerDispatcher("WORKERS", 5);
 
 	private WorldLevelScene worldScene;
@@ -75,7 +73,7 @@ public class TestGameLogic extends GameLogic {
 		// worldScene.getCamera().updateMatrix();
 		worldScene.getLightDirection().set(new Vector3f(0.5f, 0.5f, 0.5f).normalize());
 
-		GameObjectFactory.INSTANCE = new GameObjectFactory(worldScene.getCache(), MESH_LOAD, RENDER_DISPATCHER);
+		GameObjectFactory.INSTANCE = new GameObjectFactory(worldScene.getCache(), WORKERS, RENDER_DISPATCHER);
 
 		final CubeMesh cubeMesh = new CubeMesh("cubeMesh", null, new Vector3f(0.5f));
 		worldScene.getCache().addMesh(cubeMesh);
@@ -92,7 +90,7 @@ public class TestGameLogic extends GameLogic {
 	@Override
 	public void update(float dTime) {
 		if (state == null) {
-			state = new TaskFuture<>(MESH_LOAD, () -> {
+			state = new TaskFuture<>(WORKERS, () -> {
 				final WorldGenerator worldGenerator = new ImageWorldGenerator("classpath:/maps/world_map.png",
 						4 / 255f);
 				GlobalLogger.info("Generating world...");
@@ -105,7 +103,7 @@ public class TestGameLogic extends GameLogic {
 						.nanoTime(() -> worldGenerator.generateMesh(worldScene.getCache()));
 				GlobalLogger.info("Mesh generated in " + (mesh.getValue() / 1e6) + " ms");
 				return mesh.getKey();
-			}, 0).then(MESH_LOAD, (mesh) -> {
+			}, 0).then(WORKERS, (mesh) -> {
 				GlobalLogger.info("Creating entity...");
 				final long time = PCUtils.nanoTime((Runnable) () -> {
 					final TerrainObject terrainEntity = new TerrainObject("terrain", mesh);
@@ -114,7 +112,7 @@ public class TestGameLogic extends GameLogic {
 					worldScene.setTerrain(terrainEntity);
 				});
 				GlobalLogger.info("Entity created in " + (time / 1e6) + " ms");
-			}).then(MESH_LOAD, () -> {
+			}).then(WORKERS, () -> {
 				new TaskFuture<>(RENDER_DISPATCHER, () -> {
 					GlobalLogger.info("Generating water mesh...");
 					final Pair<Mesh, Long> meshTime = PCUtils.nanoTime(() -> new QuadMesh("water", null,
@@ -123,7 +121,7 @@ public class TestGameLogic extends GameLogic {
 					worldScene.getCache().addMesh(meshTime.getKey());
 					GlobalLogger.info("Water mesh generated in " + (meshTime.getValue() / 1e6) + " ms");
 					return meshTime.getKey();
-				}).then(MESH_LOAD,
+				}).then(WORKERS,
 						(ExceptionFunction<Mesh, GameObject>) (mesh) -> worldScene
 								.setWaterLevel(new GameObject("water", mesh,
 										new Transform3D(new Vector3f(0, 0.9f, 0),
@@ -132,7 +130,8 @@ public class TestGameLogic extends GameLogic {
 						.push();
 
 				GameObjectFactory.create(WaterTowerObject.class, worldScene, new Transform3D())
-						.then(MESH_LOAD, (ExceptionConsumer<WaterTowerObject>) (obj) -> {
+						.then(WORKERS, (ExceptionConsumer<WaterTowerObject>) (obj) -> {
+							System.err.println("got 2: " + obj);
 							final Vector2i pos = new Vector2i(0, 0);
 							while (!obj.isPlaceable(worldScene, pos, Direction.NONE)) {
 								pos.x++;
@@ -148,25 +147,26 @@ public class TestGameLogic extends GameLogic {
 						}).push();
 
 				GameObjectFactory.create(WaterTowerObject.class, worldScene, new Transform3D())
-						.then(MESH_LOAD, (ExceptionConsumer<WaterTowerObject>) (obj) -> {
-							obj.placeDown(worldScene, new Vector2i(11, 11), Direction.NONE);
+						.then(WORKERS, (ExceptionConsumer<WaterTowerObject>) (obj) -> {
+							System.err.println("got: " + obj);
+							obj.placeDown(worldScene, new Vector2i(11, 15), Direction.NONE);
 						}).push();
 
 				GameObjectFactory.create(SolarPanelObject.class, worldScene, new Transform3D())
-						.then(MESH_LOAD, (ExceptionConsumer<SolarPanelObject>) (obj) -> obj.placeDown(worldScene,
+						.then(WORKERS, (ExceptionConsumer<SolarPanelObject>) (obj) -> obj.placeDown(worldScene,
 								new Vector2i(15, 5), Direction.NONE))
 						.push();
 
 				GameObjectFactory.create(WaterWheelObject.class, worldScene, new Transform3D())
-						.then(MESH_LOAD, (ExceptionConsumer<WaterWheelObject>) (obj) -> obj.placeDown(worldScene,
+						.then(WORKERS, (ExceptionConsumer<WaterWheelObject>) (obj) -> obj.placeDown(worldScene,
 								new Vector2i(11, 7), Direction.WEST))
 						.push();
 
-				/*
-				 * GameObjectFactory.create(WaterWheelObject.class, worldScene, new
-				 * Transform3D()) .then(MESH_LOAD, (Consumer<WaterWheelObject>) (obj) ->
-				 * obj.placeDown(worldScene, new Vector2i(13, 8), Direction.WEST)) .push();
-				 */
+				GameObjectFactory.create(WaterWheelObject.class, worldScene, new Transform3D())
+						.then(WORKERS, (ExceptionConsumer<WaterWheelObject>) (obj) -> obj.placeDown(worldScene,
+								new Vector2i(13, 8), Direction.WEST))
+						.push();
+
 			}).push();
 		}
 

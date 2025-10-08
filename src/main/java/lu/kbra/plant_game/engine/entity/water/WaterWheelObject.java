@@ -40,7 +40,7 @@ public class WaterWheelObject extends AnimatedGameObject implements PlaceableObj
 
 	@Override
 	public void computeAnimatedTransform(float t) {
-		getTransform().getMatrix().mul(animatedTransform.identity().rotateZ((float) Math.toRadians(t * 5)),
+		getTransform().getMatrix().mul(animatedTransform.identity().rotateZ((float) Math.toRadians(t * 25)),
 				animatedTransform);
 	}
 
