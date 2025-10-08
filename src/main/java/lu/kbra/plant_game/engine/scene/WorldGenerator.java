@@ -176,7 +176,6 @@ public class WorldGenerator {
 			if (Math.abs(normal.x) > Math.abs(normal.y) && Math.abs(normal.x) > Math.abs(normal.z)) {
 				// X is dominant
 				if (normal.x > 0) {
-					System.err.println("y is dom");
 					verts[0] = new Vector3f(x2, y1, z1);
 					verts[1] = new Vector3f(x2, y2, z1);
 					verts[2] = new Vector3f(x2, y2, z2);

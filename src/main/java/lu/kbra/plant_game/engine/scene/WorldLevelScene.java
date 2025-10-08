@@ -16,7 +16,7 @@ public class WorldLevelScene extends Scene3D {
 	private GameObject waterLevel;
 	private TerrainObject terrain;
 
-	private Vector3f lightColor = new Vector3f(1), lightDirection = new Vector3f(0.5f, 0.5f, 0.5f).normalize();
+	private Vector3f lightColor = new Vector3f(1), lightDirection = new Vector3f(0.8f, 0.5f, 0.5f).normalize();
 	private float ambientLight = 0.25f;
 
 	public WorldLevelScene(String name, CacheManager parent) {

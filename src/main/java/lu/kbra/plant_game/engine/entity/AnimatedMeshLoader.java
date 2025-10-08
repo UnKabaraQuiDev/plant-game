@@ -1,8 +1,9 @@
 package lu.kbra.plant_game.engine.entity;
 
+import static lu.kbra.plant_game.engine.entity.MeshLoaderLocks.releaseLock;
+import static lu.kbra.plant_game.engine.entity.MeshLoaderLocks.waitOrCreateLock;
+
 import java.net.URI;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -12,7 +13,7 @@ import lu.pcy113.pclib.PCUtils;
 import lu.pcy113.pclib.datastructure.pair.Pair;
 import lu.pcy113.pclib.datastructure.pair.Pairs;
 import lu.pcy113.pclib.impl.ExceptionFunction;
-import lu.pcy113.pclib.logger.GlobalLogger;
+
 import lu.kbra.plant_game.engine.entity.StaticMeshLoader.GenericMeshData;
 import lu.kbra.plant_game.engine.mesh.AnimatedMesh;
 import lu.kbra.plant_game.engine.util.AdvObjLoader;
@@ -25,9 +26,6 @@ import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
 import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
 
 public class AnimatedMeshLoader {
-
-	private static final Map<String, Object> locks = new ConcurrentHashMap<>();
-	private static final long LOCK_WAIT_TIMEOUT = 1000;
 
 	public record AnimatedMeshes(Mesh staticMesh, AnimatedMesh animatedMesh) {
 
@@ -100,15 +98,17 @@ public class AnimatedMeshLoader {
 		return new TaskFuture<>(loader, () -> {
 			waitOrCreateLock(meshName);
 			waitOrCreateLock(meshName + "-animated");
-
+			
 			if (cache.hasMesh(meshName + "-animated") && cache.hasMesh(meshName)) {
 				throw new SkipThen(2, new AnimatedMeshes(cache.getMesh(meshName),
 						(AnimatedMesh) cache.getMesh(meshName + "-animated")));
 			}
-
+			
 			// need to create animated mesh
 			if (cache.hasMesh(meshName)) {
 				throw new SkipThen(2, new TaskFuture<>(loader, () -> {
+					waitOrCreateLock(meshName + "-animated");
+
 					final URI baseURI = URI.create(path);
 					final JSONObject obj = new JSONObject(PCUtils.readStringSource(path));
 
@@ -121,6 +121,8 @@ public class AnimatedMeshLoader {
 			// need to create static mesh
 			if (cache.hasMesh(meshName + "-animated")) {
 				throw new SkipThen(2, new TaskFuture<>(loader, () -> {
+					waitOrCreateLock(meshName);
+
 					final URI baseURI = URI.create(path);
 					final JSONObject obj = new JSONObject(PCUtils.readStringSource(path));
 
@@ -161,38 +163,9 @@ public class AnimatedMeshLoader {
 					animatedMeshData.animData());
 		}
 
-		releaseLock(meshName);
 		cache.addMesh(animatedMesh);
+		releaseLock(meshName);
 		return animatedMesh;
-	}
-
-	private static void waitOrCreateLock(String meshName) throws InterruptedException {
-		if (locks.containsKey(meshName)) {
-			final Object lock = locks.get(meshName);
-			synchronized (lock) {
-				int iter = 0;
-				while (locks.containsKey(meshName)) {
-					lock.wait(LOCK_WAIT_TIMEOUT);
-					if (iter++ > 10)
-						throw new IllegalStateException(
-								"Still waiting for mesh: " + meshName + " (" + Thread.currentThread().getName() + ")");
-				}
-			}
-		} else {
-			locks.putIfAbsent(meshName, new Object());
-		}
-	}
-
-	private static void releaseLock(String meshName) {
-		if (locks.containsKey(meshName)) {
-			final Object lock = locks.get(meshName);
-			synchronized (lock) {
-				lock.notifyAll();
-				locks.remove(meshName);
-			}
-		} else {
-			GlobalLogger.severe("Lock wasn't held for: " + meshName);
-		}
 	}
 
 }

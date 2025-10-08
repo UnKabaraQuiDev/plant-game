@@ -94,7 +94,7 @@ public class DeferredCompositor implements Cleanupable {
 
 		if (needRegen) {
 			oldResolution.set(width, height);
-			renderResolution.set(oldResolution).div(4);
+			renderResolution.set(engine.getWindow().getOptions().windowSize).div(6);
 			outputResolution.set(width, height);
 		}
 

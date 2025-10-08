@@ -1,11 +1,16 @@
 package lu.kbra.plant_game.engine.entity;
 
+import static lu.kbra.plant_game.engine.entity.MeshLoaderLocks.releaseLock;
+import static lu.kbra.plant_game.engine.entity.MeshLoaderLocks.waitOrCreateLock;
+
 import java.net.URI;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.joml.Vector3f;
 import org.json.JSONObject;
+
+import lu.pcy113.pclib.PCUtils;
+import lu.pcy113.pclib.impl.ExceptionFunction;
+import lu.pcy113.pclib.impl.ExceptionSupplier;
 
 import lu.kbra.plant_game.engine.util.AdvObjLoader;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
@@ -15,15 +20,8 @@ import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.SkipThen;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
 import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
-import lu.pcy113.pclib.PCUtils;
-import lu.pcy113.pclib.impl.ExceptionFunction;
-import lu.pcy113.pclib.impl.ExceptionSupplier;
-import lu.pcy113.pclib.logger.GlobalLogger;
 
 public class StaticMeshLoader {
-
-	private static final Map<String, Object> locks = new ConcurrentHashMap<>();
-	private static final long LOCK_WAIT_TIMEOUT = 1000;
 
 	public record GenericMeshData(String filePath, Vector3f origin, boolean textureMaterial, String texturePath) {
 
@@ -85,38 +83,9 @@ public class StaticMeshLoader {
 			staticMesh = AdvObjLoader.loadMesh(meshName, null, meshData.filePath(), meshData.origin());
 		}
 
-		releaseLock(meshName);
 		cache.addMesh(staticMesh);
+		releaseLock(meshName);
 		return staticMesh;
-	}
-
-	private static void waitOrCreateLock(String meshName) throws InterruptedException {
-		if (locks.containsKey(meshName)) {
-			final Object lock = locks.get(meshName);
-			synchronized (lock) {
-				int iter = 0;
-				while (locks.containsKey(meshName)) {
-					lock.wait(LOCK_WAIT_TIMEOUT);
-					if (iter++ > 10)
-						throw new IllegalStateException(
-								"Still waiting for mesh: " + meshName + " (" + Thread.currentThread().getName() + ")");
-				}
-			}
-		} else {
-			locks.putIfAbsent(meshName, new Object());
-		}
-	}
-
-	private static void releaseLock(String meshName) {
-		if (locks.containsKey(meshName)) {
-			final Object lock = locks.get(meshName);
-			synchronized (lock) {
-				lock.notifyAll();
-				locks.remove(meshName);
-			}
-		} else {
-			GlobalLogger.severe("Lock wasn't held for: " + meshName);
-		}
 	}
 
 }
