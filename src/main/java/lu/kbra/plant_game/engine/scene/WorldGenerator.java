@@ -176,6 +176,7 @@ public class WorldGenerator {
 			if (Math.abs(normal.x) > Math.abs(normal.y) && Math.abs(normal.x) > Math.abs(normal.z)) {
 				// X is dominant
 				if (normal.x > 0) {
+					System.err.println("y is dom");
 					verts[0] = new Vector3f(x2, y1, z1);
 					verts[1] = new Vector3f(x2, y2, z1);
 					verts[2] = new Vector3f(x2, y2, z2);
@@ -189,10 +190,10 @@ public class WorldGenerator {
 			} else if (Math.abs(normal.y) > Math.abs(normal.z)) {
 				// Y is dominant
 				if (normal.y > 0) {
-					verts[0] = new Vector3f(x1, y2, z1);
-					verts[1] = new Vector3f(x2, y2, z1);
-					verts[2] = new Vector3f(x2, y2, z2);
-					verts[3] = new Vector3f(x1, y2, z2);
+					verts[3] = new Vector3f(x1, y2, z1);
+					verts[2] = new Vector3f(x2, y2, z1);
+					verts[1] = new Vector3f(x2, y2, z2);
+					verts[0] = new Vector3f(x1, y2, z2);
 				} else {
 					verts[0] = new Vector3f(x1, y1, z1);
 					verts[1] = new Vector3f(x1, y1, z2);
@@ -218,8 +219,6 @@ public class WorldGenerator {
 		}
 
 		public int[] indices(int base) {
-			// base = starting index of these 4 vertices in your vertex array
-			// Return two triangles (quad split)
 			return new int[] { base, base + 1, base + 2, base, base + 2, base + 3 };
 		}
 	}

@@ -81,39 +81,42 @@ public class DeferredCompositor implements Cleanupable {
 	protected TextureMaterialComputeShader textureMaterialComputeShader;
 	protected BlitShader blitShader;
 
-	protected Vector2i resolution = new Vector2i(0), outputResolution = new Vector2i(0);
+	protected Vector2i oldResolution = new Vector2i(0), renderResolution = new Vector2i(),
+			outputResolution = new Vector2i();
 
 	public void render(GameEngine engine, WorldLevelScene worldScene, Scene2D uiScene, CacheManager worldCache,
 			CacheManager uiCache) {
 		final int width = engine.getWindow().getWidth();
 		final int height = engine.getWindow().getHeight();
 
-		final boolean needRegen = !resolution.equals(width, height);
+		final boolean needRegen = !oldResolution.equals(width, height);
 		final CacheManager cache = engine.getCache();
 
 		if (needRegen) {
-			resolution = new Vector2i(width, height);
-			outputResolution = new Vector2i(width, height).div(4);
+			oldResolution.set(width, height);
+			renderResolution.set(oldResolution).div(4);
+			outputResolution.set(width, height);
 		}
 
-		renderWorldScene(cache, worldScene, worldCache, width, height, needRegen);
+		renderWorldScene(cache, worldScene, worldCache, renderResolution, needRegen);
 
-		renderMaterials(cache, worldScene, worldCache, width, height, needRegen);
+		renderMaterials(cache, worldScene, worldCache, renderResolution, needRegen);
 
-		blitToScreen(cache, width, height, needRegen);
+		blitToScreen(cache, outputResolution, needRegen);
 	}
 
-	private void blitToScreen(CacheManager cache, int width, int height, boolean needRegen) {
+	private void blitToScreen(CacheManager cache, Vector2i resolution, boolean needRegen) {
 		if (blitShader == null) {
 			blitShader = new BlitShader();
 			cache.addAbstractShader(blitShader);
 		}
 
-		blitShader.bind();
 		outputTxt.bind(0);
+		blitShader.bind();
 		if (needRegen) {
-			outputTxt.bindUniform(blitShader.getUniformLocation(BlitShader.TXT0), 0);
-			blitShader.setUniform(ComputeShader.SCREEN_SIZE, outputResolution);
+			blitShader.setUniform(BlitShader.TXT0, 0);
+			blitShader.setUniform(ComputeShader.INPUT_SIZE, renderResolution);
+			blitShader.setUniform(ComputeShader.OUTPUT_SIZE, resolution);
 		}
 
 		SCREEN.bind();
@@ -124,10 +127,8 @@ public class DeferredCompositor implements Cleanupable {
 		assert GL_W.checkError("Disable(DEPTH_TEST)");
 		GL_W.glBindFramebuffer(GL_W.GL_FRAMEBUFFER, 0);
 		assert GL_W.checkError("BindFramebuffer(0)");
-		if (needRegen) {
-			GL_W.glViewport(0, 0, width, height);
-			assert GL_W.checkError("Viewport(" + resolution + ")");
-		}
+		GL_W.glViewport(0, 0, resolution.x, resolution.y);
+		assert GL_W.checkError("Viewport(" + resolution + ")");
 		GL_W.glClear(GL_W.GL_COLOR_BUFFER_BIT | GL_W.GL_DEPTH_BUFFER_BIT);
 		assert GL_W.checkError("Clear(COLOR | DEPTH)");
 		GL_W.glDrawElements(GL_W.GL_TRIANGLES, SCREEN.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
@@ -140,8 +141,8 @@ public class DeferredCompositor implements Cleanupable {
 		blitShader.unbind();
 	}
 
-	private void renderMaterials(CacheManager cache, WorldLevelScene worldScene, CacheManager worldCache, int width,
-			int height, boolean needRegen) {
+	private void renderMaterials(CacheManager cache, WorldLevelScene worldScene, CacheManager worldCache,
+			Vector2i resolution, boolean needRegen) {
 		if (materialComputeShader == null) {
 			materialComputeShader = cache.hasAbstractShader(MaterialComputeShader.class.getName())
 					? (MaterialComputeShader) cache.getAbstractShader(MaterialComputeShader.class.getName())
@@ -157,7 +158,7 @@ public class DeferredCompositor implements Cleanupable {
 		}
 
 		if (outputTxt == null) {
-			outputTxt = new SingleTexture(WORLD_FRAMEBUFFER_NAME + ".output", outputResolution);
+			outputTxt = new SingleTexture(WORLD_FRAMEBUFFER_NAME + ".output", resolution);
 			outputTxt.setDataType(DataType.UBYTE);
 			outputTxt.setFormat(TexelFormat.RGBA);
 			outputTxt.setInternalFormat(TexelInternalFormat.RGBA8);
@@ -165,8 +166,9 @@ public class DeferredCompositor implements Cleanupable {
 			outputTxt.setGenerateMipmaps(false);
 			outputTxt.setup();
 			cache.addTexture(outputTxt);
+			needRegen = true;
 		} else if (needRegen) {
-			outputTxt.setSize(outputResolution);
+			outputTxt.setSize(resolution);
 			outputTxt.bind();
 			outputTxt.resize();
 			outputTxt.unbind();
@@ -176,12 +178,18 @@ public class DeferredCompositor implements Cleanupable {
 			assert GL_W.checkError("ClearTexImage(" + outputTxt.getTid() + ")");
 		}
 
-		final int groupsX = (width + 15) / 16;
-		final int groupsY = (height + 15) / 16;
+		GL_W.glViewport(0, 0, resolution.x, resolution.y);
+		assert GL_W.checkError("Viewport(" + resolution + ")");
+
+		final int groupsX = (resolution.x + 15) / 16;
+		final int groupsY = (resolution.y + 15) / 16;
+
+		assert groupsX != 0;
+		assert groupsY != 0;
 
 		materialComputeShader.bind();
 
-		setupMaterialInputs(materialComputeShader, worldScene, needRegen);
+		setupMaterialInputs(materialComputeShader, worldScene, resolution, needRegen);
 
 		GL_W.glDispatchCompute(groupsX, groupsY, 1);
 		assert GL_W.checkError("DispatchCompute(" + groupsX + "," + groupsY + ",1)");
@@ -195,7 +203,7 @@ public class DeferredCompositor implements Cleanupable {
 
 		textureMaterialComputeShader.bind();
 
-		setupMaterialInputs(textureMaterialComputeShader, worldScene, needRegen);
+		setupMaterialInputs(textureMaterialComputeShader, worldScene, resolution, needRegen);
 		final int txt0UniformLoc = textureMaterialComputeShader.getUniformLocation(TextureMaterialComputeShader.TXT0);
 		final int currentMaterialIdLoc = textureMaterialComputeShader
 				.getUniformLocation(TextureMaterialComputeShader.CURRENT_MATERIAL_ID);
@@ -218,7 +226,6 @@ public class DeferredCompositor implements Cleanupable {
 							if (alreadyRendered.contains(tid))
 								continue;
 
-							txt.bind(0);
 							txt.bindUniform(txt0UniformLoc, 0);
 
 							GL_W.glUniform1ui(currentMaterialIdLoc, tid);
@@ -241,7 +248,8 @@ public class DeferredCompositor implements Cleanupable {
 		textureMaterialComputeShader.unbind();
 	}
 
-	private void setupMaterialInputs(ComputeShader computeShader, WorldLevelScene worldScene, boolean needRegen) {
+	private void setupMaterialInputs(ComputeShader computeShader, WorldLevelScene worldScene, Vector2i resolution,
+			boolean needRegen) {
 		posTexture.bind(0);
 		normalTexture.bind(1);
 		uvTexture.bind(2);
@@ -264,12 +272,12 @@ public class DeferredCompositor implements Cleanupable {
 			depthTexture.bindUniform(computeShader.getUniformLocation("uDepthTex"), 4);
 
 			computeShader.setUniform(ComputeShader.INPUT_SIZE, resolution);
-			computeShader.setUniform(ComputeShader.OUTPUT_SIZE, outputResolution);
+			computeShader.setUniform(ComputeShader.OUTPUT_SIZE, resolution);
 		}
 	}
 
-	private void renderWorldScene(CacheManager cache, WorldLevelScene worldScene, CacheManager worldCache, int width,
-			int height, boolean needRegen) {
+	private void renderWorldScene(CacheManager cache, WorldLevelScene worldScene, CacheManager worldCache,
+			Vector2i resolution, boolean needRegen) {
 
 		if (transferShader == null) {
 			transferShader = cache.hasAbstractShader(TransferShader.class.getName())
@@ -279,21 +287,20 @@ public class DeferredCompositor implements Cleanupable {
 		}
 
 		if (worldFramebuffer == null) {
-			genFramebuffer(cache, width, height);
+			genFramebuffer(cache, resolution);
+			needRegen = true;
 		} else if (needRegen) {
-			resizeFramebuffer(width, height);
-
-			worldFramebuffer.bind();
-			GL_W.glViewport(0, 0, width, height);
-			assert GL_W.checkError("Viewport(" + resolution + ")");
-		} else {
-			worldFramebuffer.bind();
+			resizeFramebuffer(resolution);
 		}
+		worldFramebuffer.bind();
+
+		GL_W.glViewport(0, 0, resolution.x, resolution.y);
+		assert GL_W.checkError("Viewport(" + resolution + ")");
 
 		GL_W.glEnable(GL_W.GL_DEPTH_TEST);
 		assert GL_W.checkError("Enable(DEPTH_TEST)");
-		GL_W.glDisable(GL_W.GL_CULL_FACE);
-		assert GL_W.checkError("Disable(CULL_FACE)");
+		GL_W.glEnable(GL_W.GL_CULL_FACE);
+		assert GL_W.checkError("Enable(CULL_FACE)");
 		GL_W.glCullFace(GL_W.GL_BACK);
 		assert GL_W.checkError("CullFace(BACK)");
 
@@ -305,6 +312,7 @@ public class DeferredCompositor implements Cleanupable {
 		transferShader.bind();
 
 		final Camera3D camera = worldScene.getCamera();
+		camera.getProjection().update(outputResolution);
 		final Matrix4f projectionMatrix = camera.getProjection().getProjectionMatrix();
 		final Matrix4f viewMatrix = camera.getViewMatrix();
 
@@ -321,7 +329,7 @@ public class DeferredCompositor implements Cleanupable {
 				if (entity.hasComponentMatching(RenderConditionComponent.class)
 						&& entity.getComponentsMatching(RenderConditionComponent.class).parallelStream()
 								.allMatch(RenderConditionComponent::get)) {
-					return;
+					continue;
 				}
 
 				if (entity.hasComponentMatching(MeshComponent.class)) {
@@ -416,29 +424,31 @@ public class DeferredCompositor implements Cleanupable {
 		worldFramebuffer.unbind();
 	}
 
-	private void resizeFramebuffer(int width, int height) {
+	private void resizeFramebuffer(Vector2i resolution) {
 		worldFramebuffer.bind();
 		for (FramebufferAttachment fa : worldFramebuffer.getAttachments().values()) {
 			if (fa instanceof SingleTexture txt) {
-				txt.setSize(width, height);
+				txt.setSize(resolution.x, resolution.y);
 				txt.bind();
 				txt.resize();
 			} else if (fa instanceof RenderBuffer rb) {
-				rb.setSize(width, height);
+				rb.setSize(resolution.x, resolution.y);
 				rb.bind();
 				rb.resize();
 			}
 		}
 		worldFramebuffer.unbind();
 
-		GlobalLogger.log("Resized framebuffer: " + worldFramebuffer.getId() + " (" + width + "x" + height + ")");
+		GlobalLogger.log("Resized framebuffer: " + worldFramebuffer.getId() + " (" + resolution + ")");
 	}
 
-	private Framebuffer genFramebuffer(final CacheManager cache, final int width, final int height) {
+	private Framebuffer genFramebuffer(final CacheManager cache, Vector2i resolution) {
 		worldFramebuffer = new Framebuffer(WORLD_FRAMEBUFFER_NAME);
 		cache.addFramebuffer(worldFramebuffer);
 		worldFramebuffer.gen();
 		worldFramebuffer.bind();
+
+		final int width = resolution.x, height = resolution.y;
 
 		depthTexture = new SingleTexture(WORLD_FRAMEBUFFER_NAME + ".depth", width, height);
 		depthTexture.setDataType(DataType.FLOAT);
@@ -494,7 +504,7 @@ public class DeferredCompositor implements Cleanupable {
 		worldFramebuffer.setup();
 		worldFramebuffer.unbind();
 
-		GlobalLogger.log("Created framebuffer: " + worldFramebuffer.getId() + " (" + width + "x" + height + ")");
+		GlobalLogger.log("Created framebuffer: " + worldFramebuffer.getId() + " (" + resolution + ")");
 
 		return worldFramebuffer;
 	}
