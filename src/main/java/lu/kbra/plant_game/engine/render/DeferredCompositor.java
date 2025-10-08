@@ -157,7 +157,7 @@ public class DeferredCompositor implements Cleanupable {
 		}
 
 		if (outputTxt == null) {
-			outputTxt = new SingleTexture("output", outputResolution);
+			outputTxt = new SingleTexture(WORLD_FRAMEBUFFER_NAME + ".output", outputResolution);
 			outputTxt.setDataType(DataType.UBYTE);
 			outputTxt.setFormat(TexelFormat.RGBA);
 			outputTxt.setInternalFormat(TexelInternalFormat.RGBA8);

@@ -96,47 +96,6 @@ public class AnimatedMeshLoader {
 					(AnimatedMesh) cache.getMesh(meshName + "-animated")));
 		}
 
-		// create only static
-//		if (cache.hasMesh(meshName)) {
-//			return new TaskFuture<>(loader, () -> {
-//				waitOrCreateLock(meshName);
-//
-//				if (cache.hasMesh(meshName)) {
-//					throw new SkipThen(new AnimatedMeshes(cache.getMesh(meshName),
-//							(AnimatedMesh) cache.getMesh(meshName + "-animated")));
-//				}
-//
-//				final URI baseURI = URI.create(path);
-//				final JSONObject obj = new JSONObject(PCUtils.readStringSource(path));
-//
-//				return StaticMeshLoader.readStaticMeshData(obj, baseURI);
-//			}).then(render, (ExceptionFunction<GenericMeshData, AnimatedMeshes>) (obj) -> {
-//				return new AnimatedMeshes(StaticMeshLoader.createStatic(cache, meshName, obj),
-//						(AnimatedMesh) cache.getMesh(meshName + "-animated"));
-//			});
-//		}
-
-		// create only animated
-//		if (cache.hasMesh(meshName)) {
-//			return new TaskFuture<>(loader, () -> {
-//				waitOrCreateLock(meshName + "-animated");
-//
-//				if (cache.hasMesh(meshName + "-animated")) {
-//					throw new SkipThen(new AnimatedMeshes(cache.getMesh(meshName),
-//							(AnimatedMesh) cache.getMesh(meshName + "-animated")));
-//				}
-//
-//				final URI baseURI = URI.create(path);
-//				final JSONObject obj = new JSONObject(PCUtils.readStringSource(path));
-//
-//				final AnimatedMeshData animatedMeshData = readAnimatedMeshData(obj, baseURI);
-//
-//				return animatedMeshData;
-//			}).then(render, (ExceptionFunction<AnimatedMeshData, AnimatedMeshes>) (obj) -> {
-//				return new AnimatedMeshes(cache.getMesh(meshName), createAnimated(cache, meshName, obj));
-//			});
-//		}
-
 		// load both
 		return new TaskFuture<>(loader, () -> {
 			waitOrCreateLock(meshName);
@@ -213,16 +172,13 @@ public class AnimatedMeshLoader {
 			synchronized (lock) {
 				int iter = 0;
 				while (locks.containsKey(meshName)) {
-					System.err.println("wating for lock: " + meshName + " " + Thread.currentThread().getName());
 					lock.wait(LOCK_WAIT_TIMEOUT);
 					if (iter++ > 10)
 						throw new IllegalStateException(
 								"Still waiting for mesh: " + meshName + " (" + Thread.currentThread().getName() + ")");
 				}
-				System.err.println("finished waiting for lock: " + meshName + " " + Thread.currentThread().getName());
 			}
 		} else {
-			System.err.println("creating lock: " + meshName + " " + Thread.currentThread().getName());
 			locks.putIfAbsent(meshName, new Object());
 		}
 	}
@@ -231,7 +187,6 @@ public class AnimatedMeshLoader {
 		if (locks.containsKey(meshName)) {
 			final Object lock = locks.get(meshName);
 			synchronized (lock) {
-				System.err.println("releasing lock: " + meshName + " " + Thread.currentThread().getName());
 				lock.notifyAll();
 				locks.remove(meshName);
 			}
