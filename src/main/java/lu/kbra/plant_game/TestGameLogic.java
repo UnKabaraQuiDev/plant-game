@@ -25,6 +25,7 @@ import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.geom.CubeMesh;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.geom.QuadMesh;
+import lu.kbra.standalone.gameengine.graph.window.KeyState;
 import lu.kbra.standalone.gameengine.impl.GameLogic;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
@@ -81,10 +82,35 @@ public class TestGameLogic extends GameLogic {
 				new Vector3i(1, 0, 255), TerrainMaterialType.GRASS.getId()));
 	}
 
+	final Vector3f posAdd = new Vector3f();
+	float rotation = 0;
+	float fovDiff = 0;
+
 	@Override
 	public void input(float dTime) {
-		final Camera3D camera = worldScene.getCamera();
-		camera.getProjection().setFov((float) (camera.getProjection().getFov() + window.getScroll().y * 0.05f));
+		fovDiff = (float) (window.getScroll().y * 0.05f);
+
+		posAdd.zero();
+		rotation = 0;
+
+		if (window.getKeyState(GLFW.GLFW_KEY_W) == KeyState.PRESS) {
+			posAdd.z -= 1;
+		}
+		if (window.getKeyState(GLFW.GLFW_KEY_S) == KeyState.PRESS) {
+			posAdd.z += 1;
+		}
+		if (window.getKeyState(GLFW.GLFW_KEY_A) == KeyState.PRESS) {
+			posAdd.x -= 1;
+		}
+		if (window.getKeyState(GLFW.GLFW_KEY_D) == KeyState.PRESS) {
+			posAdd.x += 1;
+		}
+		if (window.getKeyState(GLFW.GLFW_KEY_Q) == KeyState.PRESS) {
+			rotation -= 1;
+		}
+		if (window.getKeyState(GLFW.GLFW_KEY_E) == KeyState.PRESS) {
+			rotation += 1;
+		}
 	}
 
 	@Override
@@ -172,8 +198,6 @@ public class TestGameLogic extends GameLogic {
 
 		synchronized (worldScene.getEntitiesLock()) {
 
-			// System.err.println(TOTAL_TIME);
-
 			for (Entity e : worldScene.getEntities().values()) {
 				if (e instanceof AnimatedGameObject ago) {
 					ago.computeAnimatedTransform(TOTAL_TIME);
@@ -190,26 +214,7 @@ public class TestGameLogic extends GameLogic {
 
 		final Camera3D camera = worldScene.getCamera();
 
-		final Vector3f posAdd = new Vector3f();
-		float rotation = 0;
-		if (window.isKeyPressed(GLFW.GLFW_KEY_W)) {
-			posAdd.z -= 1;
-		}
-		if (window.isKeyPressed(GLFW.GLFW_KEY_S)) {
-			posAdd.z += 1;
-		}
-		if (window.isKeyPressed(GLFW.GLFW_KEY_A)) {
-			posAdd.x -= 1;
-		}
-		if (window.isKeyPressed(GLFW.GLFW_KEY_D)) {
-			posAdd.x += 1;
-		}
-		if (window.isKeyPressed(GLFW.GLFW_KEY_Q)) {
-			rotation -= 1;
-		}
-		if (window.isKeyPressed(GLFW.GLFW_KEY_E)) {
-			rotation += 1;
-		}
+		camera.getProjection().setFov((float) (camera.getProjection().getFov() + fovDiff));
 
 		camera.getPosition().fma(dTime * 10, posAdd);
 		camera.getRotation().rotateY((float) Math.toRadians(rotation * 50 * dTime));
