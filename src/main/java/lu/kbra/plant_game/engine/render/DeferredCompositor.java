@@ -118,6 +118,8 @@ public class DeferredCompositor implements Cleanupable {
 
 		renderWorldScene(cache, worldScene, worldCache, renderResolution, needRegen);
 
+		// renderOutlines(cache, worldScene, worldCache, renderResolution, needRegen);
+
 		renderMaterials(cache, worldScene, worldCache, renderResolution, needRegen);
 
 		blitToScreen(cache, outputResolution, needRegen);
