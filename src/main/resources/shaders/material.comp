@@ -49,5 +49,7 @@ void main() {
     color = ambientLight * color + color * lightColor * diff;
     vec4 outColor = vec4(color, 1);
 
+    vec4 outIds = vec4(ids.r, ids.g, ids.b, ids.a);
+
 	imageStore(uOutputTex, outPixel, outColor);
 }

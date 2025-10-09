@@ -3,8 +3,10 @@ package lu.kbra.plant_game.engine.scene;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 import org.joml.SimplexNoise;
+import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 
@@ -30,6 +32,7 @@ public class WorldGenerator {
 	private byte[] materialIds;
 	private Vector3i[] objectIds;
 
+	private int meshId;
 	protected TerrainMaterialType[][] materialType;
 	protected Integer[][] noiseCompute;
 
@@ -57,8 +60,9 @@ public class WorldGenerator {
 
 	public TerrainMesh generateMesh(CacheManager cache) {
 		final TerrainMesh mesh = new TerrainMesh(
-				"terrain-" + width + "x" + length + "@" + System.identityHashCode(this), width, length, noiseCompute,
-				materialType, new Vec3fAttribArray(Mesh.ATTRIB_VERTICES_NAME, Mesh.ATTRIB_VERTICES_ID, 1, verts),
+				"terrain-" + width + "x" + length + "@" + System.identityHashCode(this), meshId, width, length,
+				noiseCompute, materialType,
+				new Vec3fAttribArray(Mesh.ATTRIB_VERTICES_NAME, Mesh.ATTRIB_VERTICES_ID, 1, verts),
 				new UIntAttribArray(Mesh.ATTRIB_INDICES_NAME, Mesh.ATTRIB_INDICES_ID, 1, indices,
 						BufferType.ELEMENT_ARRAY),
 				new Vec3fAttribArray(Mesh.ATTRIB_NORMALS_NAME, Mesh.ATTRIB_NORMALS_ID, 1, normals),
@@ -77,15 +81,16 @@ public class WorldGenerator {
 			for (int z = 0; z < length; z++) {
 				final int cellHeight = getCellHeight(x, z);
 
-				faces.add(new SquareFace(new Vector3f(x, cellHeight, z), new Vector3f(x + 1, cellHeight, z + 1),
-						GameEngine.Y_POS, cellHeight < 0 ? TerrainMaterialType.STONE : TerrainMaterialType.GRASS));
+				faces.add(new SquareFace(new Vector2i(x, z), new Vector3f(x, cellHeight, z),
+						new Vector3f(x + 1, cellHeight, z + 1), GameEngine.Y_POS,
+						cellHeight < 0 ? TerrainMaterialType.STONE : TerrainMaterialType.GRASS));
 
 				materialType[x][z] = cellHeight < 0 ? TerrainMaterialType.WATER : TerrainMaterialType.GRASS;
 
 				final int cellHeightXPos = getCellHeight(x + 1, z);
 				if (cellHeight > cellHeightXPos) {
 					for (int y = cellHeightXPos; y < cellHeight; y++) {
-						faces.add(new SquareFace(new Vector3f(x + 1, y, z), new Vector3f(x + 1, y + 1, z + 1),
+						faces.add(new SquareFace(null, new Vector3f(x + 1, y, z), new Vector3f(x + 1, y + 1, z + 1),
 								GameEngine.X_POS, TerrainMaterialType.DIRT));
 					}
 				}
@@ -93,7 +98,7 @@ public class WorldGenerator {
 				final int cellHeightZPos = getCellHeight(x, z + 1);
 				if (cellHeight > cellHeightZPos) {
 					for (int y = cellHeightZPos; y < cellHeight; y++) {
-						faces.add(new SquareFace(new Vector3f(x, y, z + 1), new Vector3f(x + 1, y + 1, z + 1),
+						faces.add(new SquareFace(null, new Vector3f(x, y, z + 1), new Vector3f(x + 1, y + 1, z + 1),
 								GameEngine.Z_POS, TerrainMaterialType.DIRT));
 					}
 				}
@@ -101,16 +106,16 @@ public class WorldGenerator {
 				final int cellHeightXNeg = getCellHeight(x - 1, z);
 				if (cellHeight > cellHeightXNeg) {
 					for (int y = cellHeightXNeg; y < cellHeight; y++) {
-						faces.add(new SquareFace(new Vector3f(x, y, z), new Vector3f(x, y + 1, z + 1), GameEngine.X_NEG,
-								TerrainMaterialType.DIRT));
+						faces.add(new SquareFace(null, new Vector3f(x, y, z), new Vector3f(x, y + 1, z + 1),
+								GameEngine.X_NEG, TerrainMaterialType.DIRT));
 					}
 				}
 
 				final int cellHeightZNeg = getCellHeight(x, z - 1);
 				if (cellHeight > cellHeightZNeg) {
 					for (int y = cellHeightZNeg; y < cellHeight; y++) {
-						faces.add(new SquareFace(new Vector3f(x, y, z), new Vector3f(x + 1, y + 1, z), GameEngine.Z_NEG,
-								TerrainMaterialType.DIRT));
+						faces.add(new SquareFace(null, new Vector3f(x, y, z), new Vector3f(x + 1, y + 1, z),
+								GameEngine.Z_NEG, TerrainMaterialType.DIRT));
 					}
 				}
 			}
@@ -123,6 +128,7 @@ public class WorldGenerator {
 		normals = new Vector3f[faces.size() * 4];
 		materialIds = new byte[faces.size() * 4];
 		objectIds = new Vector3i[faces.size() * 4];
+		meshId = new Random().nextInt(0, 255);
 
 		int faceCount = 0;
 		for (SquareFace face : faces) {
@@ -131,7 +137,12 @@ public class WorldGenerator {
 			System.arraycopy(face.indices(faceCount * 4), 0, indices, faceCount * 6, 6);
 			Arrays.fill(normals, faceCount * 4, faceCount * 4 + 4, face.normal);
 			Arrays.fill(materialIds, faceCount * 4, faceCount * 4 + 4, face.material().getId());
-			Arrays.fill(objectIds, faceCount * 4, faceCount * 4 + 4, new Vector3i(0, 0, 1));
+			if (face.cellPosition != null) {
+				Arrays.fill(objectIds, faceCount * 4, faceCount * 4 + 4,
+						new Vector3i(meshId, face.cellPosition.x, face.cellPosition.y));
+			} else {
+				Arrays.fill(objectIds, faceCount * 4, faceCount * 4 + 4, new Vector3i(meshId, 0, 0));
+			}
 			faceCount++;
 		}
 	}
@@ -164,7 +175,8 @@ public class WorldGenerator {
 		}
 	}
 
-	public record SquareFace(Vector3f corner1, Vector3f corner2, Vector3f normal, TerrainMaterialType material) {
+	public record SquareFace(Vector2i cellPosition, Vector3f corner1, Vector3f corner2, Vector3f normal,
+			TerrainMaterialType material) {
 		public Vector3f[] corners() {
 			// Extract coordinates
 			final float x1 = corner1.x, y1 = corner1.y, z1 = corner1.z;

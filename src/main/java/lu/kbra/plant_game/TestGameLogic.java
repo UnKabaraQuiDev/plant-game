@@ -1,15 +1,25 @@
 package lu.kbra.plant_game;
 
+import java.util.concurrent.CountDownLatch;
+
 import org.joml.Quaternionf;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
+import org.joml.Vector4i;
 import org.lwjgl.glfw.GLFW;
+
+import lu.pcy113.pclib.PCUtils;
+import lu.pcy113.pclib.datastructure.pair.Pair;
+import lu.pcy113.pclib.impl.ExceptionConsumer;
+import lu.pcy113.pclib.impl.ExceptionFunction;
+import lu.pcy113.pclib.logger.GlobalLogger;
 
 import lu.kbra.plant_game.engine.entity.GameObjectFactory;
 import lu.kbra.plant_game.engine.entity.electric.SolarPanelObject;
 import lu.kbra.plant_game.engine.entity.impl.GameObject;
+import lu.kbra.plant_game.engine.entity.impl.PlaceableObject;
 import lu.kbra.plant_game.engine.entity.terrain.TerrainMesh;
 import lu.kbra.plant_game.engine.entity.terrain.TerrainObject;
 import lu.kbra.plant_game.engine.entity.water.AnimatedGameObject;
@@ -36,11 +46,6 @@ import lu.kbra.standalone.gameengine.scene.Scene2D;
 import lu.kbra.standalone.gameengine.scene.camera.Camera3D;
 import lu.kbra.standalone.gameengine.utils.gl.consts.Direction;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
-import lu.pcy113.pclib.PCUtils;
-import lu.pcy113.pclib.datastructure.pair.Pair;
-import lu.pcy113.pclib.impl.ExceptionConsumer;
-import lu.pcy113.pclib.impl.ExceptionFunction;
-import lu.pcy113.pclib.logger.GlobalLogger;
 
 public class TestGameLogic extends GameLogic {
 
@@ -51,27 +56,20 @@ public class TestGameLogic extends GameLogic {
 	private WorldLevelScene worldScene;
 	private Scene2D uiScene;
 	private CacheManager uiCache;
-	private DeferredCompositor simpleCompositor;
+	private DeferredCompositor compositor;
 	private Entity cubeEntity;
 
 	private TaskFuture<?, Void>.TaskState<Void> state;
+	private TaskFuture<?, Void>.TaskState<Void> moveObjectTaskState;
 
 	@Override
 	public void init(GameEngine e) {
-		simpleCompositor = new DeferredCompositor();
+		compositor = new DeferredCompositor(e.getRenderThread());
 
 		worldScene = new WorldLevelScene("world", cache);
-		// worldScene.getCamera().getProjection().setFov((float)
-		// Math.toRadians(80)).update();
-		// worldScene.getCamera().lookAt(new Vector3f(0, 10, 10), new Vector3f(0, 0,
-		// 0)).updateMatrix();
 		worldScene.getCamera().setPosition(new Vector3f(-20, 25, 20).mul(1.5f));
 		worldScene.getCamera().lookAt(worldScene.getCamera().getPosition(), new Vector3f(0, 0, 0)).updateMatrix();
 		worldScene.getCamera().getProjection().setFov((float) Math.toRadians(40));
-		// worldScene.getCamera().setRotation(new Quaternionf().rotationXYZ((float)
-		// Math.toRadians(45),
-		// (float) Math.toRadians(-45), 0));
-		// worldScene.getCamera().updateMatrix();
 		worldScene.getLightDirection().set(new Vector3f(0.5f, 0.5f, 0.5f).normalize());
 
 		GameObjectFactory.INSTANCE = new GameObjectFactory(worldScene.getCache(), WORKERS, RENDER_DISPATCHER);
@@ -85,6 +83,7 @@ public class TestGameLogic extends GameLogic {
 	final Vector3f posAdd = new Vector3f();
 	float rotation = 0;
 	float fovDiff = 0;
+	final Vector2f mousePos = new Vector2f();
 
 	@Override
 	public void input(float dTime) {
@@ -111,11 +110,19 @@ public class TestGameLogic extends GameLogic {
 		if (window.getKeyState(GLFW.GLFW_KEY_E) == KeyState.PRESS) {
 			rotation += 1;
 		}
+
+		mousePos.set(window.getMousePosition());
 	}
 
 	@Override
 	public void update(float dTime) {
 		if (state == null) {
+			final CountDownLatch terrainLatch = new CountDownLatch(1);
+
+			moveObjectTaskState = new TaskFuture<Void, Void>(WORKERS, () -> {
+				terrainLatch.await();
+			}).push();
+
 			state = new TaskFuture<>(WORKERS, () -> {
 				final WorldGenerator worldGenerator = new ImageWorldGenerator("classpath:/maps/world_map.png",
 						4 / 255f);
@@ -139,6 +146,8 @@ public class TestGameLogic extends GameLogic {
 				});
 				GlobalLogger.info("Entity created in " + (time / 1e6) + " ms");
 			}).then(WORKERS, () -> {
+				terrainLatch.countDown();
+				
 				new TaskFuture<>(RENDER_DISPATCHER, () -> {
 					GlobalLogger.info("Generating water mesh...");
 					final Pair<Mesh, Long> meshTime = PCUtils.nanoTime(() -> new QuadMesh("water", null,
@@ -157,7 +166,6 @@ public class TestGameLogic extends GameLogic {
 
 				GameObjectFactory.create(WaterTowerObject.class, worldScene, new Transform3D())
 						.then(WORKERS, (ExceptionConsumer<WaterTowerObject>) (obj) -> {
-							System.err.println("got 2: " + obj);
 							final Vector2i pos = new Vector2i(0, 0);
 							while (!obj.isPlaceable(worldScene, pos, Direction.NONE)) {
 								pos.x++;
@@ -174,7 +182,6 @@ public class TestGameLogic extends GameLogic {
 
 				GameObjectFactory.create(WaterTowerObject.class, worldScene, new Transform3D())
 						.then(WORKERS, (ExceptionConsumer<WaterTowerObject>) (obj) -> {
-							System.err.println("got: " + obj);
 							obj.placeDown(worldScene, new Vector2i(11, 15), Direction.NONE);
 						}).push();
 
@@ -194,6 +201,19 @@ public class TestGameLogic extends GameLogic {
 						.push();
 
 			}).push();
+		}
+
+		if (moveObjectTaskState == null || moveObjectTaskState.isDone()) {
+			moveObjectTaskState = new TaskFuture<>(RENDER_DISPATCHER,
+					() -> compositor.getObjectId(mousePos, window.getSize())).then(WORKERS, (Vector4i objectId) -> {
+						if (objectId.y == worldScene.getTerrain().getMesh().getObjectId()) {
+							worldScene.getEntities().values().parallelStream()
+									.filter(f -> f instanceof WaterTowerObject).findFirst()
+									.ifPresent((w) -> ((PlaceableObject) w).placeDown(worldScene,
+											new Vector2i(objectId.z, objectId.w), Direction.NONE));
+							System.err.println("placed: ");
+						}
+					}).push();
 		}
 
 		synchronized (worldScene.getEntitiesLock()) {
@@ -224,7 +244,7 @@ public class TestGameLogic extends GameLogic {
 	@Override
 	public void render(float dTime) {
 		worldScene.getCamera().getProjection().update(window.getWidth(), window.getHeight());
-		simpleCompositor.render(engine, worldScene, uiScene, worldScene.getCache(), uiCache);
+		compositor.render(engine, worldScene, uiScene, worldScene.getCache(), uiCache);
 	}
 
 }

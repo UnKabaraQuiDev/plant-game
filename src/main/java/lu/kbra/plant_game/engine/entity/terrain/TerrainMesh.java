@@ -8,14 +8,16 @@ import lu.kbra.standalone.gameengine.geom.LoadedMesh;
 
 public class TerrainMesh extends LoadedMesh {
 
-	private int width, length;
+	private int objectId, width, length;
 
 	private Integer[][] cellHeight;
 	private TerrainMaterialType[][] materialType;
 
-	public TerrainMesh(String name, int width, int length, Integer[][] cellHeight, TerrainMaterialType[][] materialType,
-			Vec3fAttribArray vertices, UIntAttribArray indices, AttribArray... attribs) {
+	public TerrainMesh(String name, int objectId, int width, int length, Integer[][] cellHeight,
+			TerrainMaterialType[][] materialType, Vec3fAttribArray vertices, UIntAttribArray indices,
+			AttribArray... attribs) {
 		super(name, null, vertices, indices, attribs);
+		this.objectId = objectId;
 		this.width = width;
 		this.length = length;
 		this.cellHeight = cellHeight;
@@ -35,6 +37,10 @@ public class TerrainMesh extends LoadedMesh {
 
 	public Integer[][] getCellHeights() {
 		return cellHeight;
+	}
+
+	public int getObjectId() {
+		return objectId;
 	}
 
 	public int getWidth() {

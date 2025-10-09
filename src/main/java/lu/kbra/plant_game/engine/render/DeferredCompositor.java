@@ -1,5 +1,7 @@
 package lu.kbra.plant_game.engine.render;
 
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -9,6 +11,9 @@ import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
+import org.joml.Vector4i;
+import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.GL11;
 
 import lu.pcy113.pclib.logger.GlobalLogger;
 
@@ -72,6 +77,8 @@ public class DeferredCompositor implements Cleanupable {
 			new Vec2fAttribArray("uv", 1, 1,
 					new Vector2f[] { new Vector2f(0, 1), new Vector2f(1, 1), new Vector2f(1, 0), new Vector2f(0, 0) }));
 
+	protected Thread ownerThread;
+
 	protected SingleTexture depthTexture, posTexture, normalTexture, uvTexture, idsTexture;
 	protected Framebuffer worldFramebuffer;
 	protected TransferShader transferShader;
@@ -83,6 +90,10 @@ public class DeferredCompositor implements Cleanupable {
 
 	protected Vector2i oldResolution = new Vector2i(0), renderResolution = new Vector2i(),
 			outputResolution = new Vector2i();
+
+	public DeferredCompositor(Thread ownerThread) {
+		this.ownerThread = ownerThread;
+	}
 
 	public void render(GameEngine engine, WorldLevelScene worldScene, Scene2D uiScene, CacheManager worldCache,
 			CacheManager uiCache) {
@@ -492,7 +503,7 @@ public class DeferredCompositor implements Cleanupable {
 		worldFramebuffer.attachTexture(FrameBufferAttachment.COLOR_FIRST, WORLD_FRAMEBUFFER_UV_IDX, uvTexture);
 
 		idsTexture = new SingleTexture(WORLD_FRAMEBUFFER_NAME + ".ids", width, height);
-		idsTexture.setDataType(DataType.UBYTE);
+		idsTexture.setDataType(DataType.UINT);
 		idsTexture.setFormat(TexelFormat.RGBA_INTEGER);
 		idsTexture.setInternalFormat(TexelInternalFormat.RGBA32UI);
 		idsTexture.setFilters(TextureFilter.NEAREST);
@@ -517,6 +528,32 @@ public class DeferredCompositor implements Cleanupable {
 			SCREEN.cleanup();
 			SCREEN = null;
 		}
+	}
+
+	public Vector4i getObjectId(Vector2f mousePos, Vector2i windowSize) {
+		if (idsTexture == null)
+			throw new IllegalStateException("Ids texture is not ready.");
+		assert ownerThread == Thread.currentThread();
+
+		final int x = (int) ((mousePos.x / (float) windowSize.x) * idsTexture.getWidth());
+		final int y = (int) ((1 - (mousePos.y / (float) windowSize.y)) * idsTexture.getHeight());
+
+		worldFramebuffer.bind(GL_W.GL_READ_FRAMEBUFFER);
+		GL_W.glReadBuffer(FrameBufferAttachment.COLOR_FIRST.getGlId() + WORLD_FRAMEBUFFER_IDS_IDX);
+		assert GL_W.checkError(
+				"ReadBuffer(" + (FrameBufferAttachment.COLOR_FIRST.getGlId() + WORLD_FRAMEBUFFER_IDS_IDX) + ")");
+		final IntBuffer pixel = BufferUtils.createIntBuffer(4);
+		GL11.glReadPixels(x, y, 1, 1, idsTexture.getFormat().getGlId(), idsTexture.getDataType().getGlId(), pixel);
+		assert GL_W.checkError(
+				"ReadPixels(" + mousePos + ", " + idsTexture.getFormat() + ", " + idsTexture.getDataType() + ")");
+		worldFramebuffer.unbind(GL_W.GL_READ_FRAMEBUFFER);
+
+		int r = pixel.get(0);
+		int g = pixel.get(1);
+		int b = pixel.get(2);
+		int a = pixel.get(3);
+
+		return new Vector4i(r, g, b, a);
 	}
 
 }
