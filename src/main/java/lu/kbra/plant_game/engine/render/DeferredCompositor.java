@@ -1,10 +1,11 @@
 package lu.kbra.plant_game.engine.render;
 
-import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
+import java.util.logging.Level;
 
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
@@ -16,6 +17,7 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 
 import lu.pcy113.pclib.logger.GlobalLogger;
+import lu.pcy113.pclib.pointer.prim.BooleanPointer;
 
 import lu.kbra.plant_game.engine.entity.impl.GameObject;
 import lu.kbra.plant_game.engine.entity.water.AnimatedGameObject;
@@ -65,6 +67,7 @@ public class DeferredCompositor implements Cleanupable {
 	private static final int WORLD_FRAMEBUFFER_UV_IDX = 2;
 	private static final int WORLD_FRAMEBUFFER_IDS_IDX = 3;
 	private static final String PASS_SCREEN = "PASS_SCREEN";
+	private static final long POLL_OBJECT_ID_TIMEOUT = 1_000;
 
 	public static final String SCREEN_WIDTH = "screen_width";
 	public static final String SCREEN_HEIGHT = "screen_height";
@@ -91,6 +94,10 @@ public class DeferredCompositor implements Cleanupable {
 	protected Vector2i oldResolution = new Vector2i(0), renderResolution = new Vector2i(),
 			outputResolution = new Vector2i();
 
+	private Vector2i mousePosition = new Vector2i();
+	private BooleanPointer awaitingObjectIdPtr = new BooleanPointer(false);
+	private Vector4i objectId = new Vector4i();
+
 	public DeferredCompositor(Thread ownerThread) {
 		this.ownerThread = ownerThread;
 	}
@@ -114,6 +121,15 @@ public class DeferredCompositor implements Cleanupable {
 		renderMaterials(cache, worldScene, worldCache, renderResolution, needRegen);
 
 		blitToScreen(cache, outputResolution, needRegen);
+
+		if (awaitingObjectIdPtr.getValue()) {
+			getObjectId(engine.getWindow().getSize());
+			awaitingObjectIdPtr.setValue(false);
+			GlobalLogger.log(Level.FINEST, "retrieved object id: " + objectId);
+		} else {
+			objectId.zero();
+			mousePosition.zero();
+		}
 	}
 
 	private void blitToScreen(CacheManager cache, Vector2i resolution, boolean needRegen) {
@@ -530,13 +546,38 @@ public class DeferredCompositor implements Cleanupable {
 		}
 	}
 
-	public Vector4i getObjectId(Vector2f mousePos, Vector2i windowSize) {
+	public boolean pollObjectId(Vector2i mousePos, boolean blocking) {
+		Objects.requireNonNull(mousePos);
+		if (this.mousePosition != mousePos || mousePos.equals(this.mousePosition)) {
+			this.mousePosition.set(mousePos);
+		}
+		awaitingObjectIdPtr.setValue(true);
+		if (blocking) {
+			return awaitObjectId();
+		}
+		return !awaitingObjectIdPtr.getValue();
+	}
+
+	public boolean isAwaitingObjectId() {
+		return awaitingObjectIdPtr.getValue();
+	}
+
+	public boolean awaitObjectId() {
+		awaitingObjectIdPtr.waitForFalse(POLL_OBJECT_ID_TIMEOUT);
+		return !awaitingObjectIdPtr.getValue();
+	}
+
+	public Vector4i getObjectId() {
+		return objectId;
+	}
+
+	protected void getObjectId(Vector2i windowSize) {
 		if (idsTexture == null)
 			throw new IllegalStateException("Ids texture is not ready.");
 		assert ownerThread == Thread.currentThread();
 
-		final int x = (int) ((mousePos.x / (float) windowSize.x) * idsTexture.getWidth());
-		final int y = (int) ((1 - (mousePos.y / (float) windowSize.y)) * idsTexture.getHeight());
+		final int x = (int) ((mousePosition.x / (float) windowSize.x) * idsTexture.getWidth());
+		final int y = (int) ((1 - (mousePosition.y / (float) windowSize.y)) * idsTexture.getHeight());
 
 		worldFramebuffer.bind(GL_W.GL_READ_FRAMEBUFFER);
 		GL_W.glReadBuffer(FrameBufferAttachment.COLOR_FIRST.getGlId() + WORLD_FRAMEBUFFER_IDS_IDX);
@@ -545,7 +586,7 @@ public class DeferredCompositor implements Cleanupable {
 		final IntBuffer pixel = BufferUtils.createIntBuffer(4);
 		GL11.glReadPixels(x, y, 1, 1, idsTexture.getFormat().getGlId(), idsTexture.getDataType().getGlId(), pixel);
 		assert GL_W.checkError(
-				"ReadPixels(" + mousePos + ", " + idsTexture.getFormat() + ", " + idsTexture.getDataType() + ")");
+				"ReadPixels(" + mousePosition + ", " + idsTexture.getFormat() + ", " + idsTexture.getDataType() + ")");
 		worldFramebuffer.unbind(GL_W.GL_READ_FRAMEBUFFER);
 
 		int r = pixel.get(0);
@@ -553,7 +594,7 @@ public class DeferredCompositor implements Cleanupable {
 		int b = pixel.get(2);
 		int a = pixel.get(3);
 
-		return new Vector4i(r, g, b, a);
+		objectId.set(r, g, b, a);
 	}
 
 }

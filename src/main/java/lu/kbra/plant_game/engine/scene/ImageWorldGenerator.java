@@ -22,7 +22,7 @@ public class ImageWorldGenerator extends WorldGenerator {
 			throw new RuntimeException("Error while reading: " + location, e);
 		}
 
-		setSize(image.getWidth(null), image.getHeight(null));
+		setSize(image.getWidth(null), image.getHeight(null), (int) (255 / scale));
 	}
 
 	@Override

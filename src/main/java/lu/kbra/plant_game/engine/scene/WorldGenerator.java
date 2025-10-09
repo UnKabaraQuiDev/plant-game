@@ -23,7 +23,7 @@ import lu.kbra.standalone.gameengine.utils.gl.consts.BufferType;
 
 public class WorldGenerator {
 
-	private int width = 10, length = 15;
+	private int width = 10, length = 15, maxHeight = 5;
 
 	private List<SquareFace> faces = new ArrayList<>();
 	private Vector3f[] verts;
@@ -36,9 +36,10 @@ public class WorldGenerator {
 	protected TerrainMaterialType[][] materialType;
 	protected Integer[][] noiseCompute;
 
-	public WorldGenerator(int width, int length) {
+	public WorldGenerator(int width, int length, int maxHeight) {
 		this.width = width;
 		this.length = length;
+		this.maxHeight = maxHeight;
 
 		noiseCompute = new Integer[width][length];
 	}
@@ -46,9 +47,10 @@ public class WorldGenerator {
 	protected WorldGenerator() {
 	}
 
-	protected void setSize(int width, int length) {
+	protected void setSize(int width, int length, int maxHeight) {
 		this.width = width;
 		this.length = length;
+		this.maxHeight = maxHeight;
 
 		noiseCompute = new Integer[width][length];
 	}
@@ -61,7 +63,7 @@ public class WorldGenerator {
 	public TerrainMesh generateMesh(CacheManager cache) {
 		final TerrainMesh mesh = new TerrainMesh(
 				"terrain-" + width + "x" + length + "@" + System.identityHashCode(this), meshId, width, length,
-				noiseCompute, materialType,
+				maxHeight, noiseCompute, materialType,
 				new Vec3fAttribArray(Mesh.ATTRIB_VERTICES_NAME, Mesh.ATTRIB_VERTICES_ID, 1, verts),
 				new UIntAttribArray(Mesh.ATTRIB_INDICES_NAME, Mesh.ATTRIB_INDICES_ID, 1, indices,
 						BufferType.ELEMENT_ARRAY),

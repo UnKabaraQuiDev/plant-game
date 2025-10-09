@@ -1,13 +1,13 @@
 package lu.kbra.plant_game;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.logging.Level;
 
 import org.joml.Quaternionf;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
-import org.joml.Vector4i;
 import org.lwjgl.glfw.GLFW;
 
 import lu.pcy113.pclib.PCUtils;
@@ -83,7 +83,7 @@ public class TestGameLogic extends GameLogic {
 	final Vector3f posAdd = new Vector3f();
 	float rotation = 0;
 	float fovDiff = 0;
-	final Vector2f mousePos = new Vector2f();
+	final Vector2i mousePos = new Vector2i();
 
 	@Override
 	public void input(float dTime) {
@@ -92,26 +92,26 @@ public class TestGameLogic extends GameLogic {
 		posAdd.zero();
 		rotation = 0;
 
-		if (window.getKeyState(GLFW.GLFW_KEY_W) == KeyState.PRESS) {
+		if (window.getKeyState(GLFW.GLFW_KEY_W) != KeyState.RELEASE) {
 			posAdd.z -= 1;
 		}
-		if (window.getKeyState(GLFW.GLFW_KEY_S) == KeyState.PRESS) {
+		if (window.getKeyState(GLFW.GLFW_KEY_S) != KeyState.RELEASE) {
 			posAdd.z += 1;
 		}
-		if (window.getKeyState(GLFW.GLFW_KEY_A) == KeyState.PRESS) {
+		if (window.getKeyState(GLFW.GLFW_KEY_A) != KeyState.RELEASE) {
 			posAdd.x -= 1;
 		}
-		if (window.getKeyState(GLFW.GLFW_KEY_D) == KeyState.PRESS) {
+		if (window.getKeyState(GLFW.GLFW_KEY_D) != KeyState.RELEASE) {
 			posAdd.x += 1;
 		}
-		if (window.getKeyState(GLFW.GLFW_KEY_Q) == KeyState.PRESS) {
+		if (window.getKeyState(GLFW.GLFW_KEY_Q) != KeyState.RELEASE) {
 			rotation -= 1;
 		}
-		if (window.getKeyState(GLFW.GLFW_KEY_E) == KeyState.PRESS) {
+		if (window.getKeyState(GLFW.GLFW_KEY_E) != KeyState.RELEASE) {
 			rotation += 1;
 		}
 
-		mousePos.set(window.getMousePosition());
+		mousePos.set((int) window.getMousePosition().x, (int) window.getMousePosition().y);
 	}
 
 	@Override
@@ -147,7 +147,7 @@ public class TestGameLogic extends GameLogic {
 				GlobalLogger.info("Entity created in " + (time / 1e6) + " ms");
 			}).then(WORKERS, () -> {
 				terrainLatch.countDown();
-				
+
 				new TaskFuture<>(RENDER_DISPATCHER, () -> {
 					GlobalLogger.info("Generating water mesh...");
 					final Pair<Mesh, Long> meshTime = PCUtils.nanoTime(() -> new QuadMesh("water", null,
@@ -204,16 +204,17 @@ public class TestGameLogic extends GameLogic {
 		}
 
 		if (moveObjectTaskState == null || moveObjectTaskState.isDone()) {
-			moveObjectTaskState = new TaskFuture<>(RENDER_DISPATCHER,
-					() -> compositor.getObjectId(mousePos, window.getSize())).then(WORKERS, (Vector4i objectId) -> {
-						if (objectId.y == worldScene.getTerrain().getMesh().getObjectId()) {
-							worldScene.getEntities().values().parallelStream()
-									.filter(f -> f instanceof WaterTowerObject).findFirst()
-									.ifPresent((w) -> ((PlaceableObject) w).placeDown(worldScene,
-											new Vector2i(objectId.z, objectId.w), Direction.NONE));
-							System.err.println("placed: ");
-						}
-					}).push();
+			moveObjectTaskState = new TaskFuture<Void, Void>(RENDER_DISPATCHER, () -> {
+				final Vector2i pos;
+				pos = worldScene.getTerrain().pickTerrainCell(worldScene.getCamera(), mousePos, window.getWidth(),
+						window.getHeight());
+				System.err.println("to: " + pos);
+				if (pos != null) {
+					worldScene.getEntities().values().parallelStream().filter(f -> f instanceof WaterTowerObject)
+							.findFirst()
+							.ifPresent((w) -> ((PlaceableObject) w).placeDown(worldScene, pos, Direction.NONE));
+				}
+			}).push();
 		}
 
 		synchronized (worldScene.getEntitiesLock()) {
