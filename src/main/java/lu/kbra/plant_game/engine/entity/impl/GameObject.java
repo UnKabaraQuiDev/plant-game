@@ -115,4 +115,11 @@ public class GameObject extends Entity implements Transform3Deable {
 		return transformComponent == null ? null : transformComponent.getTransform();
 	}
 
+	@Override
+	public String toString() {
+		return super.toString() + " [materialId=" + materialId + ", entityMaterialId=" + entityMaterialId
+				+ ", objectId=" + objectId + ", objectIdLocation=" + objectIdLocation + ", transparent=" + transparent
+				+ ", getMesh()=" + getMesh() + ", getTransform()=" + getTransform() + "]";
+	}
+
 }

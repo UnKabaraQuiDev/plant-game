@@ -23,8 +23,8 @@ public class TerrainObject extends GameObject {
 		final int cellSize = tMesh.getCellSize();
 
 		// 1. Convert mouse to NDC [-1,1]
-		float ndcX = (mousePos.x / windowWidth) * 2f - 1f;
-		float ndcY = 1f - (mousePos.y / windowHeight) * 2f;
+		float ndcX = ((float) mousePos.x / windowWidth) * 2f - 1f;
+		float ndcY = 1f - ((float) mousePos.y / windowHeight) * 2f;
 
 		// 2. Unproject to world space
 		Matrix4f invProj = new Matrix4f(cam.getProjection().getProjectionMatrix()).invert();

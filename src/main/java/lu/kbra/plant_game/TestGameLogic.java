@@ -1,7 +1,6 @@
 package lu.kbra.plant_game;
 
 import java.util.concurrent.CountDownLatch;
-import java.util.logging.Level;
 
 import org.joml.Quaternionf;
 import org.joml.Vector2f;
@@ -25,6 +24,7 @@ import lu.kbra.plant_game.engine.entity.terrain.TerrainObject;
 import lu.kbra.plant_game.engine.entity.water.AnimatedGameObject;
 import lu.kbra.plant_game.engine.entity.water.WaterTowerObject;
 import lu.kbra.plant_game.engine.entity.water.WaterWheelObject;
+import lu.kbra.plant_game.engine.mesh.AttributeLocation;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.scene.ImageWorldGenerator;
 import lu.kbra.plant_game.engine.scene.WorldGenerator;
@@ -84,6 +84,8 @@ public class TestGameLogic extends GameLogic {
 	float rotation = 0;
 	float fovDiff = 0;
 	final Vector2i mousePos = new Vector2i();
+	boolean movingObject = false, prevMousePressed = false;
+	PlaceableObject attachedObject = null;
 
 	@Override
 	public void input(float dTime) {
@@ -112,6 +114,12 @@ public class TestGameLogic extends GameLogic {
 		}
 
 		mousePos.set((int) window.getMousePosition().x, (int) window.getMousePosition().y);
+
+		boolean mousePressed = window.getMouseButtonState(GLFW.GLFW_MOUSE_BUTTON_LEFT) == KeyState.PRESS;
+		if (mousePressed && !prevMousePressed) {
+			movingObject = !movingObject;
+		}
+		prevMousePressed = mousePressed;
 	}
 
 	@Override
@@ -204,17 +212,42 @@ public class TestGameLogic extends GameLogic {
 		}
 
 		if (moveObjectTaskState == null || moveObjectTaskState.isDone()) {
-			moveObjectTaskState = new TaskFuture<Void, Void>(RENDER_DISPATCHER, () -> {
-				final Vector2i pos;
-				pos = worldScene.getTerrain().pickTerrainCell(worldScene.getCamera(), mousePos, window.getWidth(),
-						window.getHeight());
-				System.err.println("to: " + pos);
-				if (pos != null) {
-					worldScene.getEntities().values().parallelStream().filter(f -> f instanceof WaterTowerObject)
-							.findFirst()
-							.ifPresent((w) -> ((PlaceableObject) w).placeDown(worldScene, pos, Direction.NONE));
+			if (movingObject) {
+				if (attachedObject == null) {
+					moveObjectTaskState = new TaskFuture<Void, Void>(WORKERS, () -> {
+						compositor.pollObjectId(mousePos, true);
+						
+						final Vector3i ids = new Vector3i(compositor.getObjectId().y, compositor.getObjectId().z,
+								compositor.getObjectId().w);
+
+						worldScene.getEntities().values().parallelStream()
+								.filter(e -> e instanceof GameObject && e instanceof PlaceableObject
+										&& ((GameObject) e).getObjectIdLocation() == AttributeLocation.ENTITY)
+								.forEach(System.err::println);
+
+						attachedObject = (PlaceableObject) worldScene.getEntities().values().parallelStream()
+								.filter(e -> e instanceof GameObject && e instanceof PlaceableObject
+										&& ((GameObject) e).getObjectIdLocation() == AttributeLocation.ENTITY)
+								.filter(e -> ids.equals(((GameObject) e).getObjectId())).findFirst().orElse(null);
+
+						if (attachedObject == null) {
+							moveObjectTaskState = null;
+							movingObject = false;
+						}
+					}).push();
+				} else {
+					moveObjectTaskState = new TaskFuture<Void, Void>(RENDER_DISPATCHER, () -> {
+						final Vector2i pos = worldScene.getTerrain().pickTerrainCell(worldScene.getCamera(), mousePos,
+								window.getWidth(), window.getHeight());
+						if (pos != null) {
+							attachedObject.placeDown(worldScene, pos, Direction.NONE);
+						}
+					}).push();
 				}
-			}).push();
+			} else {
+				attachedObject = null;
+				moveObjectTaskState = null;
+			}
 		}
 
 		synchronized (worldScene.getEntitiesLock()) {
