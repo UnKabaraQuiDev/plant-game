@@ -16,6 +16,7 @@ import org.joml.Vector4i;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 
+import lu.pcy113.pclib.PCUtils;
 import lu.pcy113.pclib.logger.GlobalLogger;
 import lu.pcy113.pclib.pointer.prim.BooleanPointer;
 
@@ -50,6 +51,7 @@ import lu.kbra.standalone.gameengine.objs.entity.components.RenderConditionCompo
 import lu.kbra.standalone.gameengine.objs.entity.components.TransformComponent;
 import lu.kbra.standalone.gameengine.scene.Scene2D;
 import lu.kbra.standalone.gameengine.scene.camera.Camera3D;
+import lu.kbra.standalone.gameengine.utils.MathUtils;
 import lu.kbra.standalone.gameengine.utils.gl.consts.BufferType;
 import lu.kbra.standalone.gameengine.utils.gl.consts.DataType;
 import lu.kbra.standalone.gameengine.utils.gl.consts.FrameBufferAttachment;
@@ -91,6 +93,7 @@ public class DeferredCompositor implements Cleanupable {
 	protected TextureMaterialComputeShader textureMaterialComputeShader;
 	protected BlitShader blitShader;
 
+	protected float oldFov;
 	protected Vector2i oldResolution = new Vector2i(0), renderResolution = new Vector2i(),
 			outputResolution = new Vector2i();
 
@@ -107,12 +110,20 @@ public class DeferredCompositor implements Cleanupable {
 		final int width = engine.getWindow().getWidth();
 		final int height = engine.getWindow().getHeight();
 
-		final boolean needRegen = !oldResolution.equals(width, height);
+		final float newFov = worldScene.getCamera().getProjection().getFov();
+		final boolean needRegen = !oldResolution.equals(width, height) || oldFov != newFov;
+		oldFov = newFov;
 		final CacheManager cache = engine.getCache();
 
 		if (needRegen) {
 			oldResolution.set(width, height);
-			renderResolution.set(engine.getWindow().getOptions().windowSize).div(6);
+			final float divisor = (float) MathUtils.map(Math.toDegrees(worldScene.getCamera().getProjection().getFov()),
+					5, 65, 6, 1);
+			// System.err.println("fov: " + worldScene.getCamera().getProjection().getFov()
+			// + "rad "
+			// + Math.toDegrees(worldScene.getCamera().getProjection().getFov()) + "deg = "
+			// + divisor);
+			renderResolution.set(engine.getWindow().getOptions().windowSize).div(PCUtils.clamp(1, 100, divisor));
 			outputResolution.set(width, height);
 		}
 
