@@ -3,8 +3,11 @@ package lu.kbra.plant_game.engine.render;
 import java.nio.IntBuffer;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
 import org.joml.Matrix4f;
@@ -12,6 +15,7 @@ import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
+import org.joml.Vector4f;
 import org.joml.Vector4i;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
@@ -28,6 +32,7 @@ import lu.kbra.plant_game.engine.mesh.MaterialMesh;
 import lu.kbra.plant_game.engine.mesh.TexturedMesh;
 import lu.kbra.plant_game.engine.render.shader.BlitShader;
 import lu.kbra.plant_game.engine.render.shader.MaterialComputeShader;
+import lu.kbra.plant_game.engine.render.shader.OutlineShader;
 import lu.kbra.plant_game.engine.render.shader.TextureMaterialComputeShader;
 import lu.kbra.plant_game.engine.render.shader.TransferShader;
 import lu.kbra.plant_game.engine.scene.WorldLevelScene;
@@ -46,6 +51,7 @@ import lu.kbra.standalone.gameengine.graph.texture.SingleTexture;
 import lu.kbra.standalone.gameengine.impl.Cleanupable;
 import lu.kbra.standalone.gameengine.impl.FramebufferAttachment;
 import lu.kbra.standalone.gameengine.objs.entity.Entity;
+import lu.kbra.standalone.gameengine.objs.entity.SceneEntity;
 import lu.kbra.standalone.gameengine.objs.entity.components.MeshComponent;
 import lu.kbra.standalone.gameengine.objs.entity.components.RenderConditionComponent;
 import lu.kbra.standalone.gameengine.objs.entity.components.TransformComponent;
@@ -84,22 +90,31 @@ public class DeferredCompositor implements Cleanupable {
 
 	protected Thread ownerThread;
 
+	// world rendering
 	protected SingleTexture depthTexture, posTexture, normalTexture, uvTexture, idsTexture;
 	protected Framebuffer worldFramebuffer;
 	protected TransferShader transferShader;
 
+	// material passes
 	protected SingleTexture outputTxt;
 	protected MaterialComputeShader materialComputeShader;
 	protected TextureMaterialComputeShader textureMaterialComputeShader;
 	protected BlitShader blitShader;
 
+	// rendering/states
 	protected float oldFov;
 	protected Vector2i oldResolution = new Vector2i(0), renderResolution = new Vector2i(),
 			outputResolution = new Vector2i();
 
+	// object ids
 	private Vector2i mousePosition = new Vector2i();
 	private BooleanPointer awaitingObjectIdPtr = new BooleanPointer(false);
 	private Vector4i objectId = new Vector4i();
+
+	// highlights
+	private volatile boolean outlineChanged = false;
+	private Map<Vector3i, Vector4f> outlinedObjects = new ConcurrentHashMap<>();
+	private OutlineShader outlineShader;
 
 	public DeferredCompositor(Thread ownerThread) {
 		this.ownerThread = ownerThread;
@@ -129,9 +144,9 @@ public class DeferredCompositor implements Cleanupable {
 
 		renderWorldScene(cache, worldScene, worldCache, renderResolution, needRegen);
 
-		// renderOutlines(cache, worldScene, worldCache, renderResolution, needRegen);
-
 		renderMaterials(cache, worldScene, worldCache, renderResolution, needRegen);
+
+		renderOutlines(cache, renderResolution, needRegen);
 
 		blitToScreen(cache, outputResolution, needRegen);
 
@@ -142,6 +157,73 @@ public class DeferredCompositor implements Cleanupable {
 		} else {
 			objectId.zero();
 			mousePosition.zero();
+		}
+	}
+
+	private void renderOutlines(CacheManager cache, Vector2i resolution, boolean needRegen) {
+		if (outlineShader == null) {
+			outlineShader = new OutlineShader();
+			cache.addAbstractShader(outlineShader);
+		}
+
+		GL_W.glViewport(0, 0, resolution.x, resolution.y);
+		assert GL_W.checkError("Viewport(" + resolution + ")");
+
+		final int groupsX = (resolution.x + 15) / 16;
+		final int groupsY = (resolution.y + 15) / 16;
+
+		assert groupsX != 0;
+		assert groupsY != 0;
+
+		outlineShader.bind();
+
+		setupOutlineInputs(outlineShader, resolution, needRegen);
+
+		GL_W.glDispatchCompute(groupsX, groupsY, 1);
+		assert GL_W.checkError("DispatchCompute(" + groupsX + "," + groupsY + ",1)");
+
+		GL_W.glMemoryBarrier(GL_W.GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+		assert GL_W.checkError("MemoryBarrier(SHADER_IMAGE_ACCESS_BARRIER_BIT)");
+
+		outlineShader.unbind();
+	}
+
+	private void setupOutlineInputs(OutlineShader computeShader, Vector2i resolution, boolean needRegen) {
+		posTexture.bind(0);
+		normalTexture.bind(1);
+		uvTexture.bind(2);
+		idsTexture.bind(3);
+		depthTexture.bind(4);
+
+		if (outlineChanged) {
+			synchronized (outlinedObjects) {
+				computeShader.setUniform(OutlineShader.CURRENT_TARGET_COUNT, outlinedObjects.size());
+				final Vector3i[] ids = new Vector3i[outlinedObjects.size()];
+				final Vector4f[] colors = new Vector4f[outlinedObjects.size()];
+				int i = 0;
+				for (Entry<Vector3i, Vector4f> evv : outlinedObjects.entrySet()) {
+					ids[i] = evv.getKey();
+					colors[i] = evv.getValue();
+					i++;
+				}
+				computeShader.setUniformUnsigned(OutlineShader.TARGET_IDS, ids);
+				computeShader.setUniform(OutlineShader.TARGET_COLORS, colors);
+			}
+		}
+
+		if (needRegen) {
+			GL_W.glBindImageTexture(0, outputTxt.getTid(), 0, false, 0, GL_W.GL_READ_WRITE,
+					outputTxt.getInternalFormat().getGlId());
+			assert GL_W.checkError("BindImageTexture(0," + outputTxt.getTid() + ",READ_WRITE)");
+
+			posTexture.bindUniform(computeShader.getUniformLocation("uPosTex"), 0);
+			normalTexture.bindUniform(computeShader.getUniformLocation("uNormalTex"), 1);
+			uvTexture.bindUniform(computeShader.getUniformLocation("uUvTex"), 2);
+			idsTexture.bindUniform(computeShader.getUniformLocation("uIdsTex"), 3);
+			depthTexture.bindUniform(computeShader.getUniformLocation("uDepthTex"), 4);
+
+			computeShader.setUniform(ComputeShader.INPUT_SIZE, resolution);
+			computeShader.setUniform(ComputeShader.OUTPUT_SIZE, resolution);
 		}
 	}
 
@@ -268,8 +350,7 @@ public class DeferredCompositor implements Cleanupable {
 
 							txt.bindUniform(txt0UniformLoc, 0);
 
-							GL_W.glUniform1ui(currentMaterialIdLoc, tid);
-							assert GL_W.checkError("Uniform1ui(" + currentMaterialIdLoc + "," + tid + ")");
+							textureMaterialComputeShader.storeUniformUnsigned(currentMaterialIdLoc, tid);
 
 							GL_W.glDispatchCompute(groupsX, groupsY, 1);
 							assert GL_W.checkError("DispatchCompute(" + groupsX + "," + groupsY + ",1)");
@@ -608,6 +689,64 @@ public class DeferredCompositor implements Cleanupable {
 		int a = pixel.get(3);
 
 		objectId.set(r, g, b, a);
+	}
+
+	public void addOutline(SceneEntity e, Vector4f color) {
+		Objects.requireNonNull(e);
+		if (e instanceof GameObject go) {
+			if (go.getObjectIdLocation() != AttributeLocation.ENTITY) {
+				throw new UnsupportedOperationException(
+						"GameObject: " + go.getId() + " (" + go.getClass().getName() + ") has no entity object id.");
+			}
+			outlinedObjects.put(go.getObjectId(), color);
+			outlineChanged = true;
+		} else {
+			throw new UnsupportedOperationException("Unsupported object: " + e + " (" + e.getClass().getName() + ")");
+		}
+	}
+
+	public void removeOutline(SceneEntity e) {
+		Objects.requireNonNull(e);
+		if (e instanceof GameObject go) {
+			if (go.getObjectIdLocation() != AttributeLocation.ENTITY) {
+				throw new UnsupportedOperationException(
+						"GameObject: " + go.getId() + " (" + go.getClass().getName() + ") has no entity object id.");
+			}
+			outlinedObjects.remove(go.getObjectId());
+			outlineChanged = true;
+		} else {
+			throw new UnsupportedOperationException("Unsupported object: " + e + " (" + e.getClass().getName() + ")");
+		}
+	}
+
+	public Vector4f getOutline(SceneEntity e) {
+		if (e == null) {
+			return null;
+		}
+		if (e instanceof GameObject go) {
+			if (go.getObjectIdLocation() != AttributeLocation.ENTITY) {
+				throw new UnsupportedOperationException(
+						"GameObject: " + go.getId() + " (" + go.getClass().getName() + ") has no entity object id.");
+			}
+			return outlinedObjects.get(go.getObjectId());
+		} else {
+			throw new UnsupportedOperationException("Unsupported object: " + e + " (" + e.getClass().getName() + ")");
+		}
+	}
+
+	public boolean hasOutline(SceneEntity e) {
+		if (e == null) {
+			return false;
+		}
+		if (e instanceof GameObject go) {
+			if (go.getObjectIdLocation() != AttributeLocation.ENTITY) {
+				throw new UnsupportedOperationException(
+						"GameObject: " + go.getId() + " (" + go.getClass().getName() + ") has no entity object id.");
+			}
+			return outlinedObjects.containsKey(go.getObjectId());
+		} else {
+			return false;
+		}
 	}
 
 }

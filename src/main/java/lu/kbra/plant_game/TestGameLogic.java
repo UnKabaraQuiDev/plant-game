@@ -7,6 +7,7 @@ import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
+import org.joml.Vector4f;
 import org.lwjgl.glfw.GLFW;
 
 import lu.pcy113.pclib.PCUtils;
@@ -51,7 +52,7 @@ public class TestGameLogic extends GameLogic {
 
 	private float TOTAL_TIME = 0;
 
-	private Dispatcher WORKERS = new WorkerDispatcher("WORKERS", 5);
+	private Dispatcher WORKERS = new WorkerDispatcher("WORKERS", 8);
 
 	private WorldLevelScene worldScene;
 	private Scene2D uiScene;
@@ -62,8 +63,12 @@ public class TestGameLogic extends GameLogic {
 	private TaskFuture<?, Void>.TaskState<Void> state;
 	private TaskFuture<?, Void>.TaskState<Void> moveObjectTaskState;
 
+	private InputHandler inputHandler;
+
 	@Override
 	public void init(GameEngine e) {
+		inputHandler = new InputHandler(window);
+
 		compositor = new DeferredCompositor(e.getRenderThread());
 
 		worldScene = new WorldLevelScene("world", cache);
@@ -86,6 +91,7 @@ public class TestGameLogic extends GameLogic {
 	final Vector2i mousePos = new Vector2i();
 	boolean movingObject = false, prevMousePressed = false;
 	PlaceableObject attachedObject = null;
+	Direction targetRotation = Direction.ZERO();
 
 	@Override
 	public void input(float dTime) {
@@ -115,11 +121,20 @@ public class TestGameLogic extends GameLogic {
 
 		mousePos.set((int) window.getMousePosition().x, (int) window.getMousePosition().y);
 
-		boolean mousePressed = window.getMouseButtonState(GLFW.GLFW_MOUSE_BUTTON_LEFT) == KeyState.PRESS;
-		if (mousePressed && !prevMousePressed) {
+		if (inputHandler.isMouseButtonPressedOnce(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
 			movingObject = !movingObject;
 		}
-		prevMousePressed = mousePressed;
+
+		if (inputHandler.isKeyPressedOnce(GLFW.GLFW_KEY_T)) {
+			targetRotation = targetRotation.getClockwise();
+		}
+		if (inputHandler.isKeyPressedOnce(GLFW.GLFW_KEY_R)) {
+			targetRotation = targetRotation.getCounterClockwise();
+		}
+
+		if (targetRotation != Direction.ZERO()) {
+			System.err.println(targetRotation);
+		}
 	}
 
 	@Override
@@ -216,7 +231,7 @@ public class TestGameLogic extends GameLogic {
 				if (attachedObject == null) {
 					moveObjectTaskState = new TaskFuture<Void, Void>(WORKERS, () -> {
 						compositor.pollObjectId(mousePos, true);
-						
+
 						final Vector3i ids = new Vector3i(compositor.getObjectId().y, compositor.getObjectId().z,
 								compositor.getObjectId().w);
 
@@ -233,6 +248,8 @@ public class TestGameLogic extends GameLogic {
 						if (attachedObject == null) {
 							moveObjectTaskState = null;
 							movingObject = false;
+						} else {
+							compositor.addOutline(attachedObject, new Vector4f(1, 0, 1, 1));
 						}
 					}).push();
 				} else {
@@ -240,11 +257,13 @@ public class TestGameLogic extends GameLogic {
 						final Vector2i pos = worldScene.getTerrain().pickTerrainCell(worldScene.getCamera(), mousePos,
 								window.getWidth(), window.getHeight());
 						if (pos != null) {
-							attachedObject.placeDown(worldScene, pos, Direction.NONE);
+							attachedObject.placeDown(worldScene, pos, targetRotation);
+							targetRotation = Direction.ZERO();
 						}
 					}).push();
 				}
-			} else {
+			} else if (attachedObject != null) {
+				compositor.removeOutline(attachedObject);
 				attachedObject = null;
 				moveObjectTaskState = null;
 			}

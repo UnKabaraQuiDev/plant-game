@@ -1,10 +1,9 @@
 package lu.kbra.plant_game.engine.render.shader;
 
-import lu.kbra.standalone.gameengine.graph.shader.ComputeShader;
 import lu.kbra.standalone.gameengine.graph.shader.part.AbstractShaderPart;
 import lu.kbra.standalone.gameengine.graph.shader.part.ComputeShaderPart;
 
-public class TextureMaterialComputeShader extends ComputeShader {
+public class TextureMaterialComputeShader extends MaterialComputeShader {
 
 	public static final String TXT0 = "txt0";
 	public static final String CURRENT_MATERIAL_ID = "currentMaterialId";
@@ -15,14 +14,10 @@ public class TextureMaterialComputeShader extends ComputeShader {
 
 	@Override
 	public void createUniforms() {
-		createUniform(INPUT_SIZE);
-		createUniform(OUTPUT_SIZE);
-
+		super.createUniforms();
+		
 		createUniform(TXT0);
 		createUniform(CURRENT_MATERIAL_ID);
-		createUniform(MaterialComputeShader.LIGHT_DIR);
-		createUniform(MaterialComputeShader.LIGHT_COLOR);
-		createUniform(MaterialComputeShader.AMBIENT_LIGHT);
 	}
 
 }

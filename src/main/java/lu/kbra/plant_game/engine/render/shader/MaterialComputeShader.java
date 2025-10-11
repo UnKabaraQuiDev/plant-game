@@ -6,9 +6,6 @@ import lu.kbra.standalone.gameengine.graph.shader.part.ComputeShaderPart;
 
 public class MaterialComputeShader extends ComputeShader {
 
-	public static final String INPUT_SIZE = "inputSize";
-	public static final String OUTPUT_SIZE = "outputSize";
-	
 	public static final String LIGHT_DIR = "lightDir";
 	public static final String LIGHT_COLOR = "lightColor";
 	public static final String AMBIENT_LIGHT = "ambientLight";
@@ -17,14 +14,17 @@ public class MaterialComputeShader extends ComputeShader {
 		super((ComputeShaderPart) AbstractShaderPart.load("classpath:/shaders/material.comp"));
 	}
 
+	public MaterialComputeShader(ComputeShaderPart part) {
+		super(part);
+	}
+
 	@Override
 	public void createUniforms() {
-		createUniform(INPUT_SIZE);
-		createUniform(OUTPUT_SIZE);
+		super.createUniforms();
 
-		createUniform(MaterialComputeShader.LIGHT_DIR);
-		createUniform(MaterialComputeShader.LIGHT_COLOR);
-		createUniform(MaterialComputeShader.AMBIENT_LIGHT);
+		createUniform(LIGHT_DIR);
+		createUniform(LIGHT_COLOR);
+		createUniform(AMBIENT_LIGHT);
 	}
 
 }
