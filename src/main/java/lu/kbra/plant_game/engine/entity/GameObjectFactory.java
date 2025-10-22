@@ -20,8 +20,6 @@ import lu.pcy113.pclib.impl.ExceptionFunction;
 
 public class GameObjectFactory {
 
-	private static final long LOCK_WAIT_TIMEOUT = 1000;
-
 	public static GameObjectFactory INSTANCE;
 
 	private Map<Class<? extends GameObject>, Boolean> animatedMesh = new HashMap<>();

@@ -11,7 +11,7 @@ import lu.kbra.standalone.gameengine.objs.entity.components.MeshComponent;
 import lu.kbra.standalone.gameengine.objs.entity.components.Transform3DComponent;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-public class GameObject extends Entity implements Transform3Deable {
+public class GameObject extends Entity implements Transform3DOwner, MeshOwner {
 
 	public static final int MESH_ATTRIB_MATERIAL_ID_ID = 3;
 	public static final int MESH_ATTRIB_OBJECT_ID_ID = 4;
@@ -24,27 +24,20 @@ public class GameObject extends Entity implements Transform3Deable {
 	protected AttributeLocation objectIdLocation = AttributeLocation.ENTITY; // object id in mesh data
 	protected MeshComponent meshComponent;
 	protected Transform3DComponent transformComponent;
-	protected boolean transparent = false;
 
 	public GameObject(String str, Mesh mesh) {
 		this(str, mesh, null);
 	}
 
 	public GameObject(String str, Mesh mesh, Transform3D transform) {
-		this(str, mesh, transform, false);
+		this(str, mesh, transform, new Vector3i((int) System.nanoTime(), (int) System.nanoTime() % 20056, (int) System.nanoTime() % 255));
 	}
 
-	public GameObject(String str, Mesh mesh, Transform3D transform, boolean transparent) {
-		this(str, mesh, transform, transparent,
-				new Vector3i((int) System.nanoTime(), (int) System.nanoTime() % 20056, (int) System.nanoTime() % 255));
+	public GameObject(String str, Mesh mesh, Transform3D transform, Vector3i objectId) {
+		this(str, mesh, transform, objectId, (short) -1);
 	}
 
-	public GameObject(String str, Mesh mesh, Transform3D transform, boolean transparent, Vector3i objectId) {
-		this(str, mesh, transform, transparent, objectId, (short) -1);
-	}
-
-	public GameObject(String str, Mesh mesh, Transform3D transform, boolean transparent, Vector3i objectId,
-			short materialId) {
+	public GameObject(String str, Mesh mesh, Transform3D transform, Vector3i objectId, short materialId) {
 		super(str, new MeshComponent(mesh), transform != null ? new Transform3DComponent(transform) : null);
 		if (mesh instanceof TexturedMesh || mesh instanceof MaterialMesh) {
 			entityMaterialId = false;
@@ -53,7 +46,6 @@ public class GameObject extends Entity implements Transform3Deable {
 		}
 		this.meshComponent = super.getComponent(MeshComponent.class);
 		this.transformComponent = super.getComponent(Transform3DComponent.class);
-		this.transparent = transparent;
 		this.objectId = objectId;
 		this.materialId = materialId;
 	}
@@ -90,14 +82,6 @@ public class GameObject extends Entity implements Transform3Deable {
 		this.objectId = objectId;
 	}
 
-	public boolean isTransparent() {
-		return transparent;
-	}
-
-	public void setTransparent(boolean transparent) {
-		this.transparent = transparent;
-	}
-
 	public MeshComponent getMeshComponent() {
 		return meshComponent;
 	}
@@ -106,6 +90,7 @@ public class GameObject extends Entity implements Transform3Deable {
 		return transformComponent;
 	}
 
+	@Override
 	public Mesh getMesh() {
 		return meshComponent == null ? null : meshComponent.getMesh();
 	}
@@ -117,9 +102,9 @@ public class GameObject extends Entity implements Transform3Deable {
 
 	@Override
 	public String toString() {
-		return super.toString() + " [materialId=" + materialId + ", entityMaterialId=" + entityMaterialId
-				+ ", objectId=" + objectId + ", objectIdLocation=" + objectIdLocation + ", transparent=" + transparent
-				+ ", getMesh()=" + getMesh() + ", getTransform()=" + getTransform() + "]";
+		return "GameObject [materialId=" + materialId + ", entityMaterialId=" + entityMaterialId + ", objectId=" + objectId
+				+ ", objectIdLocation=" + objectIdLocation + ", meshComponent=" + meshComponent + ", transformComponent="
+				+ transformComponent + ", getTransform()=" + getTransform() + ", isActive()=" + isActive() + ", getId()=" + getId() + "]";
 	}
 
 }

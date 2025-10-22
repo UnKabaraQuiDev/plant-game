@@ -27,12 +27,12 @@ import lu.kbra.plant_game.engine.entity.water.WaterTowerObject;
 import lu.kbra.plant_game.engine.entity.water.WaterWheelObject;
 import lu.kbra.plant_game.engine.mesh.AttributeLocation;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
-import lu.kbra.plant_game.engine.scene.ImageWorldGenerator;
-import lu.kbra.plant_game.engine.scene.WorldGenerator;
-import lu.kbra.plant_game.engine.scene.WorldGenerator.TerrainMaterialType;
-import lu.kbra.plant_game.engine.scene.WorldLevelScene;
+import lu.kbra.plant_game.engine.scene.ui.UIScene;
+import lu.kbra.plant_game.engine.scene.world.ImageWorldGenerator;
+import lu.kbra.plant_game.engine.scene.world.WorldGenerator;
+import lu.kbra.plant_game.engine.scene.world.WorldGenerator.TerrainMaterialType;
+import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.standalone.gameengine.GameEngine;
-import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.geom.CubeMesh;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.geom.QuadMesh;
@@ -43,7 +43,6 @@ import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
 import lu.kbra.standalone.gameengine.impl.future.WorkerDispatcher;
 import lu.kbra.standalone.gameengine.objs.entity.Entity;
 import lu.kbra.standalone.gameengine.objs.entity.components.Transform3DComponent;
-import lu.kbra.standalone.gameengine.scene.Scene2D;
 import lu.kbra.standalone.gameengine.scene.camera.Camera3D;
 import lu.kbra.standalone.gameengine.utils.gl.consts.Direction;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
@@ -55,8 +54,7 @@ public class TestGameLogic extends GameLogic {
 	private Dispatcher WORKERS = new WorkerDispatcher("WORKERS", 8);
 
 	private WorldLevelScene worldScene;
-	private Scene2D uiScene;
-	private CacheManager uiCache;
+	private UIScene uiScene;
 	private DeferredCompositor compositor;
 	private Entity cubeEntity;
 
@@ -77,12 +75,17 @@ public class TestGameLogic extends GameLogic {
 		worldScene.getCamera().getProjection().setFov((float) Math.toRadians(40));
 		worldScene.getLightDirection().set(new Vector3f(0.5f, 0.5f, 0.5f).normalize());
 
+		uiScene = new UIScene("ui", cache);
+
+		UIObjectFactory.INSTANCE = new UIObjectFactory(uiScene.getCache(), WORKERS, RENDER_DISPATCHER);
+
 		GameObjectFactory.INSTANCE = new GameObjectFactory(worldScene.getCache(), WORKERS, RENDER_DISPATCHER);
 
 		final CubeMesh cubeMesh = new CubeMesh("cubeMesh", null, new Vector3f(0.5f));
 		worldScene.getCache().addMesh(cubeMesh);
-		cubeEntity = worldScene.addEntity(new GameObject("cubeEntity", cubeMesh, new Transform3D(), false,
-				new Vector3i(1, 0, 255), TerrainMaterialType.GRASS.getId()));
+		cubeEntity = worldScene
+				.addEntity(new GameObject("cubeEntity", cubeMesh, new Transform3D(), new Vector3i(1, 0, 255),
+						TerrainMaterialType.GRASS.getId()));
 	}
 
 	final Vector3f posAdd = new Vector3f();
@@ -147,16 +150,14 @@ public class TestGameLogic extends GameLogic {
 			}).push();
 
 			state = new TaskFuture<>(WORKERS, () -> {
-				final WorldGenerator worldGenerator = new ImageWorldGenerator("classpath:/maps/world_map.png",
-						4 / 255f);
+				final WorldGenerator worldGenerator = new ImageWorldGenerator("classpath:/maps/world_map.png", 4 / 255f);
 				GlobalLogger.info("Generating world...");
 				final long time = PCUtils.nanoTime(() -> worldGenerator.compute());
 				GlobalLogger.info("World generated in " + (time / 1e6) + " ms");
 				return worldGenerator;
 			}).then(RENDER_DISPATCHER, (ExceptionFunction<WorldGenerator, TerrainMesh>) (worldGenerator) -> {
 				GlobalLogger.info("Generating mesh...");
-				final Pair<TerrainMesh, Long> mesh = PCUtils
-						.nanoTime(() -> worldGenerator.generateMesh(worldScene.getCache()));
+				final Pair<TerrainMesh, Long> mesh = PCUtils.nanoTime(() -> worldGenerator.generateMesh(worldScene.getCache()));
 				GlobalLogger.info("Mesh generated in " + (mesh.getValue() / 1e6) + " ms");
 				return mesh.getKey();
 			}, 0).then(WORKERS, (mesh) -> {
@@ -173,21 +174,24 @@ public class TestGameLogic extends GameLogic {
 
 				new TaskFuture<>(RENDER_DISPATCHER, () -> {
 					GlobalLogger.info("Generating water mesh...");
-					final Pair<Mesh, Long> meshTime = PCUtils.nanoTime(() -> new QuadMesh("water", null,
-							new Vector2f(((TerrainMesh) worldScene.getTerrain().getMesh()).getWidth(),
-									((TerrainMesh) worldScene.getTerrain().getMesh()).getLength())));
+					final Pair<Mesh, Long> meshTime = PCUtils
+							.nanoTime(() -> new QuadMesh("water", null,
+									new Vector2f(((TerrainMesh) worldScene.getTerrain().getMesh()).getWidth(),
+											((TerrainMesh) worldScene.getTerrain().getMesh()).getLength())));
 					worldScene.getCache().addMesh(meshTime.getKey());
 					GlobalLogger.info("Water mesh generated in " + (meshTime.getValue() / 1e6) + " ms");
 					return meshTime.getKey();
-				}).then(WORKERS,
-						(ExceptionFunction<Mesh, GameObject>) (mesh) -> worldScene
-								.setWaterLevel(new GameObject("water", mesh,
-										new Transform3D(new Vector3f(0, 0.9f, 0),
-												new Quaternionf().rotateX((float) Math.toRadians(-90))),
-										true, new Vector3i(2, 0, 0), TerrainMaterialType.WATER.getId())))
+				})
+						.then(WORKERS,
+								(ExceptionFunction<Mesh, GameObject>) (mesh) -> worldScene
+										.setWaterLevel(new GameObject("water", mesh,
+												new Transform3D(new Vector3f(0, 0.9f, 0),
+														new Quaternionf().rotateX((float) Math.toRadians(-90))),
+												new Vector3i(2, 0, 0), TerrainMaterialType.WATER.getId())))
 						.push();
 
-				GameObjectFactory.create(WaterTowerObject.class, worldScene, new Transform3D())
+				GameObjectFactory
+						.create(WaterTowerObject.class, worldScene, new Transform3D())
 						.then(WORKERS, (ExceptionConsumer<WaterTowerObject>) (obj) -> {
 							final Vector2i pos = new Vector2i(0, 0);
 							while (!obj.isPlaceable(worldScene, pos, Direction.NONE)) {
@@ -201,26 +205,40 @@ public class TestGameLogic extends GameLogic {
 								}
 							}
 							obj.placeDown(worldScene, pos, Direction.NONE);
-						}).push();
+						})
+						.push();
 
-				GameObjectFactory.create(WaterTowerObject.class, worldScene, new Transform3D())
+				GameObjectFactory
+						.create(WaterTowerObject.class, worldScene, new Transform3D())
 						.then(WORKERS, (ExceptionConsumer<WaterTowerObject>) (obj) -> {
 							obj.placeDown(worldScene, new Vector2i(11, 15), Direction.NONE);
-						}).push();
-
-				GameObjectFactory.create(SolarPanelObject.class, worldScene, new Transform3D())
-						.then(WORKERS, (ExceptionConsumer<SolarPanelObject>) (obj) -> obj.placeDown(worldScene,
-								new Vector2i(15, 5), Direction.NONE))
+						})
 						.push();
 
-				GameObjectFactory.create(WaterWheelObject.class, worldScene, new Transform3D())
-						.then(WORKERS, (ExceptionConsumer<WaterWheelObject>) (obj) -> obj.placeDown(worldScene,
-								new Vector2i(11, 7), Direction.WEST))
+				GameObjectFactory
+						.create(SolarPanelObject.class, worldScene, new Transform3D())
+						.then(WORKERS,
+								(ExceptionConsumer<SolarPanelObject>) (obj) -> obj
+										.placeDown(worldScene, new Vector2i(15, 5), Direction.NONE))
 						.push();
 
-				GameObjectFactory.create(WaterWheelObject.class, worldScene, new Transform3D())
-						.then(WORKERS, (ExceptionConsumer<WaterWheelObject>) (obj) -> obj.placeDown(worldScene,
-								new Vector2i(13, 8), Direction.WEST))
+				GameObjectFactory
+						.create(WaterWheelObject.class, worldScene, new Transform3D())
+						.then(WORKERS,
+								(ExceptionConsumer<WaterWheelObject>) (obj) -> obj
+										.placeDown(worldScene, new Vector2i(11, 7), Direction.WEST))
+						.push();
+
+				GameObjectFactory
+						.create(WaterWheelObject.class, worldScene, new Transform3D())
+						.then(WORKERS,
+								(ExceptionConsumer<WaterWheelObject>) (obj) -> obj
+										.placeDown(worldScene, new Vector2i(13, 8), Direction.WEST))
+						.push();
+
+				UIObjectFactory
+						.create(IconUIObject.class, uiScene, new Transform3D())
+						.then(WORKERS, (ExceptionConsumer<IconUIObject>) System.err::println)
 						.push();
 
 			}).push();
@@ -230,20 +248,28 @@ public class TestGameLogic extends GameLogic {
 			if (movingObject) {
 				if (attachedObject == null) {
 					moveObjectTaskState = new TaskFuture<Void, Void>(WORKERS, () -> {
-						compositor.pollObjectId(mousePos, true);
+						compositor.pollObjectId(true);
 
 						final Vector3i ids = new Vector3i(compositor.getObjectId().y, compositor.getObjectId().z,
 								compositor.getObjectId().w);
 
-						worldScene.getEntities().values().parallelStream()
+						worldScene
+								.getEntities()
+								.values()
+								.parallelStream()
 								.filter(e -> e instanceof GameObject && e instanceof PlaceableObject
 										&& ((GameObject) e).getObjectIdLocation() == AttributeLocation.ENTITY)
 								.forEach(System.err::println);
 
-						attachedObject = (PlaceableObject) worldScene.getEntities().values().parallelStream()
+						attachedObject = (PlaceableObject) worldScene
+								.getEntities()
+								.values()
+								.parallelStream()
 								.filter(e -> e instanceof GameObject && e instanceof PlaceableObject
 										&& ((GameObject) e).getObjectIdLocation() == AttributeLocation.ENTITY)
-								.filter(e -> ids.equals(((GameObject) e).getObjectId())).findFirst().orElse(null);
+								.filter(e -> ids.equals(((GameObject) e).getObjectId()))
+								.findFirst()
+								.orElse(null);
 
 						if (attachedObject == null) {
 							moveObjectTaskState = null;
@@ -254,8 +280,9 @@ public class TestGameLogic extends GameLogic {
 					}).push();
 				} else {
 					moveObjectTaskState = new TaskFuture<Void, Void>(RENDER_DISPATCHER, () -> {
-						final Vector2i pos = worldScene.getTerrain().pickTerrainCell(worldScene.getCamera(), mousePos,
-								window.getWidth(), window.getHeight());
+						final Vector2i pos = worldScene
+								.getTerrain()
+								.pickTerrainCell(worldScene.getCamera(), mousePos, window.getWidth(), window.getHeight());
 						if (pos != null) {
 							attachedObject.placeDown(worldScene, pos, targetRotation);
 							targetRotation = Direction.ZERO();
@@ -297,7 +324,7 @@ public class TestGameLogic extends GameLogic {
 	@Override
 	public void render(float dTime) {
 		worldScene.getCamera().getProjection().update(window.getWidth(), window.getHeight());
-		compositor.render(engine, worldScene, uiScene, worldScene.getCache(), uiCache);
+		compositor.render(engine, worldScene, uiScene);
 	}
 
 }

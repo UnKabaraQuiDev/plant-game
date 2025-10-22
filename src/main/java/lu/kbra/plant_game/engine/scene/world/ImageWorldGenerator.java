@@ -1,4 +1,4 @@
-package lu.kbra.plant_game.engine.scene;
+package lu.kbra.plant_game.engine.scene.world;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;

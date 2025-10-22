@@ -4,13 +4,13 @@ import org.joml.Vector2i;
 import org.joml.Vector3f;
 
 import lu.kbra.plant_game.engine.entity.terrain.TerrainMesh;
-import lu.kbra.plant_game.engine.scene.WorldLevelScene;
+import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.standalone.gameengine.impl.UniqueID;
 import lu.kbra.standalone.gameengine.objs.entity.SceneEntity;
 import lu.kbra.standalone.gameengine.utils.gl.consts.Direction;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-public interface PlaceableObject extends Transform3Deable, UniqueID, SceneEntity {
+public interface PlaceableObject extends Transform3DOwner, UniqueID, SceneEntity {
 
 	Vector2i getFootprint();
 

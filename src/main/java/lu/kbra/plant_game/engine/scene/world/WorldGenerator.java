@@ -1,4 +1,4 @@
-package lu.kbra.plant_game.engine.scene;
+package lu.kbra.plant_game.engine.scene.world;
 
 import java.util.ArrayList;
 import java.util.Arrays;

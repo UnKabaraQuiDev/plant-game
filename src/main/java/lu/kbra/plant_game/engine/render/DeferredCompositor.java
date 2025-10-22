@@ -35,7 +35,8 @@ import lu.kbra.plant_game.engine.render.shader.MaterialComputeShader;
 import lu.kbra.plant_game.engine.render.shader.OutlineShader;
 import lu.kbra.plant_game.engine.render.shader.TextureMaterialComputeShader;
 import lu.kbra.plant_game.engine.render.shader.TransferShader;
-import lu.kbra.plant_game.engine.scene.WorldLevelScene;
+import lu.kbra.plant_game.engine.scene.ui.UIScene;
+import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.standalone.gameengine.GameEngine;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.cache.attrib.UIntAttribArray;
@@ -43,19 +44,25 @@ import lu.kbra.standalone.gameengine.cache.attrib.Vec2fAttribArray;
 import lu.kbra.standalone.gameengine.cache.attrib.Vec3fAttribArray;
 import lu.kbra.standalone.gameengine.geom.LoadedMesh;
 import lu.kbra.standalone.gameengine.geom.Mesh;
+import lu.kbra.standalone.gameengine.geom.instance.InstanceEmitter;
 import lu.kbra.standalone.gameengine.graph.composition.buffer.Framebuffer;
 import lu.kbra.standalone.gameengine.graph.composition.buffer.RenderBuffer;
+import lu.kbra.standalone.gameengine.graph.material.Material;
 import lu.kbra.standalone.gameengine.graph.shader.ComputeShader;
 import lu.kbra.standalone.gameengine.graph.shader.RenderShader;
 import lu.kbra.standalone.gameengine.graph.texture.SingleTexture;
+import lu.kbra.standalone.gameengine.graph.window.Window;
 import lu.kbra.standalone.gameengine.impl.Cleanupable;
 import lu.kbra.standalone.gameengine.impl.FramebufferAttachment;
+import lu.kbra.standalone.gameengine.objs.entity.Component;
 import lu.kbra.standalone.gameengine.objs.entity.Entity;
 import lu.kbra.standalone.gameengine.objs.entity.SceneEntity;
+import lu.kbra.standalone.gameengine.objs.entity.components.InstanceEmitterComponent;
 import lu.kbra.standalone.gameengine.objs.entity.components.MeshComponent;
 import lu.kbra.standalone.gameengine.objs.entity.components.RenderConditionComponent;
+import lu.kbra.standalone.gameengine.objs.entity.components.TextEmitterComponent;
 import lu.kbra.standalone.gameengine.objs.entity.components.TransformComponent;
-import lu.kbra.standalone.gameengine.scene.Scene2D;
+import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
 import lu.kbra.standalone.gameengine.scene.camera.Camera3D;
 import lu.kbra.standalone.gameengine.utils.MathUtils;
 import lu.kbra.standalone.gameengine.utils.gl.consts.BufferType;
@@ -82,10 +89,8 @@ public class DeferredCompositor implements Cleanupable {
 
 	private static Mesh SCREEN = new LoadedMesh(PASS_SCREEN, null,
 			new Vec3fAttribArray("pos", 0, 1,
-					new Vector3f[] { new Vector3f(-1, 1, 0), new Vector3f(1, 1, 0), new Vector3f(1, -1, 0),
-							new Vector3f(-1, -1, 0) }),
-			new UIntAttribArray("ind", -1, 1, new int[] { 0, 1, 2, 0, 2, 3 }, BufferType.ELEMENT_ARRAY),
-			new Vec2fAttribArray("uv", 1, 1,
+					new Vector3f[] { new Vector3f(-1, 1, 0), new Vector3f(1, 1, 0), new Vector3f(1, -1, 0), new Vector3f(-1, -1, 0) }),
+			new UIntAttribArray("ind", -1, 1, new int[] { 0, 1, 2, 0, 2, 3 }, BufferType.ELEMENT_ARRAY), new Vec2fAttribArray("uv", 1, 1,
 					new Vector2f[] { new Vector2f(0, 1), new Vector2f(1, 1), new Vector2f(1, 0), new Vector2f(0, 0) }));
 
 	protected Thread ownerThread;
@@ -103,11 +108,9 @@ public class DeferredCompositor implements Cleanupable {
 
 	// rendering/states
 	protected float oldFov;
-	protected Vector2i oldResolution = new Vector2i(0), renderResolution = new Vector2i(),
-			outputResolution = new Vector2i();
+	protected Vector2i oldResolution = new Vector2i(0), renderResolution = new Vector2i(), outputResolution = new Vector2i();
 
 	// object ids
-	private Vector2i mousePosition = new Vector2i();
 	private BooleanPointer awaitingObjectIdPtr = new BooleanPointer(false);
 	private Vector4i objectId = new Vector4i();
 
@@ -120,8 +123,7 @@ public class DeferredCompositor implements Cleanupable {
 		this.ownerThread = ownerThread;
 	}
 
-	public void render(GameEngine engine, WorldLevelScene worldScene, Scene2D uiScene, CacheManager worldCache,
-			CacheManager uiCache) {
+	public void render(GameEngine engine, WorldLevelScene worldScene, UIScene uiScene) {
 		final int width = engine.getWindow().getWidth();
 		final int height = engine.getWindow().getHeight();
 
@@ -132,8 +134,7 @@ public class DeferredCompositor implements Cleanupable {
 
 		if (needRegen) {
 			oldResolution.set(width, height);
-			final float divisor = (float) MathUtils.map(Math.toDegrees(worldScene.getCamera().getProjection().getFov()),
-					5, 65, 6, 1);
+			final float divisor = (float) MathUtils.map(Math.toDegrees(worldScene.getCamera().getProjection().getFov()), 5, 65, 6, 1);
 			// System.err.println("fov: " + worldScene.getCamera().getProjection().getFov()
 			// + "rad "
 			// + Math.toDegrees(worldScene.getCamera().getProjection().getFov()) + "deg = "
@@ -142,21 +143,156 @@ public class DeferredCompositor implements Cleanupable {
 			outputResolution.set(width, height);
 		}
 
-		renderWorldScene(cache, worldScene, worldCache, renderResolution, needRegen);
+		renderWorldScene(cache, worldScene, renderResolution, needRegen);
 
-		renderMaterials(cache, worldScene, worldCache, renderResolution, needRegen);
+		renderMaterials(cache, worldScene, renderResolution, needRegen);
 
 		renderOutlines(cache, renderResolution, needRegen);
 
 		blitToScreen(cache, outputResolution, needRegen);
 
+		renderUi(cache, uiScene, outputResolution, needRegen);
+
 		if (awaitingObjectIdPtr.getValue()) {
-			getObjectId(engine.getWindow().getSize());
+			getObjectId(engine.getWindow());
 			awaitingObjectIdPtr.setValue(false);
-			GlobalLogger.log(Level.FINEST, "retrieved object id: " + objectId);
+			GlobalLogger.log(Level.FINEST, "Retrieved object id: " + objectId + " at " + engine.getWindow().getMousePosition());
 		} else {
 			objectId.zero();
-			mousePosition.zero();
+		}
+	}
+
+	private void renderUi(CacheManager cache, UIScene uiScene, Vector2i outputResolution, boolean needRegen) {
+		final CacheManager uiCache = uiScene.getCache();
+
+		GL_W.glViewport(0, 0, outputResolution.x, outputResolution.y);
+		assert GL_W.checkError("viewport(" + outputResolution + ")");
+
+		synchronized (uiScene.getEntitiesLock()) {
+			for (Entity entity : uiScene) {
+
+				if (!entity.isActive()) {
+					continue;
+				}
+
+				if (entity.hasComponentMatching(RenderConditionComponent.class) && entity
+						.getComponentsMatching(RenderConditionComponent.class)
+						.parallelStream()
+						.allMatch(RenderConditionComponent::get)) {
+					continue;
+				}
+
+				final Matrix4f transformationMatrix;
+				if (entity.hasComponentMatching(TransformComponent.class)) {
+					final TransformComponent transform = (TransformComponent) entity.getComponentMatching(TransformComponent.class);
+					if (transform != null && transform.getTransform() != null) {
+						transformationMatrix = transform.getTransform().getMatrix();
+					} else {
+						transformationMatrix = GameEngine.IDENTITY_MATRIX4F;
+					}
+				} else {
+					transformationMatrix = GameEngine.IDENTITY_MATRIX4F;
+				}
+
+				if (entity.hasComponentMatching(MeshComponent.class)) {
+					final List<MeshComponent> meshComponents = entity.getComponentsMatching(MeshComponent.class);
+
+					for (MeshComponent meshComponent : meshComponents) {
+						final Mesh mesh = meshComponent.getMesh();
+						checkMesh(mesh, meshComponent, entity);
+
+						mesh.bind();
+						final Material material = mesh.getMaterial();
+						final RenderShader shader = material.getRenderShader();
+						shader.bind();
+
+						if (shader.createUniform(RenderShader.TRANSFORMATION_MATRIX)) {
+							shader.setUniform(RenderShader.TRANSFORMATION_MATRIX, transformationMatrix);
+						}
+
+						material.bindProperties(uiCache, uiScene);
+
+						GL_W.glDrawElements(shader.getBeginMode().getGlId(), mesh.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
+						assert GL_W.checkError("DrawElements(" + mesh.getId() + ")");
+
+						shader.unbind();
+
+						mesh.unbind();
+					}
+				}
+
+				if (entity.hasComponentMatching(TextEmitterComponent.class)) {
+					final TextEmitterComponent textEmitterComponent = entity.getComponentMatching(TextEmitterComponent.class);
+					final TextEmitter textEmitter = textEmitterComponent.getTextEmitter();
+					final InstanceEmitter instances = textEmitter.getInstances();
+					final Mesh mesh = instances.getParticleMesh();
+					final Material material = mesh.getMaterial();
+					final RenderShader shader = material.getRenderShader();
+					checkMesh(mesh, textEmitterComponent, entity);
+					instances.bind();
+					shader.bind();
+
+					if (shader.createUniform(RenderShader.TRANSFORMATION_MATRIX)) {
+						shader.setUniform(RenderShader.TRANSFORMATION_MATRIX, transformationMatrix);
+					}
+
+					material.bindProperties(uiCache, uiScene);
+
+					GL_W
+							.glDrawElementsInstanced(shader.getBeginMode().getGlId(),
+									mesh.getIndicesCount(),
+									GL_W.GL_UNSIGNED_INT,
+									0,
+									instances.getParticleCount());
+					assert GL_W.checkError("DrawElementsInstanced(" + mesh.getId() + ")");
+
+					GL_W.glDisable(GL_W.GL_BLEND);
+
+					shader.unbind();
+
+					mesh.unbind();
+				}
+
+				if (entity.hasComponentMatching(InstanceEmitterComponent.class)) {
+					final InstanceEmitterComponent instanceEmitterComponent = entity.getComponentMatching(InstanceEmitterComponent.class);
+					final InstanceEmitter instances = instanceEmitterComponent.getInstanceEmitter();
+					final Mesh mesh = instances.getParticleMesh();
+					final Material material = mesh.getMaterial();
+					final RenderShader shader = material.getRenderShader();
+					checkMesh(mesh, instanceEmitterComponent, entity);
+					instances.bind();
+					shader.bind();
+
+					if (shader.createUniform(RenderShader.TRANSFORMATION_MATRIX)) {
+						shader.setUniform(RenderShader.TRANSFORMATION_MATRIX, transformationMatrix);
+					}
+
+					material.bindProperties(uiCache, uiScene);
+
+					GL_W
+							.glDrawElementsInstanced(shader.getBeginMode().getGlId(),
+									mesh.getIndicesCount(),
+									GL_W.GL_UNSIGNED_INT,
+									0,
+									instances.getParticleCount());
+					assert GL_W.checkError("DrawElementsInstanced(" + mesh.getId() + ")");
+
+					GL_W.glDisable(GL_W.GL_BLEND);
+
+					shader.unbind();
+
+					mesh.unbind();
+				}
+			}
+		}
+	}
+
+	private void checkMesh(Mesh mesh, Component source, Entity entity) {
+		if (mesh == null) {
+			throw new NullPointerException("Mesh is null on: " + source.getClass().getSimpleName() + " in " + entity.getId());
+		}
+		if (!mesh.isValid()) {
+			throw new IllegalStateException("Mesh: " + mesh + " in " + entity.getId() + " isn't valid.");
 		}
 	}
 
@@ -212,8 +348,7 @@ public class DeferredCompositor implements Cleanupable {
 		}
 
 		if (needRegen) {
-			GL_W.glBindImageTexture(0, outputTxt.getTid(), 0, false, 0, GL_W.GL_READ_WRITE,
-					outputTxt.getInternalFormat().getGlId());
+			GL_W.glBindImageTexture(0, outputTxt.getTid(), 0, false, 0, GL_W.GL_READ_WRITE, outputTxt.getInternalFormat().getGlId());
 			assert GL_W.checkError("BindImageTexture(0," + outputTxt.getTid() + ",READ_WRITE)");
 
 			posTexture.bindUniform(computeShader.getUniformLocation("uPosTex"), 0);
@@ -263,8 +398,9 @@ public class DeferredCompositor implements Cleanupable {
 		blitShader.unbind();
 	}
 
-	private void renderMaterials(CacheManager cache, WorldLevelScene worldScene, CacheManager worldCache,
-			Vector2i resolution, boolean needRegen) {
+	private void renderMaterials(CacheManager cache, WorldLevelScene worldScene, Vector2i resolution, boolean needRegen) {
+		final CacheManager worldCache = worldScene.getCache();
+
 		if (materialComputeShader == null) {
 			materialComputeShader = cache.hasAbstractShader(MaterialComputeShader.class.getName())
 					? (MaterialComputeShader) cache.getAbstractShader(MaterialComputeShader.class.getName())
@@ -273,8 +409,7 @@ public class DeferredCompositor implements Cleanupable {
 		}
 		if (textureMaterialComputeShader == null) {
 			textureMaterialComputeShader = cache.hasAbstractShader(TextureMaterialComputeShader.class.getName())
-					? (TextureMaterialComputeShader) cache
-							.getAbstractShader(TextureMaterialComputeShader.class.getName())
+					? (TextureMaterialComputeShader) cache.getAbstractShader(TextureMaterialComputeShader.class.getName())
 					: new TextureMaterialComputeShader();
 			cache.addAbstractShader(textureMaterialComputeShader);
 		}
@@ -295,8 +430,9 @@ public class DeferredCompositor implements Cleanupable {
 			outputTxt.resize();
 			outputTxt.unbind();
 		} else {
-			GL_W.glClearTexImage(outputTxt.getTid(), 0, outputTxt.getFormat().getGlId(),
-					outputTxt.getDataType().getGlId(), new float[] { 0, 0, 0, 0 });
+			GL_W
+					.glClearTexImage(outputTxt
+							.getTid(), 0, outputTxt.getFormat().getGlId(), outputTxt.getDataType().getGlId(), new float[] { 0, 0, 0, 0 });
 			assert GL_W.checkError("ClearTexImage(" + outputTxt.getTid() + ")");
 		}
 
@@ -327,8 +463,7 @@ public class DeferredCompositor implements Cleanupable {
 
 		setupMaterialInputs(textureMaterialComputeShader, worldScene, resolution, needRegen);
 		final int txt0UniformLoc = textureMaterialComputeShader.getUniformLocation(TextureMaterialComputeShader.TXT0);
-		final int currentMaterialIdLoc = textureMaterialComputeShader
-				.getUniformLocation(TextureMaterialComputeShader.CURRENT_MATERIAL_ID);
+		final int currentMaterialIdLoc = textureMaterialComputeShader.getUniformLocation(TextureMaterialComputeShader.CURRENT_MATERIAL_ID);
 
 		final Set<Integer> alreadyRendered = new HashSet<>();
 
@@ -340,6 +475,7 @@ public class DeferredCompositor implements Cleanupable {
 
 					for (MeshComponent meshComponent : meshComponents) {
 						final Mesh mesh = meshComponent.getMesh();
+						checkMesh(mesh, meshComponent, entity);
 
 						if (mesh instanceof TexturedMesh txtMesh) {
 
@@ -369,8 +505,7 @@ public class DeferredCompositor implements Cleanupable {
 		textureMaterialComputeShader.unbind();
 	}
 
-	private void setupMaterialInputs(ComputeShader computeShader, WorldLevelScene worldScene, Vector2i resolution,
-			boolean needRegen) {
+	private void setupMaterialInputs(ComputeShader computeShader, WorldLevelScene worldScene, Vector2i resolution, boolean needRegen) {
 		posTexture.bind(0);
 		normalTexture.bind(1);
 		uvTexture.bind(2);
@@ -382,8 +517,7 @@ public class DeferredCompositor implements Cleanupable {
 		computeShader.setUniform(MaterialComputeShader.AMBIENT_LIGHT, worldScene.getAmbientLight());
 
 		if (needRegen) {
-			GL_W.glBindImageTexture(0, outputTxt.getTid(), 0, false, 0, GL_W.GL_WRITE_ONLY,
-					outputTxt.getInternalFormat().getGlId());
+			GL_W.glBindImageTexture(0, outputTxt.getTid(), 0, false, 0, GL_W.GL_WRITE_ONLY, outputTxt.getInternalFormat().getGlId());
 			assert GL_W.checkError("BindImageTexture(0," + outputTxt.getTid() + ",WRITE_ONLY)");
 
 			posTexture.bindUniform(computeShader.getUniformLocation("uPosTex"), 0);
@@ -397,9 +531,7 @@ public class DeferredCompositor implements Cleanupable {
 		}
 	}
 
-	private void renderWorldScene(CacheManager cache, WorldLevelScene worldScene, CacheManager worldCache,
-			Vector2i resolution, boolean needRegen) {
-
+	private void renderWorldScene(CacheManager cache, WorldLevelScene worldScene, Vector2i resolution, boolean needRegen) {
 		if (transferShader == null) {
 			transferShader = cache.hasAbstractShader(TransferShader.class.getName())
 					? (TransferShader) cache.getAbstractShader(TransferShader.class.getName())
@@ -441,15 +573,16 @@ public class DeferredCompositor implements Cleanupable {
 		transferShader.setUniform(RenderShader.VIEW_MATRIX, viewMatrix);
 
 		synchronized (worldScene.getEntitiesLock()) {
-			for (Entity entity : worldScene.getEntities().values()) {
+			for (Entity entity : worldScene) {
 
 				if (!entity.isActive()) {
 					continue;
 				}
 
-				if (entity.hasComponentMatching(RenderConditionComponent.class)
-						&& entity.getComponentsMatching(RenderConditionComponent.class).parallelStream()
-								.allMatch(RenderConditionComponent::get)) {
+				if (entity.hasComponentMatching(RenderConditionComponent.class) && entity
+						.getComponentsMatching(RenderConditionComponent.class)
+						.parallelStream()
+						.allMatch(RenderConditionComponent::get)) {
 					continue;
 				}
 
@@ -458,14 +591,7 @@ public class DeferredCompositor implements Cleanupable {
 
 					for (MeshComponent meshComponent : meshComponents) {
 						final Mesh mesh = meshComponent.getMesh();
-						if (mesh == null) {
-							throw new NullPointerException("Mesh is null on: "
-									+ meshComponent.getClass().getSimpleName() + " in " + entity.getId());
-						}
-						if (!mesh.isValid()) {
-							throw new IllegalStateException(
-									"Mesh: " + mesh + " in " + entity.getId() + " isn't valid.");
-						}
+						checkMesh(mesh, meshComponent, entity);
 						mesh.bind();
 
 						if (transferShader.createUniform(RenderShader.TRANSFORMATION_MATRIX)) {
@@ -495,44 +621,35 @@ public class DeferredCompositor implements Cleanupable {
 							final int matId = go.getMaterialId();
 
 							GL_W.glDisableVertexAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_ID);
-							assert GL_W.checkError(
-									"DisableVertexAttribArray(" + GameObject.MESH_ATTRIB_MATERIAL_ID_ID + ")");
+							assert GL_W.checkError("DisableVertexAttribArray(" + GameObject.MESH_ATTRIB_MATERIAL_ID_ID + ")");
 							GL_W.glVertexAttribI1ui(GameObject.MESH_ATTRIB_MATERIAL_ID_ID, matId);
-							assert GL_W.checkError(
-									"VertexAttrib1f(" + GameObject.MESH_ATTRIB_MATERIAL_ID_ID + "," + matId + ")");
+							assert GL_W.checkError("VertexAttrib1f(" + GameObject.MESH_ATTRIB_MATERIAL_ID_ID + "," + matId + ")");
 						} else if (mesh instanceof TexturedMesh txtMesh) { // id in the texture id
 							final int txtId = txtMesh.getTexture().getTid();
 
 							GL_W.glDisableVertexAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_ID);
-							assert GL_W.checkError(
-									"DisableVertexAttribArray(" + GameObject.MESH_ATTRIB_MATERIAL_ID_ID + ")");
+							assert GL_W.checkError("DisableVertexAttribArray(" + GameObject.MESH_ATTRIB_MATERIAL_ID_ID + ")");
 							GL_W.glVertexAttribI1ui(GameObject.MESH_ATTRIB_MATERIAL_ID_ID, txtId);
-							assert GL_W.checkError(
-									"VertexAttrib1f(" + GameObject.MESH_ATTRIB_MATERIAL_ID_ID + "," + txtId + ")");
+							assert GL_W.checkError("VertexAttrib1f(" + GameObject.MESH_ATTRIB_MATERIAL_ID_ID + "," + txtId + ")");
 						} else if (mesh instanceof MaterialMesh matMesh) { // id is in the material
 							final int matId = matMesh.getMaterialId();
 
 							GL_W.glDisableVertexAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_ID);
-							assert GL_W.checkError(
-									"DisableVertexAttribArray(" + GameObject.MESH_ATTRIB_MATERIAL_ID_ID + ")");
+							assert GL_W.checkError("DisableVertexAttribArray(" + GameObject.MESH_ATTRIB_MATERIAL_ID_ID + ")");
 							GL_W.glVertexAttribI1ui(GameObject.MESH_ATTRIB_MATERIAL_ID_ID, matId);
-							assert GL_W.checkError(
-									"VertexAttrib1f(" + GameObject.MESH_ATTRIB_MATERIAL_ID_ID + "," + matId + ")");
+							assert GL_W.checkError("VertexAttrib1f(" + GameObject.MESH_ATTRIB_MATERIAL_ID_ID + "," + matId + ")");
 						}
 
 						if (entity instanceof GameObject go && go.getObjectIdLocation() != AttributeLocation.MESH) {
 							// object id is in the entity
 							final Vector3i objId = go.getObjectId();
 							GL_W.glDisableVertexAttribArray(GameObject.MESH_ATTRIB_OBJECT_ID_ID);
-							assert GL_W.checkError(
-									"DisableVertexAttribArray(" + GameObject.MESH_ATTRIB_OBJECT_ID_ID + ")");
+							assert GL_W.checkError("DisableVertexAttribArray(" + GameObject.MESH_ATTRIB_OBJECT_ID_ID + ")");
 							GL_W.glVertexAttribI3ui(GameObject.MESH_ATTRIB_OBJECT_ID_ID, objId.x, objId.y, objId.z);
-							assert GL_W.checkError(
-									"VertexAttrib3f(" + GameObject.MESH_ATTRIB_OBJECT_ID_ID + "," + objId + ")");
+							assert GL_W.checkError("VertexAttrib3f(" + GameObject.MESH_ATTRIB_OBJECT_ID_ID + "," + objId + ")");
 						}
 
-						GL_W.glDrawElements(transferShader.getBeginMode().getGlId(), mesh.getIndicesCount(),
-								GL_W.GL_UNSIGNED_INT, 0);
+						GL_W.glDrawElements(transferShader.getBeginMode().getGlId(), mesh.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
 						assert GL_W.checkError("DrawElements(" + mesh.getId() + ")");
 
 						mesh.unbind();
@@ -640,11 +757,7 @@ public class DeferredCompositor implements Cleanupable {
 		}
 	}
 
-	public boolean pollObjectId(Vector2i mousePos, boolean blocking) {
-		Objects.requireNonNull(mousePos);
-		if (this.mousePosition != mousePos || mousePos.equals(this.mousePosition)) {
-			this.mousePosition.set(mousePos);
-		}
+	public boolean pollObjectId(boolean blocking) {
 		awaitingObjectIdPtr.setValue(true);
 		if (blocking) {
 			return awaitObjectId();
@@ -665,22 +778,23 @@ public class DeferredCompositor implements Cleanupable {
 		return objectId;
 	}
 
-	protected void getObjectId(Vector2i windowSize) {
+	protected void getObjectId(Window window) {
 		if (idsTexture == null)
 			throw new IllegalStateException("Ids texture is not ready.");
 		assert ownerThread == Thread.currentThread();
+
+		final Vector2f mousePosition = window.getMousePosition();
+		final Vector2i windowSize = window.getSize();
 
 		final int x = (int) ((mousePosition.x / (float) windowSize.x) * idsTexture.getWidth());
 		final int y = (int) ((1 - (mousePosition.y / (float) windowSize.y)) * idsTexture.getHeight());
 
 		worldFramebuffer.bind(GL_W.GL_READ_FRAMEBUFFER);
 		GL_W.glReadBuffer(FrameBufferAttachment.COLOR_FIRST.getGlId() + WORLD_FRAMEBUFFER_IDS_IDX);
-		assert GL_W.checkError(
-				"ReadBuffer(" + (FrameBufferAttachment.COLOR_FIRST.getGlId() + WORLD_FRAMEBUFFER_IDS_IDX) + ")");
+		assert GL_W.checkError("ReadBuffer(" + (FrameBufferAttachment.COLOR_FIRST.getGlId() + WORLD_FRAMEBUFFER_IDS_IDX) + ")");
 		final IntBuffer pixel = BufferUtils.createIntBuffer(4);
 		GL11.glReadPixels(x, y, 1, 1, idsTexture.getFormat().getGlId(), idsTexture.getDataType().getGlId(), pixel);
-		assert GL_W.checkError(
-				"ReadPixels(" + mousePosition + ", " + idsTexture.getFormat() + ", " + idsTexture.getDataType() + ")");
+		assert GL_W.checkError("ReadPixels(" + mousePosition + ", " + idsTexture.getFormat() + ", " + idsTexture.getDataType() + ")");
 		worldFramebuffer.unbind(GL_W.GL_READ_FRAMEBUFFER);
 
 		int r = pixel.get(0);
