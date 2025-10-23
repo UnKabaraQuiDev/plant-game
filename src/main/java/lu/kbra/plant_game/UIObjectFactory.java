@@ -86,32 +86,19 @@ public class UIObjectFactory {
 
 			if (animatedMesh.get(clazz)) {
 
-				return StaticTextureLoader
-						.getStaticFuture(cache, clazz.getName(), dataPath.get(clazz), loader, render)
-						.then(loader, (ExceptionFunction<AnimatedMeshes, T>) (meshes) -> {
-							final T instance = PCUtils
-									.findCompatibleConstructor(clazz,
-											PCUtils
-													.combineArrays(new Class[] { String.class, Mesh.class, AnimatedMesh.class },
-															Arrays.stream(args).map(Object::getClass).toArray(Class[]::new)))
-									.newInstance(PCUtils
-											.combineArrays(
-													new Object[] {
-															clazz.getSimpleName() + "#" + System.nanoTime(),
-															meshes.staticMesh(),
-															meshes.animatedMesh() },
-													args));
-							return instance;
-						});
+				PCUtils.throwUnsupported();
+				return null;
+
 			} else {
 
-				return StaticTextureLoader
-						.getStaticFuture(cache, clazz.getName(), dataPath.get(clazz), loader, render)
+				final String txtPath = dataPath.get(clazz);
+				return StaticMeshLoader
+						.getStaticFuture(cache, txtPath, txtPath, loader, render)
 						.then(loader, (ExceptionFunction<Mesh, T>) (mesh) -> {
 							final T instance = PCUtils
 									.findCompatibleConstructor(clazz,
 											PCUtils
-													.combineArrays(new Class[] { String.class, Mesh.class },
+													.combineArrays(new Class[] { String.class, mesh.getClass() },
 															Arrays.stream(args).map(Object::getClass).toArray(Class[]::new)))
 									.newInstance(PCUtils
 											.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), mesh }, args));

@@ -235,6 +235,8 @@ public class DeferredCompositor implements Cleanupable {
 		GL_W.glViewport(0, 0, outputResolution.x, outputResolution.y);
 		assert GL_W.checkError("Viewport(" + outputResolution + ")");
 
+		GL_W.glDisable(GL_W.GL_CULL_FACE);
+
 		synchronized (uiScene.getEntitiesLock()) {
 			renderScene(uiScene, uiSceneShaders);
 		}

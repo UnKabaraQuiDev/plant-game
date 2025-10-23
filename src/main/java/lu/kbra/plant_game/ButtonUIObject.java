@@ -8,7 +8,7 @@ import lu.kbra.plant_game.engine.util.DataPath;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-@DataPath("classpath:/icons/logo-32.png")
+@DataPath("classpath:/icons/water-32.png")
 public class ButtonUIObject extends UIObject {
 
 	public ButtonUIObject(String str, Mesh mesh) {
