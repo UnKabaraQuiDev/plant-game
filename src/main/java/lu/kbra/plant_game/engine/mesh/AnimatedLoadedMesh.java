@@ -1,5 +1,7 @@
 package lu.kbra.plant_game.engine.mesh;
 
+import java.util.Arrays;
+
 import org.joml.Vector3f;
 
 import lu.kbra.plant_game.engine.entity.AnimatedMeshLoader.AnimationData;
@@ -12,8 +14,8 @@ public class AnimatedLoadedMesh extends OffsetMesh implements AnimatedMesh {
 
 	private AnimationData animationData;
 
-	public AnimatedLoadedMesh(String name, Material material, Vector3f origin, AnimationData animationData,
-			Vec3fAttribArray vertices, UIntAttribArray indices, AttribArray... attribs) {
+	public AnimatedLoadedMesh(String name, Material material, Vector3f origin, AnimationData animationData, Vec3fAttribArray vertices,
+			UIntAttribArray indices, AttribArray... attribs) {
 		super(name, material, origin, vertices, indices, attribs);
 	}
 
@@ -25,6 +27,13 @@ public class AnimatedLoadedMesh extends OffsetMesh implements AnimatedMesh {
 	@Override
 	public void setAnimation(AnimationData animationData) {
 		this.animationData = animationData;
+	}
+
+	@Override
+	public String toString() {
+		return "AnimatedLoadedMesh [animationData=" + animationData + ", name=" + name + ", vao=" + vao + ", vbo=" + vbo + ", material="
+				+ material + ", vertices=" + vertices + ", indices=" + indices + ", attribs=" + Arrays.toString(attribs) + ", vertexCount="
+				+ vertexCount + ", indicesCount=" + indicesCount + ", isValid()=" + isValid() + "]";
 	}
 
 }

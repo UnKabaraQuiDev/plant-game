@@ -32,6 +32,8 @@ import lu.kbra.plant_game.engine.mesh.AttributeLocation;
 import lu.kbra.plant_game.engine.mesh.MaterialMesh;
 import lu.kbra.plant_game.engine.mesh.TexturedMesh;
 import lu.kbra.plant_game.engine.render.shader.BlitShader;
+import lu.kbra.plant_game.engine.render.shader.DirectShader;
+import lu.kbra.plant_game.engine.render.shader.InstanceDirectShader;
 import lu.kbra.plant_game.engine.render.shader.InstanceTransferShader;
 import lu.kbra.plant_game.engine.render.shader.MaterialComputeShader;
 import lu.kbra.plant_game.engine.render.shader.OutlineShader;
@@ -49,6 +51,7 @@ import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.geom.instance.InstanceEmitter;
 import lu.kbra.standalone.gameengine.graph.composition.buffer.Framebuffer;
 import lu.kbra.standalone.gameengine.graph.composition.buffer.RenderBuffer;
+import lu.kbra.standalone.gameengine.graph.material.text.TextShader;
 import lu.kbra.standalone.gameengine.graph.shader.ComputeShader;
 import lu.kbra.standalone.gameengine.graph.shader.RenderShader;
 import lu.kbra.standalone.gameengine.graph.texture.SingleTexture;
@@ -67,7 +70,7 @@ import lu.kbra.standalone.gameengine.objs.entity.components.TextEmitterComponent
 import lu.kbra.standalone.gameengine.objs.entity.components.TransformComponent;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
 import lu.kbra.standalone.gameengine.scene.Scene;
-import lu.kbra.standalone.gameengine.scene.camera.Camera3D;
+import lu.kbra.standalone.gameengine.scene.camera.Camera;
 import lu.kbra.standalone.gameengine.utils.MathUtils;
 import lu.kbra.standalone.gameengine.utils.gl.consts.BufferType;
 import lu.kbra.standalone.gameengine.utils.gl.consts.DataType;
@@ -93,10 +96,8 @@ public class DeferredCompositor implements Cleanupable {
 
 	private static Mesh SCREEN = new LoadedMesh(PASS_SCREEN, null,
 			new Vec3fAttribArray("pos", 0, 1,
-					new Vector3f[] { new Vector3f(-1, 1, 0), new Vector3f(1, 1, 0), new Vector3f(1, -1, 0),
-							new Vector3f(-1, -1, 0) }),
-			new UIntAttribArray("ind", -1, 1, new int[] { 0, 1, 2, 0, 2, 3 }, BufferType.ELEMENT_ARRAY),
-			new Vec2fAttribArray("uv", 1, 1,
+					new Vector3f[] { new Vector3f(-1, 1, 0), new Vector3f(1, 1, 0), new Vector3f(1, -1, 0), new Vector3f(-1, -1, 0) }),
+			new UIntAttribArray("ind", -1, 1, new int[] { 0, 1, 2, 0, 2, 3 }, BufferType.ELEMENT_ARRAY), new Vec2fAttribArray("uv", 1, 1,
 					new Vector2f[] { new Vector2f(0, 1), new Vector2f(1, 1), new Vector2f(1, 0), new Vector2f(0, 0) }));
 
 	protected Thread ownerThread;
@@ -109,9 +110,13 @@ public class DeferredCompositor implements Cleanupable {
 	protected Map<Class<? extends Renderable>, RenderShader> worldSceneShaders;
 
 	// ui rendering
+	protected DirectShader directShader;
+	protected InstanceDirectShader instanceDirectShader;
+	protected TextShader textDirectShader;
 	protected Map<Class<? extends Renderable>, RenderShader> uiSceneShaders;
 
 	// material passes
+	protected Vector4f backgroundColor = new Vector4f(0, 0, 0, 1);
 	protected SingleTexture outputTxt;
 	protected MaterialComputeShader materialComputeShader;
 	protected TextureMaterialComputeShader textureMaterialComputeShader;
@@ -119,8 +124,7 @@ public class DeferredCompositor implements Cleanupable {
 
 	// rendering/states
 	protected float oldFov;
-	protected Vector2i oldResolution = new Vector2i(0), renderResolution = new Vector2i(),
-			outputResolution = new Vector2i();
+	protected Vector2i oldResolution = new Vector2i(0), renderResolution = new Vector2i(), outputResolution = new Vector2i();
 
 	// object ids
 	protected BooleanPointer awaitingObjectIdPtr = new BooleanPointer(false);
@@ -135,33 +139,40 @@ public class DeferredCompositor implements Cleanupable {
 		final CacheManager cache = engine.getCache();
 		this.ownerThread = ownerThread;
 
+		cache.addAbstractShader(transferShader = new TransferShader());
+		cache.addAbstractShader(instanceTransferShader = new InstanceTransferShader());
+
+		cache.addAbstractShader(materialComputeShader = new MaterialComputeShader());
+		cache.addAbstractShader(textureMaterialComputeShader = new TextureMaterialComputeShader());
+
 		cache.addAbstractShader(outlineShader = new OutlineShader());
 
 		cache.addAbstractShader(blitShader = new BlitShader());
 
-		cache.addAbstractShader(materialComputeShader = cache.hasAbstractShader(MaterialComputeShader.class.getName())
-				? (MaterialComputeShader) cache.getAbstractShader(MaterialComputeShader.class.getName())
-				: new MaterialComputeShader());
-
-		cache.addAbstractShader(transferShader = cache.hasAbstractShader(TransferShader.class.getName())
-				? (TransferShader) cache.getAbstractShader(TransferShader.class.getName())
-				: new TransferShader());
-
-		cache.addAbstractShader(
-				textureMaterialComputeShader = cache.hasAbstractShader(TextureMaterialComputeShader.class.getName())
-						? (TextureMaterialComputeShader) cache
-								.getAbstractShader(TextureMaterialComputeShader.class.getName())
-						: new TextureMaterialComputeShader());
+		cache.addAbstractShader(directShader = new DirectShader());
+		cache.addAbstractShader(instanceDirectShader = new InstanceDirectShader());
 
 		cache.addFramebuffer(worldFramebuffer = genFramebuffer(cache, engine.getWindow().getSize()));
 
-		System.err.println("FRAMEBUFFER: " + worldFramebuffer.getGlId());
+		worldSceneShaders = PCUtils
+				.hashMap(Mesh.class,
+						transferShader,
+						AnimatedMesh.class,
+						transferShader,
+						TextEmitter.class,
+						null,
+						InstanceEmitter.class,
+						instanceTransferShader);
 
-		worldSceneShaders = PCUtils.hashMap(Mesh.class, transferShader, AnimatedMesh.class, transferShader,
-				TextEmitter.class, null, InstanceEmitter.class, instanceTransferShader);
-
-		uiSceneShaders = PCUtils.hashMap(Mesh.class, transferShader, AnimatedMesh.class, transferShader,
-				TextEmitter.class, instanceTransferShader, InstanceEmitter.class, instanceTransferShader);
+		uiSceneShaders = PCUtils
+				.hashMap(Mesh.class,
+						directShader,
+						AnimatedMesh.class,
+						directShader,
+						TextEmitter.class,
+						textDirectShader,
+						InstanceEmitter.class,
+						instanceDirectShader);
 	}
 
 	public void render(GameEngine engine, WorldLevelScene worldScene, UIScene uiScene) {
@@ -175,19 +186,19 @@ public class DeferredCompositor implements Cleanupable {
 
 		if (needRegen) {
 			oldResolution.set(width, height);
-			final float divisor = (float) MathUtils.map(Math.toDegrees(worldScene.getCamera().getProjection().getFov()),
-					5, 65, 6, 1);
+			final float divisor = (float) MathUtils.map(Math.toDegrees(worldScene.getCamera().getProjection().getFov()), 5, 65, 6, 1);
 			// System.err.println("fov: " + worldScene.getCamera().getProjection().getFov()
 			// + "rad "
 			// + Math.toDegrees(worldScene.getCamera().getProjection().getFov()) + "deg = "
 			// + divisor);
+			// idk why this uses the option windowSize but ok
 			renderResolution.set(engine.getWindow().getOptions().windowSize).div(PCUtils.clamp(1, 100, divisor));
 			outputResolution.set(width, height);
 
 			resizeFramebuffer(worldFramebuffer, renderResolution);
 		}
 
-		renderWorldScene(cache, worldScene, renderResolution, needRegen);
+		// renderWorldScene(cache, worldScene, renderResolution, needRegen);
 
 		renderMaterials(cache, worldScene, renderResolution, needRegen);
 
@@ -195,13 +206,12 @@ public class DeferredCompositor implements Cleanupable {
 
 		blitToScreen(cache, outputResolution, needRegen);
 
-		// renderUi(cache, uiScene, outputResolution, needRegen);
+		renderUi(cache, uiScene, outputResolution, needRegen);
 
 		if (awaitingObjectIdPtr.getValue()) {
 			getObjectId(engine.getWindow());
 			awaitingObjectIdPtr.setValue(false);
-			GlobalLogger.log(Level.FINEST,
-					"Retrieved object id: " + objectId + " at " + engine.getWindow().getMousePosition());
+			GlobalLogger.log(Level.FINEST, "Retrieved object id: " + objectId + " at " + engine.getWindow().getMousePosition());
 		} else {
 			objectId.zero();
 		}
@@ -210,8 +220,14 @@ public class DeferredCompositor implements Cleanupable {
 	private void renderUi(CacheManager cache, UIScene uiScene, Vector2i outputResolution, boolean needRegen) {
 		final CacheManager uiCache = uiScene.getCache();
 
+		GL_W.glBindFramebuffer(GL_W.GL_FRAMEBUFFER, 0);
+		assert GL_W.checkError("BindFramebuffer(0)");
+
 		GL_W.glViewport(0, 0, outputResolution.x, outputResolution.y);
 		assert GL_W.checkError("Viewport(" + outputResolution + ")");
+
+		GL_W.glCullFace(GL_W.GL_NONE);
+		assert GL_W.checkError("CullFace(NONE)");
 
 		synchronized (uiScene.getEntitiesLock()) {
 			renderScene(uiScene, uiSceneShaders);
@@ -220,8 +236,7 @@ public class DeferredCompositor implements Cleanupable {
 
 	private void checkComponent(GLObject mesh, Component source, Entity entity) {
 		if (mesh == null) {
-			throw new NullPointerException(
-					"Mesh is null on: " + source.getClass().getSimpleName() + " in " + entity.getId());
+			throw new NullPointerException("Mesh is null on: " + source.getClass().getSimpleName() + " in " + entity.getId());
 		}
 		if (!mesh.isValid()) {
 			throw new IllegalStateException("Mesh: " + mesh + " in " + entity.getId() + " isn't valid.");
@@ -275,8 +290,7 @@ public class DeferredCompositor implements Cleanupable {
 		}
 
 		if (needRegen) {
-			GL_W.glBindImageTexture(0, outputTxt.getTid(), 0, false, 0, GL_W.GL_READ_WRITE,
-					outputTxt.getInternalFormat().getGlId());
+			GL_W.glBindImageTexture(0, outputTxt.getTid(), 0, false, 0, GL_W.GL_READ_WRITE, outputTxt.getInternalFormat().getGlId());
 			assert GL_W.checkError("BindImageTexture(0, " + outputTxt.getTid() + ", READ_WRITE)");
 
 			posTexture.bindUniform(computeShader.getUniformLocation("uPosTex"), 0);
@@ -305,14 +319,19 @@ public class DeferredCompositor implements Cleanupable {
 		assert GL_W.checkError("Disable(CULL_FACE)");
 		GL_W.glDisable(GL_W.GL_DEPTH_TEST);
 		assert GL_W.checkError("Disable(DEPTH_TEST)");
+
 		GL_W.glBindFramebuffer(GL_W.GL_FRAMEBUFFER, 0);
 		assert GL_W.checkError("BindFramebuffer(0)");
 		GL_W.glViewport(0, 0, resolution.x, resolution.y);
 		assert GL_W.checkError("Viewport(" + resolution + ")");
+		GL_W.glClearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z, backgroundColor.w);
+		assert GL_W.checkError("ClearColor(" + backgroundColor + ")");
 		GL_W.glClear(GL_W.GL_COLOR_BUFFER_BIT | GL_W.GL_DEPTH_BUFFER_BIT);
 		assert GL_W.checkError("Clear(COLOR | DEPTH)");
+
 		GL_W.glDrawElements(GL_W.GL_TRIANGLES, SCREEN.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
 		assert GL_W.checkError("DrawElements()");
+
 		GL_W.glEnable(GL_W.GL_DEPTH_TEST);
 		assert GL_W.checkError("Enable(DEPTH_TEST)");
 
@@ -321,8 +340,7 @@ public class DeferredCompositor implements Cleanupable {
 		blitShader.unbind();
 	}
 
-	private void renderMaterials(CacheManager cache, WorldLevelScene worldScene, Vector2i resolution,
-			boolean needRegen) {
+	private void renderMaterials(CacheManager cache, WorldLevelScene worldScene, Vector2i resolution, boolean needRegen) {
 		final CacheManager worldCache = worldScene.getCache();
 
 		if (outputTxt == null) {
@@ -341,8 +359,9 @@ public class DeferredCompositor implements Cleanupable {
 			outputTxt.resize();
 			outputTxt.unbind();
 		} else {
-			GL_W.glClearTexImage(outputTxt.getTid(), 0, outputTxt.getFormat().getGlId(),
-					outputTxt.getDataType().getGlId(), new float[] { 0, 0, 0, 0 });
+			GL_W
+					.glClearTexImage(outputTxt
+							.getTid(), 0, outputTxt.getFormat().getGlId(), outputTxt.getDataType().getGlId(), new float[] { 0, 0, 0, 0 });
 			assert GL_W.checkError("ClearTexImage(" + outputTxt.getTid() + ")");
 		}
 
@@ -373,8 +392,7 @@ public class DeferredCompositor implements Cleanupable {
 
 		setupMaterialInputs(textureMaterialComputeShader, worldScene, resolution, needRegen);
 		final int txt0UniformLoc = textureMaterialComputeShader.getUniformLocation(TextureMaterialComputeShader.TXT0);
-		final int currentMaterialIdLoc = textureMaterialComputeShader
-				.getUniformLocation(TextureMaterialComputeShader.CURRENT_MATERIAL_ID);
+		final int currentMaterialIdLoc = textureMaterialComputeShader.getUniformLocation(TextureMaterialComputeShader.CURRENT_MATERIAL_ID);
 
 		final Set<Integer> alreadyRendered = new HashSet<>();
 
@@ -447,8 +465,7 @@ public class DeferredCompositor implements Cleanupable {
 		textureMaterialComputeShader.unbind();
 	}
 
-	private void setupMaterialInputs(ComputeShader computeShader, WorldLevelScene worldScene, Vector2i resolution,
-			boolean needRegen) {
+	private void setupMaterialInputs(ComputeShader computeShader, WorldLevelScene worldScene, Vector2i resolution, boolean needRegen) {
 		posTexture.bind(0);
 		normalTexture.bind(1);
 		uvTexture.bind(2);
@@ -460,8 +477,7 @@ public class DeferredCompositor implements Cleanupable {
 		computeShader.setUniform(MaterialComputeShader.AMBIENT_LIGHT, worldScene.getAmbientLight());
 
 		if (needRegen) {
-			GL_W.glBindImageTexture(0, outputTxt.getTid(), 0, false, 0, GL_W.GL_WRITE_ONLY,
-					outputTxt.getInternalFormat().getGlId());
+			GL_W.glBindImageTexture(0, outputTxt.getTid(), 0, false, 0, GL_W.GL_WRITE_ONLY, outputTxt.getInternalFormat().getGlId());
 			assert GL_W.checkError("BindImageTexture(0," + outputTxt.getTid() + ",WRITE_ONLY)");
 
 			posTexture.bindUniform(computeShader.getUniformLocation("uPosTex"), 0);
@@ -475,8 +491,7 @@ public class DeferredCompositor implements Cleanupable {
 		}
 	}
 
-	private void renderWorldScene(CacheManager cache, WorldLevelScene worldScene, Vector2i resolution,
-			boolean needRegen) {
+	private void renderWorldScene(CacheManager cache, WorldLevelScene worldScene, Vector2i resolution, boolean needRegen) {
 		worldFramebuffer.bind();
 
 		GL_W.glViewport(0, 0, resolution.x, resolution.y);
@@ -496,14 +511,6 @@ public class DeferredCompositor implements Cleanupable {
 
 		transferShader.bind();
 
-		final Camera3D camera = worldScene.getCamera();
-		camera.getProjection().update(outputResolution);
-		final Matrix4f projectionMatrix = camera.getProjection().getProjectionMatrix();
-		final Matrix4f viewMatrix = camera.getViewMatrix();
-
-		transferShader.setUniform(RenderShader.PROJECTION_MATRIX, projectionMatrix);
-		transferShader.setUniform(RenderShader.VIEW_MATRIX, viewMatrix);
-
 		synchronized (worldScene.getEntitiesLock()) {
 			renderScene(worldScene, worldSceneShaders);
 		}
@@ -512,31 +519,35 @@ public class DeferredCompositor implements Cleanupable {
 		worldFramebuffer.unbind();
 	}
 
-	private void renderScene(Scene worldScene, Map<Class<? extends Renderable>, RenderShader> shaders) {
+	private void renderScene(Scene scene, Map<Class<? extends Renderable>, RenderShader> shaders) {
 		final RenderShader meshShader = shaders.get(Mesh.class);
 		final RenderShader animatedMeshShader = shaders.get(AnimatedMesh.class);
 		final RenderShader textEmitterShader = shaders.get(TextEmitter.class);
 		final RenderShader instanceEmitterShader = shaders.get(InstanceEmitter.class);
 
-		for (Entity entity : worldScene) {
+		setupUniforms(shaders, scene);
+
+		for (Entity entity : scene) {
 
 			if (!entity.isActive()) {
 				continue;
 			}
 
-			if (entity.hasComponentMatching(RenderConditionComponent.class)
-					&& entity.getComponentsMatching(RenderConditionComponent.class).parallelStream()
-							.allMatch(RenderConditionComponent::get)) {
+			if (entity.hasComponentMatching(RenderConditionComponent.class) && entity
+					.getComponentsMatching(RenderConditionComponent.class)
+					.parallelStream()
+					.allMatch(RenderConditionComponent::get)) {
 				continue;
 			}
+
+			System.err.println("rendering: " + entity);
 
 			// set as the object's transform in the beginning
 			Matrix4f transformationMatrix;
 			if (entity instanceof GameObject go) {
 				transformationMatrix = go.getTransform().getMatrix();
 			} else if (entity.hasComponentMatching(TransformComponent.class)) {
-				final TransformComponent transform = (TransformComponent) entity
-						.getComponentMatching(TransformComponent.class);
+				final TransformComponent transform = (TransformComponent) entity.getComponentMatching(TransformComponent.class);
 				if (transform != null && transform.getTransform() != null) {
 					transformationMatrix = transform.getTransform().getMatrix();
 				} else {
@@ -556,11 +567,9 @@ public class DeferredCompositor implements Cleanupable {
 			}
 
 			if (animatedMeshShader != null && entity.hasComponentMatching(AnimatedMeshComponent.class)) {
-				final List<AnimatedMeshComponent> animatedMeshComponents = entity
-						.getComponentsMatching(AnimatedMeshComponent.class);
+				final List<AnimatedMeshComponent> animatedMeshComponents = entity.getComponentsMatching(AnimatedMeshComponent.class);
 
-				final Matrix4f animatedTransformationMatrix = entity instanceof AnimatedTransformOwner ago
-						? ago.getAnimatedTransform()
+				final Matrix4f animatedTransformationMatrix = entity instanceof AnimatedTransformOwner ago ? ago.getAnimatedTransform()
 						: transformationMatrix;
 
 				for (AnimatedMeshComponent animatedMeshComponent : animatedMeshComponents) {
@@ -570,13 +579,11 @@ public class DeferredCompositor implements Cleanupable {
 			}
 
 			if (textEmitterShader != null && entity.hasComponentMatching(TextEmitterComponent.class)) {
-				final List<TextEmitterComponent> textEmitterComponents = entity
-						.getComponentsMatching(TextEmitterComponent.class);
+				final List<TextEmitterComponent> textEmitterComponents = entity.getComponentsMatching(TextEmitterComponent.class);
 
 				for (TextEmitterComponent textEmitterComponent : textEmitterComponents) {
 					final TextEmitter textEmitter = textEmitterComponent.getTextEmitter();
-					renderTextEmitter(textEmitter, textEmitterComponent, entity, transformationMatrix,
-							textEmitterShader);
+					renderTextEmitter(textEmitter, textEmitterComponent, entity, transformationMatrix, textEmitterShader);
 				}
 			}
 
@@ -586,15 +593,33 @@ public class DeferredCompositor implements Cleanupable {
 
 				for (InstanceEmitterComponent instanceEmitterComponent : instanceEmitterComponents) {
 					final InstanceEmitter instanceEmitter = instanceEmitterComponent.getInstanceEmitter();
-					renderInstanceEmitter(instanceEmitter, instanceEmitterComponent, entity, transformationMatrix,
-							instanceEmitterShader);
+					renderInstanceEmitter(instanceEmitter, instanceEmitterComponent, entity, transformationMatrix, instanceEmitterShader);
 				}
 			}
 		}
 	}
 
-	private void renderInstanceEmitter(InstanceEmitter obj, InstanceEmitterComponent component, Entity entity,
-			Matrix4f transformationMatrix, RenderShader shader) {
+	private void setupUniforms(Map<Class<? extends Renderable>, RenderShader> shaders, Scene scene) {
+		final Camera cam = scene.getCamera();
+		cam.getProjection().update(outputResolution);
+		final Matrix4f viewMatrix = cam.getViewMatrix(), projectionMatrix = cam.getProjection().getProjectionMatrix();
+
+		for (RenderShader shader : shaders.values()) {
+			if (shader == null) {
+				continue;
+			}
+
+			shader.setUniform(RenderShader.VIEW_MATRIX, viewMatrix);
+			shader.setUniform(RenderShader.PROJECTION_MATRIX, projectionMatrix);
+		}
+	}
+
+	private void renderInstanceEmitter(
+			InstanceEmitter obj,
+			InstanceEmitterComponent component,
+			Entity entity,
+			Matrix4f transformationMatrix,
+			RenderShader shader) {
 		checkComponent(obj, component, entity);
 		final Mesh mesh = obj.getParticleMesh();
 		obj.bind();
@@ -604,8 +629,12 @@ public class DeferredCompositor implements Cleanupable {
 			shader.setUniform(RenderShader.TRANSFORMATION_MATRIX, transformationMatrix);
 		}
 
-		GL_W.glDrawElementsInstanced(shader.getBeginMode().getGlId(), mesh.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0,
-				obj.getParticleCount());
+		GL_W
+				.glDrawElementsInstanced(shader.getBeginMode().getGlId(),
+						mesh.getIndicesCount(),
+						GL_W.GL_UNSIGNED_INT,
+						0,
+						obj.getParticleCount());
 		assert GL_W.checkError("DrawElementsInstanced(" + mesh.getId() + ")");
 
 		shader.unbind();
@@ -613,7 +642,11 @@ public class DeferredCompositor implements Cleanupable {
 		mesh.unbind();
 	}
 
-	private void renderTextEmitter(TextEmitter obj, Component component, Entity entity, Matrix4f transformationMatrix,
+	private void renderTextEmitter(
+			TextEmitter obj,
+			Component component,
+			Entity entity,
+			Matrix4f transformationMatrix,
 			RenderShader shader) {
 		checkComponent(obj, component, entity);
 		final InstanceEmitter instances = obj.getInstances();
@@ -630,8 +663,12 @@ public class DeferredCompositor implements Cleanupable {
 		GL_W.glBlendFunc(GL_W.GL_SRC_ALPHA, GL_W.GL_ONE_MINUS_SRC_ALPHA);
 		assert GL_W.checkError("BlendFunc(SRC_ALPHA, ONE_MINUS_SRC_ALPHA)");
 
-		GL_W.glDrawElementsInstanced(shader.getBeginMode().getGlId(), mesh.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0,
-				instances.getParticleCount());
+		GL_W
+				.glDrawElementsInstanced(shader.getBeginMode().getGlId(),
+						mesh.getIndicesCount(),
+						GL_W.GL_UNSIGNED_INT,
+						0,
+						instances.getParticleCount());
 		assert GL_W.checkError("DrawElementsInstanced(" + mesh.getId() + ")");
 
 		GL_W.glDisable(GL_W.GL_BLEND);
@@ -640,14 +677,21 @@ public class DeferredCompositor implements Cleanupable {
 		mesh.unbind();
 	}
 
-	private void renderMesh(Mesh mesh, Component component, Entity entity, Matrix4f transformationMatrix,
-			RenderShader shader) {
+	private void renderMesh(Mesh mesh, Component component, Entity entity, Matrix4f transformationMatrix, RenderShader shader) {
 		checkComponent(mesh, component, entity);
 		mesh.bind();
 		shader.bind();
 
 		if (shader.createUniform(RenderShader.TRANSFORMATION_MATRIX)) {
 			shader.setUniform(RenderShader.TRANSFORMATION_MATRIX, transformationMatrix);
+		}
+
+		System.err.println(mesh);
+		System.err.println(shader);
+
+		if (mesh instanceof TexturedMesh txtMesh && shader.createUniform(DirectShader.TXT0)) {
+			System.err.println("textured & " + shader);
+			txtMesh.getTexture().bindUniform(shader.getUniformLocation(DirectShader.TXT0), 0);
 		}
 
 		if (entity instanceof GameObject go && go.isEntityMaterialId()) {
@@ -683,7 +727,10 @@ public class DeferredCompositor implements Cleanupable {
 			assert GL_W.checkError("VertexAttrib3f(" + GameObject.MESH_ATTRIB_OBJECT_ID_ID + "," + objId + ")");
 		}
 
-		GL_W.glDrawElements(transferShader.getBeginMode().getGlId(), mesh.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
+		GL_W.glDisable(GL_W.GL_CULL_FACE);
+
+		System.err.println("drawing: " + mesh);
+		GL_W.glDrawElements(shader.getBeginMode().getGlId(), mesh.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
 		assert GL_W.checkError("DrawElements(" + mesh.getId() + ")");
 
 		mesh.unbind();
@@ -817,12 +864,10 @@ public class DeferredCompositor implements Cleanupable {
 
 		worldFramebuffer.bind(GL_W.GL_READ_FRAMEBUFFER);
 		GL_W.glReadBuffer(FrameBufferAttachment.COLOR_FIRST.getGlId() + WORLD_FRAMEBUFFER_IDS_IDX);
-		assert GL_W.checkError(
-				"ReadBuffer(" + (FrameBufferAttachment.COLOR_FIRST.getGlId() + WORLD_FRAMEBUFFER_IDS_IDX) + ")");
+		assert GL_W.checkError("ReadBuffer(" + (FrameBufferAttachment.COLOR_FIRST.getGlId() + WORLD_FRAMEBUFFER_IDS_IDX) + ")");
 		final IntBuffer pixel = BufferUtils.createIntBuffer(4);
 		GL11.glReadPixels(x, y, 1, 1, idsTexture.getFormat().getGlId(), idsTexture.getDataType().getGlId(), pixel);
-		assert GL_W.checkError(
-				"ReadPixels(" + mousePosition + ", " + idsTexture.getFormat() + ", " + idsTexture.getDataType() + ")");
+		assert GL_W.checkError("ReadPixels(" + mousePosition + ", " + idsTexture.getFormat() + ", " + idsTexture.getDataType() + ")");
 		worldFramebuffer.unbind(GL_W.GL_READ_FRAMEBUFFER);
 
 		int r = pixel.get(0);
@@ -889,6 +934,14 @@ public class DeferredCompositor implements Cleanupable {
 		} else {
 			return false;
 		}
+	}
+
+	public Vector4f getBackgroundColor() {
+		return backgroundColor;
+	}
+
+	public void setBackgroundColor(Vector4f backgroundColor) {
+		this.backgroundColor = backgroundColor;
 	}
 
 }

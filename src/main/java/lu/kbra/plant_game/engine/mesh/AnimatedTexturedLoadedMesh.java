@@ -1,5 +1,7 @@
 package lu.kbra.plant_game.engine.mesh;
 
+import java.util.Arrays;
+
 import org.joml.Vector3f;
 
 import lu.kbra.plant_game.engine.entity.AnimatedMeshLoader.AnimationData;
@@ -39,6 +41,14 @@ public class AnimatedTexturedLoadedMesh extends OffsetMesh implements TexturedMe
 	@Override
 	public void setTexture(SingleTexture texture) {
 		this.texture = texture;
+	}
+
+	@Override
+	public String toString() {
+		return "AnimatedTexturedLoadedMesh [texture=" + texture + ", animation=" + animation + ", name=" + name + ", vao=" + vao + ", vbo="
+				+ vbo + ", material=" + material + ", vertices=" + vertices + ", indices=" + indices + ", attribs="
+				+ Arrays.toString(attribs) + ", vertexCount=" + vertexCount + ", indicesCount=" + indicesCount + ", isValid()=" + isValid()
+				+ "]";
 	}
 
 }

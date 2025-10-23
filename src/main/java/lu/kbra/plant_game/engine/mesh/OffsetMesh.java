@@ -1,5 +1,7 @@
 package lu.kbra.plant_game.engine.mesh;
 
+import java.util.Arrays;
+
 import org.joml.Vector3f;
 
 import lu.kbra.standalone.gameengine.cache.attrib.AttribArray;
@@ -24,6 +26,13 @@ public class OffsetMesh extends LoadedMesh {
 
 	public void setOrigin(Vector3f origin) {
 		this.origin = origin;
+	}
+
+	@Override
+	public String toString() {
+		return "OffsetMesh [origin=" + origin + ", name=" + name + ", vao=" + vao + ", vbo=" + vbo + ", material=" + material
+				+ ", vertices=" + vertices + ", indices=" + indices + ", attribs=" + Arrays.toString(attribs) + ", vertexCount="
+				+ vertexCount + ", indicesCount=" + indicesCount + ", isValid()=" + isValid() + "]";
 	}
 
 }

@@ -21,7 +21,6 @@ public class WaterTowerObject extends GameObject implements PlaceableObject, Wat
 
 	public WaterTowerObject(String str, Mesh mesh, Transform3D transform) {
 		super(str, mesh, transform);
-		System.err.println("creating: " + str + " with mesh " + mesh);
 	}
 
 	public WaterTowerObject(String str, Mesh mesh) {

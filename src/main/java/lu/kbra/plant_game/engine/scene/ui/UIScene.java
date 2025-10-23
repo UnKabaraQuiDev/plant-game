@@ -1,10 +1,10 @@
 package lu.kbra.plant_game.engine.scene.ui;
 
 import lu.kbra.standalone.gameengine.cache.CacheManager;
-import lu.kbra.standalone.gameengine.scene.Scene2D;
+import lu.kbra.standalone.gameengine.scene.Scene3D;
 import lu.kbra.standalone.gameengine.scene.camera.Camera;
 
-public class UIScene extends Scene2D {
+public class UIScene extends Scene3D {
 
 	private CacheManager uiCache;
 

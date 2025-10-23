@@ -166,6 +166,7 @@ public class TestGameLogic extends GameLogic {
 					final TerrainObject terrainEntity = new TerrainObject("terrain", mesh);
 					terrainEntity.getTransform().getTranslation().set(-mesh.getWidth() / 2, 0, -mesh.getLength() / 2);
 					terrainEntity.getTransform().updateMatrix();
+					terrainEntity.setActive(false);
 					worldScene.setTerrain(terrainEntity);
 				});
 				GlobalLogger.info("Entity created in " + (time / 1e6) + " ms");
@@ -183,11 +184,12 @@ public class TestGameLogic extends GameLogic {
 					return meshTime.getKey();
 				})
 						.then(WORKERS,
-								(ExceptionFunction<Mesh, GameObject>) (mesh) -> worldScene
+								(ExceptionConsumer<Mesh>) (mesh) -> worldScene
 										.setWaterLevel(new GameObject("water", mesh,
 												new Transform3D(new Vector3f(0, 0.9f, 0),
 														new Quaternionf().rotateX((float) Math.toRadians(-90))),
-												new Vector3i(2, 0, 0), TerrainMaterialType.WATER.getId())))
+												new Vector3i(2, 0, 0), TerrainMaterialType.WATER.getId()))
+										.setActive(false))
 						.push();
 
 				GameObjectFactory
@@ -237,8 +239,11 @@ public class TestGameLogic extends GameLogic {
 						.push();
 
 				UIObjectFactory
-						.create(IconUIObject.class, uiScene, new Transform3D())
-						.then(WORKERS, (ExceptionConsumer<IconUIObject>) System.err::println)
+						.create(IconUIObject.class, uiScene, new Transform3D(new Vector3f(), new Quaternionf(), new Vector3f(5)))
+						.then(WORKERS, (ExceptionConsumer<IconUIObject>) e -> {
+							System.err.println(e);
+							System.out.println(e.getMesh());
+						})
 						.push();
 
 			}).push();
@@ -324,6 +329,9 @@ public class TestGameLogic extends GameLogic {
 	@Override
 	public void render(float dTime) {
 		worldScene.getCamera().getProjection().update(window.getWidth(), window.getHeight());
+		uiScene.getCamera().getProjection().update(window.getWidth(), window.getHeight());
+		uiScene.setCamera(worldScene.getCamera());
+		compositor.getBackgroundColor().set(1, 0, 0, 1);
 		compositor.render(engine, worldScene, uiScene);
 	}
 
