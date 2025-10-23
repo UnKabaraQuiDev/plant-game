@@ -13,7 +13,7 @@ import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 public class TerrainObject extends GameObject {
 
 	public TerrainObject(String str, TerrainMesh mesh) {
-		super(str, mesh, new Transform3D(), false);
+		super(str, mesh, new Transform3D());
 		setEntityMaterialId(false);
 		setObjectIdLocation(AttributeLocation.MESH);
 	}

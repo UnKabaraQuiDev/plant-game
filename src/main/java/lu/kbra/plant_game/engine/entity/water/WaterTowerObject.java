@@ -15,12 +15,8 @@ public class WaterTowerObject extends GameObject implements PlaceableObject, Wat
 
 	protected long waterLevel;
 
-	public WaterTowerObject(String str, Mesh mesh, Transform3D transform, boolean transparent, Vector3i objectId) {
-		super(str, mesh, transform, transparent, objectId);
-	}
-
-	public WaterTowerObject(String str, Mesh mesh, Transform3D transform, boolean transparent) {
-		super(str, mesh, transform, transparent);
+	public WaterTowerObject(String str, Mesh mesh, Transform3D transform, Vector3i objectId) {
+		super(str, mesh, transform, objectId);
 	}
 
 	public WaterTowerObject(String str, Mesh mesh, Transform3D transform) {

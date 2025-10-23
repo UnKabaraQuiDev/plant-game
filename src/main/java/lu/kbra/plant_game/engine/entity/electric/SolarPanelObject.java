@@ -15,7 +15,7 @@ public class SolarPanelObject extends GameObject implements PlaceableObject, Ele
 	protected long waterLevel;
 
 	public SolarPanelObject(String str, Mesh mesh, Transform3D transform, Vector3i objectId) {
-		super(str, mesh, transform, false, objectId);
+		super(str, mesh, transform, objectId);
 	}
 
 	public SolarPanelObject(String str, Mesh mesh, Transform3D transform) {

@@ -42,7 +42,7 @@ public class AnimatedUIObject extends UIObject implements AnimatedTransformOwner
 
 	@Override
 	public AnimatedMesh getAnimatedMesh() {
-		return animatedMeshComponent == null ? null : animatedMeshComponent.getMesh();
+		return animatedMeshComponent == null ? null : animatedMeshComponent.getAnimatedMesh();
 	}
 
 	public AnimatedMeshComponent getAnimatedMeshComponent() {

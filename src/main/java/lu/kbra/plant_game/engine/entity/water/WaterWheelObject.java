@@ -1,5 +1,6 @@
 package lu.kbra.plant_game.engine.entity.water;
 
+import org.joml.Matrix4f;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
 
@@ -15,19 +16,14 @@ public class WaterWheelObject extends AnimatedGameObject implements PlaceableObj
 
 	protected long waterLevel;
 
-	public WaterWheelObject(String str, Mesh mesh, AnimatedMesh animatedMesh, Transform3D transform,
-			boolean transparent, Vector3i objectId, short materialId) {
-		super(str, mesh, animatedMesh, transform, transparent, objectId, materialId);
+	public WaterWheelObject(String str, Mesh mesh, AnimatedMesh animatedMesh, Transform3D transform, Vector3i objectId,
+			short materialId) {
+		super(str, mesh, animatedMesh, transform, objectId, materialId);
 	}
 
 	public WaterWheelObject(String str, Mesh mesh, AnimatedMesh animatedMesh, Transform3D transform,
-			boolean transparent, Vector3i objectId) {
-		super(str, mesh, animatedMesh, transform, transparent, objectId);
-	}
-
-	public WaterWheelObject(String str, Mesh mesh, AnimatedMesh animatedMesh, Transform3D transform,
-			boolean transparent) {
-		super(str, mesh, animatedMesh, transform, transparent);
+			Vector3i objectId) {
+		super(str, mesh, animatedMesh, transform, objectId);
 	}
 
 	public WaterWheelObject(String str, Mesh mesh, AnimatedMesh animatedMesh, Transform3D transform) {
@@ -39,9 +35,10 @@ public class WaterWheelObject extends AnimatedGameObject implements PlaceableObj
 	}
 
 	@Override
-	public void computeAnimatedTransform(float t) {
+	public Matrix4f computeAnimatedTransform(float t) {
 		getTransform().getMatrix().mul(animatedTransform.identity().rotateZ((float) Math.toRadians(t * 25)),
 				animatedTransform);
+		return animatedTransform;
 	}
 
 	@Override

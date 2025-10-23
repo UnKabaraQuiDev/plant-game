@@ -1,23 +1,22 @@
 package lu.kbra.plant_game.engine.entity.water;
 
 import lu.kbra.plant_game.engine.mesh.AnimatedMesh;
-import lu.kbra.standalone.gameengine.geom.Mesh;
-import lu.kbra.standalone.gameengine.objs.entity.components.MeshComponent;
+import lu.kbra.standalone.gameengine.objs.entity.Component;
 
-public class AnimatedMeshComponent extends MeshComponent {
+public class AnimatedMeshComponent extends Component {
 
-	public AnimatedMeshComponent(AnimatedMesh mesh) {
-		super((Mesh) mesh);
+	protected AnimatedMesh AnimatedMesh;
+
+	public AnimatedMeshComponent(AnimatedMesh AnimatedMesh) {
+		this.AnimatedMesh = AnimatedMesh;
 	}
 
-	@Override
-	public AnimatedMesh getMesh() {
-		return (AnimatedMesh) super.getMesh();
+	public AnimatedMesh getAnimatedMesh() {
+		return AnimatedMesh;
 	}
 
-	@Override
-	public void setMesh(Mesh mesh) {
-		super.setMesh((AnimatedMesh) mesh);
+	public void setAnimatedMesh(AnimatedMesh AnimatedMesh) {
+		this.AnimatedMesh = AnimatedMesh;
 	}
 
 }

@@ -13,12 +13,12 @@ import lu.kbra.plant_game.engine.entity.StaticMeshLoader;
 import lu.kbra.plant_game.engine.entity.impl.AnimatedUIObject;
 import lu.kbra.plant_game.engine.entity.impl.UIObject;
 import lu.kbra.plant_game.engine.mesh.AnimatedMesh;
+import lu.kbra.plant_game.engine.scene.ui.UIScene;
 import lu.kbra.plant_game.engine.util.DataPath;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
-import lu.kbra.standalone.gameengine.scene.Scene3D;
 
 public class UIObjectFactory {
 
@@ -81,7 +81,7 @@ public class UIObjectFactory {
 		}
 	}
 
-	public <T extends UIObject> TaskFuture<?, T> create_(Class<T> clazz, Scene3D scene, Object... args) {
+	public <T extends UIObject> TaskFuture<?, T> create_(Class<T> clazz, UIScene scene, Object... args) {
 		return create_(clazz, args).then(loader, (ExceptionFunction<T, T>) scene::addEntity);
 	}
 
@@ -89,7 +89,7 @@ public class UIObjectFactory {
 		return INSTANCE.create_(clazz, args);
 	}
 
-	public static <T extends UIObject> TaskFuture<?, T> create(Class<T> clazz, Scene3D scene, Object... args) {
+	public static <T extends UIObject> TaskFuture<?, T> create(Class<T> clazz, UIScene scene, Object... args) {
 		return INSTANCE.create_(clazz, scene, args);
 	}
 

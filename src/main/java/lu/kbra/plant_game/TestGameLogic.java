@@ -67,7 +67,7 @@ public class TestGameLogic extends GameLogic {
 	public void init(GameEngine e) {
 		inputHandler = new InputHandler(window);
 
-		compositor = new DeferredCompositor(e.getRenderThread());
+		compositor = new DeferredCompositor(engine, e.getRenderThread());
 
 		worldScene = new WorldLevelScene("world", cache);
 		worldScene.getCamera().setPosition(new Vector3f(-20, 25, 20).mul(1.5f));

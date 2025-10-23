@@ -30,7 +30,8 @@ public class GameObject extends Entity implements Transform3DOwner, MeshOwner {
 	}
 
 	public GameObject(String str, Mesh mesh, Transform3D transform) {
-		this(str, mesh, transform, new Vector3i((int) System.nanoTime(), (int) System.nanoTime() % 20056, (int) System.nanoTime() % 255));
+		this(str, mesh, transform,
+				new Vector3i((int) System.nanoTime(), (int) System.nanoTime() % 20056, (int) System.nanoTime() % 255));
 	}
 
 	public GameObject(String str, Mesh mesh, Transform3D transform, Vector3i objectId) {
@@ -102,9 +103,9 @@ public class GameObject extends Entity implements Transform3DOwner, MeshOwner {
 
 	@Override
 	public String toString() {
-		return "GameObject [materialId=" + materialId + ", entityMaterialId=" + entityMaterialId + ", objectId=" + objectId
-				+ ", objectIdLocation=" + objectIdLocation + ", meshComponent=" + meshComponent + ", transformComponent="
-				+ transformComponent + ", getTransform()=" + getTransform() + ", isActive()=" + isActive() + ", getId()=" + getId() + "]";
+		return "GameObject [materialId=" + materialId + ", entityMaterialId=" + entityMaterialId + ", objectId="
+				+ objectId + ", objectIdLocation=" + objectIdLocation + ", getMesh()=" + getMesh() + ", getTransform()="
+				+ getTransform() + ", getComponents()=" + getComponents().size() + ", isActive()=" + isActive() + "]";
 	}
 
 }
