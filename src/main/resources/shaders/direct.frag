@@ -11,5 +11,5 @@ out vec4 fragColor;
 uniform sampler2D txt0;
 
 void main() {
-    fragColor = vec4(1, 0, 0, 1);
+    fragColor = texture(txt0, bet_UV);
 }

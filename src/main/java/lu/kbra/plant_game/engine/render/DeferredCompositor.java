@@ -152,6 +152,15 @@ public class DeferredCompositor implements Cleanupable {
 		cache.addAbstractShader(directShader = new DirectShader());
 		cache.addAbstractShader(instanceDirectShader = new InstanceDirectShader());
 
+		outputTxt = new SingleTexture(WORLD_FRAMEBUFFER_NAME + ".output", engine.getWindow().getSize());
+		outputTxt.setDataType(DataType.HALF_FLOAT);
+		outputTxt.setFormat(TexelFormat.RGBA);
+		outputTxt.setInternalFormat(TexelInternalFormat.RGBA16F);
+		outputTxt.setFilters(TextureFilter.NEAREST);
+		outputTxt.setGenerateMipmaps(false);
+		outputTxt.setup();
+		cache.addTexture(outputTxt);
+
 		cache.addFramebuffer(worldFramebuffer = genFramebuffer(cache, engine.getWindow().getSize()));
 
 		worldSceneShaders = PCUtils
@@ -225,9 +234,6 @@ public class DeferredCompositor implements Cleanupable {
 
 		GL_W.glViewport(0, 0, outputResolution.x, outputResolution.y);
 		assert GL_W.checkError("Viewport(" + outputResolution + ")");
-
-		GL_W.glCullFace(GL_W.GL_NONE);
-		assert GL_W.checkError("CullFace(NONE)");
 
 		synchronized (uiScene.getEntitiesLock()) {
 			renderScene(uiScene, uiSceneShaders);
@@ -305,13 +311,12 @@ public class DeferredCompositor implements Cleanupable {
 	}
 
 	private void blitToScreen(CacheManager cache, Vector2i resolution, boolean needRegen) {
-		outputTxt.bind(0);
 		blitShader.bind();
 		if (needRegen) {
-			blitShader.setUniform(BlitShader.TXT0, 0);
 			blitShader.setUniform(ComputeShader.INPUT_SIZE, renderResolution);
 			blitShader.setUniform(ComputeShader.OUTPUT_SIZE, resolution);
 		}
+		outputTxt.bindUniform(blitShader.getUniformLocation(BlitShader.TXT0), 0);
 
 		SCREEN.bind();
 
@@ -329,7 +334,7 @@ public class DeferredCompositor implements Cleanupable {
 		GL_W.glClear(GL_W.GL_COLOR_BUFFER_BIT | GL_W.GL_DEPTH_BUFFER_BIT);
 		assert GL_W.checkError("Clear(COLOR | DEPTH)");
 
-		GL_W.glDrawElements(GL_W.GL_TRIANGLES, SCREEN.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
+		GL_W.glDrawElements(blitShader.getBeginMode().getGlId(), SCREEN.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
 		assert GL_W.checkError("DrawElements()");
 
 		GL_W.glEnable(GL_W.GL_DEPTH_TEST);
@@ -343,17 +348,7 @@ public class DeferredCompositor implements Cleanupable {
 	private void renderMaterials(CacheManager cache, WorldLevelScene worldScene, Vector2i resolution, boolean needRegen) {
 		final CacheManager worldCache = worldScene.getCache();
 
-		if (outputTxt == null) {
-			outputTxt = new SingleTexture(WORLD_FRAMEBUFFER_NAME + ".output", resolution);
-			outputTxt.setDataType(DataType.UBYTE);
-			outputTxt.setFormat(TexelFormat.RGBA);
-			outputTxt.setInternalFormat(TexelInternalFormat.RGBA8);
-			outputTxt.setFilters(TextureFilter.NEAREST);
-			outputTxt.setGenerateMipmaps(false);
-			outputTxt.setup();
-			cache.addTexture(outputTxt);
-			needRegen = true;
-		} else if (needRegen) {
+		if (needRegen) {
 			outputTxt.setSize(resolution);
 			outputTxt.bind();
 			outputTxt.resize();
@@ -542,8 +537,7 @@ public class DeferredCompositor implements Cleanupable {
 
 			System.err.println("rendering: " + entity);
 
-			// set as the object's transform in the beginning
-			Matrix4f transformationMatrix;
+			final Matrix4f transformationMatrix;
 			if (entity instanceof GameObject go) {
 				transformationMatrix = go.getTransform().getMatrix();
 			} else if (entity.hasComponentMatching(TransformComponent.class)) {
@@ -609,9 +603,14 @@ public class DeferredCompositor implements Cleanupable {
 				continue;
 			}
 
+			shader.bind();
+
 			shader.setUniform(RenderShader.VIEW_MATRIX, viewMatrix);
 			shader.setUniform(RenderShader.PROJECTION_MATRIX, projectionMatrix);
 		}
+
+		GL_W.glUseProgram(0);
+		assert GL_W.checkError("UseProgram(0)");
 	}
 
 	private void renderInstanceEmitter(
@@ -686,11 +685,7 @@ public class DeferredCompositor implements Cleanupable {
 			shader.setUniform(RenderShader.TRANSFORMATION_MATRIX, transformationMatrix);
 		}
 
-		System.err.println(mesh);
-		System.err.println(shader);
-
 		if (mesh instanceof TexturedMesh txtMesh && shader.createUniform(DirectShader.TXT0)) {
-			System.err.println("textured & " + shader);
 			txtMesh.getTexture().bindUniform(shader.getUniformLocation(DirectShader.TXT0), 0);
 		}
 
@@ -727,9 +722,6 @@ public class DeferredCompositor implements Cleanupable {
 			assert GL_W.checkError("VertexAttrib3f(" + GameObject.MESH_ATTRIB_OBJECT_ID_ID + "," + objId + ")");
 		}
 
-		GL_W.glDisable(GL_W.GL_CULL_FACE);
-
-		System.err.println("drawing: " + mesh);
 		GL_W.glDrawElements(shader.getBeginMode().getGlId(), mesh.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
 		assert GL_W.checkError("DrawElements(" + mesh.getId() + ")");
 

@@ -241,6 +241,7 @@ public class TestGameLogic extends GameLogic {
 				UIObjectFactory
 						.create(IconUIObject.class, uiScene, new Transform3D(new Vector3f(), new Quaternionf(), new Vector3f(5)))
 						.then(WORKERS, (ExceptionConsumer<IconUIObject>) e -> {
+							worldScene.addEntity(e);
 							System.err.println(e);
 							System.out.println(e.getMesh());
 						})
@@ -329,9 +330,9 @@ public class TestGameLogic extends GameLogic {
 	@Override
 	public void render(float dTime) {
 		worldScene.getCamera().getProjection().update(window.getWidth(), window.getHeight());
-		uiScene.getCamera().getProjection().update(window.getWidth(), window.getHeight());
+		// uiScene.getCamera().getProjection().update(window.getWidth(), window.getHeight());
 		uiScene.setCamera(worldScene.getCamera());
-		compositor.getBackgroundColor().set(1, 0, 0, 1);
+		compositor.getBackgroundColor().set(1, 1, 0, 1);
 		compositor.render(engine, worldScene, uiScene);
 	}
 
