@@ -68,6 +68,7 @@ public class TestGameLogic extends GameLogic {
 		inputHandler = new InputHandler(window);
 
 		compositor = new DeferredCompositor(engine, e.getRenderThread());
+		compositor.getBackgroundColor().set(1, 1, 0, 1);
 
 		worldScene = new WorldLevelScene("world", cache);
 		worldScene.getCamera().setPosition(new Vector3f(-20, 25, 20).mul(1.5f));
@@ -76,6 +77,14 @@ public class TestGameLogic extends GameLogic {
 		worldScene.getLightDirection().set(new Vector3f(0.5f, 0.5f, 0.5f).normalize());
 
 		uiScene = new UIScene("ui", cache);
+		uiScene.getCamera().getPosition().set(0, 1, 0);
+		uiScene.getCamera().lookAt(uiScene.getCamera().getPosition(), GameEngine.ZERO);
+		uiScene.getCamera().getProjection().setSize(1);
+		uiScene.getCamera().getProjection().setNearPlane(-1);
+		uiScene.getCamera().getProjection().setFarPlane(1);
+		uiScene.getCamera().getProjection().setPerspective(false);
+		uiScene.getCamera().getProjection().update();
+		uiScene.getCamera().updateMatrix();
 
 		UIObjectFactory.INSTANCE = new UIObjectFactory(uiScene.getCache(), WORKERS, RENDER_DISPATCHER);
 
@@ -241,7 +250,6 @@ public class TestGameLogic extends GameLogic {
 				UIObjectFactory
 						.create(IconUIObject.class, uiScene, new Transform3D(new Vector3f(), new Quaternionf(), new Vector3f(5)))
 						.then(WORKERS, (ExceptionConsumer<IconUIObject>) e -> {
-							worldScene.addEntity(e);
 							System.err.println(e);
 							System.out.println(e.getMesh());
 						})
@@ -330,9 +338,7 @@ public class TestGameLogic extends GameLogic {
 	@Override
 	public void render(float dTime) {
 		worldScene.getCamera().getProjection().update(window.getWidth(), window.getHeight());
-		// uiScene.getCamera().getProjection().update(window.getWidth(), window.getHeight());
-		uiScene.setCamera(worldScene.getCamera());
-		compositor.getBackgroundColor().set(1, 1, 0, 1);
+		uiScene.getCamera().getProjection().update(window.getWidth(), window.getHeight());
 		compositor.render(engine, worldScene, uiScene);
 	}
 

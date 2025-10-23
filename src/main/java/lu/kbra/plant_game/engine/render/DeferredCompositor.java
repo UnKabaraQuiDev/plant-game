@@ -207,7 +207,7 @@ public class DeferredCompositor implements Cleanupable {
 			resizeFramebuffer(worldFramebuffer, renderResolution);
 		}
 
-		// renderWorldScene(cache, worldScene, renderResolution, needRegen);
+		renderWorldScene(cache, worldScene, renderResolution, needRegen);
 
 		renderMaterials(cache, worldScene, renderResolution, needRegen);
 
@@ -534,8 +534,6 @@ public class DeferredCompositor implements Cleanupable {
 					.allMatch(RenderConditionComponent::get)) {
 				continue;
 			}
-
-			System.err.println("rendering: " + entity);
 
 			final Matrix4f transformationMatrix;
 			if (entity instanceof GameObject go) {

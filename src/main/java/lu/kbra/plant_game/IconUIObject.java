@@ -5,7 +5,7 @@ import lu.kbra.plant_game.engine.util.DataPath;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-@DataPath("classpath:/models/water_tower.json")
+@DataPath("classpath:/models/plane.json")
 public class IconUIObject extends UIObject {
 
 	public IconUIObject(String str, Mesh mesh) {
