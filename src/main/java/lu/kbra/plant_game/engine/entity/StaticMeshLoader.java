@@ -42,7 +42,6 @@ public class StaticMeshLoader {
 	public static GenericMeshData readStaticMeshData(JSONObject obj, URI baseURI) {
 		final JSONObject meshes = obj.getJSONObject("meshes");
 
-		// -- static mesh
 		final JSONObject jsonObj = meshes.getJSONObject("static");
 
 		final String filePath = jsonObj.getString("file");
@@ -56,8 +55,12 @@ public class StaticMeshLoader {
 		return new GenericMeshData(meshFilePath, origin, textureMaterial, texturePath);
 	}
 
-	public static TaskFuture<?, Mesh> getStaticFuture(CacheManager cache, String meshName, String path,
-			Dispatcher loader, Dispatcher render) {
+	public static TaskFuture<?, Mesh> getStaticFuture(
+			CacheManager cache,
+			String meshName,
+			String path,
+			Dispatcher loader,
+			Dispatcher render) {
 		return new TaskFuture<>(loader, (ExceptionSupplier<GenericMeshData>) () -> {
 			waitOrCreateLock(meshName);
 
@@ -74,8 +77,7 @@ public class StaticMeshLoader {
 	static Mesh createStatic(CacheManager cache, String meshName, GenericMeshData meshData) {
 		final Mesh staticMesh;
 		if (meshData.textureMaterial()) {
-			final SingleTexture txt0 = cache.hasTexture(meshData.texturePath())
-					? (SingleTexture) cache.getTexture(meshData.texturePath())
+			final SingleTexture txt0 = cache.hasTexture(meshData.texturePath()) ? (SingleTexture) cache.getTexture(meshData.texturePath())
 					: SingleTexture.loadSingleTexture(cache, meshData.texturePath(), meshData.texturePath());
 
 			staticMesh = AdvObjLoader.loadMesh(meshName, null, meshData.filePath(), meshData.origin(), txt0);

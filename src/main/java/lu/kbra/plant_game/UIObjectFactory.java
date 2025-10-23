@@ -44,39 +44,81 @@ public class UIObjectFactory {
 			return k.getAnnotation(DataPath.class).value();
 		});
 
-		if (animatedMesh.get(clazz)) {
+		if (dataPath.get(clazz).endsWith("json")) { // data file
 
-			return AnimatedMeshLoader
-					.getAnimatedFuture(cache, clazz.getName(), dataPath.get(clazz), loader, render)
-					.then(loader, (ExceptionFunction<AnimatedMeshes, T>) (meshes) -> {
-						final T instance = PCUtils
-								.findCompatibleConstructor(clazz,
-										PCUtils
-												.combineArrays(new Class[] { String.class, Mesh.class, AnimatedMesh.class },
-														Arrays.stream(args).map(Object::getClass).toArray(Class[]::new)))
-								.newInstance(PCUtils
-										.combineArrays(
-												new Object[] {
-														clazz.getSimpleName() + "#" + System.nanoTime(),
-														meshes.staticMesh(),
-														meshes.animatedMesh() },
-												args));
-						return instance;
-					});
+			if (animatedMesh.get(clazz)) {
+
+				return AnimatedMeshLoader
+						.getAnimatedFuture(cache, clazz.getName(), dataPath.get(clazz), loader, render)
+						.then(loader, (ExceptionFunction<AnimatedMeshes, T>) (meshes) -> {
+							final T instance = PCUtils
+									.findCompatibleConstructor(clazz,
+											PCUtils
+													.combineArrays(new Class[] { String.class, Mesh.class, AnimatedMesh.class },
+															Arrays.stream(args).map(Object::getClass).toArray(Class[]::new)))
+									.newInstance(PCUtils
+											.combineArrays(
+													new Object[] {
+															clazz.getSimpleName() + "#" + System.nanoTime(),
+															meshes.staticMesh(),
+															meshes.animatedMesh() },
+													args));
+							return instance;
+						});
+			} else {
+
+				return StaticMeshLoader
+						.getStaticFuture(cache, clazz.getName(), dataPath.get(clazz), loader, render)
+						.then(loader, (ExceptionFunction<Mesh, T>) (mesh) -> {
+							final T instance = PCUtils
+									.findCompatibleConstructor(clazz,
+											PCUtils
+													.combineArrays(new Class[] { String.class, Mesh.class },
+															Arrays.stream(args).map(Object::getClass).toArray(Class[]::new)))
+									.newInstance(PCUtils
+											.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), mesh }, args));
+							return instance;
+						});
+
+			}
+
 		} else {
 
-			return StaticMeshLoader
-					.getStaticFuture(cache, clazz.getName(), dataPath.get(clazz), loader, render)
-					.then(loader, (ExceptionFunction<Mesh, T>) (mesh) -> {
-						final T instance = PCUtils
-								.findCompatibleConstructor(clazz,
-										PCUtils
-												.combineArrays(new Class[] { String.class, Mesh.class },
-														Arrays.stream(args).map(Object::getClass).toArray(Class[]::new)))
-								.newInstance(PCUtils
-										.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), mesh }, args));
-						return instance;
-					});
+			if (animatedMesh.get(clazz)) {
+
+				return StaticTextureLoader
+						.getStaticFuture(cache, clazz.getName(), dataPath.get(clazz), loader, render)
+						.then(loader, (ExceptionFunction<AnimatedMeshes, T>) (meshes) -> {
+							final T instance = PCUtils
+									.findCompatibleConstructor(clazz,
+											PCUtils
+													.combineArrays(new Class[] { String.class, Mesh.class, AnimatedMesh.class },
+															Arrays.stream(args).map(Object::getClass).toArray(Class[]::new)))
+									.newInstance(PCUtils
+											.combineArrays(
+													new Object[] {
+															clazz.getSimpleName() + "#" + System.nanoTime(),
+															meshes.staticMesh(),
+															meshes.animatedMesh() },
+													args));
+							return instance;
+						});
+			} else {
+
+				return StaticTextureLoader
+						.getStaticFuture(cache, clazz.getName(), dataPath.get(clazz), loader, render)
+						.then(loader, (ExceptionFunction<Mesh, T>) (mesh) -> {
+							final T instance = PCUtils
+									.findCompatibleConstructor(clazz,
+											PCUtils
+													.combineArrays(new Class[] { String.class, Mesh.class },
+															Arrays.stream(args).map(Object::getClass).toArray(Class[]::new)))
+									.newInstance(PCUtils
+											.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), mesh }, args));
+							return instance;
+						});
+
+			}
 
 		}
 	}

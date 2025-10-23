@@ -1,12 +1,14 @@
 package lu.kbra.plant_game.engine.entity.impl;
 
+import java.awt.Shape;
+
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.objs.entity.Entity;
 import lu.kbra.standalone.gameengine.objs.entity.components.MeshComponent;
 import lu.kbra.standalone.gameengine.objs.entity.components.Transform3DComponent;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-public class UIObject extends Entity implements Transform3DOwner, MeshOwner {
+public abstract class UIObject extends Entity implements Transform3DOwner, MeshOwner {
 
 	protected MeshComponent meshComponent;
 	protected Transform3DComponent transformComponent;
@@ -19,6 +21,16 @@ public class UIObject extends Entity implements Transform3DOwner, MeshOwner {
 		super(str, new MeshComponent(mesh), transform != null ? new Transform3DComponent(transform) : null);
 		this.meshComponent = super.getComponent(MeshComponent.class);
 		this.transformComponent = super.getComponent(Transform3DComponent.class);
+	}
+
+	public abstract Shape getBounds();
+
+	public void hover(WindowInputHandler input) {
+
+	}
+
+	public void click(WindowInputHandler input) {
+
 	}
 
 	public MeshComponent getMeshComponent() {

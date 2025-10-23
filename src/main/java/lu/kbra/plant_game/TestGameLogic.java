@@ -1,7 +1,11 @@
 package lu.kbra.plant_game;
 
+import java.awt.Shape;
+import java.awt.geom.Point2D;
+import java.io.File;
 import java.util.concurrent.CountDownLatch;
 
+import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
@@ -20,6 +24,8 @@ import lu.kbra.plant_game.engine.entity.GameObjectFactory;
 import lu.kbra.plant_game.engine.entity.electric.SolarPanelObject;
 import lu.kbra.plant_game.engine.entity.impl.GameObject;
 import lu.kbra.plant_game.engine.entity.impl.PlaceableObject;
+import lu.kbra.plant_game.engine.entity.impl.UIObject;
+import lu.kbra.plant_game.engine.entity.impl.WindowInputHandler;
 import lu.kbra.plant_game.engine.entity.terrain.TerrainMesh;
 import lu.kbra.plant_game.engine.entity.terrain.TerrainObject;
 import lu.kbra.plant_game.engine.entity.water.AnimatedGameObject;
@@ -44,6 +50,8 @@ import lu.kbra.standalone.gameengine.impl.future.WorkerDispatcher;
 import lu.kbra.standalone.gameengine.objs.entity.Entity;
 import lu.kbra.standalone.gameengine.objs.entity.components.Transform3DComponent;
 import lu.kbra.standalone.gameengine.scene.camera.Camera3D;
+import lu.kbra.standalone.gameengine.utils.geo.GeoPlane;
+import lu.kbra.standalone.gameengine.utils.gl.consts.Consts;
 import lu.kbra.standalone.gameengine.utils.gl.consts.Direction;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
@@ -61,11 +69,12 @@ public class TestGameLogic extends GameLogic {
 	private TaskFuture<?, Void>.TaskState<Void> state;
 	private TaskFuture<?, Void>.TaskState<Void> moveObjectTaskState;
 
-	private InputHandler inputHandler;
+	private WindowInputHandler inputHandler;
 
 	@Override
-	public void init(GameEngine e) {
-		inputHandler = new InputHandler(window);
+	public void init(GameEngine e) throws Exception {
+		inputHandler = new MappingInputHandler(window);
+		((MappingInputHandler) inputHandler).saveMappings(new File(Consts.CONFIG_DIR, "mappings.json"));
 
 		compositor = new DeferredCompositor(engine, e.getRenderThread());
 		compositor.getBackgroundColor().set(1, 1, 0, 1);
@@ -78,10 +87,10 @@ public class TestGameLogic extends GameLogic {
 
 		uiScene = new UIScene("ui", cache);
 		uiScene.getCamera().getPosition().set(0, 1, 0);
-		uiScene.getCamera().lookAt(uiScene.getCamera().getPosition(), GameEngine.ZERO);
+		uiScene.getCamera().getRotation().set(new Quaternionf().lookAlong(new Vector3f(0, -1, 0), new Vector3f(0, 0, -1)));
 		uiScene.getCamera().getProjection().setSize(1);
-		uiScene.getCamera().getProjection().setNearPlane(-1);
-		uiScene.getCamera().getProjection().setFarPlane(1);
+		uiScene.getCamera().getProjection().setNearPlane(0.001f);
+		uiScene.getCamera().getProjection().setFarPlane(1000f);
 		uiScene.getCamera().getProjection().setPerspective(false);
 		uiScene.getCamera().getProjection().update();
 		uiScene.getCamera().updateMatrix();
@@ -107,6 +116,10 @@ public class TestGameLogic extends GameLogic {
 
 	@Override
 	public void input(float dTime) {
+		inputHandler.onFrameBegin();
+
+		handleUi();
+
 		fovDiff = (float) (window.getScroll().y * 0.05f);
 
 		posAdd.zero();
@@ -147,7 +160,35 @@ public class TestGameLogic extends GameLogic {
 		if (targetRotation != Direction.ZERO()) {
 			System.err.println(targetRotation);
 		}
+
+		assert inputHandler.isKeyPressedOnce(GLFW.GLFW_KEY_A) == inputHandler.isKeyPressedOnce(GLFW.GLFW_KEY_A);
 	}
+
+	private void handleUi() {
+		final Vector2f normalizedMousePosition = inputHandler.getNormalizedMousePosition();
+		final Matrix4f inverseProj = new Matrix4f(uiScene.getCamera().getProjection().getProjectionMatrix()).invert();
+		final Vector4f mouseClip = new Vector4f(normalizedMousePosition.x, normalizedMousePosition.y, 0f, 1f);
+		final Vector4f mouseWorld = inverseProj.transform(mouseClip);
+
+		final Vector2f mouseWorld2D = new Vector2f(mouseWorld.x / mouseWorld.w, mouseWorld.y / mouseWorld.w);
+
+		for (Entity e : uiScene) {
+			if (e instanceof UIObject uiObj) {
+				final Shape bounds = uiObj.getBounds();
+				final Vector3f pos3 = uiObj.getTransform().getTranslation();
+				final Vector2f pos = GeoPlane.XY.projectToPlane(pos3);
+				mouseWorld2D.sub(pos, pos);
+
+				if (bounds.contains(new Point2D.Float(pos.x, pos.y))) {
+					uiObj.hover(inputHandler);
+					System.err.println("hovering");
+				}
+			}
+		}
+
+	}
+
+	ButtonUIObject obj;
 
 	@Override
 	public void update(float dTime) {
@@ -248,10 +289,11 @@ public class TestGameLogic extends GameLogic {
 						.push();
 
 				UIObjectFactory
-						.create(IconUIObject.class, uiScene, new Transform3D(new Vector3f(), new Quaternionf(), new Vector3f(5)))
-						.then(WORKERS, (ExceptionConsumer<IconUIObject>) e -> {
+						.create(ButtonUIObject.class, uiScene, new Transform3D())
+						.then(WORKERS, (ExceptionConsumer<ButtonUIObject>) e -> {
 							System.err.println(e);
 							System.out.println(e.getMesh());
+							obj = e;
 						})
 						.push();
 
