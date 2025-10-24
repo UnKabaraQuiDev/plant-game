@@ -8,7 +8,7 @@ import lu.kbra.standalone.gameengine.objs.entity.components.MeshComponent;
 import lu.kbra.standalone.gameengine.objs.entity.components.Transform3DComponent;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-public abstract class UIObject extends Entity implements Transform3DOwner, MeshOwner {
+public abstract class UIObject extends Entity implements Transform3DOwner, MeshOwner, TransparentEntity {
 
 	protected MeshComponent meshComponent;
 	protected Transform3DComponent transformComponent;

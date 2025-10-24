@@ -2,18 +2,13 @@ package lu.kbra.plant_game.engine.entity;
 
 import static lu.kbra.plant_game.engine.entity.MeshLoaderLocks.releaseLock;
 import static lu.kbra.plant_game.engine.entity.MeshLoaderLocks.waitOrCreateLock;
+import static lu.kbra.standalone.gameengine.graph.texture.Texture.getFormatByChannels;
+import static lu.kbra.standalone.gameengine.graph.texture.Texture.getInternalFormatByChannels;
 
 import java.net.URI;
 
-import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.json.JSONObject;
-
-import lu.pcy113.pclib.PCUtils;
-import lu.pcy113.pclib.datastructure.pair.Pair;
-import lu.pcy113.pclib.datastructure.pair.Pairs;
-import lu.pcy113.pclib.impl.ExceptionFunction;
-import lu.pcy113.pclib.impl.ExceptionSupplier;
 
 import lu.kbra.plant_game.TexturedQuadMesh;
 import lu.kbra.plant_game.engine.util.AdvObjLoader;
@@ -25,7 +20,14 @@ import lu.kbra.standalone.gameengine.impl.future.SkipThen;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
 import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
 import lu.kbra.standalone.gameengine.utils.file.FileUtils;
+import lu.kbra.standalone.gameengine.utils.gl.consts.TexelFormat;
+import lu.kbra.standalone.gameengine.utils.gl.consts.TexelInternalFormat;
 import lu.kbra.standalone.gameengine.utils.mem.img.MemImage;
+import lu.pcy113.pclib.PCUtils;
+import lu.pcy113.pclib.datastructure.pair.Pair;
+import lu.pcy113.pclib.datastructure.pair.Pairs;
+import lu.pcy113.pclib.impl.ExceptionFunction;
+import lu.pcy113.pclib.impl.ExceptionSupplier;
 
 public class StaticMeshLoader {
 
@@ -61,12 +63,8 @@ public class StaticMeshLoader {
 		return new GenericMeshData(meshFilePath, origin, textureMaterial, texturePath);
 	}
 
-	public static TaskFuture<?, Mesh> getStaticFuture(
-			CacheManager cache,
-			String meshName,
-			String path,
-			Dispatcher loader,
-			Dispatcher render) {
+	public static TaskFuture<?, Mesh> getStaticFuture(CacheManager cache, String meshName, String path,
+			Dispatcher loader, Dispatcher render) {
 
 		if (path.endsWith("json")) {
 
@@ -96,8 +94,7 @@ public class StaticMeshLoader {
 				}
 
 				final MemImage image = FileUtils.STBILoad(path);
-				final int width = image.getWidth(), height = image.getHeight();
-				final SingleTexture txt = new SingleTexture(path, width, height, image);
+				final SingleTexture txt = new SingleTexture(path, image);
 
 				return Pairs.readOnly(image, txt);
 			}).then(render, (pair) -> {
@@ -115,7 +112,8 @@ public class StaticMeshLoader {
 	}
 
 	static Mesh createStatic(CacheManager cache, String meshName, SingleTexture txt) {
-		final Mesh staticMesh = new TexturedQuadMesh(meshName, txt, GameEngineUtils.normalizeSize(txt.getWidth(), txt.getHeight()));
+		final Mesh staticMesh = new TexturedQuadMesh(meshName, txt,
+				GameEngineUtils.normalizeSize(txt.getWidth(), txt.getHeight()));
 		cache.addMesh(staticMesh);
 		releaseLock(meshName);
 		return staticMesh;
@@ -124,7 +122,8 @@ public class StaticMeshLoader {
 	static Mesh createStatic(CacheManager cache, String meshName, GenericMeshData meshData) {
 		final Mesh staticMesh;
 		if (meshData.textureMaterial()) {
-			final SingleTexture txt0 = cache.hasTexture(meshData.texturePath()) ? (SingleTexture) cache.getTexture(meshData.texturePath())
+			final SingleTexture txt0 = cache.hasTexture(meshData.texturePath())
+					? (SingleTexture) cache.getTexture(meshData.texturePath())
 					: SingleTexture.loadSingleTexture(cache, meshData.texturePath(), meshData.texturePath());
 
 			staticMesh = AdvObjLoader.loadMesh(meshName, null, meshData.filePath(), meshData.origin(), txt0);

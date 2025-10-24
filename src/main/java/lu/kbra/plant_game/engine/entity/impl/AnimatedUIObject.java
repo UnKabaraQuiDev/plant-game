@@ -9,7 +9,7 @@ import lu.kbra.plant_game.engine.mesh.AnimatedMesh;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-public class AnimatedUIObject extends UIObject implements AnimatedTransformOwner, AnimatedMeshOwner {
+public abstract class AnimatedUIObject extends UIObject implements AnimatedTransformOwner, AnimatedMeshOwner {
 
 	protected Matrix4f animatedTransform = new Matrix4f().identity();
 	protected AnimatedMeshComponent animatedMeshComponent;

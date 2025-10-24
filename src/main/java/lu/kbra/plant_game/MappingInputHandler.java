@@ -104,6 +104,10 @@ public class MappingInputHandler extends DefaultInputHandler {
 		config.keyMap = keyMap;
 		config.mouseMap = mouseMap;
 
+		if (!file.getParentFile().exists())
+			file.getParentFile().mkdirs();
+		if (!file.exists())
+			file.createNewFile();
 		Consts.OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValue(file, config);
 	}
 
