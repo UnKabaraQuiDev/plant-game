@@ -12,42 +12,8 @@
   <defs
      id="defs429" />
   <g
-     id="layer4"
-     transform="translate(-296)">
-    <g
-       id="g10298"
-       transform="matrix(0.70537641,0,0,0.70537641,97.631001,13.377935)">
-      <path
-         style="opacity:1;fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.7;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke fill markers;stop-color:#000000"
-         d="m 328.06629,63.832608 c -5,-15 -5,-40 0,-50"
-         id="path10173" />
-      <path
-         id="path10209"
-         style="opacity:1;fill:#08f9ff;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.7;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:markers fill stroke;stop-color:#000000"
-         d="m 318.06629,-6.1673916 c -1.67614,3.2159852 -1.99614,7.11209482 -0.86721,10.5584716 1.12894,3.4463769 3.69208,6.398049 6.94613,7.999043 2.22595,1.095171 4.74275,1.566972 7.22025,1.439485 2.47751,-0.127488 4.91318,-0.846231 7.10563,-2.007026 4.9202,-2.6050101 8.53161,-6.6084617 9.5952,-12.9899736 1,-6 -7.34244,-6.2668527 -14,-3 -1.26518,-2.2546086 -9,-13.0000004 -16,-2 z m 16,2 c -2.59379,1.4288794 -4.451,2.4009124 -6,3" />
-      <g
-         id="g10151"
-         transform="rotate(-15.780133,306.9402,64.280514)"
-         style="fill:#0b7904;fill-opacity:1">
-        <path
-           id="path10145"
-           style="opacity:1;fill:#0b7904;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.7;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke fill markers;stop-color:#000000"
-           d="m 323.06629,63.832608 c 2.69308,-2.521111 4.07332,-6.374748 3.59325,-10.032371 -0.48007,-3.657622 -2.80802,-7.024554 -6.06047,-8.765307 -2.28383,-1.222332 -4.98192,-1.652981 -7.53278,-1.202322 m 0,0 c -1.55541,1.204789 -2.79022,2.819665 -3.54527,4.636453 -0.75504,1.816789 -1.02853,3.831188 -0.78519,5.78352 0.24333,1.952332 1.0029,3.837975 2.18079,5.413849 1.17789,1.575874 2.77132,2.838248 4.57487,3.624389 2.36574,1.031193 5.08638,1.225787 7.5748,0.541789" />
-      </g>
-      <g
-         id="g10157"
-         transform="matrix(-0.74899257,-0.5923914,-0.59805855,0.80366704,605.81282,174.97615)"
-         style="fill:#0b7904;fill-opacity:1">
-        <path
-           id="path10155"
-           style="opacity:1;fill:#0b7904;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.7;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke fill markers;stop-color:#000000"
-           d="m 323.06629,63.832608 c 2.69308,-2.521111 4.07332,-6.374748 3.59325,-10.032371 -0.48007,-3.657622 -2.80802,-7.024554 -6.06047,-8.765307 -2.28383,-1.222332 -4.98192,-1.652981 -7.53278,-1.202322 m 0,0 c -1.55541,1.204789 -2.79022,2.819665 -3.54527,4.636453 -0.75504,1.816789 -1.02853,3.831188 -0.78519,5.78352 0.24333,1.952332 1.0029,3.837975 2.18079,5.413849 1.17789,1.575874 2.77132,2.838248 4.57487,3.624389 2.36574,1.031193 5.08638,1.225787 7.5748,0.541789" />
-      </g>
-    </g>
-  </g>
-  <g
      id="layer5"
-     transform="translate(-296)">
+     transform="translate(-370)">
     <g
        id="g7869">
       <path
