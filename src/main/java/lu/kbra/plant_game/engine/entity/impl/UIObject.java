@@ -1,6 +1,7 @@
 package lu.kbra.plant_game.engine.entity.impl;
 
 import java.awt.Shape;
+import java.awt.geom.Rectangle2D;
 
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.objs.entity.Entity;
@@ -10,6 +11,8 @@ import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 public abstract class UIObject extends Entity implements Transform3DOwner, MeshOwner, TransparentEntity {
 
+	public static final Shape SQUARE_1_UNIT = new Rectangle2D.Float(-0.5f, -0.5f, 1f, 1f);
+
 	protected MeshComponent meshComponent;
 	protected Transform3DComponent transformComponent;
 
@@ -18,7 +21,8 @@ public abstract class UIObject extends Entity implements Transform3DOwner, MeshO
 	}
 
 	public UIObject(String str, Mesh mesh, Transform3D transform) {
-		super(str, new MeshComponent(mesh), transform != null ? new Transform3DComponent(transform) : null);
+		super(str, mesh != null ? new MeshComponent(mesh) : null,
+				transform != null ? new Transform3DComponent(transform) : null);
 		this.meshComponent = super.getComponent(MeshComponent.class);
 		this.transformComponent = super.getComponent(Transform3DComponent.class);
 	}
@@ -26,11 +30,9 @@ public abstract class UIObject extends Entity implements Transform3DOwner, MeshO
 	public abstract Shape getBounds();
 
 	public void hover(final WindowInputHandler input, final float dTime) {
-
 	}
 
 	public void click(final WindowInputHandler input, final float dTime) {
-
 	}
 
 	public MeshComponent getMeshComponent() {

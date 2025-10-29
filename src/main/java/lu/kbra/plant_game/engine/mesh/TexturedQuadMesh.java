@@ -1,8 +1,7 @@
-package lu.kbra.plant_game;
+package lu.kbra.plant_game.engine.mesh;
 
 import org.joml.Vector2f;
 
-import lu.kbra.plant_game.engine.mesh.TexturedMesh;
 import lu.kbra.standalone.gameengine.geom.QuadMesh;
 import lu.kbra.standalone.gameengine.graph.texture.SingleTexture;
 

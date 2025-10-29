@@ -1,7 +1,6 @@
-package lu.kbra.plant_game;
+package lu.kbra.plant_game.engine.entity.ui;
 
 import java.awt.Shape;
-import java.awt.geom.Rectangle2D;
 
 import lu.kbra.plant_game.engine.entity.impl.UIObject;
 import lu.kbra.plant_game.engine.entity.impl.WindowInputHandler;
@@ -9,32 +8,28 @@ import lu.kbra.plant_game.engine.util.DataPath;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-@DataPath("classpath:/icons/money-128.png")
-public class ButtonUIObject extends UIObject {
+@DataPath("classpath:/icons/money-32.png")
+public class MoneyUIObject extends UIObject {
 
-	public ButtonUIObject(String str, Mesh mesh) {
+	public MoneyUIObject(String str, Mesh mesh) {
 		super(str, mesh);
 	}
 
-	public ButtonUIObject(String str, Mesh mesh, Transform3D transform) {
+	public MoneyUIObject(String str, Mesh mesh, Transform3D transform) {
 		super(str, mesh, transform);
 	}
 
 	@Override
 	public void hover(WindowInputHandler input, float dTime) {
-		super.getTransform().getScale().mul(1.001f);
-		super.getTransform().updateMatrix();
 	}
 
 	@Override
 	public void click(WindowInputHandler input, float dTime) {
-		super.getTransform().getScale().set(1);
-		super.getTransform().updateMatrix();
 	}
 
 	@Override
 	public Shape getBounds() {
-		return new Rectangle2D.Float(-0.5f, -0.5f, 1f, 1f);
+		return UIObject.SQUARE_1_UNIT;
 	}
 
 }

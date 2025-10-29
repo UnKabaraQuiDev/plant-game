@@ -1,4 +1,4 @@
-package lu.kbra.plant_game;
+package lu.kbra.plant_game.engine.input;
 
 import java.io.File;
 import java.io.IOException;

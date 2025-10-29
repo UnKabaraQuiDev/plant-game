@@ -4,36 +4,27 @@ import java.io.File;
 
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
-import org.joml.Vector3i;
 
 import lu.kbra.plant_game.engine.entity.GameObjectFactory;
-import lu.kbra.plant_game.engine.entity.impl.GameObject;
 import lu.kbra.plant_game.engine.entity.impl.WindowInputHandler;
+import lu.kbra.plant_game.engine.input.MappingInputHandler;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
-import lu.kbra.plant_game.engine.scene.world.WorldGenerator.TerrainMaterialType;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.standalone.gameengine.GameEngine;
-import lu.kbra.standalone.gameengine.geom.CubeMesh;
 import lu.kbra.standalone.gameengine.impl.GameLogic;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
 import lu.kbra.standalone.gameengine.impl.future.WorkerDispatcher;
-import lu.kbra.standalone.gameengine.objs.entity.Entity;
-import lu.kbra.standalone.gameengine.objs.entity.components.Transform3DComponent;
 import lu.kbra.standalone.gameengine.utils.gl.consts.Consts;
-import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 public class TestGameLogic extends GameLogic {
-
-	private float TOTAL_TIME = 0;
 
 	private Dispatcher WORKERS = new WorkerDispatcher("WORKERS", 8);
 
 	private WorldLevelScene worldScene;
 	private UIScene uiScene;
 	private DeferredCompositor compositor;
-	private Entity cubeEntity;
 
 	private TaskFuture<?, Void>.TaskState<Void> state;
 
@@ -68,14 +59,8 @@ public class TestGameLogic extends GameLogic {
 		UIObjectFactory.INSTANCE = new UIObjectFactory(uiScene.getCache(), WORKERS, RENDER_DISPATCHER);
 		GameObjectFactory.INSTANCE = new GameObjectFactory(worldScene.getCache(), WORKERS, RENDER_DISPATCHER);
 
-		final CubeMesh cubeMesh = new CubeMesh("cubeMesh", null, new Vector3f(0.5f));
-		worldScene.getCache().addMesh(cubeMesh);
-		cubeEntity = worldScene.addEntity(new GameObject("cubeEntity", cubeMesh, new Transform3D(),
-				new Vector3i(1, 0, 255), TerrainMaterialType.GRASS.getId()));
-
+		uiScene.init(WORKERS, RENDER_DISPATCHER);
 		worldScene.init(WORKERS, RENDER_DISPATCHER);
-
-		UIObjectFactory.create(ButtonUIObject.class, uiScene, new Transform3D()).push();
 	}
 
 	private final UpdateFrameState frameState = new UpdateFrameState();
@@ -83,7 +68,6 @@ public class TestGameLogic extends GameLogic {
 	@Override
 	public void input(float dTime) {
 		frameState.reset();
-
 		inputHandler.onFrameBegin();
 
 		uiScene.input(inputHandler, dTime, frameState);
@@ -93,18 +77,13 @@ public class TestGameLogic extends GameLogic {
 	@Override
 	public void update(float dTime) {
 		worldScene.update(inputHandler, dTime, compositor, WORKERS, RENDER_DISPATCHER);
-
-		TOTAL_TIME += dTime;
-
-		final Transform3DComponent transform3DComponent = cubeEntity.getComponent(Transform3DComponent.class);
-		transform3DComponent.getTransform().getRotation().rotateY(dTime);
-		transform3DComponent.getTransform().updateMatrix();
 	}
 
 	@Override
 	public void render(float dTime) {
 		worldScene.getCamera().getProjection().update(window.getWidth(), window.getHeight());
 		uiScene.getCamera().getProjection().update(window.getWidth(), window.getHeight());
+
 		compositor.render(engine, worldScene, uiScene);
 	}
 

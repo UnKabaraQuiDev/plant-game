@@ -2,15 +2,13 @@ package lu.kbra.plant_game.engine.entity;
 
 import static lu.kbra.plant_game.engine.entity.MeshLoaderLocks.releaseLock;
 import static lu.kbra.plant_game.engine.entity.MeshLoaderLocks.waitOrCreateLock;
-import static lu.kbra.standalone.gameengine.graph.texture.Texture.getFormatByChannels;
-import static lu.kbra.standalone.gameengine.graph.texture.Texture.getInternalFormatByChannels;
 
 import java.net.URI;
 
 import org.joml.Vector3f;
 import org.json.JSONObject;
 
-import lu.kbra.plant_game.TexturedQuadMesh;
+import lu.kbra.plant_game.engine.mesh.TexturedQuadMesh;
 import lu.kbra.plant_game.engine.util.AdvObjLoader;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.geom.Mesh;
@@ -20,8 +18,7 @@ import lu.kbra.standalone.gameengine.impl.future.SkipThen;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
 import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
 import lu.kbra.standalone.gameengine.utils.file.FileUtils;
-import lu.kbra.standalone.gameengine.utils.gl.consts.TexelFormat;
-import lu.kbra.standalone.gameengine.utils.gl.consts.TexelInternalFormat;
+import lu.kbra.standalone.gameengine.utils.gl.consts.TextureFilter;
 import lu.kbra.standalone.gameengine.utils.mem.img.MemImage;
 import lu.pcy113.pclib.PCUtils;
 import lu.pcy113.pclib.datastructure.pair.Pair;
@@ -95,6 +92,7 @@ public class StaticMeshLoader {
 
 				final MemImage image = FileUtils.STBILoad(path);
 				final SingleTexture txt = new SingleTexture(path, image);
+				txt.setFilters(TextureFilter.NEAREST);
 
 				return Pairs.readOnly(image, txt);
 			}).then(render, (pair) -> {

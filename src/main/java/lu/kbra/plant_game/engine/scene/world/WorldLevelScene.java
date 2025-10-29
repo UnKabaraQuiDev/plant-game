@@ -9,12 +9,6 @@ import org.joml.Vector3i;
 import org.joml.Vector4f;
 import org.lwjgl.glfw.GLFW;
 
-import lu.pcy113.pclib.PCUtils;
-import lu.pcy113.pclib.datastructure.pair.Pair;
-import lu.pcy113.pclib.impl.ExceptionConsumer;
-import lu.pcy113.pclib.impl.ExceptionFunction;
-import lu.pcy113.pclib.logger.GlobalLogger;
-
 import lu.kbra.plant_game.UpdateFrameState;
 import lu.kbra.plant_game.engine.entity.GameObjectFactory;
 import lu.kbra.plant_game.engine.entity.electric.SolarPanelObject;
@@ -39,6 +33,11 @@ import lu.kbra.standalone.gameengine.scene.Scene3D;
 import lu.kbra.standalone.gameengine.scene.camera.Camera3D;
 import lu.kbra.standalone.gameengine.utils.gl.consts.Direction;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
+import lu.pcy113.pclib.PCUtils;
+import lu.pcy113.pclib.datastructure.pair.Pair;
+import lu.pcy113.pclib.impl.ExceptionConsumer;
+import lu.pcy113.pclib.impl.ExceptionFunction;
+import lu.pcy113.pclib.logger.GlobalLogger;
 
 public class WorldLevelScene extends Scene3D {
 

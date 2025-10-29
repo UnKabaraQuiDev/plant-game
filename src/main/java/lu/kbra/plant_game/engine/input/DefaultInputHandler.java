@@ -1,4 +1,4 @@
-package lu.kbra.plant_game;
+package lu.kbra.plant_game.engine.input;
 
 import org.joml.Vector2d;
 import org.joml.Vector2f;
