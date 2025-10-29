@@ -25,11 +25,11 @@ public abstract class UIObject extends Entity implements Transform3DOwner, MeshO
 
 	public abstract Shape getBounds();
 
-	public void hover(WindowInputHandler input) {
+	public void hover(final WindowInputHandler input, final float dTime) {
 
 	}
 
-	public void click(WindowInputHandler input) {
+	public void click(final WindowInputHandler input, final float dTime) {
 
 	}
 

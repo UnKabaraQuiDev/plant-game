@@ -1,5 +1,6 @@
 package lu.kbra.plant_game;
 
+import org.joml.Vector2d;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.lwjgl.glfw.GLFW;
@@ -19,6 +20,7 @@ public class DefaultInputHandler implements WindowInputHandler {
 	protected final boolean[] currentMousePressed = new boolean[GLFW.GLFW_MOUSE_BUTTON_LAST + 1];
 
 	protected Vector2f normalizedMousePosition = new Vector2f();
+	protected Vector2d mouseScroll = new Vector2d();
 
 	public DefaultInputHandler(Window window) {
 		this.window = window;
@@ -37,6 +39,10 @@ public class DefaultInputHandler implements WindowInputHandler {
 			KeyState state = getButtonState(i);
 			currentMousePressed[i] = (state == KeyState.PRESS || state == KeyState.REPEAT);
 		}
+
+		// TODO: check if this is correct
+		mouseScroll.add(window.getScroll());
+		window.clearScroll();
 	}
 
 	@Override
@@ -129,6 +135,11 @@ public class DefaultInputHandler implements WindowInputHandler {
 	public boolean isMouseButtonPressed(int code) {
 		final KeyState state = getButtonState(code);
 		return state == KeyState.PRESS;
+	}
+
+	@Override
+	public Vector2d getMouseScroll() {
+		return window.getScroll();
 	}
 
 }

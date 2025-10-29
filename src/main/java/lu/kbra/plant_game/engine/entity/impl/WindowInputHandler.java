@@ -1,5 +1,6 @@
 package lu.kbra.plant_game.engine.entity.impl;
 
+import org.joml.Vector2d;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 
@@ -35,5 +36,7 @@ public interface WindowInputHandler {
 	boolean isMouseButtonPressedOnce(int code);
 
 	boolean isKeyPressedOrRepeat(int code);
+	
+	Vector2d getMouseScroll();
 
 }

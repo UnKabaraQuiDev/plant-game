@@ -103,6 +103,7 @@ public class DeferredCompositor implements Cleanupable {
 					new Vector2f[] { new Vector2f(0, 1), new Vector2f(1, 1), new Vector2f(1, 0), new Vector2f(0, 0) }));
 
 	protected Thread ownerThread;
+	protected Window window;
 
 	// world rendering
 	protected SingleTexture depthTexture, posTexture, normalTexture, uvTexture, idsTexture;
@@ -141,6 +142,7 @@ public class DeferredCompositor implements Cleanupable {
 	public DeferredCompositor(GameEngine engine, Thread ownerThread) {
 		final CacheManager cache = engine.getCache();
 		this.ownerThread = ownerThread;
+		this.window = engine.getWindow();
 
 		cache.addAbstractShader(transferShader = new TransferShader());
 		cache.addAbstractShader(instanceTransferShader = new InstanceTransferShader());
@@ -677,7 +679,7 @@ public class DeferredCompositor implements Cleanupable {
 			assert GL_W.checkError("Enable(BLEND)");
 			GL_W.glBlendFunc(GL_W.GL_SRC_ALPHA, GL_W.GL_ONE_MINUS_SRC_ALPHA);
 			assert GL_W.checkError("BlendFunc(SRC_ALPHA, ONE_MINUS_SRC_ALPHA)");
-		}else {
+		} else {
 			GL_W.glDisable(GL_W.GL_BLEND);
 			assert GL_W.checkError("Disable(BLEND)");
 		}
@@ -933,6 +935,10 @@ public class DeferredCompositor implements Cleanupable {
 
 	public void setBackgroundColor(Vector4f backgroundColor) {
 		this.backgroundColor = backgroundColor;
+	}
+
+	public Window getWindow() {
+		return window;
 	}
 
 }

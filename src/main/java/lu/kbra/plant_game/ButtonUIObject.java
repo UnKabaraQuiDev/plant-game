@@ -4,6 +4,7 @@ import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
 
 import lu.kbra.plant_game.engine.entity.impl.UIObject;
+import lu.kbra.plant_game.engine.entity.impl.WindowInputHandler;
 import lu.kbra.plant_game.engine.util.DataPath;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
@@ -20,8 +21,20 @@ public class ButtonUIObject extends UIObject {
 	}
 
 	@Override
+	public void hover(WindowInputHandler input, float dTime) {
+		super.getTransform().getScale().mul(1.001f);
+		super.getTransform().updateMatrix();
+	}
+
+	@Override
+	public void click(WindowInputHandler input, float dTime) {
+		super.getTransform().getScale().set(1);
+		super.getTransform().updateMatrix();
+	}
+
+	@Override
 	public Shape getBounds() {
-		return new Rectangle2D.Float(-0.25f, -0.25f, 0.5f, 0.5f);
+		return new Rectangle2D.Float(-0.5f, -0.5f, 1f, 1f);
 	}
 
 }
