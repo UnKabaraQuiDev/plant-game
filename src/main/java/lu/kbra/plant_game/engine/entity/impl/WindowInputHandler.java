@@ -4,6 +4,7 @@ import org.joml.Vector2d;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 
+import lu.kbra.standalone.gameengine.GameEngine;
 import lu.kbra.standalone.gameengine.graph.window.KeyState;
 import lu.kbra.standalone.gameengine.graph.window.Window;
 
@@ -13,6 +14,8 @@ public interface WindowInputHandler {
 
 	Vector2f getNormalizedMousePosition();
 
+	GameEngine getGameEngine();
+	
 	Window getWindow();
 
 	Vector2i getWindowSize();
@@ -36,7 +39,15 @@ public interface WindowInputHandler {
 	boolean isMouseButtonPressedOnce(int code);
 
 	boolean isKeyPressedOrRepeat(int code);
-	
+
 	Vector2d getMouseScroll();
+
+	Thread getOwner();
+
+	void setOwner(Thread owner);
+
+	boolean isOwnerThread();
+
+	void checkOwnerThread();
 
 }

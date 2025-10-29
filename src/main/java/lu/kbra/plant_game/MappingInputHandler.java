@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.lwjgl.glfw.GLFW;
 
+import lu.kbra.standalone.gameengine.GameEngine;
 import lu.kbra.standalone.gameengine.graph.window.KeyState;
 import lu.kbra.standalone.gameengine.graph.window.Window;
 import lu.kbra.standalone.gameengine.utils.gl.consts.Consts;
@@ -15,8 +16,8 @@ public class MappingInputHandler extends DefaultInputHandler {
 	protected final int[] keyMapping = new int[GLFW.GLFW_KEY_LAST + 1];
 	protected final int[] mouseMapping = new int[GLFW.GLFW_MOUSE_BUTTON_LAST + 1];
 
-	public MappingInputHandler(Window window) {
-		super(window);
+	public MappingInputHandler(GameEngine engine) {
+		super(engine);
 
 		for (int i = 0; i <= GLFW.GLFW_KEY_LAST; i++) {
 			keyMapping[i] = i;
@@ -29,13 +30,13 @@ public class MappingInputHandler extends DefaultInputHandler {
 	@Override
 	public KeyState getKeyState(int code) {
 		int mappedCode = keyMapping[code];
-		return window.getKeyState(mappedCode);
+		return super.getKeyState(mappedCode);
 	}
 
 	@Override
 	public KeyState getButtonState(int code) {
 		int mappedCode = mouseMapping[code];
-		return window.getMouseButtonState(mappedCode);
+		return super.getButtonState(mappedCode);
 	}
 
 	public void remapKey(int logicalKey, int physicalKey) {

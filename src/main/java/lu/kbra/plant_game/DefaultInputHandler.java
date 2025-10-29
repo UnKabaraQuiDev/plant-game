@@ -6,11 +6,13 @@ import org.joml.Vector2i;
 import org.lwjgl.glfw.GLFW;
 
 import lu.kbra.plant_game.engine.entity.impl.WindowInputHandler;
+import lu.kbra.standalone.gameengine.GameEngine;
 import lu.kbra.standalone.gameengine.graph.window.KeyState;
 import lu.kbra.standalone.gameengine.graph.window.Window;
 
 public class DefaultInputHandler implements WindowInputHandler {
 
+	protected final GameEngine engine;
 	protected final Window window;
 
 	protected final boolean[] prevKeyPressed = new boolean[GLFW.GLFW_KEY_LAST + 1];
@@ -19,15 +21,21 @@ public class DefaultInputHandler implements WindowInputHandler {
 	protected final boolean[] prevMousePressed = new boolean[GLFW.GLFW_MOUSE_BUTTON_LAST + 1];
 	protected final boolean[] currentMousePressed = new boolean[GLFW.GLFW_MOUSE_BUTTON_LAST + 1];
 
+	protected Thread owner;
+
 	protected Vector2f normalizedMousePosition = new Vector2f();
 	protected Vector2d mouseScroll = new Vector2d();
+	protected Vector2f mousePosition = new Vector2f();
 
-	public DefaultInputHandler(Window window) {
-		this.window = window;
+	public DefaultInputHandler(GameEngine engine) {
+		this.engine = engine;
+		this.window = engine.getWindow();
 	}
 
 	@Override
 	public void onFrameBegin() {
+		checkOwnerThread();
+
 		System.arraycopy(currentKeyPressed, 0, prevKeyPressed, 0, prevKeyPressed.length);
 		System.arraycopy(currentMousePressed, 0, prevMousePressed, 0, prevMousePressed.length);
 
@@ -40,13 +48,26 @@ public class DefaultInputHandler implements WindowInputHandler {
 			currentMousePressed[i] = (state == KeyState.PRESS || state == KeyState.REPEAT);
 		}
 
-		// TODO: check if this is correct
-		mouseScroll.add(window.getScroll());
+		// set normalized mouse position
+		final Vector2i windowSize = getWindowSize();
+		final Vector2f mousePosition = getMousePosition();
+
+		final float ndcX = (2.0f * mousePosition.x) / windowSize.x - 1.0f;
+		final float ndcY = 1.0f - (2.0f * mousePosition.y) / windowSize.y; // flip y
+
+		normalizedMousePosition.set(ndcX, ndcY);
+		// --------------- -------------
+
+		mouseScroll.set(window.getScroll());
 		window.clearScroll();
+
+		mousePosition.set(window.getMousePosition());
 	}
 
 	@Override
 	public boolean isKeyPressedOnce(int code) {
+		checkOwnerThread();
+
 		final boolean pressed = isKeyHeld(code);
 
 		final boolean pressedOnce = pressed && !prevKeyPressed[code];
@@ -57,6 +78,8 @@ public class DefaultInputHandler implements WindowInputHandler {
 
 	@Override
 	public boolean isKeyPressedOrRepeat(int code) {
+		checkOwnerThread();
+
 		final KeyState state = getKeyState(code);
 
 		final boolean pressedOrRepeat = (state == KeyState.PRESS && !prevKeyPressed[code]) || state == KeyState.REPEAT;
@@ -67,6 +90,8 @@ public class DefaultInputHandler implements WindowInputHandler {
 
 	@Override
 	public boolean isMouseButtonPressedOnce(int code) {
+		checkOwnerThread();
+
 		final boolean pressed = isMouseButtonPressed(code);
 
 		final boolean pressedOnce = pressed && !prevMousePressed[code];
@@ -77,18 +102,14 @@ public class DefaultInputHandler implements WindowInputHandler {
 
 	@Override
 	public Vector2f getMousePosition() {
-		return window.getMousePosition();
+		checkOwnerThread();
+
+		return mousePosition;
 	}
 
 	@Override
 	public Vector2f getNormalizedMousePosition() {
-		final Vector2i windowSize = getWindowSize();
-		final Vector2f mousePosition = getMousePosition();
-
-		final float ndcX = (2.0f * mousePosition.x) / windowSize.x - 1.0f;
-		final float ndcY = 1.0f - (2.0f * mousePosition.y) / windowSize.y; // flip y
-
-		normalizedMousePosition.set(ndcX, ndcY);
+		checkOwnerThread();
 
 		return normalizedMousePosition;
 	}
@@ -139,7 +160,34 @@ public class DefaultInputHandler implements WindowInputHandler {
 
 	@Override
 	public Vector2d getMouseScroll() {
-		return window.getScroll();
+		return mouseScroll;
+	}
+
+	@Override
+	public Thread getOwner() {
+		return owner;
+	}
+
+	@Override
+	public void setOwner(Thread owner) {
+		this.owner = owner;
+	}
+
+	@Override
+	public boolean isOwnerThread() {
+		if (owner == null)
+			return true;
+		return owner == Thread.currentThread();
+	}
+
+	@Override
+	public void checkOwnerThread() {
+		assert isOwnerThread() : "Thread: " + Thread.currentThread() + " not owner (" + owner + ")";
+	}
+
+	@Override
+	public GameEngine getGameEngine() {
+		return engine;
 	}
 
 }

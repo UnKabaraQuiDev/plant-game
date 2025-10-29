@@ -9,8 +9,13 @@ import org.joml.Vector3i;
 import org.joml.Vector4f;
 import org.lwjgl.glfw.GLFW;
 
-import lu.kbra.plant_game.ButtonUIObject;
-import lu.kbra.plant_game.UIObjectFactory;
+import lu.pcy113.pclib.PCUtils;
+import lu.pcy113.pclib.datastructure.pair.Pair;
+import lu.pcy113.pclib.impl.ExceptionConsumer;
+import lu.pcy113.pclib.impl.ExceptionFunction;
+import lu.pcy113.pclib.logger.GlobalLogger;
+
+import lu.kbra.plant_game.UpdateFrameState;
 import lu.kbra.plant_game.engine.entity.GameObjectFactory;
 import lu.kbra.plant_game.engine.entity.electric.SolarPanelObject;
 import lu.kbra.plant_game.engine.entity.impl.GameObject;
@@ -24,11 +29,9 @@ import lu.kbra.plant_game.engine.entity.water.WaterWheelObject;
 import lu.kbra.plant_game.engine.mesh.AttributeLocation;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.scene.world.WorldGenerator.TerrainMaterialType;
-import lu.kbra.standalone.gameengine.GameEngine;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.geom.QuadMesh;
-import lu.kbra.standalone.gameengine.graph.window.KeyState;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
 import lu.kbra.standalone.gameengine.objs.entity.Entity;
@@ -36,11 +39,6 @@ import lu.kbra.standalone.gameengine.scene.Scene3D;
 import lu.kbra.standalone.gameengine.scene.camera.Camera3D;
 import lu.kbra.standalone.gameengine.utils.gl.consts.Direction;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
-import lu.pcy113.pclib.PCUtils;
-import lu.pcy113.pclib.datastructure.pair.Pair;
-import lu.pcy113.pclib.impl.ExceptionConsumer;
-import lu.pcy113.pclib.impl.ExceptionFunction;
-import lu.pcy113.pclib.logger.GlobalLogger;
 
 public class WorldLevelScene extends Scene3D {
 
@@ -58,10 +56,9 @@ public class WorldLevelScene extends Scene3D {
 	private float rotation = 0;
 	private float fovDiff = 0;
 
-	private final Vector2i mousePos = new Vector2i();
 	private boolean movingObject = false;
 	private PlaceableObject attachedObject = null;
-	private Direction targetRotation = Direction.ZERO();
+	private Direction targetRotation = Direction.DEFAULT();
 	private TaskFuture<?, Void>.TaskState<Void> moveObjectTaskState;
 
 	public WorldLevelScene(String name, CacheManager parent) {
@@ -152,45 +149,50 @@ public class WorldLevelScene extends Scene3D {
 		}).push();
 	}
 
-	public void input(WindowInputHandler inputHandler, float dTime) {
+	public void input(final WindowInputHandler inputHandler, final float dTime, final UpdateFrameState frameState) {
 		fovDiff = (float) (inputHandler.getMouseScroll().y * 0.05f);
 
 		posAdd.zero();
 		rotation = 0;
 
-		if (inputHandler.getKeyState(GLFW.GLFW_KEY_W) != KeyState.RELEASE) {
-			posAdd.z -= 1;
-		}
-		if (inputHandler.getKeyState(GLFW.GLFW_KEY_S) != KeyState.RELEASE) {
-			posAdd.z += 1;
-		}
-		if (inputHandler.getKeyState(GLFW.GLFW_KEY_A) != KeyState.RELEASE) {
-			posAdd.x -= 1;
-		}
-		if (inputHandler.getKeyState(GLFW.GLFW_KEY_D) != KeyState.RELEASE) {
-			posAdd.x += 1;
-		}
-		if (inputHandler.getKeyState(GLFW.GLFW_KEY_Q) != KeyState.RELEASE) {
-			rotation -= 1;
-		}
-		if (inputHandler.getKeyState(GLFW.GLFW_KEY_E) != KeyState.RELEASE) {
-			rotation += 1;
+		if (!frameState.uiSceneCaughtKeyboardInput) {
+			if (inputHandler.isKeyHeld(GLFW.GLFW_KEY_W)) {
+				posAdd.z -= 1;
+			}
+			if (inputHandler.isKeyHeld(GLFW.GLFW_KEY_S)) {
+				posAdd.z += 1;
+			}
+			if (inputHandler.isKeyHeld(GLFW.GLFW_KEY_A)) {
+				posAdd.x -= 1;
+			}
+			if (inputHandler.isKeyHeld(GLFW.GLFW_KEY_D)) {
+				posAdd.x += 1;
+			}
+			if (inputHandler.isKeyHeld(GLFW.GLFW_KEY_Q)) {
+				rotation -= 1;
+			}
+			if (inputHandler.isKeyHeld(GLFW.GLFW_KEY_E)) {
+				rotation += 1;
+			}
+
+			if (inputHandler.isKeyPressedOrRepeat(GLFW.GLFW_KEY_T)) {
+				targetRotation = targetRotation.getClockwise();
+			}
+			if (inputHandler.isKeyPressedOrRepeat(GLFW.GLFW_KEY_R)) {
+				targetRotation = targetRotation.getCounterClockwise();
+			}
 		}
 
-		if (inputHandler.isMouseButtonPressedOnce(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
-			movingObject = !movingObject;
+		if (!frameState.uiSceneCaughtMouseInput) {
+			if (inputHandler.isMouseButtonPressedOnce(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
+				movingObject = !movingObject;
+			}
 		}
 
-		if (inputHandler.isKeyPressedOnce(GLFW.GLFW_KEY_T)) {
-			targetRotation = targetRotation.getClockwise();
-		}
-		if (inputHandler.isKeyPressedOnce(GLFW.GLFW_KEY_R)) {
-			targetRotation = targetRotation.getCounterClockwise();
-		}
 	}
 
-	public void update(GameEngine engine, float dTime, DeferredCompositor compositor, Dispatcher renderDispatcher,
-			Dispatcher workers) {
+	public void update(final WindowInputHandler inputHandler, float dTime, DeferredCompositor compositor,
+			Dispatcher workers, Dispatcher renderDispatcher) {
 		if (moveObjectTaskState == null || moveObjectTaskState.isDone()) {
 			if (movingObject) {
 				if (attachedObject == null) {
@@ -202,8 +204,7 @@ public class WorldLevelScene extends Scene3D {
 
 						super.getEntities().values().parallelStream()
 								.filter(e -> e instanceof GameObject && e instanceof PlaceableObject
-										&& ((GameObject) e).getObjectIdLocation() == AttributeLocation.ENTITY)
-								.forEach(System.err::println);
+										&& ((GameObject) e).getObjectIdLocation() == AttributeLocation.ENTITY);
 
 						attachedObject = (PlaceableObject) super.getEntities().values().parallelStream()
 								.filter(e -> e instanceof GameObject && e instanceof PlaceableObject
@@ -218,12 +219,14 @@ public class WorldLevelScene extends Scene3D {
 						}
 					}).push();
 				} else {
+					final Vector2f mousePos = inputHandler.getMousePosition();
 					moveObjectTaskState = new TaskFuture<Void, Void>(renderDispatcher, () -> {
 						final Vector2i pos = this.getTerrain().pickTerrainCell(super.getCamera(), mousePos,
 								compositor.getWindow().getWidth(), compositor.getWindow().getHeight());
+						System.err.println(pos);
 						if (pos != null) {
 							attachedObject.placeDown(this, pos, targetRotation);
-							targetRotation = Direction.ZERO();
+							targetRotation = Direction.DEFAULT();
 						}
 					}).push();
 				}
@@ -234,7 +237,7 @@ public class WorldLevelScene extends Scene3D {
 			}
 		}
 
-		final float time = (float) engine.getTotalTime();
+		final float time = (float) inputHandler.getGameEngine().getTotalTime();
 
 		synchronized (super.getEntitiesLock()) {
 

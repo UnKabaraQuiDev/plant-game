@@ -10,6 +10,7 @@ import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.lwjgl.glfw.GLFW;
 
+import lu.kbra.plant_game.UpdateFrameState;
 import lu.kbra.plant_game.engine.entity.impl.UIObject;
 import lu.kbra.plant_game.engine.entity.impl.WindowInputHandler;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
@@ -28,15 +29,13 @@ public class UIScene extends Scene3D {
 		this.uiCache = new CacheManager(name, parent);
 	}
 
-	public boolean input(final WindowInputHandler inputHandler, final float dTime) {
+	public void input(final WindowInputHandler inputHandler, final float dTime, final UpdateFrameState frameState) {
 		final Vector2f normalizedMousePosition = inputHandler.getNormalizedMousePosition();
 		final Matrix4f inverseProj = new Matrix4f(super.getCamera().getProjection().getProjectionMatrix()).invert();
 		final Vector4f mouseClip = new Vector4f(normalizedMousePosition.x, normalizedMousePosition.y, 0f, 1f);
 		final Vector4f mouseWorld = inverseProj.transform(mouseClip);
 
 		final Vector2f mouseWorld2D = new Vector2f(mouseWorld.x / mouseWorld.w, mouseWorld.y / mouseWorld.w);
-
-		boolean inputHandled = false;
 
 		synchronized (super.getEntitiesLock()) {
 			for (Entity e : this) {
@@ -52,7 +51,7 @@ public class UIScene extends Scene3D {
 					final Shape scaledBounds = scaledTransform.createTransformedShape(bounds);
 
 					if (scaledBounds.contains(new Point2D.Float(pos.x, pos.y))) {
-						inputHandled = true;
+						frameState.uiSceneCaughtMouseInput = true;
 
 						uiObj.hover(inputHandler, dTime);
 
@@ -63,8 +62,6 @@ public class UIScene extends Scene3D {
 				}
 			}
 		}
-
-		return inputHandled;
 	}
 
 	public CacheManager getCache() {

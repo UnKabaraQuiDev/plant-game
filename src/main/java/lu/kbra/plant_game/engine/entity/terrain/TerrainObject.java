@@ -1,6 +1,7 @@
 package lu.kbra.plant_game.engine.entity.terrain;
 
 import org.joml.Matrix4f;
+import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
@@ -18,7 +19,7 @@ public class TerrainObject extends GameObject {
 		setObjectIdLocation(AttributeLocation.MESH);
 	}
 
-	public Vector2i pickTerrainCell(Camera3D cam, Vector2i mousePos, int windowWidth, int windowHeight) {
+	public Vector2i pickTerrainCell(Camera3D cam, Vector2f mousePos, int windowWidth, int windowHeight) {
 		final TerrainMesh tMesh = this.getMesh();
 		final int cellSize = tMesh.getCellSize();
 

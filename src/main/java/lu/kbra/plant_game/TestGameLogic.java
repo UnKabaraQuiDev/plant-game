@@ -41,7 +41,8 @@ public class TestGameLogic extends GameLogic {
 
 	@Override
 	public void init(GameEngine e) throws Exception {
-		inputHandler = new MappingInputHandler(window);
+		inputHandler = new MappingInputHandler(e);
+		inputHandler.setOwner(e.getUpdateThread());
 		((MappingInputHandler) inputHandler).saveMappings(new File(Consts.CONFIG_DIR, "mappings.json"));
 
 		compositor = new DeferredCompositor(engine, e.getRenderThread());
@@ -77,18 +78,21 @@ public class TestGameLogic extends GameLogic {
 		UIObjectFactory.create(ButtonUIObject.class, uiScene, new Transform3D()).push();
 	}
 
+	private final UpdateFrameState frameState = new UpdateFrameState();
+
 	@Override
 	public void input(float dTime) {
+		frameState.reset();
+
 		inputHandler.onFrameBegin();
 
-		if (!uiScene.input(inputHandler, dTime)) {
-			worldScene.input(inputHandler, dTime);
-		}
+		uiScene.input(inputHandler, dTime, frameState);
+		worldScene.input(inputHandler, dTime, frameState);
 	}
 
 	@Override
 	public void update(float dTime) {
-		worldScene.update(engine, dTime, compositor, WORKERS, RENDER_DISPATCHER);
+		worldScene.update(inputHandler, dTime, compositor, WORKERS, RENDER_DISPATCHER);
 
 		TOTAL_TIME += dTime;
 
