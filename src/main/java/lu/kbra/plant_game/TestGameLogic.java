@@ -11,7 +11,6 @@ import lu.kbra.plant_game.engine.input.MappingInputHandler;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
-import lu.kbra.standalone.gameengine.GameEngine;
 import lu.kbra.standalone.gameengine.impl.GameLogic;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
@@ -20,7 +19,7 @@ import lu.kbra.standalone.gameengine.utils.gl.consts.Consts;
 
 public class TestGameLogic extends GameLogic {
 
-	private Dispatcher WORKERS = new WorkerDispatcher("WORKERS", 8);
+	private final Dispatcher WORKERS = new WorkerDispatcher("WORKERS", 8);
 
 	private WorldLevelScene worldScene;
 	private UIScene uiScene;
@@ -31,12 +30,12 @@ public class TestGameLogic extends GameLogic {
 	private WindowInputHandler inputHandler;
 
 	@Override
-	public void init(GameEngine e) throws Exception {
-		inputHandler = new MappingInputHandler(e);
-		inputHandler.setOwner(e.getUpdateThread());
+	public void init() throws Exception {
+		inputHandler = new MappingInputHandler(engine);
+		inputHandler.setOwner(engine.getUpdateThread());
 		((MappingInputHandler) inputHandler).saveMappings(new File(Consts.CONFIG_DIR, "mappings.json"));
 
-		compositor = new DeferredCompositor(engine, e.getRenderThread());
+		compositor = new DeferredCompositor(engine, engine.getRenderThread());
 		compositor.getBackgroundColor().set(1, 1, 0, 1);
 
 		worldScene = new WorldLevelScene("world", cache);

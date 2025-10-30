@@ -16,6 +16,7 @@ import lu.kbra.plant_game.engine.entity.impl.UIObject;
 import lu.kbra.plant_game.engine.entity.impl.WindowInputHandler;
 import lu.kbra.plant_game.engine.entity.ui.MoneyUIObject;
 import lu.kbra.plant_game.engine.entity.ui.TextButtonUIObject;
+import lu.kbra.standalone.gameengine.GameEngine;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.objs.entity.Entity;
@@ -54,8 +55,10 @@ public class UIScene extends Scene3D {
 			for (Entity e : this) {
 				if (e instanceof UIObject uiObj) {
 					final Shape bounds = uiObj.getBounds();
-					final Vector3f pos3 = uiObj.getTransform().getTranslation();
-					final Vector3f scale3 = uiObj.getTransform().getScale();
+					final Vector3f pos3 = uiObj.getTransform() == null ? GameEngine.ZERO
+							: uiObj.getTransform().getTranslation();
+					final Vector3f scale3 = uiObj.getTransform() == null ? GameEngine.IDENTITY
+							: uiObj.getTransform().getScale();
 					final Vector2f pos = GeoPlane.XY.projectToPlane(pos3);
 					mouseWorld2D.sub(pos, pos);
 
