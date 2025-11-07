@@ -1,16 +1,26 @@
-package lu.kbra.plant_game;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.Properties;
 
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
+import org.junit.Test;
 
+import lu.pcy113.pclib.PCUtils;
+
+import lu.kbra.plant_game.UIObjectFactory;
+import lu.kbra.plant_game.UpdateFrameState;
 import lu.kbra.plant_game.engine.entity.GameObjectFactory;
 import lu.kbra.plant_game.engine.entity.impl.WindowInputHandler;
 import lu.kbra.plant_game.engine.input.MappingInputHandler;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
+import lu.kbra.standalone.gameengine.GameEngine;
+import lu.kbra.standalone.gameengine.graph.window.WindowOptions;
 import lu.kbra.standalone.gameengine.impl.GameLogic;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
@@ -84,6 +94,21 @@ public class TestGameLogic extends GameLogic {
 		uiScene.getCamera().getProjection().update(window.getWidth(), window.getHeight());
 
 		compositor.render(engine, worldScene, uiScene);
+	}
+
+	@Test
+	public void main() throws FileNotFoundException, IOException {
+		final GameLogic gameLogic = new TestGameLogic();
+
+		final Properties props = new Properties();
+		props.load(new StringReader(PCUtils.readStringSource("classpath:/config/main.properties")));
+
+		final GameEngine engine = new GameEngine("test", gameLogic, new WindowOptions(props, "windowOptions"));
+		engine.start();
+	}
+
+	public static void main(String[] args) throws FileNotFoundException, IOException {
+		new TestGameLogic().main();
 	}
 
 }

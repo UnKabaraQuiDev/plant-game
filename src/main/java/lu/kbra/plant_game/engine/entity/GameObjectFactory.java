@@ -65,7 +65,7 @@ public class GameObjectFactory {
 								.newInstance(PCUtils.combineArrays(
 										new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), mesh }, args));
 						instance.setMaterialId(
-								(short) (mesh instanceof TexturedMesh ? ((TexturedMesh) mesh).getTexture().getTid()
+								(short) (mesh instanceof TexturedMesh ? ((TexturedMesh) mesh).getTexture().getGlId()
 										: -1));
 						return instance;
 					});

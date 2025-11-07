@@ -1,6 +1,5 @@
 package lu.kbra.plant_game.engine.render;
 
-import java.nio.IntBuffer;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -15,9 +14,9 @@ import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 import org.joml.Vector4f;
-import org.joml.Vector4i;
-import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.GL11;
+
+import lu.pcy113.pclib.PCUtils;
+import lu.pcy113.pclib.logger.GlobalLogger;
 
 import lu.kbra.plant_game.engine.entity.impl.GameObject;
 import lu.kbra.plant_game.engine.entity.impl.TransparentEntity;
@@ -72,8 +71,6 @@ import lu.kbra.standalone.gameengine.utils.gl.consts.TexelInternalFormat;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextureFilter;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextureWrap;
 import lu.kbra.standalone.gameengine.utils.gl.wrapper.GL_W;
-import lu.pcy113.pclib.PCUtils;
-import lu.pcy113.pclib.logger.GlobalLogger;
 
 public class DeferredIconRenderer implements Cleanupable {
 
@@ -89,10 +86,8 @@ public class DeferredIconRenderer implements Cleanupable {
 
 	private static Mesh SCREEN = new LoadedMesh(PASS_SCREEN, null,
 			new Vec3fAttribArray("pos", 0, 1,
-					new Vector3f[] { new Vector3f(-1, 1, 0), new Vector3f(1, 1, 0), new Vector3f(1, -1, 0),
-							new Vector3f(-1, -1, 0) }),
-			new UIntAttribArray("ind", -1, 1, new int[] { 0, 1, 2, 0, 2, 3 }, BufferType.ELEMENT_ARRAY),
-			new Vec2fAttribArray("uv", 1, 1,
+					new Vector3f[] { new Vector3f(-1, 1, 0), new Vector3f(1, 1, 0), new Vector3f(1, -1, 0), new Vector3f(-1, -1, 0) }),
+			new UIntAttribArray("ind", -1, 1, new int[] { 0, 1, 2, 0, 2, 3 }, BufferType.ELEMENT_ARRAY), new Vec2fAttribArray("uv", 1, 1,
 					new Vector2f[] { new Vector2f(0, 1), new Vector2f(1, 1), new Vector2f(1, 0), new Vector2f(0, 0) }));
 
 	protected Thread ownerThread;
@@ -132,9 +127,9 @@ public class DeferredIconRenderer implements Cleanupable {
 		blitShader = cache.getAbstractShader(BlitShader.class);
 
 		outputTxt = new SingleTexture(ICON_FRAMEBUFFER_NAME + ".output", engine.getWindow().getSize());
-		outputTxt.setDataType(DataType.HALF_FLOAT);
+		outputTxt.setDataType(DataType.UBYTE);
 		outputTxt.setFormat(TexelFormat.RGBA);
-		outputTxt.setInternalFormat(TexelInternalFormat.RGBA16F);
+		outputTxt.setInternalFormat(TexelInternalFormat.RGBA8);
 		outputTxt.setFilters(TextureFilter.NEAREST);
 		outputTxt.setGenerateMipmaps(false);
 		outputTxt.setup();
@@ -142,12 +137,30 @@ public class DeferredIconRenderer implements Cleanupable {
 
 		cache.addFramebuffer(iconFramebuffer = genFramebuffer(cache, engine.getWindow().getSize()));
 
-		worldSceneShaders = PCUtils.hashMap(Mesh.class, transferShader, AnimatedMesh.class, transferShader,
-				TextEmitter.class, null, InstanceEmitter.class, instanceTransferShader);
+		fakeScene.getCamera().getPosition().set(10, 10, 10);
+		fakeScene.getCamera().lookAt(fakeScene.getCamera().getPosition(), GameEngine.ZERO);
+		fakeScene.getCamera().updateMatrix();
+
+		worldSceneShaders = PCUtils
+				.hashMap(Mesh.class,
+						transferShader,
+						AnimatedMesh.class,
+						transferShader,
+						TextEmitter.class,
+						null,
+						InstanceEmitter.class,
+						instanceTransferShader);
 	}
 
-	public SingleTexture render(GameEngine engine, GameObject obj, int outputSize, Vector4f lightColor,
-			Vector3f lightDirection, Vector4f ambientLight) {
+	public SingleTexture render(
+			GameEngine engine,
+			GameObject obj,
+			int outputSize,
+			Vector3f lightColor,
+			Vector3f lightDirection,
+			float ambientLight) {
+		Objects.requireNonNull(obj);
+
 		final CacheManager cache = engine.getCache();
 
 		final Vector2i renderResolution = new Vector2i(outputSize);
@@ -170,22 +183,74 @@ public class DeferredIconRenderer implements Cleanupable {
 
 			renderMaterials(cache, fakeScene, renderResolution, lightColor, lightDirection, ambientLight);
 
-			renderOutlines(cache, renderResolution);
+			// renderOutlines(cache, renderResolution);
+
+			// blitToScreen(cache, renderResolution, engine.getWindow().getSize(), true);
 
 			fakeScene.getEntities().clear();
 		}
 
 		texture.bind();
-		GL_W.glCopyImageSubData(outputTxt.getGlId(), outputTxt.getTextureType().getGlId(), 0, 0, 0, 0,
-				texture.getGlId(), texture.getTextureType().getGlId(), 0, 0, 0, 0, texture.getWidth(),
-				texture.getHeight(), 1);
+		GL_W
+				.glCopyImageSubData(outputTxt.getGlId(),
+						outputTxt.getTextureType().getGlId(),
+						0,
+						0,
+						0,
+						0,
+						texture.getGlId(),
+						texture.getTextureType().getGlId(),
+						0,
+						0,
+						0,
+						0,
+						texture.getWidth(),
+						texture.getHeight(),
+						1);
+		assert GL_W.checkError();
+		GL_W.glFinish();
+		assert GL_W.checkError();
 		texture.unbind();
 
 		return texture;
 	}
 
-	public void renderObject(Map<Class<? extends Renderable>, RenderShader> shaderso, GameObject obj,
-			Vector2i resolution) {
+	private void blitToScreen(CacheManager cache, Vector2i renderResolution, Vector2i resolution, boolean needRegen) {
+		blitShader.bind();
+		if (needRegen) {
+			blitShader.setUniform(ComputeShader.INPUT_SIZE, renderResolution);
+			blitShader.setUniform(ComputeShader.OUTPUT_SIZE, resolution);
+		}
+		outputTxt.bindUniform(blitShader.getUniformLocation(BlitShader.TXT0), 0);
+
+		SCREEN.bind();
+
+		GL_W.glDisable(GL_W.GL_CULL_FACE);
+		assert GL_W.checkError("Disable(CULL_FACE)");
+		GL_W.glDisable(GL_W.GL_DEPTH_TEST);
+		assert GL_W.checkError("Disable(DEPTH_TEST)");
+
+		GL_W.glBindFramebuffer(GL_W.GL_FRAMEBUFFER, 0);
+		assert GL_W.checkError("BindFramebuffer(0)");
+		GL_W.glViewport(0, 0, resolution.x, resolution.y);
+		assert GL_W.checkError("Viewport(" + resolution + ")");
+		GL_W.glClearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z, backgroundColor.w);
+		assert GL_W.checkError("ClearColor(" + backgroundColor + ")");
+		GL_W.glClear(GL_W.GL_COLOR_BUFFER_BIT | GL_W.GL_DEPTH_BUFFER_BIT);
+		assert GL_W.checkError("Clear(COLOR | DEPTH)");
+
+		GL_W.glDrawElements(blitShader.getBeginMode().getGlId(), SCREEN.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
+		assert GL_W.checkError("DrawElements()");
+
+		GL_W.glEnable(GL_W.GL_DEPTH_TEST);
+		assert GL_W.checkError("Enable(DEPTH_TEST)");
+
+		SCREEN.unbind();
+
+		blitShader.unbind();
+	}
+
+	public void renderObject(Map<Class<? extends Renderable>, RenderShader> shaderso, GameObject obj, Vector2i resolution) {
 		iconFramebuffer.bind();
 
 		GL_W.glViewport(0, 0, resolution.x, resolution.y);
@@ -205,7 +270,7 @@ public class DeferredIconRenderer implements Cleanupable {
 
 		transferShader.bind();
 
-		renderScene(fakeScene, null);
+		renderScene(fakeScene, worldSceneShaders, resolution);
 
 		transferShader.unbind();
 		iconFramebuffer.unbind();
@@ -213,8 +278,7 @@ public class DeferredIconRenderer implements Cleanupable {
 
 	private void checkComponent(GLObject mesh, Component source, Entity entity) {
 		if (mesh == null) {
-			throw new NullPointerException(
-					"Mesh is null on: " + source.getClass().getSimpleName() + " in " + entity.getId());
+			throw new NullPointerException("Mesh is null on: " + source.getClass().getSimpleName() + " in " + entity.getId());
 		}
 		if (!mesh.isValid()) {
 			throw new IllegalStateException("Mesh: " + mesh + " in " + entity.getId() + " isn't valid.");
@@ -265,8 +329,7 @@ public class DeferredIconRenderer implements Cleanupable {
 			computeShader.setUniform(OutlineShader.TARGET_COLORS, colors);
 		}
 
-		GL_W.glBindImageTexture(0, outputTxt.getGlId(), 0, false, 0, GL_W.GL_READ_WRITE,
-				outputTxt.getInternalFormat().getGlId());
+		GL_W.glBindImageTexture(0, outputTxt.getGlId(), 0, false, 0, GL_W.GL_READ_WRITE, outputTxt.getInternalFormat().getGlId());
 		assert GL_W.checkError("BindImageTexture(0, " + outputTxt.getGlId() + ", READ_WRITE)");
 
 		posTexture.bindUniform(computeShader.getUniformLocation("uPosTex"), 0);
@@ -279,11 +342,17 @@ public class DeferredIconRenderer implements Cleanupable {
 		computeShader.setUniform(ComputeShader.OUTPUT_SIZE, resolution);
 	}
 
-	private void renderMaterials(CacheManager cache, Scene3D scene, Vector2i resolution, Vector4f lightColor,
-			Vector3f lightDirection, Vector4f ambientLight) {
-		GL_W.glClearTexImage(outputTxt.getTid(), 0, outputTxt.getFormat().getGlId(), outputTxt.getDataType().getGlId(),
-				new float[] { 0, 0, 0, 0 });
-		assert GL_W.checkError("ClearTexImage(" + outputTxt.getTid() + ")");
+	private void renderMaterials(
+			CacheManager cache,
+			Scene3D scene,
+			Vector2i resolution,
+			Vector3f lightColor,
+			Vector3f lightDirection,
+			float ambientLight) {
+		GL_W
+				.glClearTexImage(outputTxt
+						.getGlId(), 0, outputTxt.getFormat().getGlId(), outputTxt.getDataType().getGlId(), new float[] { 0, 0, 0, 0 });
+		assert GL_W.checkError("ClearTexImage(" + outputTxt.getGlId() + ")");
 
 		GL_W.glViewport(0, 0, resolution.x, resolution.y);
 		assert GL_W.checkError("Viewport(" + resolution + ")");
@@ -312,8 +381,7 @@ public class DeferredIconRenderer implements Cleanupable {
 
 		setupMaterialInputs(textureMaterialComputeShader, scene, resolution, lightColor, lightDirection, ambientLight);
 		final int txt0UniformLoc = textureMaterialComputeShader.getUniformLocation(TextureMaterialComputeShader.TXT0);
-		final int currentMaterialIdLoc = textureMaterialComputeShader
-				.getUniformLocation(TextureMaterialComputeShader.CURRENT_MATERIAL_ID);
+		final int currentMaterialIdLoc = textureMaterialComputeShader.getUniformLocation(TextureMaterialComputeShader.CURRENT_MATERIAL_ID);
 
 		final Set<Integer> alreadyRendered = new HashSet<>();
 
@@ -327,9 +395,11 @@ public class DeferredIconRenderer implements Cleanupable {
 						final Mesh mesh = meshComponent.getMesh();
 						checkComponent(mesh, meshComponent, entity);
 
+						GlobalLogger.info("Texturing mesh: " + mesh.getId());
+
 						if (mesh instanceof TexturedMesh txtMesh) {
 							final SingleTexture txt = txtMesh.getTexture();
-							final int tid = txt.getTid();
+							final int tid = txt.getGlId();
 							if (alreadyRendered.contains(tid))
 								continue;
 
@@ -359,9 +429,11 @@ public class DeferredIconRenderer implements Cleanupable {
 						checkComponent(instances, instanceEmitterComponent, entity);
 						final Mesh mesh = instances.getParticleMesh();
 
+						GlobalLogger.info("Texturing mesh: " + mesh.getId() + " from instances: " + instances.getId());
+
 						if (mesh instanceof TexturedMesh txtMesh) {
 							final SingleTexture txt = txtMesh.getTexture();
-							final int tid = txt.getTid();
+							final int tid = txt.getGlId();
 							if (alreadyRendered.contains(tid))
 								continue;
 
@@ -386,8 +458,13 @@ public class DeferredIconRenderer implements Cleanupable {
 		textureMaterialComputeShader.unbind();
 	}
 
-	private void setupMaterialInputs(ComputeShader computeShader, Scene3D scene, Vector2i resolution,
-			Vector4f lightColor, Vector3f lightDirection, Vector4f ambientLight) {
+	private void setupMaterialInputs(
+			ComputeShader computeShader,
+			Scene3D scene,
+			Vector2i resolution,
+			Vector3f lightColor,
+			Vector3f lightDirection,
+			float ambientLight) {
 		posTexture.bind(0);
 		normalTexture.bind(1);
 		uvTexture.bind(2);
@@ -398,9 +475,8 @@ public class DeferredIconRenderer implements Cleanupable {
 		computeShader.setUniform(MaterialComputeShader.LIGHT_DIR, lightDirection);
 		computeShader.setUniform(MaterialComputeShader.AMBIENT_LIGHT, ambientLight);
 
-		GL_W.glBindImageTexture(0, outputTxt.getTid(), 0, false, 0, GL_W.GL_WRITE_ONLY,
-				outputTxt.getInternalFormat().getGlId());
-		assert GL_W.checkError("BindImageTexture(0," + outputTxt.getTid() + ",WRITE_ONLY)");
+		GL_W.glBindImageTexture(0, outputTxt.getGlId(), 0, false, 0, GL_W.GL_WRITE_ONLY, outputTxt.getInternalFormat().getGlId());
+		assert GL_W.checkError("BindImageTexture(0," + outputTxt.getGlId() + ",WRITE_ONLY)");
 
 		posTexture.bindUniform(computeShader.getUniformLocation("uPosTex"), 0);
 		normalTexture.bindUniform(computeShader.getUniformLocation("uNormalTex"), 1);
@@ -412,13 +488,13 @@ public class DeferredIconRenderer implements Cleanupable {
 		computeShader.setUniform(ComputeShader.OUTPUT_SIZE, resolution);
 	}
 
-	private void renderScene(Scene scene, Map<Class<? extends Renderable>, RenderShader> shaders) {
+	private void renderScene(Scene scene, Map<Class<? extends Renderable>, RenderShader> shaders, Vector2i resolution) {
 		final RenderShader meshShader = shaders.get(Mesh.class);
 		final RenderShader animatedMeshShader = shaders.get(AnimatedMesh.class);
 		final RenderShader textEmitterShader = shaders.get(TextEmitter.class);
 		final RenderShader instanceEmitterShader = shaders.get(InstanceEmitter.class);
 
-		setupUniforms(shaders, scene);
+		setupUniforms(shaders, scene, resolution);
 
 		for (Entity entity : scene) {
 
@@ -426,9 +502,10 @@ public class DeferredIconRenderer implements Cleanupable {
 				continue;
 			}
 
-			if (entity.hasComponentMatching(RenderConditionComponent.class)
-					&& entity.getComponentsMatching(RenderConditionComponent.class).parallelStream()
-							.allMatch(RenderConditionComponent::get)) {
+			if (entity.hasComponentMatching(RenderConditionComponent.class) && entity
+					.getComponentsMatching(RenderConditionComponent.class)
+					.parallelStream()
+					.allMatch(RenderConditionComponent::get)) {
 				continue;
 			}
 
@@ -436,8 +513,7 @@ public class DeferredIconRenderer implements Cleanupable {
 			if (entity instanceof GameObject go) {
 				transformationMatrix = go.getTransform().getMatrix();
 			} else if (entity.hasComponentMatching(TransformComponent.class)) {
-				final TransformComponent transform = (TransformComponent) entity
-						.getComponentMatching(TransformComponent.class);
+				final TransformComponent transform = (TransformComponent) entity.getComponentMatching(TransformComponent.class);
 				if (transform != null && transform.getTransform() != null) {
 					transformationMatrix = transform.getTransform().getMatrix();
 				} else {
@@ -457,11 +533,9 @@ public class DeferredIconRenderer implements Cleanupable {
 			}
 
 			if (animatedMeshShader != null && entity.hasComponentMatching(AnimatedMeshComponent.class)) {
-				final List<AnimatedMeshComponent> animatedMeshComponents = entity
-						.getComponentsMatching(AnimatedMeshComponent.class);
+				final List<AnimatedMeshComponent> animatedMeshComponents = entity.getComponentsMatching(AnimatedMeshComponent.class);
 
-				final Matrix4f animatedTransformationMatrix = entity instanceof AnimatedTransformOwner ago
-						? ago.getAnimatedTransform()
+				final Matrix4f animatedTransformationMatrix = entity instanceof AnimatedTransformOwner ago ? ago.getAnimatedTransform()
 						: transformationMatrix;
 
 				for (AnimatedMeshComponent animatedMeshComponent : animatedMeshComponents) {
@@ -471,13 +545,11 @@ public class DeferredIconRenderer implements Cleanupable {
 			}
 
 			if (textEmitterShader != null && entity.hasComponentMatching(TextEmitterComponent.class)) {
-				final List<TextEmitterComponent> textEmitterComponents = entity
-						.getComponentsMatching(TextEmitterComponent.class);
+				final List<TextEmitterComponent> textEmitterComponents = entity.getComponentsMatching(TextEmitterComponent.class);
 
 				for (TextEmitterComponent textEmitterComponent : textEmitterComponents) {
 					final TextEmitter textEmitter = textEmitterComponent.getTextEmitter();
-					renderTextEmitter(textEmitter, textEmitterComponent, entity, transformationMatrix,
-							textEmitterShader);
+					renderTextEmitter(textEmitter, textEmitterComponent, entity, transformationMatrix, textEmitterShader);
 				}
 			}
 
@@ -487,17 +559,15 @@ public class DeferredIconRenderer implements Cleanupable {
 
 				for (InstanceEmitterComponent instanceEmitterComponent : instanceEmitterComponents) {
 					final InstanceEmitter instanceEmitter = instanceEmitterComponent.getInstanceEmitter();
-					renderInstanceEmitter(instanceEmitter, instanceEmitterComponent, entity, transformationMatrix,
-							instanceEmitterShader);
+					renderInstanceEmitter(instanceEmitter, instanceEmitterComponent, entity, transformationMatrix, instanceEmitterShader);
 				}
 			}
 		}
 	}
 
-	private void setupUniforms(Map<Class<? extends Renderable>, RenderShader> shaders, Scene scene) {
+	private void setupUniforms(Map<Class<? extends Renderable>, RenderShader> shaders, Scene scene, Vector2i resolution) {
 		final Camera cam = scene.getCamera();
-		cam.getProjection().update(outputResolution);
-		final Matrix4f viewMatrix = cam.getViewMatrix(), projectionMatrix = cam.getProjection().getProjectionMatrix();
+		final Matrix4f viewMatrix = cam.updateMatrix(), projectionMatrix = cam.getProjection().update(resolution).getProjectionMatrix();
 
 		for (RenderShader shader : shaders.values()) {
 			if (shader == null) {
@@ -514,19 +584,29 @@ public class DeferredIconRenderer implements Cleanupable {
 		assert GL_W.checkError("UseProgram(0)");
 	}
 
-	private void renderInstanceEmitter(InstanceEmitter obj, InstanceEmitterComponent component, Entity entity,
-			Matrix4f transformationMatrix, RenderShader shader) {
+	private void renderInstanceEmitter(
+			InstanceEmitter obj,
+			InstanceEmitterComponent component,
+			Entity entity,
+			Matrix4f transformationMatrix,
+			RenderShader shader) {
 		checkComponent(obj, component, entity);
 		final Mesh mesh = obj.getParticleMesh();
 		obj.bind();
 		shader.bind();
 
+		GlobalLogger.info("Drawing mesh: " + mesh.getId() + " from instances: " + obj.getId());
+
 		if (shader.createUniform(RenderShader.TRANSFORMATION_MATRIX)) {
 			shader.setUniform(RenderShader.TRANSFORMATION_MATRIX, transformationMatrix);
 		}
 
-		GL_W.glDrawElementsInstanced(shader.getBeginMode().getGlId(), mesh.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0,
-				obj.getParticleCount());
+		GL_W
+				.glDrawElementsInstanced(shader.getBeginMode().getGlId(),
+						mesh.getIndicesCount(),
+						GL_W.GL_UNSIGNED_INT,
+						0,
+						obj.getParticleCount());
 		assert GL_W.checkError("DrawElementsInstanced(" + mesh.getId() + ")");
 
 		shader.unbind();
@@ -534,13 +614,19 @@ public class DeferredIconRenderer implements Cleanupable {
 		mesh.unbind();
 	}
 
-	private void renderTextEmitter(TextEmitter obj, Component component, Entity entity, Matrix4f transformationMatrix,
+	private void renderTextEmitter(
+			TextEmitter obj,
+			Component component,
+			Entity entity,
+			Matrix4f transformationMatrix,
 			RenderShader shader) {
 		checkComponent(obj, component, entity);
 		final InstanceEmitter instances = obj.getInstances();
 		final Mesh mesh = instances.getParticleMesh();
 		instances.bind();
 		shader.bind();
+
+		GlobalLogger.info("Drawing mesh: " + mesh.getId() + " from instances: " + instances.getId() + " for text: " + obj.getId());
 
 		if (shader.createUniform(RenderShader.TRANSFORMATION_MATRIX)) {
 			shader.setUniform(RenderShader.TRANSFORMATION_MATRIX, transformationMatrix);
@@ -551,8 +637,12 @@ public class DeferredIconRenderer implements Cleanupable {
 		GL_W.glBlendFunc(GL_W.GL_SRC_ALPHA, GL_W.GL_ONE_MINUS_SRC_ALPHA);
 		assert GL_W.checkError("BlendFunc(SRC_ALPHA, ONE_MINUS_SRC_ALPHA)");
 
-		GL_W.glDrawElementsInstanced(shader.getBeginMode().getGlId(), mesh.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0,
-				instances.getParticleCount());
+		GL_W
+				.glDrawElementsInstanced(shader.getBeginMode().getGlId(),
+						mesh.getIndicesCount(),
+						GL_W.GL_UNSIGNED_INT,
+						0,
+						instances.getParticleCount());
 		assert GL_W.checkError("DrawElementsInstanced(" + mesh.getId() + ")");
 
 		GL_W.glDisable(GL_W.GL_BLEND);
@@ -561,11 +651,12 @@ public class DeferredIconRenderer implements Cleanupable {
 		mesh.unbind();
 	}
 
-	private void renderMesh(Mesh mesh, Component component, Entity entity, Matrix4f transformationMatrix,
-			RenderShader shader) {
+	private void renderMesh(Mesh mesh, Component component, Entity entity, Matrix4f transformationMatrix, RenderShader shader) {
 		checkComponent(mesh, component, entity);
 		mesh.bind();
 		shader.bind();
+
+		GlobalLogger.info("Drawing mesh: " + mesh.getId());
 
 		if (shader.createUniform(RenderShader.TRANSFORMATION_MATRIX)) {
 			shader.setUniform(RenderShader.TRANSFORMATION_MATRIX, transformationMatrix);
@@ -594,7 +685,7 @@ public class DeferredIconRenderer implements Cleanupable {
 			GL_W.glVertexAttribI1ui(GameObject.MESH_ATTRIB_MATERIAL_ID_ID, matId);
 			assert GL_W.checkError("VertexAttrib1f(" + GameObject.MESH_ATTRIB_MATERIAL_ID_ID + "," + matId + ")");
 		} else if (mesh instanceof TexturedMesh txtMesh) { // id in the texture id
-			final int txtId = txtMesh.getTexture().getTid();
+			final int txtId = txtMesh.getTexture().getGlId();
 
 			GL_W.glDisableVertexAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_ID);
 			assert GL_W.checkError("DisableVertexAttribArray(" + GameObject.MESH_ATTRIB_MATERIAL_ID_ID + ")");
@@ -718,56 +809,6 @@ public class DeferredIconRenderer implements Cleanupable {
 		}
 	}
 
-	public boolean pollObjectId(boolean blocking) {
-		awaitingObjectIdPtr.setValue(true);
-		if (blocking) {
-			return awaitObjectId();
-		}
-		return !awaitingObjectIdPtr.getValue();
-	}
-
-	public boolean isAwaitingObjectId() {
-		return awaitingObjectIdPtr.getValue();
-	}
-
-	public boolean awaitObjectId() {
-		awaitingObjectIdPtr.waitForFalse(POLL_OBJECT_ID_TIMEOUT);
-		return !awaitingObjectIdPtr.getValue();
-	}
-
-	public Vector4i getObjectId() {
-		return objectId;
-	}
-
-	protected void getObjectId(Window window) {
-		if (idsTexture == null)
-			throw new IllegalStateException("Ids texture is not ready.");
-		assert ownerThread == Thread.currentThread();
-
-		final Vector2f mousePosition = window.getMousePosition();
-		final Vector2i windowSize = window.getSize();
-
-		final int x = (int) ((mousePosition.x / (float) windowSize.x) * idsTexture.getWidth());
-		final int y = (int) ((1 - (mousePosition.y / (float) windowSize.y)) * idsTexture.getHeight());
-
-		iconFramebuffer.bind(GL_W.GL_READ_FRAMEBUFFER);
-		GL_W.glReadBuffer(FrameBufferAttachment.COLOR_FIRST.getGlId() + ICON_FRAMEBUFFER_IDS_IDX);
-		assert GL_W.checkError(
-				"ReadBuffer(" + (FrameBufferAttachment.COLOR_FIRST.getGlId() + ICON_FRAMEBUFFER_IDS_IDX) + ")");
-		final IntBuffer pixel = BufferUtils.createIntBuffer(4);
-		GL11.glReadPixels(x, y, 1, 1, idsTexture.getFormat().getGlId(), idsTexture.getDataType().getGlId(), pixel);
-		assert GL_W.checkError(
-				"ReadPixels(" + mousePosition + ", " + idsTexture.getFormat() + ", " + idsTexture.getDataType() + ")");
-		iconFramebuffer.unbind(GL_W.GL_READ_FRAMEBUFFER);
-
-		int r = pixel.get(0);
-		int g = pixel.get(1);
-		int b = pixel.get(2);
-		int a = pixel.get(3);
-
-		objectId.set(r, g, b, a);
-	}
-
 	public void addOutline(SceneEntity e, Vector4f color) {
 		Objects.requireNonNull(e);
 		if (e instanceof GameObject go) {
@@ -776,7 +817,6 @@ public class DeferredIconRenderer implements Cleanupable {
 						"GameObject: " + go.getId() + " (" + go.getClass().getName() + ") has no entity object id.");
 			}
 			outlinedObjects.put(go.getObjectId(), color);
-			outlineChanged = true;
 		} else {
 			throw new UnsupportedOperationException("Unsupported object: " + e + " (" + e.getClass().getName() + ")");
 		}
@@ -790,7 +830,6 @@ public class DeferredIconRenderer implements Cleanupable {
 						"GameObject: " + go.getId() + " (" + go.getClass().getName() + ") has no entity object id.");
 			}
 			outlinedObjects.remove(go.getObjectId());
-			outlineChanged = true;
 		} else {
 			throw new UnsupportedOperationException("Unsupported object: " + e + " (" + e.getClass().getName() + ")");
 		}
