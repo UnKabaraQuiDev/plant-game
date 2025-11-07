@@ -180,7 +180,7 @@ public class DeferredIconRenderer implements Cleanupable {
 				texture.getGlId(), texture.getTextureType().getGlId(), 0, 0, 0, 0, texture.getWidth(),
 				texture.getHeight(), 1);
 		texture.unbind();
-		
+
 		return texture;
 	}
 
@@ -265,9 +265,9 @@ public class DeferredIconRenderer implements Cleanupable {
 			computeShader.setUniform(OutlineShader.TARGET_COLORS, colors);
 		}
 
-		GL_W.glBindImageTexture(0, outputTxt.getTid(), 0, false, 0, GL_W.GL_READ_WRITE,
+		GL_W.glBindImageTexture(0, outputTxt.getGlId(), 0, false, 0, GL_W.GL_READ_WRITE,
 				outputTxt.getInternalFormat().getGlId());
-		assert GL_W.checkError("BindImageTexture(0, " + outputTxt.getTid() + ", READ_WRITE)");
+		assert GL_W.checkError("BindImageTexture(0, " + outputTxt.getGlId() + ", READ_WRITE)");
 
 		posTexture.bindUniform(computeShader.getUniformLocation("uPosTex"), 0);
 		normalTexture.bindUniform(computeShader.getUniformLocation("uNormalTex"), 1);
