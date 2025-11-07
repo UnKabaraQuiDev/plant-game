@@ -6,6 +6,8 @@ import lu.kbra.plant_game.engine.entity.impl.GameObject;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.standalone.gameengine.GameEngine;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
+import lu.kbra.standalone.gameengine.geom.BoundingBox;
+import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.graph.texture.SingleTexture;
 import lu.kbra.standalone.gameengine.utils.gl.consts.DataType;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TexelFormat;
@@ -22,6 +24,7 @@ public class DeferredIconRenderer extends DeferredCompositor {
 
 		fakeWorld = new WorldLevelScene("fakeWorld", engine.getCache());
 
+		fakeWorld.getCamera().getProjection().setPerspective(false);
 		fakeWorld.getCamera().getPosition().set(10, 10, 10);
 		fakeWorld.getCamera().lookAt(fakeWorld.getCamera().getPosition(), GameEngine.ZERO);
 		fakeWorld.getCamera().updateMatrix();
@@ -35,6 +38,26 @@ public class DeferredIconRenderer extends DeferredCompositor {
 			Vector3f lightDir,
 			float ambientLight) {
 		final CacheManager cache = engine.getCache();
+
+		final Mesh mesh = obj.getMesh();
+		final BoundingBox bb = mesh.getBoundingBox();
+
+		final float radius = 0.5f * new Vector3f(bb.getMax()).sub(bb.getMin()).length();
+
+		final float fovY = fakeWorld.getCamera().getProjection().getFov();
+		final float distance = radius / (float) Math.sin(fovY / 2f);
+
+		// final float fovX = fovY * fakeWorld.getCamera().getProjection().getAspectRatio();
+		// distance = radius / (float) Math.sin(fovX / 2f);
+
+		final Vector3f forwardVector = new Vector3f(1).normalize().negate();
+		final Vector3f cameraPos = new Vector3f(bb.getCenter()).sub(forwardVector.mul(distance, new Vector3f()));
+		fakeWorld.getCamera().lookAt(cameraPos, bb.getCenter());
+		fakeWorld.getCamera().updateMatrix();
+
+		if (!fakeWorld.getCamera().getProjection().isPerspective()) {
+			fakeWorld.getCamera().getProjection().setSize(0.3f);
+		}
 
 		fakeWorld.addEntity(obj);
 

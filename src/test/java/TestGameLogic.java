@@ -56,8 +56,7 @@ public class TestGameLogic extends GameLogic {
 
 		uiScene = new UIScene("ui", cache);
 		uiScene.getCamera().getPosition().set(0, 1, 0);
-		uiScene.getCamera().getRotation()
-				.set(new Quaternionf().lookAlong(new Vector3f(0, -1, 0), new Vector3f(0, 0, -1)));
+		uiScene.getCamera().getRotation().set(new Quaternionf().lookAlong(new Vector3f(0, -1, 0), new Vector3f(0, 0, -1)));
 		uiScene.getCamera().getProjection().setSize(1);
 		uiScene.getCamera().getProjection().setNearPlane(0.001f);
 		uiScene.getCamera().getProjection().setFarPlane(1000f);
@@ -94,6 +93,11 @@ public class TestGameLogic extends GameLogic {
 		uiScene.getCamera().getProjection().update(window.getWidth(), window.getHeight());
 
 		compositor.render(engine, worldScene, uiScene);
+	}
+
+	@Override
+	public void cleanup() {
+		compositor.cleanup();
 	}
 
 	@Test
