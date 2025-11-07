@@ -4,6 +4,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import lu.pcy113.pclib.PCUtils;
+import lu.pcy113.pclib.impl.ExceptionFunction;
+
+import lu.kbra.plant_game.GameObjectRegistry;
 import lu.kbra.plant_game.engine.entity.AnimatedMeshLoader.AnimatedMeshes;
 import lu.kbra.plant_game.engine.entity.impl.GameObject;
 import lu.kbra.plant_game.engine.entity.water.AnimatedGameObject;
@@ -15,8 +19,6 @@ import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
 import lu.kbra.standalone.gameengine.scene.Scene3D;
-import lu.pcy113.pclib.PCUtils;
-import lu.pcy113.pclib.impl.ExceptionFunction;
 
 public class GameObjectFactory {
 
@@ -44,29 +46,34 @@ public class GameObjectFactory {
 
 		if (animatedMesh.get(clazz)) {
 
-			return AnimatedMeshLoader.getAnimatedFuture(cache, clazz.getName(), dataPath.get(clazz), loader, render)
+			return AnimatedMeshLoader
+					.getAnimatedFuture(cache, clazz.getName(), dataPath.get(clazz), loader, render)
 					.then(loader, (ExceptionFunction<AnimatedMeshes, T>) (meshes) -> {
-						final T instance = PCUtils.findCompatibleConstructor(clazz,
-								PCUtils.combineArrays(new Class[] { String.class, Mesh.class, AnimatedMesh.class },
-										Arrays.stream(args).map(Object::getClass).toArray(Class[]::new)))
+						final T instance = PCUtils
+								.findCompatibleConstructor(clazz,
+										PCUtils
+												.combineArrays(new Class[] { String.class, Mesh.class, AnimatedMesh.class },
+														Arrays.stream(args).map(Object::getClass).toArray(Class[]::new)))
 								.newInstance(PCUtils
-										.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(),
-												meshes.staticMesh(), meshes.animatedMesh() }, args));
+										.combineArrays(
+												new Object[] {
+														clazz.getSimpleName() + "#" + System.nanoTime(),
+														meshes.staticMesh(),
+														meshes.animatedMesh() },
+												args));
 						return instance;
 					});
 		} else {
 
-			return StaticMeshLoader.getStaticFuture(cache, clazz.getName(), dataPath.get(clazz), loader, render)
+			return StaticMeshLoader
+					.getStaticFuture(cache, clazz.getName(), dataPath.get(clazz), loader, render)
 					.then(loader, (ExceptionFunction<Mesh, T>) (mesh) -> {
-						final T instance = PCUtils
-								.findCompatibleConstructor(clazz,
-										PCUtils.combineArrays(new Class[] { String.class, Mesh.class },
-												Arrays.stream(args).map(Object::getClass).toArray(Class[]::new)))
-								.newInstance(PCUtils.combineArrays(
-										new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), mesh }, args));
-						instance.setMaterialId(
-								(short) (mesh instanceof TexturedMesh ? ((TexturedMesh) mesh).getTexture().getGlId()
-										: -1));
+						final T instance = GameObjectRegistry
+								.create(clazz,
+										PCUtils
+												.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), mesh },
+														args));
+						instance.setMaterialId((short) (mesh instanceof TexturedMesh ? ((TexturedMesh) mesh).getTexture().getGlId() : -1));
 						return instance;
 					});
 
