@@ -7,6 +7,11 @@ import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.standalone.gameengine.GameEngine;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.graph.texture.SingleTexture;
+import lu.kbra.standalone.gameengine.utils.gl.consts.DataType;
+import lu.kbra.standalone.gameengine.utils.gl.consts.TexelFormat;
+import lu.kbra.standalone.gameengine.utils.gl.consts.TexelInternalFormat;
+import lu.kbra.standalone.gameengine.utils.gl.consts.TextureFilter;
+import lu.kbra.standalone.gameengine.utils.gl.wrapper.GL_W;
 
 public class DeferredIconRenderer extends DeferredCompositor {
 
@@ -37,6 +42,10 @@ public class DeferredIconRenderer extends DeferredCompositor {
 
 		renderResolution.set(size);
 		outputResolution.set(size);
+		outputTxt.setSize(size);
+		outputTxt.bind();
+		outputTxt.resize();
+		outputTxt.unbind();
 
 		resizeFramebuffer(worldFramebuffer, renderResolution);
 
@@ -50,7 +59,33 @@ public class DeferredIconRenderer extends DeferredCompositor {
 
 		fakeWorld.getEntities().clear();
 
-		return outputTxt;
+		final SingleTexture texture = new SingleTexture(obj.getId(), renderResolution);
+		texture.setDataType(DataType.UBYTE);
+		texture.setFormat(TexelFormat.RGBA);
+		texture.setInternalFormat(TexelInternalFormat.RGBA8);
+		texture.setFilters(TextureFilter.NEAREST);
+		texture.setGenerateMipmaps(false);
+		texture.setup();
+
+		GL_W
+				.glCopyImageSubData(outputTxt.getGlId(),
+						outputTxt.getTextureType().getGlId(),
+						0,
+						0,
+						0,
+						0,
+						texture.getGlId(),
+						texture.getTextureType().getGlId(),
+						0,
+						0,
+						0,
+						0,
+						texture.getWidth(),
+						texture.getHeight(),
+						1);
+		assert GL_W.checkError("CopyImageSubData()");
+
+		return texture;
 	}
 
 }
