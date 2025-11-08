@@ -5,6 +5,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 
 import org.joml.Matrix4f;
+import org.joml.Quaternionf;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
@@ -29,6 +30,7 @@ import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 public class UIScene extends Scene3D {
 
 	private CacheManager uiCache;
+	private TextButtonUIObject textEntity;
 
 	public UIScene(String name, CacheManager parent) {
 		super(name);
@@ -37,10 +39,13 @@ public class UIScene extends Scene3D {
 	}
 
 	public void init(Dispatcher workers, Dispatcher renderDispatcher) {
-		UIObjectFactory.create(MoneyUIObject.class, this, new Transform3D()).push();
-		final TextEmitter textEmitter = new TextEmitter("qsd", null, 12, "text", new Vector2f(0.1f));
+		// UIObjectFactory.create(MoneyUIObject.class, this, new Transform3D(new Vector3f(), new Quaternionf(), new Vector3f(0.5f))).push();
+		// UIObjectFactory.create(MoneyUIObject.class, this, new Transform3D(new Vector3f(0.5f, 0, 0), new
+		// Quaternionf(), new Vector3f(0.5f))).push();
+
+		final TextEmitter textEmitter = new TextEmitter("qsd", null, 12, "text", new Vector2f(0.5f));
 		uiCache.addTextEmitter(textEmitter);
-		super.addEntity(new TextButtonUIObject("qsd", textEmitter));
+		textEntity = super.addEntity(new TextButtonUIObject("qsd", textEmitter, new Transform3D()));
 	}
 
 	public void input(final WindowInputHandler inputHandler, final float dTime, final UpdateFrameState frameState) {
@@ -55,10 +60,8 @@ public class UIScene extends Scene3D {
 			for (Entity e : this) {
 				if (e instanceof UIObject uiObj) {
 					final Shape bounds = uiObj.getBounds();
-					final Vector3f pos3 = uiObj.getTransform() == null ? GameEngine.ZERO
-							: uiObj.getTransform().getTranslation();
-					final Vector3f scale3 = uiObj.getTransform() == null ? GameEngine.IDENTITY
-							: uiObj.getTransform().getScale();
+					final Vector3f pos3 = uiObj.getTransform() == null ? GameEngine.ZERO : uiObj.getTransform().getTranslation();
+					final Vector3f scale3 = uiObj.getTransform() == null ? GameEngine.IDENTITY : uiObj.getTransform().getScale();
 					final Vector2f pos = GeoPlane.XY.projectToPlane(pos3);
 					mouseWorld2D.sub(pos, pos);
 

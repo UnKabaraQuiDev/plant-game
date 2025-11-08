@@ -38,6 +38,7 @@ import lu.kbra.plant_game.engine.render.shader.InstanceDirectShader;
 import lu.kbra.plant_game.engine.render.shader.InstanceTransferShader;
 import lu.kbra.plant_game.engine.render.shader.MaterialComputeShader;
 import lu.kbra.plant_game.engine.render.shader.OutlineShader;
+import lu.kbra.plant_game.engine.render.shader.TextDirectShader;
 import lu.kbra.plant_game.engine.render.shader.TextureMaterialComputeShader;
 import lu.kbra.plant_game.engine.render.shader.TransferShader;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
@@ -51,7 +52,6 @@ import lu.kbra.standalone.gameengine.geom.LoadedMesh;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.geom.instance.InstanceEmitter;
 import lu.kbra.standalone.gameengine.graph.composition.buffer.Framebuffer;
-import lu.kbra.standalone.gameengine.graph.material.text.TextShader;
 import lu.kbra.standalone.gameengine.graph.shader.ComputeShader;
 import lu.kbra.standalone.gameengine.graph.shader.RenderShader;
 import lu.kbra.standalone.gameengine.graph.texture.SingleTexture;
@@ -110,9 +110,10 @@ public class DeferredCompositor implements Cleanupable {
 	protected Map<Class<? extends Renderable>, RenderShader> worldSceneShaders;
 
 	// ui rendering
+	protected SingleTexture fontTexture;
 	protected DirectShader directShader;
 	protected InstanceDirectShader instanceDirectShader;
-	protected TextShader textDirectShader;
+	protected TextDirectShader textDirectShader;
 	protected Map<Class<? extends Renderable>, RenderShader> uiSceneShaders;
 
 	// material passes
@@ -151,7 +152,17 @@ public class DeferredCompositor implements Cleanupable {
 		cache.addAbstractShader(blitShader = new BlitShader());
 
 		cache.addAbstractShader(directShader = new DirectShader());
+		cache.addAbstractShader(textDirectShader = new TextDirectShader());
 		cache.addAbstractShader(instanceDirectShader = new InstanceDirectShader());
+
+		fontTexture = SingleTexture
+				.loadSingleTexture(cache,
+						TextDirectShader.FONT_TEXTURE_NAME,
+						"classpath:/bakes/fonts/QuinqueFive.ttf/16.png",
+						TextureFilter.NEAREST);
+		fontTexture.setGenerateMipmaps(true);
+		fontTexture.genMipMaps();
+		cache.addTexture(fontTexture);
 
 		outputTxt = new SingleTexture(WORLD_FRAMEBUFFER_NAME + ".output", engine.getWindow().getSize());
 		outputTxt.setDataType(DataType.UBYTE);
@@ -230,8 +241,6 @@ public class DeferredCompositor implements Cleanupable {
 	}
 
 	protected void renderUi(CacheManager cache, UIScene uiScene, Vector2i outputResolution, boolean needRegen) {
-		final CacheManager uiCache = uiScene.getCache();
-
 		GL_W.glBindFramebuffer(GL_W.GL_FRAMEBUFFER, 0);
 		assert GL_W.checkError("BindFramebuffer(0)");
 
@@ -351,8 +360,6 @@ public class DeferredCompositor implements Cleanupable {
 	}
 
 	protected void renderMaterials(CacheManager cache, WorldLevelScene worldScene, Vector2i resolution, boolean needRegen) {
-		final CacheManager worldCache = worldScene.getCache();
-
 		if (needRegen) {
 			outputTxt.setSize(resolution);
 			outputTxt.bind();
@@ -653,13 +660,22 @@ public class DeferredCompositor implements Cleanupable {
 		checkComponent(obj, component, entity);
 		final InstanceEmitter instances = obj.getInstances();
 		final Mesh mesh = instances.getParticleMesh();
-		instances.bind();
 		shader.bind();
+		instances.bind();
 
 		if (shader.createUniform(RenderShader.TRANSFORMATION_MATRIX)) {
 			shader.setUniform(RenderShader.TRANSFORMATION_MATRIX, transformationMatrix);
 		}
 
+		fontTexture.bindUniform(shader.getUniformLocation(TextDirectShader.TXT0), 1);
+
+		shader.setUniform(TextDirectShader.FG_COLOR, new Vector4f(1));
+		shader.setUniform(TextDirectShader.BG_COLOR, new Vector4f(0.1f));
+		shader.setUniform(TextDirectShader.TRANSPARENT, false);
+		shader.setUniformUnsigned(TextDirectShader.TEXT_LENGTH, obj.getText().length());
+
+		GL_W.glDisable(GL_W.GL_CULL_FACE);
+		assert GL_W.checkError("Disable(CULL_FACE)");
 		GL_W.glEnable(GL_W.GL_BLEND);
 		assert GL_W.checkError("Enable(BLEND)");
 		GL_W.glBlendFunc(GL_W.GL_SRC_ALPHA, GL_W.GL_ONE_MINUS_SRC_ALPHA);
@@ -675,8 +691,10 @@ public class DeferredCompositor implements Cleanupable {
 
 		GL_W.glDisable(GL_W.GL_BLEND);
 		assert GL_W.checkError("Disable(BLEND)");
+		GL_W.glEnable(GL_W.GL_CULL_FACE);
+		assert GL_W.checkError("Enable(CULL_FACE)");
 
-		mesh.unbind();
+		instances.unbind();
 	}
 
 	private void renderMesh(Mesh mesh, Component component, Entity entity, Matrix4f transformationMatrix, RenderShader shader) {

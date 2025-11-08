@@ -60,8 +60,12 @@ public class StaticMeshLoader {
 		return new GenericMeshData(meshFilePath, origin, textureMaterial, texturePath);
 	}
 
-	public static TaskFuture<?, Mesh> getStaticFuture(CacheManager cache, String meshName, String path,
-			Dispatcher loader, Dispatcher render) {
+	public static TaskFuture<?, Mesh> getStaticFuture(
+			CacheManager cache,
+			String meshName,
+			String path,
+			Dispatcher loader,
+			Dispatcher render) {
 
 		if (path.endsWith("json")) {
 
@@ -110,8 +114,7 @@ public class StaticMeshLoader {
 	}
 
 	static Mesh createStatic(CacheManager cache, String meshName, SingleTexture txt) {
-		final Mesh staticMesh = new TexturedQuadMesh(meshName, txt,
-				GameEngineUtils.normalizeSize(txt.getWidth(), txt.getHeight()));
+		final Mesh staticMesh = new TexturedQuadMesh(meshName, txt, GameEngineUtils.normalizeSize(txt.getWidth(), txt.getHeight()));
 		cache.addMesh(staticMesh);
 		releaseLock(meshName);
 		return staticMesh;
@@ -120,8 +123,7 @@ public class StaticMeshLoader {
 	static Mesh createStatic(CacheManager cache, String meshName, GenericMeshData meshData) {
 		final Mesh staticMesh;
 		if (meshData.textureMaterial()) {
-			final SingleTexture txt0 = cache.hasTexture(meshData.texturePath())
-					? (SingleTexture) cache.getTexture(meshData.texturePath())
+			final SingleTexture txt0 = cache.hasTexture(meshData.texturePath()) ? (SingleTexture) cache.getTexture(meshData.texturePath())
 					: SingleTexture.loadSingleTexture(cache, meshData.texturePath(), meshData.texturePath());
 
 			staticMesh = AdvObjLoader.loadMesh(meshName, null, meshData.filePath(), meshData.origin(), txt0);
