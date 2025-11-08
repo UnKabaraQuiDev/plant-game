@@ -12,14 +12,9 @@ public class GameObjectConstructorNotFound extends RuntimeException {
 
 	public GameObjectConstructorNotFound(Class<? extends GameObject> clazz, Object[] args) {
 		super("Matching constructor for GameObject not found: " + clazz.getName() + " ("
-				+ Arrays.stream(args).map(c -> c.getClass().toString() + " " + c).collect(Collectors.joining(", ")) + ")");
+				+ Arrays.stream(args).map(c -> c.getClass().getSimpleName()).collect(Collectors.joining(", ")) + ")");
 		this.clazz = clazz;
 		this.args = args;
-	}
-
-	@Override
-	public String toString() {
-		return "GameObjectConstructorNotFound [clazz=" + clazz + ", args=" + Arrays.toString(args) + "]";
 	}
 
 }

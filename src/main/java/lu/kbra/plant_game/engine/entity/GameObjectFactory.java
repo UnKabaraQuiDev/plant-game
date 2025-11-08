@@ -7,13 +7,13 @@ import java.util.Map;
 import lu.pcy113.pclib.PCUtils;
 import lu.pcy113.pclib.impl.ExceptionFunction;
 
-import lu.kbra.plant_game.GameObjectRegistry;
 import lu.kbra.plant_game.engine.entity.AnimatedMeshLoader.AnimatedMeshes;
 import lu.kbra.plant_game.engine.entity.impl.GameObject;
 import lu.kbra.plant_game.engine.entity.water.AnimatedGameObject;
 import lu.kbra.plant_game.engine.mesh.AnimatedMesh;
 import lu.kbra.plant_game.engine.mesh.TexturedMesh;
 import lu.kbra.plant_game.engine.util.DataPath;
+import lu.kbra.plant_game.generated.GameObjectRegistry;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
@@ -24,11 +24,11 @@ public class GameObjectFactory {
 
 	public static GameObjectFactory INSTANCE;
 
-	private Map<Class<? extends GameObject>, Boolean> animatedMesh = new HashMap<>();
-	private Map<Class<? extends GameObject>, String> dataPath = new HashMap<>();
+	private final Map<Class<? extends GameObject>, Boolean> animatedMesh = new HashMap<>();
+	private final Map<Class<? extends GameObject>, String> dataPath = new HashMap<>();
 
-	private CacheManager cache;
-	private Dispatcher loader, render;
+	private final CacheManager cache;
+	private final Dispatcher loader, render;
 
 	public GameObjectFactory(CacheManager cache, Dispatcher loader, Dispatcher render) {
 		this.cache = cache;
@@ -39,8 +39,9 @@ public class GameObjectFactory {
 	public <T extends GameObject> TaskFuture<?, T> create_(Class<T> clazz, Object... args) {
 		animatedMesh.computeIfAbsent(clazz, k -> AnimatedGameObject.class.isAssignableFrom(k));
 		dataPath.computeIfAbsent(clazz, k -> {
-			if (!k.isAnnotationPresent(DataPath.class))
+			if (!k.isAnnotationPresent(DataPath.class)) {
 				throw new IllegalArgumentException(clazz.getName() + " doesn't have @DataPath.");
+			}
 			return k.getAnnotation(DataPath.class).value();
 		});
 
