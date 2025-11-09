@@ -1,9 +1,9 @@
 {
-    "collection_name": "plane",
+    "collection_name": "flower_round_small",
     "animated": false,
     "meshes": {
         "static": {
-            "file": "models/plane_static.obj",
+            "file": "models/flower_round_small_static.obj",
             "offset_from_origin": [
                 0.0,
                 0.0,

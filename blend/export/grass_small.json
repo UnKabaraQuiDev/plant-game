@@ -1,9 +1,9 @@
 {
-    "collection_name": "plane",
+    "collection_name": "grass_small",
     "animated": false,
     "meshes": {
         "static": {
-            "file": "models/plane_static.obj",
+            "file": "models/grass_small_static.obj",
             "offset_from_origin": [
                 0.0,
                 0.0,
