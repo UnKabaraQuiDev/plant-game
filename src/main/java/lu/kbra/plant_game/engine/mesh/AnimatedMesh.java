@@ -4,7 +4,7 @@ import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
-import lu.kbra.plant_game.engine.entity.AnimatedMeshLoader.AnimationData;
+import lu.kbra.plant_game.engine.mesh.loader.AnimatedMeshLoader.AnimationData;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 
 public interface AnimatedMesh extends Mesh {

@@ -5,23 +5,21 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 
 import org.joml.Matrix4f;
-import org.joml.Quaternionf;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.lwjgl.glfw.GLFW;
 
-import lu.kbra.plant_game.UIObjectFactory;
 import lu.kbra.plant_game.UpdateFrameState;
-import lu.kbra.plant_game.engine.entity.impl.UIObject;
-import lu.kbra.plant_game.engine.entity.impl.WindowInputHandler;
-import lu.kbra.plant_game.engine.entity.ui.MoneyUIObject;
-import lu.kbra.plant_game.engine.entity.ui.TextButtonUIObject;
+import lu.kbra.plant_game.engine.entity.ui.btn.DelegatingTextUIObject;
+import lu.kbra.plant_game.engine.entity.ui.btn.QuitButtonUIObject;
+import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
+import lu.kbra.plant_game.engine.entity.ui.impl.UIObject;
+import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.GameEngine;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.objs.entity.Entity;
-import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
 import lu.kbra.standalone.gameengine.scene.Scene3D;
 import lu.kbra.standalone.gameengine.scene.camera.Camera;
 import lu.kbra.standalone.gameengine.utils.geo.GeoPlane;
@@ -30,7 +28,7 @@ import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 public class UIScene extends Scene3D {
 
 	private CacheManager uiCache;
-	private TextButtonUIObject textEntity;
+	private DelegatingTextUIObject textEntity;
 
 	public UIScene(String name, CacheManager parent) {
 		super(name);
@@ -39,13 +37,21 @@ public class UIScene extends Scene3D {
 	}
 
 	public void init(Dispatcher workers, Dispatcher renderDispatcher) {
-		// UIObjectFactory.create(MoneyUIObject.class, this, new Transform3D(new Vector3f(), new Quaternionf(), new Vector3f(0.5f))).push();
-		// UIObjectFactory.create(MoneyUIObject.class, this, new Transform3D(new Vector3f(0.5f, 0, 0), new
+		// UIObjectFactory.create(MoneyUIObject.class, this, new Transform3D(new
+		// Vector3f(), new Quaternionf(), new Vector3f(0.5f))).push();
+		// UIObjectFactory.create(MoneyUIObject.class, this, new Transform3D(new
+		// Vector3f(0.5f, 0, 0), new
 		// Quaternionf(), new Vector3f(0.5f))).push();
 
-		final TextEmitter textEmitter = new TextEmitter("qsd", null, 12, "text", new Vector2f(0.5f));
-		uiCache.addTextEmitter(textEmitter);
-		textEntity = super.addEntity(new TextButtonUIObject("qsd", textEmitter, new Transform3D()));
+		/*
+		 * int i = 0; for (TextAlignment ta : TextAlignment.values()) { final TextEmitter textEmitter = new
+		 * TextEmitter("qsd" + ta, null, 12, ta.name(), new Vector2f(0.1f));
+		 * textEmitter.setTextAlignment(ta); textEmitter.updateText(); uiCache.addTextEmitter(textEmitter);
+		 * textEntity = super.addEntity(new DelegatingTextUIObject("qsd" + ta, textEmitter, new
+		 * Transform3D(new Vector3f(0, 0, (float) (i++) / TextAlignment.values().length - 0.5f)))); }
+		 */
+
+		UIObjectFactory.create(QuitButtonUIObject.class, this, new Transform3D()).push();
 	}
 
 	public void input(final WindowInputHandler inputHandler, final float dTime, final UpdateFrameState frameState) {

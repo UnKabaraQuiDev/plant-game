@@ -11,14 +11,14 @@ import org.junit.Test;
 
 import lu.pcy113.pclib.PCUtils;
 
-import lu.kbra.plant_game.UIObjectFactory;
 import lu.kbra.plant_game.UpdateFrameState;
-import lu.kbra.plant_game.engine.entity.GameObjectFactory;
-import lu.kbra.plant_game.engine.entity.impl.WindowInputHandler;
-import lu.kbra.plant_game.engine.input.MappingInputHandler;
+import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory;
+import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
+import lu.kbra.plant_game.engine.window.input.MappingInputHandler;
+import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.GameEngine;
 import lu.kbra.standalone.gameengine.graph.window.WindowOptions;
 import lu.kbra.standalone.gameengine.impl.GameLogic;

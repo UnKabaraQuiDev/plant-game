@@ -1,16 +1,20 @@
 package lu.kbra.plant_game;
 
 import java.io.File;
+import java.util.Locale;
+import java.util.Properties;
 
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
-import lu.kbra.plant_game.engine.entity.GameObjectFactory;
-import lu.kbra.plant_game.engine.entity.impl.WindowInputHandler;
-import lu.kbra.plant_game.engine.input.MappingInputHandler;
+import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory;
+import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
+import lu.kbra.plant_game.engine.locale.LocalizationService;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
+import lu.kbra.plant_game.engine.window.input.MappingInputHandler;
+import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.impl.GameLogic;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
@@ -56,6 +60,7 @@ public class PGLogic extends GameLogic {
 
 		UIObjectFactory.INSTANCE = new UIObjectFactory(uiScene.getCache(), WORKERS, RENDER_DISPATCHER);
 		GameObjectFactory.INSTANCE = new GameObjectFactory(worldScene.getCache(), WORKERS, RENDER_DISPATCHER);
+		LocalizationService.INSTANCE = new LocalizationService(Locale.US);
 
 		uiScene.init(WORKERS, RENDER_DISPATCHER);
 		worldScene.init(WORKERS, RENDER_DISPATCHER);

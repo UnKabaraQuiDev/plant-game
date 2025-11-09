@@ -9,20 +9,29 @@ import org.joml.Vector3i;
 import org.joml.Vector4f;
 import org.lwjgl.glfw.GLFW;
 
+import lu.pcy113.pclib.PCUtils;
+import lu.pcy113.pclib.datastructure.pair.Pair;
+import lu.pcy113.pclib.impl.ThrowingConsumer;
+import lu.pcy113.pclib.impl.ThrowingFunction;
+import lu.pcy113.pclib.logger.GlobalLogger;
+
 import lu.kbra.plant_game.UpdateFrameState;
-import lu.kbra.plant_game.engine.entity.GameObjectFactory;
-import lu.kbra.plant_game.engine.entity.electric.SolarPanelObject;
-import lu.kbra.plant_game.engine.entity.impl.GameObject;
-import lu.kbra.plant_game.engine.entity.impl.PlaceableObject;
-import lu.kbra.plant_game.engine.entity.impl.WindowInputHandler;
-import lu.kbra.plant_game.engine.entity.terrain.TerrainMesh;
-import lu.kbra.plant_game.engine.entity.terrain.TerrainObject;
-import lu.kbra.plant_game.engine.entity.water.AnimatedGameObject;
-import lu.kbra.plant_game.engine.entity.water.WaterTowerObject;
-import lu.kbra.plant_game.engine.entity.water.WaterWheelObject;
-import lu.kbra.plant_game.engine.mesh.AttributeLocation;
+import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory;
+import lu.kbra.plant_game.engine.entity.go.impl.AnimatedGameObject;
+import lu.kbra.plant_game.engine.entity.go.impl.GameObject;
+import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
+import lu.kbra.plant_game.engine.entity.go.mesh.terrain.TerrainMesh;
+import lu.kbra.plant_game.engine.entity.go.obj.energy.SolarPanelObject;
+import lu.kbra.plant_game.engine.entity.go.obj.terrain.TerrainObject;
+import lu.kbra.plant_game.engine.entity.go.obj.water.WaterTowerObject;
+import lu.kbra.plant_game.engine.entity.go.obj.water.WaterWheelObject;
+import lu.kbra.plant_game.engine.mesh.data.AttributeLocation;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
-import lu.kbra.plant_game.engine.scene.world.WorldGenerator.TerrainMaterialType;
+import lu.kbra.plant_game.engine.scene.world.data.LevelData;
+import lu.kbra.plant_game.engine.scene.world.generator.ImageWorldGenerator;
+import lu.kbra.plant_game.engine.scene.world.generator.WorldGenerator;
+import lu.kbra.plant_game.engine.scene.world.generator.WorldGenerator.TerrainMaterialType;
+import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.geom.QuadMesh;
@@ -33,11 +42,6 @@ import lu.kbra.standalone.gameengine.scene.Scene3D;
 import lu.kbra.standalone.gameengine.scene.camera.Camera3D;
 import lu.kbra.standalone.gameengine.utils.gl.consts.Direction;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
-import lu.pcy113.pclib.PCUtils;
-import lu.pcy113.pclib.datastructure.pair.Pair;
-import lu.pcy113.pclib.impl.ExceptionConsumer;
-import lu.pcy113.pclib.impl.ExceptionFunction;
-import lu.pcy113.pclib.logger.GlobalLogger;
 
 public class WorldLevelScene extends Scene3D {
 
@@ -78,7 +82,7 @@ public class WorldLevelScene extends Scene3D {
 			final long time = PCUtils.nanoTime(() -> worldGenerator.compute());
 			GlobalLogger.info("World generated in " + (time / 1e6) + " ms");
 			return worldGenerator;
-		}).then(renderDispatcher, (ExceptionFunction<WorldGenerator, TerrainMesh>) (worldGenerator) -> {
+		}).then(renderDispatcher, (ThrowingFunction<WorldGenerator, TerrainMesh, Throwable>) (worldGenerator) -> {
 			GlobalLogger.info("Generating mesh...");
 			final Pair<TerrainMesh, Long> mesh = PCUtils.nanoTime(() -> worldGenerator.generateMesh(this.getCache()));
 			GlobalLogger.info("Mesh generated in " + (mesh.getValue() / 1e6) + " ms");
@@ -97,20 +101,22 @@ public class WorldLevelScene extends Scene3D {
 
 			new TaskFuture<>(renderDispatcher, () -> {
 				GlobalLogger.info("Generating water mesh...");
-				final Pair<Mesh, Long> meshTime = PCUtils.nanoTime(() -> new QuadMesh("water", null,
-						new Vector2f(((TerrainMesh) this.getTerrain().getMesh()).getWidth(),
+				final Pair<Mesh, Long> meshTime = PCUtils
+						.nanoTime(() -> new QuadMesh("water", null, new Vector2f(((TerrainMesh) this.getTerrain().getMesh()).getWidth(),
 								((TerrainMesh) this.getTerrain().getMesh()).getLength())));
 				this.getCache().addMesh(meshTime.getKey());
 				GlobalLogger.info("Water mesh generated in " + (meshTime.getValue() / 1e6) + " ms");
 				return meshTime.getKey();
-			}).then(workers,
-					(ExceptionConsumer<Mesh>) (mesh) -> this
-							.setWaterLevel(new GameObject("water", mesh, new Transform3D(new Vector3f(0, 0.9f, 0)),
-									new Vector3i(2, 0, 0), TerrainMaterialType.WATER.getId())))
+			})
+					.then(workers,
+							(ThrowingConsumer<Mesh, Throwable>) (mesh) -> this
+									.setWaterLevel(new GameObject("water", mesh, new Transform3D(new Vector3f(0, 0.9f, 0)),
+											new Vector3i(2, 0, 0), TerrainMaterialType.WATER.getId())))
 					.push();
 
-			GameObjectFactory.create(WaterTowerObject.class, this, new Transform3D())
-					.then(workers, (ExceptionConsumer<WaterTowerObject>) (obj) -> {
+			GameObjectFactory
+					.create(WaterTowerObject.class, this, new Transform3D())
+					.then(workers, (ThrowingConsumer<WaterTowerObject, Throwable>) (obj) -> {
 						final Vector2i pos = new Vector2i(0, 0);
 						while (!obj.isPlaceable(this, pos, Direction.NONE)) {
 							pos.x++;
@@ -123,26 +129,35 @@ public class WorldLevelScene extends Scene3D {
 							}
 						}
 						obj.placeDown(this, pos, Direction.NONE);
-					}).push();
+					})
+					.push();
 
-			GameObjectFactory.create(WaterTowerObject.class, this, new Transform3D())
-					.then(workers, (ExceptionConsumer<WaterTowerObject>) (obj) -> {
+			GameObjectFactory
+					.create(WaterTowerObject.class, this, new Transform3D())
+					.then(workers, (ThrowingConsumer<WaterTowerObject, Throwable>) (obj) -> {
 						obj.placeDown(this, new Vector2i(11, 15), Direction.NONE);
-					}).push();
-
-			GameObjectFactory.create(SolarPanelObject.class, this, new Transform3D())
-					.then(workers, (ExceptionConsumer<SolarPanelObject>) (obj) -> obj.placeDown(this,
-							new Vector2i(15, 5), Direction.NONE))
+					})
 					.push();
 
-			GameObjectFactory.create(WaterWheelObject.class, this, new Transform3D())
-					.then(workers, (ExceptionConsumer<WaterWheelObject>) (obj) -> obj.placeDown(this,
-							new Vector2i(11, 7), Direction.WEST))
+			GameObjectFactory
+					.create(SolarPanelObject.class, this, new Transform3D())
+					.then(workers,
+							(ThrowingConsumer<SolarPanelObject, Throwable>) (obj) -> obj
+									.placeDown(this, new Vector2i(15, 5), Direction.NONE))
 					.push();
 
-			GameObjectFactory.create(WaterWheelObject.class, this, new Transform3D())
-					.then(workers, (ExceptionConsumer<WaterWheelObject>) (obj) -> obj.placeDown(this,
-							new Vector2i(13, 8), Direction.WEST))
+			GameObjectFactory
+					.create(WaterWheelObject.class, this, new Transform3D())
+					.then(workers,
+							(ThrowingConsumer<WaterWheelObject, Throwable>) (obj) -> obj
+									.placeDown(this, new Vector2i(11, 7), Direction.WEST))
+					.push();
+
+			GameObjectFactory
+					.create(WaterWheelObject.class, this, new Transform3D())
+					.then(workers,
+							(ThrowingConsumer<WaterWheelObject, Throwable>) (obj) -> obj
+									.placeDown(this, new Vector2i(13, 8), Direction.WEST))
 					.push();
 
 		}).push();
@@ -187,11 +202,14 @@ public class WorldLevelScene extends Scene3D {
 				movingObject = !movingObject;
 			}
 		}
-
 	}
 
-	public void update(final WindowInputHandler inputHandler, float dTime, DeferredCompositor compositor,
-			Dispatcher workers, Dispatcher renderDispatcher) {
+	public void update(
+			final WindowInputHandler inputHandler,
+			float dTime,
+			DeferredCompositor compositor,
+			Dispatcher workers,
+			Dispatcher renderDispatcher) {
 		if (moveObjectTaskState == null || moveObjectTaskState.isDone()) {
 			if (movingObject) {
 				if (attachedObject == null) {
@@ -201,14 +219,20 @@ public class WorldLevelScene extends Scene3D {
 						final Vector3i ids = new Vector3i(compositor.getObjectId().y, compositor.getObjectId().z,
 								compositor.getObjectId().w);
 
-						super.getEntities().values().parallelStream()
+						super.getEntities()
+								.values()
+								.parallelStream()
 								.filter(e -> e instanceof GameObject && e instanceof PlaceableObject
 										&& ((GameObject) e).getObjectIdLocation() == AttributeLocation.ENTITY);
 
-						attachedObject = (PlaceableObject) super.getEntities().values().parallelStream()
+						attachedObject = (PlaceableObject) super.getEntities()
+								.values()
+								.parallelStream()
 								.filter(e -> e instanceof GameObject && e instanceof PlaceableObject
 										&& ((GameObject) e).getObjectIdLocation() == AttributeLocation.ENTITY)
-								.filter(e -> ids.equals(((GameObject) e).getObjectId())).findFirst().orElse(null);
+								.filter(e -> ids.equals(((GameObject) e).getObjectId()))
+								.findFirst()
+								.orElse(null);
 
 						if (attachedObject == null) {
 							moveObjectTaskState = null;
@@ -220,8 +244,12 @@ public class WorldLevelScene extends Scene3D {
 				} else {
 					final Vector2f mousePos = inputHandler.getMousePosition();
 					moveObjectTaskState = new TaskFuture<Void, Void>(renderDispatcher, () -> {
-						final Vector2i pos = this.getTerrain().pickTerrainCell(super.getCamera(), mousePos,
-								compositor.getWindow().getWidth(), compositor.getWindow().getHeight());
+						final Vector2i pos = this
+								.getTerrain()
+								.pickTerrainCell(super.getCamera(),
+										mousePos,
+										compositor.getWindow().getWidth(),
+										compositor.getWindow().getHeight());
 						System.err.println(pos);
 						if (pos != null) {
 							attachedObject.placeDown(this, pos, targetRotation);

@@ -1,26 +1,24 @@
 // @formatter:off
 package lu.kbra.plant_game.generated;
 
-import java.lang.Class;
-import java.lang.Object;
-import java.lang.String;
-import java.lang.SuppressWarnings;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import lu.kbra.plant_game.engine.entity.electric.SolarPanelObject;
-import lu.kbra.plant_game.engine.entity.impl.GameObject;
-import lu.kbra.plant_game.engine.entity.water.WaterTowerObject;
-import lu.kbra.plant_game.engine.entity.water.WaterWheelObject;
+
+import org.joml.Vector3i;
+
+import lu.kbra.plant_game.engine.entity.go.impl.GameObject;
+import lu.kbra.plant_game.engine.entity.go.obj.energy.SolarPanelObject;
+import lu.kbra.plant_game.engine.entity.go.obj.water.WaterTowerObject;
+import lu.kbra.plant_game.engine.entity.go.obj.water.WaterWheelObject;
 import lu.kbra.plant_game.engine.mesh.AnimatedMesh;
-import lu.kbra.plant_game.exceptions.GameObjectConstructorNotFound;
-import lu.kbra.plant_game.exceptions.GameObjectNotFound;
-import lu.kbra.plant_game.exceptions.InternalConstructorFunction;
+import lu.kbra.plant_game.engine.util.InternalConstructorFunction;
+import lu.kbra.plant_game.engine.util.exceptions.GameObjectConstructorNotFound;
+import lu.kbra.plant_game.engine.util.exceptions.GameObjectNotFound;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
-import org.joml.Vector3i;
 
 public class GameObjectRegistry {
 	private static final Map<Class<? extends GameObject>, List<InternalConstructorFunction<GameObject>>> GAME_OBJECT_CONSTRUCTORS;
