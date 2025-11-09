@@ -4,6 +4,7 @@ import static lu.kbra.plant_game.engine.mesh.loader.MeshLoaderLocks.releaseLock;
 import static lu.kbra.plant_game.engine.mesh.loader.MeshLoaderLocks.waitOrCreateLock;
 
 import java.net.URI;
+import java.util.function.Function;
 
 import org.joml.Vector3f;
 import org.json.JSONObject;
@@ -11,7 +12,6 @@ import org.json.JSONObject;
 import lu.pcy113.pclib.PCUtils;
 import lu.pcy113.pclib.datastructure.pair.Pair;
 import lu.pcy113.pclib.datastructure.pair.Pairs;
-import lu.pcy113.pclib.impl.ThrowingFunction;
 import lu.pcy113.pclib.impl.ThrowingSupplier;
 
 import lu.kbra.plant_game.engine.mesh.TexturedQuadMesh;
@@ -78,7 +78,7 @@ public class StaticMeshLoader {
 				}
 
 				return getStaticMeshData(path);
-			}).then(render, (ThrowingFunction<GenericMeshData, Mesh, Throwable>) (meshData) -> {
+			}).then(render, (Function<GenericMeshData, Mesh>) (meshData) -> {
 				return createStatic(cache, meshName, meshData);
 			});
 
@@ -100,14 +100,14 @@ public class StaticMeshLoader {
 				txt.setFilters(TextureFilter.NEAREST);
 
 				return Pairs.readOnly(image, txt);
-			}).then(render, (pair) -> {
+			}).then(render, (Function<Pair<MemImage, SingleTexture>, Pair<MemImage, SingleTexture>>) (pair) -> {
 				pair.getValue().setup();
 				cache.addTexture(pair.getValue());
 				return pair;
-			}).then(loader, (pair) -> {
+			}).then(loader, (Function<Pair<MemImage, SingleTexture>, SingleTexture>) (pair) -> {
 				pair.getKey().cleanup();
 				return pair.getValue();
-			}).then(render, (ThrowingFunction<SingleTexture, Mesh, Throwable>) (txt) -> {
+			}).then(render, (Function<SingleTexture, Mesh>) (txt) -> {
 				return createStatic(cache, meshName, txt);
 			});
 

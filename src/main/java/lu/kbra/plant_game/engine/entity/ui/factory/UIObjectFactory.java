@@ -8,8 +8,8 @@ import org.joml.Vector2f;
 import lu.pcy113.pclib.PCUtils;
 import lu.pcy113.pclib.impl.ThrowingFunction;
 
-import lu.kbra.plant_game.engine.entity.ui.btn.TextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.AnimatedUIObject;
+import lu.kbra.plant_game.engine.entity.ui.impl.TextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.UIObject;
 import lu.kbra.plant_game.engine.mesh.loader.AnimatedMeshLoader;
 import lu.kbra.plant_game.engine.mesh.loader.AnimatedMeshLoader.AnimatedMeshes;
@@ -27,7 +27,8 @@ import lu.kbra.standalone.gameengine.utils.gl.consts.TextAlignment;
 
 public class UIObjectFactory {
 
-	public static final Vector2f DEFAULT_CHAR_SIZE = new Vector2f(0.1f);
+	public static final Vector2f DEFAULT_CHAR_SIZE = new Vector2f(0.5f);
+	public static final TextData DEFAULT_TEXT_DATA = new TextData(DEFAULT_CHAR_SIZE, TextAlignment.LEFT);
 	public static UIObjectFactory INSTANCE;
 
 	private final Map<Class<? extends UIObject>, Boolean> animatedMesh = new HashMap<>();
@@ -42,7 +43,7 @@ public class UIObjectFactory {
 		this.render = render;
 	}
 
-	public <T extends UIObject> TaskFuture<?, T> create_(Class<T> clazz, Object... args) {
+	public <T extends UIObject> TaskFuture<?, T> create_(Class<T> clazz, final Object... args) {
 		animatedMesh.computeIfAbsent(clazz, k -> AnimatedUIObject.class.isAssignableFrom(k));
 		dataPath.computeIfAbsent(clazz, k -> {
 			if (!k.isAnnotationPresent(DataPath.class)) {
@@ -89,13 +90,23 @@ public class UIObjectFactory {
 		} else if (TextUIObject.class.isAssignableFrom(clazz) && dataPath.get(clazz).startsWith("localization:")) {
 
 			final String key = dataPath.get(clazz).substring(dataPath.get(clazz).indexOf(":") + 1);
-			System.err.println(key);
+
+			final TextData td;
+			final Object[] nargs;
+			if (args[0] instanceof TextData vvec) {
+				td = vvec;
+				nargs = PCUtils.removeArray(args, 0);
+			} else {
+				td = DEFAULT_TEXT_DATA;
+				nargs = args;
+			}
+
 			return StaticTextLoader
-					.getFuture(cache, key, key, DEFAULT_CHAR_SIZE, TextAlignment.LEFT, loader, render)
+					.getFuture(cache, key, key, td, loader, render)
 					.then(loader, (ThrowingFunction<TextEmitter, T, Throwable>) (te) -> {
 						final T instance = UIObjectRegistry
 								.create(clazz,
-										PCUtils.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), te }, args));
+										PCUtils.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), te }, nargs));
 						return instance;
 					});
 
@@ -136,6 +147,9 @@ public class UIObjectFactory {
 
 	public static <T extends UIObject> TaskFuture<?, T> create(Class<T> clazz, UIScene scene, Object... args) {
 		return INSTANCE.create_(clazz, scene, args);
+	}
+
+	public static record TextData(Vector2f charSize, TextAlignment textAlignment) {
 	}
 
 }

@@ -1,4 +1,4 @@
-package lu.kbra.plant_game.engine.entity.ui.btn;
+package lu.kbra.plant_game.engine.entity.ui.impl;
 
 import lu.pcy113.pclib.impl.TriConsumer;
 

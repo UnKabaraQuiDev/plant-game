@@ -2,28 +2,26 @@ package lu.kbra.plant_game;
 
 import java.io.File;
 import java.util.Locale;
-import java.util.Properties;
 
-import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
 import lu.kbra.plant_game.engine.locale.LocalizationService;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
+import lu.kbra.plant_game.engine.scene.ui.MainMenuUIScene;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.plant_game.engine.window.input.MappingInputHandler;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.impl.GameLogic;
-import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
 import lu.kbra.standalone.gameengine.impl.future.WorkerDispatcher;
 import lu.kbra.standalone.gameengine.utils.gl.consts.Consts;
 
 public class PGLogic extends GameLogic {
 
-	private final Dispatcher WORKERS = new WorkerDispatcher("WORKERS", 8);
+	private final WorkerDispatcher WORKERS = new WorkerDispatcher("WORKERS", 8);
 
 	private WorldLevelScene worldScene;
 	private UIScene uiScene;
@@ -48,15 +46,7 @@ public class PGLogic extends GameLogic {
 		worldScene.getCamera().getProjection().setFov((float) Math.toRadians(40));
 		worldScene.getLightDirection().set(new Vector3f(0.5f, 0.5f, 0.5f).normalize());
 
-		uiScene = new UIScene("ui", cache);
-		uiScene.getCamera().getPosition().set(0, 1, 0);
-		uiScene.getCamera().getRotation().set(new Quaternionf().lookAlong(new Vector3f(0, -1, 0), new Vector3f(0, 0, -1)));
-		uiScene.getCamera().getProjection().setSize(1);
-		uiScene.getCamera().getProjection().setNearPlane(0.001f);
-		uiScene.getCamera().getProjection().setFarPlane(1000f);
-		uiScene.getCamera().getProjection().setPerspective(false);
-		uiScene.getCamera().getProjection().update();
-		uiScene.getCamera().updateMatrix();
+		uiScene = new MainMenuUIScene(cache);
 
 		UIObjectFactory.INSTANCE = new UIObjectFactory(uiScene.getCache(), WORKERS, RENDER_DISPATCHER);
 		GameObjectFactory.INSTANCE = new GameObjectFactory(worldScene.getCache(), WORKERS, RENDER_DISPATCHER);
@@ -93,6 +83,7 @@ public class PGLogic extends GameLogic {
 	@Override
 	public void cleanup() {
 		compositor.cleanup();
+		WORKERS.shutdown();
 	}
 
 }

@@ -1,6 +1,7 @@
 package lu.kbra.plant_game.engine.scene.world;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.function.Consumer;
 
 import org.joml.Vector2f;
 import org.joml.Vector2i;
@@ -87,7 +88,7 @@ public class WorldLevelScene extends Scene3D {
 			final Pair<TerrainMesh, Long> mesh = PCUtils.nanoTime(() -> worldGenerator.generateMesh(this.getCache()));
 			GlobalLogger.info("Mesh generated in " + (mesh.getValue() / 1e6) + " ms");
 			return mesh.getKey();
-		}, 0).then(workers, (mesh) -> {
+		}, 0).then(workers, (Consumer<TerrainMesh>) (mesh) -> {
 			GlobalLogger.info("Creating entity...");
 			final long time = PCUtils.nanoTime((Runnable) () -> {
 				final TerrainObject terrainEntity = new TerrainObject("terrain", mesh);
@@ -96,7 +97,7 @@ public class WorldLevelScene extends Scene3D {
 				this.setTerrain(terrainEntity);
 			});
 			GlobalLogger.info("Entity created in " + (time / 1e6) + " ms");
-		}).then(workers, () -> {
+		}).then(workers, (Runnable) () -> {
 			terrainLatch.countDown();
 
 			new TaskFuture<>(renderDispatcher, () -> {

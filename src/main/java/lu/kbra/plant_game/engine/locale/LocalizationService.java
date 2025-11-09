@@ -29,7 +29,6 @@ public class LocalizationService {
 
 		while (resources.hasMoreElements()) {
 			final URL url = resources.nextElement();
-			System.err.println(url);
 			try (InputStream in = url.openStream()) {
 				final Properties cprop = new Properties();
 				cprop.load(in);

@@ -1,10 +1,9 @@
-package lu.kbra.plant_game.engine.entity.ui.btn;
+package lu.kbra.plant_game.engine.entity.ui.impl;
 
 import java.awt.Shape;
 
 import javax.swing.GroupLayout.Alignment;
 
-import lu.kbra.plant_game.engine.entity.ui.impl.UIObject;
 import lu.kbra.standalone.gameengine.objs.entity.components.TextEmitterComponent;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
 import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
