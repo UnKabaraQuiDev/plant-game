@@ -21,6 +21,8 @@ import lu.kbra.standalone.gameengine.utils.gl.consts.Consts;
 
 public class PGLogic extends GameLogic {
 
+	public static PGLogic INSTANCE;
+
 	private final WorkerDispatcher WORKERS = new WorkerDispatcher("WORKERS", 8);
 
 	private WorldLevelScene worldScene;
@@ -30,6 +32,10 @@ public class PGLogic extends GameLogic {
 	private TaskFuture<?, Void>.TaskState<Void> state;
 
 	private WindowInputHandler inputHandler;
+
+	public PGLogic() {
+		INSTANCE = this;
+	}
 
 	@Override
 	public void init() throws Exception {
@@ -69,6 +75,7 @@ public class PGLogic extends GameLogic {
 
 	@Override
 	public void update(float dTime) {
+		uiScene.update(inputHandler, dTime, compositor, WORKERS, RENDER_DISPATCHER);
 		worldScene.update(inputHandler, dTime, compositor, WORKERS, RENDER_DISPATCHER);
 	}
 
@@ -84,6 +91,10 @@ public class PGLogic extends GameLogic {
 	public void cleanup() {
 		compositor.cleanup();
 		WORKERS.shutdown();
+	}
+
+	public static double TOTAL_TIME() {
+		return INSTANCE.engine.getTotalTime();
 	}
 
 }

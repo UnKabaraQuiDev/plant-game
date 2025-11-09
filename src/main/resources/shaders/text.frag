@@ -23,9 +23,9 @@ uniform uint len;
 uniform bool transparent;
 
 void main() {
-	/*if (bet_Index >= len) {
+	if (bet_Index >= len) {
 		discard;
-	}*/
+	}
 
 	vec4 mask = texture(
 			txt0,
@@ -35,13 +35,12 @@ void main() {
 			)
 	);
 
-	if(mask.a == 0.0 && transparent) {
+	if (mask.a <= 0.001 && transparent) {
 		discard;
-	}
-
-	if(mask.r > 0.0) {
+	} else if(mask.r > 0.0) {
 		fragColor = fgColor * mask;
-	}else{
+	} else {
 		fragColor = bgColor * mask;
 	}
+
 }

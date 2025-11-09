@@ -1,8 +1,10 @@
 package lu.kbra.plant_game.engine.scene.ui;
 
-import java.awt.Shape;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
@@ -12,20 +14,26 @@ import org.joml.Vector4f;
 import org.lwjgl.glfw.GLFW;
 
 import lu.kbra.plant_game.UpdateFrameState;
+import lu.kbra.plant_game.engine.entity.impl.Transform3DOwner;
+import lu.kbra.plant_game.engine.entity.ui.NeedsUpdate;
+import lu.kbra.plant_game.engine.entity.ui.btn.HoverState;
 import lu.kbra.plant_game.engine.entity.ui.impl.DelegatingTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.UIObject;
+import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
-import lu.kbra.standalone.gameengine.GameEngine;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
+import lu.kbra.standalone.gameengine.impl.future.WorkerDispatcher;
 import lu.kbra.standalone.gameengine.objs.entity.Entity;
 import lu.kbra.standalone.gameengine.scene.Scene3D;
 import lu.kbra.standalone.gameengine.scene.camera.Camera;
-import lu.kbra.standalone.gameengine.utils.geo.GeoPlane;
 
 public class UIScene extends Scene3D {
 
-	private CacheManager uiCache;
+	public static final Comparator<Entity> DEPTH_COMPARATOR = Comparator
+			.comparing((Entity e) -> e instanceof Transform3DOwner ? ((Transform3DOwner) e).getTransform().getTranslation().y : 0f);
+
+	private final CacheManager uiCache;
 	private DelegatingTextUIObject textEntity;
 
 	public UIScene(String name, CacheManager parent) {
@@ -47,36 +55,52 @@ public class UIScene extends Scene3D {
 
 	}
 
+	protected Set<UIObject> hovering = new HashSet<>();
+
 	public void input(final WindowInputHandler inputHandler, final float dTime, final UpdateFrameState frameState) {
 		final Vector2f normalizedMousePosition = inputHandler.getNormalizedMousePosition();
 		final Matrix4f inverseProj = new Matrix4f(super.getCamera().getProjection().getProjectionMatrix()).invert();
 		final Vector4f mouseClip = new Vector4f(normalizedMousePosition.x, normalizedMousePosition.y, 0f, 1f);
 		final Vector4f mouseWorld = inverseProj.transform(mouseClip);
 
-		final Vector2f mouseWorld2D = new Vector2f(mouseWorld.x / mouseWorld.w, mouseWorld.y / mouseWorld.w);
+		final Vector2f mouseWorld2D = new Vector2f(mouseWorld.x / mouseWorld.w, -mouseWorld.y / mouseWorld.w);
+
+		final Set<UIObject> newHovered = new HashSet<>();
 
 		synchronized (super.getEntitiesLock()) {
 			for (Entity e : this) {
-				if (e instanceof UIObject uiObj) {
-					final Shape bounds = uiObj.getBounds();
-					final Vector3f pos3 = uiObj.getTransform() == null ? GameEngine.ZERO : uiObj.getTransform().getTranslation();
-					final Vector3f scale3 = uiObj.getTransform() == null ? GameEngine.IDENTITY : uiObj.getTransform().getScale();
-					final Vector2f pos = GeoPlane.XY.projectToPlane(pos3);
-					mouseWorld2D.sub(pos, pos);
+				if (e instanceof UIObject uiObj
+						&& uiObj.getTransformedBounds().contains(new Point2D.Float(mouseWorld2D.x, mouseWorld2D.y))) {
+					frameState.uiSceneCaughtMouseInput = true;
 
-					final AffineTransform scaledTransform = new AffineTransform();
-					scaledTransform.scale(scale3.x, scale3.y);
-					final Shape scaledBounds = scaledTransform.createTransformedShape(bounds);
+					uiObj.hover(inputHandler, dTime, hovering.contains(uiObj) ? HoverState.STAY : HoverState.ENTER);
+					newHovered.add(uiObj);
 
-					if (scaledBounds.contains(new Point2D.Float(pos.x, pos.y))) {
-						frameState.uiSceneCaughtMouseInput = true;
-
-						uiObj.hover(inputHandler, dTime);
-
-						if (inputHandler.isMouseButtonPressedOnce(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
-							uiObj.click(inputHandler, dTime);
-						}
+					if (inputHandler.isMouseButtonPressedOnce(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
+						uiObj.click(inputHandler, dTime);
 					}
+				}
+			}
+		}
+
+		hovering.removeAll(newHovered);
+		for (UIObject uiObj : hovering) {
+			uiObj.hover(inputHandler, dTime, HoverState.LEAVE);
+		}
+
+		hovering = newHovered;
+	}
+
+	public void update(
+			WindowInputHandler inputHandler,
+			float dTime,
+			DeferredCompositor compositor,
+			WorkerDispatcher workers,
+			Dispatcher render) {
+		synchronized (super.getEntitiesLock()) {
+			for (Entity e : this) {
+				if (e instanceof NeedsUpdate needsUpdate) {
+					needsUpdate.update(dTime);
 				}
 			}
 		}
@@ -84,6 +108,11 @@ public class UIScene extends Scene3D {
 
 	public CacheManager getCache() {
 		return uiCache;
+	}
+
+	@Override
+	public Iterator<Entity> iterator() {
+		return this.entities.values().stream().sorted(DEPTH_COMPARATOR).iterator();
 	}
 
 }

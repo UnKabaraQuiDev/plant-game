@@ -1,35 +1,19 @@
 package lu.kbra.plant_game.engine.entity.ui.btn;
 
-import java.awt.Shape;
-
-import lu.kbra.plant_game.engine.entity.ui.impl.UIObject;
+import lu.kbra.plant_game.engine.entity.ui.impl.TextureUIObject;
+import lu.kbra.plant_game.engine.mesh.TexturedQuadMesh;
 import lu.kbra.plant_game.engine.util.DataPath;
-import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
-import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 @DataPath("classpath:/icons/money-32.png")
-public class MoneyUIObject extends UIObject {
+public class MoneyUIObject extends TextureUIObject {
 
-	public MoneyUIObject(String str, Mesh mesh) {
+	public MoneyUIObject(String str, TexturedQuadMesh mesh) {
 		super(str, mesh);
 	}
 
-	public MoneyUIObject(String str, Mesh mesh, Transform3D transform) {
+	public MoneyUIObject(String str, TexturedQuadMesh mesh, Transform3D transform) {
 		super(str, mesh, transform);
-	}
-
-	@Override
-	public void hover(WindowInputHandler input, float dTime) {
-	}
-
-	@Override
-	public void click(WindowInputHandler input, float dTime) {
-	}
-
-	@Override
-	public Shape getBounds() {
-		return UIObject.SQUARE_1_UNIT;
 	}
 
 }

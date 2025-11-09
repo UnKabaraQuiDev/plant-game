@@ -158,7 +158,7 @@ public class DeferredCompositor implements Cleanupable {
 		fontTexture = SingleTexture
 				.loadSingleTexture(cache,
 						TextDirectShader.FONT_TEXTURE_NAME,
-						"classpath:/bakes/fonts/QuinqueFive.ttf/16.png",
+						"classpath:/bakes/fonts/QuinqueFive.ttf/48.png",
 						TextureFilter.NEAREST);
 		fontTexture.setGenerateMipmaps(true);
 		fontTexture.genMipMaps();
@@ -667,17 +667,29 @@ public class DeferredCompositor implements Cleanupable {
 			shader.setUniform(RenderShader.TRANSFORMATION_MATRIX, transformationMatrix);
 		}
 
+		final boolean transparent = entity instanceof TransparentEntity
+				|| (obj.isTransparent() != null ? (boolean) obj.isTransparent() : TextEmitter.DEFAULT_TRANSPARENT);
+
 		fontTexture.bindUniform(shader.getUniformLocation(TextDirectShader.TXT0), 1);
 
-		shader.setUniform(TextDirectShader.FG_COLOR, new Vector4f(1));
-		shader.setUniform(TextDirectShader.BG_COLOR, new Vector4f(0.1f));
-		shader.setUniform(TextDirectShader.TRANSPARENT, false);
-		shader.setUniformUnsigned(TextDirectShader.TEXT_LENGTH, obj.getText().length());
+		shader
+				.setUniform(TextDirectShader.FG_COLOR,
+						obj.getForegroundColor() != null ? obj.getForegroundColor() : TextEmitter.DEFAULT_FG_COLOR);
+		shader
+				.setUniform(TextDirectShader.BG_COLOR,
+						obj.getBackgroundColor() != null ? obj.getBackgroundColor() : TextEmitter.DEFAULT_BG_COLOR);
+		shader.setUniform(TextDirectShader.TRANSPARENT, transparent);
+		shader.setUniformUnsigned(TextDirectShader.TEXT_LENGTH, obj.getCharCount());
 
 		GL_W.glDisable(GL_W.GL_CULL_FACE);
 		assert GL_W.checkError("Disable(CULL_FACE)");
-		GL_W.glEnable(GL_W.GL_BLEND);
-		assert GL_W.checkError("Enable(BLEND)");
+		if (transparent) {
+			GL_W.glEnable(GL_W.GL_BLEND);
+			assert GL_W.checkError("Enable(BLEND)");
+		} else {
+			GL_W.glDisable(GL_W.GL_BLEND);
+			assert GL_W.checkError("Disable(BLEND)");
+		}
 		GL_W.glBlendFunc(GL_W.GL_SRC_ALPHA, GL_W.GL_ONE_MINUS_SRC_ALPHA);
 		assert GL_W.checkError("BlendFunc(SRC_ALPHA, ONE_MINUS_SRC_ALPHA)");
 

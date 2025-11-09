@@ -10,17 +10,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import lu.kbra.plant_game.engine.entity.ui.CursorUIObject;
 import lu.kbra.plant_game.engine.entity.ui.btn.MoneyUIObject;
 import lu.kbra.plant_game.engine.entity.ui.btn.OptionsButtonUIObject;
 import lu.kbra.plant_game.engine.entity.ui.btn.PlayButtonUIObject;
 import lu.kbra.plant_game.engine.entity.ui.btn.QuitButtonUIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.DelegatingTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.TextUIObject;
+import lu.kbra.plant_game.engine.entity.ui.impl.TextureUIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.UIObject;
+import lu.kbra.plant_game.engine.mesh.TexturedQuadMesh;
 import lu.kbra.plant_game.engine.util.InternalConstructorFunction;
 import lu.kbra.plant_game.engine.util.exceptions.UIObjectConstructorNotFound;
 import lu.kbra.plant_game.engine.util.exceptions.UIObjectNotFound;
-import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 import lu.pcy113.pclib.impl.TriConsumer;
@@ -37,10 +39,28 @@ public class UIObjectRegistry {
 		listTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, Transform3D.class}, (Object[] arr) -> (UIObject) new TextUIObject((String) arr[0], (TextEmitter) arr[1], (Transform3D) arr[2])));
 		UI_OBJECT_CONSTRUCTORS.put(TextUIObject.class, listTextUIObject);
 
+		/*                 TextureUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listTextureUIObject = new ArrayList<>();
+		listTextureUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new TextureUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
+		listTextureUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class, Transform3D.class}, (Object[] arr) -> (UIObject) new TextureUIObject((String) arr[0], (TexturedQuadMesh) arr[1], (Transform3D) arr[2])));
+		UI_OBJECT_CONSTRUCTORS.put(TextureUIObject.class, listTextureUIObject);
+
+		/*                 DelegatingTextUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listDelegatingTextUIObject = new ArrayList<>();
+		listDelegatingTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, TriConsumer.class, TriConsumer.class}, (Object[] arr) -> (UIObject) new DelegatingTextUIObject((String) arr[0], (TextEmitter) arr[1], (TriConsumer) arr[2], (TriConsumer) arr[3])));
+		listDelegatingTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, Transform3D.class, TriConsumer.class, TriConsumer.class}, (Object[] arr) -> (UIObject) new DelegatingTextUIObject((String) arr[0], (TextEmitter) arr[1], (Transform3D) arr[2], (TriConsumer) arr[3], (TriConsumer) arr[4])));
+		UI_OBJECT_CONSTRUCTORS.put(DelegatingTextUIObject.class, listDelegatingTextUIObject);
+
+		/*                 CursorUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listCursorUIObject = new ArrayList<>();
+		listCursorUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new CursorUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
+		listCursorUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class, Transform3D.class}, (Object[] arr) -> (UIObject) new CursorUIObject((String) arr[0], (TexturedQuadMesh) arr[1], (Transform3D) arr[2])));
+		UI_OBJECT_CONSTRUCTORS.put(CursorUIObject.class, listCursorUIObject);
+
 		/*                 MoneyUIObject                 */
 		final List<InternalConstructorFunction<UIObject>> listMoneyUIObject = new ArrayList<>();
-		listMoneyUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class}, (Object[] arr) -> (UIObject) new MoneyUIObject((String) arr[0], (Mesh) arr[1])));
-		listMoneyUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class, Transform3D.class}, (Object[] arr) -> (UIObject) new MoneyUIObject((String) arr[0], (Mesh) arr[1], (Transform3D) arr[2])));
+		listMoneyUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new MoneyUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
+		listMoneyUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class, Transform3D.class}, (Object[] arr) -> (UIObject) new MoneyUIObject((String) arr[0], (TexturedQuadMesh) arr[1], (Transform3D) arr[2])));
 		UI_OBJECT_CONSTRUCTORS.put(MoneyUIObject.class, listMoneyUIObject);
 
 		/*                 OptionsButtonUIObject                 */
@@ -54,12 +74,6 @@ public class UIObjectRegistry {
 		listQuitButtonUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class}, (Object[] arr) -> (UIObject) new QuitButtonUIObject((String) arr[0], (TextEmitter) arr[1])));
 		listQuitButtonUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, Transform3D.class}, (Object[] arr) -> (UIObject) new QuitButtonUIObject((String) arr[0], (TextEmitter) arr[1], (Transform3D) arr[2])));
 		UI_OBJECT_CONSTRUCTORS.put(QuitButtonUIObject.class, listQuitButtonUIObject);
-
-		/*                 DelegatingTextUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listDelegatingTextUIObject = new ArrayList<>();
-		listDelegatingTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, TriConsumer.class, TriConsumer.class}, (Object[] arr) -> (UIObject) new DelegatingTextUIObject((String) arr[0], (TextEmitter) arr[1], (TriConsumer) arr[2], (TriConsumer) arr[3])));
-		listDelegatingTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, Transform3D.class, TriConsumer.class, TriConsumer.class}, (Object[] arr) -> (UIObject) new DelegatingTextUIObject((String) arr[0], (TextEmitter) arr[1], (Transform3D) arr[2], (TriConsumer) arr[3], (TriConsumer) arr[4])));
-		UI_OBJECT_CONSTRUCTORS.put(DelegatingTextUIObject.class, listDelegatingTextUIObject);
 
 		/*                 PlayButtonUIObject                 */
 		final List<InternalConstructorFunction<UIObject>> listPlayButtonUIObject = new ArrayList<>();

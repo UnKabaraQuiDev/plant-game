@@ -2,6 +2,7 @@ package lu.kbra.plant_game.engine.entity.ui.impl;
 
 import lu.pcy113.pclib.impl.TriConsumer;
 
+import lu.kbra.plant_game.engine.entity.ui.btn.HoverState;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
@@ -28,7 +29,7 @@ public class DelegatingTextUIObject extends TextUIObject {
 	}
 
 	@Override
-	public void hover(WindowInputHandler input, float dTime) {
+	public void hover(WindowInputHandler input, float dTime, HoverState hoverState) {
 		if (hoverDelegate != null) {
 			hoverDelegate.accept(input, dTime, this);
 		}
