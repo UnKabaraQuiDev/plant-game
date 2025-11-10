@@ -4,6 +4,7 @@ import java.awt.geom.Point2D;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import org.joml.Matrix4f;
@@ -18,7 +19,6 @@ import lu.kbra.plant_game.engine.entity.impl.Transform3DOwner;
 import lu.kbra.plant_game.engine.entity.ui.HoverState;
 import lu.kbra.plant_game.engine.entity.ui.NeedsUpdate;
 import lu.kbra.plant_game.engine.entity.ui.btn.NeedsClick;
-import lu.kbra.plant_game.engine.entity.ui.impl.DelegatingTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsHover;
 import lu.kbra.plant_game.engine.entity.ui.impl.UIObject;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
@@ -27,6 +27,7 @@ import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.WorkerDispatcher;
 import lu.kbra.standalone.gameengine.objs.entity.Entity;
+import lu.kbra.standalone.gameengine.objs.entity.components.SubEntitiesComponent;
 import lu.kbra.standalone.gameengine.scene.Scene3D;
 import lu.kbra.standalone.gameengine.scene.camera.Camera;
 
@@ -36,7 +37,6 @@ public class UIScene extends Scene3D {
 			.comparing((Entity e) -> e instanceof Transform3DOwner ? ((Transform3DOwner) e).getTransform().getTranslation().y : 0f);
 
 	private final CacheManager uiCache;
-	private DelegatingTextUIObject textEntity;
 
 	public UIScene(String name, CacheManager parent) {
 		super(name);
@@ -71,19 +71,7 @@ public class UIScene extends Scene3D {
 
 		synchronized (super.getEntitiesLock()) {
 			for (Entity e : this) {
-				if (e instanceof UIObject uiObj && (e instanceof NeedsHover || e instanceof NeedsClick)
-						&& uiObj.getTransformedBounds().contains(new Point2D.Float(mouseWorld2D.x, mouseWorld2D.y))) {
-					frameState.uiSceneCaughtMouseInput = true;
-
-					if (uiObj instanceof NeedsHover uiObjectHover) {
-						uiObjectHover.hover(inputHandler, dTime, hovering.contains(uiObj) ? HoverState.STAY : HoverState.ENTER);
-						newHovered.add(uiObj);
-					}
-
-					if (uiObj instanceof NeedsClick uiObjectClick && inputHandler.isMouseButtonPressedOnce(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
-						uiObjectClick.click(inputHandler, dTime);
-					}
-				}
+				checkInput(e, inputHandler, dTime, frameState, mouseWorld2D, newHovered);
 			}
 		}
 
@@ -95,6 +83,36 @@ public class UIScene extends Scene3D {
 		hovering = newHovered;
 	}
 
+	private void checkInput(
+			Entity e,
+			WindowInputHandler inputHandler,
+			float dTime,
+			UpdateFrameState frameState,
+			Vector2f mouseWorld2D,
+			Set<UIObject> newHovered) {
+		if (e.hasComponentMatching(SubEntitiesComponent.class)) {
+			e.getComponentsMatching(SubEntitiesComponent.class).forEach(se -> {
+				for (Entity e2 : (List<Entity>) se.getEntities()) {
+					checkInput(e2, inputHandler, dTime, frameState, mouseWorld2D, newHovered);
+				}
+			});
+		}
+
+		if (e instanceof UIObject uiObj && (e instanceof NeedsHover || e instanceof NeedsClick)
+				&& uiObj.getTransformedBounds().contains(new Point2D.Float(mouseWorld2D.x, mouseWorld2D.y))) {
+			frameState.uiSceneCaughtMouseInput = true;
+
+			if (uiObj instanceof NeedsHover uiObjectHover) {
+				uiObjectHover.hover(inputHandler, dTime, hovering.contains(uiObj) ? HoverState.STAY : HoverState.ENTER);
+				newHovered.add(uiObj);
+			}
+
+			if (uiObj instanceof NeedsClick uiObjectClick && inputHandler.isMouseButtonPressedOnce(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
+				uiObjectClick.click(inputHandler, dTime);
+			}
+		}
+	}
+
 	public void update(
 			WindowInputHandler inputHandler,
 			float dTime,
@@ -103,10 +121,22 @@ public class UIScene extends Scene3D {
 			Dispatcher render) {
 		synchronized (super.getEntitiesLock()) {
 			for (Entity e : this) {
-				if (e instanceof NeedsUpdate needsUpdate) {
-					needsUpdate.update(dTime);
-				}
+				updateEntity(inputHandler, dTime, e);
 			}
+		}
+	}
+
+	private void updateEntity(WindowInputHandler inputHandler, float dTime, Entity e) {
+		if (e.hasComponentMatching(SubEntitiesComponent.class)) {
+			e.getComponentsMatching(SubEntitiesComponent.class).forEach(se -> {
+				for (Entity e2 : (List<Entity>) se.getEntities()) {
+					updateEntity(inputHandler, dTime, e2);
+				}
+			});
+		}
+
+		if (e instanceof NeedsUpdate needsUpdate) {
+			needsUpdate.update(dTime);
 		}
 	}
 

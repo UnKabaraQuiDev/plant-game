@@ -22,7 +22,7 @@ public class PGLogic extends GameLogic {
 
 	public static PGLogic INSTANCE;
 
-	private final WorkerDispatcher WORKERS = new WorkerDispatcher("WORKERS", 8);
+	public final WorkerDispatcher WORKERS = new WorkerDispatcher("WORKERS", 8);
 
 	private WorldLevelScene worldScene;
 	private UIScene uiScene;
@@ -88,6 +88,26 @@ public class PGLogic extends GameLogic {
 	public void cleanup() {
 		compositor.cleanup();
 		WORKERS.shutdown();
+	}
+
+	public WorldLevelScene getWorldScene() {
+		return worldScene;
+	}
+
+	public UIScene getUiScene() {
+		return uiScene;
+	}
+
+	public DeferredCompositor getCompositor() {
+		return compositor;
+	}
+
+	public WindowInputHandler getInputHandler() {
+		return inputHandler;
+	}
+
+	public UpdateFrameState getFrameState() {
+		return frameState;
 	}
 
 	public static double TOTAL_TIME() {

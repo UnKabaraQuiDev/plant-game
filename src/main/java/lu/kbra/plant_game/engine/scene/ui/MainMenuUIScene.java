@@ -1,20 +1,16 @@
 package lu.kbra.plant_game.engine.scene.ui;
 
-import java.util.Optional;
 import java.util.function.Consumer;
 
 import org.joml.Quaternionf;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 
-import lu.pcy113.pclib.PCUtils;
-
 import lu.kbra.plant_game.engine.entity.ui.btn.OptionsButtonUIObject;
 import lu.kbra.plant_game.engine.entity.ui.btn.PlayButtonUIObject;
 import lu.kbra.plant_game.engine.entity.ui.btn.QuitButtonUIObject;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory.TextData;
-import lu.kbra.plant_game.engine.entity.ui.impl.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.texture.CursorUIObject;
 import lu.kbra.plant_game.engine.entity.ui.texture.GradientQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.texture.LargeLogoUIObject;
@@ -30,11 +26,23 @@ import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 public class MainMenuUIScene extends UIScene {
 
-	protected UIObjectGroup mainMenuGroup = new UIObjectGroup();
+	public static final int MAIN = 0;
+	public static final int PLAY = 1;
+	public static final int OPTIONS = 2;
+	public static final int QUIT = 3;
+
+	protected int currentGroup = 0;
+	protected int targetGroup = 0;
+
+	protected OffsetUIObjectGroup mainMenuGroup = new OffsetUIObjectGroup("main", new Transform3D());
+	protected OffsetUIObjectGroup optionMenuGroup = new OffsetUIObjectGroup("option", new Transform3D(new Vector3f(2, 0, 0)));
+
+	protected OffsetUIObjectGroup[] groups = new OffsetUIObjectGroup[] { mainMenuGroup, null, optionMenuGroup, null };
 
 	protected CursorUIObject cursor;
 
-	protected GradientQuadUIObject gradient;
+	protected GradientQuadUIObject greenGradient;
+	protected GradientQuadUIObject blueGradient;
 
 	public MainMenuUIScene(CacheManager parent) {
 		super("main-menu", parent);
@@ -42,33 +50,59 @@ public class MainMenuUIScene extends UIScene {
 
 	@Override
 	public void init(Dispatcher workers, Dispatcher renderDispatcher) {
+		super.addEntities(mainMenuGroup, optionMenuGroup);
+
 		final TextData uiTextData = new TextData(new Vector2f(0.2f), TextAlignment.TEXT_CENTER);
 
 		final float x = -0.8f;
 
+		/** main menu */
 		UIObjectFactory
-				.create(PlayButtonUIObject.class, this, uiTextData, new Transform3D(new Vector3f(x, 0, -0.25f)))
-				.then(workers, (Consumer<PlayButtonUIObject>) mainMenuGroup::add)
+				.create(PlayButtonUIObject.class, uiTextData, new Transform3D(new Vector3f(x, 0, -0.25f)))
+				.then(workers, (Consumer<PlayButtonUIObject>) (t) -> {
+					mainMenuGroup.add(t);
+				})
 				.push();
 		UIObjectFactory
-				.create(OptionsButtonUIObject.class, this, uiTextData, new Transform3D(new Vector3f(x, 0, 0)))
-				.then(workers, (Consumer<OptionsButtonUIObject>) mainMenuGroup::add)
+				.create(OptionsButtonUIObject.class, uiTextData, new Transform3D(new Vector3f(x, 0, 0)))
+				.then(workers, (Consumer<OptionsButtonUIObject>) (t) -> {
+					mainMenuGroup.add(t);
+				})
 				.push();
 		UIObjectFactory
-				.create(QuitButtonUIObject.class, this, uiTextData, new Transform3D(new Vector3f(x, 0, 0.25f)))
-				.then(workers, (Consumer<QuitButtonUIObject>) mainMenuGroup::add)
+				.create(QuitButtonUIObject.class, uiTextData, new Transform3D(new Vector3f(x, 0, 0.25f)))
+				.then(workers, (Consumer<QuitButtonUIObject>) (t) -> {
+					mainMenuGroup.add(t);
+				})
 				.push();
 
 		UIObjectFactory
-				.create(LargeLogoUIObject.class, this, new Transform3D(new Vector3f(0, 0, -0.75f), new Quaternionf(), new Vector3f(2)))
-				.then(workers, (Consumer<LargeLogoUIObject>) mainMenuGroup::add)
+				.create(LargeLogoUIObject.class, new Transform3D(new Vector3f(0, 0, -0.75f), new Quaternionf(), new Vector3f(2)))
+				.then(workers, (Consumer<LargeLogoUIObject>) (t) -> {
+					mainMenuGroup.add(t);
+				})
 				.push();
 
 		UIObjectFactory
-				.create(GradientQuadUIObject.class, this, new Transform3D(), GradientDirection.UV_X)
+				.create(GradientQuadUIObject.class, new Transform3D(), GradientDirection.UV_X, GameEngineUtils.hexToColorToVec4f("3b784a"))
 				.then(workers, (Consumer<GradientQuadUIObject>) (GradientQuadUIObject t) -> {
-					t.setTint(GameEngineUtils.hexToColorToVec4f("3b784a"));
-					gradient = t;
+					t.getTransform().translationSet(-1, -0.11f, 0).scaleSet(2, 1, 2).updateMatrix();
+					greenGradient = t;
+					mainMenuGroup.add(t);
+				})
+				.push();
+
+		/** options */
+
+		UIObjectFactory
+				.create(GradientQuadUIObject.class,
+						new Transform3D(),
+						GradientDirection.UV_X,
+						GameEngineUtils.hexToColorToVec4f("317dac8c"))
+				.then(workers, (Consumer<GradientQuadUIObject>) (GradientQuadUIObject t) -> {
+					t.getTransform().translationSet(0.9f, -0.1f, 0).scaleSet(2, 1, 2).rotationSet(0, (float) Math.PI, 0).updateMatrix();
+					blueGradient = t;
+					optionMenuGroup.add(t);
 				})
 				.push();
 
@@ -79,6 +113,7 @@ public class MainMenuUIScene extends UIScene {
 					cursor = btn;
 				})
 				.push();
+
 	}
 
 	@Override
@@ -91,16 +126,34 @@ public class MainMenuUIScene extends UIScene {
 		super.update(inputHandler, dTime, compositor, workers, render);
 
 		if (cursor != null) {
-			final Optional<UIObject> hoverObj = hovering.stream().findFirst();
-			if (hoverObj.isPresent())
-				cursor.setTargetedObject(hoverObj.get());
+			hovering.stream().findFirst().ifPresent(cursor::setTargetedObject);
 		}
 
-		if (gradient != null) {
-			gradient.getTransform().getTranslation().set(-0.9f, -0.1f, 0);
-			gradient.getTransform().getScale().set(2, 1, 2);	
-			gradient.getTransform().updateMatrix();
+		if (greenGradient != null) {
+			greenGradient.getTransform().getTranslation().x = -camera.getProjection().getAspectRatio()
+					+ (greenGradient.getTransform().getScale().x * (float) (greenGradient.getBounds().getWidth() / 2));
+			greenGradient.getTransform().updateMatrix();
 		}
+
+		if (blueGradient != null) {
+			blueGradient.getTransform().getTranslation().x = camera.getProjection().getAspectRatio()
+					- (blueGradient.getTransform().getScale().x * (float) (blueGradient.getBounds().getWidth() / 2));
+			blueGradient.getTransform().updateMatrix();
+		}
+
+		if (targetGroup != currentGroup) {
+			final OffsetUIObjectGroup target = groups[targetGroup];
+			final OffsetUIObjectGroup current = groups[currentGroup];
+
+			final Vector3f offset = new Vector3f(-1, 0, 0).mul(dTime);
+			current.getTransform().translateAdd(offset).updateMatrix();
+			target.getTransform().translateAdd(offset).updateMatrix();
+		}
+	}
+
+	public void startTransition(int target) {
+		System.err.println("Going to: " + target);
+		this.targetGroup = target;
 	}
 
 }

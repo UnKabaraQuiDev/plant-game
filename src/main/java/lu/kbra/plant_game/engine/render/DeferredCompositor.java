@@ -67,6 +67,7 @@ import lu.kbra.standalone.gameengine.objs.entity.SceneEntity;
 import lu.kbra.standalone.gameengine.objs.entity.components.InstanceEmitterComponent;
 import lu.kbra.standalone.gameengine.objs.entity.components.MeshComponent;
 import lu.kbra.standalone.gameengine.objs.entity.components.RenderConditionComponent;
+import lu.kbra.standalone.gameengine.objs.entity.components.SubEntitiesComponent;
 import lu.kbra.standalone.gameengine.objs.entity.components.TextEmitterComponent;
 import lu.kbra.standalone.gameengine.objs.entity.components.TransformComponent;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
@@ -544,79 +545,85 @@ public class DeferredCompositor implements Cleanupable {
 		setupUniforms(shaders, scene);
 
 		for (Entity entity : scene) {
+			renderEntityRecursive(entity,
+					shaders,
+					meshShader,
+					animatedMeshShader,
+					textEmitterShader,
+					instanceEmitterShader,
+					gradientMeshShader,
+					GameEngine.IDENTITY_MATRIX4F);
+		}
+	}
 
-			if (!entity.isActive()) {
-				continue;
+	private void renderEntityRecursive(
+			Entity entity,
+			Map<Class<? extends Renderable>, RenderShader> shaders,
+			RenderShader meshShader,
+			RenderShader animatedMeshShader,
+			RenderShader textEmitterShader,
+			RenderShader instanceEmitterShader,
+			RenderShader gradientMeshShader,
+			Matrix4f parentTransform) {
+
+		if (!entity.isActive()) {
+			return;
+		}
+
+		if (entity.hasComponentMatching(RenderConditionComponent.class)
+				&& entity.getComponentsMatching(RenderConditionComponent.class).parallelStream().allMatch(RenderConditionComponent::get)) {
+			return;
+		}
+
+		final Matrix4f localTransform = entity instanceof GameObject go ? go.getTransform().getMatrix()
+				: entity.hasComponentMatching(TransformComponent.class)
+						? entity.getComponentMatching(TransformComponent.class).getTransform().getMatrix()
+				: GameEngine.IDENTITY_MATRIX4F;
+
+		final Matrix4f worldTransform = new Matrix4f(parentTransform).mul(localTransform);
+
+		if (meshShader != null && entity.hasComponentMatching(MeshComponent.class)) {
+			for (MeshComponent meshComponent : entity.getComponentsMatching(MeshComponent.class)) {
+				renderMesh(meshComponent.getMesh(), meshComponent, entity, worldTransform, meshShader);
 			}
+		}
 
-			if (entity.hasComponentMatching(RenderConditionComponent.class) && entity
-					.getComponentsMatching(RenderConditionComponent.class)
-					.parallelStream()
-					.allMatch(RenderConditionComponent::get)) {
-				continue;
+		if (gradientMeshShader != null && entity.hasComponentMatching(GradientMeshComponent.class)) {
+			for (GradientMeshComponent gradientMeshComponent : entity.getComponentsMatching(GradientMeshComponent.class)) {
+				renderMesh(gradientMeshComponent.getGradientMesh(), gradientMeshComponent, entity, worldTransform, gradientMeshShader);
 			}
+		}
 
-			final Matrix4f transformationMatrix;
-			if (entity instanceof GameObject go) {
-				transformationMatrix = go.getTransform().getMatrix();
-			} else if (entity.hasComponentMatching(TransformComponent.class)) {
-				final TransformComponent transform = (TransformComponent) entity.getComponentMatching(TransformComponent.class);
-				if (transform != null && transform.getTransform() != null) {
-					transformationMatrix = transform.getTransform().getMatrix();
-				} else {
-					transformationMatrix = GameEngine.IDENTITY_MATRIX4F;
-				}
-			} else {
-				transformationMatrix = GameEngine.IDENTITY_MATRIX4F;
+		if (animatedMeshShader != null && entity.hasComponentMatching(AnimatedMeshComponent.class)) {
+			final Matrix4f animatedTransform = entity instanceof AnimatedTransformOwner ago ? ago.getAnimatedTransform() : worldTransform;
+			for (AnimatedMeshComponent animatedMeshComponent : entity.getComponentsMatching(AnimatedMeshComponent.class)) {
+				renderMesh(animatedMeshComponent.getAnimatedMesh(), animatedMeshComponent, entity, animatedTransform, animatedMeshShader);
 			}
+		}
 
-			if (meshShader != null && entity.hasComponentMatching(MeshComponent.class)) {
-				final List<MeshComponent> meshComponents = entity.getComponentsMatching(MeshComponent.class);
-
-				for (MeshComponent meshComponent : meshComponents) {
-					final Mesh mesh = meshComponent.getMesh();
-					renderMesh(mesh, meshComponent, entity, transformationMatrix, meshShader);
-				}
+		if (textEmitterShader != null && entity.hasComponentMatching(TextEmitterComponent.class)) {
+			for (TextEmitterComponent textEmitterComponent : entity.getComponentsMatching(TextEmitterComponent.class)) {
+				renderTextEmitter(textEmitterComponent.getTextEmitter(), textEmitterComponent, entity, worldTransform, textEmitterShader);
 			}
+		}
 
-			if (gradientMeshShader != null && entity.hasComponentMatching(GradientMeshComponent.class)) {
-				final List<GradientMeshComponent> gradientMeshComponents = entity.getComponentsMatching(GradientMeshComponent.class);
-
-				for (GradientMeshComponent gradientMeshComponent : gradientMeshComponents) {
-					final GradientMesh mesh = gradientMeshComponent.getGradientMesh();
-					renderMesh(mesh, gradientMeshComponent, entity, transformationMatrix, gradientMeshShader);
-				}
+		if (instanceEmitterShader != null && entity.hasComponentMatching(InstanceEmitterComponent.class)) {
+			for (InstanceEmitterComponent instanceEmitterComponent : entity.getComponentsMatching(InstanceEmitterComponent.class)) {
+				renderInstanceEmitter(instanceEmitterComponent
+						.getInstanceEmitter(), instanceEmitterComponent, entity, worldTransform, instanceEmitterShader);
 			}
+		}
 
-			if (animatedMeshShader != null && entity.hasComponentMatching(AnimatedMeshComponent.class)) {
-				final List<AnimatedMeshComponent> animatedMeshComponents = entity.getComponentsMatching(AnimatedMeshComponent.class);
-
-				final Matrix4f animatedTransformationMatrix = entity instanceof AnimatedTransformOwner ago ? ago.getAnimatedTransform()
-						: transformationMatrix;
-
-				for (AnimatedMeshComponent animatedMeshComponent : animatedMeshComponents) {
-					final AnimatedMesh mesh = animatedMeshComponent.getAnimatedMesh();
-					renderMesh(mesh, animatedMeshComponent, entity, animatedTransformationMatrix, animatedMeshShader);
-				}
-			}
-
-			if (textEmitterShader != null && entity.hasComponentMatching(TextEmitterComponent.class)) {
-				final List<TextEmitterComponent> textEmitterComponents = entity.getComponentsMatching(TextEmitterComponent.class);
-
-				for (TextEmitterComponent textEmitterComponent : textEmitterComponents) {
-					final TextEmitter textEmitter = textEmitterComponent.getTextEmitter();
-					renderTextEmitter(textEmitter, textEmitterComponent, entity, transformationMatrix, textEmitterShader);
-				}
-			}
-
-			if (instanceEmitterShader != null && entity.hasComponentMatching(InstanceEmitterComponent.class)) {
-				final List<InstanceEmitterComponent> instanceEmitterComponents = entity
-						.getComponentsMatching(InstanceEmitterComponent.class);
-
-				for (InstanceEmitterComponent instanceEmitterComponent : instanceEmitterComponents) {
-					final InstanceEmitter instanceEmitter = instanceEmitterComponent.getInstanceEmitter();
-					renderInstanceEmitter(instanceEmitter, instanceEmitterComponent, entity, transformationMatrix, instanceEmitterShader);
-				}
+		if (entity.hasComponentMatching(SubEntitiesComponent.class)) {
+			for (Entity child : (List<Entity>) entity.getComponentMatching(SubEntitiesComponent.class).getEntities()) {
+				renderEntityRecursive(child,
+						shaders,
+						meshShader,
+						animatedMeshShader,
+						textEmitterShader,
+						instanceEmitterShader,
+						gradientMeshShader,
+						worldTransform);
 			}
 		}
 	}
