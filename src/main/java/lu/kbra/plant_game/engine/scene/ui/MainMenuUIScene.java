@@ -6,6 +6,8 @@ import org.joml.Quaternionf;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 
+import lu.pcy113.pclib.PCUtils;
+
 import lu.kbra.plant_game.engine.entity.ui.btn.OptionsButtonUIObject;
 import lu.kbra.plant_game.engine.entity.ui.btn.PlayButtonUIObject;
 import lu.kbra.plant_game.engine.entity.ui.btn.QuitButtonUIObject;
@@ -145,9 +147,7 @@ public class MainMenuUIScene extends UIScene {
 			final OffsetUIObjectGroup target = groups[targetGroup];
 			final OffsetUIObjectGroup current = groups[currentGroup];
 
-			final Vector3f offset = new Vector3f(-1, 0, 0).mul(dTime);
-			current.getTransform().translateAdd(offset).updateMatrix();
-			target.getTransform().translateAdd(offset).updateMatrix();
+			PCUtils.throwUnsupported();
 		}
 	}
 
