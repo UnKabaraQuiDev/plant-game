@@ -7,6 +7,8 @@ import org.joml.Quaternionf;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 
+import lu.pcy113.pclib.PCUtils;
+
 import lu.kbra.plant_game.engine.entity.ui.btn.OptionsButtonUIObject;
 import lu.kbra.plant_game.engine.entity.ui.btn.PlayButtonUIObject;
 import lu.kbra.plant_game.engine.entity.ui.btn.QuitButtonUIObject;
@@ -22,6 +24,7 @@ import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.WorkerDispatcher;
+import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextAlignment;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
@@ -63,7 +66,10 @@ public class MainMenuUIScene extends UIScene {
 
 		UIObjectFactory
 				.create(GradientQuadUIObject.class, this, new Transform3D(), GradientDirection.UV_X)
-				.then(workers, (Consumer<GradientQuadUIObject>) (GradientQuadUIObject t) -> gradient = t)
+				.then(workers, (Consumer<GradientQuadUIObject>) (GradientQuadUIObject t) -> {
+					t.setTint(GameEngineUtils.hexToColorToVec4f("3b784a"));
+					gradient = t;
+				})
 				.push();
 
 		UIObjectFactory
@@ -91,7 +97,9 @@ public class MainMenuUIScene extends UIScene {
 		}
 
 		if (gradient != null) {
-			gradient.getTransform().rotate(0.1f, 0.1f, 0.1f).updateMatrix();
+			gradient.getTransform().getTranslation().set(-0.9f, -0.1f, 0);
+			gradient.getTransform().getScale().set(2, 1, 2);	
+			gradient.getTransform().updateMatrix();
 		}
 	}
 

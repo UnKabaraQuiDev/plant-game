@@ -119,8 +119,6 @@ public class UIObjectFactory {
 
 		} else if (TextureUIObject.class.isAssignableFrom(clazz) && cDataPath.startsWith("image:")) {
 
-			System.err.println(clazz);
-
 			if (animatedMesh.get(clazz)) {
 
 				PCUtils.throwUnsupported();

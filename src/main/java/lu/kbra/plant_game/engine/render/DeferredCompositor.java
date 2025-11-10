@@ -539,7 +539,7 @@ public class DeferredCompositor implements Cleanupable {
 		final RenderShader animatedMeshShader = shaders.get(AnimatedMesh.class);
 		final RenderShader textEmitterShader = shaders.get(TextEmitter.class);
 		final RenderShader instanceEmitterShader = shaders.get(InstanceEmitter.class);
-		final RenderShader gradientMeshShader = shaders.get(GradientQuadMesh.class);
+		final RenderShader gradientMeshShader = shaders.get(GradientMesh.class);
 
 		setupUniforms(shaders, scene);
 
@@ -572,7 +572,7 @@ public class DeferredCompositor implements Cleanupable {
 
 			if (meshShader != null && entity.hasComponentMatching(MeshComponent.class)) {
 				final List<MeshComponent> meshComponents = entity.getComponentsMatching(MeshComponent.class);
-				
+
 				for (MeshComponent meshComponent : meshComponents) {
 					final Mesh mesh = meshComponent.getMesh();
 					renderMesh(mesh, meshComponent, entity, transformationMatrix, meshShader);
@@ -581,8 +581,7 @@ public class DeferredCompositor implements Cleanupable {
 
 			if (gradientMeshShader != null && entity.hasComponentMatching(GradientMeshComponent.class)) {
 				final List<GradientMeshComponent> gradientMeshComponents = entity.getComponentsMatching(GradientMeshComponent.class);
-				System.err.println(gradientMeshComponents);
-				
+
 				for (GradientMeshComponent gradientMeshComponent : gradientMeshComponents) {
 					final GradientMesh mesh = gradientMeshComponent.getGradientMesh();
 					renderMesh(mesh, gradientMeshComponent, entity, transformationMatrix, gradientMeshShader);
@@ -751,39 +750,47 @@ public class DeferredCompositor implements Cleanupable {
 			txtMesh.getTexture().bindUniform(shader.getUniformLocation(DirectShader.TXT0), 0);
 		}
 
-		if (entity instanceof TintOwner tintEntity && shader.createUniform(DirectShader.TINT)) {
-			shader.setUniform(DirectShader.TINT, tintEntity.getTint() == null ? DirectShader.DEFAULT_TINT : tintEntity.getTint());
-		} else if (mesh instanceof TintOwner tintMesh && shader.createUniform(DirectShader.TINT)) {
-			shader.setUniform(DirectShader.TINT, tintMesh.getTint() == null ? DirectShader.DEFAULT_TINT : tintMesh.getTint());
+		final TintOwner tintOwner;
+		if (shader.createUniform(DirectShader.TINT)) {
+			if (entity instanceof TintOwner tintEntity) {
+				tintOwner = tintEntity;
+			} else if (mesh instanceof TintOwner tintMesh) {
+				tintOwner = tintMesh;
+			} else {
+				tintOwner = null;
+			}
+
+			shader
+					.setUniform(DirectShader.TINT,
+							(tintOwner == null || tintOwner.getTint() == null) ? DirectShader.DEFAULT_TINT : tintOwner.getTint());
 		}
 
-		if (entity instanceof GradientOwner gradientEntity && shader.createUniform(GradientShader.GRADIENT_DIRECTION)) {
+		final GradientOwner gradientOwner;
+		if (shader.createUniform(GradientShader.GRADIENT_DIRECTION)) {
+			if (entity instanceof GradientOwner gradientEntity) {
+				gradientOwner = gradientEntity;
+			} else if (mesh instanceof GradientOwner gradientMesh) {
+				gradientOwner = gradientMesh;
+			} else {
+				gradientOwner = null;
+			}
+
 			shader
-					.setUniform(GradientShader.GRADIENT_DIRECTION,
-							(gradientEntity.getDirection() == null ? GradientShader.DEFAULT_DIRECTION : gradientEntity.getDirection())
-									.getId());
-			shader
-					.setUniform(GradientShader.GRADIENT_RANGE,
-							gradientEntity.getRange() == null ? GradientShader.DEFAULT_RANGE : gradientEntity.getRange());
-			shader
-					.setUniform(GradientShader.START_COLOR,
-							gradientEntity.getStartColor() == null ? GradientShader.DEFAULT_START_COLOR : gradientEntity.getStartColor());
-			shader
-					.setUniform(GradientShader.END_COLOR,
-							gradientEntity.getEndColor() == null ? GradientShader.DEFAULT_END_COLOR : gradientEntity.getEndColor());
-		} else if (mesh instanceof GradientOwner gradientMesh && shader.createUniform(GradientShader.GRADIENT_DIRECTION)) {
-			shader
-					.setUniform(GradientShader.GRADIENT_DIRECTION,
-							(gradientMesh.getDirection() == null ? GradientShader.DEFAULT_DIRECTION : gradientMesh.getDirection()).getId());
+					.setUniformUnsigned(GradientShader.GRADIENT_DIRECTION,
+							((gradientOwner == null || gradientOwner.getDirection() == null) ? GradientShader.DEFAULT_DIRECTION
+									: gradientOwner.getDirection()).getId());
 			shader
 					.setUniform(GradientShader.GRADIENT_RANGE,
-							gradientMesh.getRange() == null ? GradientShader.DEFAULT_RANGE : gradientMesh.getRange());
+							(gradientOwner == null || gradientOwner.getRange() == null) ? GradientShader.DEFAULT_RANGE
+									: gradientOwner.getRange());
 			shader
 					.setUniform(GradientShader.START_COLOR,
-							gradientMesh.getStartColor() == null ? GradientShader.DEFAULT_START_COLOR : gradientMesh.getStartColor());
+							(gradientOwner == null || gradientOwner.getStartColor() == null) ? GradientShader.DEFAULT_START_COLOR
+									: gradientOwner.getStartColor());
 			shader
 					.setUniform(GradientShader.END_COLOR,
-							gradientMesh.getEndColor() == null ? GradientShader.DEFAULT_END_COLOR : gradientMesh.getEndColor());
+							(gradientOwner == null || gradientOwner.getEndColor() == null) ? GradientShader.DEFAULT_END_COLOR
+									: gradientOwner.getEndColor());
 		}
 
 		if (entity instanceof GameObject go && go.isEntityMaterialId()) {

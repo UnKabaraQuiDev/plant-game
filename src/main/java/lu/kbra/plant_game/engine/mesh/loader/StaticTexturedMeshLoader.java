@@ -32,8 +32,6 @@ public class StaticTexturedMeshLoader {
 			Dispatcher loader,
 			Dispatcher render) {
 
-		System.err.println(meshName + " " + path);
-
 		return new TaskFuture<>(loader, (ThrowingSupplier<Pair<MemImage, SingleTexture>, Throwable>) () -> {
 			waitOrCreateLock(meshName);
 
@@ -63,8 +61,8 @@ public class StaticTexturedMeshLoader {
 	}
 
 	static TexturedMesh createStaticQuad(CacheManager cache, String meshName, SingleTexture txt) {
-		System.err.println(meshName + " " + txt);
-		final TexturedMesh staticMesh = new TexturedQuadLoadedMesh(meshName, txt, GameEngineUtils.normalizeSize(txt.getWidth(), txt.getHeight()));
+		final TexturedMesh staticMesh = new TexturedQuadLoadedMesh(meshName, txt,
+				GameEngineUtils.normalizeSize(txt.getWidth(), txt.getHeight()));
 		cache.addMesh(staticMesh);
 		releaseLock(meshName);
 		return staticMesh;

@@ -16,7 +16,7 @@ public class GradientShader extends DirectShader {
 	public static final GradientDirection DEFAULT_DIRECTION = GradientDirection.UV_X;
 	public static final Vector2f DEFAULT_RANGE = new Vector2f(0, 1);
 	public static final Vector4f DEFAULT_START_COLOR = new Vector4f(1);
-	public static final Vector4f DEFAULT_END_COLOR = new Vector4f(1);
+	public static final Vector4f DEFAULT_END_COLOR = new Vector4f(0);
 
 	public GradientShader() {
 		super(AbstractShaderPart.load("classpath:/shaders/gbuffer.vert"),

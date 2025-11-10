@@ -6,6 +6,7 @@ import org.joml.Vector2f;
 import org.joml.Vector4f;
 
 import lu.kbra.plant_game.engine.entity.ui.impl.QuadUIObject;
+import lu.kbra.plant_game.engine.entity.ui.impl.TransparentEntity;
 import lu.kbra.plant_game.engine.mesh.TintOwner;
 import lu.kbra.plant_game.engine.render.GradientDirection;
 import lu.kbra.plant_game.engine.render.GradientMesh;
@@ -17,7 +18,7 @@ import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 @DataPath("")
-public class GradientQuadUIObject extends QuadUIObject implements TintOwner, GradientOwner {
+public class GradientQuadUIObject extends QuadUIObject implements TintOwner, GradientOwner, TransparentEntity {
 
 	protected Vector4f tint;
 	protected Vector4f startColor;
