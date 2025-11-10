@@ -9,7 +9,8 @@ flat in uvec3 bet_ObjectId;
 out vec4 fragColor;
 
 uniform sampler2D txt0;
+uniform vec4 tint;
 
 void main() {
-    fragColor = texture(txt0, bet_UV);
+    fragColor = texture(txt0, bet_UV) * tint;
 }

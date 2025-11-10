@@ -1,4 +1,4 @@
-package lu.kbra.plant_game.engine.entity.ui.btn;
+package lu.kbra.plant_game.engine.entity.ui.impl;
 
 import org.joml.Math;
 import org.joml.Vector3f;
@@ -8,7 +8,7 @@ import lu.pcy113.pclib.PCUtils;
 import lu.kbra.plant_game.engine.entity.impl.Transform3DOwner;
 import lu.kbra.plant_game.engine.entity.ui.NeedsUpdate;
 
-public interface GrowOnHover extends NeedsUpdate, Transform3DOwner {
+public interface GrowOnHover extends NeedsUpdate, Transform3DOwner, NeedsHover {
 
 	boolean isHovered();
 

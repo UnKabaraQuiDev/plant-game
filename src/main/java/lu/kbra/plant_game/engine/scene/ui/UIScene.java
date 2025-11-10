@@ -15,9 +15,11 @@ import org.lwjgl.glfw.GLFW;
 
 import lu.kbra.plant_game.UpdateFrameState;
 import lu.kbra.plant_game.engine.entity.impl.Transform3DOwner;
+import lu.kbra.plant_game.engine.entity.ui.HoverState;
 import lu.kbra.plant_game.engine.entity.ui.NeedsUpdate;
-import lu.kbra.plant_game.engine.entity.ui.btn.HoverState;
+import lu.kbra.plant_game.engine.entity.ui.btn.NeedsClick;
 import lu.kbra.plant_game.engine.entity.ui.impl.DelegatingTextUIObject;
+import lu.kbra.plant_game.engine.entity.ui.impl.NeedsHover;
 import lu.kbra.plant_game.engine.entity.ui.impl.UIObject;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
@@ -69,15 +71,17 @@ public class UIScene extends Scene3D {
 
 		synchronized (super.getEntitiesLock()) {
 			for (Entity e : this) {
-				if (e instanceof UIObject uiObj
+				if (e instanceof UIObject uiObj && (e instanceof NeedsHover || e instanceof NeedsClick)
 						&& uiObj.getTransformedBounds().contains(new Point2D.Float(mouseWorld2D.x, mouseWorld2D.y))) {
 					frameState.uiSceneCaughtMouseInput = true;
 
-					uiObj.hover(inputHandler, dTime, hovering.contains(uiObj) ? HoverState.STAY : HoverState.ENTER);
-					newHovered.add(uiObj);
+					if (uiObj instanceof NeedsHover uiObjectHover) {
+						uiObjectHover.hover(inputHandler, dTime, hovering.contains(uiObj) ? HoverState.STAY : HoverState.ENTER);
+						newHovered.add(uiObj);
+					}
 
-					if (inputHandler.isMouseButtonPressedOnce(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
-						uiObj.click(inputHandler, dTime);
+					if (uiObj instanceof NeedsClick uiObjectClick && inputHandler.isMouseButtonPressedOnce(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
+						uiObjectClick.click(inputHandler, dTime);
 					}
 				}
 			}
@@ -85,7 +89,7 @@ public class UIScene extends Scene3D {
 
 		hovering.removeAll(newHovered);
 		for (UIObject uiObj : hovering) {
-			uiObj.hover(inputHandler, dTime, HoverState.LEAVE);
+			((NeedsHover) uiObj).hover(inputHandler, dTime, HoverState.LEAVE);
 		}
 
 		hovering = newHovered;

@@ -1,14 +1,15 @@
 // @formatter:off
 package lu.kbra.plant_game.generated;
 
+import java.lang.Class;
+import java.lang.Object;
+import java.lang.String;
+import java.lang.SuppressWarnings;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
-import org.joml.Vector3i;
-
 import lu.kbra.plant_game.engine.entity.go.impl.GameObject;
 import lu.kbra.plant_game.engine.entity.go.obj.energy.SolarPanelObject;
 import lu.kbra.plant_game.engine.entity.go.obj.water.WaterTowerObject;
@@ -19,6 +20,7 @@ import lu.kbra.plant_game.engine.util.exceptions.GameObjectConstructorNotFound;
 import lu.kbra.plant_game.engine.util.exceptions.GameObjectNotFound;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
+import org.joml.Vector3i;
 
 public class GameObjectRegistry {
 	private static final Map<Class<? extends GameObject>, List<InternalConstructorFunction<GameObject>>> GAME_OBJECT_CONSTRUCTORS;
@@ -26,19 +28,19 @@ public class GameObjectRegistry {
 	static {
 		GAME_OBJECT_CONSTRUCTORS = new HashMap<>();
 
-		/*                 SolarPanelObject                 */
-		final List<InternalConstructorFunction<GameObject>> listSolarPanelObject = new ArrayList<>();
-		listSolarPanelObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class}, (Object[] arr) -> (GameObject) new SolarPanelObject((String) arr[0], (Mesh) arr[1])));
-		listSolarPanelObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class, Transform3D.class}, (Object[] arr) -> (GameObject) new SolarPanelObject((String) arr[0], (Mesh) arr[1], (Transform3D) arr[2])));
-		listSolarPanelObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class, Transform3D.class, Vector3i.class}, (Object[] arr) -> (GameObject) new SolarPanelObject((String) arr[0], (Mesh) arr[1], (Transform3D) arr[2], (Vector3i) arr[3])));
-		GAME_OBJECT_CONSTRUCTORS.put(SolarPanelObject.class, listSolarPanelObject);
-
 		/*                 WaterTowerObject                 */
 		final List<InternalConstructorFunction<GameObject>> listWaterTowerObject = new ArrayList<>();
 		listWaterTowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class}, (Object[] arr) -> (GameObject) new WaterTowerObject((String) arr[0], (Mesh) arr[1])));
 		listWaterTowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class, Transform3D.class}, (Object[] arr) -> (GameObject) new WaterTowerObject((String) arr[0], (Mesh) arr[1], (Transform3D) arr[2])));
 		listWaterTowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class, Transform3D.class, Vector3i.class}, (Object[] arr) -> (GameObject) new WaterTowerObject((String) arr[0], (Mesh) arr[1], (Transform3D) arr[2], (Vector3i) arr[3])));
 		GAME_OBJECT_CONSTRUCTORS.put(WaterTowerObject.class, listWaterTowerObject);
+
+		/*                 SolarPanelObject                 */
+		final List<InternalConstructorFunction<GameObject>> listSolarPanelObject = new ArrayList<>();
+		listSolarPanelObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class}, (Object[] arr) -> (GameObject) new SolarPanelObject((String) arr[0], (Mesh) arr[1])));
+		listSolarPanelObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class, Transform3D.class}, (Object[] arr) -> (GameObject) new SolarPanelObject((String) arr[0], (Mesh) arr[1], (Transform3D) arr[2])));
+		listSolarPanelObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class, Transform3D.class, Vector3i.class}, (Object[] arr) -> (GameObject) new SolarPanelObject((String) arr[0], (Mesh) arr[1], (Transform3D) arr[2], (Vector3i) arr[3])));
+		GAME_OBJECT_CONSTRUCTORS.put(SolarPanelObject.class, listSolarPanelObject);
 
 		/*                 WaterWheelObject                 */
 		final List<InternalConstructorFunction<GameObject>> listWaterWheelObject = new ArrayList<>();

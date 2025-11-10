@@ -156,9 +156,9 @@ public class AnimatedMeshLoader {
 			final SingleTexture txt0 = cache.hasTexture(meshData.texturePath()) ? (SingleTexture) cache.getTexture(meshData.texturePath())
 					: SingleTexture.loadSingleTexture(cache, meshData.texturePath(), meshData.texturePath());
 
-			animatedMesh = AdvObjLoader.loadMesh(meshName, null, meshData.filePath(), meshData.origin(), txt0, animatedMeshData.animData());
+			animatedMesh = AdvObjLoader.loadAnimatedTexturedMesh(meshName, null, meshData.filePath(), meshData.origin(), txt0, animatedMeshData.animData());
 		} else {
-			animatedMesh = AdvObjLoader.loadMesh(meshName, null, meshData.filePath(), meshData.origin(), animatedMeshData.animData());
+			animatedMesh = AdvObjLoader.loadAnimatedMesh(meshName, null, meshData.filePath(), meshData.origin(), animatedMeshData.animData());
 		}
 
 		cache.addMesh(animatedMesh);

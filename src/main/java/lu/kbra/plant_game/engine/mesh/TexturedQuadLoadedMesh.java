@@ -2,14 +2,14 @@ package lu.kbra.plant_game.engine.mesh;
 
 import org.joml.Vector2f;
 
-import lu.kbra.standalone.gameengine.geom.QuadMesh;
+import lu.kbra.standalone.gameengine.geom.LoadedQuadMesh;
 import lu.kbra.standalone.gameengine.graph.texture.SingleTexture;
 
-public class TexturedQuadMesh extends QuadMesh implements TexturedMesh {
+public class TexturedQuadLoadedMesh extends LoadedQuadMesh implements TexturedMesh {
 
 	private SingleTexture texture;
 
-	public TexturedQuadMesh(String name, SingleTexture txt, Vector2f size) {
+	public TexturedQuadLoadedMesh(String name, SingleTexture txt, Vector2f size) {
 		super(name, null, size);
 		this.texture = txt;
 	}

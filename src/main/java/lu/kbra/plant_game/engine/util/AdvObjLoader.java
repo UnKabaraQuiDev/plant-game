@@ -13,27 +13,50 @@ import lu.kbra.standalone.gameengine.graph.texture.SingleTexture;
 
 public class AdvObjLoader {
 
-	public static OffsetMesh loadMesh(String name, Material material, String path, Vector3f origin) {
-		return ObjLoader.loadMesh(name, material, path,
-				(t) -> new OffsetMesh(t.name(), null, origin, t.vertices(), t.indices(), t.attribs()));
+	public static OffsetMesh loadOffsetMesh(String name, Material material, String path, Vector3f origin) {
+		return ObjLoader
+				.loadMesh(name, material, path, (t) -> new OffsetMesh(t.name(), null, origin, t.vertices(), t.indices(), t.attribs()));
 	}
 
-	public static AnimatedLoadedMesh loadMesh(String name, Material material, String path, Vector3f origin,
+	public static AnimatedLoadedMesh loadAnimatedMesh(
+			String name,
+			Material material,
+			String path,
+			Vector3f origin,
 			AnimationData animationData) {
-		return ObjLoader.loadMesh(name, material, path, (t) -> new AnimatedLoadedMesh(t.name(), null, origin,
-				animationData, t.vertices(), t.indices(), t.attribs()));
+		return ObjLoader
+				.loadMesh(name,
+						material,
+						path,
+						(t) -> new AnimatedLoadedMesh(t.name(), null, origin, animationData, t.vertices(), t.indices(), t.attribs()));
 	}
 
-	public static TexturedLoadedMesh loadMesh(String name, Material material, String path, Vector3f origin,
-			SingleTexture texture) {
-		return ObjLoader.loadMesh(name, material, path,
-				(t) -> new TexturedLoadedMesh(t.name(), null, origin, texture, t.vertices(), t.indices(), t.attribs()));
+	public static TexturedLoadedMesh loadTexturedMesh(String name, Material material, String path, Vector3f origin, SingleTexture texture) {
+		return ObjLoader
+				.loadMesh(name,
+						material,
+						path,
+						(t) -> new TexturedLoadedMesh(t.name(), null, origin, texture, t.vertices(), t.indices(), t.attribs()));
 	}
 
-	public static AnimatedTexturedLoadedMesh loadMesh(String name, Material material, String path, Vector3f origin,
-			SingleTexture texture, AnimationData animationData) {
-		return ObjLoader.loadMesh(name, material, path, (t) -> new AnimatedTexturedLoadedMesh(t.name(), null, origin,
-				texture, animationData, t.vertices(), t.indices(), t.attribs()));
+	public static AnimatedTexturedLoadedMesh loadAnimatedTexturedMesh(
+			String name,
+			Material material,
+			String path,
+			Vector3f origin,
+			SingleTexture texture,
+			AnimationData animationData) {
+		return ObjLoader
+				.loadMesh(name,
+						material,
+						path,
+						(t) -> new AnimatedTexturedLoadedMesh(t.name(), null, origin, texture, animationData, t.vertices(), t.indices(),
+								t.attribs()));
+	}
+
+	public static GradientLoadedMesh loadGradientMesh(String name, Material material, String path) {
+		return ObjLoader
+				.loadMesh(name, material, path, (t) -> new GradientLoadedMesh(name, material, t.vertices(), t.indices(), t.attribs()));
 	}
 
 }

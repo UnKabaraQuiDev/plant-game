@@ -1,25 +1,26 @@
-package lu.kbra.plant_game.engine.entity.ui;
+package lu.kbra.plant_game.engine.entity.ui.texture;
 
 import org.joml.Vector3f;
 
 import lu.kbra.plant_game.PGLogic;
+import lu.kbra.plant_game.engine.entity.ui.NeedsUpdate;
 import lu.kbra.plant_game.engine.entity.ui.impl.TextureUIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.UIObject;
-import lu.kbra.plant_game.engine.mesh.TexturedQuadMesh;
+import lu.kbra.plant_game.engine.mesh.TexturedQuadLoadedMesh;
 import lu.kbra.plant_game.engine.util.DataPath;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-@DataPath("classpath:/icons/cursor-128.png")
+@DataPath("image:classpath:/icons/cursor-128.png")
 public class CursorUIObject extends TextureUIObject implements NeedsUpdate {
 
 	private float toX;
 	private float toZ;
 
-	public CursorUIObject(String str, TexturedQuadMesh mesh) {
+	public CursorUIObject(String str, TexturedQuadLoadedMesh mesh) {
 		super(str, mesh);
 	}
 
-	public CursorUIObject(String str, TexturedQuadMesh mesh, Transform3D transform) {
+	public CursorUIObject(String str, TexturedQuadLoadedMesh mesh, Transform3D transform) {
 		super(str, mesh, transform);
 	}
 
@@ -30,7 +31,8 @@ public class CursorUIObject extends TextureUIObject implements NeedsUpdate {
 
 		final float cursorWidth = (float) (getBounds().getWidth() * getTransform().getScale().x);
 
-		toX = (float) (uiObject.getTransform().getTranslation().x + uiObject.getBounds().getBounds2D().getX() - cursorWidth * 1.5);
+		toX = uiObject.getTransform().getTranslation().x
+				+ (float) uiObject.getBounds().getBounds2D().getX() * uiObject.getTransform().getScale().x - cursorWidth;
 		toZ = (float) uiObject.getTransform().getTranslation().z;
 	}
 

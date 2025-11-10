@@ -15,7 +15,6 @@ import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.plant_game.engine.window.input.MappingInputHandler;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.impl.GameLogic;
-import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
 import lu.kbra.standalone.gameengine.impl.future.WorkerDispatcher;
 import lu.kbra.standalone.gameengine.utils.gl.consts.Consts;
 
@@ -28,8 +27,6 @@ public class PGLogic extends GameLogic {
 	private WorldLevelScene worldScene;
 	private UIScene uiScene;
 	private DeferredCompositor compositor;
-
-	private TaskFuture<?, Void>.TaskState<Void> state;
 
 	private WindowInputHandler inputHandler;
 

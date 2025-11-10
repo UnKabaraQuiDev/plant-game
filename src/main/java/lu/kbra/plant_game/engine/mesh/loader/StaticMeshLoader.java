@@ -10,11 +10,9 @@ import org.joml.Vector3f;
 import org.json.JSONObject;
 
 import lu.pcy113.pclib.PCUtils;
-import lu.pcy113.pclib.datastructure.pair.Pair;
-import lu.pcy113.pclib.datastructure.pair.Pairs;
 import lu.pcy113.pclib.impl.ThrowingSupplier;
 
-import lu.kbra.plant_game.engine.mesh.TexturedQuadMesh;
+import lu.kbra.plant_game.engine.mesh.TexturedQuadLoadedMesh;
 import lu.kbra.plant_game.engine.util.AdvObjLoader;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.geom.Mesh;
@@ -23,9 +21,6 @@ import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.SkipThen;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
 import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
-import lu.kbra.standalone.gameengine.utils.file.FileUtils;
-import lu.kbra.standalone.gameengine.utils.gl.consts.TextureFilter;
-import lu.kbra.standalone.gameengine.utils.mem.img.MemImage;
 
 public class StaticMeshLoader {
 
@@ -68,54 +63,21 @@ public class StaticMeshLoader {
 			Dispatcher loader,
 			Dispatcher render) {
 
-		if (path.endsWith("json")) {
+		return new TaskFuture<>(loader, (ThrowingSupplier<GenericMeshData, Throwable>) () -> {
+			waitOrCreateLock(meshName);
 
-			return new TaskFuture<>(loader, (ThrowingSupplier<GenericMeshData, Throwable>) () -> {
-				waitOrCreateLock(meshName);
+			if (cache.hasMesh(meshName)) {
+				throw new SkipThen(cache.getMesh(meshName));
+			}
 
-				if (cache.hasMesh(meshName)) {
-					throw new SkipThen(cache.getMesh(meshName));
-				}
-
-				return getStaticMeshData(path);
-			}).then(render, (Function<GenericMeshData, Mesh>) (meshData) -> {
-				return createStatic(cache, meshName, meshData);
-			});
-
-		} else {
-
-			return new TaskFuture<>(loader, (ThrowingSupplier<Pair<MemImage, SingleTexture>, Throwable>) () -> {
-				waitOrCreateLock(meshName);
-
-				if (cache.hasMesh(meshName)) {
-					throw new SkipThen(3, cache.getMesh(meshName));
-				}
-
-				if (cache.hasTexture(meshName)) {
-					throw new SkipThen(2, cache.getTexture(meshName));
-				}
-
-				final MemImage image = FileUtils.STBILoad(path);
-				final SingleTexture txt = new SingleTexture(path, image);
-				txt.setFilters(TextureFilter.NEAREST);
-
-				return Pairs.readOnly(image, txt);
-			}).then(render, (Function<Pair<MemImage, SingleTexture>, Pair<MemImage, SingleTexture>>) (pair) -> {
-				pair.getValue().setup();
-				cache.addTexture(pair.getValue());
-				return pair;
-			}).then(loader, (Function<Pair<MemImage, SingleTexture>, SingleTexture>) (pair) -> {
-				pair.getKey().cleanup();
-				return pair.getValue();
-			}).then(render, (Function<SingleTexture, Mesh>) (txt) -> {
-				return createStatic(cache, meshName, txt);
-			});
-
-		}
+			return getStaticMeshData(path);
+		}).then(render, (Function<GenericMeshData, Mesh>) (meshData) -> {
+			return createStatic(cache, meshName, meshData);
+		});
 	}
 
-	static Mesh createStatic(CacheManager cache, String meshName, SingleTexture txt) {
-		final Mesh staticMesh = new TexturedQuadMesh(meshName, txt, GameEngineUtils.normalizeSize(txt.getWidth(), txt.getHeight()));
+	static Mesh createStaticQuad(CacheManager cache, String meshName, SingleTexture txt) {
+		final Mesh staticMesh = new TexturedQuadLoadedMesh(meshName, txt, GameEngineUtils.normalizeSize(txt.getWidth(), txt.getHeight()));
 		cache.addMesh(staticMesh);
 		releaseLock(meshName);
 		return staticMesh;
@@ -127,9 +89,9 @@ public class StaticMeshLoader {
 			final SingleTexture txt0 = cache.hasTexture(meshData.texturePath()) ? (SingleTexture) cache.getTexture(meshData.texturePath())
 					: SingleTexture.loadSingleTexture(cache, meshData.texturePath(), meshData.texturePath());
 
-			staticMesh = AdvObjLoader.loadMesh(meshName, null, meshData.filePath(), meshData.origin(), txt0);
+			staticMesh = AdvObjLoader.loadTexturedMesh(meshName, null, meshData.filePath(), meshData.origin(), txt0);
 		} else {
-			staticMesh = AdvObjLoader.loadMesh(meshName, null, meshData.filePath(), meshData.origin());
+			staticMesh = AdvObjLoader.loadOffsetMesh(meshName, null, meshData.filePath(), meshData.origin());
 		}
 
 		cache.addMesh(staticMesh);

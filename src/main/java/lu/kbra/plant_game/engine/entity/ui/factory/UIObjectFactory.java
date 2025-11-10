@@ -10,11 +10,16 @@ import lu.pcy113.pclib.impl.ThrowingFunction;
 
 import lu.kbra.plant_game.engine.entity.ui.impl.AnimatedUIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.TextUIObject;
+import lu.kbra.plant_game.engine.entity.ui.impl.TextureUIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.UIObject;
+import lu.kbra.plant_game.engine.entity.ui.texture.GradientQuadUIObject;
+import lu.kbra.plant_game.engine.mesh.TexturedMesh;
 import lu.kbra.plant_game.engine.mesh.loader.AnimatedMeshLoader;
 import lu.kbra.plant_game.engine.mesh.loader.AnimatedMeshLoader.AnimatedMeshes;
 import lu.kbra.plant_game.engine.mesh.loader.StaticMeshLoader;
 import lu.kbra.plant_game.engine.mesh.loader.StaticTextLoader;
+import lu.kbra.plant_game.engine.mesh.loader.StaticTexturedMeshLoader;
+import lu.kbra.plant_game.engine.render.GradientMesh;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
 import lu.kbra.plant_game.engine.util.DataPath;
 import lu.kbra.plant_game.generated.UIObjectRegistry;
@@ -52,14 +57,16 @@ public class UIObjectFactory {
 			return k.getAnnotation(DataPath.class).value();
 		});
 
-		if (dataPath.get(clazz).endsWith("json")) { // data file
+		final String cDataPath = dataPath.get(clazz);
+
+		if (cDataPath.endsWith("json")) { // data file
 
 			PCUtils.throwUnsupported();
 
 			if (animatedMesh.get(clazz)) {
 
 				return AnimatedMeshLoader
-						.getAnimatedFuture(cache, clazz.getName(), dataPath.get(clazz), loader, render)
+						.getAnimatedFuture(cache, clazz.getName(), cDataPath, loader, render)
 						.then(loader, (ThrowingFunction<AnimatedMeshes, T, Throwable>) (meshes) -> {
 							final T instance = UIObjectRegistry
 									.create(clazz,
@@ -75,7 +82,7 @@ public class UIObjectFactory {
 			} else {
 
 				return StaticMeshLoader
-						.getStaticFuture(cache, clazz.getName(), dataPath.get(clazz), loader, render)
+						.getStaticFuture(cache, clazz.getName(), cDataPath, loader, render)
 						.then(loader, (ThrowingFunction<Mesh, T, Throwable>) (mesh) -> {
 							final T instance = UIObjectRegistry
 									.create(clazz,
@@ -87,9 +94,9 @@ public class UIObjectFactory {
 
 			}
 
-		} else if (TextUIObject.class.isAssignableFrom(clazz) && dataPath.get(clazz).startsWith("localization:")) {
+		} else if (TextUIObject.class.isAssignableFrom(clazz) && cDataPath.startsWith("localization:")) {
 
-			final String key = dataPath.get(clazz).substring(dataPath.get(clazz).indexOf(":") + 1);
+			final String key = cDataPath.substring(cDataPath.indexOf(":") + 1);
 
 			final TextData td;
 			final Object[] nargs;
@@ -110,7 +117,9 @@ public class UIObjectFactory {
 						return instance;
 					});
 
-		} else {
+		} else if (TextureUIObject.class.isAssignableFrom(clazz) && cDataPath.startsWith("image:")) {
+
+			System.err.println(clazz);
 
 			if (animatedMesh.get(clazz)) {
 
@@ -119,11 +128,11 @@ public class UIObjectFactory {
 
 			} else {
 
-				final String txtPath = dataPath.get(clazz);
+				final String txtPath = cDataPath.substring(cDataPath.indexOf(":") + 1);
 
-				return StaticMeshLoader
+				return StaticTexturedMeshLoader
 						.getStaticFuture(cache, txtPath, txtPath, loader, render)
-						.then(loader, (ThrowingFunction<Mesh, T, Throwable>) (mesh) -> {
+						.then(loader, (ThrowingFunction<TexturedMesh, T, Throwable>) (mesh) -> {
 							final T instance = UIObjectRegistry
 									.create(clazz,
 											PCUtils
@@ -133,6 +142,37 @@ public class UIObjectFactory {
 						});
 
 			}
+
+		} else if (GradientQuadUIObject.class.isAssignableFrom(clazz)) {
+
+			if (animatedMesh.get(clazz)) {
+
+				PCUtils.throwUnsupported();
+				return null;
+
+			} else {
+
+				return StaticGradientMeshLoader
+						.getStaticFuture(cache,
+								cDataPath.isBlank() ? GradientQuadUIObject.class.getName() : cDataPath,
+								cDataPath,
+								loader,
+								render)
+						.then(loader, (ThrowingFunction<GradientMesh, T, Throwable>) (mesh) -> {
+							final T instance = UIObjectRegistry
+									.create(clazz,
+											PCUtils
+													.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), mesh },
+															args));
+							return instance;
+						});
+
+			}
+
+		} else {
+
+			PCUtils.throwUnsupported(clazz.getName() + " & " + cDataPath);
+			return null;
 
 		}
 	}

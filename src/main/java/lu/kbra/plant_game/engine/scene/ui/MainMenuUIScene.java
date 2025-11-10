@@ -7,14 +7,17 @@ import org.joml.Quaternionf;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 
-import lu.kbra.plant_game.engine.entity.ui.CursorUIObject;
 import lu.kbra.plant_game.engine.entity.ui.btn.OptionsButtonUIObject;
 import lu.kbra.plant_game.engine.entity.ui.btn.PlayButtonUIObject;
 import lu.kbra.plant_game.engine.entity.ui.btn.QuitButtonUIObject;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory.TextData;
 import lu.kbra.plant_game.engine.entity.ui.impl.UIObject;
+import lu.kbra.plant_game.engine.entity.ui.texture.CursorUIObject;
+import lu.kbra.plant_game.engine.entity.ui.texture.GradientQuadUIObject;
+import lu.kbra.plant_game.engine.entity.ui.texture.LargeLogoUIObject;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
+import lu.kbra.plant_game.engine.render.GradientDirection;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
@@ -24,10 +27,11 @@ import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 public class MainMenuUIScene extends UIScene {
 
-	protected PlayButtonUIObject playButton;
-	protected OptionsButtonUIObject optionsButton;
-	protected QuitButtonUIObject quitButton;
+	protected UIObjectGroup mainMenuGroup = new UIObjectGroup();
+
 	protected CursorUIObject cursor;
+
+	protected GradientQuadUIObject gradient;
 
 	public MainMenuUIScene(CacheManager parent) {
 		super("main-menu", parent);
@@ -41,21 +45,31 @@ public class MainMenuUIScene extends UIScene {
 
 		UIObjectFactory
 				.create(PlayButtonUIObject.class, this, uiTextData, new Transform3D(new Vector3f(x, 0, -0.25f)))
-				.then(workers, (Consumer<PlayButtonUIObject>) (btn) -> playButton = btn)
+				.then(workers, (Consumer<PlayButtonUIObject>) mainMenuGroup::add)
 				.push();
 		UIObjectFactory
 				.create(OptionsButtonUIObject.class, this, uiTextData, new Transform3D(new Vector3f(x, 0, 0)))
-				.then(workers, (Consumer<OptionsButtonUIObject>) (btn) -> optionsButton = btn)
+				.then(workers, (Consumer<OptionsButtonUIObject>) mainMenuGroup::add)
 				.push();
 		UIObjectFactory
 				.create(QuitButtonUIObject.class, this, uiTextData, new Transform3D(new Vector3f(x, 0, 0.25f)))
-				.then(workers, (Consumer<QuitButtonUIObject>) (btn) -> quitButton = btn)
+				.then(workers, (Consumer<QuitButtonUIObject>) mainMenuGroup::add)
+				.push();
+
+		UIObjectFactory
+				.create(LargeLogoUIObject.class, this, new Transform3D(new Vector3f(0, 0, -0.75f), new Quaternionf(), new Vector3f(2)))
+				.then(workers, (Consumer<LargeLogoUIObject>) mainMenuGroup::add)
+				.push();
+
+		UIObjectFactory
+				.create(GradientQuadUIObject.class, this, new Transform3D(), GradientDirection.UV_X)
+				.then(workers, (Consumer<GradientQuadUIObject>) (GradientQuadUIObject t) -> gradient = t)
 				.push();
 
 		UIObjectFactory
 				.create(CursorUIObject.class, this, new Transform3D(new Vector3f(x, 0.01f, 0.25f), new Quaternionf(), new Vector3f(0.15f)))
 				.then(workers, (Consumer<CursorUIObject>) (btn) -> {
-					btn.setTargetedObject(playButton);
+					btn.setTargetedObject(mainMenuGroup.get(0));
 					cursor = btn;
 				})
 				.push();
@@ -72,9 +86,12 @@ public class MainMenuUIScene extends UIScene {
 
 		if (cursor != null) {
 			final Optional<UIObject> hoverObj = hovering.stream().findFirst();
-			if (hoverObj.isPresent()) {
+			if (hoverObj.isPresent())
 				cursor.setTargetedObject(hoverObj.get());
-			}
+		}
+
+		if (gradient != null) {
+			gradient.getTransform().rotate(0.1f, 0.1f, 0.1f).updateMatrix();
 		}
 	}
 

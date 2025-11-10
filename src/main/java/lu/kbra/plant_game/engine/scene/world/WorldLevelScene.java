@@ -35,7 +35,7 @@ import lu.kbra.plant_game.engine.scene.world.generator.WorldGenerator.TerrainMat
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.geom.Mesh;
-import lu.kbra.standalone.gameengine.geom.QuadMesh;
+import lu.kbra.standalone.gameengine.geom.LoadedQuadMesh;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
 import lu.kbra.standalone.gameengine.objs.entity.Entity;
@@ -103,7 +103,7 @@ public class WorldLevelScene extends Scene3D {
 			new TaskFuture<>(renderDispatcher, () -> {
 				GlobalLogger.info("Generating water mesh...");
 				final Pair<Mesh, Long> meshTime = PCUtils
-						.nanoTime(() -> new QuadMesh("water", null, new Vector2f(((TerrainMesh) this.getTerrain().getMesh()).getWidth(),
+						.nanoTime(() -> new LoadedQuadMesh("water", null, new Vector2f(((TerrainMesh) this.getTerrain().getMesh()).getWidth(),
 								((TerrainMesh) this.getTerrain().getMesh()).getLength())));
 				this.getCache().addMesh(meshTime.getKey());
 				GlobalLogger.info("Water mesh generated in " + (meshTime.getValue() / 1e6) + " ms");
