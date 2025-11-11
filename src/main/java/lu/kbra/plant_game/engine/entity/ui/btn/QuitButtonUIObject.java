@@ -7,6 +7,7 @@ import lu.kbra.plant_game.engine.entity.ui.impl.GrowOnHoverTextUIObject;
 import lu.kbra.plant_game.engine.util.DataPath;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
+import lu.kbra.standalone.gameengine.scene.Scene;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 @DataPath("localization:btn.quit")
@@ -25,12 +26,12 @@ public class QuitButtonUIObject extends GrowOnHoverTextUIObject implements Needs
 	}
 
 	@Override
-	public void click(WindowInputHandler input, float dTime) {
+	public void click(WindowInputHandler input, float dTime, Scene scene) {
 		PGLogic.INSTANCE.stop();
 	}
 
 	@Override
-	public void update(float dTime) {
+	public void update(float dTime, Scene scene) {
 		final float factor = super.grow(dTime, isHovered());
 		getTransform().updateMatrix();
 

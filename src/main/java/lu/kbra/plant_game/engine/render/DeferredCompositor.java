@@ -615,15 +615,18 @@ public class DeferredCompositor implements Cleanupable {
 		}
 
 		if (entity.hasComponentMatching(SubEntitiesComponent.class)) {
-			for (Entity child : (List<Entity>) entity.getComponentMatching(SubEntitiesComponent.class).getEntities()) {
-				renderEntityRecursive(child,
-						shaders,
-						meshShader,
-						animatedMeshShader,
-						textEmitterShader,
-						instanceEmitterShader,
-						gradientMeshShader,
-						worldTransform);
+			final SubEntitiesComponent<?> subEntitiesComponent = entity.getComponentMatching(SubEntitiesComponent.class);
+			synchronized (subEntitiesComponent.getEntitiesLock()) {
+				for (Entity child : (List<Entity>) subEntitiesComponent.getEntities()) {
+					renderEntityRecursive(child,
+							shaders,
+							meshShader,
+							animatedMeshShader,
+							textEmitterShader,
+							instanceEmitterShader,
+							gradientMeshShader,
+							worldTransform);
+				}
 			}
 		}
 	}

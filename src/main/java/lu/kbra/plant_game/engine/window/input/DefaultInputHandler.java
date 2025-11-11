@@ -22,6 +22,8 @@ public class DefaultInputHandler implements WindowInputHandler {
 
 	protected Thread owner;
 
+	protected boolean windowResized;
+	protected Vector2i oldSize = new Vector2i();
 	protected Vector2f normalizedMousePosition = new Vector2f();
 	protected Vector2d mouseScroll = new Vector2d();
 	protected Vector2f mousePosition = new Vector2f();
@@ -60,6 +62,8 @@ public class DefaultInputHandler implements WindowInputHandler {
 		mouseScroll.set(window.getScroll());
 		window.clearScroll();
 
+		windowResized = oldSize.x != window.getSize().x || oldSize.y != window.getSize().y;
+		oldSize.set(window.getSize());
 		mousePosition.set(window.getMousePosition());
 	}
 
@@ -187,6 +191,11 @@ public class DefaultInputHandler implements WindowInputHandler {
 	@Override
 	public GameEngine getGameEngine() {
 		return engine;
+	}
+
+	@Override
+	public boolean wasResized() {
+		return windowResized;
 	}
 
 }

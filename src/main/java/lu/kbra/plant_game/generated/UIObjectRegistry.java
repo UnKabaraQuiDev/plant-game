@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import lu.kbra.plant_game.engine.entity.ui.btn.BackButtonUIObject;
 import lu.kbra.plant_game.engine.entity.ui.btn.MoneyUIObject;
 import lu.kbra.plant_game.engine.entity.ui.btn.OptionsButtonUIObject;
 import lu.kbra.plant_game.engine.entity.ui.btn.PlayButtonUIObject;
@@ -107,6 +108,12 @@ public class UIObjectRegistry {
 		listMoneyUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadLoadedMesh.class}, (Object[] arr) -> (UIObject) new MoneyUIObject((String) arr[0], (TexturedQuadLoadedMesh) arr[1])));
 		listMoneyUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadLoadedMesh.class, Transform3D.class}, (Object[] arr) -> (UIObject) new MoneyUIObject((String) arr[0], (TexturedQuadLoadedMesh) arr[1], (Transform3D) arr[2])));
 		UI_OBJECT_CONSTRUCTORS.put(MoneyUIObject.class, listMoneyUIObject);
+
+		/*                 BackButtonUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listBackButtonUIObject = new ArrayList<>();
+		listBackButtonUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class}, (Object[] arr) -> (UIObject) new BackButtonUIObject((String) arr[0], (TextEmitter) arr[1])));
+		listBackButtonUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, Transform3D.class}, (Object[] arr) -> (UIObject) new BackButtonUIObject((String) arr[0], (TextEmitter) arr[1], (Transform3D) arr[2])));
+		UI_OBJECT_CONSTRUCTORS.put(BackButtonUIObject.class, listBackButtonUIObject);
 
 		/*                 OptionsButtonUIObject                 */
 		final List<InternalConstructorFunction<UIObject>> listOptionsButtonUIObject = new ArrayList<>();

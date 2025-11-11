@@ -6,6 +6,7 @@ import lu.kbra.plant_game.engine.entity.ui.HoverState;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.GameEngine;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
+import lu.kbra.standalone.gameengine.scene.Scene;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 public class GrowOnHoverTextUIObject extends TextUIObject implements GrowOnHover {
@@ -23,7 +24,7 @@ public class GrowOnHoverTextUIObject extends TextUIObject implements GrowOnHover
 	}
 
 	@Override
-	public void hover(WindowInputHandler input, float dTime, HoverState hoverState) {
+	public void hover(WindowInputHandler input, float dTime, HoverState hoverState, Scene scene) {
 		hovered = (hoverState == HoverState.ENTER || hoverState == HoverState.STAY);
 	}
 

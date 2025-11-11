@@ -8,20 +8,20 @@ import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
 import lu.kbra.standalone.gameengine.scene.Scene;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-@DataPath("localization:btn.options")
-public class OptionsButtonUIObject extends GrowOnHoverTextUIObject implements NeedsClick {
+@DataPath("localization:btn.back")
+public class BackButtonUIObject extends GrowOnHoverTextUIObject implements NeedsClick {
 
-	public OptionsButtonUIObject(String str, TextEmitter text) {
+	public BackButtonUIObject(String str, TextEmitter text) {
 		super(str, text);
 	}
 
-	public OptionsButtonUIObject(String str, TextEmitter text, Transform3D transform) {
+	public BackButtonUIObject(String str, TextEmitter text, Transform3D transform) {
 		super(str, text, transform);
 	}
 
 	@Override
 	public void click(WindowInputHandler input, float dTime, Scene scene) {
-		((MainMenuUIScene) scene).startTransition(MainMenuUIScene.OPTIONS);
+		((MainMenuUIScene) scene).startTransition(MainMenuUIScene.MAIN);
 	}
 
 }

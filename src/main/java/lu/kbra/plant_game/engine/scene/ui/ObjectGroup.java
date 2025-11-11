@@ -3,6 +3,7 @@ package lu.kbra.plant_game.engine.scene.ui;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -11,7 +12,6 @@ import java.util.stream.Stream;
 import lu.kbra.standalone.gameengine.objs.entity.Component;
 import lu.kbra.standalone.gameengine.objs.entity.Entity;
 import lu.kbra.standalone.gameengine.objs.entity.components.SubEntitiesComponent;
-import java.util.Collections;
 
 public class ObjectGroup<T extends Entity> extends Entity implements Iterable<T> {
 
@@ -42,33 +42,51 @@ public class ObjectGroup<T extends Entity> extends Entity implements Iterable<T>
 		return subEntitiesComponent == null ? Collections.emptyList() : subEntitiesComponent.getEntities();
 	}
 
+	public Object getSubEntitiesLock() {
+		return subEntitiesComponent == null ? null : subEntitiesComponent.getEntitiesLock();
+	}
+
 	public boolean contains(T o) {
-		return getSubEntities().contains(o);
+		synchronized (getSubEntitiesLock()) {
+			return getSubEntities().contains(o);
+		}
 	}
 
 	public boolean add(T e) {
-		return getSubEntities().add(e);
+		synchronized (getSubEntitiesLock()) {
+			return getSubEntities().add(e);
+		}
 	}
 
 	public boolean addAll(Collection<? extends T> c) {
-		return getSubEntities().addAll(c);
+		synchronized (getSubEntitiesLock()) {
+			return getSubEntities().addAll(c);
+		}
 	}
 
 	public boolean addAll(ObjectGroup<? extends T> c) {
-		return getSubEntities().addAll(c.getSubEntities());
+		synchronized (getSubEntitiesLock()) {
+			return getSubEntities().addAll(c.getSubEntities());
+		}
 	}
 
 	public T get(int index) {
-		return getSubEntities().get(index);
+		synchronized (getSubEntitiesLock()) {
+			return getSubEntities().get(index);
+		}
 	}
 
 	public Stream<T> stream() {
-		return getSubEntities().stream();
+		synchronized (getSubEntitiesLock()) {
+			return getSubEntities().stream();
+		}
 	}
 
 	@Override
 	public Iterator<T> iterator() {
-		return getSubEntities().iterator();
+		synchronized (getSubEntitiesLock()) {
+			return getSubEntities().iterator();
+		}
 	}
 
 	@Override

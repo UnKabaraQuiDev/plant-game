@@ -17,17 +17,20 @@ import org.lwjgl.glfw.GLFW;
 import lu.kbra.plant_game.UpdateFrameState;
 import lu.kbra.plant_game.engine.entity.impl.Transform3DOwner;
 import lu.kbra.plant_game.engine.entity.ui.HoverState;
+import lu.kbra.plant_game.engine.entity.ui.NeedsInput;
 import lu.kbra.plant_game.engine.entity.ui.NeedsUpdate;
 import lu.kbra.plant_game.engine.entity.ui.btn.NeedsClick;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsHover;
 import lu.kbra.plant_game.engine.entity.ui.impl.UIObject;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
+import lu.kbra.standalone.gameengine.GameEngine;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.WorkerDispatcher;
 import lu.kbra.standalone.gameengine.objs.entity.Entity;
 import lu.kbra.standalone.gameengine.objs.entity.components.SubEntitiesComponent;
+import lu.kbra.standalone.gameengine.objs.entity.components.TransformComponent;
 import lu.kbra.standalone.gameengine.scene.Scene3D;
 import lu.kbra.standalone.gameengine.scene.camera.Camera;
 
@@ -60,27 +63,36 @@ public class UIScene extends Scene3D {
 	protected Set<UIObject> hovering = new HashSet<>();
 
 	public void input(final WindowInputHandler inputHandler, final float dTime, final UpdateFrameState frameState) {
-		final Vector2f normalizedMousePosition = inputHandler.getNormalizedMousePosition();
-		final Matrix4f inverseProj = new Matrix4f(super.getCamera().getProjection().getProjectionMatrix()).invert();
-		final Vector4f mouseClip = new Vector4f(normalizedMousePosition.x, normalizedMousePosition.y, 0f, 1f);
-		final Vector4f mouseWorld = inverseProj.transform(mouseClip);
-
-		final Vector2f mouseWorld2D = new Vector2f(mouseWorld.x / mouseWorld.w, -mouseWorld.y / mouseWorld.w);
+		final Vector2f mouseWorld2D = getMouseCoords(inputHandler);
 
 		final Set<UIObject> newHovered = new HashSet<>();
 
 		synchronized (super.getEntitiesLock()) {
 			for (Entity e : this) {
-				checkInput(e, inputHandler, dTime, frameState, mouseWorld2D, newHovered);
+				checkInput(e,
+						inputHandler,
+						dTime,
+						frameState,
+						new Point2D.Float(mouseWorld2D.x, mouseWorld2D.y),
+						newHovered,
+						GameEngine.IDENTITY_MATRIX4F);
 			}
 		}
 
 		hovering.removeAll(newHovered);
 		for (UIObject uiObj : hovering) {
-			((NeedsHover) uiObj).hover(inputHandler, dTime, HoverState.LEAVE);
+			((NeedsHover) uiObj).hover(inputHandler, dTime, HoverState.LEAVE, this);
 		}
 
 		hovering = newHovered;
+	}
+
+	public Vector2f getMouseCoords(WindowInputHandler inputHandler) {
+		final Vector2f normalizedMousePosition = inputHandler.getNormalizedMousePosition();
+		final Matrix4f inverseProj = new Matrix4f(super.getCamera().getProjection().getProjectionMatrix()).invert();
+		final Vector4f mouseClip = new Vector4f(normalizedMousePosition.x, normalizedMousePosition.y, 0f, 1f);
+		final Vector4f mouseWorld = inverseProj.transform(mouseClip);
+		return new Vector2f(mouseWorld.x / mouseWorld.w, -mouseWorld.y / mouseWorld.w);
 	}
 
 	private void checkInput(
@@ -88,27 +100,41 @@ public class UIScene extends Scene3D {
 			WindowInputHandler inputHandler,
 			float dTime,
 			UpdateFrameState frameState,
-			Vector2f mouseWorld2D,
-			Set<UIObject> newHovered) {
+			Point2D.Float mousePos,
+			Set<UIObject> newHovered,
+			Matrix4f parentTransform) {
+
 		if (e.hasComponentMatching(SubEntitiesComponent.class)) {
+			final Matrix4f newMatrix = e.hasComponentMatching(TransformComponent.class)
+					? parentTransform.mul(e.getComponentMatching(TransformComponent.class).getTransform().getMatrix(), new Matrix4f())
+					: parentTransform;
+
 			e.getComponentsMatching(SubEntitiesComponent.class).forEach(se -> {
-				for (Entity e2 : (List<Entity>) se.getEntities()) {
-					checkInput(e2, inputHandler, dTime, frameState, mouseWorld2D, newHovered);
+				synchronized (se.getEntitiesLock()) {
+					for (Entity e2 : (List<Entity>) se.getEntities()) {
+						checkInput(e2, inputHandler, dTime, frameState, mousePos, newHovered, newMatrix);
+					}
 				}
 			});
 		}
 
-		if (e instanceof UIObject uiObj && (e instanceof NeedsHover || e instanceof NeedsClick)
-				&& uiObj.getTransformedBounds().contains(new Point2D.Float(mouseWorld2D.x, mouseWorld2D.y))) {
-			frameState.uiSceneCaughtMouseInput = true;
-
-			if (uiObj instanceof NeedsHover uiObjectHover) {
-				uiObjectHover.hover(inputHandler, dTime, hovering.contains(uiObj) ? HoverState.STAY : HoverState.ENTER);
+		if (e instanceof UIObject uiObj) {
+			if (uiObj instanceof NeedsInput uiObjectInput) {
+				uiObjectInput.input(inputHandler, dTime, this);
 				newHovered.add(uiObj);
 			}
 
-			if (uiObj instanceof NeedsClick uiObjectClick && inputHandler.isMouseButtonPressedOnce(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
-				uiObjectClick.click(inputHandler, dTime);
+			if ((e instanceof NeedsHover || e instanceof NeedsClick) && uiObj.getTransformedBounds(parentTransform).contains(mousePos)) {
+				frameState.uiSceneCaughtMouseInput = true;
+
+				if (uiObj instanceof NeedsHover uiObjectHover) {
+					uiObjectHover.hover(inputHandler, dTime, hovering.contains(uiObj) ? HoverState.STAY : HoverState.ENTER, this);
+					newHovered.add(uiObj);
+				}
+
+				if (uiObj instanceof NeedsClick uiObjectClick && inputHandler.isMouseButtonPressedOnce(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
+					uiObjectClick.click(inputHandler, dTime, this);
+				}
 			}
 		}
 	}
@@ -129,14 +155,16 @@ public class UIScene extends Scene3D {
 	private void updateEntity(WindowInputHandler inputHandler, float dTime, Entity e) {
 		if (e.hasComponentMatching(SubEntitiesComponent.class)) {
 			e.getComponentsMatching(SubEntitiesComponent.class).forEach(se -> {
-				for (Entity e2 : (List<Entity>) se.getEntities()) {
-					updateEntity(inputHandler, dTime, e2);
+				synchronized (se.getEntitiesLock()) {
+					for (Entity e2 : (List<Entity>) se.getEntities()) {
+						updateEntity(inputHandler, dTime, e2);
+					}
 				}
 			});
 		}
 
 		if (e instanceof NeedsUpdate needsUpdate) {
-			needsUpdate.update(dTime);
+			needsUpdate.update(dTime, this);
 		}
 	}
 

@@ -7,6 +7,7 @@ import lu.pcy113.pclib.PCUtils;
 
 import lu.kbra.plant_game.engine.entity.impl.Transform3DOwner;
 import lu.kbra.plant_game.engine.entity.ui.NeedsUpdate;
+import lu.kbra.standalone.gameengine.scene.Scene;
 
 public interface GrowOnHover extends NeedsUpdate, Transform3DOwner, NeedsHover {
 
@@ -17,7 +18,7 @@ public interface GrowOnHover extends NeedsUpdate, Transform3DOwner, NeedsHover {
 	float getGrowthRate(boolean grow);
 
 	@Override
-	default void update(float dTime) {
+	default void update(float dTime, Scene scene) {
 		grow(dTime, isHovered());
 		getTransform().updateMatrix();
 	}

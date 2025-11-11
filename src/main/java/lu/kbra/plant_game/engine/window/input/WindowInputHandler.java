@@ -49,5 +49,7 @@ public interface WindowInputHandler {
 	boolean isOwnerThread();
 
 	void checkOwnerThread();
+	
+	boolean wasResized();
 
 }
