@@ -52,10 +52,11 @@ public class ObjectGroup<T extends Entity> extends Entity implements Iterable<T>
 		}
 	}
 
-	public boolean add(T e) {
+	public T add(T e) {
 		synchronized (getSubEntitiesLock()) {
-			return getSubEntities().add(e);
+			getSubEntities().add(e);
 		}
+		return e;
 	}
 
 	public boolean addAll(Collection<? extends T> c) {

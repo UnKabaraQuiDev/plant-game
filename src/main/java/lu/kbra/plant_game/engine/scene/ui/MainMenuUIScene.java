@@ -1,5 +1,7 @@
 package lu.kbra.plant_game.engine.scene.ui;
 
+import java.nio.ByteBuffer;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import org.joml.Quaternionf;
@@ -15,6 +17,7 @@ import lu.kbra.plant_game.engine.entity.ui.btn.QuitButtonUIObject;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory.TextData;
 import lu.kbra.plant_game.engine.entity.ui.impl.TextUIObject;
+import lu.kbra.plant_game.engine.entity.ui.impl.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.texture.CursorUIObject;
 import lu.kbra.plant_game.engine.entity.ui.texture.GradientQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.texture.LargeLogoUIObject;
@@ -36,6 +39,8 @@ public class MainMenuUIScene extends UIScene {
 	public static final int OPTIONS = 2;
 	public static final int QUIT = 3;
 
+	public static final float GRADIENT_DEPTH = -0.1f;
+
 	protected int currentGroup = 0;
 	protected int targetGroup = 0;
 	protected float progress = 0;
@@ -52,6 +57,7 @@ public class MainMenuUIScene extends UIScene {
 
 	protected GradientQuadUIObject greenGradient;
 	protected GradientQuadUIObject blueGradient;
+	protected BackButtonUIObject optionsBackBtn;
 
 	public MainMenuUIScene(CacheManager parent) {
 		super("main-menu", parent);
@@ -67,38 +73,24 @@ public class MainMenuUIScene extends UIScene {
 
 		/** main menu */
 
+		UIObjectFactory.create(PlayButtonUIObject.class, mainMenuGroup, uiTextData, new Transform3D(new Vector3f(x, 0, -0.25f))).push();
+		UIObjectFactory.create(OptionsButtonUIObject.class, mainMenuGroup, uiTextData, new Transform3D(new Vector3f(x, 0, 0))).push();
+		UIObjectFactory.create(QuitButtonUIObject.class, mainMenuGroup, uiTextData, new Transform3D(new Vector3f(x, 0, 0.25f))).push();
+
 		UIObjectFactory
-				.create(PlayButtonUIObject.class, uiTextData, new Transform3D(new Vector3f(x, 0, -0.25f)))
-				.then(workers, (Consumer<PlayButtonUIObject>) (t) -> {
-					mainMenuGroup.add(t);
-				})
-				.push();
-		UIObjectFactory
-				.create(OptionsButtonUIObject.class, uiTextData, new Transform3D(new Vector3f(x, 0, 0)))
-				.then(workers, (Consumer<OptionsButtonUIObject>) (t) -> {
-					mainMenuGroup.add(t);
-				})
-				.push();
-		UIObjectFactory
-				.create(QuitButtonUIObject.class, uiTextData, new Transform3D(new Vector3f(x, 0, 0.25f)))
-				.then(workers, (Consumer<QuitButtonUIObject>) (t) -> {
-					mainMenuGroup.add(t);
-				})
+				.create(LargeLogoUIObject.class,
+						mainMenuGroup,
+						new Transform3D(new Vector3f(0, 0, -0.75f), new Quaternionf(), new Vector3f(2)))
 				.push();
 
 		UIObjectFactory
-				.create(LargeLogoUIObject.class, new Transform3D(new Vector3f(0, 0, -0.75f), new Quaternionf(), new Vector3f(2)))
-				.then(workers, (Consumer<LargeLogoUIObject>) (t) -> {
-					mainMenuGroup.add(t);
-				})
-				.push();
-
-		UIObjectFactory
-				.create(GradientQuadUIObject.class, new Transform3D(), GradientDirection.UV_X, GameEngineUtils.hexToColorToVec4f("3b784a"))
+				.create(GradientQuadUIObject.class,
+						mainMenuGroup,
+						new Transform3D(new Vector3f(0, GRADIENT_DEPTH, 0), new Quaternionf(), new Vector3f(2.5f, 1, 2)),
+						GradientDirection.UV_X,
+						GameEngineUtils.hexToColorToVec4f("3b784a"))
 				.then(workers, (Consumer<GradientQuadUIObject>) (GradientQuadUIObject t) -> {
-					t.getTransform().translationSet(-1, -0.11f, 0).scaleSet(2, 1, 2).updateMatrix();
 					greenGradient = t;
-					mainMenuGroup.add(t);
 				})
 				.push();
 
@@ -106,29 +98,30 @@ public class MainMenuUIScene extends UIScene {
 
 		UIObjectFactory
 				.create(GradientQuadUIObject.class,
-						new Transform3D(),
+						optionsMenuGroup,
+						new Transform3D(new Vector3f(0, GRADIENT_DEPTH, 0), new Quaternionf().rotateY((float) Math.PI),
+								new Vector3f(2.5f, 1, 2)),
 						GradientDirection.UV_X,
 						GameEngineUtils.hexToColorToVec4f("317dac8c"))
 				.then(workers, (Consumer<GradientQuadUIObject>) (GradientQuadUIObject t) -> {
-					t.getTransform().translationSet(0.9f, -0.1f, 0).scaleSet(2, 1, 2).rotationSet(0, (float) Math.PI, 0).updateMatrix();
 					blueGradient = t;
-					optionsMenuGroup.add(t);
 				})
 				.push();
 
 		UIObjectFactory
 				.create(BackButtonUIObject.class,
+						optionsMenuGroup,
 						uiTextData,
 						new Transform3D(new Vector3f(-0.5f, 0, -0.5f), new Quaternionf(), new Vector3f(0.5f)))
 				.then(workers, (Consumer<BackButtonUIObject>) (t) -> {
-					optionsMenuGroup.add(t);
+					optionsBackBtn = t;
 				})
 				.push();
 
 		UIObjectFactory
 				.create(CursorUIObject.class, this, new Transform3D(new Vector3f(x, 0.01f, 0.25f), new Quaternionf(), new Vector3f(0.15f)))
 				.then(workers, (Consumer<CursorUIObject>) (btn) -> {
-					btn.setTargetedObject(mainMenuGroup.get(0));
+					btn.forceCirclingMouse();
 					cursor = btn;
 				})
 				.push();
@@ -145,7 +138,17 @@ public class MainMenuUIScene extends UIScene {
 		super.update(inputHandler, dTime, compositor, workers, render);
 
 		if (cursor != null) {
-			hovering.stream().filter(c -> c instanceof TextUIObject).findFirst().ifPresent(cursor::setTargetedObject);
+			final Optional<UIObject> focusCandidate = hovering.stream().filter(c -> c instanceof TextUIObject).findFirst();
+			if (cursor.isCirclingMouse() && focusCandidate.isEmpty()) {
+				cursor.setCirclingMouse(getMouseCoords(inputHandler));
+			} else {
+				focusCandidate.ifPresent(cursor::setTargetedObject);
+			}
+		}
+
+		restPositions[OPTIONS].x = camera.getProjection().getAspectRatio() * 2;
+		if (currentGroup != OPTIONS) {
+			optionsMenuGroup.getTransform().translationSet(restPositions[OPTIONS]).updateMatrix();
 		}
 
 		if (greenGradient != null) {
@@ -160,11 +163,11 @@ public class MainMenuUIScene extends UIScene {
 			blueGradient.getTransform().updateMatrix();
 		}
 
-		if (inputHandler.wasResized()) {
-			restPositions[OPTIONS].x = camera.getProjection().getAspectRatio() * 2;
-			if (currentGroup != OPTIONS) {
-				optionsMenuGroup.getTransform().translationSet(restPositions[OPTIONS]).updateMatrix();
-			}
+		if (optionsBackBtn != null) {
+			optionsBackBtn.getTransform().getTranslation().x = -camera.getProjection().getAspectRatio()
+					+ (optionsBackBtn.getTransform().getScale().x * (float) (optionsBackBtn.getBounds().getBounds2D().getWidth() / 2));
+			optionsBackBtn.getTransform().getTranslation().z = -1 + (float) (optionsBackBtn.getBounds().getBounds2D().getHeight() / 2);
+			optionsBackBtn.getTransform().updateMatrix();
 		}
 
 		if (targetGroup != currentGroup) {
@@ -200,9 +203,9 @@ public class MainMenuUIScene extends UIScene {
 	}
 
 	public void startTransition(int target) {
-		if (progress != 0 && progress != 1)
+		if (progress != 0 && progress != 1) {
 			return;
-		System.err.println("Going to: " + target);
+		}
 		this.targetGroup = target;
 		this.progress = 0;
 	}

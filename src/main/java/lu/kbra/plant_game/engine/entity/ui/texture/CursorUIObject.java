@@ -4,19 +4,16 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 
 import lu.kbra.plant_game.PGLogic;
-import lu.kbra.plant_game.engine.entity.ui.NeedsInput;
 import lu.kbra.plant_game.engine.entity.ui.NeedsUpdate;
 import lu.kbra.plant_game.engine.entity.ui.impl.TextureUIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.UIObject;
 import lu.kbra.plant_game.engine.mesh.TexturedQuadLoadedMesh;
-import lu.kbra.plant_game.engine.scene.ui.UIScene;
 import lu.kbra.plant_game.engine.util.DataPath;
-import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.scene.Scene;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 @DataPath("image:classpath:/icons/cursor-128.png")
-public class CursorUIObject extends TextureUIObject implements NeedsInput, NeedsUpdate {
+public class CursorUIObject extends TextureUIObject implements NeedsUpdate {
 
 	private final Vector2f to = new Vector2f();
 	private boolean circlingMouse;
@@ -41,13 +38,6 @@ public class CursorUIObject extends TextureUIObject implements NeedsInput, Needs
 		this.to.x = uiObject.getTransform().getTranslation().x
 				+ (float) uiObject.getBounds().getBounds2D().getX() * uiObject.getTransform().getScale().x - cursorWidth;
 		this.to.y = (float) uiObject.getTransform().getTranslation().z;
-	}
-
-	@Override
-	public void input(WindowInputHandler inputHandler, float dTime, Scene scene) {
-		if (circlingMouse) {
-			to.set(((UIScene) scene).getMouseCoords(inputHandler));
-		}
 	}
 
 	@Override
@@ -92,6 +82,14 @@ public class CursorUIObject extends TextureUIObject implements NeedsInput, Needs
 		this.to.x = mouseTarget.x;
 		this.to.y = mouseTarget.y;
 		this.circlingMouse = true;
+	}
+
+	public boolean isCirclingMouse() {
+		return circlingMouse;
+	}
+
+	public void forceCirclingMouse() {
+		circlingMouse = true;
 	}
 
 }

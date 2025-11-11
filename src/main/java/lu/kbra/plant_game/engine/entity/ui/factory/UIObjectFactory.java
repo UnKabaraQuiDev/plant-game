@@ -20,6 +20,7 @@ import lu.kbra.plant_game.engine.mesh.loader.StaticMeshLoader;
 import lu.kbra.plant_game.engine.mesh.loader.StaticTextLoader;
 import lu.kbra.plant_game.engine.mesh.loader.StaticTexturedMeshLoader;
 import lu.kbra.plant_game.engine.render.GradientMesh;
+import lu.kbra.plant_game.engine.scene.ui.ObjectGroup;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
 import lu.kbra.plant_game.engine.util.DataPath;
 import lu.kbra.plant_game.generated.UIObjectRegistry;
@@ -31,6 +32,9 @@ import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextAlignment;
 
 public class UIObjectFactory {
+
+	public static record TextData(Vector2f charSize, TextAlignment textAlignment) {
+	}
 
 	public static final Vector2f DEFAULT_CHAR_SIZE = new Vector2f(0.5f);
 	public static final TextData DEFAULT_TEXT_DATA = new TextData(DEFAULT_CHAR_SIZE, TextAlignment.LEFT);
@@ -179,6 +183,11 @@ public class UIObjectFactory {
 		return create_(clazz, args).then(loader, (ThrowingFunction<T, T, Throwable>) scene::addEntity);
 	}
 
+	@SuppressWarnings("unchecked")
+	public <T extends UIObject, V extends T> TaskFuture<?, T> create_(Class<T> clazz, ObjectGroup<V> obj, Object... args) {
+		return create_(clazz, args).then(loader, (ThrowingFunction<T, T, Throwable>) (T t) -> obj.add((V) t));
+	}
+
 	public static <T extends UIObject> TaskFuture<?, T> create(Class<T> clazz, Object... args) {
 		return INSTANCE.create_(clazz, args);
 	}
@@ -187,7 +196,8 @@ public class UIObjectFactory {
 		return INSTANCE.create_(clazz, scene, args);
 	}
 
-	public static record TextData(Vector2f charSize, TextAlignment textAlignment) {
+	public static <T extends UIObject> TaskFuture<?, T> create(Class<T> clazz, ObjectGroup obj, Object... args) {
+		return INSTANCE.create_(clazz, obj, args);
 	}
 
 }
