@@ -2,7 +2,6 @@ package lu.kbra.plant_game.engine.entity.ui.impl;
 
 import org.joml.Vector3f;
 
-import lu.kbra.plant_game.engine.entity.ui.HoverState;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.GameEngine;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;

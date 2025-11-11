@@ -1,4 +1,4 @@
-package lu.kbra.plant_game.engine.entity.ui;
+package lu.kbra.plant_game.engine.entity.ui.impl;
 
 import lu.kbra.standalone.gameengine.scene.Scene;
 

@@ -16,11 +16,11 @@ import org.lwjgl.glfw.GLFW;
 
 import lu.kbra.plant_game.UpdateFrameState;
 import lu.kbra.plant_game.engine.entity.impl.Transform3DOwner;
-import lu.kbra.plant_game.engine.entity.ui.HoverState;
-import lu.kbra.plant_game.engine.entity.ui.NeedsInput;
-import lu.kbra.plant_game.engine.entity.ui.NeedsUpdate;
-import lu.kbra.plant_game.engine.entity.ui.btn.NeedsClick;
+import lu.kbra.plant_game.engine.entity.ui.impl.HoverState;
+import lu.kbra.plant_game.engine.entity.ui.impl.NeedsClick;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsHover;
+import lu.kbra.plant_game.engine.entity.ui.impl.NeedsInput;
+import lu.kbra.plant_game.engine.entity.ui.impl.NeedsUpdate;
 import lu.kbra.plant_game.engine.entity.ui.impl.UIObject;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;

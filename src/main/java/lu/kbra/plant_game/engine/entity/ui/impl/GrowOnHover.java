@@ -6,7 +6,6 @@ import org.joml.Vector3f;
 import lu.pcy113.pclib.PCUtils;
 
 import lu.kbra.plant_game.engine.entity.impl.Transform3DOwner;
-import lu.kbra.plant_game.engine.entity.ui.NeedsUpdate;
 import lu.kbra.standalone.gameengine.scene.Scene;
 
 public interface GrowOnHover extends NeedsUpdate, Transform3DOwner, NeedsHover {

@@ -18,7 +18,7 @@ public class GenMainConsts extends Consts {
 	public static final File SRC_TEST_JAVA_DIR = new File(SRC_TEST_DIR, "/java");
 	public static final File SRC_TEST_RESOURCES_DIR = new File(SRC_TEST_DIR, "/resources");
 
-	public static final String MAIN_PACKAGE = PGMain.class.getPackageName();
+	public static final String MAIN_PACKAGE = PGLogic.class.getPackageName();
 	public static final String GEN_PACKAGE = MAIN_PACKAGE + ".generated";
 	public static final File SRC_MAIN_JAVA_GEN_DIR = new File(SRC_MAIN_JAVA_DIR, GEN_PACKAGE.replace(".", "/"));
 

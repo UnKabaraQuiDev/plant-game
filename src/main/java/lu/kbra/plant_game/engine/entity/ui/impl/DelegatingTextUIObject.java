@@ -2,8 +2,6 @@ package lu.kbra.plant_game.engine.entity.ui.impl;
 
 import lu.pcy113.pclib.impl.TriConsumer;
 
-import lu.kbra.plant_game.engine.entity.ui.HoverState;
-import lu.kbra.plant_game.engine.entity.ui.btn.NeedsClick;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
 import lu.kbra.standalone.gameengine.scene.Scene;
