@@ -90,7 +90,7 @@ local.properties
 build/*
 !build/build.sh
 
-test/
+# test/
 
 /bin/*
 /target/*
