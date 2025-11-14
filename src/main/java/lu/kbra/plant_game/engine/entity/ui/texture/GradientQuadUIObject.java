@@ -13,7 +13,7 @@ import lu.kbra.plant_game.engine.render.GradientMesh;
 import lu.kbra.plant_game.engine.render.GradientMeshComponent;
 import lu.kbra.plant_game.engine.render.GradientOwner;
 import lu.kbra.plant_game.engine.render.GradientQuadMesh;
-import lu.kbra.plant_game.engine.util.DataPath;
+import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 

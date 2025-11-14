@@ -251,7 +251,6 @@ public class WorldLevelScene extends Scene3D {
 										mousePos,
 										compositor.getWindow().getWidth(),
 										compositor.getWindow().getHeight());
-						System.err.println(pos);
 						if (pos != null) {
 							attachedObject.placeDown(this, pos, targetRotation);
 							targetRotation = Direction.DEFAULT();

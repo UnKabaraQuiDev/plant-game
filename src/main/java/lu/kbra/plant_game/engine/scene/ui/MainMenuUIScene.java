@@ -7,6 +7,8 @@ import org.joml.Quaternionf;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 
+import lu.pcy113.pclib.PCUtils;
+
 import lu.kbra.plant_game.engine.entity.ui.btn.BackButtonUIObject;
 import lu.kbra.plant_game.engine.entity.ui.btn.OptionsButtonUIObject;
 import lu.kbra.plant_game.engine.entity.ui.btn.PlayButtonUIObject;
@@ -15,7 +17,11 @@ import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory.TextData;
 import lu.kbra.plant_game.engine.entity.ui.impl.TextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.UIObject;
-import lu.kbra.plant_game.engine.entity.ui.text.TextFieldUIObject;
+import lu.kbra.plant_game.engine.entity.ui.text.BackwardButtonUIObject;
+import lu.kbra.plant_game.engine.entity.ui.text.ForwardButtonUIObject;
+import lu.kbra.plant_game.engine.entity.ui.text.LeftButtonUIObject;
+import lu.kbra.plant_game.engine.entity.ui.text.RightButtonUIObject;
+import lu.kbra.plant_game.engine.entity.ui.textinput.TextFieldUIObject;
 import lu.kbra.plant_game.engine.entity.ui.texture.CursorUIObject;
 import lu.kbra.plant_game.engine.entity.ui.texture.GradientQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.texture.LargeLogoUIObject;
@@ -29,7 +35,6 @@ import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextAlignment;
 import lu.kbra.standalone.gameengine.utils.interpolation.Interpolators;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
-import lu.pcy113.pclib.PCUtils;
 
 public class MainMenuUIScene extends UIScene {
 
@@ -93,8 +98,6 @@ public class MainMenuUIScene extends UIScene {
 				})
 				.push();
 
-		UIObjectFactory.create(TextFieldUIObject.class, mainMenuGroup, uiTextData).push();
-
 		/** options */
 
 		UIObjectFactory
@@ -118,6 +121,15 @@ public class MainMenuUIScene extends UIScene {
 					optionsBackBtn = t;
 				})
 				.push();
+
+		final TextData uiSmallLeftTextData = new TextData(new Vector2f(0.1f), TextAlignment.TEXT_LEFT, -1);
+
+		UIObjectFactory.create(ForwardButtonUIObject.class, optionsMenuGroup, uiSmallLeftTextData).push();
+		UIObjectFactory.create(BackwardButtonUIObject.class, optionsMenuGroup, uiSmallLeftTextData).push();
+		UIObjectFactory.create(LeftButtonUIObject.class, optionsMenuGroup, uiSmallLeftTextData).push();
+		UIObjectFactory.create(RightButtonUIObject.class, optionsMenuGroup, uiSmallLeftTextData).push();
+
+		/* common */
 
 		UIObjectFactory
 				.create(CursorUIObject.class, this, new Transform3D(new Vector3f(x, 0.01f, 0.25f), new Quaternionf(), new Vector3f(0.15f)))
