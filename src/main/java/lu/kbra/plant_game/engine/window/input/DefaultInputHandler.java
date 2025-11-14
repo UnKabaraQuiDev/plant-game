@@ -182,8 +182,9 @@ public class DefaultInputHandler implements WindowInputHandler {
 
 	@Override
 	public boolean isOwnerThread() {
-		if (owner == null)
+		if (owner == null) {
 			return true;
+		}
 		return owner == Thread.currentThread();
 	}
 
@@ -204,7 +205,7 @@ public class DefaultInputHandler implements WindowInputHandler {
 
 	@Override
 	public char getPressedKeyChar() {
-		return character;
+		return character == null ? '\0' : character;
 	}
 
 	@Override

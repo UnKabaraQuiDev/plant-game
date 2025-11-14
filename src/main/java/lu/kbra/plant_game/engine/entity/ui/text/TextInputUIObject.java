@@ -30,7 +30,7 @@ public class TextInputUIObject extends TextUIObject implements NeedsInput, Needs
 		if (focused && inputHandler.hasPressedKeyChar()) {
 			super.getTextEmitter().setText(super.getTextEmitter().getText() + inputHandler.getPressedKeyChar());
 			PGLogic.INSTANCE.RENDER_DISPATCHER.post(() -> super.getTextEmitter().updateText());
-		} else if (focused && inputHandler.isKeyPressedOnce(GLFW.GLFW_KEY_BACKSPACE) && super.getTextEmitter().getText().length() > 0) {
+		} else if (focused && inputHandler.isKeyPressedOrRepeat(GLFW.GLFW_KEY_BACKSPACE) && super.getTextEmitter().getText().length() > 0) {
 			super.getTextEmitter().setText(super.getTextEmitter().getText().substring(0, super.getTextEmitter().getText().length() - 1));
 			PGLogic.INSTANCE.RENDER_DISPATCHER.post(() -> super.getTextEmitter().updateText());
 		}
