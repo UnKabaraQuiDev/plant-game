@@ -46,10 +46,8 @@ public class TerrainObject extends GameObject {
 		Vector4f localOrigin4 = invMesh.transform(new Vector4f(rayOrigin, 1f));
 		Vector3f localOrigin = new Vector3f(localOrigin4.x, localOrigin4.y, localOrigin4.z);
 
-		Vector4f localDir4 = invMesh
-				.transform(new Vector4f(rayOrigin.x + rayDir.x, rayOrigin.y + rayDir.y, rayOrigin.z + rayDir.z, 1f));
-		Vector3f localDir = new Vector3f(localDir4.x - localOrigin.x, localDir4.y - localOrigin.y,
-				localDir4.z - localOrigin.z).normalize();
+		Vector4f localDir4 = invMesh.transform(new Vector4f(rayOrigin.x + rayDir.x, rayOrigin.y + rayDir.y, rayOrigin.z + rayDir.z, 1f));
+		Vector3f localDir = new Vector3f(localDir4.x - localOrigin.x, localDir4.y - localOrigin.y, localDir4.z - localOrigin.z).normalize();
 
 		// Convert hit point on XZ plane to grid
 		// Ray-plane intersection at Y = max height

@@ -17,13 +17,11 @@ public class WaterWheelObject extends AnimatedGameObject implements PlaceableObj
 
 	protected long waterLevel;
 
-	public WaterWheelObject(String str, Mesh mesh, AnimatedMesh animatedMesh, Transform3D transform, Vector3i objectId,
-			short materialId) {
+	public WaterWheelObject(String str, Mesh mesh, AnimatedMesh animatedMesh, Transform3D transform, Vector3i objectId, short materialId) {
 		super(str, mesh, animatedMesh, transform, objectId, materialId);
 	}
 
-	public WaterWheelObject(String str, Mesh mesh, AnimatedMesh animatedMesh, Transform3D transform,
-			Vector3i objectId) {
+	public WaterWheelObject(String str, Mesh mesh, AnimatedMesh animatedMesh, Transform3D transform, Vector3i objectId) {
 		super(str, mesh, animatedMesh, transform, objectId);
 	}
 
@@ -37,8 +35,7 @@ public class WaterWheelObject extends AnimatedGameObject implements PlaceableObj
 
 	@Override
 	public Matrix4f computeAnimatedTransform(float t) {
-		getTransform().getMatrix().mul(animatedTransform.identity().rotateZ((float) Math.toRadians(t * 25)),
-				animatedTransform);
+		getTransform().getMatrix().mul(animatedTransform.identity().rotateZ((float) Math.toRadians(t * 25)), animatedTransform);
 		return animatedTransform;
 	}
 

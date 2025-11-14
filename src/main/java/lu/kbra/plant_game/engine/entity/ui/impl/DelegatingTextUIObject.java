@@ -12,9 +12,7 @@ public class DelegatingTextUIObject extends TextUIObject implements NeedsHover, 
 	private final TriConsumer<WindowInputHandler, Float, DelegatingTextUIObject> hoverDelegate;
 	private final TriConsumer<WindowInputHandler, Float, DelegatingTextUIObject> clickDelegate;
 
-	public DelegatingTextUIObject(
-			String str,
-			TextEmitter text,
+	public DelegatingTextUIObject(String str, TextEmitter text,
 			TriConsumer<WindowInputHandler, Float, DelegatingTextUIObject> hoverDelegate,
 			TriConsumer<WindowInputHandler, Float, DelegatingTextUIObject> clickDelegate) {
 		super(str, text);
@@ -22,10 +20,7 @@ public class DelegatingTextUIObject extends TextUIObject implements NeedsHover, 
 		this.clickDelegate = clickDelegate;
 	}
 
-	public DelegatingTextUIObject(
-			String str,
-			TextEmitter text,
-			Transform3D transform,
+	public DelegatingTextUIObject(String str, TextEmitter text, Transform3D transform,
 			TriConsumer<WindowInputHandler, Float, DelegatingTextUIObject> hoverDelegate,
 			TriConsumer<WindowInputHandler, Float, DelegatingTextUIObject> clickDelegate) {
 		super(str, text, transform);

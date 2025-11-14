@@ -19,14 +19,8 @@ public class LoadedGradientQuadMesh extends LoadedQuadMesh implements GradientQu
 		super(name, material, size);
 	}
 
-	public LoadedGradientQuadMesh(
-			String name,
-			Material material,
-			Vector2f size,
-			Vector4f startColor,
-			Vector4f endColor,
-			GradientDirection gradientDirection,
-			Vector2f gradientRange) {
+	public LoadedGradientQuadMesh(String name, Material material, Vector2f size, Vector4f startColor, Vector4f endColor,
+			GradientDirection gradientDirection, Vector2f gradientRange) {
 		super(name, material, size);
 		this.startColor = startColor;
 		this.endColor = endColor;

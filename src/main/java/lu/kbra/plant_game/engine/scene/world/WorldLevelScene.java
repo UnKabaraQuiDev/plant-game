@@ -15,8 +15,7 @@ import lu.pcy113.pclib.datastructure.pair.Pair;
 import lu.pcy113.pclib.impl.ThrowingConsumer;
 import lu.pcy113.pclib.impl.ThrowingFunction;
 import lu.pcy113.pclib.logger.GlobalLogger;
-
-import lu.kbra.plant_game.UpdateFrameState;
+import lu.kbra.plant_game.engine.UpdateFrameState;
 import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory;
 import lu.kbra.plant_game.engine.entity.go.impl.AnimatedGameObject;
 import lu.kbra.plant_game.engine.entity.go.impl.GameObject;
@@ -103,8 +102,9 @@ public class WorldLevelScene extends Scene3D {
 			new TaskFuture<>(renderDispatcher, () -> {
 				GlobalLogger.info("Generating water mesh...");
 				final Pair<Mesh, Long> meshTime = PCUtils
-						.nanoTime(() -> new LoadedQuadMesh("water", null, new Vector2f(((TerrainMesh) this.getTerrain().getMesh()).getWidth(),
-								((TerrainMesh) this.getTerrain().getMesh()).getLength())));
+						.nanoTime(
+								() -> new LoadedQuadMesh("water", null, new Vector2f(((TerrainMesh) this.getTerrain().getMesh()).getWidth(),
+										((TerrainMesh) this.getTerrain().getMesh()).getLength())));
 				this.getCache().addMesh(meshTime.getKey());
 				GlobalLogger.info("Water mesh generated in " + (meshTime.getValue() / 1e6) + " ms");
 				return meshTime.getKey();

@@ -15,7 +15,7 @@ public interface WindowInputHandler {
 	Vector2f getNormalizedMousePosition();
 
 	GameEngine getGameEngine();
-	
+
 	Window getWindow();
 
 	Vector2i getWindowSize();
@@ -49,7 +49,11 @@ public interface WindowInputHandler {
 	boolean isOwnerThread();
 
 	void checkOwnerThread();
-	
+
 	boolean wasResized();
+
+	char getPressedKeyChar();
+
+	boolean hasPressedKeyChar();
 
 }

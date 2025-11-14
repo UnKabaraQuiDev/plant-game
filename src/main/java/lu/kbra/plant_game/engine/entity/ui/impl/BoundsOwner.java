@@ -5,5 +5,5 @@ import java.awt.Shape;
 public interface BoundsOwner {
 
 	Shape getBounds();
-	
+
 }

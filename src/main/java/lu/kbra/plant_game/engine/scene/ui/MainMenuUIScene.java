@@ -1,14 +1,11 @@
 package lu.kbra.plant_game.engine.scene.ui;
 
-import java.nio.ByteBuffer;
 import java.util.Optional;
 import java.util.function.Consumer;
 
 import org.joml.Quaternionf;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
-
-import lu.pcy113.pclib.PCUtils;
 
 import lu.kbra.plant_game.engine.entity.ui.btn.BackButtonUIObject;
 import lu.kbra.plant_game.engine.entity.ui.btn.OptionsButtonUIObject;
@@ -18,6 +15,7 @@ import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory.TextData;
 import lu.kbra.plant_game.engine.entity.ui.impl.TextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.UIObject;
+import lu.kbra.plant_game.engine.entity.ui.text.TextInputUIObject;
 import lu.kbra.plant_game.engine.entity.ui.texture.CursorUIObject;
 import lu.kbra.plant_game.engine.entity.ui.texture.GradientQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.texture.LargeLogoUIObject;
@@ -31,6 +29,7 @@ import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextAlignment;
 import lu.kbra.standalone.gameengine.utils.interpolation.Interpolators;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
+import lu.pcy113.pclib.PCUtils;
 
 public class MainMenuUIScene extends UIScene {
 
@@ -94,6 +93,8 @@ public class MainMenuUIScene extends UIScene {
 				})
 				.push();
 
+		UIObjectFactory.create(TextInputUIObject.class, mainMenuGroup).push();
+
 		/** options */
 
 		UIObjectFactory
@@ -138,7 +139,10 @@ public class MainMenuUIScene extends UIScene {
 		super.update(inputHandler, dTime, compositor, workers, render);
 
 		if (cursor != null) {
-			final Optional<UIObject> focusCandidate = hovering.stream().filter(c -> c instanceof TextUIObject).findFirst();
+			final Optional<UIObject> focusCandidate = hovering
+					.stream()
+					.filter(c -> c instanceof TextUIObject && !(c instanceof TextInputUIObject))
+					.findFirst();
 			if (cursor.isCirclingMouse() && focusCandidate.isEmpty()) {
 				cursor.setCirclingMouse(getMouseCoords(inputHandler));
 			} else {

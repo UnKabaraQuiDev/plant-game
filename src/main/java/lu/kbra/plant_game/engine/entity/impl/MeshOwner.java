@@ -5,5 +5,5 @@ import lu.kbra.standalone.gameengine.geom.Mesh;
 public interface MeshOwner {
 
 	Mesh getMesh();
-	
+
 }

@@ -14,8 +14,7 @@ public class TerrainMesh extends LoadedMesh {
 	private TerrainMaterialType[][] materialType;
 
 	public TerrainMesh(String name, int objectId, int width, int length, int maxHeight, Integer[][] cellHeight,
-			TerrainMaterialType[][] materialType, Vec3fAttribArray vertices, UIntAttribArray indices,
-			AttribArray... attribs) {
+			TerrainMaterialType[][] materialType, Vec3fAttribArray vertices, UIntAttribArray indices, AttribArray... attribs) {
 		super(name, null, vertices, indices, attribs);
 		this.objectId = objectId;
 		this.width = width;

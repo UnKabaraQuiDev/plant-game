@@ -98,13 +98,13 @@ public class UIObjectFactory {
 
 			}
 
-		} else if (TextUIObject.class.isAssignableFrom(clazz) && cDataPath.startsWith("localization:")) {
+		} else if (TextUIObject.class.isAssignableFrom(clazz) && (cDataPath.startsWith("localization:") || cDataPath.isEmpty())) {
 
 			final String key = cDataPath.substring(cDataPath.indexOf(":") + 1);
 
 			final TextData td;
 			final Object[] nargs;
-			if (args[0] instanceof TextData vvec) {
+			if (args.length > 0 && args[0] instanceof TextData vvec) {
 				td = vvec;
 				nargs = PCUtils.removeArray(args, 0);
 			} else {

@@ -5,6 +5,7 @@ import java.util.Locale;
 
 import org.joml.Vector3f;
 
+import lu.kbra.plant_game.engine.UpdateFrameState;
 import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
 import lu.kbra.plant_game.engine.locale.LocalizationService;

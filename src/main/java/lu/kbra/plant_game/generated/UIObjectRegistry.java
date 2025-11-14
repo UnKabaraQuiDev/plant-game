@@ -21,6 +21,7 @@ import lu.kbra.plant_game.engine.entity.ui.impl.QuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.TextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.TextureUIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.UIObject;
+import lu.kbra.plant_game.engine.entity.ui.text.TextInputUIObject;
 import lu.kbra.plant_game.engine.entity.ui.texture.CursorUIObject;
 import lu.kbra.plant_game.engine.entity.ui.texture.GradientQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.texture.LargeLogoUIObject;
@@ -78,6 +79,12 @@ public class UIObjectRegistry {
 		listTextureUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadLoadedMesh.class}, (Object[] arr) -> (UIObject) new TextureUIObject((String) arr[0], (TexturedQuadLoadedMesh) arr[1])));
 		listTextureUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadLoadedMesh.class, Transform3D.class}, (Object[] arr) -> (UIObject) new TextureUIObject((String) arr[0], (TexturedQuadLoadedMesh) arr[1], (Transform3D) arr[2])));
 		UI_OBJECT_CONSTRUCTORS.put(TextureUIObject.class, listTextureUIObject);
+
+		/*                 TextInputUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listTextInputUIObject = new ArrayList<>();
+		listTextInputUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class}, (Object[] arr) -> (UIObject) new TextInputUIObject((String) arr[0], (TextEmitter) arr[1])));
+		listTextInputUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, Transform3D.class}, (Object[] arr) -> (UIObject) new TextInputUIObject((String) arr[0], (TextEmitter) arr[1], (Transform3D) arr[2])));
+		UI_OBJECT_CONSTRUCTORS.put(TextInputUIObject.class, listTextInputUIObject);
 
 		/*                 DelegatingTextUIObject                 */
 		final List<InternalConstructorFunction<UIObject>> listDelegatingTextUIObject = new ArrayList<>();

@@ -47,7 +47,7 @@ public class LocalizationService {
 	}
 
 	public static String get(String key) {
-		return INSTANCE.get_(key);
+		return key.isEmpty() ? "" : INSTANCE.get_(key);
 	}
 
 	public Properties getProps() {

@@ -1,4 +1,4 @@
-package lu.kbra.plant_game;
+package lu.kbra.plant_game.engine;
 
 public class UpdateFrameState {
 

@@ -20,8 +20,7 @@ public class PGMain {
 
 		GlobalLogger.INIT_DEFAULT_IF_NOT_INITIALIZED = false;
 		GlobalLogger.init(PCUtils.readStringSource(props.getProperty("logs.config.file")));
-		GlobalLogger.info(
-				"Removed " + PCUtils.deleteOldFiles(new File("./logs/"), 20) + " entries from the logs directory.");
+		GlobalLogger.info("Removed " + PCUtils.deleteOldFiles(new File("./logs/"), 20) + " entries from the logs directory.");
 
 		final GameLogic gameLogic = new PGLogic();
 

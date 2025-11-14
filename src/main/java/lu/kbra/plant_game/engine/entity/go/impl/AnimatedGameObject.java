@@ -24,13 +24,12 @@ public class AnimatedGameObject extends GameObject implements AnimatedTransformO
 				new Vector3i((int) System.nanoTime(), (int) System.nanoTime() % 20056, (int) System.nanoTime() % 255));
 	}
 
-	public AnimatedGameObject(String str, Mesh mesh, AnimatedMesh animatedMesh, Transform3D transform,
-			Vector3i objectId) {
+	public AnimatedGameObject(String str, Mesh mesh, AnimatedMesh animatedMesh, Transform3D transform, Vector3i objectId) {
 		this(str, mesh, animatedMesh, transform, objectId, (short) -1);
 	}
 
-	public AnimatedGameObject(String str, Mesh mesh, AnimatedMesh animatedMesh, Transform3D transform,
-			Vector3i objectId, short materialId) {
+	public AnimatedGameObject(String str, Mesh mesh, AnimatedMesh animatedMesh, Transform3D transform, Vector3i objectId,
+			short materialId) {
 		super(str, mesh, transform, objectId, materialId);
 		super.addComponent(new AnimatedMeshComponent(animatedMesh));
 		this.animatedMeshComponent = super.getComponent(AnimatedMeshComponent.class);
@@ -64,9 +63,9 @@ public class AnimatedGameObject extends GameObject implements AnimatedTransformO
 
 	@Override
 	public String toString() {
-		return "AnimatedGameObject [animatedTransform=" + animatedTransform + ", materialId=" + materialId
-				+ ", entityMaterialId=" + entityMaterialId + ", objectId=" + objectId + ", objectIdLocation="
-				+ objectIdLocation + ", getComponents()=" + getComponents().size() + ", isActive()=" + isActive() + "]";
+		return "AnimatedGameObject [animatedTransform=" + animatedTransform + ", materialId=" + materialId + ", entityMaterialId="
+				+ entityMaterialId + ", objectId=" + objectId + ", objectIdLocation=" + objectIdLocation + ", getComponents()="
+				+ getComponents().size() + ", isActive()=" + isActive() + "]";
 	}
 
 }

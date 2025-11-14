@@ -14,7 +14,7 @@ import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.lwjgl.glfw.GLFW;
 
-import lu.kbra.plant_game.UpdateFrameState;
+import lu.kbra.plant_game.engine.UpdateFrameState;
 import lu.kbra.plant_game.engine.entity.impl.Transform3DOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.HoverState;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsClick;
@@ -22,6 +22,7 @@ import lu.kbra.plant_game.engine.entity.ui.impl.NeedsHover;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsInput;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsUpdate;
 import lu.kbra.plant_game.engine.entity.ui.impl.UIObject;
+import lu.kbra.plant_game.engine.entity.ui.text.Focusable;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.GameEngine;
@@ -61,11 +62,16 @@ public class UIScene extends Scene3D {
 	}
 
 	protected Set<UIObject> hovering = new HashSet<>();
+	protected Focusable focused;
 
 	public void input(final WindowInputHandler inputHandler, final float dTime, final UpdateFrameState frameState) {
 		final Vector2f mouseWorld2D = getMouseCoords(inputHandler);
 
 		final Set<UIObject> newHovered = new HashSet<>();
+
+		if (focused != null && !focused.hasFocus()) {
+			focused = null;
+		}
 
 		synchronized (super.getEntitiesLock()) {
 			for (Entity e : this) {
@@ -134,6 +140,14 @@ public class UIScene extends Scene3D {
 
 				if (uiObj instanceof NeedsClick uiObjectClick && inputHandler.isMouseButtonPressedOnce(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
 					uiObjectClick.click(inputHandler, dTime, this);
+
+					if (uiObj instanceof Focusable) {
+						if (focused != null) {
+							focused.removeFocus();
+						}
+						focused = (Focusable) uiObj;
+						focused.giveFocus();
+					}
 				}
 			}
 		}

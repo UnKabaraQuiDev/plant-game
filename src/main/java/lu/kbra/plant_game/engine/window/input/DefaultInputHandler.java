@@ -27,6 +27,7 @@ public class DefaultInputHandler implements WindowInputHandler {
 	protected Vector2f normalizedMousePosition = new Vector2f();
 	protected Vector2d mouseScroll = new Vector2d();
 	protected Vector2f mousePosition = new Vector2f();
+	protected Character character;
 
 	public DefaultInputHandler(GameEngine engine) {
 		this.engine = engine;
@@ -41,11 +42,11 @@ public class DefaultInputHandler implements WindowInputHandler {
 		System.arraycopy(currentMousePressed, 0, prevMousePressed, 0, prevMousePressed.length);
 
 		for (int i = 0; i <= GLFW.GLFW_KEY_LAST; i++) {
-			KeyState state = getKeyState(i);
+			final KeyState state = getKeyState(i);
 			currentKeyPressed[i] = (state == KeyState.PRESS || state == KeyState.REPEAT);
 		}
 		for (int i = 0; i <= GLFW.GLFW_MOUSE_BUTTON_LAST; i++) {
-			KeyState state = getButtonState(i);
+			final KeyState state = getButtonState(i);
 			currentMousePressed[i] = (state == KeyState.PRESS || state == KeyState.REPEAT);
 		}
 
@@ -65,6 +66,9 @@ public class DefaultInputHandler implements WindowInputHandler {
 		windowResized = oldSize.x != window.getSize().x || oldSize.y != window.getSize().y;
 		oldSize.set(window.getSize());
 		mousePosition.set(window.getMousePosition());
+
+		character = window.getCharacter();
+		window.clearCharacter();
 	}
 
 	@Override
@@ -196,6 +200,16 @@ public class DefaultInputHandler implements WindowInputHandler {
 	@Override
 	public boolean wasResized() {
 		return windowResized;
+	}
+
+	@Override
+	public char getPressedKeyChar() {
+		return character;
+	}
+
+	@Override
+	public boolean hasPressedKeyChar() {
+		return character != null;
 	}
 
 }

@@ -27,7 +27,7 @@ public class CursorUIObject extends TextureUIObject implements NeedsUpdate {
 	}
 
 	public void setTargetedObject(UIObject uiObject) {
-		if (uiObject == null || uiObject == this) {
+		if (uiObject == null || uiObject == this || uiObject.getTransform() == null) {
 			return;
 		}
 

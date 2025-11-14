@@ -12,8 +12,7 @@ public class BlitShader extends RenderShader {
 	}
 
 	public BlitShader(String name) {
-		super(name, AbstractShaderPart.load("classpath:/shaders/blit.frag"),
-				AbstractShaderPart.load("classpath:/shaders/blit.vert"));
+		super(name, AbstractShaderPart.load("classpath:/shaders/blit.frag"), AbstractShaderPart.load("classpath:/shaders/blit.vert"));
 	}
 
 	@Override

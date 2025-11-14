@@ -56,8 +56,9 @@ public interface PlaceableObject extends Transform3DOwner, UniqueID, SceneEntity
 		final int cellHeight = mesh.getCellHeight(tile.x, tile.y);
 
 		rotation.rotate(transform.getRotation());
-		transform.getTranslation().set(meshTranslation.x + tile.x + 0.5f, +meshTranslation.y + cellHeight,
-				meshTranslation.z + tile.y + 0.5f);
+		transform
+				.getTranslation()
+				.set(meshTranslation.x + tile.x + 0.5f, +meshTranslation.y + cellHeight, meshTranslation.z + tile.y + 0.5f);
 
 		transform.updateMatrix();
 	}

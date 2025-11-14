@@ -14,8 +14,7 @@ public class OutlineShader extends ComputeShader {
 	public static final String TARGET_COLORS = "targetColors";
 
 	public OutlineShader() {
-		super((ComputeShaderPart) AbstractShaderPart.load("classpath:/shaders/outline.comp",
-				PCUtils.hashMap("{MAX_COUNT}", MAX_COUNT)));
+		super((ComputeShaderPart) AbstractShaderPart.load("classpath:/shaders/outline.comp", PCUtils.hashMap("{MAX_COUNT}", MAX_COUNT)));
 	}
 
 	@Override
