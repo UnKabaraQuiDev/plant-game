@@ -48,13 +48,24 @@ public class GradientQuadUIObject extends QuadUIObject implements TintOwner, Gra
 		this(str, gradientMesh, null, dir, null, start, end);
 	}
 
-	public GradientQuadUIObject(String str, GradientQuadMesh gradientMesh, GradientDirection dir, Vector2f gradientRange, Vector4f start,
+	public GradientQuadUIObject(
+			String str,
+			GradientQuadMesh gradientMesh,
+			GradientDirection dir,
+			Vector2f gradientRange,
+			Vector4f start,
 			Vector4f end) {
 		this(str, gradientMesh, null, dir, gradientRange, null, start, end);
 	}
 
-	public GradientQuadUIObject(String str, GradientQuadMesh gradientMesh, GradientDirection dir, Vector2f gradientRange, Vector4f tint,
-			Vector4f start, Vector4f end) {
+	public GradientQuadUIObject(
+			String str,
+			GradientQuadMesh gradientMesh,
+			GradientDirection dir,
+			Vector2f gradientRange,
+			Vector4f tint,
+			Vector4f start,
+			Vector4f end) {
 		this(str, gradientMesh, null, dir, gradientRange, tint, start, end);
 	}
 
@@ -70,23 +81,46 @@ public class GradientQuadUIObject extends QuadUIObject implements TintOwner, Gra
 		this(str, gradientMesh, transform, dir, null, tint, null, null);
 	}
 
-	public GradientQuadUIObject(String str, GradientQuadMesh gradientMesh, Transform3D transform, GradientDirection dir,
-			Vector2f gradientRange, Vector4f tint) {
+	public GradientQuadUIObject(
+			String str,
+			GradientQuadMesh gradientMesh,
+			Transform3D transform,
+			GradientDirection dir,
+			Vector2f gradientRange,
+			Vector4f tint) {
 		this(str, gradientMesh, transform, dir, gradientRange, tint, null, null);
 	}
 
-	public GradientQuadUIObject(String str, GradientQuadMesh gradientMesh, Transform3D transform, GradientDirection dir, Vector4f start,
+	public GradientQuadUIObject(
+			String str,
+			GradientQuadMesh gradientMesh,
+			Transform3D transform,
+			GradientDirection dir,
+			Vector4f start,
 			Vector4f end) {
 		this(str, gradientMesh, transform, dir, null, null, start, end);
 	}
 
-	public GradientQuadUIObject(String str, GradientQuadMesh gradientMesh, Transform3D transform, GradientDirection dir,
-			Vector2f gradientRange, Vector4f start, Vector4f end) {
+	public GradientQuadUIObject(
+			String str,
+			GradientQuadMesh gradientMesh,
+			Transform3D transform,
+			GradientDirection dir,
+			Vector2f gradientRange,
+			Vector4f start,
+			Vector4f end) {
 		this(str, gradientMesh, transform, dir, gradientRange, null, start, end);
 	}
 
-	public GradientQuadUIObject(String str, GradientQuadMesh gradientMesh, Transform3D transform, GradientDirection dir,
-			Vector2f gradientRange, Vector4f tint, Vector4f start, Vector4f end) {
+	public GradientQuadUIObject(
+			String str,
+			GradientQuadMesh gradientMesh,
+			Transform3D transform,
+			GradientDirection dir,
+			Vector2f gradientRange,
+			Vector4f tint,
+			Vector4f start,
+			Vector4f end) {
 		super(str, null, transform);
 		super.addComponent(gradientMeshComponent = new GradientMeshComponent(gradientMesh));
 		bounds = GameEngineUtils.toRectangleBounds(gradientMesh.getSize(), Alignment.CENTER, Alignment.CENTER);

@@ -28,7 +28,12 @@ public class AnimatedGameObject extends GameObject implements AnimatedTransformO
 		this(str, mesh, animatedMesh, transform, objectId, (short) -1);
 	}
 
-	public AnimatedGameObject(String str, Mesh mesh, AnimatedMesh animatedMesh, Transform3D transform, Vector3i objectId,
+	public AnimatedGameObject(
+			String str,
+			Mesh mesh,
+			AnimatedMesh animatedMesh,
+			Transform3D transform,
+			Vector3i objectId,
 			short materialId) {
 		super(str, mesh, transform, objectId, materialId);
 		super.addComponent(new AnimatedMeshComponent(animatedMesh));

@@ -1,98 +1,29 @@
 package lu.kbra.plant_game.engine.scene.ui;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import lu.kbra.standalone.gameengine.objs.entity.Component;
+import lu.kbra.plant_game.engine.entity.ui.impl.UIObject;
 import lu.kbra.standalone.gameengine.objs.entity.Entity;
+import lu.kbra.standalone.gameengine.objs.entity.ParentAware;
 import lu.kbra.standalone.gameengine.objs.entity.components.SubEntitiesComponent;
 
-public class ObjectGroup<T extends Entity> extends Entity implements Iterable<T> {
+public interface ObjectGroup<T extends Entity> extends Iterable<T>, ParentAware {
 
-	private SubEntitiesComponent<T> subEntitiesComponent;
+	T get(int index);
 
-	public ObjectGroup(String str, Component... cs) {
-		super(str, cs);
-		super.addComponent(this.subEntitiesComponent = new SubEntitiesComponent<>());
-	}
+	boolean addAll(ObjectGroup<? extends UIObject> c);
 
-	public ObjectGroup(String str, List<T> entities, Component... cs) {
-		super(str, cs);
-		super.addComponent(this.subEntitiesComponent = new SubEntitiesComponent<>(entities));
-	}
+	boolean addAll(Collection<? extends UIObject> c);
 
-	@SafeVarargs
-	public ObjectGroup(String str, T... values) {
-		super(str);
-		super.addComponent(this.subEntitiesComponent = new SubEntitiesComponent<>(
-				Arrays.stream(values).collect(Collectors.toCollection(ArrayList::new))));
-	}
+	<V extends T> V add(V e);
 
-	public SubEntitiesComponent<T> getSubEntitiesComponent() {
-		return subEntitiesComponent;
-	}
+	boolean contains(UIObject o);
 
-	public List<T> getSubEntities() {
-		return subEntitiesComponent == null ? Collections.emptyList() : subEntitiesComponent.getEntities();
-	}
+	Object getSubEntitiesLock();
 
-	public Object getSubEntitiesLock() {
-		return subEntitiesComponent == null ? null : subEntitiesComponent.getEntitiesLock();
-	}
+	List<UIObject> getSubEntities();
 
-	public boolean contains(T o) {
-		synchronized (getSubEntitiesLock()) {
-			return getSubEntities().contains(o);
-		}
-	}
-
-	public T add(T e) {
-		synchronized (getSubEntitiesLock()) {
-			getSubEntities().add(e);
-		}
-		return e;
-	}
-
-	public boolean addAll(Collection<? extends T> c) {
-		synchronized (getSubEntitiesLock()) {
-			return getSubEntities().addAll(c);
-		}
-	}
-
-	public boolean addAll(ObjectGroup<? extends T> c) {
-		synchronized (getSubEntitiesLock()) {
-			return getSubEntities().addAll(c.getSubEntities());
-		}
-	}
-
-	public T get(int index) {
-		synchronized (getSubEntitiesLock()) {
-			return getSubEntities().get(index);
-		}
-	}
-
-	public Stream<T> stream() {
-		synchronized (getSubEntitiesLock()) {
-			return getSubEntities().stream();
-		}
-	}
-
-	@Override
-	public Iterator<T> iterator() {
-		synchronized (getSubEntitiesLock()) {
-			return getSubEntities().iterator();
-		}
-	}
-
-	@Override
-	public String toString() {
-		return "ObjectGroup [subEntitiesComponent=" + subEntitiesComponent + ", getSubEntities()=" + getSubEntities() + "]";
-	}
+	SubEntitiesComponent<UIObject> getSubEntitiesComponent();
 
 }

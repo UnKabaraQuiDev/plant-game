@@ -14,8 +14,14 @@ public class TexturedLoadedMesh extends OffsetMesh implements TexturedMesh {
 
 	protected SingleTexture texture;
 
-	public TexturedLoadedMesh(String name, Material material, Vector3f origin, SingleTexture texture, Vec3fAttribArray vertices,
-			UIntAttribArray indices, AttribArray... attribs) {
+	public TexturedLoadedMesh(
+			String name,
+			Material material,
+			Vector3f origin,
+			SingleTexture texture,
+			Vec3fAttribArray vertices,
+			UIntAttribArray indices,
+			AttribArray... attribs) {
 		super(name, material, origin, vertices, indices, attribs);
 		this.texture = texture;
 	}

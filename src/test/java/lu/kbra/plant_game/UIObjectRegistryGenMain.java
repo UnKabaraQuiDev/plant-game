@@ -78,7 +78,7 @@ public class UIObjectRegistryGenMain extends GenMainConsts {
 			/*
 			 * if (!c.isAnnotationPresent(DataPath.class)) { continue; }
 			 */
-			if(java.lang.reflect.Modifier.isAbstract(c.getModifiers())) {
+			if (java.lang.reflect.Modifier.isAbstract(c.getModifiers())) {
 				continue;
 			}
 

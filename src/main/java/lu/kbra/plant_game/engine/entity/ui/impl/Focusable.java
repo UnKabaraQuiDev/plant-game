@@ -3,7 +3,7 @@ package lu.kbra.plant_game.engine.entity.ui.impl;
 public interface Focusable {
 
 	boolean hasFocus();
-	
+
 	default void giveFocus() {
 		setFocused(true);
 	}
@@ -11,7 +11,7 @@ public interface Focusable {
 	default void removeFocus() {
 		setFocused(false);
 	}
-	
+
 	void setFocused(boolean focused);
-	
+
 }

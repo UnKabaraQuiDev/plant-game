@@ -33,10 +33,15 @@ import lu.kbra.plant_game.engine.entity.ui.texture.LargeLogoUIObject;
 import lu.kbra.plant_game.engine.mesh.TexturedQuadLoadedMesh;
 import lu.kbra.plant_game.engine.render.GradientDirection;
 import lu.kbra.plant_game.engine.render.GradientQuadMesh;
+import lu.kbra.plant_game.engine.scene.ui.Layout;
+import lu.kbra.plant_game.engine.scene.ui.LayoutOffsetUIObjectGroup;
+import lu.kbra.plant_game.engine.scene.ui.OffsetUIObjectGroup;
+import lu.kbra.plant_game.engine.scene.ui.UIObjectGroup;
 import lu.kbra.plant_game.engine.util.InternalConstructorFunction;
 import lu.kbra.plant_game.engine.util.exceptions.UIObjectConstructorNotFound;
 import lu.kbra.plant_game.engine.util.exceptions.UIObjectNotFound;
 import lu.kbra.standalone.gameengine.geom.QuadMesh;
+import lu.kbra.standalone.gameengine.objs.entity.Component;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 import lu.pcy113.pclib.impl.TriConsumer;
@@ -54,6 +59,13 @@ public class UIObjectRegistry {
 		listQuadUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, QuadMesh.class}, (Object[] arr) -> (UIObject) new QuadUIObject((String) arr[0], (QuadMesh) arr[1])));
 		listQuadUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, QuadMesh.class, Transform3D.class}, (Object[] arr) -> (UIObject) new QuadUIObject((String) arr[0], (QuadMesh) arr[1], (Transform3D) arr[2])));
 		UI_OBJECT_CONSTRUCTORS.put(QuadUIObject.class, listQuadUIObject);
+
+		/*                 UIObjectGroup                 */
+		final List<InternalConstructorFunction<UIObject>> listUIObjectGroup = new ArrayList<>();
+		listUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObject[].class}, (Object[] arr) -> (UIObject) new UIObjectGroup((String) arr[0], (UIObject[]) arr[1])));
+		listUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Component[].class}, (Object[] arr) -> (UIObject) new UIObjectGroup((String) arr[0], (Component[]) arr[1])));
+		listUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, List.class, Component[].class}, (Object[] arr) -> (UIObject) new UIObjectGroup((String) arr[0], (List) arr[1], (Component[]) arr[2])));
+		UI_OBJECT_CONSTRUCTORS.put(UIObjectGroup.class, listUIObjectGroup);
 
 		/*                 TextUIObject                 */
 		final List<InternalConstructorFunction<UIObject>> listTextUIObject = new ArrayList<>();
@@ -84,6 +96,13 @@ public class UIObjectRegistry {
 		listTextureUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadLoadedMesh.class}, (Object[] arr) -> (UIObject) new TextureUIObject((String) arr[0], (TexturedQuadLoadedMesh) arr[1])));
 		listTextureUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadLoadedMesh.class, Transform3D.class}, (Object[] arr) -> (UIObject) new TextureUIObject((String) arr[0], (TexturedQuadLoadedMesh) arr[1], (Transform3D) arr[2])));
 		UI_OBJECT_CONSTRUCTORS.put(TextureUIObject.class, listTextureUIObject);
+
+		/*                 OffsetUIObjectGroup                 */
+		final List<InternalConstructorFunction<UIObject>> listOffsetUIObjectGroup = new ArrayList<>();
+		listOffsetUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObject[].class}, (Object[] arr) -> (UIObject) new OffsetUIObjectGroup((String) arr[0], (UIObject[]) arr[1])));
+		listOffsetUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Transform3D.class, UIObject[].class}, (Object[] arr) -> (UIObject) new OffsetUIObjectGroup((String) arr[0], (Transform3D) arr[1], (UIObject[]) arr[2])));
+		listOffsetUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObjectGroup.class, UIObject[].class}, (Object[] arr) -> (UIObject) new OffsetUIObjectGroup((String) arr[0], (UIObjectGroup) arr[1], (UIObject[]) arr[2])));
+		UI_OBJECT_CONSTRUCTORS.put(OffsetUIObjectGroup.class, listOffsetUIObjectGroup);
 
 		/*                 RightButtonUIObject                 */
 		final List<InternalConstructorFunction<UIObject>> listRightButtonUIObject = new ArrayList<>();
@@ -144,6 +163,13 @@ public class UIObjectRegistry {
 		listMoneyUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadLoadedMesh.class}, (Object[] arr) -> (UIObject) new MoneyUIObject((String) arr[0], (TexturedQuadLoadedMesh) arr[1])));
 		listMoneyUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadLoadedMesh.class, Transform3D.class}, (Object[] arr) -> (UIObject) new MoneyUIObject((String) arr[0], (TexturedQuadLoadedMesh) arr[1], (Transform3D) arr[2])));
 		UI_OBJECT_CONSTRUCTORS.put(MoneyUIObject.class, listMoneyUIObject);
+
+		/*                 LayoutOffsetUIObjectGroup                 */
+		final List<InternalConstructorFunction<UIObject>> listLayoutOffsetUIObjectGroup = new ArrayList<>();
+		listLayoutOffsetUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Layout.class, UIObject[].class}, (Object[] arr) -> (UIObject) new LayoutOffsetUIObjectGroup((String) arr[0], (Layout) arr[1], (UIObject[]) arr[2])));
+		listLayoutOffsetUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Layout.class, UIObjectGroup.class, UIObject[].class}, (Object[] arr) -> (UIObject) new LayoutOffsetUIObjectGroup((String) arr[0], (Layout) arr[1], (UIObjectGroup) arr[2], (UIObject[]) arr[3])));
+		listLayoutOffsetUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Layout.class, Transform3D.class, UIObject[].class}, (Object[] arr) -> (UIObject) new LayoutOffsetUIObjectGroup((String) arr[0], (Layout) arr[1], (Transform3D) arr[2], (UIObject[]) arr[3])));
+		UI_OBJECT_CONSTRUCTORS.put(LayoutOffsetUIObjectGroup.class, listLayoutOffsetUIObjectGroup);
 
 		/*                 TextBoxUIObject                 */
 		final List<InternalConstructorFunction<UIObject>> listTextBoxUIObject = new ArrayList<>();

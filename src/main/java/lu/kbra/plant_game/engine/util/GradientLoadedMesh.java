@@ -22,8 +22,16 @@ public class GradientLoadedMesh extends LoadedMesh implements GradientMesh {
 		super(name, material, vertices, indices, attribs);
 	}
 
-	public GradientLoadedMesh(String name, Material material, Vec3fAttribArray vertices, UIntAttribArray indices, Vector4f startColor,
-			Vector4f endColor, GradientDirection gradientDirection, Vector2f gradientRange, AttribArray... attribs) {
+	public GradientLoadedMesh(
+			String name,
+			Material material,
+			Vec3fAttribArray vertices,
+			UIntAttribArray indices,
+			Vector4f startColor,
+			Vector4f endColor,
+			GradientDirection gradientDirection,
+			Vector2f gradientRange,
+			AttribArray... attribs) {
 		super(name, material, vertices, indices, attribs);
 		this.startColor = startColor;
 		this.endColor = endColor;

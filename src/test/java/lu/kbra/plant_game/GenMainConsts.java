@@ -22,7 +22,6 @@ public class GenMainConsts extends Consts {
 	public static final String GEN_PACKAGE = MAIN_PACKAGE + ".generated";
 	public static final File SRC_MAIN_JAVA_GEN_DIR = new File(SRC_MAIN_JAVA_DIR, GEN_PACKAGE.replace(".", "/"));
 
-
 	public static final File SRC_MAIN_RESOURCES_FONTS_DIR = new File(SRC_MAIN_RESOURCES_DIR, "/fonts");
 	public static final File SRC_MAIN_RESOURCES_BAKES_DIR = new File(SRC_MAIN_RESOURCES_DIR, "/bakes");
 	public static final File SRC_MAIN_RESOURCES_BAKES_FONTS_DIR = new File(SRC_MAIN_RESOURCES_BAKES_DIR, "/fonts");

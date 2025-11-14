@@ -14,8 +14,14 @@ public class AnimatedLoadedMesh extends OffsetMesh implements AnimatedMesh {
 
 	private AnimationData animationData;
 
-	public AnimatedLoadedMesh(String name, Material material, Vector3f origin, AnimationData animationData, Vec3fAttribArray vertices,
-			UIntAttribArray indices, AttribArray... attribs) {
+	public AnimatedLoadedMesh(
+			String name,
+			Material material,
+			Vector3f origin,
+			AnimationData animationData,
+			Vec3fAttribArray vertices,
+			UIntAttribArray indices,
+			AttribArray... attribs) {
 		super(name, material, origin, vertices, indices, attribs);
 	}
 

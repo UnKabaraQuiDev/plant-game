@@ -6,11 +6,12 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.Properties;
 
+import lu.pcy113.pclib.PCUtils;
+import lu.pcy113.pclib.logger.GlobalLogger;
+
 import lu.kbra.standalone.gameengine.GameEngine;
 import lu.kbra.standalone.gameengine.graph.window.WindowOptions;
 import lu.kbra.standalone.gameengine.impl.GameLogic;
-import lu.pcy113.pclib.PCUtils;
-import lu.pcy113.pclib.logger.GlobalLogger;
 
 public class PGMain {
 

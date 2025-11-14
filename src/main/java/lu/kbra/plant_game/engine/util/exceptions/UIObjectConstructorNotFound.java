@@ -3,7 +3,6 @@ package lu.kbra.plant_game.engine.util.exceptions;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-import lu.kbra.plant_game.engine.entity.go.impl.GameObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.UIObject;
 
 public class UIObjectConstructorNotFound extends RuntimeException {

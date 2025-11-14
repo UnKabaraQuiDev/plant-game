@@ -33,12 +33,10 @@ public class WorldGeneratorTest {
 
 			@Override
 			protected Integer genNoise(int x, int z) {
-				final float oct1 = MathUtils.map(Interpolators.SINE_OUT.evaluate(noise.noise(x + 0.5f, z + 0.5f)), 0, 1,
-						0, 1);
-				final float oct2 = MathUtils.map(
-						Interpolators.BOUNCE_OUT
-								.evaluate(noise.noise(MathUtils.rotate(new Vector2f(x + 0.5f, (z + 0.5f) * 0.5f), 45))),
-						0, 1, -1, 1);
+				final float oct1 = MathUtils.map(Interpolators.SINE_OUT.evaluate(noise.noise(x + 0.5f, z + 0.5f)), 0, 1, 0, 1);
+				final float oct2 = MathUtils
+						.map(Interpolators.BOUNCE_OUT
+								.evaluate(noise.noise(MathUtils.rotate(new Vector2f(x + 0.5f, (z + 0.5f) * 0.5f), 45))), 0, 1, -1, 1);
 				return (int) Math.floor(Math.max(-1, Math.pow(oct1 * 2 + oct2 * 3, 3) + 3));
 			}
 		};

@@ -14,7 +14,12 @@ public class OffsetMesh extends LoadedMesh {
 
 	private Vector3f origin;
 
-	public OffsetMesh(String name, Material material, Vector3f origin, Vec3fAttribArray vertices, UIntAttribArray indices,
+	public OffsetMesh(
+			String name,
+			Material material,
+			Vector3f origin,
+			Vec3fAttribArray vertices,
+			UIntAttribArray indices,
 			AttribArray... attribs) {
 		super(name, material, vertices, indices, attribs);
 		this.origin = origin;

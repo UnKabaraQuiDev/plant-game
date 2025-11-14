@@ -72,7 +72,7 @@ public class UIScene extends Scene3D {
 		if (focused != null && !focused.hasFocus()) {
 			focused = null;
 		}
-		
+
 		synchronized (super.getEntitiesLock()) {
 			for (Entity e : this) {
 				checkInput(e,
@@ -91,8 +91,8 @@ public class UIScene extends Scene3D {
 		}
 
 		hovering = newHovered;
-		
-		if(focused != null && focused.hasFocus()) {
+
+		if (focused != null && focused.hasFocus()) {
 			frameState.uiSceneCaughtKeyboardInput = true;
 		}
 	}

@@ -16,8 +16,15 @@ public class AnimatedTexturedLoadedMesh extends OffsetMesh implements TexturedMe
 	protected SingleTexture texture;
 	protected AnimationData animation;
 
-	public AnimatedTexturedLoadedMesh(String name, Material mat, Vector3f origin, SingleTexture texture, AnimationData data,
-			Vec3fAttribArray vertices, UIntAttribArray indices, AttribArray... attribs) {
+	public AnimatedTexturedLoadedMesh(
+			String name,
+			Material mat,
+			Vector3f origin,
+			SingleTexture texture,
+			AnimationData data,
+			Vec3fAttribArray vertices,
+			UIntAttribArray indices,
+			AttribArray... attribs) {
 		super(name, mat, origin, vertices, indices, attribs);
 		this.texture = texture;
 		this.animation = data;
