@@ -65,8 +65,6 @@ public class GameObjectRegistryGenMain extends GenMainConsts {
 
 		final TypeSpec.Builder registry = TypeSpec.classBuilder("GameObjectRegistry").addModifiers(Modifier.PUBLIC).addField(hashMap);
 
-		System.out.println(JavaFile.builder(GEN_PACKAGE, registry.build()).indent("\t").build());
-
 		final Reflections reflections = new Reflections(MAIN_PACKAGE);
 		final Set<Class<? extends GameObject>> classes = reflections.getSubTypesOf(GameObject.class);
 

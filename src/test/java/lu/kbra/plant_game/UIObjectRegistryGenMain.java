@@ -64,8 +64,6 @@ public class UIObjectRegistryGenMain extends GenMainConsts {
 
 		final TypeSpec.Builder registry = TypeSpec.classBuilder("UIObjectRegistry").addModifiers(Modifier.PUBLIC).addField(hashMap);
 
-		System.out.println(JavaFile.builder(GEN_PACKAGE, registry.build()).indent("\t").build());
-
 		final Reflections reflections = new Reflections(MAIN_PACKAGE);
 		final Set<Class<? extends UIObject>> classes = reflections.getSubTypesOf(UIObject.class);
 
