@@ -1,0 +1,93 @@
+package lu.kbra.plant_game.engine.entity.ui.text;
+
+import org.lwjgl.glfw.GLFW;
+
+import lu.pcy113.pclib.PCUtils;
+
+import lu.kbra.plant_game.PGLogic;
+import lu.kbra.plant_game.engine.entity.ui.impl.NeedsClick;
+import lu.kbra.plant_game.engine.entity.ui.impl.NeedsInput;
+import lu.kbra.plant_game.engine.entity.ui.impl.TextUIObject;
+import lu.kbra.plant_game.engine.util.DataPath;
+import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
+import lu.kbra.standalone.gameengine.impl.future.ScheduledTask;
+import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
+import lu.kbra.standalone.gameengine.scene.Scene;
+import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
+
+@DataPath("localization:string-placeholder")
+@BufferSize(25)
+public class TextFieldUIObject extends TextUIObject implements NeedsInput, NeedsClick, Focusable {
+
+	private static final char CURSOR_CHAR = '_';
+
+	protected String input = "";
+	protected boolean focused = false;
+	protected int cursorPosition = -1;
+	protected ScheduledTask updateTask;
+
+	public TextFieldUIObject(String str, TextEmitter textEmitter) {
+		super(str, textEmitter);
+		this.input = textEmitter.getText();
+	}
+
+	public TextFieldUIObject(String str, TextEmitter input, Transform3D transform) {
+		super(str, input, transform);
+		this.input = input.getText();
+	}
+
+	@Override
+	public void input(WindowInputHandler inputHandler, float dTime, Scene scene) {
+		final boolean dirty;
+
+		if (focused && inputHandler.hasPressedKeyChar() && cursorPosition != -1) {
+			input = PCUtils.insertChar(input, cursorPosition, inputHandler.getPressedKeyChar());
+			cursorPosition++;
+
+			super.getTextEmitter().setText(PCUtils.insertChar(input, cursorPosition, CURSOR_CHAR));
+
+			dirty = true;
+		} else if (focused && inputHandler.isKeyPressedOrRepeat(GLFW.GLFW_KEY_BACKSPACE) && super.getTextEmitter().getText().length() > 0
+				&& cursorPosition != -1) {
+			input = PCUtils.backspace(input, cursorPosition);
+			cursorPosition = Math.max(0, cursorPosition - 1);
+
+			super.getTextEmitter().setText(input);
+
+			dirty = true;
+		} else {
+			dirty = false;
+		}
+
+		if (dirty && (updateTask == null || updateTask.wasRan())) {
+			updateTask = PGLogic.INSTANCE.RENDER_DISPATCHER.post(() -> super.getTextEmitter().updateText());
+		} else if (updateTask != null && updateTask.wasRan()) {
+			updateTask = null;
+		}
+	}
+
+	@Override
+	public void click(WindowInputHandler input, float dTime, Scene scene) {
+
+	}
+
+	@Override
+	public boolean hasFocus() {
+		return focused;
+	}
+
+	@Override
+	public void setFocused(boolean focused) {
+		this.focused = focused;
+		if (focused) {
+			cursorPosition = super.getTextEmitter().getText().length();
+		} else {
+			cursorPosition = -1;
+		}
+	}
+
+	public String getText() {
+		return getTextEmitter() != null ? super.getTextEmitter().getText() : null;
+	}
+
+}

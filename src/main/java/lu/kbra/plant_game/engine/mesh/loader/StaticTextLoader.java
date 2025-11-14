@@ -20,6 +20,7 @@ import lu.kbra.standalone.gameengine.utils.gl.consts.TextAlignment;
 public class StaticTextLoader {
 
 	public static final int MAX_CHAR_BUFFER_LENGTH = 256;
+	public static final int MIN_CHAR_BUFFER_LENGTH = 12;
 
 	public static TaskFuture<?, TextEmitter> getFuture(
 			CacheManager cache,
@@ -38,13 +39,16 @@ public class StaticTextLoader {
 
 			return LocalizationService.get(key);
 		}).then(render, (ThrowingFunction<String, TextEmitter, Throwable>) (String text) -> {
-			return create(cache, meshName, text, td.charSize(), td.textAlignment());
+			return create(cache, meshName, text, td.charSize(), td.textAlignment(), td.bufferSize());
 		});
 
 	}
 
-	static TextEmitter create(CacheManager cache, String meshName, String text, Vector2f size, TextAlignment ta) {
-		final TextEmitter te = new TextEmitter(meshName, null, Math.min((int) (text.length() * 1.25), MAX_CHAR_BUFFER_LENGTH), text, size);
+	static TextEmitter create(CacheManager cache, String meshName, String text, Vector2f size, TextAlignment ta, int bufferSize) {
+		final TextEmitter te = new TextEmitter(meshName, null,
+				bufferSize == -1 ? Math.min(Math.max((int) (text.length() * 1.25), MIN_CHAR_BUFFER_LENGTH), MAX_CHAR_BUFFER_LENGTH)
+						: bufferSize,
+				text, size);
 		te.setTextAlignment(ta);
 		te.setup();
 		cache.addTextEmitter(te);

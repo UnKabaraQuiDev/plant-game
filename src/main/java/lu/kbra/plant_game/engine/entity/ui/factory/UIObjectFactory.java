@@ -12,6 +12,7 @@ import lu.kbra.plant_game.engine.entity.ui.impl.AnimatedUIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.TextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.TextureUIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.UIObject;
+import lu.kbra.plant_game.engine.entity.ui.text.BufferSize;
 import lu.kbra.plant_game.engine.entity.ui.texture.GradientQuadUIObject;
 import lu.kbra.plant_game.engine.mesh.TexturedMesh;
 import lu.kbra.plant_game.engine.mesh.loader.AnimatedMeshLoader;
@@ -33,15 +34,21 @@ import lu.kbra.standalone.gameengine.utils.gl.consts.TextAlignment;
 
 public class UIObjectFactory {
 
-	public static record TextData(Vector2f charSize, TextAlignment textAlignment) {
+	public static record TextData(Vector2f charSize, TextAlignment textAlignment, int bufferSize) {
+		public TextData(Vector2f charSize, TextAlignment textAlignment) {
+			this(charSize, textAlignment, -1);
+		}
 	}
 
 	public static final Vector2f DEFAULT_CHAR_SIZE = new Vector2f(0.5f);
-	public static final TextData DEFAULT_TEXT_DATA = new TextData(DEFAULT_CHAR_SIZE, TextAlignment.LEFT);
+	public static final int DEFAULT_BUFFER_SIZE = 12;
+	public static final TextData DEFAULT_TEXT_DATA = new TextData(DEFAULT_CHAR_SIZE, TextAlignment.LEFT, DEFAULT_BUFFER_SIZE);
+
 	public static UIObjectFactory INSTANCE;
 
 	private final Map<Class<? extends UIObject>, Boolean> animatedMesh = new HashMap<>();
 	private final Map<Class<? extends UIObject>, String> dataPath = new HashMap<>();
+	private final Map<Class<? extends UIObject>, Integer> bufferSize = new HashMap<>();
 
 	private final CacheManager cache;
 	private final Dispatcher loader, render;
@@ -102,7 +109,7 @@ public class UIObjectFactory {
 
 			final String key = cDataPath.substring(cDataPath.indexOf(":") + 1);
 
-			final TextData td;
+			TextData td;
 			final Object[] nargs;
 			if (args.length > 0 && args[0] instanceof TextData vvec) {
 				td = vvec;
@@ -110,6 +117,13 @@ public class UIObjectFactory {
 			} else {
 				td = DEFAULT_TEXT_DATA;
 				nargs = args;
+
+				if (bufferSize
+						.computeIfAbsent(clazz,
+								(c) -> clazz.isAnnotationPresent(BufferSize.class) ? clazz.getAnnotation(BufferSize.class).value()
+										: -1) != -1) {
+					td = new TextData(td.charSize, td.textAlignment, bufferSize.get(clazz));
+				}
 			}
 
 			return StaticTextLoader

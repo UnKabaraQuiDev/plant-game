@@ -15,7 +15,7 @@ import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory.TextData;
 import lu.kbra.plant_game.engine.entity.ui.impl.TextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.UIObject;
-import lu.kbra.plant_game.engine.entity.ui.text.TextInputUIObject;
+import lu.kbra.plant_game.engine.entity.ui.text.TextFieldUIObject;
 import lu.kbra.plant_game.engine.entity.ui.texture.CursorUIObject;
 import lu.kbra.plant_game.engine.entity.ui.texture.GradientQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.texture.LargeLogoUIObject;
@@ -66,7 +66,7 @@ public class MainMenuUIScene extends UIScene {
 	public void init(Dispatcher workers, Dispatcher renderDispatcher) {
 		super.addEntities(mainMenuGroup, optionsMenuGroup);
 
-		final TextData uiTextData = new TextData(new Vector2f(0.2f), TextAlignment.TEXT_CENTER);
+		final TextData uiTextData = new TextData(new Vector2f(0.2f), TextAlignment.TEXT_CENTER, -1);
 
 		final float x = -0.8f;
 
@@ -93,7 +93,7 @@ public class MainMenuUIScene extends UIScene {
 				})
 				.push();
 
-		UIObjectFactory.create(TextInputUIObject.class, mainMenuGroup).push();
+		UIObjectFactory.create(TextFieldUIObject.class, mainMenuGroup, uiTextData).push();
 
 		/** options */
 
@@ -141,7 +141,7 @@ public class MainMenuUIScene extends UIScene {
 		if (cursor != null) {
 			final Optional<UIObject> focusCandidate = hovering
 					.stream()
-					.filter(c -> c instanceof TextUIObject && !(c instanceof TextInputUIObject))
+					.filter(c -> c instanceof TextUIObject && !(c instanceof TextFieldUIObject))
 					.findFirst();
 			if (cursor.isCirclingMouse() && focusCandidate.isEmpty()) {
 				cursor.setCirclingMouse(getMouseCoords(inputHandler));
