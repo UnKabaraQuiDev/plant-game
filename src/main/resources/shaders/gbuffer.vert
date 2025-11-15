@@ -19,6 +19,8 @@ out vec3 bet_ViewNormal;
 out vec2 bet_UV;
 flat out uint bet_MaterialId;
 flat out uvec3 bet_ObjectId;
+// instances
+flat out uint bet_InstanceID;
 
 void main() {
 // obj space
@@ -43,6 +45,7 @@ void main() {
     bet_UV = in_UV;
     bet_MaterialId = in_MaterialId;
     bet_ObjectId = in_ObjectId;
+    bet_InstanceID = 0;
 
     gl_Position = projectionMatrix * viewPos4;
 }

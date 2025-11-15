@@ -87,7 +87,9 @@ public class PGLogic extends GameLogic {
 
 	@Override
 	public void cleanup() {
-		this.compositor.cleanup();
+		if (this.compositor != null) {
+			this.compositor.cleanup();
+		}
 		this.WORKERS.shutdown();
 	}
 

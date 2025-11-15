@@ -24,13 +24,11 @@ public class TextDirectShader extends DirectShader {
 	public void createUniforms() {
 		super.createUniforms();
 
-		createUniform(TXT0);
+		this.createUniform(FG_COLOR);
+		this.createUniform(BG_COLOR);
+		this.createUniform(TRANSPARENT);
 
-		createUniform(FG_COLOR);
-		createUniform(BG_COLOR);
-		createUniform(TRANSPARENT);
-
-		createUniform(TEXT_LENGTH);
+		this.createUniform(TEXT_LENGTH);
 	}
 
 }

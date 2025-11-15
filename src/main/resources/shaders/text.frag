@@ -8,9 +8,9 @@ in vec3 bet_WorldNormal;
 in vec2 bet_UV;
 flat in uint bet_MaterialId;
 flat in uvec3 bet_ObjectId;
-
+// instances
+flat in uint bet_InstnceID;
 // text related
-flat in uint bet_Index;
 flat in uint bet_CharIndex;
 
 out vec4 fragColor;
@@ -23,7 +23,7 @@ uniform uint len;
 uniform bool transparent;
 
 void main() {
-	if (bet_Index >= len) {
+	if (bet_InstnceID >= len) {
 		discard;
 	}
 
