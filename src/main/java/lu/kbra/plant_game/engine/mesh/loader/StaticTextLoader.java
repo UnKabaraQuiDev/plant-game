@@ -23,12 +23,16 @@ public class StaticTextLoader {
 	public static final int MIN_CHAR_BUFFER_LENGTH = 12;
 
 	public static TaskFuture<?, TextEmitter> getFuture(
-			CacheManager cache,
-			String meshName,
-			String key,
-			TextData td,
-			Dispatcher loader,
-			Dispatcher render) {
+			final CacheManager cache,
+			final String meshName,
+			final String key,
+			final TextData td,
+			final Dispatcher loader,
+			final Dispatcher render) {
+
+		final Vector2f charSize = td.getCharSize();
+		final TextAlignment textAlignment = td.getTextAlignment();
+		final int bufferSize = td.getBufferSize();
 
 		return new TaskFuture<>(loader, (ThrowingSupplier<String, Throwable>) () -> {
 			waitOrCreateLock(meshName);
@@ -38,13 +42,21 @@ public class StaticTextLoader {
 			}
 
 			return LocalizationService.get(key);
-		}).then(render, (ThrowingFunction<String, TextEmitter, Throwable>) (String text) -> {
-			return create(cache, meshName, text, td.charSize(), td.textAlignment(), td.bufferSize());
-		});
+		})
+				.then(render,
+						(ThrowingFunction<String, TextEmitter, Throwable>) (
+								final String text) -> create(cache, meshName, text, charSize, textAlignment, bufferSize));
 
 	}
 
-	static TextEmitter create(CacheManager cache, String meshName, String text, Vector2f size, TextAlignment ta, int bufferSize) {
+	static TextEmitter create(
+			final CacheManager cache,
+			final String meshName,
+			final String text,
+			final Vector2f size,
+			final TextAlignment ta,
+			final int bufferSize) {
+		System.err.println("buffer size: " + bufferSize);
 		final TextEmitter te = new TextEmitter(meshName, null,
 				bufferSize == -1 ? Math.min(Math.max((int) (text.length() * 1.25), MIN_CHAR_BUFFER_LENGTH), MAX_CHAR_BUFFER_LENGTH)
 						: bufferSize,

@@ -18,13 +18,12 @@ import lu.kbra.plant_game.engine.entity.ui.btn.QuitButtonUIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.DelegatingTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.GrowOnHoverTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.QuadUIObject;
+import lu.kbra.plant_game.engine.entity.ui.impl.Scale2dDir;
 import lu.kbra.plant_game.engine.entity.ui.impl.TextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.TextureUIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.UIObject;
-import lu.kbra.plant_game.engine.entity.ui.text.BackwardButtonUIObject;
-import lu.kbra.plant_game.engine.entity.ui.text.ForwardButtonUIObject;
-import lu.kbra.plant_game.engine.entity.ui.text.LeftButtonUIObject;
-import lu.kbra.plant_game.engine.entity.ui.text.RightButtonUIObject;
+import lu.kbra.plant_game.engine.entity.ui.text.ProgrammaticGrowOnHoverTextUIObject;
+import lu.kbra.plant_game.engine.entity.ui.text.ProgrammaticTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.textinput.TextBoxUIObject;
 import lu.kbra.plant_game.engine.entity.ui.textinput.TextFieldUIObject;
 import lu.kbra.plant_game.engine.entity.ui.texture.CursorUIObject;
@@ -36,6 +35,7 @@ import lu.kbra.plant_game.engine.render.GradientQuadMesh;
 import lu.kbra.plant_game.engine.scene.ui.Layout;
 import lu.kbra.plant_game.engine.scene.ui.LayoutOffsetUIObjectGroup;
 import lu.kbra.plant_game.engine.scene.ui.OffsetUIObjectGroup;
+import lu.kbra.plant_game.engine.scene.ui.OptionKeyUIObject;
 import lu.kbra.plant_game.engine.scene.ui.UIObjectGroup;
 import lu.kbra.plant_game.engine.util.InternalConstructorFunction;
 import lu.kbra.plant_game.engine.util.exceptions.UIObjectConstructorNotFound;
@@ -104,18 +104,6 @@ public class UIObjectRegistry {
 		listOffsetUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObjectGroup.class, UIObject[].class}, (Object[] arr) -> (UIObject) new OffsetUIObjectGroup((String) arr[0], (UIObjectGroup) arr[1], (UIObject[]) arr[2])));
 		UI_OBJECT_CONSTRUCTORS.put(OffsetUIObjectGroup.class, listOffsetUIObjectGroup);
 
-		/*                 RightButtonUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listRightButtonUIObject = new ArrayList<>();
-		listRightButtonUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class}, (Object[] arr) -> (UIObject) new RightButtonUIObject((String) arr[0], (TextEmitter) arr[1])));
-		listRightButtonUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, Transform3D.class}, (Object[] arr) -> (UIObject) new RightButtonUIObject((String) arr[0], (TextEmitter) arr[1], (Transform3D) arr[2])));
-		UI_OBJECT_CONSTRUCTORS.put(RightButtonUIObject.class, listRightButtonUIObject);
-
-		/*                 ForwardButtonUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listForwardButtonUIObject = new ArrayList<>();
-		listForwardButtonUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class}, (Object[] arr) -> (UIObject) new ForwardButtonUIObject((String) arr[0], (TextEmitter) arr[1])));
-		listForwardButtonUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, Transform3D.class}, (Object[] arr) -> (UIObject) new ForwardButtonUIObject((String) arr[0], (TextEmitter) arr[1], (Transform3D) arr[2])));
-		UI_OBJECT_CONSTRUCTORS.put(ForwardButtonUIObject.class, listForwardButtonUIObject);
-
 		/*                 TextFieldUIObject                 */
 		final List<InternalConstructorFunction<UIObject>> listTextFieldUIObject = new ArrayList<>();
 		listTextFieldUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class}, (Object[] arr) -> (UIObject) new TextFieldUIObject((String) arr[0], (TextEmitter) arr[1])));
@@ -128,23 +116,17 @@ public class UIObjectRegistry {
 		listDelegatingTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, Transform3D.class, TriConsumer.class, TriConsumer.class}, (Object[] arr) -> (UIObject) new DelegatingTextUIObject((String) arr[0], (TextEmitter) arr[1], (Transform3D) arr[2], (TriConsumer) arr[3], (TriConsumer) arr[4])));
 		UI_OBJECT_CONSTRUCTORS.put(DelegatingTextUIObject.class, listDelegatingTextUIObject);
 
-		/*                 BackwardButtonUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listBackwardButtonUIObject = new ArrayList<>();
-		listBackwardButtonUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class}, (Object[] arr) -> (UIObject) new BackwardButtonUIObject((String) arr[0], (TextEmitter) arr[1])));
-		listBackwardButtonUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, Transform3D.class}, (Object[] arr) -> (UIObject) new BackwardButtonUIObject((String) arr[0], (TextEmitter) arr[1], (Transform3D) arr[2])));
-		UI_OBJECT_CONSTRUCTORS.put(BackwardButtonUIObject.class, listBackwardButtonUIObject);
-
-		/*                 LeftButtonUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listLeftButtonUIObject = new ArrayList<>();
-		listLeftButtonUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class}, (Object[] arr) -> (UIObject) new LeftButtonUIObject((String) arr[0], (TextEmitter) arr[1])));
-		listLeftButtonUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, Transform3D.class}, (Object[] arr) -> (UIObject) new LeftButtonUIObject((String) arr[0], (TextEmitter) arr[1], (Transform3D) arr[2])));
-		UI_OBJECT_CONSTRUCTORS.put(LeftButtonUIObject.class, listLeftButtonUIObject);
-
 		/*                 GrowOnHoverTextUIObject                 */
 		final List<InternalConstructorFunction<UIObject>> listGrowOnHoverTextUIObject = new ArrayList<>();
-		listGrowOnHoverTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class}, (Object[] arr) -> (UIObject) new GrowOnHoverTextUIObject((String) arr[0], (TextEmitter) arr[1])));
-		listGrowOnHoverTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, Transform3D.class}, (Object[] arr) -> (UIObject) new GrowOnHoverTextUIObject((String) arr[0], (TextEmitter) arr[1], (Transform3D) arr[2])));
+		listGrowOnHoverTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, Scale2dDir.class}, (Object[] arr) -> (UIObject) new GrowOnHoverTextUIObject((String) arr[0], (TextEmitter) arr[1], (Scale2dDir) arr[2])));
+		listGrowOnHoverTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, Scale2dDir.class, Transform3D.class}, (Object[] arr) -> (UIObject) new GrowOnHoverTextUIObject((String) arr[0], (TextEmitter) arr[1], (Scale2dDir) arr[2], (Transform3D) arr[3])));
 		UI_OBJECT_CONSTRUCTORS.put(GrowOnHoverTextUIObject.class, listGrowOnHoverTextUIObject);
+
+		/*                 ProgrammaticTextUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listProgrammaticTextUIObject = new ArrayList<>();
+		listProgrammaticTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class}, (Object[] arr) -> (UIObject) new ProgrammaticTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2])));
+		listProgrammaticTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, Transform3D.class}, (Object[] arr) -> (UIObject) new ProgrammaticTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (Transform3D) arr[3])));
+		UI_OBJECT_CONSTRUCTORS.put(ProgrammaticTextUIObject.class, listProgrammaticTextUIObject);
 
 		/*                 LargeLogoUIObject                 */
 		final List<InternalConstructorFunction<UIObject>> listLargeLogoUIObject = new ArrayList<>();
@@ -200,6 +182,18 @@ public class UIObjectRegistry {
 		listPlayButtonUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class}, (Object[] arr) -> (UIObject) new PlayButtonUIObject((String) arr[0], (TextEmitter) arr[1])));
 		listPlayButtonUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, Transform3D.class}, (Object[] arr) -> (UIObject) new PlayButtonUIObject((String) arr[0], (TextEmitter) arr[1], (Transform3D) arr[2])));
 		UI_OBJECT_CONSTRUCTORS.put(PlayButtonUIObject.class, listPlayButtonUIObject);
+
+		/*                 ProgrammaticGrowOnHoverTextUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listProgrammaticGrowOnHoverTextUIObject = new ArrayList<>();
+		listProgrammaticGrowOnHoverTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, Scale2dDir.class}, (Object[] arr) -> (UIObject) new ProgrammaticGrowOnHoverTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (Scale2dDir) arr[3])));
+		listProgrammaticGrowOnHoverTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, Scale2dDir.class, Transform3D.class}, (Object[] arr) -> (UIObject) new ProgrammaticGrowOnHoverTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (Scale2dDir) arr[3], (Transform3D) arr[4])));
+		UI_OBJECT_CONSTRUCTORS.put(ProgrammaticGrowOnHoverTextUIObject.class, listProgrammaticGrowOnHoverTextUIObject);
+
+		/*                 OptionKeyUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listOptionKeyUIObject = new ArrayList<>();
+		listOptionKeyUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, Scale2dDir.class}, (Object[] arr) -> (UIObject) new OptionKeyUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (Scale2dDir) arr[3])));
+		listOptionKeyUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, Scale2dDir.class, Transform3D.class}, (Object[] arr) -> (UIObject) new OptionKeyUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (Scale2dDir) arr[3], (Transform3D) arr[4])));
+		UI_OBJECT_CONSTRUCTORS.put(OptionKeyUIObject.class, listOptionKeyUIObject);
 
 	}
 

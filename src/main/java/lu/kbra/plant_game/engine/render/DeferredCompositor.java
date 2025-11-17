@@ -154,6 +154,7 @@ public class DeferredCompositor implements Cleanupable {
 	protected BlitShader blitShader;
 
 	// debug
+	protected boolean deferredPass = false;
 	protected LineDirectShader lineDirectShader;
 	protected LineInstanceDirectShader lineInstanceDirectShader;
 
@@ -261,7 +262,9 @@ public class DeferredCompositor implements Cleanupable {
 			this.resizeFramebuffer(this.worldFramebuffer, this.renderResolution);
 		}
 
+		this.deferredPass = true;
 		this.renderWorldScene(cache, worldScene, this.renderResolution, needRegen);
+		this.deferredPass = false;
 
 		this.renderMaterials(cache, worldScene, this.renderResolution, needRegen);
 
@@ -652,7 +655,6 @@ public class DeferredCompositor implements Cleanupable {
 
 		if (meshShader != null && entity.hasComponentMatching(MeshComponent.class)) {
 			for (final MeshComponent meshComponent : entity.getComponentsMatching(MeshComponent.class)) {
-				System.err.println("mesh: " + entity.getId());
 				this.renderMesh(meshComponent.getMesh(), meshComponent, entity, worldTransform, meshShader);
 			}
 		}
@@ -933,7 +935,7 @@ public class DeferredCompositor implements Cleanupable {
 	}
 
 	private void drawDebugTriangles(final Mesh mesh, final Matrix4f transformationMatrix) {
-		if (DEBUG_TRIANGLES && this.lineDirectShader != null) {
+		if (!this.deferredPass && DEBUG_TRIANGLES && this.lineDirectShader != null) {
 			this.lineDirectShader.bind();
 
 			this.lineDirectShader.setUniform(LineDirectShader.TINT, DEBUG_TRIANGLE_COLOR);
@@ -960,7 +962,7 @@ public class DeferredCompositor implements Cleanupable {
 	}
 
 	private void drawDebugTrianglesInstanced(final Mesh mesh, final Matrix4f transformationMatrix, final InstanceEmitter instances) {
-		if (DEBUG_TRIANGLES && this.lineInstanceDirectShader != null) {
+		if (!this.deferredPass && DEBUG_TRIANGLES && this.lineInstanceDirectShader != null) {
 			this.lineInstanceDirectShader.bind();
 
 			this.lineInstanceDirectShader.setUniform(LineDirectShader.TINT, DEBUG_TRIANGLE_COLOR);
@@ -992,7 +994,7 @@ public class DeferredCompositor implements Cleanupable {
 	}
 
 	private void drawDebugTrianglesText(final Mesh mesh, final Matrix4f transformationMatrix, final TextEmitter emitter) {
-		if (DEBUG_TRIANGLES && this.lineInstanceDirectShader != null) {
+		if (!this.deferredPass && DEBUG_TRIANGLES && this.lineInstanceDirectShader != null) {
 			this.lineInstanceDirectShader.bind();
 
 			this.lineInstanceDirectShader.setUniform(LineDirectShader.TINT, DEBUG_TRIANGLE_COLOR);
@@ -1024,7 +1026,7 @@ public class DeferredCompositor implements Cleanupable {
 	}
 
 	private void drawDebugBounds(final Shape shape) {
-		if (DEBUG_BOUNDS && this.lineDirectShader != null) {
+		if (!this.deferredPass && DEBUG_BOUNDS && this.lineDirectShader != null) {
 			QUAD.bind();
 			this.lineDirectShader.bind();
 

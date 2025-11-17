@@ -38,26 +38,26 @@ import lu.kbra.standalone.gameengine.scene.camera.Camera;
 public class UIScene extends Scene3D {
 
 	public static final Comparator<Entity> DEPTH_COMPARATOR = Comparator
-			.comparing((Entity e) -> e instanceof Transform3DOwner ? ((Transform3DOwner) e).getTransform().getTranslation().y : 0f);
+			.comparing((final Entity e) -> e instanceof Transform3DOwner ? ((Transform3DOwner) e).getTransform().getTranslation().y : 0f);
 
 	private final CacheManager uiCache;
 
-	public UIScene(String name, CacheManager parent) {
+	public UIScene(final String name, final CacheManager parent) {
 		super(name);
 		this.uiCache = new CacheManager(name, parent);
 
-		setCamera(Camera.orthographicCamera3D());
-		getCamera().getPosition().set(0, 1, 0);
-		getCamera().getRotation().set(new Quaternionf().lookAlong(new Vector3f(0, -1, 0), new Vector3f(0, 0, -1)));
-		getCamera().getProjection().setSize(1);
-		getCamera().getProjection().setNearPlane(0.001f);
-		getCamera().getProjection().setFarPlane(1000f);
-		getCamera().getProjection().setPerspective(false);
-		getCamera().getProjection().update();
-		getCamera().updateMatrix();
+		this.setCamera(Camera.orthographicCamera3D());
+		this.getCamera().getPosition().set(0, 1, 0);
+		this.getCamera().getRotation().set(new Quaternionf().lookAlong(new Vector3f(0, -1, 0), new Vector3f(0, 0, -1)));
+		this.getCamera().getProjection().setSize(1);
+		this.getCamera().getProjection().setNearPlane(0.001f);
+		this.getCamera().getProjection().setFarPlane(1000f);
+		this.getCamera().getProjection().setPerspective(false);
+		this.getCamera().getProjection().update();
+		this.getCamera().updateMatrix();
 	}
 
-	public void init(Dispatcher workers, Dispatcher renderDispatcher) {
+	public void init(final Dispatcher workers, final Dispatcher renderDispatcher) {
 
 	}
 
@@ -65,39 +65,43 @@ public class UIScene extends Scene3D {
 	protected Focusable focused;
 
 	public void input(final WindowInputHandler inputHandler, final float dTime, final UpdateFrameState frameState) {
-		final Vector2f mouseWorld2D = getMouseCoords(inputHandler);
+		final Vector2f mouseWorld2D = this.getMouseCoords(inputHandler);
 
 		final Set<UIObject> newHovered = new HashSet<>();
 
-		if (focused != null && !focused.hasFocus()) {
-			focused = null;
+		if (this.focused != null && !this.focused.hasFocus()) {
+			this.focused = null;
 		}
 
 		synchronized (super.getEntitiesLock()) {
-			for (Entity e : this) {
-				checkInput(e,
-						inputHandler,
-						dTime,
-						frameState,
-						new Point2D.Float(mouseWorld2D.x, mouseWorld2D.y),
-						newHovered,
-						GameEngine.IDENTITY_MATRIX4F);
+			for (final Entity e : this) {
+				this
+						.checkInput(e,
+								inputHandler,
+								dTime,
+								frameState,
+								new Point2D.Float(mouseWorld2D.x, mouseWorld2D.y),
+								newHovered,
+								GameEngine.IDENTITY_MATRIX4F);
 			}
 		}
 
-		hovering.removeAll(newHovered);
-		for (UIObject uiObj : hovering) {
+		System.err.println(newHovered);
+		System.err.println(this.hovering);
+
+		this.hovering.removeAll(newHovered);
+		for (final UIObject uiObj : this.hovering) {
 			((NeedsHover) uiObj).hover(inputHandler, dTime, HoverState.LEAVE, this);
 		}
 
-		hovering = newHovered;
+		this.hovering = newHovered;
 
-		if (focused != null && focused.hasFocus()) {
+		if (this.focused != null && this.focused.hasFocus()) {
 			frameState.uiSceneCaughtKeyboardInput = true;
 		}
 	}
 
-	public Vector2f getMouseCoords(WindowInputHandler inputHandler) {
+	public Vector2f getMouseCoords(final WindowInputHandler inputHandler) {
 		final Vector2f normalizedMousePosition = inputHandler.getNormalizedMousePosition();
 		final Matrix4f inverseProj = new Matrix4f(super.getCamera().getProjection().getProjectionMatrix()).invert();
 		final Vector4f mouseClip = new Vector4f(normalizedMousePosition.x, normalizedMousePosition.y, 0f, 1f);
@@ -106,13 +110,41 @@ public class UIScene extends Scene3D {
 	}
 
 	private void checkInput(
-			Entity e,
-			WindowInputHandler inputHandler,
-			float dTime,
-			UpdateFrameState frameState,
-			Point2D.Float mousePos,
-			Set<UIObject> newHovered,
-			Matrix4f parentTransform) {
+			final Entity e,
+			final WindowInputHandler inputHandler,
+			final float dTime,
+			final UpdateFrameState frameState,
+			final Point2D.Float mousePos,
+			final Set<UIObject> newHovered,
+			final Matrix4f parentTransform) {
+
+		if (e instanceof final UIObject uiObj) {
+			if (uiObj instanceof final NeedsInput uiObjectInput) {
+				uiObjectInput.input(inputHandler, dTime, this);
+				newHovered.add(uiObj);
+			}
+
+			if ((e instanceof NeedsHover || e instanceof NeedsClick) && uiObj.getTransformedBounds(parentTransform).contains(mousePos)) {
+				frameState.uiSceneCaughtMouseInput = true;
+
+				if (uiObj instanceof final NeedsHover uiObjectHover) {
+					uiObjectHover.hover(inputHandler, dTime, this.hovering.contains(uiObj) ? HoverState.STAY : HoverState.ENTER, this);
+					newHovered.add(uiObj);
+				}
+
+				if (uiObj instanceof final NeedsClick uiObjectClick && inputHandler.isMouseButtonPressedOnce(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
+					uiObjectClick.click(inputHandler, dTime, this);
+
+					if (uiObj instanceof Focusable) {
+						if (this.focused != null) {
+							this.focused.removeFocus();
+						}
+						this.focused = (Focusable) uiObj;
+						this.focused.giveFocus();
+					}
+				}
+			}
+		}
 
 		if (e.hasComponentMatching(SubEntitiesComponent.class)) {
 			final Matrix4f newMatrix = e.hasComponentMatching(TransformComponent.class)
@@ -121,73 +153,45 @@ public class UIScene extends Scene3D {
 
 			e.getComponentsMatching(SubEntitiesComponent.class).forEach(se -> {
 				synchronized (se.getEntitiesLock()) {
-					for (Entity e2 : (List<Entity>) se.getEntities()) {
-						checkInput(e2, inputHandler, dTime, frameState, mousePos, newHovered, newMatrix);
+					for (final Entity e2 : (List<Entity>) se.getEntities()) {
+						this.checkInput(e2, inputHandler, dTime, frameState, mousePos, newHovered, newMatrix);
 					}
 				}
 			});
-		}
-
-		if (e instanceof UIObject uiObj) {
-			if (uiObj instanceof NeedsInput uiObjectInput) {
-				uiObjectInput.input(inputHandler, dTime, this);
-				newHovered.add(uiObj);
-			}
-
-			if ((e instanceof NeedsHover || e instanceof NeedsClick) && uiObj.getTransformedBounds(parentTransform).contains(mousePos)) {
-				frameState.uiSceneCaughtMouseInput = true;
-
-				if (uiObj instanceof NeedsHover uiObjectHover) {
-					uiObjectHover.hover(inputHandler, dTime, hovering.contains(uiObj) ? HoverState.STAY : HoverState.ENTER, this);
-					newHovered.add(uiObj);
-				}
-
-				if (uiObj instanceof NeedsClick uiObjectClick && inputHandler.isMouseButtonPressedOnce(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
-					uiObjectClick.click(inputHandler, dTime, this);
-
-					if (uiObj instanceof Focusable) {
-						if (focused != null) {
-							focused.removeFocus();
-						}
-						focused = (Focusable) uiObj;
-						focused.giveFocus();
-					}
-				}
-			}
 		}
 	}
 
 	public void update(
-			WindowInputHandler inputHandler,
-			float dTime,
-			DeferredCompositor compositor,
-			WorkerDispatcher workers,
-			Dispatcher render) {
+			final WindowInputHandler inputHandler,
+			final float dTime,
+			final DeferredCompositor compositor,
+			final WorkerDispatcher workers,
+			final Dispatcher render) {
 		synchronized (super.getEntitiesLock()) {
-			for (Entity e : this) {
-				updateEntity(inputHandler, dTime, e);
+			for (final Entity e : this) {
+				this.updateEntity(inputHandler, dTime, e);
 			}
 		}
 	}
 
-	private void updateEntity(WindowInputHandler inputHandler, float dTime, Entity e) {
+	private void updateEntity(final WindowInputHandler inputHandler, final float dTime, final Entity e) {
 		if (e.hasComponentMatching(SubEntitiesComponent.class)) {
 			e.getComponentsMatching(SubEntitiesComponent.class).forEach(se -> {
 				synchronized (se.getEntitiesLock()) {
-					for (Entity e2 : (List<Entity>) se.getEntities()) {
-						updateEntity(inputHandler, dTime, e2);
+					for (final Entity e2 : (List<Entity>) se.getEntities()) {
+						this.updateEntity(inputHandler, dTime, e2);
 					}
 				}
 			});
 		}
 
-		if (e instanceof NeedsUpdate needsUpdate) {
+		if (e instanceof final NeedsUpdate needsUpdate) {
 			needsUpdate.update(dTime, this);
 		}
 	}
 
 	public CacheManager getCache() {
-		return uiCache;
+		return this.uiCache;
 	}
 
 	@Override

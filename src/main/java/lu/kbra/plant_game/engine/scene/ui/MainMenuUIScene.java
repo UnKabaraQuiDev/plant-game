@@ -1,5 +1,7 @@
 package lu.kbra.plant_game.engine.scene.ui;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -8,19 +10,19 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 
 import lu.pcy113.pclib.PCUtils;
+import lu.pcy113.pclib.concurrency.TriggerLatch;
 
+import lu.kbra.plant_game.PGLogic;
 import lu.kbra.plant_game.engine.entity.ui.btn.BackButtonUIObject;
 import lu.kbra.plant_game.engine.entity.ui.btn.OptionsButtonUIObject;
 import lu.kbra.plant_game.engine.entity.ui.btn.PlayButtonUIObject;
 import lu.kbra.plant_game.engine.entity.ui.btn.QuitButtonUIObject;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory.TextData;
+import lu.kbra.plant_game.engine.entity.ui.impl.Scale2dDir;
 import lu.kbra.plant_game.engine.entity.ui.impl.TextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.UIObject;
-import lu.kbra.plant_game.engine.entity.ui.text.BackwardButtonUIObject;
-import lu.kbra.plant_game.engine.entity.ui.text.ForwardButtonUIObject;
-import lu.kbra.plant_game.engine.entity.ui.text.LeftButtonUIObject;
-import lu.kbra.plant_game.engine.entity.ui.text.RightButtonUIObject;
+import lu.kbra.plant_game.engine.entity.ui.text.ProgrammaticTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.textinput.TextFieldUIObject;
 import lu.kbra.plant_game.engine.entity.ui.texture.CursorUIObject;
 import lu.kbra.plant_game.engine.entity.ui.texture.GradientQuadUIObject;
@@ -30,6 +32,7 @@ import lu.kbra.plant_game.engine.render.GradientDirection;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
+import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
 import lu.kbra.standalone.gameengine.impl.future.WorkerDispatcher;
 import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextAlignment;
@@ -55,10 +58,8 @@ public class MainMenuUIScene extends UIScene {
 	protected OffsetUIObjectGroup optionsMenuGroup = new OffsetUIObjectGroup("option",
 			new Transform3D(new Vector3f(this.restPositions[OPTIONS])));
 	protected LayoutOffsetUIObjectGroup optionsKeysMenuGroup = new LayoutOffsetUIObjectGroup("option.keys",
-			new MarginFlowLayout(true, 0.00f, 0.03f, 0, 0.5f, 0, (byte) (MarginFlowLayout.LEFT | MarginFlowLayout.TOP)),
+			new MarginFlowLayout(true, 0.0125f, 0.1f, 0, 0.5f, 0, (byte) (MarginFlowLayout.LEFT | MarginFlowLayout.TOP)),
 			this.optionsMenuGroup);
-	protected LayoutOffsetUIObjectGroup optionsValuesMenuGroup = new LayoutOffsetUIObjectGroup("option.values",
-			new MarginFlowLayout(true, 0.00f, 0, 0.03f, 0.5f, 0, (MarginFlowLayout.TOP)), this.optionsMenuGroup);
 
 	protected OffsetUIObjectGroup[] groups = new OffsetUIObjectGroup[] { this.mainMenuGroup, null, this.optionsMenuGroup, null };
 
@@ -129,19 +130,28 @@ public class MainMenuUIScene extends UIScene {
 				})
 				.push();
 
-		final TextData uiSmallLeftTextData = new TextData(new Vector2f(0.1f), TextAlignment.TEXT_LEFT, -1);
+		final TextData uiSmallLeftTextData = new TextData(new Vector2f(0.125f), TextAlignment.TEXT_LEFT, -1);
 
-		UIObjectFactory.create(ForwardButtonUIObject.class, this.optionsKeysMenuGroup, uiSmallLeftTextData, new Transform3D()).push();
-		UIObjectFactory.create(BackwardButtonUIObject.class, this.optionsKeysMenuGroup, uiSmallLeftTextData, new Transform3D()).push();
-		UIObjectFactory.create(LeftButtonUIObject.class, this.optionsKeysMenuGroup, uiSmallLeftTextData, new Transform3D()).push();
-		UIObjectFactory.create(RightButtonUIObject.class, this.optionsKeysMenuGroup, uiSmallLeftTextData, new Transform3D()).push();
-
-		UIObjectFactory.create(ForwardButtonUIObject.class, this.optionsValuesMenuGroup, uiSmallLeftTextData, new Transform3D()).push();
-		UIObjectFactory.create(BackwardButtonUIObject.class, this.optionsValuesMenuGroup, uiSmallLeftTextData, new Transform3D()).push();
-		UIObjectFactory.create(LeftButtonUIObject.class, this.optionsValuesMenuGroup, uiSmallLeftTextData, new Transform3D()).push();
-		UIObjectFactory.create(RightButtonUIObject.class, this.optionsValuesMenuGroup, uiSmallLeftTextData, new Transform3D()).push();
-
-		this.optionsValuesMenuGroup.getTransform().translateAdd(-1, 0, 0).updateMatrix();
+		final List<OptionKeyUIObject> all = new ArrayList<>();
+		final TriggerLatch latch = new TriggerLatch(this.keys.length, () -> new TaskFuture<>(workers, this::updateKeys).push());
+		for (final String key : this.keys) {
+			uiSmallLeftTextData.setBufferSize(25);
+			uiSmallLeftTextData.setName("options.keys" + key);
+			UIObjectFactory
+					.create(OptionKeyUIObject.class,
+							this.optionsKeysMenuGroup,
+							uiSmallLeftTextData,
+							key,
+							Scale2dDir.BOTH,
+							new Transform3D())
+					.then(workers, (Consumer<OptionKeyUIObject>) t -> {
+						all.add(t);
+						latch.decrement();
+					})
+					.push();
+		}
+		uiSmallLeftTextData.setBufferSize(-1);
+		uiSmallLeftTextData.setName(null);
 
 		/* common */
 
@@ -153,6 +163,40 @@ public class MainMenuUIScene extends UIScene {
 				})
 				.push();
 
+	}
+
+	final String[] keys = {
+			"forward",
+			"backward",
+			"left",
+			"right",
+			"rotate.left",
+			"rotate.right",
+			"turn.cw",
+			"turn.ccw",
+			"place",
+			"cancel" };
+
+	private void updateKeys() {
+		this.optionsKeysMenuGroup
+				.getSubEntities()
+				.parallelStream()
+				.filter(ProgrammaticTextUIObject.class::isInstance)
+				.map(e -> (ProgrammaticTextUIObject) e)
+				.forEach(e -> {
+
+				});
+
+		PGLogic.INSTANCE.RENDER_DISPATCHER.post(() -> {
+			this.optionsKeysMenuGroup
+					.getSubEntities()
+					.stream()
+					.filter(ProgrammaticTextUIObject.class::isInstance)
+					.map(e -> (ProgrammaticTextUIObject) e)
+					.forEach(e -> e.getTextEmitter().updateText());
+		});
+
+		this.optionsKeysMenuGroup.doLayout();
 	}
 
 	@Override
@@ -168,7 +212,6 @@ public class MainMenuUIScene extends UIScene {
 			this.camera.getProjection().update(inputHandler.getWindowSize());
 
 			this.optionsKeysMenuGroup.doLayout();
-			this.optionsValuesMenuGroup.doLayout();
 		}
 
 		if (this.cursor != null) {

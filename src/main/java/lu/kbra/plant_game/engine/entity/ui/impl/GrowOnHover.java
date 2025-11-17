@@ -10,6 +10,10 @@ import lu.kbra.standalone.gameengine.scene.Scene;
 
 public interface GrowOnHover extends NeedsUpdate, Transform3DOwner, NeedsHover {
 
+	Vector3f HORIZONTAL_GROWTH_SCALE = new Vector3f(1.1f, 1, 1);
+	Vector3f VERTICAL_GROWTH_SCALE = new Vector3f(1, 1, 1.1f);
+	Vector3f BOTH_GROWTH_SCALE = new Vector3f(1.1f, 1, 1.1f);
+
 	boolean isHovered();
 
 	Vector3f getTargetScale(boolean grow);
@@ -17,16 +21,16 @@ public interface GrowOnHover extends NeedsUpdate, Transform3DOwner, NeedsHover {
 	float getGrowthRate(boolean grow);
 
 	@Override
-	default void update(float dTime, Scene scene) {
-		grow(dTime, isHovered());
-		getTransform().updateMatrix();
+	default void update(final float dTime, final Scene scene) {
+		this.grow(dTime, this.isHovered());
+		this.getTransform().updateMatrix();
 	}
 
-	default float grow(float dTime, boolean grow) {
-		final Vector3f scale = getTransform().getScale();
-		final Vector3f target = getTargetScale(grow);
+	default float grow(final float dTime, final boolean grow) {
+		final Vector3f scale = this.getTransform().getScale();
+		final Vector3f target = this.getTargetScale(grow);
 
-		final float speed = getGrowthRate(grow);
+		final float speed = this.getGrowthRate(grow);
 
 		for (int i = 0; i < 3; i++) {
 			final float s = scale.get(i);
@@ -40,8 +44,10 @@ public interface GrowOnHover extends NeedsUpdate, Transform3DOwner, NeedsHover {
 			}
 		}
 
-		final Vector3f start = getTargetScale(false), end = getTargetScale(true);
-		final float currentDist = scale.distance(start), maxDistance = scale.distance(end);
+		final Vector3f start = this.getTargetScale(false);
+		final Vector3f end = this.getTargetScale(true);
+		final float currentDist = scale.distance(start);
+		final float maxDistance = scale.distance(end);
 
 		return Math.clamp(0, 1, currentDist / maxDistance);
 	}

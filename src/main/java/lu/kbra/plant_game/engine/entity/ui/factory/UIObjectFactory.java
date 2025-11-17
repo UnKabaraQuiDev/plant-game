@@ -34,15 +34,68 @@ import lu.kbra.standalone.gameengine.utils.gl.consts.TextAlignment;
 
 public class UIObjectFactory {
 
-	public static record TextData(Vector2f charSize, TextAlignment textAlignment, int bufferSize) {
-		public TextData(Vector2f charSize, TextAlignment textAlignment) {
-			this(charSize, textAlignment, -1);
+	public static class TextData {
+
+		protected Vector2f charSize;
+		protected TextAlignment textAlignment;
+		protected int bufferSize;
+		protected String name;
+
+		public TextData(final Vector2f charSize, final TextAlignment textAlignment, final int bufferSize, final String name) {
+			this.charSize = charSize;
+			this.textAlignment = textAlignment;
+			this.bufferSize = bufferSize;
+			this.name = name;
 		}
+
+		public TextData(final Vector2f charSize, final TextAlignment textAlignment, final int bufferSize) {
+			this.charSize = charSize;
+			this.textAlignment = textAlignment;
+			this.bufferSize = bufferSize;
+		}
+
+		public TextData(final Vector2f charSize, final TextAlignment textAlignment) {
+			this.charSize = charSize;
+			this.textAlignment = textAlignment;
+		}
+
+		public Vector2f getCharSize() {
+			return this.charSize;
+		}
+
+		public void setCharSize(final Vector2f charSize) {
+			this.charSize = charSize;
+		}
+
+		public TextAlignment getTextAlignment() {
+			return this.textAlignment;
+		}
+
+		public void setTextAlignment(final TextAlignment textAlignment) {
+			this.textAlignment = textAlignment;
+		}
+
+		public int getBufferSize() {
+			return this.bufferSize;
+		}
+
+		public void setBufferSize(final int bufferSize) {
+			this.bufferSize = bufferSize;
+		}
+
+		public String getName() {
+			return this.name;
+		}
+
+		public void setName(final String name) {
+			this.name = name;
+		}
+
 	}
 
 	public static final Vector2f DEFAULT_CHAR_SIZE = new Vector2f(0.5f);
 	public static final int DEFAULT_BUFFER_SIZE = 12;
-	public static final TextData DEFAULT_TEXT_DATA = new TextData(DEFAULT_CHAR_SIZE, TextAlignment.LEFT, DEFAULT_BUFFER_SIZE);
+	public static final TextData DEFAULT_TEXT_DATA = new TextData(DEFAULT_CHAR_SIZE, TextAlignment.LEFT, DEFAULT_BUFFER_SIZE, null);
 
 	public static UIObjectFactory INSTANCE;
 
@@ -53,32 +106,32 @@ public class UIObjectFactory {
 	private final CacheManager cache;
 	private final Dispatcher loader, render;
 
-	public UIObjectFactory(CacheManager cache, Dispatcher loader, Dispatcher render) {
+	public UIObjectFactory(final CacheManager cache, final Dispatcher loader, final Dispatcher render) {
 		this.cache = cache;
 		this.loader = loader;
 		this.render = render;
 	}
 
-	public <T extends UIObject> TaskFuture<?, T> create_(Class<T> clazz, final Object... args) {
-		animatedMesh.computeIfAbsent(clazz, k -> AnimatedUIObject.class.isAssignableFrom(k));
-		dataPath.computeIfAbsent(clazz, k -> {
+	public <T extends UIObject> TaskFuture<?, T> create_(final Class<T> clazz, final Object... args) {
+		this.animatedMesh.computeIfAbsent(clazz, k -> AnimatedUIObject.class.isAssignableFrom(k));
+		this.dataPath.computeIfAbsent(clazz, k -> {
 			if (!k.isAnnotationPresent(DataPath.class)) {
 				throw new IllegalArgumentException(clazz.getName() + " doesn't have @DataPath.");
 			}
 			return k.getAnnotation(DataPath.class).value();
 		});
 
-		final String cDataPath = dataPath.get(clazz);
+		final String cDataPath = this.dataPath.get(clazz);
 
 		if (cDataPath.endsWith("json")) { // data file
 
 			PCUtils.throwUnsupported();
 
-			if (animatedMesh.get(clazz)) {
+			if (this.animatedMesh.get(clazz)) {
 
 				return AnimatedMeshLoader
-						.getAnimatedFuture(cache, clazz.getName(), cDataPath, loader, render)
-						.then(loader, (ThrowingFunction<AnimatedMeshes, T, Throwable>) (meshes) -> {
+						.getAnimatedFuture(this.cache, clazz.getName(), cDataPath, this.loader, this.render)
+						.then(this.loader, (ThrowingFunction<AnimatedMeshes, T, Throwable>) meshes -> {
 							final T instance = UIObjectRegistry
 									.create(clazz,
 											PCUtils
@@ -90,127 +143,121 @@ public class UIObjectFactory {
 															args));
 							return instance;
 						});
-			} else {
-
-				return StaticMeshLoader
-						.getStaticFuture(cache, clazz.getName(), cDataPath, loader, render)
-						.then(loader, (ThrowingFunction<Mesh, T, Throwable>) (mesh) -> {
-							final T instance = UIObjectRegistry
-									.create(clazz,
-											PCUtils
-													.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), mesh },
-															args));
-							return instance;
-						});
-
 			}
+			return StaticMeshLoader
+					.getStaticFuture(this.cache, clazz.getName(), cDataPath, this.loader, this.render)
+					.then(this.loader, (ThrowingFunction<Mesh, T, Throwable>) mesh -> {
+						final T instance = UIObjectRegistry
+								.create(clazz,
+										PCUtils
+												.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), mesh },
+														args));
+						return instance;
+					});
 
-		} else if (TextUIObject.class.isAssignableFrom(clazz) && (cDataPath.startsWith("localization:") || cDataPath.isEmpty())) {
+		}
+		if (TextUIObject.class.isAssignableFrom(clazz) && (cDataPath.startsWith("localization:") || cDataPath.isEmpty())) {
 
 			final String key = cDataPath.substring(cDataPath.indexOf(":") + 1);
 
 			TextData td;
 			final Object[] nargs;
-			if (args.length > 0 && args[0] instanceof TextData vvec) {
+			if (args.length > 0 && args[0] instanceof final TextData vvec) {
 				td = vvec;
 				nargs = PCUtils.removeArray(args, 0);
 			} else {
 				td = DEFAULT_TEXT_DATA;
 				nargs = args;
 
-				if (bufferSize
+				if (this.bufferSize
 						.computeIfAbsent(clazz,
-								(c) -> clazz.isAnnotationPresent(BufferSize.class) ? clazz.getAnnotation(BufferSize.class).value()
+								c -> clazz.isAnnotationPresent(BufferSize.class) ? clazz.getAnnotation(BufferSize.class).value()
 										: -1) != -1) {
-					td = new TextData(td.charSize, td.textAlignment, bufferSize.get(clazz));
+					td = new TextData(td.charSize, td.textAlignment, this.bufferSize.get(clazz));
 				}
 			}
 
+			System.err.println("given buffer size: " + td.bufferSize);
+
 			return StaticTextLoader
-					.getFuture(cache, key, key, td, loader, render)
-					.then(loader, (ThrowingFunction<TextEmitter, T, Throwable>) (te) -> {
+					.getFuture(this.cache, td.name == null ? key : td.name, key, td, this.loader, this.render)
+					.then(this.loader, (ThrowingFunction<TextEmitter, T, Throwable>) te -> {
 						final T instance = UIObjectRegistry
 								.create(clazz,
 										PCUtils.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), te }, nargs));
 						return instance;
 					});
 
-		} else if (TextureUIObject.class.isAssignableFrom(clazz) && cDataPath.startsWith("image:")) {
+		}
+		if (TextureUIObject.class.isAssignableFrom(clazz) && cDataPath.startsWith("image:")) {
 
-			if (animatedMesh.get(clazz)) {
-
-				PCUtils.throwUnsupported();
-				return null;
-
-			} else {
-
-				final String txtPath = cDataPath.substring(cDataPath.indexOf(":") + 1);
-
-				return StaticTexturedMeshLoader
-						.getStaticFuture(cache, txtPath, txtPath, loader, render)
-						.then(loader, (ThrowingFunction<TexturedMesh, T, Throwable>) (mesh) -> {
-							final T instance = UIObjectRegistry
-									.create(clazz,
-											PCUtils
-													.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), mesh },
-															args));
-							return instance;
-						});
-
-			}
-
-		} else if (GradientQuadUIObject.class.isAssignableFrom(clazz)) {
-
-			if (animatedMesh.get(clazz)) {
+			if (this.animatedMesh.get(clazz)) {
 
 				PCUtils.throwUnsupported();
 				return null;
 
-			} else {
-
-				return StaticGradientMeshLoader
-						.getStaticFuture(cache,
-								cDataPath.isBlank() ? GradientQuadUIObject.class.getName() : cDataPath,
-								cDataPath,
-								loader,
-								render)
-						.then(loader, (ThrowingFunction<GradientMesh, T, Throwable>) (mesh) -> {
-							final T instance = UIObjectRegistry
-									.create(clazz,
-											PCUtils
-													.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), mesh },
-															args));
-							return instance;
-						});
-
 			}
+			final String txtPath = cDataPath.substring(cDataPath.indexOf(":") + 1);
 
-		} else {
+			return StaticTexturedMeshLoader
+					.getStaticFuture(this.cache, txtPath, txtPath, this.loader, this.render)
+					.then(this.loader, (ThrowingFunction<TexturedMesh, T, Throwable>) mesh -> {
+						final T instance = UIObjectRegistry
+								.create(clazz,
+										PCUtils
+												.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), mesh },
+														args));
+						return instance;
+					});
+
+		}
+		if (!GradientQuadUIObject.class.isAssignableFrom(clazz)) {
 
 			PCUtils.throwUnsupported(clazz.getName() + " & " + cDataPath);
 			return null;
 
 		}
+		if (this.animatedMesh.get(clazz)) {
+
+			PCUtils.throwUnsupported();
+			return null;
+
+		}
+		return StaticGradientMeshLoader
+				.getStaticFuture(this.cache,
+						cDataPath.isBlank() ? GradientQuadUIObject.class.getName() : cDataPath,
+						cDataPath,
+						this.loader,
+						this.render)
+				.then(this.loader, (ThrowingFunction<GradientMesh, T, Throwable>) mesh -> {
+					final T instance = UIObjectRegistry
+							.create(clazz,
+									PCUtils.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), mesh }, args));
+					return instance;
+				});
 	}
 
-	public <T extends UIObject> TaskFuture<?, T> create_(Class<T> clazz, UIScene scene, Object... args) {
-		return create_(clazz, args).then(loader, (ThrowingFunction<T, T, Throwable>) scene::addEntity);
+	public <T extends UIObject> TaskFuture<?, T> create_(final Class<T> clazz, final UIScene scene, final Object... args) {
+		return this.create_(clazz, args).then(this.loader, (ThrowingFunction<T, T, Throwable>) scene::addEntity);
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T extends UIObject, V extends T> TaskFuture<?, T> create_(Class<T> clazz, ObjectGroup<V> obj, Object... args) {
-		return create_(clazz, args).then(loader, (ThrowingFunction<T, T, Throwable>) (T t) -> obj.add((V) t));
+	public <T extends UIObject, V extends T> TaskFuture<?, T> create_(
+			final Class<T> clazz,
+			final ObjectGroup<V> obj,
+			final Object... args) {
+		return this.create_(clazz, args).then(this.loader, (ThrowingFunction<T, T, Throwable>) (final T t) -> obj.add((V) t));
 	}
 
-	public static <T extends UIObject> TaskFuture<?, T> create(Class<T> clazz, Object... args) {
+	public static <T extends UIObject> TaskFuture<?, T> create(final Class<T> clazz, final Object... args) {
 		return INSTANCE.create_(clazz, args);
 	}
 
-	public static <T extends UIObject> TaskFuture<?, T> create(Class<T> clazz, UIScene scene, Object... args) {
+	public static <T extends UIObject> TaskFuture<?, T> create(final Class<T> clazz, final UIScene scene, final Object... args) {
 		return INSTANCE.create_(clazz, scene, args);
 	}
 
-	public static <T extends UIObject> TaskFuture<?, T> create(Class<T> clazz, ObjectGroup obj, Object... args) {
+	public static <T extends UIObject> TaskFuture<?, T> create(final Class<T> clazz, final ObjectGroup obj, final Object... args) {
 		return INSTANCE.create_(clazz, obj, args);
 	}
 
