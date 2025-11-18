@@ -86,9 +86,6 @@ public class UIScene extends Scene3D {
 			}
 		}
 
-		System.err.println(newHovered);
-		System.err.println(this.hovering);
-
 		this.hovering.removeAll(newHovered);
 		for (final UIObject uiObj : this.hovering) {
 			((NeedsHover) uiObj).hover(inputHandler, dTime, HoverState.LEAVE, this);
@@ -118,10 +115,24 @@ public class UIScene extends Scene3D {
 			final Set<UIObject> newHovered,
 			final Matrix4f parentTransform) {
 
+		// treat children first so they are earlier in the hovered stack
+		if (e.hasComponentMatching(SubEntitiesComponent.class)) {
+			final Matrix4f newMatrix = e.hasComponentMatching(TransformComponent.class)
+					? parentTransform.mul(e.getComponentMatching(TransformComponent.class).getTransform().getMatrix(), new Matrix4f())
+					: parentTransform;
+
+			e.getComponentsMatching(SubEntitiesComponent.class).forEach(se -> {
+				synchronized (se.getEntitiesLock()) {
+					for (final Entity e2 : (List<Entity>) se.getEntities()) {
+						this.checkInput(e2, inputHandler, dTime, frameState, mousePos, newHovered, newMatrix);
+					}
+				}
+			});
+		}
+
 		if (e instanceof final UIObject uiObj) {
 			if (uiObj instanceof final NeedsInput uiObjectInput) {
 				uiObjectInput.input(inputHandler, dTime, this);
-				newHovered.add(uiObj);
 			}
 
 			if ((e instanceof NeedsHover || e instanceof NeedsClick) && uiObj.getTransformedBounds(parentTransform).contains(mousePos)) {
@@ -144,20 +155,6 @@ public class UIScene extends Scene3D {
 					}
 				}
 			}
-		}
-
-		if (e.hasComponentMatching(SubEntitiesComponent.class)) {
-			final Matrix4f newMatrix = e.hasComponentMatching(TransformComponent.class)
-					? parentTransform.mul(e.getComponentMatching(TransformComponent.class).getTransform().getMatrix(), new Matrix4f())
-					: parentTransform;
-
-			e.getComponentsMatching(SubEntitiesComponent.class).forEach(se -> {
-				synchronized (se.getEntitiesLock()) {
-					for (final Entity e2 : (List<Entity>) se.getEntities()) {
-						this.checkInput(e2, inputHandler, dTime, frameState, mousePos, newHovered, newMatrix);
-					}
-				}
-			});
 		}
 	}
 

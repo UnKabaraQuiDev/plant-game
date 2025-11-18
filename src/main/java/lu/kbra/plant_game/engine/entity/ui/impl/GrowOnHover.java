@@ -30,6 +30,10 @@ public interface GrowOnHover extends NeedsUpdate, Transform3DOwner, NeedsHover {
 		final Vector3f scale = this.getTransform().getScale();
 		final Vector3f target = this.getTargetScale(grow);
 
+		if (scale.equals(target, 0.001f)) {
+			return grow ? 1 : 0;
+		}
+
 		final float speed = this.getGrowthRate(grow);
 
 		for (int i = 0; i < 3; i++) {
@@ -40,6 +44,7 @@ public interface GrowOnHover extends NeedsUpdate, Transform3DOwner, NeedsHover {
 			if (!PCUtils.compare(s, t, 0.001f)) {
 				scale.setComponent(i, s + factor * dTime);
 			} else {
+				// snap into position
 				scale.setComponent(i, t);
 			}
 		}

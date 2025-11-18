@@ -1,5 +1,7 @@
 package lu.kbra.plant_game.engine.scene.ui;
 
+import org.joml.Vector2f;
+
 import lu.pcy113.pclib.PCUtils;
 
 import lu.kbra.plant_game.PGLogic;
@@ -15,6 +17,7 @@ import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
 import lu.kbra.standalone.gameengine.scene.Scene;
 import lu.kbra.standalone.gameengine.utils.interpolation.Interpolators;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
+import lu.kbra.standalone.gameengine.utils.transform.Transform3DPivot;
 
 @DataPath("localization:string-placeholder")
 public class OptionKeyUIObject extends ProgrammaticGrowOnHoverTextUIObject implements NeedsClick, NeedsInput {
@@ -81,6 +84,12 @@ public class OptionKeyUIObject extends ProgrammaticGrowOnHoverTextUIObject imple
 		final String loc = LocalizationService.get("key." + super.key);
 		value = "[" + value + "]";
 		this.getTextEmitter().setText(loc + " ".repeat(Math.max(length - loc.length() - value.length(), 0)) + value);
+
+		final Transform3D transform = this.getTransform();
+		if (transform instanceof final Transform3DPivot t3dp) {
+			final Vector2f textBounds = this.getTextEmitter().getTextBounds();
+			t3dp.scalePivotSet(textBounds.x / 2, 0, textBounds.y / 2);
+		}
 	}
 
 }

@@ -38,6 +38,7 @@ import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextAlignment;
 import lu.kbra.standalone.gameengine.utils.interpolation.Interpolators;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
+import lu.kbra.standalone.gameengine.utils.transform.Transform3DPivot;
 
 public class MainMenuUIScene extends UIScene {
 
@@ -58,8 +59,7 @@ public class MainMenuUIScene extends UIScene {
 	protected OffsetUIObjectGroup optionsMenuGroup = new OffsetUIObjectGroup("option",
 			new Transform3D(new Vector3f(this.restPositions[OPTIONS])));
 	protected LayoutOffsetUIObjectGroup optionsKeysMenuGroup = new LayoutOffsetUIObjectGroup("option.keys",
-			new MarginFlowLayout(true, 0.0125f, 0.1f, 0, 0.5f, 0, (byte) (MarginFlowLayout.LEFT | MarginFlowLayout.TOP)),
-			this.optionsMenuGroup);
+			new CenteringFlowLayout(true, 0.0f), this.optionsMenuGroup);
 
 	protected OffsetUIObjectGroup[] groups = new OffsetUIObjectGroup[] { this.mainMenuGroup, null, this.optionsMenuGroup, null };
 
@@ -143,7 +143,7 @@ public class MainMenuUIScene extends UIScene {
 							uiSmallLeftTextData,
 							key,
 							Scale2dDir.BOTH,
-							new Transform3D())
+							new Transform3DPivot())
 					.then(workers, (Consumer<OptionKeyUIObject>) t -> {
 						all.add(t);
 						latch.decrement();
