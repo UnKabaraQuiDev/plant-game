@@ -1,6 +1,6 @@
 package lu.kbra.plant_game.engine.entity.ui.impl;
 
-import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.GameEngine;
@@ -34,7 +34,7 @@ public class GrowOnHoverTextUIObject extends TextUIObject implements GrowOnHover
 	}
 
 	@Override
-	public Vector3f getTargetScale(final boolean grow) {
+	public Vector3fc getTargetScale(final boolean grow) {
 		return grow ? switch (this.dir) {
 		case HORIZONTAL -> HORIZONTAL_GROWTH_SCALE;
 		case VERTICAL -> VERTICAL_GROWTH_SCALE;

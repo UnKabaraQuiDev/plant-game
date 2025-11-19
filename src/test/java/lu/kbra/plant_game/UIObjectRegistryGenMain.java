@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,7 +66,12 @@ public class UIObjectRegistryGenMain extends GenMainConsts {
 		final TypeSpec.Builder registry = TypeSpec.classBuilder("UIObjectRegistry").addModifiers(Modifier.PUBLIC).addField(hashMap);
 
 		final Reflections reflections = new Reflections(MAIN_PACKAGE);
-		final Set<Class<? extends UIObject>> classes = reflections.getSubTypesOf(UIObject.class);
+		final Set<Class<? extends UIObject>> classes = reflections
+				.getSubTypesOf(UIObject.class)
+				.parallelStream()
+				.filter(c -> !c.isAnonymousClass())
+				.filter(c -> !c.isMemberClass() || !c.isSynthetic())
+				.collect(Collectors.toSet());
 
 		final CodeBlock.Builder staticCodeBlock = CodeBlock.builder();
 
@@ -74,7 +80,7 @@ public class UIObjectRegistryGenMain extends GenMainConsts {
 		staticCodeBlock.addStatement("$N = new $T<>()", hashMap, HashMap.class);
 		staticCodeBlock.add("\n");
 
-		for (Class<? extends UIObject> c : classes) {
+		for (final Class<? extends UIObject> c : classes) {
 			/*
 			 * if (!c.isAnnotationPresent(DataPath.class)) { continue; }
 			 */
@@ -91,9 +97,9 @@ public class UIObjectRegistryGenMain extends GenMainConsts {
 			staticCodeBlock.add("/* $L $T $L */\n", spacer, TypeName.get(c), spacer);
 			staticCodeBlock.addStatement("final $T $L = new $T<>()", specificSubListType, listName, ArrayList.class);
 
-			for (Constructor<?> con : Arrays
+			for (final Constructor<?> con : Arrays
 					.stream(c.getConstructors())
-					.sorted((c1, c2) -> Integer.compare(c1.getParameterCount(), c2.getParameterCount()))
+					.sorted(Comparator.comparing(Constructor<?>::getParameterCount))
 					.toList()) {
 
 				staticCodeBlock

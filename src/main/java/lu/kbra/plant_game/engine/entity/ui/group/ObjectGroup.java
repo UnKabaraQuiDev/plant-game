@@ -1,4 +1,4 @@
-package lu.kbra.plant_game.engine.scene.ui;
+package lu.kbra.plant_game.engine.entity.ui.group;
 
 import java.util.Collection;
 import java.util.List;

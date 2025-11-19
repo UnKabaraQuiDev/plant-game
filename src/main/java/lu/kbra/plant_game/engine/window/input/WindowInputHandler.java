@@ -4,7 +4,6 @@ import org.joml.Vector2d;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 
-import lu.kbra.plant_game.engine.scene.ui.KeyOption;
 import lu.kbra.standalone.gameengine.GameEngine;
 import lu.kbra.standalone.gameengine.graph.window.KeyState;
 import lu.kbra.standalone.gameengine.graph.window.Window;

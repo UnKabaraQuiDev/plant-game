@@ -1,6 +1,8 @@
 package lu.kbra.plant_game.engine.scene.ui;
 
+import java.awt.Shape;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -8,6 +10,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.joml.Matrix4f;
+import org.joml.Matrix4fc;
 import org.joml.Quaternionf;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
@@ -16,6 +19,7 @@ import org.lwjgl.glfw.GLFW;
 
 import lu.kbra.plant_game.engine.UpdateFrameState;
 import lu.kbra.plant_game.engine.entity.impl.Transform3DOwner;
+import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.Focusable;
 import lu.kbra.plant_game.engine.entity.ui.impl.HoverState;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsClick;
@@ -35,7 +39,7 @@ import lu.kbra.standalone.gameengine.objs.entity.components.TransformComponent;
 import lu.kbra.standalone.gameengine.scene.Scene3D;
 import lu.kbra.standalone.gameengine.scene.camera.Camera;
 
-public class UIScene extends Scene3D {
+public class UIScene extends Scene3D implements BoundsOwner {
 
 	public static final Comparator<Entity> DEPTH_COMPARATOR = Comparator
 			.comparing((final Entity e) -> e instanceof Transform3DOwner ? ((Transform3DOwner) e).getTransform().getTranslation().y : 0f);
@@ -113,11 +117,11 @@ public class UIScene extends Scene3D {
 			final UpdateFrameState frameState,
 			final Point2D.Float mousePos,
 			final Set<UIObject> newHovered,
-			final Matrix4f parentTransform) {
+			final Matrix4fc parentTransform) {
 
 		// treat children first so they are earlier in the hovered stack
 		if (e.hasComponentMatching(SubEntitiesComponent.class)) {
-			final Matrix4f newMatrix = e.hasComponentMatching(TransformComponent.class)
+			final Matrix4fc newMatrix = e.hasComponentMatching(TransformComponent.class)
 					? parentTransform.mul(e.getComponentMatching(TransformComponent.class).getTransform().getMatrix(), new Matrix4f())
 					: parentTransform;
 
@@ -194,6 +198,12 @@ public class UIScene extends Scene3D {
 	@Override
 	public Iterator<Entity> iterator() {
 		return this.entities.values().stream().sorted(DEPTH_COMPARATOR).iterator();
+	}
+
+	@Override
+	public Shape getBounds() {
+		final float width = this.getCamera().getProjection().getAspectRatio();
+		return new Rectangle2D.Float(-width / 2, -1, width, 2);
 	}
 
 }

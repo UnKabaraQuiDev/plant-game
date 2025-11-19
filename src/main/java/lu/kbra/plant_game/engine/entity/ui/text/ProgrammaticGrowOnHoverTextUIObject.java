@@ -1,6 +1,6 @@
 package lu.kbra.plant_game.engine.entity.ui.text;
 
-import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
 import lu.kbra.plant_game.engine.entity.ui.impl.GrowOnHover;
 import lu.kbra.plant_game.engine.entity.ui.impl.HoverState;
@@ -49,7 +49,7 @@ public class ProgrammaticGrowOnHoverTextUIObject extends ProgrammaticTextUIObjec
 	}
 
 	@Override
-	public Vector3f getTargetScale(final boolean grow) {
+	public Vector3fc getTargetScale(final boolean grow) {
 		return grow ? switch (this.dir) {
 		case HORIZONTAL -> HORIZONTAL_GROWTH_SCALE;
 		case VERTICAL -> VERTICAL_GROWTH_SCALE;

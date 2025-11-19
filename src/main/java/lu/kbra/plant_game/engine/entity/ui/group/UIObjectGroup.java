@@ -1,4 +1,4 @@
-package lu.kbra.plant_game.engine.scene.ui;
+package lu.kbra.plant_game.engine.entity.ui.group;
 
 import java.awt.Shape;
 import java.awt.geom.Area;
@@ -138,8 +138,14 @@ public class UIObjectGroup extends UIObject implements ObjectGroup<UIObject> {
 	public void recomputeBounds() {
 		final Area combined = new Area();
 		synchronized (this.getSubEntitiesLock()) {
-			this.getSubEntities().forEach(se -> combined.add(new Area(se.getTransformedBounds())));
+			this.getSubEntities().forEach(se -> {
+				if (se instanceof final UIObjectGroup objGroup) {
+					objGroup.recomputeBounds();
+				}
+				combined.add(new Area(se.getTransformedBounds()));
+			});
 		}
+		System.err.println("recomputing bounds for: " + this.name + " " + combined.getBounds2D());
 		this.bounds = combined;
 	}
 

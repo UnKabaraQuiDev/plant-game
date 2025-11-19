@@ -1,7 +1,9 @@
 package lu.kbra.plant_game.engine.util;
 
 import org.joml.Vector2f;
+import org.joml.Vector2fc;
 import org.joml.Vector4f;
+import org.joml.Vector4fc;
 
 import lu.kbra.plant_game.engine.render.GradientDirection;
 import lu.kbra.plant_game.engine.render.GradientMesh;
@@ -10,6 +12,7 @@ import lu.kbra.standalone.gameengine.cache.attrib.UIntAttribArray;
 import lu.kbra.standalone.gameengine.cache.attrib.Vec3fAttribArray;
 import lu.kbra.standalone.gameengine.geom.LoadedMesh;
 import lu.kbra.standalone.gameengine.graph.material.Material;
+import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
 
 public class GradientLoadedMesh extends LoadedMesh implements GradientMesh {
 
@@ -18,20 +21,25 @@ public class GradientLoadedMesh extends LoadedMesh implements GradientMesh {
 	protected GradientDirection gradientDirection;
 	protected Vector2f gradientRange;
 
-	public GradientLoadedMesh(String name, Material material, Vec3fAttribArray vertices, UIntAttribArray indices, AttribArray... attribs) {
+	public GradientLoadedMesh(
+			final String name,
+			final Material material,
+			final Vec3fAttribArray vertices,
+			final UIntAttribArray indices,
+			final AttribArray... attribs) {
 		super(name, material, vertices, indices, attribs);
 	}
 
 	public GradientLoadedMesh(
-			String name,
-			Material material,
-			Vec3fAttribArray vertices,
-			UIntAttribArray indices,
-			Vector4f startColor,
-			Vector4f endColor,
-			GradientDirection gradientDirection,
-			Vector2f gradientRange,
-			AttribArray... attribs) {
+			final String name,
+			final Material material,
+			final Vec3fAttribArray vertices,
+			final UIntAttribArray indices,
+			final Vector4f startColor,
+			final Vector4f endColor,
+			final GradientDirection gradientDirection,
+			final Vector2f gradientRange,
+			final AttribArray... attribs) {
 		super(name, material, vertices, indices, attribs);
 		this.startColor = startColor;
 		this.endColor = endColor;
@@ -41,42 +49,42 @@ public class GradientLoadedMesh extends LoadedMesh implements GradientMesh {
 
 	@Override
 	public GradientDirection getDirection() {
-		return gradientDirection;
+		return this.gradientDirection;
 	}
 
 	@Override
-	public void setDirection(GradientDirection dir) {
+	public void setDirection(final GradientDirection dir) {
 		this.gradientDirection = dir;
 	}
 
 	@Override
 	public Vector2f getRange() {
-		return gradientRange;
+		return this.gradientRange;
 	}
 
 	@Override
-	public void setRange(Vector2f range) {
-		this.gradientRange = range;
+	public void setRange(final Vector2fc range) {
+		this.gradientRange = GameEngineUtils.clone(range);
 	}
 
 	@Override
 	public Vector4f getStartColor() {
-		return startColor;
+		return this.startColor;
 	}
 
 	@Override
-	public void setStartColor(Vector4f color) {
-		this.startColor = color;
+	public void setStartColor(final Vector4fc color) {
+		this.startColor = GameEngineUtils.clone(color);
 	}
 
 	@Override
 	public Vector4f getEndColor() {
-		return endColor;
+		return this.endColor;
 	}
 
 	@Override
-	public void setEndColor(Vector4f color) {
-		this.endColor = color;
+	public void setEndColor(final Vector4fc color) {
+		this.endColor = GameEngineUtils.clone(color);
 	}
 
 }

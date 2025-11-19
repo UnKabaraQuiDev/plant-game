@@ -1,7 +1,9 @@
 package lu.kbra.plant_game.engine.render;
 
 import org.joml.Vector2f;
+import org.joml.Vector2fc;
 import org.joml.Vector4f;
+import org.joml.Vector4fc;
 
 public interface GradientOwner {
 
@@ -11,14 +13,14 @@ public interface GradientOwner {
 
 	Vector2f getRange();
 
-	void setRange(Vector2f range);
+	void setRange(Vector2fc range);
 
 	Vector4f getStartColor();
 
-	void setStartColor(Vector4f color);
+	void setStartColor(Vector4fc color);
 
 	Vector4f getEndColor();
 
-	void setEndColor(Vector4f color);
+	void setEndColor(Vector4fc color);
 
 }

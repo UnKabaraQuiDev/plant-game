@@ -1,4 +1,4 @@
-package lu.kbra.plant_game.engine.scene.ui;
+package lu.kbra.plant_game.engine.entity.ui.text;
 
 import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
@@ -8,17 +8,18 @@ import lu.kbra.plant_game.engine.entity.ui.impl.Focusable;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsClick;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsInput;
 import lu.kbra.plant_game.engine.entity.ui.impl.Scale2dDir;
-import lu.kbra.plant_game.engine.entity.ui.text.ProgrammaticGrowOnHoverTextUIObject;
 import lu.kbra.plant_game.engine.locale.LocalizationService;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
+import lu.kbra.plant_game.engine.window.input.KeyOption;
 import lu.kbra.plant_game.engine.window.input.MappingInputHandler;
+import lu.kbra.plant_game.engine.window.input.StandardKeyOption;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
 import lu.kbra.standalone.gameengine.scene.Scene;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3DPivot;
 
-@DataPath("localization:string-placeholder")
+@DataPath("")
 public class OptionKeyUIObject extends ProgrammaticGrowOnHoverTextUIObject implements NeedsClick, Focusable, NeedsInput {
 
 	public static enum State {
@@ -98,7 +99,7 @@ public class OptionKeyUIObject extends ProgrammaticGrowOnHoverTextUIObject imple
 
 	public void setKeyValue(String value) {
 		final int length = this.getTextEmitter().getBufferLength();
-		final String loc = LocalizationService.get("key." + super.key);
+		final String loc = LocalizationService.get("key." + super.getKey());
 		value = "[" + (value == null ? " " : value) + "]";
 		this.getTextEmitter().setText(loc + " ".repeat(Math.max(length - loc.length() - value.length(), 0)) + value);
 

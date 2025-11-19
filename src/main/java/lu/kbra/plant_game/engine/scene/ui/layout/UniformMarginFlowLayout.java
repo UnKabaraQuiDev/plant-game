@@ -1,4 +1,4 @@
-package lu.kbra.plant_game.engine.scene.ui;
+package lu.kbra.plant_game.engine.scene.ui.layout;
 
 public class UniformMarginFlowLayout extends MarginFlowLayout {
 

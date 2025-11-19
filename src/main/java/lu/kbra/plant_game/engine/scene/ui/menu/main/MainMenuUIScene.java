@@ -1,4 +1,4 @@
-package lu.kbra.plant_game.engine.scene.ui;
+package lu.kbra.plant_game.engine.scene.ui.menu.main;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,17 +19,26 @@ import lu.kbra.plant_game.engine.entity.ui.btn.PlayButtonUIObject;
 import lu.kbra.plant_game.engine.entity.ui.btn.QuitButtonUIObject;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory.TextData;
+import lu.kbra.plant_game.engine.entity.ui.group.LayoutOffsetUIObjectGroup;
+import lu.kbra.plant_game.engine.entity.ui.group.OffsetUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.impl.Scale2dDir;
 import lu.kbra.plant_game.engine.entity.ui.impl.TextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.UIObject;
+import lu.kbra.plant_game.engine.entity.ui.slider.VolumeSliderUIObject;
+import lu.kbra.plant_game.engine.entity.ui.text.OptionKeyUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.ProgrammaticTextUIObject;
+import lu.kbra.plant_game.engine.entity.ui.text.VolumeTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.textinput.TextFieldUIObject;
 import lu.kbra.plant_game.engine.entity.ui.texture.CursorUIObject;
 import lu.kbra.plant_game.engine.entity.ui.texture.GradientQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.texture.LargeLogoUIObject;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.render.GradientDirection;
+import lu.kbra.plant_game.engine.scene.ui.UIScene;
+import lu.kbra.plant_game.engine.scene.ui.layout.CenteringFlowLayout;
+import lu.kbra.plant_game.engine.scene.ui.layout.FlowLayout;
 import lu.kbra.plant_game.engine.window.input.MappingInputHandler;
+import lu.kbra.plant_game.engine.window.input.StandardKeyOption;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
@@ -131,13 +140,15 @@ public class MainMenuUIScene extends UIScene {
 				})
 				.push();
 
-		final TextData uiSmallLeftTextData = new TextData(new Vector2f(0.1f), TextAlignment.TEXT_LEFT, -1);
+		final TextData uiSmallLeftTextData = new TextData(new Vector2f(0.1f), TextAlignment.TEXT_CENTER, -1);
+
+		final int COLUMN_COUNT = 25;
 
 		final List<OptionKeyUIObject> all = new ArrayList<>();
 		final TriggerLatch latch = new TriggerLatch(StandardKeyOption.values().length,
 				() -> new TaskFuture<>(workers, this::updateKeys).push());
 		for (final StandardKeyOption key : StandardKeyOption.values()) {
-			uiSmallLeftTextData.setBufferSize(25);
+			uiSmallLeftTextData.setBufferSize(COLUMN_COUNT);
 			uiSmallLeftTextData.setName("options.keys" + key);
 			UIObjectFactory
 					.create(OptionKeyUIObject.class,
@@ -154,6 +165,16 @@ public class MainMenuUIScene extends UIScene {
 		}
 		uiSmallLeftTextData.setBufferSize(-1);
 		uiSmallLeftTextData.setName(null);
+
+		final LayoutOffsetUIObjectGroup optionsVolumeGroup = new LayoutOffsetUIObjectGroup("options.volume",
+				new EdgeStickLayout(true, 0, uiSmallLeftTextData.getCharSize().x() * COLUMN_COUNT));
+
+		uiSmallLeftTextData.setTextAlignment(TextAlignment.TEXT_LEFT);
+		UIObjectFactory.create(VolumeTextUIObject.class, optionsVolumeGroup, uiSmallLeftTextData, new Transform3DPivot()).push();
+		uiSmallLeftTextData.setTextAlignment(TextAlignment.TEXT_RIGHT);
+		UIObjectFactory.create(VolumeSliderUIObject.class, optionsVolumeGroup, uiSmallLeftTextData, new Transform3DPivot()).push();
+
+		this.optionsKeysMenuGroup.add(optionsVolumeGroup);
 
 		/* common */
 
@@ -195,10 +216,7 @@ public class MainMenuUIScene extends UIScene {
 
 		((FlowLayout) this.optionsKeysMenuGroup.getLayout())
 				.setGap((float) (example.getBounds().getBounds2D().getHeight()
-						* (example.getTargetScale(true).z - example.getTargetScale(false).z)));
-		System.err
-				.println("gap: " + (float) (example.getBounds().getBounds2D().getHeight()
-						* (example.getTargetScale(true).z - example.getTargetScale(false).z)));
+						* (example.getTargetScale(true).z() - example.getTargetScale(false).z())));
 
 		this.optionsKeysMenuGroup.doLayout();
 	}

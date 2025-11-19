@@ -1,4 +1,4 @@
-package lu.kbra.plant_game.engine.scene.ui;
+package lu.kbra.plant_game.engine.scene.ui.layout;
 
 import java.awt.Shape;
 import java.awt.geom.Rectangle2D;

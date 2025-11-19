@@ -15,6 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
 import org.joml.Matrix4f;
+import org.joml.Matrix4fc;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
@@ -635,7 +636,7 @@ public class DeferredCompositor implements Cleanupable {
 			final RenderShader textEmitterShader,
 			final RenderShader instanceEmitterShader,
 			final RenderShader gradientMeshShader,
-			final Matrix4f parentTransform) {
+			final Matrix4fc parentTransform) {
 
 		if (!entity.isActive()) {
 			return;
@@ -646,7 +647,7 @@ public class DeferredCompositor implements Cleanupable {
 			return;
 		}
 
-		final Matrix4f localTransform = entity instanceof final GameObject go ? go.getTransform().getMatrix()
+		final Matrix4fc localTransform = entity instanceof final GameObject go ? go.getTransform().getMatrix()
 				: entity.hasComponentMatching(TransformComponent.class)
 						? entity.getComponentMatching(TransformComponent.class).getTransform().getMatrix()
 				: GameEngine.IDENTITY_MATRIX4F;

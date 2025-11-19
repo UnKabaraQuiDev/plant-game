@@ -8,6 +8,7 @@ import org.joml.Vector2f;
 import lu.pcy113.pclib.PCUtils;
 import lu.pcy113.pclib.impl.ThrowingFunction;
 
+import lu.kbra.plant_game.engine.entity.ui.group.ObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.impl.AnimatedUIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.TextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.TextureUIObject;
@@ -20,7 +21,6 @@ import lu.kbra.plant_game.engine.mesh.loader.StaticMeshLoader;
 import lu.kbra.plant_game.engine.mesh.loader.StaticTextLoader;
 import lu.kbra.plant_game.engine.mesh.loader.StaticTexturedMeshLoader;
 import lu.kbra.plant_game.engine.render.GradientMesh;
-import lu.kbra.plant_game.engine.scene.ui.ObjectGroup;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
 import lu.kbra.plant_game.engine.util.annotation.BufferSize;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
@@ -176,8 +176,6 @@ public class UIObjectFactory {
 					td = new TextData(td.charSize, td.textAlignment, this.bufferSize.get(clazz));
 				}
 			}
-
-			System.err.println("given buffer size: " + td.bufferSize);
 
 			return StaticTextLoader
 					.getFuture(this.cache, td.name == null ? key : td.name, key, td, this.loader, this.render)
