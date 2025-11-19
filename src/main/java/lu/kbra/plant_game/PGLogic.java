@@ -29,7 +29,7 @@ public class PGLogic extends GameLogic {
 	private UIScene uiScene;
 	private DeferredCompositor compositor;
 
-	private WindowInputHandler inputHandler;
+	private MappingInputHandler inputHandler;
 
 	public PGLogic() {
 		INSTANCE = this;
@@ -39,7 +39,7 @@ public class PGLogic extends GameLogic {
 	public void init() throws Exception {
 		this.inputHandler = new MappingInputHandler(this.engine);
 		this.inputHandler.setOwner(this.engine.getUpdateThread());
-		((MappingInputHandler) this.inputHandler).saveMappings(new File(Consts.CONFIG_DIR, "mappings.json"));
+		inputHandler.saveMappings(new File(Consts.CONFIG_DIR, "mappings.json"));
 
 		this.compositor = new DeferredCompositor(this.engine, this.engine.getRenderThread());
 		this.compositor.getBackgroundColor().set(1, 1, 0, 1);
@@ -105,7 +105,7 @@ public class PGLogic extends GameLogic {
 		return this.compositor;
 	}
 
-	public WindowInputHandler getInputHandler() {
+	public MappingInputHandler getInputHandler() {
 		return this.inputHandler;
 	}
 

@@ -15,8 +15,10 @@ import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 @DataPath("image:classpath:/icons/cursor-128.png")
 public class CursorUIObject extends TextureUIObject implements NeedsUpdate {
 
-	private final Vector2f to = new Vector2f();
-	private boolean circlingMouse;
+	protected final Vector2f to = new Vector2f();
+	protected boolean circlingMouse;
+	protected float snapAngle = 0.25f;
+	protected float offsetX = 0;
 
 	public CursorUIObject(String str, TexturedQuadLoadedMesh mesh) {
 		super(str, mesh);
@@ -35,7 +37,7 @@ public class CursorUIObject extends TextureUIObject implements NeedsUpdate {
 
 		final float cursorWidth = (float) (getBounds().getWidth() * getTransform().getScale().x);
 
-		this.to.x = uiObject.getTransform().getTranslation().x
+		this.to.x = offsetX + uiObject.getTransform().getTranslation().x
 				+ (float) uiObject.getBounds().getBounds2D().getX() * uiObject.getTransform().getScale().x - cursorWidth;
 		this.to.y = (float) uiObject.getTransform().getTranslation().z;
 	}
@@ -72,7 +74,7 @@ public class CursorUIObject extends TextureUIObject implements NeedsUpdate {
 			cursorPos.x += Math.cos(PGLogic.TOTAL_TIME() * freq) * freq * (cursorWidth / 2) * dTime;
 			cursorPos.z += (to.y - cursorPos.z) * dTime * speed;
 
-			getTransform().getRotation().rotationY((float) ((cursorPos.z / 0.25f) * (2 * Math.PI / 3)));
+			getTransform().getRotation().rotationY((float) ((cursorPos.z / snapAngle) * (2 * Math.PI / 3)));
 		}
 
 		getTransform().updateMatrix();
@@ -90,6 +92,18 @@ public class CursorUIObject extends TextureUIObject implements NeedsUpdate {
 
 	public void forceCirclingMouse() {
 		circlingMouse = true;
+	}
+
+	public void setSnapAngle(float snapAngle) {
+		this.snapAngle = snapAngle;
+	}
+
+	public void setOffsetX(float offsetX) {
+		this.offsetX = offsetX;
+	}
+
+	public float getOffsetX() {
+		return offsetX;
 	}
 
 }

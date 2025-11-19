@@ -9,9 +9,6 @@ import org.joml.Quaternionf;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 
-import lu.pcy113.pclib.PCUtils;
-import lu.pcy113.pclib.concurrency.TriggerLatch;
-
 import lu.kbra.plant_game.PGLogic;
 import lu.kbra.plant_game.engine.entity.ui.btn.BackButtonUIObject;
 import lu.kbra.plant_game.engine.entity.ui.btn.OptionsButtonUIObject;
@@ -29,6 +26,7 @@ import lu.kbra.plant_game.engine.entity.ui.texture.GradientQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.texture.LargeLogoUIObject;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.render.GradientDirection;
+import lu.kbra.plant_game.engine.window.input.MappingInputHandler;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
@@ -39,6 +37,8 @@ import lu.kbra.standalone.gameengine.utils.gl.consts.TextAlignment;
 import lu.kbra.standalone.gameengine.utils.interpolation.Interpolators;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3DPivot;
+import lu.pcy113.pclib.PCUtils;
+import lu.pcy113.pclib.concurrency.TriggerLatch;
 
 public class MainMenuUIScene extends UIScene {
 
@@ -133,15 +133,15 @@ public class MainMenuUIScene extends UIScene {
 		final TextData uiSmallLeftTextData = new TextData(new Vector2f(0.125f), TextAlignment.TEXT_LEFT, -1);
 
 		final List<OptionKeyUIObject> all = new ArrayList<>();
-		final TriggerLatch latch = new TriggerLatch(this.keys.length, () -> new TaskFuture<>(workers, this::updateKeys).push());
-		for (final String key : this.keys) {
+		final TriggerLatch latch = new TriggerLatch(KeyOption.values().length, () -> new TaskFuture<>(workers, this::updateKeys).push());
+		for (final KeyOption key : KeyOption.values()) {
 			uiSmallLeftTextData.setBufferSize(25);
 			uiSmallLeftTextData.setName("options.keys" + key);
 			UIObjectFactory
 					.create(OptionKeyUIObject.class,
 							this.optionsKeysMenuGroup,
 							uiSmallLeftTextData,
-							key,
+							key.name().toLowerCase(),
 							Scale2dDir.BOTH,
 							new Transform3DPivot())
 					.then(workers, (Consumer<OptionKeyUIObject>) t -> {
@@ -162,30 +162,17 @@ public class MainMenuUIScene extends UIScene {
 					this.cursor = btn;
 				})
 				.push();
-
 	}
 
-	final String[] keys = {
-			"forward",
-			"backward",
-			"left",
-			"right",
-			"rotate.left",
-			"rotate.right",
-			"turn.cw",
-			"turn.ccw",
-			"place",
-			"cancel" };
-
 	private void updateKeys() {
+		final MappingInputHandler inputHandler = PGLogic.INSTANCE.getInputHandler();
+
 		this.optionsKeysMenuGroup
 				.getSubEntities()
 				.parallelStream()
-				.filter(ProgrammaticTextUIObject.class::isInstance)
-				.map(e -> (ProgrammaticTextUIObject) e)
-				.forEach(e -> {
-
-				});
+				.filter(OptionKeyUIObject.class::isInstance)
+				.map(e -> (OptionKeyUIObject) e)
+				.forEach(e -> e.setKeyValue(inputHandler.getMappedInputName(e.getKeyOption().getPhysicalKey())));
 
 		PGLogic.INSTANCE.RENDER_DISPATCHER.post(() -> {
 			this.optionsKeysMenuGroup
@@ -222,6 +209,9 @@ public class MainMenuUIScene extends UIScene {
 			if (this.cursor.isCirclingMouse() && focusCandidate.isEmpty()) {
 				this.cursor.setCirclingMouse(this.getMouseCoords(inputHandler));
 			} else {
+				if (currentGroup == OPTIONS) {
+					cursor.setOffsetX(-0.1f);
+				}
 				focusCandidate.ifPresent(this.cursor::setTargetedObject);
 			}
 		}

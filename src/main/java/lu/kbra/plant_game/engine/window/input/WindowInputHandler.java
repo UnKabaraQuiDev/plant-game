@@ -56,4 +56,18 @@ public interface WindowInputHandler {
 
 	boolean hasPressedKeyChar();
 
+	String getButtonName(int code);
+
+	String getKeyName(int code);
+
+	String getMappedInputName(int code);
+
+	int getPressedMouse();
+
+	int getPressedKey();
+
+	boolean hasPressedMouse();
+
+	boolean hasPressedKey();
+
 }

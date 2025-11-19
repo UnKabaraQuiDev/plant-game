@@ -1,8 +1,7 @@
 package lu.kbra.plant_game.engine.scene.ui;
 
 import org.joml.Vector2f;
-
-import lu.pcy113.pclib.PCUtils;
+import org.lwjgl.glfw.GLFW;
 
 import lu.kbra.plant_game.PGLogic;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsClick;
@@ -12,23 +11,21 @@ import lu.kbra.plant_game.engine.entity.ui.text.ProgrammaticGrowOnHoverTextUIObj
 import lu.kbra.plant_game.engine.locale.LocalizationService;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
-import lu.kbra.standalone.gameengine.impl.future.ScheduledTask;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
 import lu.kbra.standalone.gameengine.scene.Scene;
-import lu.kbra.standalone.gameengine.utils.interpolation.Interpolators;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3DPivot;
 
 @DataPath("localization:string-placeholder")
 public class OptionKeyUIObject extends ProgrammaticGrowOnHoverTextUIObject implements NeedsClick, NeedsInput {
 
-	private String textContent = null;
+	public static enum State {
+		IDLE, WAITING_RELEASE, WAITING_INPUT;
+	}
 
-	public OptionKeyUIObject(
-			final String str,
-			final TextEmitter text,
-			final String key,
-			final Scale2dDir dir,
+	private State awaitInput = State.IDLE;
+
+	public OptionKeyUIObject(final String str, final TextEmitter text, final String key, final Scale2dDir dir,
 			final Transform3D transform) {
 		super(str, text, key, dir, transform);
 
@@ -41,42 +38,44 @@ public class OptionKeyUIObject extends ProgrammaticGrowOnHoverTextUIObject imple
 
 	@Override
 	public void click(final WindowInputHandler input, final float dTime, final Scene scene) {
-		this.textContent = this.getTextEmitter().getText();
-		this.totalCharCount = this.textContent.length() - this.textContent.replaceAll("[^ ]", "").length();
+		if (awaitInput != State.IDLE) {
+			return;
+		}
+		setKeyValue(" ");
+		PGLogic.INSTANCE.RENDER_DISPATCHER.post(() -> {
+			getTextEmitter().updateText();
+			awaitInput = State.WAITING_RELEASE;
+		});
 	}
-
-	private int totalCharCount;
-	private float time = 0f;
-	protected ScheduledTask updateTask;
 
 	@Override
 	public void input(final WindowInputHandler inputHandler, final float dTime, final Scene scene) {
-		if (this.updateTask != null && this.updateTask.wasRan()) {
-			this.updateTask = null;
-		}
-		if (this.textContent == null) {
+		if (awaitInput == State.IDLE) {
 			return;
 		}
-
-		final float duration = 1f;
-
-		this.time += dTime;
-		final float t = Interpolators.CIRC_IN.evaluate(org.joml.Math.clamp(0f, 1f, this.time / duration));
-
-		final int replaced = Math.round(t * this.totalCharCount);
-
-		this.getTextEmitter().setText(PCUtils.replace(this.textContent, ' ', '-', replaced, false));
-
-		if (this.updateTask == null || this.updateTask.wasRan()) {
-			this.updateTask = PGLogic.INSTANCE.RENDER_DISPATCHER.post(() -> super.getTextEmitter().updateText());
+		if (awaitInput == State.WAITING_RELEASE && inputHandler.isMouseButtonPressed(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
+			return;
+		} else if (awaitInput == State.WAITING_RELEASE && !inputHandler.isMouseButtonPressed(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
+			awaitInput = State.WAITING_INPUT;
 		}
-	}
 
-	public void flush() {
-		this.getTextEmitter().setText(this.textContent);
-		this.textContent = null;
+		final boolean dirty;
+		if (inputHandler.hasPressedKey()) {
+			setKeyValue(inputHandler.getMappedInputName(inputHandler.getPressedKey()));
+			dirty = true;
+		} else if (inputHandler.hasPressedMouse()) {
+			setKeyValue(inputHandler.getMappedInputName(inputHandler.getPressedMouse()));
+			dirty = true;
+		} else {
+			dirty = false;
+		}
 
-		this.updateTask = PGLogic.INSTANCE.RENDER_DISPATCHER.post(() -> super.getTextEmitter().updateText());
+		if (dirty) {
+			PGLogic.INSTANCE.RENDER_DISPATCHER.post(() -> {
+				getTextEmitter().updateText();
+				awaitInput = State.IDLE;
+			});
+		}
 	}
 
 	public void setKeyValue(String value) {
@@ -90,6 +89,10 @@ public class OptionKeyUIObject extends ProgrammaticGrowOnHoverTextUIObject imple
 			final Vector2f textBounds = this.getTextEmitter().getTextBounds();
 			t3dp.scalePivotSet(textBounds.x / 2, 0, textBounds.y / 2);
 		}
+	}
+
+	public KeyOption getKeyOption() {
+		return KeyOption.valueOf(super.key.toUpperCase());
 	}
 
 }

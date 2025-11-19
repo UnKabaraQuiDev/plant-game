@@ -38,6 +38,44 @@ public class MappingInputHandler extends DefaultInputHandler {
 		return super.getButtonState(mappedCode);
 	}
 
+	public int getMappedButton(int code) {
+		return mouseMapping[code];
+	}
+
+	public int getMappedKey(int code) {
+		return keyMapping[code];
+	}
+
+	public String getMappedKeyName(int code) {
+		return GLFW.glfwGetKeyName(getMappedKey(code), 0);
+	}
+
+	public String getMappedButtonName(int code) {
+		int physical = getMappedButton(code);
+		if (physical >= 0 && physical < MOUSE_BUTTON_NAMES.length) {
+			return MOUSE_BUTTON_NAMES[physical];
+		}
+		return null;
+	}
+
+	@Override
+	public String getMappedInputName(int code) {
+		if (code >= GLFW.GLFW_MOUSE_BUTTON_1 && code <= GLFW.GLFW_MOUSE_BUTTON_LAST) {
+			int physicalButton = getMappedButton(code) - GLFW.GLFW_MOUSE_BUTTON_1;
+			if (physicalButton >= 0 && physicalButton < MOUSE_BUTTON_NAMES.length) {
+				return MOUSE_BUTTON_NAMES[physicalButton];
+			}
+			return null;
+		}
+
+		if (code <= GLFW.GLFW_KEY_LAST) {
+			int physicalKey = getMappedKey(code);
+			return GLFW.glfwGetKeyName(physicalKey, 0);
+		}
+
+		return null;
+	}
+
 	public void remapKey(int logicalKey, int physicalKey) {
 		if (logicalKey >= 0 && logicalKey <= GLFW.GLFW_KEY_LAST)
 			keyMapping[logicalKey] = physicalKey;

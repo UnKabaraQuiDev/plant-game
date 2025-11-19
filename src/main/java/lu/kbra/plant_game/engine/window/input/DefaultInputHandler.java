@@ -11,6 +11,16 @@ import lu.kbra.standalone.gameengine.graph.window.Window;
 
 public class DefaultInputHandler implements WindowInputHandler {
 
+	public static final String[] MOUSE_BUTTON_NAMES = {
+			"Left",
+			"Right",
+			"Middle",
+			"Button 3",
+			"Button 4",
+			"Button 5",
+			"Button 6",
+			"Button 7" };
+
 	protected final GameEngine engine;
 	protected final Window window;
 
@@ -166,6 +176,35 @@ public class DefaultInputHandler implements WindowInputHandler {
 	}
 
 	@Override
+	public String getKeyName(int code) {
+		return GLFW.glfwGetKeyName(code, 0);
+	}
+
+	@Override
+	public String getButtonName(int code) {
+		if (code >= 0 && code < MOUSE_BUTTON_NAMES.length) {
+			return MOUSE_BUTTON_NAMES[code];
+		}
+		return null;
+	}
+
+	@Override
+	public String getMappedInputName(int code) {
+		if (code >= 0 && code <= GLFW.GLFW_KEY_LAST) {
+			return GLFW.glfwGetKeyName(code, 0);
+		}
+
+		if (code >= 0 && code <= GLFW.GLFW_MOUSE_BUTTON_LAST) {
+			if (code >= 0 && code < MOUSE_BUTTON_NAMES.length) {
+				return MOUSE_BUTTON_NAMES[code];
+			}
+			return null;
+		}
+
+		return null;
+	}
+
+	@Override
 	public Vector2d getMouseScroll() {
 		return mouseScroll;
 	}
@@ -201,6 +240,46 @@ public class DefaultInputHandler implements WindowInputHandler {
 	@Override
 	public boolean wasResized() {
 		return windowResized;
+	}
+
+	@Override
+	public boolean hasPressedKey() {
+		for (boolean b : currentKeyPressed) {
+			if (b) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public boolean hasPressedMouse() {
+		for (boolean b : currentMousePressed) {
+			if (b) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public int getPressedKey() {
+		for (int i = 0; i < currentKeyPressed.length; i++) {
+			if (currentKeyPressed[i]) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	@Override
+	public int getPressedMouse() {
+		for (int i = 0; i < currentMousePressed.length; i++) {
+			if (currentMousePressed[i]) {
+				return i;
+			}
+		}
+		return -1;
 	}
 
 	@Override

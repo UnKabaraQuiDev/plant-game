@@ -1,6 +1,7 @@
 package lu.kbra.plant_game.engine.scene.ui;
 
 import lu.kbra.plant_game.engine.entity.ui.impl.UIObject;
+import lu.kbra.standalone.gameengine.objs.entity.ParentAware;
 import lu.kbra.standalone.gameengine.objs.entity.SceneParentAware;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
@@ -26,6 +27,9 @@ public class LayoutOffsetUIObjectGroup extends OffsetUIObjectGroup implements La
 	@Override
 	public void setLayout(final Layout layout) {
 		this.layout = layout;
+		if(layout instanceof ParentAware pa) {
+			pa.setParent(this);
+		}
 	}
 
 	@Override
