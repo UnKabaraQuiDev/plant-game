@@ -9,7 +9,7 @@ in vec2 bet_UV;
 flat in uint bet_MaterialId;
 flat in uvec3 bet_ObjectId;
 // instances
-flat in uint bet_InstnceID;
+flat in uint bet_InstanceID;
 // text related
 flat in uint bet_CharIndex;
 
@@ -23,7 +23,7 @@ uniform uint len;
 uniform bool transparent;
 
 void main() {
-	if (bet_InstnceID >= len) {
+	if (bet_InstanceID >= len) {
 		discard;
 	}
 
