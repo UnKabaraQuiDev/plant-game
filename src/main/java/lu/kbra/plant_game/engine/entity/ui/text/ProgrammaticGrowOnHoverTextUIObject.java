@@ -59,7 +59,7 @@ public class ProgrammaticGrowOnHoverTextUIObject extends ProgrammaticTextUIObjec
 
 	@Override
 	public float getGrowthRate(final boolean grow) {
-		return 3f;
+		return 0.5f;
 	}
 
 }

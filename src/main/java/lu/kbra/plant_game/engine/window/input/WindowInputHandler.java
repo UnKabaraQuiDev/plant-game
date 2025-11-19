@@ -27,44 +27,44 @@ public interface WindowInputHandler {
 
 	KeyState getButtonState(int code);
 
-	default boolean isKeyHeld(KeyOption code) {
-		return isKeyHeld(code.getPhysicalKey());
+	default boolean isKeyHeld(final KeyOption code) {
+		return this.isKeyHeld(code.getPhysicalKey());
 	}
 
 	boolean isKeyHeld(int code);
 
-	default boolean isKeyPressed(KeyOption code) {
-		return isKeyPressed(code.getPhysicalKey());
+	default boolean isKeyPressed(final KeyOption code) {
+		return this.isKeyPressed(code.getPhysicalKey());
 	}
 
 	boolean isKeyPressed(int code);
 
-	default boolean isKeyRepeat(KeyOption code) {
-		return isKeyRepeat(code.getPhysicalKey());
+	default boolean isKeyRepeat(final KeyOption code) {
+		return this.isKeyRepeat(code.getPhysicalKey());
 	}
 
 	boolean isKeyRepeat(int code);
 
-	default boolean isMouseButtonPressed(KeyOption code) {
-		return isMouseButtonPressed(code.getPhysicalKey());
+	default boolean isMouseButtonPressed(final KeyOption code) {
+		return this.isMouseButtonPressed(code.getPhysicalKey());
 	}
 
 	boolean isMouseButtonPressed(int code);
 
-	default boolean isKeyPressedOnce(KeyOption code) {
-		return isKeyPressedOnce(code.getPhysicalKey());
+	default boolean isKeyPressedOnce(final KeyOption code) {
+		return this.isKeyPressedOnce(code.getPhysicalKey());
 	}
 
 	boolean isKeyPressedOnce(int code);
 
-	default boolean isMouseButtonPressedOnce(KeyOption code) {
-		return isMouseButtonPressedOnce(code.getPhysicalKey());
+	default boolean isMouseButtonPressedOnce(final KeyOption code) {
+		return this.isMouseButtonPressedOnce(code.getPhysicalKey());
 	}
 
 	boolean isMouseButtonPressedOnce(int code);
 
-	default boolean isKeyPressedOrRepeat(KeyOption code) {
-		return isKeyPressedOrRepeat(code.getPhysicalKey());
+	default boolean isKeyPressedOrRepeat(final KeyOption code) {
+		return this.isKeyPressedOrRepeat(code.getPhysicalKey());
 	}
 
 	boolean isKeyPressedOrRepeat(int code);
@@ -85,23 +85,23 @@ public interface WindowInputHandler {
 
 	boolean hasPressedKeyChar();
 
-	default String getButtonName(KeyOption code) {
-		return getButtonName(code.getPhysicalKey());
+	default String getButtonName(final KeyOption code) {
+		return this.getButtonName(code.getPhysicalKey());
 	}
 
 	String getButtonName(int code);
 
-	default String getKeyName(KeyOption code) {
-		return getKeyName(code.getPhysicalKey());
+	default String getKeyName(final KeyOption code) {
+		return this.getKeyName(code.getPhysicalKey());
 	}
 
 	String getKeyName(int code);
 
-	default String getMappedInputName(KeyOption code) {
-		return getMappedInputName(code.getPhysicalKey());
+	default String getInputName(final KeyOption code) {
+		return this.getInputName(code.getPhysicalKey());
 	}
 
-	String getMappedInputName(int code);
+	String getInputName(int code);
 
 	int getPressedMouse();
 

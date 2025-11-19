@@ -39,12 +39,16 @@ public interface GrowOnHover extends NeedsUpdate, Transform3DOwner, NeedsHover {
 		for (int i = 0; i < 3; i++) {
 			final float s = scale.get(i);
 			final float t = target.get(i);
-			final float factor = (t - s) * speed;
+			final float step = speed * dTime;
+			final float diff = t - s;
 
 			if (!PCUtils.compare(s, t, 0.001f)) {
-				scale.setComponent(i, s + factor * dTime);
+				if (Math.abs(diff) > step) {
+					scale.setComponent(i, s + Math.signum(diff) * step);
+				} else {
+					scale.setComponent(i, t);
+				}
 			} else {
-				// snap into position
 				scale.setComponent(i, t);
 			}
 		}

@@ -27,10 +27,10 @@ public class CenteringFlowLayout extends FlowLayout implements SceneParentAware 
 		final Scene parent = this.getSceneParent();
 		final float width = parent.getCamera().getProjection().getAspectRatio();
 
-		final float totalHeight = (float) (double) (children
+		final float totalHeight = (float) (children
 				.parallelStream()
 				.map(e -> e.getBounds().getBounds2D().getHeight())
-				.collect(Collectors.summingDouble(Double::valueOf)) + gap * (children.size() - 1));
+				.collect(Collectors.summingDouble(Double::valueOf)) + this.gap * (children.size() - 1));
 
 		float offsetX = 0;
 		float offsetY = -totalHeight / 2;

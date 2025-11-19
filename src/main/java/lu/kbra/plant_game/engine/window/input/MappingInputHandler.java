@@ -12,78 +12,127 @@ import lu.kbra.standalone.gameengine.utils.gl.consts.Consts;
 
 public class MappingInputHandler extends DefaultInputHandler {
 
-	protected final int[] keyMapping = new int[GLFW.GLFW_KEY_LAST + 1];
-	protected final int[] mouseMapping = new int[GLFW.GLFW_MOUSE_BUTTON_LAST + 1];
+	protected final int[] keyMapping = new int[GLFW.GLFW_KEY_LAST - GLFW_KEY_FIRST + 1];
+	protected final int[] mouseMapping = new int[GLFW.GLFW_MOUSE_BUTTON_LAST - GLFW_MOUSE_FIRST + 1];
 
-	public MappingInputHandler(GameEngine engine) {
+	public MappingInputHandler(final GameEngine engine) {
 		super(engine);
 
-		for (int i = 0; i <= GLFW.GLFW_KEY_LAST; i++) {
-			keyMapping[i] = i;
-		}
-		for (int i = 0; i <= GLFW.GLFW_MOUSE_BUTTON_LAST; i++) {
-			mouseMapping[i] = i;
-		}
+		this.resetKeyMappings();
+		this.resetMouseMappings();
 	}
 
 	@Override
-	public KeyState getKeyState(int code) {
-		int mappedCode = keyMapping[code];
-		return super.getKeyState(mappedCode);
-	}
-
-	@Override
-	public KeyState getButtonState(int code) {
-		int mappedCode = mouseMapping[code];
-		return super.getButtonState(mappedCode);
-	}
-
-	public int getMappedButton(int code) {
-		return mouseMapping[code];
-	}
-
-	public int getMappedKey(int code) {
-		return keyMapping[code];
-	}
-
-	public String getMappedKeyName(int code) {
-		return GLFW.glfwGetKeyName(getMappedKey(code), 0);
-	}
-
-	public String getMappedButtonName(int code) {
-		int physical = getMappedButton(code);
-		if (physical >= 0 && physical < MOUSE_BUTTON_NAMES.length) {
-			return MOUSE_BUTTON_NAMES[physical];
+	public boolean isKeyPressedOnce(final int code) {
+		if (!this.isKeyMapped(code)) {
+			return false;
 		}
-		return null;
+		return super.isKeyPressedOnce(this.getMappedKey(code));
 	}
 
 	@Override
-	public String getMappedInputName(int code) {
-		if (code >= GLFW.GLFW_MOUSE_BUTTON_1 && code <= GLFW.GLFW_MOUSE_BUTTON_LAST) {
-			int physicalButton = getMappedButton(code) - GLFW.GLFW_MOUSE_BUTTON_1;
+	public boolean isKeyPressedOrRepeat(final int code) {
+		if (!this.isKeyMapped(code)) {
+			return false;
+		}
+		return super.isKeyPressedOrRepeat(this.getMappedKey(code));
+	}
+
+	@Override
+	public boolean isMouseButtonPressedOnce(final int code) {
+		if (!this.isButtonMapped(code)) {
+			return false;
+		}
+		return super.isMouseButtonPressedOnce(this.getMappedButton(code));
+	}
+
+	@Override
+	public KeyState getKeyState(final int code) {
+		if (!this.isKeyMapped(code)) {
+			return KeyState.RELEASE;
+		}
+		return super.getKeyState(this.getMappedKey(code));
+	}
+
+	@Override
+	public KeyState getButtonState(final int code) {
+		if (!this.isButtonMapped(code)) {
+			return KeyState.RELEASE;
+		}
+		return super.getButtonState(this.getMappedButton(code));
+	}
+
+	public boolean isKeyMapped(final int code) {
+		return this.keyMapping[code] != -1;
+	}
+
+	public boolean isButtonMapped(final int code) {
+		return this.mouseMapping[code] != -1;
+	}
+
+	public Integer getMappedButton(final int code) {
+		return this.isButtonMapped(code) ? this.mouseMapping[code] : null;
+	}
+
+	public Integer getMappedKey(final int code) {
+		return this.isKeyMapped(code) ? this.keyMapping[code] : null;
+	}
+
+	@Override
+	public String getKeyName(final int code) {
+		if (!this.isKeyMapped(code)) {
+			return null;
+		}
+		return GLFW.glfwGetKeyName(this.getMappedKey(code), 0);
+	}
+
+	@Override
+	public String getButtonName(final int code) {
+		if (!this.isButtonMapped(code)) {
+			return null;
+		}
+		return super.getButtonName(this.getMappedButton(code));
+	}
+
+	@Override
+	public String getInputName(final int code) {
+		if (code >= GLFW_MOUSE_FIRST && code <= GLFW.GLFW_MOUSE_BUTTON_LAST) {
+			if (!this.isButtonMapped(code)) {
+				return null;
+			}
+			final int physicalButton = this.getMappedButton(code) - GLFW_MOUSE_FIRST;
 			if (physicalButton >= 0 && physicalButton < MOUSE_BUTTON_NAMES.length) {
 				return MOUSE_BUTTON_NAMES[physicalButton];
 			}
-			return null;
-		}
-
-		if (code <= GLFW.GLFW_KEY_LAST) {
-			int physicalKey = getMappedKey(code);
+		} else if (code >= GLFW_KEY_FIRST && code <= GLFW.GLFW_KEY_LAST) {
+			if (!this.isKeyMapped(code)) {
+				return null;
+			}
+			final int physicalKey = this.getMappedKey(code);
 			return GLFW.glfwGetKeyName(physicalKey, 0);
 		}
 
 		return null;
 	}
 
-	public void remapKey(int logicalKey, int physicalKey) {
-		if (logicalKey >= 0 && logicalKey <= GLFW.GLFW_KEY_LAST)
-			keyMapping[logicalKey] = physicalKey;
+	public void unsetKey(final int logicalKey) {
+		this.keyMapping[logicalKey] = -1;
 	}
 
-	public void remapMouseButton(int logicalButton, int physicalButton) {
-		if (logicalButton >= 0 && logicalButton <= GLFW.GLFW_MOUSE_BUTTON_LAST)
-			mouseMapping[logicalButton] = physicalButton;
+	public void remapKey(final int logicalKey, final int physicalKey) {
+		if (logicalKey >= 0 && logicalKey <= GLFW.GLFW_KEY_LAST) {
+			this.keyMapping[logicalKey] = physicalKey;
+		}
+	}
+
+	public void unsetMouseButton(final int logicalButton) {
+		this.mouseMapping[logicalButton] = -1;
+	}
+
+	public void remapMouseButton(final int logicalButton, final int physicalButton) {
+		if (logicalButton >= 0 && logicalButton <= GLFW.GLFW_MOUSE_BUTTON_LAST) {
+			this.mouseMapping[logicalButton] = physicalButton;
+		}
 	}
 
 	public static class InputMappingConfig {
@@ -92,60 +141,67 @@ public class MappingInputHandler extends DefaultInputHandler {
 	}
 
 	public void resetKeyMappings() {
-		for (int i = 0; i <= GLFW.GLFW_KEY_LAST; i++)
-			keyMapping[i] = i;
+		for (int i = GLFW_KEY_FIRST; i <= GLFW.GLFW_KEY_LAST; i++) {
+			this.keyMapping[i - GLFW_KEY_FIRST] = i;
+		}
 	}
 
 	public void resetMouseMappings() {
-		for (int i = 0; i <= GLFW.GLFW_MOUSE_BUTTON_LAST; i++)
-			mouseMapping[i] = i;
+		for (int i = GLFW_MOUSE_FIRST; i <= GLFW.GLFW_MOUSE_BUTTON_LAST; i++) {
+			this.mouseMapping[i - GLFW_MOUSE_FIRST] = i;
+		}
 	}
 
-	public void loadMappings(File file) throws IOException {
-		if (!file.exists())
+	public void loadMappings(final File file) throws IOException {
+		if (!file.exists()) {
 			return;
+		}
 
-		InputMappingConfig config = Consts.OBJECT_MAPPER.readValue(file, InputMappingConfig.class);
+		final InputMappingConfig config = Consts.OBJECT_MAPPER.readValue(file, InputMappingConfig.class);
 
-		resetKeyMappings();
-		resetMouseMappings();
+		this.resetKeyMappings();
+		this.resetMouseMappings();
 
 		if (config.keyMap != null) {
-			for (Map.Entry<Integer, Integer> e : config.keyMap.entrySet()) {
-				remapKey(e.getKey(), e.getValue());
+			for (final Map.Entry<Integer, Integer> e : config.keyMap.entrySet()) {
+				this.remapKey(e.getKey(), e.getValue());
 			}
 		}
 
 		if (config.mouseMap != null) {
-			for (Map.Entry<Integer, Integer> e : config.mouseMap.entrySet()) {
-				remapMouseButton(e.getKey(), e.getValue());
+			for (final Map.Entry<Integer, Integer> e : config.mouseMap.entrySet()) {
+				this.remapMouseButton(e.getKey(), e.getValue());
 			}
 		}
 	}
 
-	public void saveMappings(File file) throws IOException {
-		InputMappingConfig config = new InputMappingConfig();
+	public void saveMappings(final File file) throws IOException {
+		final InputMappingConfig config = new InputMappingConfig();
 
-		Map<Integer, Integer> keyMap = new java.util.HashMap<>();
-		Map<Integer, Integer> mouseMap = new java.util.HashMap<>();
+		final Map<Integer, Integer> keyMap = new java.util.HashMap<>();
+		final Map<Integer, Integer> mouseMap = new java.util.HashMap<>();
 
-		for (int i = 0; i <= GLFW.GLFW_KEY_LAST; i++) {
-			if (keyMapping[i] != i)
-				keyMap.put(i, keyMapping[i]);
+		for (int i = 0; i < this.keyMapping.length; i++) {
+			if (this.keyMapping[i] != i) {
+				keyMap.put(i + GLFW_KEY_FIRST, this.keyMapping[i]);
+			}
 		}
 
-		for (int i = 0; i <= GLFW.GLFW_MOUSE_BUTTON_LAST; i++) {
-			if (mouseMapping[i] != i)
-				mouseMap.put(i, mouseMapping[i]);
+		for (int i = 0; i < this.mouseMapping.length; i++) {
+			if (this.mouseMapping[i] != i) {
+				mouseMap.put(i + GLFW_MOUSE_FIRST, this.mouseMapping[i]);
+			}
 		}
 
 		config.keyMap = keyMap;
 		config.mouseMap = mouseMap;
 
-		if (!file.getParentFile().exists())
+		if (!file.getParentFile().exists()) {
 			file.getParentFile().mkdirs();
-		if (!file.exists())
+		}
+		if (!file.exists()) {
 			file.createNewFile();
+		}
 		Consts.OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValue(file, config);
 	}
 

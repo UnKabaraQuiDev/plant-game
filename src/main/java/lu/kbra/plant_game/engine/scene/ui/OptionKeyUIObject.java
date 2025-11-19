@@ -28,7 +28,11 @@ public class OptionKeyUIObject extends ProgrammaticGrowOnHoverTextUIObject imple
 	private State awaitInput = State.IDLE;
 	private boolean focused = false;
 
-	public OptionKeyUIObject(final String str, final TextEmitter text, final String key, final Scale2dDir dir,
+	public OptionKeyUIObject(
+			final String str,
+			final TextEmitter text,
+			final String key,
+			final Scale2dDir dir,
 			final Transform3D transform) {
 		super(str, text, key, dir, transform);
 
@@ -41,38 +45,43 @@ public class OptionKeyUIObject extends ProgrammaticGrowOnHoverTextUIObject imple
 
 	@Override
 	public void click(final WindowInputHandler input, final float dTime, final Scene scene) {
-		if (awaitInput != State.IDLE) {
+		if (this.awaitInput != State.IDLE) {
 			return;
 		}
-		focused = true;
-		setKeyValue(" ");
+		this.focused = true;
+		this.setKeyValue(" ");
 		PGLogic.INSTANCE.RENDER_DISPATCHER.post(() -> {
-			getTextEmitter().updateText();
-			awaitInput = State.WAITING_RELEASE;
+			this.getTextEmitter().updateText();
+			this.awaitInput = State.WAITING_RELEASE;
 		});
 	}
 
 	@Override
 	public void input(final WindowInputHandler inputHandler, final float dTime, final Scene scene) {
-		if (awaitInput == State.IDLE) {
+		if (this.awaitInput == State.IDLE) {
 			return;
 		}
-		if (awaitInput == State.WAITING_RELEASE && inputHandler.isMouseButtonPressed(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
+		if (this.awaitInput == State.WAITING_RELEASE && inputHandler.isMouseButtonPressed(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
 			return;
-		} else if (awaitInput == State.WAITING_RELEASE && !inputHandler.isMouseButtonPressed(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
-			awaitInput = State.WAITING_INPUT;
+		}
+		if (this.awaitInput == State.WAITING_RELEASE && !inputHandler.isMouseButtonPressed(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
+			this.awaitInput = State.WAITING_INPUT;
 		}
 
 		final boolean dirty;
 		if (inputHandler.hasPressedKey()) {
 			final int key = inputHandler.getPressedKey();
-			setKeyValue(inputHandler.getMappedInputName(key));
-			((MappingInputHandler) inputHandler).remapKey(getKeyOption().getPhysicalKey(), key);
+			if (key == GLFW.GLFW_KEY_ESCAPE) {
+				((MappingInputHandler) inputHandler).unsetKey(this.getKeyOption().getPhysicalKey());
+			} else {
+				this.setKeyValue(inputHandler.getInputName(key));
+				((MappingInputHandler) inputHandler).remapKey(this.getKeyOption().getPhysicalKey(), key);
+			}
 			dirty = true;
 		} else if (inputHandler.hasPressedMouse()) {
 			final int btn = inputHandler.getPressedMouse();
-			setKeyValue(inputHandler.getMappedInputName(btn));
-			((MappingInputHandler) inputHandler).remapMouseButton(getKeyOption().getPhysicalKey(), btn);
+			this.setKeyValue(inputHandler.getInputName(btn));
+			((MappingInputHandler) inputHandler).remapMouseButton(this.getKeyOption().getPhysicalKey(), btn);
 			dirty = true;
 		} else {
 			dirty = false;
@@ -80,9 +89,9 @@ public class OptionKeyUIObject extends ProgrammaticGrowOnHoverTextUIObject imple
 
 		if (dirty) {
 			PGLogic.INSTANCE.RENDER_DISPATCHER.post(() -> {
-				getTextEmitter().updateText();
-				awaitInput = State.IDLE;
-				focused = false;
+				this.getTextEmitter().updateText();
+				this.awaitInput = State.IDLE;
+				this.focused = false;
 			});
 		}
 	}
@@ -90,7 +99,7 @@ public class OptionKeyUIObject extends ProgrammaticGrowOnHoverTextUIObject imple
 	public void setKeyValue(String value) {
 		final int length = this.getTextEmitter().getBufferLength();
 		final String loc = LocalizationService.get("key." + super.key);
-		value = "[" + value + "]";
+		value = "[" + (value == null ? " " : value) + "]";
 		this.getTextEmitter().setText(loc + " ".repeat(Math.max(length - loc.length() - value.length(), 0)) + value);
 
 		final Transform3D transform = this.getTransform();
@@ -100,17 +109,23 @@ public class OptionKeyUIObject extends ProgrammaticGrowOnHoverTextUIObject imple
 		}
 	}
 
-	public StandardKeyOption getKeyOption() {
+	public KeyOption getKeyOption() {
 		return StandardKeyOption.valueOf(super.key.toUpperCase());
 	}
 
 	@Override
-	public void setFocused(boolean focused) {
+	public float getGrowthRate(final boolean grow) {
+		return grow ? 0.5f : 0.1f;
+	}
+
+	@Override
+	public void setFocused(final boolean focused) {
 		this.focused = focused;
 	}
 
+	@Override
 	public boolean hasFocus() {
-		return focused;
+		return this.focused;
 	}
 
 }

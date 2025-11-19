@@ -11,6 +11,9 @@ import lu.kbra.standalone.gameengine.graph.window.Window;
 
 public class DefaultInputHandler implements WindowInputHandler {
 
+	public static final int GLFW_KEY_FIRST = GLFW.GLFW_KEY_SPACE;
+	public static final int GLFW_MOUSE_FIRST = GLFW.GLFW_MOUSE_BUTTON_1;
+
 	public static final String[] MOUSE_BUTTON_NAMES = {
 			"Left",
 			"Right",
@@ -24,11 +27,11 @@ public class DefaultInputHandler implements WindowInputHandler {
 	protected final GameEngine engine;
 	protected final Window window;
 
-	protected final boolean[] prevKeyPressed = new boolean[GLFW.GLFW_KEY_LAST + 1];
-	protected final boolean[] currentKeyPressed = new boolean[GLFW.GLFW_KEY_LAST + 1];
+	protected final boolean[] prevKeyPressed = new boolean[GLFW.GLFW_KEY_LAST - GLFW_KEY_FIRST + 1];
+	protected final boolean[] currentKeyPressed = new boolean[GLFW.GLFW_KEY_LAST - GLFW_KEY_FIRST + 1];
 
-	protected final boolean[] prevMousePressed = new boolean[GLFW.GLFW_MOUSE_BUTTON_LAST + 1];
-	protected final boolean[] currentMousePressed = new boolean[GLFW.GLFW_MOUSE_BUTTON_LAST + 1];
+	protected final boolean[] prevMousePressed = new boolean[GLFW.GLFW_MOUSE_BUTTON_LAST - GLFW_MOUSE_FIRST + 1];
+	protected final boolean[] currentMousePressed = new boolean[GLFW.GLFW_MOUSE_BUTTON_LAST - GLFW_MOUSE_FIRST + 1];
 
 	protected Thread owner;
 
@@ -39,149 +42,149 @@ public class DefaultInputHandler implements WindowInputHandler {
 	protected Vector2f mousePosition = new Vector2f();
 	protected Character character;
 
-	public DefaultInputHandler(GameEngine engine) {
+	public DefaultInputHandler(final GameEngine engine) {
 		this.engine = engine;
 		this.window = engine.getWindow();
 	}
 
 	@Override
 	public void onFrameBegin() {
-		checkOwnerThread();
+		this.checkOwnerThread();
 
-		System.arraycopy(currentKeyPressed, 0, prevKeyPressed, 0, prevKeyPressed.length);
-		System.arraycopy(currentMousePressed, 0, prevMousePressed, 0, prevMousePressed.length);
+		System.arraycopy(this.currentKeyPressed, 0, this.prevKeyPressed, 0, this.prevKeyPressed.length);
+		System.arraycopy(this.currentMousePressed, 0, this.prevMousePressed, 0, this.prevMousePressed.length);
 
-		for (int i = 0; i <= GLFW.GLFW_KEY_LAST; i++) {
-			final KeyState state = getKeyState(i);
-			currentKeyPressed[i] = (state == KeyState.PRESS || state == KeyState.REPEAT);
+		for (int i = 0; i < this.currentKeyPressed.length; i++) {
+			final KeyState state = this.getKeyState(i);
+			this.currentKeyPressed[i] = (state == KeyState.PRESS || state == KeyState.REPEAT);
 		}
-		for (int i = 0; i <= GLFW.GLFW_MOUSE_BUTTON_LAST; i++) {
-			final KeyState state = getButtonState(i);
-			currentMousePressed[i] = (state == KeyState.PRESS || state == KeyState.REPEAT);
+		for (int i = 0; i < this.currentMousePressed.length; i++) {
+			final KeyState state = this.getButtonState(i);
+			this.currentMousePressed[i] = (state == KeyState.PRESS || state == KeyState.REPEAT);
 		}
 
 		// set normalized mouse position
-		final Vector2i windowSize = getWindowSize();
-		final Vector2f mousePosition = getMousePosition();
+		final Vector2i windowSize = this.getWindowSize();
+		final Vector2f mousePosition = this.getMousePosition();
 
 		final float ndcX = (2.0f * mousePosition.x) / windowSize.x - 1.0f;
 		final float ndcY = 1.0f - (2.0f * mousePosition.y) / windowSize.y; // flip y
 
-		normalizedMousePosition.set(ndcX, ndcY);
+		this.normalizedMousePosition.set(ndcX, ndcY);
 		// --------------- -------------
 
-		mouseScroll.set(window.getScroll());
-		window.clearScroll();
+		this.mouseScroll.set(this.window.getScroll());
+		this.window.clearScroll();
 
-		windowResized = oldSize.x != window.getSize().x || oldSize.y != window.getSize().y;
-		oldSize.set(window.getSize());
-		mousePosition.set(window.getMousePosition());
+		this.windowResized = this.oldSize.x != this.window.getSize().x || this.oldSize.y != this.window.getSize().y;
+		this.oldSize.set(this.window.getSize());
+		mousePosition.set(this.window.getMousePosition());
 
-		character = window.getCharacter();
-		window.clearCharacter();
+		this.character = this.window.getCharacter();
+		this.window.clearCharacter();
 	}
 
 	@Override
-	public boolean isKeyPressedOnce(int code) {
-		checkOwnerThread();
+	public boolean isKeyPressedOnce(final int code) {
+		this.checkOwnerThread();
 
-		final boolean pressed = isKeyHeld(code);
+		final boolean pressed = this.isKeyHeld(code);
 
-		final boolean pressedOnce = pressed && !prevKeyPressed[code];
-		prevKeyPressed[code] = pressed;
+		final boolean pressedOnce = pressed && !this.prevKeyPressed[code];
+		this.prevKeyPressed[code] = pressed;
 
 		return pressedOnce;
 	}
 
 	@Override
-	public boolean isKeyPressedOrRepeat(int code) {
-		checkOwnerThread();
+	public boolean isKeyPressedOrRepeat(final int code) {
+		this.checkOwnerThread();
 
-		final KeyState state = getKeyState(code);
+		final KeyState state = this.getKeyState(code);
 
-		final boolean pressedOrRepeat = (state == KeyState.PRESS && !prevKeyPressed[code]) || state == KeyState.REPEAT;
-		prevKeyPressed[code] = (state == KeyState.PRESS || state == KeyState.REPEAT);
+		final boolean pressedOrRepeat = (state == KeyState.PRESS && !this.prevKeyPressed[code]) || state == KeyState.REPEAT;
+		this.prevKeyPressed[code] = (state == KeyState.PRESS || state == KeyState.REPEAT);
 
 		return pressedOrRepeat;
 	}
 
 	@Override
-	public boolean isMouseButtonPressedOnce(int code) {
-		checkOwnerThread();
+	public boolean isMouseButtonPressedOnce(final int code) {
+		this.checkOwnerThread();
 
-		final boolean pressed = isMouseButtonPressed(code);
+		final boolean pressed = this.isMouseButtonPressed(code);
 
-		final boolean pressedOnce = pressed && !prevMousePressed[code];
-		prevMousePressed[code] = pressed;
+		final boolean pressedOnce = pressed && !this.prevMousePressed[code];
+		this.prevMousePressed[code] = pressed;
 
 		return pressedOnce;
 	}
 
 	@Override
-	public Vector2f getMousePosition() {
-		checkOwnerThread();
-
-		return mousePosition;
+	public KeyState getKeyState(final int code) {
+		return this.window.getKeyState(code);
 	}
 
 	@Override
-	public Vector2f getNormalizedMousePosition() {
-		checkOwnerThread();
-
-		return normalizedMousePosition;
-	}
-
-	@Override
-	public Window getWindow() {
-		return window;
-	}
-
-	@Override
-	public Vector2i getWindowSize() {
-		return window.getSize();
-	}
-
-	@Override
-	public KeyState getKeyState(int code) {
-		return window.getKeyState(code);
-	}
-
-	@Override
-	public boolean isKeyPressed(int code) {
-		final KeyState state = getKeyState(code);
+	public boolean isKeyPressed(final int code) {
+		final KeyState state = this.getKeyState(code);
 		return state == KeyState.PRESS;
 	}
 
 	@Override
-	public boolean isKeyHeld(int code) {
-		final KeyState state = getKeyState(code);
+	public boolean isKeyHeld(final int code) {
+		final KeyState state = this.getKeyState(code);
 		return state == KeyState.PRESS || state == KeyState.REPEAT;
 	}
 
 	@Override
-	public boolean isKeyRepeat(int code) {
-		final KeyState state = getButtonState(code);
+	public boolean isKeyRepeat(final int code) {
+		final KeyState state = this.getButtonState(code);
 		return state == KeyState.REPEAT;
 	}
 
 	@Override
-	public KeyState getButtonState(int code) {
-		return window.getMouseButtonState(code);
+	public KeyState getButtonState(final int code) {
+		return this.window.getMouseButtonState(code);
 	}
 
 	@Override
-	public boolean isMouseButtonPressed(int code) {
-		final KeyState state = getButtonState(code);
+	public boolean isMouseButtonPressed(final int code) {
+		final KeyState state = this.getButtonState(code);
 		return state == KeyState.PRESS;
 	}
 
 	@Override
-	public String getKeyName(int code) {
+	public Vector2f getMousePosition() {
+		this.checkOwnerThread();
+
+		return this.mousePosition;
+	}
+
+	@Override
+	public Vector2f getNormalizedMousePosition() {
+		this.checkOwnerThread();
+
+		return this.normalizedMousePosition;
+	}
+
+	@Override
+	public Window getWindow() {
+		return this.window;
+	}
+
+	@Override
+	public Vector2i getWindowSize() {
+		return this.window.getSize();
+	}
+
+	@Override
+	public String getKeyName(final int code) {
 		return GLFW.glfwGetKeyName(code, 0);
 	}
 
 	@Override
-	public String getButtonName(int code) {
+	public String getButtonName(final int code) {
 		if (code >= 0 && code < MOUSE_BUTTON_NAMES.length) {
 			return MOUSE_BUTTON_NAMES[code];
 		}
@@ -189,16 +192,12 @@ public class DefaultInputHandler implements WindowInputHandler {
 	}
 
 	@Override
-	public String getMappedInputName(int code) {
-		if (code >= 0 && code <= GLFW.GLFW_KEY_LAST) {
-			return GLFW.glfwGetKeyName(code, 0);
+	public String getInputName(final int code) {
+		if (code >= GLFW_MOUSE_FIRST && code <= GLFW.GLFW_MOUSE_BUTTON_LAST) {
+			return MOUSE_BUTTON_NAMES[code - GLFW_MOUSE_FIRST];
 		}
-
-		if (code >= 0 && code <= GLFW.GLFW_MOUSE_BUTTON_LAST) {
-			if (code >= 0 && code < MOUSE_BUTTON_NAMES.length) {
-				return MOUSE_BUTTON_NAMES[code];
-			}
-			return null;
+		if (code >= GLFW_KEY_FIRST && code <= GLFW.GLFW_KEY_LAST) {
+			return GLFW.glfwGetKeyName(code, 0);
 		}
 
 		return null;
@@ -206,45 +205,45 @@ public class DefaultInputHandler implements WindowInputHandler {
 
 	@Override
 	public Vector2d getMouseScroll() {
-		return mouseScroll;
+		return this.mouseScroll;
 	}
 
 	@Override
 	public Thread getOwner() {
-		return owner;
+		return this.owner;
 	}
 
 	@Override
-	public void setOwner(Thread owner) {
+	public void setOwner(final Thread owner) {
 		this.owner = owner;
 	}
 
 	@Override
 	public boolean isOwnerThread() {
-		if (owner == null) {
+		if (this.owner == null) {
 			return true;
 		}
-		return owner == Thread.currentThread();
+		return this.owner == Thread.currentThread();
 	}
 
 	@Override
 	public void checkOwnerThread() {
-		assert isOwnerThread() : "Thread: " + Thread.currentThread() + " not owner (" + owner + ")";
+		assert this.isOwnerThread() : "Thread: " + Thread.currentThread() + " not owner (" + this.owner + ")";
 	}
 
 	@Override
 	public GameEngine getGameEngine() {
-		return engine;
+		return this.engine;
 	}
 
 	@Override
 	public boolean wasResized() {
-		return windowResized;
+		return this.windowResized;
 	}
 
 	@Override
 	public boolean hasPressedKey() {
-		for (boolean b : currentKeyPressed) {
+		for (final boolean b : this.currentKeyPressed) {
 			if (b) {
 				return true;
 			}
@@ -254,7 +253,7 @@ public class DefaultInputHandler implements WindowInputHandler {
 
 	@Override
 	public boolean hasPressedMouse() {
-		for (boolean b : currentMousePressed) {
+		for (final boolean b : this.currentMousePressed) {
 			if (b) {
 				return true;
 			}
@@ -264,8 +263,8 @@ public class DefaultInputHandler implements WindowInputHandler {
 
 	@Override
 	public int getPressedKey() {
-		for (int i = 0; i < currentKeyPressed.length; i++) {
-			if (currentKeyPressed[i]) {
+		for (int i = 0; i < this.currentKeyPressed.length; i++) {
+			if (this.currentKeyPressed[i]) {
 				return i;
 			}
 		}
@@ -274,8 +273,8 @@ public class DefaultInputHandler implements WindowInputHandler {
 
 	@Override
 	public int getPressedMouse() {
-		for (int i = 0; i < currentMousePressed.length; i++) {
-			if (currentMousePressed[i]) {
+		for (int i = 0; i < this.currentMousePressed.length; i++) {
+			if (this.currentMousePressed[i]) {
 				return i;
 			}
 		}
@@ -284,12 +283,12 @@ public class DefaultInputHandler implements WindowInputHandler {
 
 	@Override
 	public char getPressedKeyChar() {
-		return character == null ? '\0' : character;
+		return this.character == null ? '\0' : this.character;
 	}
 
 	@Override
 	public boolean hasPressedKeyChar() {
-		return character != null;
+		return this.character != null;
 	}
 
 }

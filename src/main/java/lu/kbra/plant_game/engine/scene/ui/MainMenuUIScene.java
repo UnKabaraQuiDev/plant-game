@@ -9,6 +9,9 @@ import org.joml.Quaternionf;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 
+import lu.pcy113.pclib.PCUtils;
+import lu.pcy113.pclib.concurrency.TriggerLatch;
+
 import lu.kbra.plant_game.PGLogic;
 import lu.kbra.plant_game.engine.entity.ui.btn.BackButtonUIObject;
 import lu.kbra.plant_game.engine.entity.ui.btn.OptionsButtonUIObject;
@@ -37,8 +40,6 @@ import lu.kbra.standalone.gameengine.utils.gl.consts.TextAlignment;
 import lu.kbra.standalone.gameengine.utils.interpolation.Interpolators;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3DPivot;
-import lu.pcy113.pclib.PCUtils;
-import lu.pcy113.pclib.concurrency.TriggerLatch;
 
 public class MainMenuUIScene extends UIScene {
 
@@ -130,10 +131,11 @@ public class MainMenuUIScene extends UIScene {
 				})
 				.push();
 
-		final TextData uiSmallLeftTextData = new TextData(new Vector2f(0.125f), TextAlignment.TEXT_LEFT, -1);
+		final TextData uiSmallLeftTextData = new TextData(new Vector2f(0.1f), TextAlignment.TEXT_LEFT, -1);
 
 		final List<OptionKeyUIObject> all = new ArrayList<>();
-		final TriggerLatch latch = new TriggerLatch(StandardKeyOption.values().length, () -> new TaskFuture<>(workers, this::updateKeys).push());
+		final TriggerLatch latch = new TriggerLatch(StandardKeyOption.values().length,
+				() -> new TaskFuture<>(workers, this::updateKeys).push());
 		for (final StandardKeyOption key : StandardKeyOption.values()) {
 			uiSmallLeftTextData.setBufferSize(25);
 			uiSmallLeftTextData.setName("options.keys" + key);
@@ -172,7 +174,15 @@ public class MainMenuUIScene extends UIScene {
 				.parallelStream()
 				.filter(OptionKeyUIObject.class::isInstance)
 				.map(e -> (OptionKeyUIObject) e)
-				.forEach(e -> e.setKeyValue(inputHandler.getMappedInputName(e.getKeyOption().getPhysicalKey())));
+				.forEach(e -> e.setKeyValue(inputHandler.getInputName(e.getKeyOption().getPhysicalKey())));
+
+		final OptionKeyUIObject example = this.optionsKeysMenuGroup
+				.getSubEntities()
+				.parallelStream()
+				.filter(OptionKeyUIObject.class::isInstance)
+				.map(e -> (OptionKeyUIObject) e)
+				.findFirst()
+				.orElseThrow(IllegalStateException::new);
 
 		PGLogic.INSTANCE.RENDER_DISPATCHER.post(() -> {
 			this.optionsKeysMenuGroup
@@ -182,6 +192,13 @@ public class MainMenuUIScene extends UIScene {
 					.map(e -> (ProgrammaticTextUIObject) e)
 					.forEach(e -> e.getTextEmitter().updateText());
 		});
+
+		((FlowLayout) this.optionsKeysMenuGroup.getLayout())
+				.setGap((float) (example.getBounds().getBounds2D().getHeight()
+						* (example.getTargetScale(true).z - example.getTargetScale(false).z)));
+		System.err
+				.println("gap: " + (float) (example.getBounds().getBounds2D().getHeight()
+						* (example.getTargetScale(true).z - example.getTargetScale(false).z)));
 
 		this.optionsKeysMenuGroup.doLayout();
 	}
@@ -209,8 +226,8 @@ public class MainMenuUIScene extends UIScene {
 			if (this.cursor.isCirclingMouse() && focusCandidate.isEmpty()) {
 				this.cursor.setCirclingMouse(this.getMouseCoords(inputHandler));
 			} else {
-				if (currentGroup == OPTIONS) {
-					cursor.setOffsetX(-0.1f);
+				if (this.currentGroup == OPTIONS) {
+					this.cursor.setOffsetX(-0.1f);
 				}
 				focusCandidate.ifPresent(this.cursor::setTargetedObject);
 			}
