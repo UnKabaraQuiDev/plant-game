@@ -28,6 +28,7 @@ import lu.kbra.plant_game.engine.entity.go.obj.water.WaterTowerObject;
 import lu.kbra.plant_game.engine.entity.go.obj.water.WaterWheelObject;
 import lu.kbra.plant_game.engine.mesh.data.AttributeLocation;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
+import lu.kbra.plant_game.engine.scene.ui.StandardKeyOption;
 import lu.kbra.plant_game.engine.scene.world.data.LevelData;
 import lu.kbra.plant_game.engine.scene.world.generator.ImageWorldGenerator;
 import lu.kbra.plant_game.engine.scene.world.generator.WorldGenerator;
@@ -172,35 +173,35 @@ public class WorldLevelScene extends Scene3D {
 		rotation = 0;
 
 		if (!frameState.uiSceneCaughtKeyboardInput) {
-			if (inputHandler.isKeyHeld(GLFW.GLFW_KEY_W)) {
+			if (inputHandler.isKeyHeld(StandardKeyOption.FORWARD)) {
 				posAdd.z -= 1;
 			}
-			if (inputHandler.isKeyHeld(GLFW.GLFW_KEY_S)) {
+			if (inputHandler.isKeyHeld(StandardKeyOption.BACKWARD)) {
 				posAdd.z += 1;
 			}
-			if (inputHandler.isKeyHeld(GLFW.GLFW_KEY_A)) {
+			if (inputHandler.isKeyHeld(StandardKeyOption.LEFT)) {
 				posAdd.x -= 1;
 			}
-			if (inputHandler.isKeyHeld(GLFW.GLFW_KEY_D)) {
+			if (inputHandler.isKeyHeld(StandardKeyOption.RIGHT)) {
 				posAdd.x += 1;
 			}
-			if (inputHandler.isKeyHeld(GLFW.GLFW_KEY_Q)) {
+			if (inputHandler.isKeyHeld(StandardKeyOption.ROTATE_LEFT)) {
 				rotation -= 1;
 			}
-			if (inputHandler.isKeyHeld(GLFW.GLFW_KEY_E)) {
+			if (inputHandler.isKeyHeld(StandardKeyOption.ROTATE_RIGHT)) {
 				rotation += 1;
 			}
 
-			if (inputHandler.isKeyPressedOrRepeat(GLFW.GLFW_KEY_T)) {
+			if (inputHandler.isKeyPressedOrRepeat(StandardKeyOption.TURN_CW)) {
 				targetRotation = targetRotation.getClockwise();
 			}
-			if (inputHandler.isKeyPressedOrRepeat(GLFW.GLFW_KEY_R)) {
+			if (inputHandler.isKeyPressedOrRepeat(StandardKeyOption.TURN_CCW)) {
 				targetRotation = targetRotation.getCounterClockwise();
 			}
 		}
 
 		if (!frameState.uiSceneCaughtMouseInput) {
-			if (inputHandler.isMouseButtonPressedOnce(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
+			if (inputHandler.isMouseButtonPressedOnce(StandardKeyOption.PLACE)) {
 				movingObject = !movingObject;
 			}
 		}

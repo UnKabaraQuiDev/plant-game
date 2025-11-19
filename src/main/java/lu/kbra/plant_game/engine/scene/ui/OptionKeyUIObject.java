@@ -4,12 +4,14 @@ import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
 
 import lu.kbra.plant_game.PGLogic;
+import lu.kbra.plant_game.engine.entity.ui.impl.Focusable;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsClick;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsInput;
 import lu.kbra.plant_game.engine.entity.ui.impl.Scale2dDir;
 import lu.kbra.plant_game.engine.entity.ui.text.ProgrammaticGrowOnHoverTextUIObject;
 import lu.kbra.plant_game.engine.locale.LocalizationService;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
+import lu.kbra.plant_game.engine.window.input.MappingInputHandler;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
 import lu.kbra.standalone.gameengine.scene.Scene;
@@ -17,13 +19,14 @@ import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3DPivot;
 
 @DataPath("localization:string-placeholder")
-public class OptionKeyUIObject extends ProgrammaticGrowOnHoverTextUIObject implements NeedsClick, NeedsInput {
+public class OptionKeyUIObject extends ProgrammaticGrowOnHoverTextUIObject implements NeedsClick, Focusable, NeedsInput {
 
 	public static enum State {
 		IDLE, WAITING_RELEASE, WAITING_INPUT;
 	}
 
 	private State awaitInput = State.IDLE;
+	private boolean focused = false;
 
 	public OptionKeyUIObject(final String str, final TextEmitter text, final String key, final Scale2dDir dir,
 			final Transform3D transform) {
@@ -41,6 +44,7 @@ public class OptionKeyUIObject extends ProgrammaticGrowOnHoverTextUIObject imple
 		if (awaitInput != State.IDLE) {
 			return;
 		}
+		focused = true;
 		setKeyValue(" ");
 		PGLogic.INSTANCE.RENDER_DISPATCHER.post(() -> {
 			getTextEmitter().updateText();
@@ -61,10 +65,14 @@ public class OptionKeyUIObject extends ProgrammaticGrowOnHoverTextUIObject imple
 
 		final boolean dirty;
 		if (inputHandler.hasPressedKey()) {
-			setKeyValue(inputHandler.getMappedInputName(inputHandler.getPressedKey()));
+			final int key = inputHandler.getPressedKey();
+			setKeyValue(inputHandler.getMappedInputName(key));
+			((MappingInputHandler) inputHandler).remapKey(getKeyOption().getPhysicalKey(), key);
 			dirty = true;
 		} else if (inputHandler.hasPressedMouse()) {
-			setKeyValue(inputHandler.getMappedInputName(inputHandler.getPressedMouse()));
+			final int btn = inputHandler.getPressedMouse();
+			setKeyValue(inputHandler.getMappedInputName(btn));
+			((MappingInputHandler) inputHandler).remapMouseButton(getKeyOption().getPhysicalKey(), btn);
 			dirty = true;
 		} else {
 			dirty = false;
@@ -74,6 +82,7 @@ public class OptionKeyUIObject extends ProgrammaticGrowOnHoverTextUIObject imple
 			PGLogic.INSTANCE.RENDER_DISPATCHER.post(() -> {
 				getTextEmitter().updateText();
 				awaitInput = State.IDLE;
+				focused = false;
 			});
 		}
 	}
@@ -91,8 +100,17 @@ public class OptionKeyUIObject extends ProgrammaticGrowOnHoverTextUIObject imple
 		}
 	}
 
-	public KeyOption getKeyOption() {
-		return KeyOption.valueOf(super.key.toUpperCase());
+	public StandardKeyOption getKeyOption() {
+		return StandardKeyOption.valueOf(super.key.toUpperCase());
+	}
+
+	@Override
+	public void setFocused(boolean focused) {
+		this.focused = focused;
+	}
+
+	public boolean hasFocus() {
+		return focused;
 	}
 
 }

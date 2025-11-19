@@ -133,8 +133,8 @@ public class MainMenuUIScene extends UIScene {
 		final TextData uiSmallLeftTextData = new TextData(new Vector2f(0.125f), TextAlignment.TEXT_LEFT, -1);
 
 		final List<OptionKeyUIObject> all = new ArrayList<>();
-		final TriggerLatch latch = new TriggerLatch(KeyOption.values().length, () -> new TaskFuture<>(workers, this::updateKeys).push());
-		for (final KeyOption key : KeyOption.values()) {
+		final TriggerLatch latch = new TriggerLatch(StandardKeyOption.values().length, () -> new TaskFuture<>(workers, this::updateKeys).push());
+		for (final StandardKeyOption key : StandardKeyOption.values()) {
 			uiSmallLeftTextData.setBufferSize(25);
 			uiSmallLeftTextData.setName("options.keys" + key);
 			UIObjectFactory
