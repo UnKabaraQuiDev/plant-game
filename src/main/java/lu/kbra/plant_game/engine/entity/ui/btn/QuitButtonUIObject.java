@@ -1,8 +1,10 @@
 package lu.kbra.plant_game.engine.entity.ui.btn;
 
 import org.joml.Vector4f;
+import org.joml.Vector4fc;
 
 import lu.kbra.plant_game.PGLogic;
+import lu.kbra.plant_game.engine.entity.ui.impl.AbsoluteTransformedBoundsOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.GrowOnHoverTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsClick;
 import lu.kbra.plant_game.engine.entity.ui.impl.Scale2dDir;
@@ -13,9 +15,9 @@ import lu.kbra.standalone.gameengine.scene.Scene;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 @DataPath("localization:btn.quit")
-public class QuitButtonUIObject extends GrowOnHoverTextUIObject implements NeedsClick {
+public class QuitButtonUIObject extends GrowOnHoverTextUIObject implements NeedsClick, IndexedMenuElement, AbsoluteTransformedBoundsOwner {
 
-	public static final Vector4f TARGET_RED = new Vector4f(1, 0.25f, 0.25f, 1);
+	public static final Vector4fc TARGET_RED = new Vector4f(1, 0.25f, 0.25f, 1);
 
 	public QuitButtonUIObject(final String str, final TextEmitter text) {
 		this(str, text, null);
@@ -38,6 +40,11 @@ public class QuitButtonUIObject extends GrowOnHoverTextUIObject implements Needs
 		this.getTransform().updateMatrix();
 
 		TextEmitter.DEFAULT_FG_COLOR.lerp(TARGET_RED, factor, this.getTextEmitter().getForegroundColor());
+	}
+
+	@Override
+	public int getIndex() {
+		return 2;
 	}
 
 }

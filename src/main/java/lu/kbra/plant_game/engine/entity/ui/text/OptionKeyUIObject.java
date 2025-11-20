@@ -4,6 +4,8 @@ import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
 
 import lu.kbra.plant_game.PGLogic;
+import lu.kbra.plant_game.engine.entity.ui.btn.IndexedMenuElement;
+import lu.kbra.plant_game.engine.entity.ui.impl.AbsoluteTransformOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.Focusable;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsClick;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsInput;
@@ -20,7 +22,8 @@ import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3DPivot;
 
 @DataPath("")
-public class OptionKeyUIObject extends ProgrammaticGrowOnHoverTextUIObject implements NeedsClick, Focusable, NeedsInput {
+public class OptionKeyUIObject extends ProgrammaticGrowOnHoverTextUIObject
+		implements NeedsClick, Focusable, NeedsInput, IndexedMenuElement, AbsoluteTransformOwner {
 
 	public static enum State {
 		IDLE, WAITING_RELEASE, WAITING_INPUT;
@@ -116,7 +119,7 @@ public class OptionKeyUIObject extends ProgrammaticGrowOnHoverTextUIObject imple
 
 	@Override
 	public float getGrowthRate(final boolean grow) {
-		return grow ? 0.5f : 0.1f;
+		return grow ? 0.5f : 0.4f;
 	}
 
 	@Override
@@ -127,6 +130,11 @@ public class OptionKeyUIObject extends ProgrammaticGrowOnHoverTextUIObject imple
 	@Override
 	public boolean hasFocus() {
 		return this.focused;
+	}
+
+	@Override
+	public int getIndex() {
+		return StandardKeyOption.valueOf(super.key.toUpperCase()).ordinal();
 	}
 
 }

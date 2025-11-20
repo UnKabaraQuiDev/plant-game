@@ -2,6 +2,7 @@ package lu.kbra.plant_game.engine.entity.ui.group;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Stream;
 
 import lu.kbra.plant_game.engine.entity.ui.impl.UIObject;
 import lu.kbra.standalone.gameengine.objs.entity.Entity;
@@ -22,8 +23,16 @@ public interface ObjectGroup<T extends Entity> extends Iterable<T>, ParentAware 
 
 	Object getSubEntitiesLock();
 
-	List<UIObject> getSubEntities();
+	List<T> getSubEntities();
 
-	SubEntitiesComponent<UIObject> getSubEntitiesComponent();
+	SubEntitiesComponent<T> getSubEntitiesComponent();
+
+	Stream<T> parallelStream();
+
+	Stream<T> stream();
+
+	void doSort();
+
+	int size();
 
 }

@@ -42,7 +42,6 @@ public class EdgeStickLayout extends FlowLayout implements BoundsOwnerParentAwar
 				final Transform3D t = left.getTransform();
 				t.translationSet(-width / 2 - (float) bounds.getMinX(), 0, y).updateMatrix();
 				maxHeight = Math.max(maxHeight, (float) bounds.getHeight() * t.getScale().y());
-				System.err.println("x: " + -bounds.getMinX() + " for: " + left + " " + bounds);
 			}
 
 			if (right != null && right.hasTransform()) {

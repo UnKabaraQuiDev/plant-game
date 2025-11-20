@@ -42,12 +42,14 @@ public class LayoutOffsetUIObjectGroup extends OffsetUIObjectGroup implements La
 	@Override
 	public void doLayout() {
 		synchronized (this.getSubEntitiesLock()) {
-			this
-					.getSubEntities()
-					.stream()
-					.filter(LayoutParent.class::isInstance)
-					.map(e -> (LayoutParent) e)
-					.forEach(LayoutParent::doLayout);
+			this.getSubEntities().stream().forEach(e -> {
+				if (e instanceof final LayoutParent lp) {
+					lp.doLayout();
+				}
+				if (e instanceof final UIObjectGroup objGroup) {
+					objGroup.recomputeBounds();
+				}
+			});
 		}
 		this.layout.doLayout(this.getSubEntities(), this.getSceneParent().getCamera().getProjection().getAspectRatio());
 		this.recomputeBounds();

@@ -1,6 +1,5 @@
 package lu.kbra.plant_game.engine.scene.ui.menu.main;
 
-import java.util.Comparator;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -21,6 +20,7 @@ import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory.TextData;
 import lu.kbra.plant_game.engine.entity.ui.group.LayoutOffsetUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.group.OffsetUIObjectGroup;
+import lu.kbra.plant_game.engine.entity.ui.impl.AbsoluteTransformOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.Scale2dDir;
 import lu.kbra.plant_game.engine.entity.ui.impl.TextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.UIObject;
@@ -36,6 +36,7 @@ import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.render.GradientDirection;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
 import lu.kbra.plant_game.engine.scene.ui.layout.FlowLayout;
+import lu.kbra.plant_game.engine.scene.ui.layout.MarginFlowLayout;
 import lu.kbra.plant_game.engine.window.input.MappingInputHandler;
 import lu.kbra.plant_game.engine.window.input.StandardKeyOption;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
@@ -64,13 +65,21 @@ public class MainMenuUIScene extends UIScene {
 	protected int targetGroup = 0;
 	protected float progress = 0;
 
-	protected Vector3f[] restPositions = { new Vector3f(), null, new Vector3f(2, 0, 0), null };
+	protected Vector3f[] restPositions = { new Vector3f(), null, new Vector3f(5, 0, 0), null };
 
-	protected OffsetUIObjectGroup mainMenuGroup = new OffsetUIObjectGroup("main", new Transform3D());
+	protected OffsetUIObjectGroup mainMenuGroup = new OffsetUIObjectGroup("main", new Transform3D(new Vector3f(this.restPositions[MAIN])));
+	protected LayoutOffsetUIObjectGroup mainLeftMenuGroup = new LayoutOffsetUIObjectGroup(
+			"main.left",
+			new MarginFlowLayout(true, 0.02f, 0.3f, 0, 0.5f, 0.5f, MarginFlowLayout.LEFT),
+			this.mainMenuGroup);
+	protected LayoutOffsetUIObjectGroup mainButtonsMenuGroup = new LayoutOffsetUIObjectGroup(
+			"main.buttons",
+			new FlowLayout(true, 0.02f),
+			this.mainLeftMenuGroup);
 	protected OffsetUIObjectGroup optionsMenuGroup = new OffsetUIObjectGroup(
 			"option",
 			new Transform3D(new Vector3f(this.restPositions[OPTIONS])));
-	protected LayoutOffsetUIObjectGroup optionsKeysMenuGroup = new LayoutOffsetUIObjectGroup(
+	protected LayoutOffsetUIObjectGroup optionsEntriesMenuGroup = new LayoutOffsetUIObjectGroup(
 			"option.keys",
 			new FlowLayout(true, 0.0f),
 			this.optionsMenuGroup);
@@ -114,19 +123,14 @@ public class MainMenuUIScene extends UIScene {
 				"options.volume",
 				new EdgeStickLayout(true, 0, uiSmallLeftTextData.getCharSize().x() * OPTIONS_COLUMN_COUNT));
 
-		this.optionsKeysMenuGroup.add(optionsVolumeGroup);
-		this.optionsKeysMenuGroup.add(UIObjectFactory.createVerticalSpacer(2 * uiSmallLeftTextData.getCharSize().y()));
+		this.optionsEntriesMenuGroup.add(optionsVolumeGroup);
+		this.optionsEntriesMenuGroup.add(UIObjectFactory.createVerticalSpacer(2 * uiSmallLeftTextData.getCharSize().y()));
 
 		final ListTriggerLatch<OptionKeyUIObject> optionKeyGroupLatch = new ListTriggerLatch<>(
 				StandardKeyOption.values().length,
 				l -> workers.post(() -> {
-					l
-							.stream()
-							.sorted(Comparator.comparingInt(o -> ((StandardKeyOption) o.getKeyOption()).ordinal()))
-							.forEachOrdered(this.optionsKeysMenuGroup::add);
+					l.forEach(this.optionsEntriesMenuGroup::add);
 					this.updateKeys();
-
-					this.optionsKeysMenuGroup.getSubEntities().forEach(System.err::println);
 				}));
 		for (final StandardKeyOption key : StandardKeyOption.values()) {
 			uiSmallLeftTextData.setBufferSize(OPTIONS_COLUMN_COUNT);
@@ -158,13 +162,14 @@ public class MainMenuUIScene extends UIScene {
 	private void buildMainMenu(final Dispatcher workers, final Dispatcher renderDispatcher) {
 		final TextData uiTextData = new TextData(new Vector2f(0.2f), TextAlignment.TEXT_CENTER, -1);
 
-		final float x = -0.8f;
+		final ListTriggerLatch<UIObject> mainButtonsLatch = new ListTriggerLatch<>(3, l -> workers.post(() -> {
+			l.forEach(this.mainButtonsMenuGroup::add);
+			this.mainLeftMenuGroup.doLayout();
+		}));
 
-		UIObjectFactory
-				.create(PlayButtonUIObject.class, this.mainMenuGroup, uiTextData, new Transform3D(new Vector3f(x, 0, -0.25f)))
-				.push();
-		UIObjectFactory.create(OptionsButtonUIObject.class, this.mainMenuGroup, uiTextData, new Transform3D(new Vector3f(x, 0, 0))).push();
-		UIObjectFactory.create(QuitButtonUIObject.class, this.mainMenuGroup, uiTextData, new Transform3D(new Vector3f(x, 0, 0.25f))).push();
+		UIObjectFactory.create(PlayButtonUIObject.class, mainButtonsLatch, uiTextData, new Transform3D()).push();
+		UIObjectFactory.create(OptionsButtonUIObject.class, mainButtonsLatch, uiTextData, new Transform3D()).push();
+		UIObjectFactory.create(QuitButtonUIObject.class, mainButtonsLatch, uiTextData, new Transform3D()).push();
 
 		UIObjectFactory
 				.create(LargeLogoUIObject.class,
@@ -213,14 +218,14 @@ public class MainMenuUIScene extends UIScene {
 	private void updateKeys() {
 		final MappingInputHandler inputHandler = PGLogic.INSTANCE.getInputHandler();
 
-		this.optionsKeysMenuGroup
+		this.optionsEntriesMenuGroup
 				.getSubEntities()
 				.parallelStream()
 				.filter(OptionKeyUIObject.class::isInstance)
 				.map(e -> (OptionKeyUIObject) e)
 				.forEach(e -> e.setKeyValue(inputHandler.getInputName(e.getKeyOption().getPhysicalKey())));
 
-		final OptionKeyUIObject example = this.optionsKeysMenuGroup
+		final OptionKeyUIObject example = this.optionsEntriesMenuGroup
 				.getSubEntities()
 				.parallelStream()
 				.filter(OptionKeyUIObject.class::isInstance)
@@ -229,7 +234,7 @@ public class MainMenuUIScene extends UIScene {
 				.orElseThrow(IllegalStateException::new);
 
 		PGLogic.INSTANCE.RENDER_DISPATCHER.post(() -> {
-			this.optionsKeysMenuGroup
+			this.optionsEntriesMenuGroup
 					.getSubEntities()
 					.stream()
 					.filter(ProgrammaticTextUIObject.class::isInstance)
@@ -237,11 +242,13 @@ public class MainMenuUIScene extends UIScene {
 					.forEach(e -> e.getTextEmitter().updateText());
 		});
 
-		((FlowLayout) this.optionsKeysMenuGroup.getLayout())
+		((FlowLayout) this.optionsEntriesMenuGroup.getLayout())
 				.setGap((float) (example.getBounds().getBounds2D().getHeight()
 						* (example.getTargetScale(true).z() - example.getTargetScale(false).z())));
 
-		this.optionsKeysMenuGroup.doLayout();
+		this.optionsEntriesMenuGroup.doLayout();
+
+		this.optionsEntriesMenuGroup.getTransform().translationSet(0, 0, -1f + 0.3f).updateMatrix();
 	}
 
 	@Override
@@ -251,10 +258,11 @@ public class MainMenuUIScene extends UIScene {
 		if (inputHandler.wasResized()) {
 			this.camera.getProjection().update(inputHandler.getWindowSize());
 
-			this.optionsKeysMenuGroup.doLayout();
+			this.optionsEntriesMenuGroup.doLayout();
+			this.mainLeftMenuGroup.doLayout();
 		}
 
-		this.optionsKeysMenuGroup
+		this.optionsEntriesMenuGroup
 				.getTransform()
 				.translationAdd(0, 0, (float) inputHandler.getMouseScroll().y * OPTIONS_SCROLL_SPEED)
 				.updateMatrix();
@@ -285,9 +293,18 @@ public class MainMenuUIScene extends UIScene {
 			final Dispatcher render) {
 		super.update(inputHandler, dTime, compositor, workers, render);
 
-		this.restPositions[OPTIONS].x = this.camera.getProjection().getAspectRatio() * 2;
-		if (this.currentGroup != OPTIONS) {
-			this.optionsMenuGroup.getTransform().translationSet(this.restPositions[OPTIONS]).updateMatrix();
+		if (this.cursor != null && this.currentGroup == MAIN && this.mainButtonsMenuGroup.size() > 1) {
+			this.cursor.setActive(true);
+
+			final float z1 = ((AbsoluteTransformOwner) this.mainButtonsMenuGroup.get(0))
+					.getAbsoluteTransform()
+					.getTranslation(new Vector3f()).z;
+			final float z2 = ((AbsoluteTransformOwner) this.mainButtonsMenuGroup.get(1))
+					.getAbsoluteTransform()
+					.getTranslation(new Vector3f()).z;
+
+			this.cursor.setSnapPhase(Math.max(z1, z2));
+			this.cursor.setSnapAngle(Math.abs(Math.min(z1, z2) - Math.max(z1, z2)));
 		}
 
 		if (this.greenGradient != null) {
@@ -312,6 +329,8 @@ public class MainMenuUIScene extends UIScene {
 		}
 
 		if (this.targetGroup != this.currentGroup) {
+			this.cursor.setActive(this.targetGroup == MAIN);
+
 			final OffsetUIObjectGroup target = this.groups[this.targetGroup];
 			final OffsetUIObjectGroup current = this.groups[this.currentGroup];
 

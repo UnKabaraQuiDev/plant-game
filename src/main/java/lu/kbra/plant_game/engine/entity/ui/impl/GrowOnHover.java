@@ -4,10 +4,9 @@ import org.joml.Math;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
-import lu.pcy113.pclib.PCUtils;
-
 import lu.kbra.plant_game.engine.entity.impl.Transform3DOwner;
 import lu.kbra.standalone.gameengine.scene.Scene;
+import lu.kbra.standalone.gameengine.utils.interpolation.Interpolators;
 
 public interface GrowOnHover extends NeedsUpdate, Transform3DOwner, NeedsHover {
 
@@ -27,39 +26,29 @@ public interface GrowOnHover extends NeedsUpdate, Transform3DOwner, NeedsHover {
 		this.getTransform().updateMatrix();
 	}
 
+	// not sure if this code works
 	default float grow(final float dTime, final boolean grow) {
 		final Vector3f scale = this.getTransform().getScale();
-		final Vector3fc target = this.getTargetScale(grow);
+		final Vector3fc start = this.getTargetScale(false);
+		final Vector3fc end = this.getTargetScale(true);
 
-		if (scale.equals(target, 0.001f)) {
+		if (scale.equals(grow ? end : start, 0.001f)) {
 			return grow ? 1 : 0;
 		}
 
-		final float speed = this.getGrowthRate(grow);
-
-		for (int i = 0; i < 3; i++) {
-			final float s = scale.get(i);
-			final float t = target.get(i);
-			final float step = speed * dTime;
-			final float diff = t - s;
-
-			if (!PCUtils.compare(s, t, 0.001f)) {
-				if (Math.abs(diff) > step) {
-					scale.setComponent(i, s + Math.signum(diff) * step);
-				} else {
-					scale.setComponent(i, t);
-				}
-			} else {
-				scale.setComponent(i, t);
-			}
-		}
-
-		final Vector3fc start = this.getTargetScale(false);
-		final Vector3fc end = this.getTargetScale(true);
 		final float currentDist = scale.distance(start);
-		final float maxDistance = scale.distance(end);
+		final float maxDistance = start.distance(end);
+		float t = maxDistance > 0 ? currentDist / maxDistance : 1f;
 
-		return Math.clamp(0, 1, currentDist / maxDistance);
+		final float speed = this.getGrowthRate(grow);
+		t += (grow ? 1 : -1) * speed * dTime / maxDistance;
+		t = Math.clamp(0f, 1f, t);
+
+		final float interpT = Interpolators.SINE_IN.evaluate(t);
+
+		start.lerp(end, interpT, scale);
+
+		return t;
 	}
 
 }

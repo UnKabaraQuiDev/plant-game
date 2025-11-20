@@ -6,11 +6,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import lu.kbra.plant_game.engine.entity.ui.btn.IndexedMenuElement;
 import lu.kbra.plant_game.engine.entity.ui.impl.UIObject;
 import lu.kbra.standalone.gameengine.objs.entity.Component;
 import lu.kbra.standalone.gameengine.objs.entity.ParentAware;
@@ -67,6 +69,9 @@ public class UIObjectGroup extends UIObject implements ObjectGroup<UIObject> {
 	public <V extends UIObject> V add(final V e) {
 		synchronized (this.getSubEntitiesLock()) {
 			this.getSubEntitiesComponent().getEntities().add(e);
+			if (e instanceof IndexedMenuElement) {
+				this.doSort();
+			}
 		}
 		if (e instanceof final ParentAware pa) {
 			pa.setParent(this);
@@ -76,12 +81,27 @@ public class UIObjectGroup extends UIObject implements ObjectGroup<UIObject> {
 	}
 
 	@Override
+	public void doSort() {
+		synchronized (this.getSubEntitiesLock()) {
+			this.getSubEntitiesComponent().getEntities().sort(Comparator.comparingInt(b -> {
+				if (b instanceof final IndexedMenuElement ime) {
+					return ime.getIndex();
+				}
+				return 0;
+			}));
+		}
+	}
+
+	@Override
 	public boolean addAll(final Collection<? extends UIObject> c) {
 		final boolean result;
 		synchronized (this.getSubEntitiesLock()) {
 			result = this.getSubEntities().addAll(c);
+			if (c.parallelStream().anyMatch(IndexedMenuElement.class::isInstance)) {
+				this.doSort();
+			}
 		}
-		c.stream().filter(ParentAware.class::isInstance).forEach(b -> ((ParentAware) b).setParent(this));
+		c.stream().filter(ParentAware.class::isInstance).forEach(b -> b.setParent(this));
 		this.recomputeBounds();
 		return result;
 	}
@@ -91,10 +111,20 @@ public class UIObjectGroup extends UIObject implements ObjectGroup<UIObject> {
 		final boolean result;
 		synchronized (this.getSubEntitiesLock()) {
 			result = this.getSubEntities().addAll(c.getSubEntities());
+			if (c.parallelStream().anyMatch(IndexedMenuElement.class::isInstance)) {
+				this.doSort();
+			}
 		}
-		c.getSubEntities().stream().filter(ParentAware.class::isInstance).forEach(b -> ((ParentAware) b).setParent(this));
+		c.getSubEntities().stream().filter(ParentAware.class::isInstance).forEach(b -> b.setParent(this));
 		this.recomputeBounds();
 		return result;
+	}
+
+	@Override
+	public int size() {
+		synchronized (this.getSubEntitiesLock()) {
+			return this.getSubEntities().size();
+		}
 	}
 
 	@Override
@@ -104,9 +134,17 @@ public class UIObjectGroup extends UIObject implements ObjectGroup<UIObject> {
 		}
 	}
 
+	@Override
 	public Stream<UIObject> stream() {
 		synchronized (this.getSubEntitiesLock()) {
 			return this.getSubEntities().stream();
+		}
+	}
+
+	@Override
+	public Stream<UIObject> parallelStream() {
+		synchronized (this.getSubEntitiesLock()) {
+			return this.getSubEntities().parallelStream();
 		}
 	}
 

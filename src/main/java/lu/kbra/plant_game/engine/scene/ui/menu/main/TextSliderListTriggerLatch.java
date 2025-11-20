@@ -16,7 +16,6 @@ public class TextSliderListTriggerLatch<A extends TextUIObject, B extends UIObje
 			final Object a = l.get(0);
 			final Object b = l.get(1);
 
-			// determine which object matches which class
 			final A objA = text.isInstance(a) ? text.cast(a)
 					: text.isInstance(b) ? text.cast(b)
 					: null;
@@ -42,7 +41,6 @@ public class TextSliderListTriggerLatch<A extends TextUIObject, B extends UIObje
 			final Object a = l.get(0);
 			final Object b = l.get(1);
 
-			// determine which object matches which class
 			final A objA = text.isInstance(a) ? text.cast(a)
 					: text.isInstance(b) ? text.cast(b)
 					: null;

@@ -59,8 +59,8 @@ public class MarginFlowLayout extends FlowLayout {
 			final float scaleX = child.getTransform().getScale().x;
 			final float scaleY = child.getTransform().getScale().y;
 
-			final float x = offsetX + scaleX * (float) (left ? bounds.getX() : -bounds.getWidth());
-			final float y = offsetY + scaleY * (float) (top ? -bounds.getY() : bounds.getHeight());
+			final float x = offsetX + scaleX * (float) (left ? -bounds.getMinX() : bounds.getMaxX());
+			final float y = offsetY + scaleY * (float) (top ? bounds.getMinY() : -bounds.getMaxY());
 
 			child.getTransform().translationSet(x, 0, y).updateMatrix();
 

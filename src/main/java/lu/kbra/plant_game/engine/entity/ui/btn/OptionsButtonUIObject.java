@@ -1,5 +1,6 @@
 package lu.kbra.plant_game.engine.entity.ui.btn;
 
+import lu.kbra.plant_game.engine.entity.ui.impl.AbsoluteTransformedBoundsOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.GrowOnHoverTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsClick;
 import lu.kbra.plant_game.engine.entity.ui.impl.Scale2dDir;
@@ -11,7 +12,8 @@ import lu.kbra.standalone.gameengine.scene.Scene;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 @DataPath("localization:btn.options")
-public class OptionsButtonUIObject extends GrowOnHoverTextUIObject implements NeedsClick {
+public class OptionsButtonUIObject extends GrowOnHoverTextUIObject
+		implements NeedsClick, IndexedMenuElement, AbsoluteTransformedBoundsOwner {
 
 	public OptionsButtonUIObject(final String str, final TextEmitter text) {
 		super(str, text, Scale2dDir.HORIZONTAL);
@@ -24,6 +26,11 @@ public class OptionsButtonUIObject extends GrowOnHoverTextUIObject implements Ne
 	@Override
 	public void click(final WindowInputHandler input, final float dTime, final Scene scene) {
 		((MainMenuUIScene) scene).startTransition(MainMenuUIScene.OPTIONS);
+	}
+
+	@Override
+	public int getIndex() {
+		return 1;
 	}
 
 }
