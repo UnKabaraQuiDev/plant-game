@@ -8,7 +8,6 @@ import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 import org.joml.Vector4f;
-import org.lwjgl.glfw.GLFW;
 
 import lu.pcy113.pclib.PCUtils;
 import lu.pcy113.pclib.datastructure.pair.Pair;
@@ -49,7 +48,7 @@ public class WorldLevelScene extends Scene3D {
 
 	private LevelData levelData;
 
-	private CacheManager worldCache;
+	private final CacheManager worldCache;
 
 	private GameObject waterLevel;
 	private TerrainObject terrain;
@@ -66,15 +65,15 @@ public class WorldLevelScene extends Scene3D {
 	private Direction targetRotation = Direction.DEFAULT();
 	private TaskFuture<?, Void>.TaskState<Void> moveObjectTaskState;
 
-	public WorldLevelScene(String name, CacheManager parent) {
+	public WorldLevelScene(final String name, final CacheManager parent) {
 		super(name);
 		this.worldCache = new CacheManager(name, parent);
 	}
 
-	public void init(Dispatcher workers, Dispatcher renderDispatcher) {
+	public void init(final Dispatcher workers, final Dispatcher renderDispatcher) {
 		final CountDownLatch terrainLatch = new CountDownLatch(1);
 
-		moveObjectTaskState = new TaskFuture<Void, Void>(workers, () -> {
+		this.moveObjectTaskState = new TaskFuture<Void, Void>(workers, () -> {
 			terrainLatch.await();
 		}).push();
 
@@ -84,12 +83,12 @@ public class WorldLevelScene extends Scene3D {
 			final long time = PCUtils.nanoTime(() -> worldGenerator.compute());
 			GlobalLogger.info("World generated in " + (time / 1e6) + " ms");
 			return worldGenerator;
-		}).then(renderDispatcher, (ThrowingFunction<WorldGenerator, TerrainMesh, Throwable>) (worldGenerator) -> {
+		}).then(renderDispatcher, (ThrowingFunction<WorldGenerator, TerrainMesh, Throwable>) worldGenerator -> {
 			GlobalLogger.info("Generating mesh...");
 			final Pair<TerrainMesh, Long> mesh = PCUtils.nanoTime(() -> worldGenerator.generateMesh(this.getCache()));
 			GlobalLogger.info("Mesh generated in " + (mesh.getValue() / 1e6) + " ms");
 			return mesh.getKey();
-		}, 0).then(workers, (Consumer<TerrainMesh>) (mesh) -> {
+		}, 0).then(workers, (Consumer<TerrainMesh>) mesh -> {
 			GlobalLogger.info("Creating entity...");
 			final long time = PCUtils.nanoTime((Runnable) () -> {
 				final TerrainObject terrainEntity = new TerrainObject("terrain", mesh);
@@ -104,22 +103,21 @@ public class WorldLevelScene extends Scene3D {
 			new TaskFuture<>(renderDispatcher, () -> {
 				GlobalLogger.info("Generating water mesh...");
 				final Pair<Mesh, Long> meshTime = PCUtils
-						.nanoTime(
-								() -> new LoadedQuadMesh("water", null, new Vector2f(((TerrainMesh) this.getTerrain().getMesh()).getWidth(),
-										((TerrainMesh) this.getTerrain().getMesh()).getLength())));
+						.nanoTime(() -> new LoadedQuadMesh("water", null,
+								new Vector2f(this.getTerrain().getMesh().getWidth(), this.getTerrain().getMesh().getLength())));
 				this.getCache().addMesh(meshTime.getKey());
 				GlobalLogger.info("Water mesh generated in " + (meshTime.getValue() / 1e6) + " ms");
 				return meshTime.getKey();
 			})
 					.then(workers,
-							(ThrowingConsumer<Mesh, Throwable>) (mesh) -> this
+							(ThrowingConsumer<Mesh, Throwable>) mesh -> this
 									.setWaterLevel(new GameObject("water", mesh, new Transform3D(new Vector3f(0, 0.9f, 0)),
 											new Vector3i(2, 0, 0), TerrainMaterialType.WATER.getId())))
 					.push();
 
 			GameObjectFactory
 					.create(WaterTowerObject.class, this, new Transform3D())
-					.then(workers, (ThrowingConsumer<WaterTowerObject, Throwable>) (obj) -> {
+					.then(workers, (ThrowingConsumer<WaterTowerObject, Throwable>) obj -> {
 						final Vector2i pos = new Vector2i(0, 0);
 						while (!obj.isPlaceable(this, pos, Direction.NONE)) {
 							pos.x++;
@@ -137,7 +135,7 @@ public class WorldLevelScene extends Scene3D {
 
 			GameObjectFactory
 					.create(WaterTowerObject.class, this, new Transform3D())
-					.then(workers, (ThrowingConsumer<WaterTowerObject, Throwable>) (obj) -> {
+					.then(workers, (ThrowingConsumer<WaterTowerObject, Throwable>) obj -> {
 						obj.placeDown(this, new Vector2i(11, 15), Direction.NONE);
 					})
 					.push();
@@ -145,21 +143,21 @@ public class WorldLevelScene extends Scene3D {
 			GameObjectFactory
 					.create(SolarPanelObject.class, this, new Transform3D())
 					.then(workers,
-							(ThrowingConsumer<SolarPanelObject, Throwable>) (obj) -> obj
+							(ThrowingConsumer<SolarPanelObject, Throwable>) obj -> obj
 									.placeDown(this, new Vector2i(15, 5), Direction.NONE))
 					.push();
 
 			GameObjectFactory
 					.create(WaterWheelObject.class, this, new Transform3D())
 					.then(workers,
-							(ThrowingConsumer<WaterWheelObject, Throwable>) (obj) -> obj
+							(ThrowingConsumer<WaterWheelObject, Throwable>) obj -> obj
 									.placeDown(this, new Vector2i(11, 7), Direction.WEST))
 					.push();
 
 			GameObjectFactory
 					.create(WaterWheelObject.class, this, new Transform3D())
 					.then(workers,
-							(ThrowingConsumer<WaterWheelObject, Throwable>) (obj) -> obj
+							(ThrowingConsumer<WaterWheelObject, Throwable>) obj -> obj
 									.placeDown(this, new Vector2i(13, 8), Direction.WEST))
 					.push();
 
@@ -167,56 +165,56 @@ public class WorldLevelScene extends Scene3D {
 	}
 
 	public void input(final WindowInputHandler inputHandler, final float dTime, final UpdateFrameState frameState) {
-		fovDiff = (float) (inputHandler.getMouseScroll().y * 0.05f);
-
-		posAdd.zero();
-		rotation = 0;
+		this.posAdd.zero();
+		this.rotation = 0;
 
 		if (!frameState.uiSceneCaughtKeyboardInput) {
 			if (inputHandler.isKeyHeld(StandardKeyOption.FORWARD)) {
-				posAdd.z -= 1;
+				this.posAdd.z -= 1;
 			}
 			if (inputHandler.isKeyHeld(StandardKeyOption.BACKWARD)) {
-				posAdd.z += 1;
+				this.posAdd.z += 1;
 			}
 			if (inputHandler.isKeyHeld(StandardKeyOption.LEFT)) {
-				posAdd.x -= 1;
+				this.posAdd.x -= 1;
 			}
 			if (inputHandler.isKeyHeld(StandardKeyOption.RIGHT)) {
-				posAdd.x += 1;
+				this.posAdd.x += 1;
 			}
 			if (inputHandler.isKeyHeld(StandardKeyOption.ROTATE_LEFT)) {
-				rotation -= 1;
+				this.rotation -= 1;
 			}
 			if (inputHandler.isKeyHeld(StandardKeyOption.ROTATE_RIGHT)) {
-				rotation += 1;
+				this.rotation += 1;
 			}
 
 			if (inputHandler.isKeyPressedOrRepeat(StandardKeyOption.TURN_CW)) {
-				targetRotation = targetRotation.getClockwise();
+				this.targetRotation = this.targetRotation.getClockwise();
 			}
 			if (inputHandler.isKeyPressedOrRepeat(StandardKeyOption.TURN_CCW)) {
-				targetRotation = targetRotation.getCounterClockwise();
+				this.targetRotation = this.targetRotation.getCounterClockwise();
 			}
 		}
 
 		if (!frameState.uiSceneCaughtMouseInput) {
+			this.fovDiff = (float) (inputHandler.getMouseScroll().y * 0.05f);
+
 			if (inputHandler.isMouseButtonPressedOnce(StandardKeyOption.PLACE)) {
-				movingObject = !movingObject;
+				this.movingObject = !this.movingObject;
 			}
 		}
 	}
 
 	public void update(
 			final WindowInputHandler inputHandler,
-			float dTime,
-			DeferredCompositor compositor,
-			Dispatcher workers,
-			Dispatcher renderDispatcher) {
-		if (moveObjectTaskState == null || moveObjectTaskState.isDone()) {
-			if (movingObject) {
-				if (attachedObject == null) {
-					moveObjectTaskState = new TaskFuture<Void, Void>(workers, () -> {
+			final float dTime,
+			final DeferredCompositor compositor,
+			final Dispatcher workers,
+			final Dispatcher renderDispatcher) {
+		if (this.moveObjectTaskState == null || this.moveObjectTaskState.isDone()) {
+			if (this.movingObject) {
+				if (this.attachedObject == null) {
+					this.moveObjectTaskState = new TaskFuture<Void, Void>(workers, () -> {
 						compositor.pollObjectId(true);
 
 						final Vector3i ids = new Vector3i(compositor.getObjectId().y, compositor.getObjectId().z,
@@ -228,7 +226,7 @@ public class WorldLevelScene extends Scene3D {
 								.filter(e -> e instanceof GameObject && e instanceof PlaceableObject
 										&& ((GameObject) e).getObjectIdLocation() == AttributeLocation.ENTITY);
 
-						attachedObject = (PlaceableObject) super.getEntities()
+						this.attachedObject = (PlaceableObject) super.getEntities()
 								.values()
 								.parallelStream()
 								.filter(e -> e instanceof GameObject && e instanceof PlaceableObject
@@ -237,16 +235,16 @@ public class WorldLevelScene extends Scene3D {
 								.findFirst()
 								.orElse(null);
 
-						if (attachedObject == null) {
-							moveObjectTaskState = null;
-							movingObject = false;
+						if (this.attachedObject == null) {
+							this.moveObjectTaskState = null;
+							this.movingObject = false;
 						} else {
-							compositor.addOutline(attachedObject, new Vector4f(1, 0, 1, 1));
+							compositor.addOutline(this.attachedObject, new Vector4f(1, 0, 1, 1));
 						}
 					}).push();
 				} else {
 					final Vector2f mousePos = inputHandler.getMousePosition();
-					moveObjectTaskState = new TaskFuture<Void, Void>(renderDispatcher, () -> {
+					this.moveObjectTaskState = new TaskFuture<Void, Void>(renderDispatcher, () -> {
 						final Vector2i pos = this
 								.getTerrain()
 								.pickTerrainCell(super.getCamera(),
@@ -254,15 +252,15 @@ public class WorldLevelScene extends Scene3D {
 										compositor.getWindow().getWidth(),
 										compositor.getWindow().getHeight());
 						if (pos != null) {
-							attachedObject.placeDown(this, pos, targetRotation);
-							targetRotation = Direction.DEFAULT();
+							this.attachedObject.placeDown(this, pos, this.targetRotation);
+							this.targetRotation = Direction.DEFAULT();
 						}
 					}).push();
 				}
-			} else if (attachedObject != null) {
-				compositor.removeOutline(attachedObject);
-				attachedObject = null;
-				moveObjectTaskState = null;
+			} else if (this.attachedObject != null) {
+				compositor.removeOutline(this.attachedObject);
+				this.attachedObject = null;
+				this.moveObjectTaskState = null;
 			}
 		}
 
@@ -270,8 +268,8 @@ public class WorldLevelScene extends Scene3D {
 
 		synchronized (super.getEntitiesLock()) {
 
-			for (Entity e : this) {
-				if (e instanceof AnimatedGameObject ago) {
+			for (final Entity e : this) {
+				if (e instanceof final AnimatedGameObject ago) {
 					ago.computeAnimatedTransform(time);
 				}
 			}
@@ -279,55 +277,55 @@ public class WorldLevelScene extends Scene3D {
 		}
 
 		final Camera3D camera = super.getCamera();
-		camera.getProjection().setFov((float) (camera.getProjection().getFov() + fovDiff));
-		camera.getPosition().fma(dTime * 10, posAdd);
-		camera.getRotation().rotateY((float) Math.toRadians(rotation * 50 * dTime));
+		camera.getProjection().setFov(camera.getProjection().getFov() + this.fovDiff);
+		camera.getPosition().fma(dTime * 10, this.posAdd);
+		camera.getRotation().rotateY((float) Math.toRadians(this.rotation * 50 * dTime));
 		camera.updateMatrix();
 	}
 
 	public GameObject getWaterLevel() {
-		return waterLevel;
+		return this.waterLevel;
 	}
 
-	public <T extends GameObject> T setWaterLevel(T waterLevel) {
+	public <T extends GameObject> T setWaterLevel(final T waterLevel) {
 		this.waterLevel = waterLevel;
 		return super.addEntity(waterLevel);
 	}
 
 	public TerrainObject getTerrain() {
-		return terrain;
+		return this.terrain;
 	}
 
-	public void setTerrain(TerrainObject terrain) {
+	public void setTerrain(final TerrainObject terrain) {
 		this.terrain = terrain;
 		super.addEntity(terrain);
 	}
 
 	public CacheManager getCache() {
-		return worldCache;
+		return this.worldCache;
 	}
 
 	public Vector3f getLightColor() {
-		return lightColor;
+		return this.lightColor;
 	}
 
-	public void setLightColor(Vector3f lightColor) {
+	public void setLightColor(final Vector3f lightColor) {
 		this.lightColor = lightColor;
 	}
 
 	public Vector3f getLightDirection() {
-		return lightDirection;
+		return this.lightDirection;
 	}
 
-	public void setLightDirection(Vector3f lightDirection) {
+	public void setLightDirection(final Vector3f lightDirection) {
 		this.lightDirection = lightDirection;
 	}
 
 	public float getAmbientLight() {
-		return ambientLight;
+		return this.ambientLight;
 	}
 
-	public void setAmbientLight(float ambientLight) {
+	public void setAmbientLight(final float ambientLight) {
 		this.ambientLight = ambientLight;
 	}
 

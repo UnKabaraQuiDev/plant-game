@@ -22,6 +22,7 @@ import lu.kbra.plant_game.engine.entity.impl.Transform3DOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.Focusable;
 import lu.kbra.plant_game.engine.entity.ui.impl.HoverState;
+import lu.kbra.plant_game.engine.entity.ui.impl.NeedsBoundsInput;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsClick;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsHover;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsInput;
@@ -139,7 +140,8 @@ public class UIScene extends Scene3D implements BoundsOwner {
 				uiObjectInput.input(inputHandler, dTime, this);
 			}
 
-			if ((e instanceof NeedsHover || e instanceof NeedsClick) && uiObj.getTransformedBounds(parentTransform).contains(mousePos)) {
+			if ((e instanceof NeedsHover || e instanceof NeedsClick || e instanceof NeedsBoundsInput)
+					&& uiObj.getTransformedBounds(parentTransform).contains(mousePos)) {
 				frameState.uiSceneCaughtMouseInput = true;
 
 				if (uiObj instanceof final NeedsHover uiObjectHover) {
@@ -147,16 +149,21 @@ public class UIScene extends Scene3D implements BoundsOwner {
 					newHovered.add(uiObj);
 				}
 
+				if (uiObj instanceof final NeedsBoundsInput uiObjectInput) {
+					uiObjectInput.input(inputHandler, dTime, this);
+					newHovered.add(uiObj);
+				}
+
 				if (uiObj instanceof final NeedsClick uiObjectClick && inputHandler.isMouseButtonPressedOnce(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
 					uiObjectClick.click(inputHandler, dTime, this);
+				}
 
-					if (uiObj instanceof Focusable) {
-						if (this.focused != null) {
-							this.focused.removeFocus();
-						}
-						this.focused = (Focusable) uiObj;
-						this.focused.giveFocus();
+				if (uiObj instanceof Focusable && inputHandler.isMouseButtonPressedOnce(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
+					if (this.focused != null) {
+						this.focused.removeFocus();
 					}
+					this.focused = (Focusable) uiObj;
+					this.focused.giveFocus();
 				}
 			}
 		}

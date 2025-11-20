@@ -18,6 +18,7 @@ public class EdgeStickLayout extends FlowLayout implements BoundsOwnerParentAwar
 	public EdgeStickLayout(final boolean vertical, final float gap, final float size) {
 		super(vertical, gap);
 		assert vertical : "horizontal not supported";
+		this.size = size;
 	}
 
 	@Override
@@ -39,14 +40,15 @@ public class EdgeStickLayout extends FlowLayout implements BoundsOwnerParentAwar
 			if (left.hasTransform()) {
 				final Rectangle2D bounds = left.getBounds().getBounds2D();
 				final Transform3D t = left.getTransform();
-				t.translationSet(-(float) bounds.getMinX(), 0, y).updateMatrix();
+				t.translationSet(-width / 2 - (float) bounds.getMinX(), 0, y).updateMatrix();
 				maxHeight = Math.max(maxHeight, (float) bounds.getHeight() * t.getScale().y());
+				System.err.println("x: " + -bounds.getMinX() + " for: " + left + " " + bounds);
 			}
 
 			if (right != null && right.hasTransform()) {
 				final Rectangle2D bounds = right.getBounds().getBounds2D();
 				final Transform3D t = right.getTransform();
-				t.translationSet(width - (float) bounds.getMaxX(), 0, y).updateMatrix();
+				t.translationSet(width / 2 - (float) bounds.getMaxX(), 0, y).updateMatrix();
 				maxHeight = Math.max(maxHeight, (float) bounds.getHeight() * t.getScale().y());
 			}
 

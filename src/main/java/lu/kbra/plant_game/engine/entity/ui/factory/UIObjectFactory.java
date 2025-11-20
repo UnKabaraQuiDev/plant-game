@@ -6,6 +6,7 @@ import java.util.Map;
 import org.joml.Vector2f;
 
 import lu.pcy113.pclib.PCUtils;
+import lu.pcy113.pclib.concurrency.ListTriggerLatch;
 import lu.pcy113.pclib.impl.ThrowingFunction;
 
 import lu.kbra.plant_game.engine.entity.ui.group.ObjectGroup;
@@ -22,6 +23,8 @@ import lu.kbra.plant_game.engine.mesh.loader.StaticTextLoader;
 import lu.kbra.plant_game.engine.mesh.loader.StaticTexturedMeshLoader;
 import lu.kbra.plant_game.engine.render.GradientMesh;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
+import lu.kbra.plant_game.engine.scene.ui.menu.main.NoMeshObject;
+import lu.kbra.plant_game.engine.scene.ui.menu.main.SpacerUIObject;
 import lu.kbra.plant_game.engine.util.annotation.BufferSize;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.plant_game.generated.UIObjectRegistry;
@@ -31,6 +34,7 @@ import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextAlignment;
+import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 public class UIObjectFactory {
 
@@ -209,6 +213,15 @@ public class UIObjectFactory {
 					});
 
 		}
+		if (NoMeshObject.class.isAssignableFrom(clazz)) {
+
+			return new TaskFuture<>(this.loader, () -> {
+				final T instance = UIObjectRegistry
+						.create(clazz, PCUtils.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime() }, args));
+				return instance;
+			});
+
+		}
 		if (!GradientQuadUIObject.class.isAssignableFrom(clazz)) {
 
 			PCUtils.throwUnsupported(clazz.getName() + " & " + cDataPath);
@@ -247,6 +260,16 @@ public class UIObjectFactory {
 		return this.create_(clazz, args).then(this.loader, (ThrowingFunction<T, T, Throwable>) (final T t) -> obj.add((V) t));
 	}
 
+	public <T extends UIObject, V extends T> TaskFuture<?, T> create_(
+			final Class<T> clazz,
+			final ListTriggerLatch<V> obj,
+			final Object... args) {
+		return this.create_(clazz, args).then(this.loader, (ThrowingFunction<T, T, Throwable>) (final T t) -> {
+			obj.add((V) t);
+			return t;
+		});
+	}
+
 	public static <T extends UIObject> TaskFuture<?, T> create(final Class<T> clazz, final Object... args) {
 		return INSTANCE.create_(clazz, args);
 	}
@@ -255,8 +278,24 @@ public class UIObjectFactory {
 		return INSTANCE.create_(clazz, scene, args);
 	}
 
+	public static <T extends UIObject> TaskFuture<?, T> create(final Class<T> clazz, final ListTriggerLatch latch, final Object... args) {
+		return INSTANCE.create_(clazz, latch, args);
+	}
+
 	public static <T extends UIObject> TaskFuture<?, T> create(final Class<T> clazz, final ObjectGroup obj, final Object... args) {
 		return INSTANCE.create_(clazz, obj, args);
+	}
+
+	public static UIObject createVerticalSpacer(final float f) {
+		return new SpacerUIObject("spacer-v-" + System.nanoTime() % 200_000, null, new Transform3D(), new Vector2f(1f, f));
+	}
+
+	public static UIObject createHorizontalSpacer(final float f) {
+		return new SpacerUIObject("spacer-h-" + System.nanoTime() % 200_000, null, new Transform3D(), new Vector2f(f, 1f));
+	}
+
+	public static UIObject createSpacer(final float x, final float y) {
+		return new SpacerUIObject("spacer-" + System.nanoTime() % 200_000, null, new Transform3D(), new Vector2f(x, y));
 	}
 
 }

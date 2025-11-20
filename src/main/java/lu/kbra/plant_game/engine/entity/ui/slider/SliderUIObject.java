@@ -3,9 +3,10 @@ package lu.kbra.plant_game.engine.entity.ui.slider;
 import org.joml.Math;
 import org.joml.Vector2f;
 import org.joml.Vector2fc;
+import org.lwjgl.glfw.GLFW;
 
 import lu.kbra.plant_game.PGLogic;
-import lu.kbra.plant_game.engine.entity.ui.impl.NeedsClick;
+import lu.kbra.plant_game.engine.entity.ui.impl.NeedsInput;
 import lu.kbra.plant_game.engine.entity.ui.impl.TextUIObject;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
@@ -17,7 +18,7 @@ import lu.kbra.standalone.gameengine.utils.gl.consts.TextAlignment;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 @DataPath("")
-public class SliderUIObject extends TextUIObject implements NeedsClick {
+public class SliderUIObject extends TextUIObject implements NeedsInput {
 
 	protected float min;
 	protected float max;
@@ -58,8 +59,12 @@ public class SliderUIObject extends TextUIObject implements NeedsClick {
 	}
 
 	@Override
-	public void click(final WindowInputHandler input, final float dTime, final Scene scene) {
-		final Vector2f coords = ((UIScene) scene).getMouseCoords(input);
+	public void input(final WindowInputHandler inputHandler, final float dTime, final Scene scene) {
+		if (!inputHandler.isMouseButtonPressed(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
+			return;
+		}
+
+		final Vector2f coords = ((UIScene) scene).getMouseCoords(inputHandler);
 		coords.sub(GeoPlane.XZ.projectToPlane(this.getTransform().getTranslation()));
 		coords.y += this.getTextEmitter().getCharSize().y() / 2;
 
@@ -77,10 +82,18 @@ public class SliderUIObject extends TextUIObject implements NeedsClick {
 		final boolean dirty;
 		if (coords.x() >= firstCharBounds.x() - charSize.x() && firstCharBounds.y() - charSize.y() >= 0 && coords.x() <= firstCharBounds.x()
 				&& coords.y() <= firstCharBounds.y()) {
+			if (!inputHandler.isMouseButtonPressedOnce(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
+				return;
+			}
+
 			this.value = Math.clamp(this.min, this.max, this.value - (this.max - this.min) / this.divisors);
 			dirty = true;
 		} else if (coords.x() >= lastCharBounds.x() - charSize.x() && coords.y() >= 0 && coords.x() <= lastCharBounds.x()
 				&& coords.y() <= lastCharBounds.y()) {
+			if (!inputHandler.isMouseButtonPressedOnce(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
+				return;
+			}
+
 			this.value = Math.clamp(this.min, this.max, this.value + (this.max - this.min) / this.divisors);
 			dirty = true;
 		} else {

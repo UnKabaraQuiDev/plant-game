@@ -1,7 +1,6 @@
 package lu.kbra.plant_game.engine.scene.ui.menu.main;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Comparator;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -10,9 +9,10 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 
 import lu.pcy113.pclib.PCUtils;
-import lu.pcy113.pclib.concurrency.TriggerLatch;
+import lu.pcy113.pclib.concurrency.ListTriggerLatch;
 
 import lu.kbra.plant_game.PGLogic;
+import lu.kbra.plant_game.engine.UpdateFrameState;
 import lu.kbra.plant_game.engine.entity.ui.btn.BackButtonUIObject;
 import lu.kbra.plant_game.engine.entity.ui.btn.OptionsButtonUIObject;
 import lu.kbra.plant_game.engine.entity.ui.btn.PlayButtonUIObject;
@@ -35,14 +35,12 @@ import lu.kbra.plant_game.engine.entity.ui.texture.LargeLogoUIObject;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.render.GradientDirection;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
-import lu.kbra.plant_game.engine.scene.ui.layout.CenteringFlowLayout;
 import lu.kbra.plant_game.engine.scene.ui.layout.FlowLayout;
 import lu.kbra.plant_game.engine.window.input.MappingInputHandler;
 import lu.kbra.plant_game.engine.window.input.StandardKeyOption;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
-import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
 import lu.kbra.standalone.gameengine.impl.future.WorkerDispatcher;
 import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextAlignment;
@@ -59,6 +57,9 @@ public class MainMenuUIScene extends UIScene {
 
 	public static final float GRADIENT_DEPTH = -0.1f;
 
+	public static final float OPTIONS_SCROLL_SPEED = 0.1f;
+	public static final int OPTIONS_COLUMN_COUNT = 25;
+
 	protected int currentGroup = 0;
 	protected int targetGroup = 0;
 	protected float progress = 0;
@@ -66,10 +67,13 @@ public class MainMenuUIScene extends UIScene {
 	protected Vector3f[] restPositions = { new Vector3f(), null, new Vector3f(2, 0, 0), null };
 
 	protected OffsetUIObjectGroup mainMenuGroup = new OffsetUIObjectGroup("main", new Transform3D());
-	protected OffsetUIObjectGroup optionsMenuGroup = new OffsetUIObjectGroup("option",
+	protected OffsetUIObjectGroup optionsMenuGroup = new OffsetUIObjectGroup(
+			"option",
 			new Transform3D(new Vector3f(this.restPositions[OPTIONS])));
-	protected LayoutOffsetUIObjectGroup optionsKeysMenuGroup = new LayoutOffsetUIObjectGroup("option.keys",
-			new CenteringFlowLayout(true, 0.0f), this.optionsMenuGroup);
+	protected LayoutOffsetUIObjectGroup optionsKeysMenuGroup = new LayoutOffsetUIObjectGroup(
+			"option.keys",
+			new FlowLayout(true, 0.0f),
+			this.optionsMenuGroup);
 
 	protected OffsetUIObjectGroup[] groups = new OffsetUIObjectGroup[] { this.mainMenuGroup, null, this.optionsMenuGroup, null };
 
@@ -87,11 +91,74 @@ public class MainMenuUIScene extends UIScene {
 	public void init(final Dispatcher workers, final Dispatcher renderDispatcher) {
 		super.addEntities(this.mainMenuGroup, this.optionsMenuGroup);
 
+		/** main menu */
+		this.buildMainMenu(workers, renderDispatcher);
+
+		/* option content */
+		this.buildOptionsMenu(workers, renderDispatcher);
+
+		/* common */
+		UIObjectFactory
+				.create(CursorUIObject.class, this, new Transform3D(new Vector3f(0, 0.01f, 0.25f), new Quaternionf(), new Vector3f(0.15f)))
+				.then(workers, (Consumer<CursorUIObject>) btn -> {
+					btn.forceCirclingMouse();
+					this.cursor = btn;
+				})
+				.push();
+	}
+
+	private void buildOptionsMenu(final Dispatcher workers, final Dispatcher renderDispatcher) {
+		final TextData uiSmallLeftTextData = new TextData(new Vector2f(0.1f), TextAlignment.TEXT_CENTER, -1);
+
+		final LayoutOffsetUIObjectGroup optionsVolumeGroup = new LayoutOffsetUIObjectGroup(
+				"options.volume",
+				new EdgeStickLayout(true, 0, uiSmallLeftTextData.getCharSize().x() * OPTIONS_COLUMN_COUNT));
+
+		this.optionsKeysMenuGroup.add(optionsVolumeGroup);
+		this.optionsKeysMenuGroup.add(UIObjectFactory.createVerticalSpacer(2 * uiSmallLeftTextData.getCharSize().y()));
+
+		final ListTriggerLatch<OptionKeyUIObject> optionKeyGroupLatch = new ListTriggerLatch<>(
+				StandardKeyOption.values().length,
+				l -> workers.post(() -> {
+					l
+							.stream()
+							.sorted(Comparator.comparingInt(o -> ((StandardKeyOption) o.getKeyOption()).ordinal()))
+							.forEachOrdered(this.optionsKeysMenuGroup::add);
+					this.updateKeys();
+
+					this.optionsKeysMenuGroup.getSubEntities().forEach(System.err::println);
+				}));
+		for (final StandardKeyOption key : StandardKeyOption.values()) {
+			uiSmallLeftTextData.setBufferSize(OPTIONS_COLUMN_COUNT);
+			uiSmallLeftTextData.setName("options.keys" + key);
+			UIObjectFactory
+					.create(OptionKeyUIObject.class,
+							optionKeyGroupLatch,
+							uiSmallLeftTextData,
+							key.name().toLowerCase(),
+							Scale2dDir.BOTH,
+							new Transform3D())
+					.push();
+		}
+		uiSmallLeftTextData.setBufferSize(-1);
+		uiSmallLeftTextData.setName(null);
+
+		/* volume */
+		final ListTriggerLatch<UIObject> optionsVolumeGroupLatch = new TextSliderListTriggerLatch<>(
+				workers,
+				optionsVolumeGroup,
+				VolumeTextUIObject.class,
+				VolumeSliderUIObject.class);
+
+		uiSmallLeftTextData.setTextAlignment(TextAlignment.TEXT_LEFT);
+		UIObjectFactory.create(VolumeTextUIObject.class, optionsVolumeGroupLatch, uiSmallLeftTextData, new Transform3DPivot()).push();
+		UIObjectFactory.create(VolumeSliderUIObject.class, optionsVolumeGroupLatch, uiSmallLeftTextData, new Transform3DPivot()).push();
+	}
+
+	private void buildMainMenu(final Dispatcher workers, final Dispatcher renderDispatcher) {
 		final TextData uiTextData = new TextData(new Vector2f(0.2f), TextAlignment.TEXT_CENTER, -1);
 
 		final float x = -0.8f;
-
-		/** main menu */
 
 		UIObjectFactory
 				.create(PlayButtonUIObject.class, this.mainMenuGroup, uiTextData, new Transform3D(new Vector3f(x, 0, -0.25f)))
@@ -121,7 +188,9 @@ public class MainMenuUIScene extends UIScene {
 		UIObjectFactory
 				.create(GradientQuadUIObject.class,
 						this.optionsMenuGroup,
-						new Transform3D(new Vector3f(0, GRADIENT_DEPTH, 0), new Quaternionf().rotateY((float) Math.PI),
+						new Transform3D(
+								new Vector3f(0, GRADIENT_DEPTH, 0),
+								new Quaternionf().rotateY((float) Math.PI),
 								new Vector3f(2.5f, 1, 2)),
 						GradientDirection.UV_X,
 						GameEngineUtils.hexToColorToVec4f("317dac8c"))
@@ -137,52 +206,6 @@ public class MainMenuUIScene extends UIScene {
 						new Transform3D(new Vector3f(-0.5f, 0, -0.5f), new Quaternionf(), new Vector3f(0.5f)))
 				.then(workers, (Consumer<BackButtonUIObject>) t -> {
 					this.optionsBackBtn = t;
-				})
-				.push();
-
-		final TextData uiSmallLeftTextData = new TextData(new Vector2f(0.1f), TextAlignment.TEXT_CENTER, -1);
-
-		final int COLUMN_COUNT = 25;
-
-		final List<OptionKeyUIObject> all = new ArrayList<>();
-		final TriggerLatch latch = new TriggerLatch(StandardKeyOption.values().length,
-				() -> new TaskFuture<>(workers, this::updateKeys).push());
-		for (final StandardKeyOption key : StandardKeyOption.values()) {
-			uiSmallLeftTextData.setBufferSize(COLUMN_COUNT);
-			uiSmallLeftTextData.setName("options.keys" + key);
-			UIObjectFactory
-					.create(OptionKeyUIObject.class,
-							this.optionsKeysMenuGroup,
-							uiSmallLeftTextData,
-							key.name().toLowerCase(),
-							Scale2dDir.BOTH,
-							new Transform3DPivot())
-					.then(workers, (Consumer<OptionKeyUIObject>) t -> {
-						all.add(t);
-						latch.decrement();
-					})
-					.push();
-		}
-		uiSmallLeftTextData.setBufferSize(-1);
-		uiSmallLeftTextData.setName(null);
-
-		final LayoutOffsetUIObjectGroup optionsVolumeGroup = new LayoutOffsetUIObjectGroup("options.volume",
-				new EdgeStickLayout(true, 0, uiSmallLeftTextData.getCharSize().x() * COLUMN_COUNT));
-
-		uiSmallLeftTextData.setTextAlignment(TextAlignment.TEXT_LEFT);
-		UIObjectFactory.create(VolumeTextUIObject.class, optionsVolumeGroup, uiSmallLeftTextData, new Transform3DPivot()).push();
-		uiSmallLeftTextData.setTextAlignment(TextAlignment.TEXT_RIGHT);
-		UIObjectFactory.create(VolumeSliderUIObject.class, optionsVolumeGroup, uiSmallLeftTextData, new Transform3DPivot()).push();
-
-		this.optionsKeysMenuGroup.add(optionsVolumeGroup);
-
-		/* common */
-
-		UIObjectFactory
-				.create(CursorUIObject.class, this, new Transform3D(new Vector3f(x, 0.01f, 0.25f), new Quaternionf(), new Vector3f(0.15f)))
-				.then(workers, (Consumer<CursorUIObject>) btn -> {
-					btn.forceCirclingMouse();
-					this.cursor = btn;
 				})
 				.push();
 	}
@@ -222,19 +245,20 @@ public class MainMenuUIScene extends UIScene {
 	}
 
 	@Override
-	public void update(
-			final WindowInputHandler inputHandler,
-			final float dTime,
-			final DeferredCompositor compositor,
-			final WorkerDispatcher workers,
-			final Dispatcher render) {
-		super.update(inputHandler, dTime, compositor, workers, render);
+	public void input(final WindowInputHandler inputHandler, final float dTime, final UpdateFrameState frameState) {
+		super.input(inputHandler, dTime, frameState);
 
 		if (inputHandler.wasResized()) {
 			this.camera.getProjection().update(inputHandler.getWindowSize());
 
 			this.optionsKeysMenuGroup.doLayout();
 		}
+
+		this.optionsKeysMenuGroup
+				.getTransform()
+				.translationAdd(0, 0, (float) inputHandler.getMouseScroll().y * OPTIONS_SCROLL_SPEED)
+				.updateMatrix();
+		frameState.uiSceneCaughtMouseInput = true;
 
 		if (this.cursor != null) {
 			final Optional<UIObject> focusCandidate = this.hovering
@@ -250,6 +274,16 @@ public class MainMenuUIScene extends UIScene {
 				focusCandidate.ifPresent(this.cursor::setTargetedObject);
 			}
 		}
+	}
+
+	@Override
+	public void update(
+			final WindowInputHandler inputHandler,
+			final float dTime,
+			final DeferredCompositor compositor,
+			final WorkerDispatcher workers,
+			final Dispatcher render) {
+		super.update(inputHandler, dTime, compositor, workers, render);
 
 		this.restPositions[OPTIONS].x = this.camera.getProjection().getAspectRatio() * 2;
 		if (this.currentGroup != OPTIONS) {

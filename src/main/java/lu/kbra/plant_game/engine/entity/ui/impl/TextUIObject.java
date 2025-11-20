@@ -13,31 +13,31 @@ public class TextUIObject extends UIObject {
 
 	private TextEmitterComponent textEmitterComponent;
 
-	public TextUIObject(String str, TextEmitter text) {
+	public TextUIObject(final String str, final TextEmitter text) {
 		super(str, null);
-		super.addComponent(textEmitterComponent = new TextEmitterComponent(text));
+		super.addComponent(this.textEmitterComponent = new TextEmitterComponent(text));
 	}
 
-	public TextUIObject(String str, TextEmitter text, Transform3D transform) {
+	public TextUIObject(final String str, final TextEmitter text, final Transform3D transform) {
 		super(str, null, transform);
-		super.addComponent(textEmitterComponent = new TextEmitterComponent(text));
+		super.addComponent(this.textEmitterComponent = new TextEmitterComponent(text));
 	}
 
 	@Override
 	public Shape getBounds() {
-		assert textEmitterComponent.getTextEmitter().getLineCount() == 1;
+		assert this.textEmitterComponent.getTextEmitter().getLineCount() == 1;
 		return GameEngineUtils
-				.toRectangleBounds(textEmitterComponent.getTextEmitter().getTextBounds(),
-						textEmitterComponent.getTextEmitter().getTextAlignment().asSwingAlignment(),
+				.toRectangleBounds(this.textEmitterComponent.getTextEmitter().getTextBounds(),
+						this.textEmitterComponent.getTextEmitter().getTextAlignment().asSwingAlignment(),
 						Alignment.CENTER);
 	}
 
 	public TextEmitterComponent getTextEmitterComponent() {
-		return textEmitterComponent;
+		return this.textEmitterComponent;
 	}
 
 	public TextEmitter getTextEmitter() {
-		return textEmitterComponent == null ? null : textEmitterComponent.getTextEmitter();
+		return this.textEmitterComponent == null ? null : this.textEmitterComponent.getTextEmitter();
 	}
 
 }

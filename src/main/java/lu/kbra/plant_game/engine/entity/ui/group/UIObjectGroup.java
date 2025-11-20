@@ -145,14 +145,13 @@ public class UIObjectGroup extends UIObject implements ObjectGroup<UIObject> {
 				combined.add(new Area(se.getTransformedBounds()));
 			});
 		}
-		System.err.println("recomputing bounds for: " + this.name + " " + combined.getBounds2D());
 		this.bounds = combined;
 	}
 
 	@Override
 	public String toString() {
-		return "UIObjectGroup [subEntitiesComponent=" + this.subEntitiesComponent + ", bounds=" + this.bounds + ", parent=" + this.parent
-				+ "]";
+		return "UIObjectGroup [subEntitiesComponent=" + this.subEntitiesComponent + ", bounds=" + this.bounds + ", active=" + this.active
+				+ ", name=" + this.name + "]";
 	}
 
 }

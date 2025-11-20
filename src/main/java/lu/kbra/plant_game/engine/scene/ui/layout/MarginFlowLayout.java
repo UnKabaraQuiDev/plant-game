@@ -46,6 +46,8 @@ public class MarginFlowLayout extends FlowLayout {
 		float offsetX = left ? -aspectRatio + this.marginLeft : aspectRatio - this.marginRight;
 		float offsetY = top ? -1.0f + this.marginTop : 1.0f - this.marginBottom;
 
+		this.gap = 0;
+
 		for (final UIObject child : children) {
 			if (child.getTransform() == null) {
 				continue;
@@ -57,15 +59,15 @@ public class MarginFlowLayout extends FlowLayout {
 			final float scaleX = child.getTransform().getScale().x;
 			final float scaleY = child.getTransform().getScale().y;
 
-			final float x = offsetX + scaleX * (float) (left ? bounds.getMinX() : -bounds.getWidth());
-			final float y = offsetY + scaleY * (float) (top ? -bounds.getMinY() : bounds.getHeight());
+			final float x = offsetX + scaleX * (float) (left ? bounds.getX() : -bounds.getWidth());
+			final float y = offsetY + scaleY * (float) (top ? -bounds.getY() : bounds.getHeight());
 
 			child.getTransform().translationSet(x, 0, y).updateMatrix();
 
 			if (this.vertical) {
-				offsetY = y + (top ? 1 : -1) * scaleY * ((float) bounds.getHeight() + this.gap);
+				offsetY = y + (top ? 1 : -1) * (scaleY * (float) bounds.getHeight() + this.gap);
 			} else {
-				offsetX = x + (left ? 1 : -1) * scaleX * ((float) bounds.getWidth() + this.gap);
+				offsetX = x + (left ? 1 : -1) * (scaleX * (float) bounds.getWidth() + this.gap);
 			}
 		}
 	}

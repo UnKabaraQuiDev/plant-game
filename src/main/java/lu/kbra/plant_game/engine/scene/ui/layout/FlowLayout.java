@@ -1,10 +1,10 @@
 package lu.kbra.plant_game.engine.scene.ui.layout;
 
-import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
 
 import lu.kbra.plant_game.engine.entity.ui.impl.UIObject;
+import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 public class FlowLayout implements Layout {
 
@@ -26,15 +26,25 @@ public class FlowLayout implements Layout {
 				continue;
 			}
 
-			final Shape boundsShape = child.getBounds();
-			final Rectangle2D bounds = boundsShape.getBounds2D();
+			final Rectangle2D bounds = child.getBounds().getBounds2D();
 
-			child.getTransform().translationSet(offsetX, 0, offsetY).updateMatrix();
+			final float scaleY;
+			final float scaleX;
+			if (child.hasTransform()) {
+				final Transform3D transform = child.getTransform();
+				scaleX = transform.getScale().x();
+				scaleY = transform.getScale().y();
+			} else {
+				scaleX = 1f;
+				scaleY = 1f;
+			}
+
+			child.getTransform().translationSet(offsetX, 0, offsetY - (float) bounds.getMinY() * scaleY).updateMatrix();
 
 			if (this.vertical) {
-				offsetY += bounds.getHeight() + this.gap;
+				offsetY += bounds.getHeight() * scaleY + this.gap;
 			} else {
-				offsetX += bounds.getWidth() + this.gap;
+				offsetX += bounds.getWidth() * scaleX + this.gap;
 			}
 		}
 	}
