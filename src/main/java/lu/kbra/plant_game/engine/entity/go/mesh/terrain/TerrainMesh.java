@@ -8,22 +8,25 @@ import lu.kbra.standalone.gameengine.geom.LoadedMesh;
 
 public class TerrainMesh extends LoadedMesh {
 
-	private int objectId, width, length, maxHeight;
+	private final int objectId;
+	private final int width;
+	private final int length;
+	private final int maxHeight;
 
-	private Integer[][] cellHeight;
-	private TerrainMaterialType[][] materialType;
+	private final Integer[][] cellHeight;
+	private final TerrainMaterialType[][] materialType;
 
 	public TerrainMesh(
-			String name,
-			int objectId,
-			int width,
-			int length,
-			int maxHeight,
-			Integer[][] cellHeight,
-			TerrainMaterialType[][] materialType,
-			Vec3fAttribArray vertices,
-			UIntAttribArray indices,
-			AttribArray... attribs) {
+			final String name,
+			final int objectId,
+			final int width,
+			final int length,
+			final int maxHeight,
+			final Integer[][] cellHeight,
+			final TerrainMaterialType[][] materialType,
+			final Vec3fAttribArray vertices,
+			final UIntAttribArray indices,
+			final AttribArray... attribs) {
 		super(name, null, vertices, indices, attribs);
 		this.objectId = objectId;
 		this.width = width;
@@ -33,40 +36,40 @@ public class TerrainMesh extends LoadedMesh {
 		this.materialType = materialType;
 	}
 
-	public int getCellHeight(int x, int z) {
-		if (isInBounds(x, z)) {
-			return cellHeight[x][z];
+	public int getCellHeight(final int x, final int z) {
+		if (this.isInBounds(x, z)) {
+			return this.cellHeight[x][z];
 		}
 
 		return Integer.MIN_VALUE;
 	}
 
-	public boolean isInBounds(int x, int z) {
-		return x >= 0 && x < width && z >= 0 && z < length;
+	public boolean isInBounds(final int x, final int z) {
+		return x >= 0 && x < this.width && z >= 0 && z < this.length;
 	}
 
 	public Integer[][] getCellHeights() {
-		return cellHeight;
+		return this.cellHeight;
 	}
 
 	public int getObjectId() {
-		return objectId;
+		return this.objectId;
 	}
 
 	public int getWidth() {
-		return width;
+		return this.width;
 	}
 
 	public int getLength() {
-		return length;
+		return this.length;
 	}
 
-	public TerrainMaterialType getCellMaterial(int x, int z) {
-		return materialType[x][z];
+	public TerrainMaterialType getCellMaterial(final int x, final int z) {
+		return this.materialType[x][z];
 	}
 
 	public TerrainMaterialType[][] getMaterialTypes() {
-		return materialType;
+		return this.materialType;
 	}
 
 	public int getCellSize() {
@@ -78,7 +81,7 @@ public class TerrainMesh extends LoadedMesh {
 	}
 
 	public int getMaxHeight() {
-		return maxHeight;
+		return this.maxHeight;
 	}
 
 }

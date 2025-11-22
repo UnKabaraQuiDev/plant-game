@@ -63,8 +63,14 @@ public class WorldGenerator {
 	}
 
 	public TerrainMesh generateMesh(final CacheManager cache) {
-		final TerrainMesh mesh = new TerrainMesh("terrain-" + this.width + "x" + this.length + "@" + System.identityHashCode(this),
-				this.meshId, this.width, this.length, this.maxHeight, this.noiseCompute, this.materialType,
+		final TerrainMesh mesh = new TerrainMesh(
+				"terrain-" + this.width + "x" + this.length + "@" + System.identityHashCode(this),
+				this.meshId,
+				this.width,
+				this.length,
+				this.maxHeight,
+				this.noiseCompute,
+				this.materialType,
 				new Vec3fAttribArray(Mesh.ATTRIB_VERTICES_NAME, Mesh.ATTRIB_VERTICES_ID, 1, this.verts),
 				new UIntAttribArray(Mesh.ATTRIB_INDICES_NAME, Mesh.ATTRIB_INDICES_ID, 1, this.indices, BufferType.ELEMENT_ARRAY),
 				new Vec3fAttribArray(Mesh.ATTRIB_NORMALS_NAME, Mesh.ATTRIB_NORMALS_ID, 1, this.normals),
@@ -82,8 +88,12 @@ public class WorldGenerator {
 				final int cellHeight = this.getCellHeight(x, z);
 
 				this.faces
-						.add(new SquareFace(new Vector2i(x, z), new Vector3f(x, cellHeight, z), new Vector3f(x + 1, cellHeight, z + 1),
-								GameEngine.Y_POS, cellHeight < 0 ? TerrainMaterialType.STONE : TerrainMaterialType.GRASS));
+						.add(new SquareFace(
+								new Vector2i(x, z),
+								new Vector3f(x, cellHeight, z),
+								new Vector3f(x + 1, cellHeight, z + 1),
+								GameEngine.Y_POS,
+								cellHeight < 0 ? TerrainMaterialType.STONE : TerrainMaterialType.GRASS));
 
 				this.materialType[x][z] = cellHeight < 0 ? TerrainMaterialType.WATER : TerrainMaterialType.GRASS;
 
@@ -91,7 +101,11 @@ public class WorldGenerator {
 				if (cellHeight > cellHeightXPos) {
 					for (int y = cellHeightXPos; y < cellHeight; y++) {
 						this.faces
-								.add(new SquareFace(null, new Vector3f(x + 1, y, z), new Vector3f(x + 1, y + 1, z + 1), GameEngine.X_POS,
+								.add(new SquareFace(
+										null,
+										new Vector3f(x + 1, y, z),
+										new Vector3f(x + 1, y + 1, z + 1),
+										GameEngine.X_POS,
 										TerrainMaterialType.DIRT));
 					}
 				}
@@ -100,7 +114,11 @@ public class WorldGenerator {
 				if (cellHeight > cellHeightZPos) {
 					for (int y = cellHeightZPos; y < cellHeight; y++) {
 						this.faces
-								.add(new SquareFace(null, new Vector3f(x, y, z + 1), new Vector3f(x + 1, y + 1, z + 1), GameEngine.Z_POS,
+								.add(new SquareFace(
+										null,
+										new Vector3f(x, y, z + 1),
+										new Vector3f(x + 1, y + 1, z + 1),
+										GameEngine.Z_POS,
 										TerrainMaterialType.DIRT));
 					}
 				}
@@ -109,7 +127,11 @@ public class WorldGenerator {
 				if (cellHeight > cellHeightXNeg) {
 					for (int y = cellHeightXNeg; y < cellHeight; y++) {
 						this.faces
-								.add(new SquareFace(null, new Vector3f(x, y, z), new Vector3f(x, y + 1, z + 1), GameEngine.X_NEG,
+								.add(new SquareFace(
+										null,
+										new Vector3f(x, y, z),
+										new Vector3f(x, y + 1, z + 1),
+										GameEngine.X_NEG,
 										TerrainMaterialType.DIRT));
 					}
 				}
@@ -118,7 +140,11 @@ public class WorldGenerator {
 				if (cellHeight > cellHeightZNeg) {
 					for (int y = cellHeightZNeg; y < cellHeight; y++) {
 						this.faces
-								.add(new SquareFace(null, new Vector3f(x, y, z), new Vector3f(x + 1, y + 1, z), GameEngine.Z_NEG,
+								.add(new SquareFace(
+										null,
+										new Vector3f(x, y, z),
+										new Vector3f(x + 1, y + 1, z),
+										GameEngine.Z_NEG,
 										TerrainMaterialType.DIRT));
 					}
 				}
@@ -171,7 +197,8 @@ public class WorldGenerator {
 	}
 
 	public enum TerrainMaterialType {
-		GRASS((byte) 1), DIRT((byte) 2), STONE((byte) 3), WATER((byte) 4);
+
+		GRASS((byte) 1), DIRT((byte) 2), STONE((byte) 3), WATER((byte) 4), RED((byte) 5), LIGHT_BLUE((byte) 6);
 
 		private final byte id;
 
@@ -182,6 +209,7 @@ public class WorldGenerator {
 		public byte getId() {
 			return this.id;
 		}
+
 	}
 
 	public record SquareFace(Vector2ic cellPosition, Vector3fc corner1, Vector3fc corner2, Vector3fc normal, TerrainMaterialType material) {

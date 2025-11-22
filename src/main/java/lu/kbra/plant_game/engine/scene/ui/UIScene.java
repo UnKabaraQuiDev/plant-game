@@ -45,7 +45,7 @@ public class UIScene extends Scene3D implements BoundsOwner {
 	public static final Comparator<Entity> DEPTH_COMPARATOR = Comparator
 			.comparing((final Entity e) -> e instanceof Transform3DOwner ? ((Transform3DOwner) e).getTransform().getTranslation().y : 0f);
 
-	private final CacheManager uiCache;
+	protected final CacheManager uiCache;
 
 	public UIScene(final String name, final CacheManager parent) {
 		super(name);
@@ -70,6 +70,10 @@ public class UIScene extends Scene3D implements BoundsOwner {
 	protected Focusable focused;
 
 	public void input(final WindowInputHandler inputHandler, final float dTime, final UpdateFrameState frameState) {
+		if (!this.active) {
+			return;
+		}
+
 		final Vector2f mouseWorld2D = this.getMouseCoords(inputHandler);
 
 		final Set<UIObject> newHovered = new HashSet<>();
@@ -175,6 +179,10 @@ public class UIScene extends Scene3D implements BoundsOwner {
 			final DeferredCompositor compositor,
 			final WorkerDispatcher workers,
 			final Dispatcher render) {
+		if (!this.active) {
+			return;
+		}
+
 		synchronized (super.getEntitiesLock()) {
 			for (final Entity e : this) {
 				this.updateEntity(inputHandler, dTime, e);

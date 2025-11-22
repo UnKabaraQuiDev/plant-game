@@ -11,23 +11,23 @@ import lu.pcy113.pclib.PCUtils;
 public class ImageWorldGenerator extends WorldGenerator {
 
 	private BufferedImage image;
-	private float scale;
+	private final float scale;
 
-	public ImageWorldGenerator(String location, float scale) {
+	public ImageWorldGenerator(final String location, final float scale) {
 		this.scale = scale;
 
 		try (ByteArrayInputStream bais = new ByteArrayInputStream(PCUtils.readBytesSource(location))) {
-			image = ImageIO.read(bais);
-		} catch (IOException e) {
+			this.image = ImageIO.read(bais);
+		} catch (final IOException e) {
 			throw new RuntimeException("Error while reading: " + location, e);
 		}
 
-		setSize(image.getWidth(null), image.getHeight(null), (int) (255 / scale));
+		this.setSize(this.image.getWidth(null), this.image.getHeight(null), (int) (255 * scale));
 	}
 
 	@Override
-	protected Integer genNoise(int x, int z) {
-		return (int) Math.round((image.getRGB(x, z) & 0xff) * scale);
+	protected Integer genNoise(final int x, final int z) {
+		return (int) Math.round((this.image.getRGB(x, z) & 0xff) * this.scale);
 	}
 
 }

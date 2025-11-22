@@ -3,8 +3,6 @@ package lu.kbra.plant_game;
 import java.io.File;
 import java.util.Locale;
 
-import org.joml.Vector3f;
-
 import lu.kbra.plant_game.engine.UpdateFrameState;
 import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
@@ -14,7 +12,6 @@ import lu.kbra.plant_game.engine.scene.ui.UIScene;
 import lu.kbra.plant_game.engine.scene.ui.menu.main.MainMenuUIScene;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.plant_game.engine.window.input.MappingInputHandler;
-import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.impl.GameLogic;
 import lu.kbra.standalone.gameengine.impl.future.WorkerDispatcher;
 import lu.kbra.standalone.gameengine.utils.gl.consts.Consts;
@@ -26,6 +23,7 @@ public class PGLogic extends GameLogic {
 	public final WorkerDispatcher WORKERS = new WorkerDispatcher("WORKERS", 8);
 
 	private WorldLevelScene worldScene;
+	private MainMenuUIScene mainMenuUIScene;
 	private UIScene uiScene;
 	private DeferredCompositor compositor;
 
@@ -39,25 +37,25 @@ public class PGLogic extends GameLogic {
 	public void init() throws Exception {
 		this.inputHandler = new MappingInputHandler(this.engine);
 		this.inputHandler.setOwner(this.engine.getUpdateThread());
-		inputHandler.saveMappings(new File(Consts.CONFIG_DIR, "mappings.json"));
+		this.inputHandler.loadMappings(new File(Consts.CONFIG_DIR, "mappings.json"));
+		// this.inputHandler.saveMappings(new File(Consts.CONFIG_DIR, "mappings.json"));
 
 		this.compositor = new DeferredCompositor(this.engine, this.engine.getRenderThread());
 		this.compositor.getBackgroundColor().set(1, 1, 0, 1);
 
 		this.worldScene = new WorldLevelScene("world", this.cache);
-		this.worldScene.getCamera().setPosition(new Vector3f(-20, 25, 20).mul(1.5f));
-		this.worldScene.getCamera().lookAt(this.worldScene.getCamera().getPosition(), new Vector3f(0, 0, 0)).updateMatrix();
-		this.worldScene.getCamera().getProjection().setFov((float) Math.toRadians(40));
-		this.worldScene.getLightDirection().set(new Vector3f(0.5f, 0.5f, 0.5f).normalize());
 
-		this.uiScene = new MainMenuUIScene(this.cache);
+		this.mainMenuUIScene = new MainMenuUIScene(this.cache);
+		this.uiScene = this.mainMenuUIScene;
 
-		UIObjectFactory.INSTANCE = new UIObjectFactory(this.uiScene.getCache(), this.WORKERS, this.RENDER_DISPATCHER);
+		UIObjectFactory.INSTANCE = new UIObjectFactory(this.mainMenuUIScene.getCache(), this.WORKERS, this.RENDER_DISPATCHER);
 		GameObjectFactory.INSTANCE = new GameObjectFactory(this.worldScene.getCache(), this.WORKERS, this.RENDER_DISPATCHER);
 		LocalizationService.INSTANCE = new LocalizationService(Locale.US);
 
 		this.uiScene.init(this.WORKERS, this.RENDER_DISPATCHER);
 		this.worldScene.init(this.WORKERS, this.RENDER_DISPATCHER);
+
+		this.uiScene = null;
 	}
 
 	private final UpdateFrameState frameState = new UpdateFrameState();
@@ -67,13 +65,17 @@ public class PGLogic extends GameLogic {
 		this.frameState.reset();
 		this.inputHandler.onFrameBegin();
 
-		this.uiScene.input(this.inputHandler, dTime, this.frameState);
+		if (this.uiScene != null) {
+			this.uiScene.input(this.inputHandler, dTime, this.frameState);
+		}
 		this.worldScene.input(this.inputHandler, dTime, this.frameState);
 	}
 
 	@Override
 	public void update(final float dTime) {
-		this.uiScene.update(this.inputHandler, dTime, this.compositor, this.WORKERS, this.RENDER_DISPATCHER);
+		if (this.uiScene != null) {
+			this.uiScene.update(this.inputHandler, dTime, this.compositor, this.WORKERS, this.RENDER_DISPATCHER);
+		}
 		this.worldScene.update(this.inputHandler, dTime, this.compositor, this.WORKERS, this.RENDER_DISPATCHER);
 	}
 
@@ -99,6 +101,10 @@ public class PGLogic extends GameLogic {
 
 	public UIScene getUiScene() {
 		return this.uiScene;
+	}
+
+	public MainMenuUIScene getMainMenuUIScene() {
+		return this.mainMenuUIScene;
 	}
 
 	public DeferredCompositor getCompositor() {

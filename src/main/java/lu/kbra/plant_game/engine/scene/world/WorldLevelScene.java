@@ -1,5 +1,6 @@
 package lu.kbra.plant_game.engine.scene.world;
 
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
 
@@ -20,6 +21,7 @@ import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory;
 import lu.kbra.plant_game.engine.entity.go.impl.AnimatedGameObject;
 import lu.kbra.plant_game.engine.entity.go.impl.GameObject;
 import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
+import lu.kbra.plant_game.engine.entity.go.mesh.pipe.PipeMesh;
 import lu.kbra.plant_game.engine.entity.go.mesh.terrain.TerrainMesh;
 import lu.kbra.plant_game.engine.entity.go.obj.energy.SolarPanelObject;
 import lu.kbra.plant_game.engine.entity.go.obj.terrain.TerrainObject;
@@ -34,13 +36,17 @@ import lu.kbra.plant_game.engine.scene.world.generator.WorldGenerator.TerrainMat
 import lu.kbra.plant_game.engine.window.input.StandardKeyOption;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
+import lu.kbra.standalone.gameengine.cache.attrib.UIntAttribArray;
+import lu.kbra.standalone.gameengine.cache.attrib.Vec3fAttribArray;
 import lu.kbra.standalone.gameengine.geom.LoadedQuadMesh;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
 import lu.kbra.standalone.gameengine.objs.entity.Entity;
+import lu.kbra.standalone.gameengine.objs.entity.components.SubEntitiesComponent;
 import lu.kbra.standalone.gameengine.scene.Scene3D;
 import lu.kbra.standalone.gameengine.scene.camera.Camera3D;
+import lu.kbra.standalone.gameengine.utils.gl.consts.BufferType;
 import lu.kbra.standalone.gameengine.utils.gl.consts.Direction;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
@@ -68,6 +74,11 @@ public class WorldLevelScene extends Scene3D {
 	public WorldLevelScene(final String name, final CacheManager parent) {
 		super(name);
 		this.worldCache = new CacheManager(name, parent);
+
+		this.getCamera().setPosition(new Vector3f(-20, 25, 20).mul(1.5f));
+		this.getCamera().lookAt(this.getCamera().getPosition(), new Vector3f(0, 0, 0)).updateMatrix();
+		this.getCamera().getProjection().setFov((float) Math.toRadians(40));
+		this.getLightDirection().set(new Vector3f(0.5f, 0.5f, 0.5f).normalize());
 	}
 
 	public void init(final Dispatcher workers, final Dispatcher renderDispatcher) {
@@ -101,9 +112,72 @@ public class WorldLevelScene extends Scene3D {
 			terrainLatch.countDown();
 
 			new TaskFuture<>(renderDispatcher, () -> {
+				final Vector3f[] pos = new Vector3f[48];
+				int index = 0;
+				final TerrainMesh terrainMesh = this.getTerrain().getMesh();
+				for (int x = 0, y = 2; x < 12; x += terrainMesh.getCellSize()) {
+					final float h0 = terrainMesh.getCellHeight(x, y) + 0.5f;
+					final float h1 = terrainMesh.getCellHeight(x + terrainMesh.getCellSize(), y) + 0.5f;
+
+					pos[index + 0] = new Vector3f(x, h0, y + 0.5f);
+					pos[index + 1] = new Vector3f(x + terrainMesh.getCellSize(), h0, y + 0.5f);
+					index += 2;
+
+					if (h0 != h1) {
+						final float low = Math.min(h0, h1);
+						final float high = Math.max(h0, h1);
+
+						pos[index + 0] = new Vector3f(x + terrainMesh.getCellSize(), low, y + 0.5f);
+						pos[index + 1] = new Vector3f(x + terrainMesh.getCellSize(), high, y + 0.5f);
+						index += 2;
+					}
+				}
+				final int[] indices = new int[pos.length * 2 + 2];
+				for (int i = 0; i < pos.length - 1; i++) {
+					indices[i * 2 + 0] = i;
+					indices[i * 2 + 1] = i + 1;
+				}
+
+				final PipeMesh mesh = new PipeMesh(
+						"pipe-" + "@" + System.identityHashCode(this),
+						12,
+						new Vec3fAttribArray(Mesh.ATTRIB_VERTICES_NAME, Mesh.ATTRIB_VERTICES_ID, 1, pos),
+						new UIntAttribArray(Mesh.ATTRIB_INDICES_NAME, Mesh.ATTRIB_INDICES_ID, 1, indices, BufferType.ELEMENT_ARRAY));
+				mesh.setEffectiveLength(index);
+				this.worldCache.addMesh(mesh);
+				this.terrain
+						.addComponent(new SubEntitiesComponent<>(
+								List
+										.of(new GameObject(
+												"test",
+												mesh,
+												new Transform3D(),
+												new Vector3i(),
+												TerrainMaterialType.LIGHT_BLUE.getId()))));
+
+				for (int x = terrainMesh.getWidth(), y = 12; x > 0; x -= terrainMesh.getCellSize()) {
+					final float h0 = terrainMesh.getCellHeight(x, y) + 0.5f;
+					final float h1 = terrainMesh.getCellHeight(x + terrainMesh.getCellSize(), y) + 0.5f;
+
+					mesh.addPoint(new Vector3f(x + terrainMesh.getCellSize(), h0, y + 0.5f));
+
+					if (h0 != h1) {
+						final float low = Math.min(h0, h1);
+						final float high = Math.max(h0, h1);
+
+						mesh.addPoint(new Vector3f(x + terrainMesh.getCellSize(), high, y + 0.5f));
+					}
+				}
+
+				System.err.println("created pipe");
+			}).push();
+
+			new TaskFuture<>(renderDispatcher, () -> {
 				GlobalLogger.info("Generating water mesh...");
 				final Pair<Mesh, Long> meshTime = PCUtils
-						.nanoTime(() -> new LoadedQuadMesh("water", null,
+						.nanoTime(() -> new LoadedQuadMesh(
+								"water",
+								null,
 								new Vector2f(this.getTerrain().getMesh().getWidth(), this.getTerrain().getMesh().getLength())));
 				this.getCache().addMesh(meshTime.getKey());
 				GlobalLogger.info("Water mesh generated in " + (meshTime.getValue() / 1e6) + " ms");
@@ -111,8 +185,12 @@ public class WorldLevelScene extends Scene3D {
 			})
 					.then(workers,
 							(ThrowingConsumer<Mesh, Throwable>) mesh -> this
-									.setWaterLevel(new GameObject("water", mesh, new Transform3D(new Vector3f(0, 0.9f, 0)),
-											new Vector3i(2, 0, 0), TerrainMaterialType.WATER.getId())))
+									.setWaterLevel(new GameObject(
+											"water",
+											mesh,
+											new Transform3D(new Vector3f(0, 0.9f, 0)),
+											new Vector3i(2, 0, 0),
+											TerrainMaterialType.WATER.getId())))
 					.push();
 
 			GameObjectFactory
@@ -143,22 +221,19 @@ public class WorldLevelScene extends Scene3D {
 			GameObjectFactory
 					.create(SolarPanelObject.class, this, new Transform3D())
 					.then(workers,
-							(ThrowingConsumer<SolarPanelObject, Throwable>) obj -> obj
-									.placeDown(this, new Vector2i(15, 5), Direction.NONE))
+							(ThrowingConsumer<SolarPanelObject, Throwable>) obj -> obj.placeDown(this, new Vector2i(15, 5), Direction.NONE))
 					.push();
 
 			GameObjectFactory
 					.create(WaterWheelObject.class, this, new Transform3D())
 					.then(workers,
-							(ThrowingConsumer<WaterWheelObject, Throwable>) obj -> obj
-									.placeDown(this, new Vector2i(11, 7), Direction.WEST))
+							(ThrowingConsumer<WaterWheelObject, Throwable>) obj -> obj.placeDown(this, new Vector2i(11, 7), Direction.WEST))
 					.push();
 
 			GameObjectFactory
 					.create(WaterWheelObject.class, this, new Transform3D())
 					.then(workers,
-							(ThrowingConsumer<WaterWheelObject, Throwable>) obj -> obj
-									.placeDown(this, new Vector2i(13, 8), Direction.WEST))
+							(ThrowingConsumer<WaterWheelObject, Throwable>) obj -> obj.placeDown(this, new Vector2i(13, 8), Direction.WEST))
 					.push();
 
 		}).push();
@@ -217,7 +292,9 @@ public class WorldLevelScene extends Scene3D {
 					this.moveObjectTaskState = new TaskFuture<Void, Void>(workers, () -> {
 						compositor.pollObjectId(true);
 
-						final Vector3i ids = new Vector3i(compositor.getObjectId().y, compositor.getObjectId().z,
+						final Vector3i ids = new Vector3i(
+								compositor.getObjectId().y,
+								compositor.getObjectId().z,
 								compositor.getObjectId().w);
 
 						super.getEntities()
