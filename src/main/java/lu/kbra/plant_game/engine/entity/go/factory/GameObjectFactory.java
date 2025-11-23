@@ -21,6 +21,7 @@ import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
+import lu.kbra.standalone.gameengine.objs.entity.components.SubEntitiesComponent;
 import lu.kbra.standalone.gameengine.scene.Scene3D;
 
 public class GameObjectFactory {
@@ -82,29 +83,38 @@ public class GameObjectFactory {
 						return instance;
 					});
 
-		} else {
-
-			return StaticMeshLoader
-					.getStaticFuture(this.cache, clazz.getName(), this.dataPath.get(clazz), this.loader, this.render)
-					.then(this.loader, (ThrowingFunction<Mesh, T, Throwable>) mesh -> {
-						final T instance = GameObjectRegistry
-								.create(clazz,
-										PCUtils
-												.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), mesh },
-														args));
-						instance.setMaterialId((short) (mesh instanceof TexturedMesh ? ((TexturedMesh) mesh).getTexture().getGlId() : -1));
-						return instance;
-					});
-
 		}
+		return StaticMeshLoader
+				.getStaticFuture(this.cache, clazz.getName(), this.dataPath.get(clazz), this.loader, this.render)
+				.then(this.loader, (ThrowingFunction<Mesh, T, Throwable>) mesh -> {
+					final T instance = GameObjectRegistry
+							.create(clazz,
+									PCUtils.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), mesh }, args));
+					instance.setMaterialId((short) (mesh instanceof TexturedMesh ? ((TexturedMesh) mesh).getTexture().getGlId() : -1));
+					return instance;
+				});
 	}
 
 	public <T extends GameObject> TaskFuture<?, T> create_(final Class<T> clazz, final Scene3D scene, final Object... args) {
 		return this.create_(clazz, args).then(this.loader, (ThrowingFunction<T, T, Throwable>) scene::addEntity);
 	}
 
+	public <T extends GameObject> TaskFuture<?, T> create_(final Class<T> clazz, final SubEntitiesComponent parent, final Object... args) {
+		return this.create_(clazz, args).then(this.loader, (ThrowingFunction<T, T, Throwable>) e -> {
+			parent.addEntity(e);
+			return e;
+		});
+	}
+
 	public static <T extends GameObject> TaskFuture<?, T> create(final Class<T> clazz, final Object... args) {
 		return INSTANCE.create_(clazz, args);
+	}
+
+	public static <T extends GameObject> TaskFuture<?, T> create(
+			final Class<T> clazz,
+			final SubEntitiesComponent parent,
+			final Object... args) {
+		return INSTANCE.create_(clazz, parent, args);
 	}
 
 	public static <T extends GameObject> TaskFuture<?, T> create(final Class<T> clazz, final Scene3D scene, final Object... args) {

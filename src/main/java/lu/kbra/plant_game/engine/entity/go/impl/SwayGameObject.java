@@ -10,21 +10,38 @@ public class SwayGameObject extends GameObject implements SwayOwner {
 
 	protected SwayMeshComponent swayMeshComponent;
 
-	private float deformRatio;
-	private float speedRatio;
+	protected float deformRatio;
+	protected float speedRatio;
+	protected float scaleRatio;
 
-	public SwayGameObject(final String str, final SwayMesh swayMesh, final float deformRatio, final float speedRatio) {
+	public SwayGameObject(
+			final String str,
+			final SwayMesh swayMesh,
+			final float deformRatio,
+			final float speedRatio,
+			final float scaleRatio) {
 		super(str, null);
 		super.addComponent(this.swayMeshComponent = new SwayMeshComponent(swayMesh));
 		this.deformRatio = deformRatio;
 		this.speedRatio = speedRatio;
+		this.scaleRatio = scaleRatio;
 	}
 
 	public SwayGameObject(final String str, final SwayMesh swayMesh, final Transform3D transform) {
 		super(str, null, transform);
 		super.addComponent(this.swayMeshComponent = new SwayMeshComponent(swayMesh));
-		this.deformRatio = 1;
-		this.speedRatio = 1;
+		this.deformRatio = 0.1f;
+		this.speedRatio = 0.1f;
+		this.scaleRatio = 0.1f;
+	}
+
+	public SwayGameObject(final String str, final SwayMesh swayMesh, final Transform3D transform, final short materialId) {
+		super(str, null, transform);
+		super.addComponent(this.swayMeshComponent = new SwayMeshComponent(swayMesh));
+		super.materialId = materialId;
+		this.deformRatio = 0.1f;
+		this.speedRatio = 0.1f;
+		this.scaleRatio = 0.1f;
 	}
 
 	public SwayGameObject(
@@ -32,11 +49,13 @@ public class SwayGameObject extends GameObject implements SwayOwner {
 			final SwayMesh swayMesh,
 			final Transform3D transform,
 			final float deformRatio,
-			final float speedRatio) {
+			final float speedRatio,
+			final float scaleRatio) {
 		super(str, null, transform);
 		super.addComponent(this.swayMeshComponent = new SwayMeshComponent(swayMesh));
 		this.deformRatio = deformRatio;
 		this.speedRatio = speedRatio;
+		this.scaleRatio = scaleRatio;
 	}
 
 	public SwayGameObject(
@@ -45,11 +64,13 @@ public class SwayGameObject extends GameObject implements SwayOwner {
 			final Transform3D transform,
 			final Vector3i objectId,
 			final float deformRatio,
-			final float speedRatio) {
+			final float speedRatio,
+			final float scaleRatio) {
 		super(str, null, transform, objectId);
 		super.addComponent(this.swayMeshComponent = new SwayMeshComponent(swayMesh));
 		this.deformRatio = deformRatio;
 		this.speedRatio = speedRatio;
+		this.scaleRatio = scaleRatio;
 	}
 
 	public SwayGameObject(
@@ -59,11 +80,13 @@ public class SwayGameObject extends GameObject implements SwayOwner {
 			final Vector3i objectId,
 			final short materialId,
 			final float deformRatio,
-			final float speedRatio) {
+			final float speedRatio,
+			final float scaleRatio) {
 		super(str, null, transform, objectId, materialId);
 		super.addComponent(this.swayMeshComponent = new SwayMeshComponent(swayMesh));
 		this.deformRatio = deformRatio;
 		this.speedRatio = speedRatio;
+		this.scaleRatio = scaleRatio;
 	}
 
 	@Override
@@ -77,6 +100,11 @@ public class SwayGameObject extends GameObject implements SwayOwner {
 	}
 
 	@Override
+	public float getScaleRatio() {
+		return this.scaleRatio;
+	}
+
+	@Override
 	public void setDeformRatio(final float dr) {
 		this.deformRatio = dr;
 	}
@@ -84,6 +112,11 @@ public class SwayGameObject extends GameObject implements SwayOwner {
 	@Override
 	public void setSpeedRatio(final float sr) {
 		this.speedRatio = sr;
+	}
+
+	@Override
+	public void setScaleRatio(final float scaleRatio) {
+		this.scaleRatio = scaleRatio;
 	}
 
 	public SwayMeshComponent getSwayMeshComponent() {
@@ -96,10 +129,10 @@ public class SwayGameObject extends GameObject implements SwayOwner {
 
 	@Override
 	public String toString() {
-		return "SwayGameObject [deformRatio=" + this.deformRatio + ", speedRatio=" + this.speedRatio + ", materialId=" + this.materialId
-				+ ", entityMaterialId=" + this.entityMaterialId + ", objectId=" + this.objectId + ", objectIdLocation="
-				+ this.objectIdLocation + ", active=" + this.active + ", name=" + this.name + ", getSwayMesh()=" + this.getSwayMesh()
-				+ ", getMesh()=" + this.getMesh() + ", getTransform()=" + this.getTransform() + "]";
+		return "SwayGameObject [deformRatio=" + this.deformRatio + ", speedRatio=" + this.speedRatio + ", scaleRatio=" + this.scaleRatio
+				+ ", materialId=" + this.materialId + ", entityMaterialId=" + this.entityMaterialId + ", objectId=" + this.objectId
+				+ ", objectIdLocation=" + this.objectIdLocation + ", active=" + this.active + ", name=" + this.name + ", getSwayMesh()="
+				+ this.getSwayMesh() + ", getMesh()=" + this.getMesh() + ", getTransform()=" + this.getTransform() + "]";
 	}
 
 }

@@ -11,6 +11,13 @@ layout(location = 5) in mat4 in_InstanceMatrix;
 uniform mat4 transformationMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
+// sway
+uniform float scaleRatio;
+uniform float time;
+uniform float deformRatio;
+uniform float speedRatio;
+uniform sampler2D swayMap;
+uniform vec2 scrollDirection;
 
 out vec3 bet_ObjPos;
 out vec3 bet_ObjNormal;

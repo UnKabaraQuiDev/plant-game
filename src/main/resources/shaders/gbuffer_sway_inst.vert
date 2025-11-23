@@ -5,6 +5,8 @@ layout(location = 1) in vec3 in_Normal;
 layout(location = 2) in vec2 in_UV;
 layout(location = 3) in uint in_MaterialId;
 layout(location = 4) in uvec3 in_ObjectId;
+// instances
+layout(location = 5) in mat4 in_InstanceMatrix;
 
 uniform mat4 transformationMatrix;
 uniform mat4 viewMatrix;
@@ -30,7 +32,10 @@ flat out uvec3 bet_ObjectId;
 flat out uint bet_InstanceID;
 
 void main() {
-	vec3 worldPos = (transformationMatrix * vec4(in_Position, 1.0)).xyz;
+// untested
+    mat4 modelMatrix = transformationMatrix * in_InstanceMatrix;
+	vec4 worldPos4 = modelMatrix * vec4(in_Position, 1.0);
+	vec3 worldPos = worldPos4.xyz;
 
 	float sway = texture(swayMap, worldPos.xz * scaleRatio + scrollDirection * speedRatio * time).r * 2 - 1;
 	float offset = deformRatio * sway * in_Position.y;
@@ -44,10 +49,9 @@ void main() {
     bet_ObjNormal = normalize(in_Normal);
 
 // world space
-    vec4 worldPos4 = transformationMatrix * vec4(pos, 1.0);
-    bet_WorldPos = worldPos4.xyz;
+    bet_WorldPos = worldPos;
 
-    mat3 normalMatrix = transpose(inverse(mat3(transformationMatrix)));
+    mat3 normalMatrix = transpose(inverse(mat3(modelMatrix)));
     bet_WorldNormal = normalize(normalMatrix * in_Normal);
 
 // view space
@@ -61,7 +65,7 @@ void main() {
     bet_UV = in_UV;
     bet_MaterialId = in_MaterialId;
     bet_ObjectId = in_ObjectId;
-    bet_InstanceID = 0;
-
+    bet_InstanceID = gl_InstanceID;
+    
     gl_Position = projectionMatrix * viewPos4;
 }

@@ -1,9 +1,9 @@
 package lu.kbra.plant_game.engine.scene.world;
 
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
 
+import org.joml.Quaternionf;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
@@ -62,6 +62,7 @@ public class WorldLevelScene extends Scene3D {
 
 	private Vector3f lightColor = new Vector3f(1), lightDirection = new Vector3f(0.8f, 0.5f, 0.5f).normalize();
 	private float ambientLight = 0.25f;
+	private Vector2f windDirection = new Vector2f(1, 1).normalize();
 
 	private final Vector3f posAdd = new Vector3f();
 	private float rotation = 0;
@@ -147,14 +148,8 @@ public class WorldLevelScene extends Scene3D {
 				mesh.setEffectiveLength(index);
 				this.worldCache.addMesh(mesh);
 				this.terrain
-						.addComponent(new SubEntitiesComponent<>(
-								List
-										.of(new GameObject(
-												"test",
-												mesh,
-												new Transform3D(),
-												new Vector3i(),
-												TerrainMaterialType.LIGHT_BLUE.getId()))));
+						.getComponent(SubEntitiesComponent.class)
+						.addEntity(new GameObject("test", mesh, new Transform3D(), new Vector3i(), TerrainMaterialType.LIGHT_BLUE.getId()));
 
 				for (int x = terrainMesh.getWidth(), y = 12; x > 0; x -= terrainMesh.getCellSize()) {
 					final float h0 = terrainMesh.getCellHeight(x, y) + 0.5f;
@@ -237,12 +232,24 @@ public class WorldLevelScene extends Scene3D {
 							(ThrowingConsumer<WaterWheelObject, Throwable>) obj -> obj.placeDown(this, new Vector2i(13, 8), Direction.WEST))
 					.push();
 
+			if (!this.getTerrain().hasComponentMatching(SubEntitiesComponent.class)) {
+				this.getTerrain().addComponent(new SubEntitiesComponent<GameObject>());
+			}
+			final SubEntitiesComponent subEntities = this.getTerrain().getComponent(SubEntitiesComponent.class);
+			for (int x = 0; x < this.getTerrain().getMesh().getWidth(); x++) {
+				for (int z = 0; z < this.getTerrain().getMesh().getLength(); z++) {
+					final float y = this.getTerrain().getMesh().getCellHeight(x, z);
+					GameObjectFactory
+							.create(LargeGrassObject.class,
+									subEntities,
+									new Transform3D(
+											new Vector3f(x + 0.5f, y, z + 0.5f),
+											new Quaternionf().rotateY((float) (Math.PI / 2 * PCUtils.randomIntRange(0, 3)))),
+									TerrainMaterialType.DIRT.getId())
+							.push();
+				}
+			}
 		}).push();
-
-		GameObjectFactory
-				.create(LargeGrassObject.class, this, new Transform3D(new Vector3f(0, 6, 0)))
-				.then(workers, (Consumer<LargeGrassObject>) m -> System.err.println("GRASS: " + m))
-				.push();
 	}
 
 	public void input(final WindowInputHandler inputHandler, final float dTime, final UpdateFrameState frameState) {
@@ -410,6 +417,14 @@ public class WorldLevelScene extends Scene3D {
 
 	public void setAmbientLight(final float ambientLight) {
 		this.ambientLight = ambientLight;
+	}
+
+	public Vector2f getWindDirection() {
+		return this.windDirection;
+	}
+
+	public void setWindDirection(final Vector2f windDirection) {
+		this.windDirection = windDirection;
 	}
 
 }

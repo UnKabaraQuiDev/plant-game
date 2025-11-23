@@ -13,6 +13,7 @@ public class SwayLoadedMesh extends LoadedMesh implements SwayMesh {
 
 	private float deformRatio = 1f;
 	private float speedRatio = 1f;
+	private float scaleRatio = 0.1f;
 
 	public SwayLoadedMesh(
 			final String name,
@@ -38,6 +39,11 @@ public class SwayLoadedMesh extends LoadedMesh implements SwayMesh {
 	}
 
 	@Override
+	public float getScaleRatio() {
+		return this.scaleRatio;
+	}
+
+	@Override
 	public void setDeformRatio(final float deformRatio) {
 		this.deformRatio = deformRatio;
 	}
@@ -48,11 +54,17 @@ public class SwayLoadedMesh extends LoadedMesh implements SwayMesh {
 	}
 
 	@Override
+	public void setScaleRatio(final float scaleRatio) {
+		this.scaleRatio = scaleRatio;
+	}
+
+	@Override
 	public String toString() {
-		return "SwayLoadedMesh [deformRatio=" + this.deformRatio + ", speedRatio=" + this.speedRatio + ", name=" + this.name + ", vao="
-				+ this.vao + ", vbo=" + this.vbo + ", material=" + this.material + ", vertices=" + this.vertices + ", indices="
-				+ this.indices + ", attribs=" + Arrays.toString(this.attribs) + ", vertexCount=" + this.vertexCount + ", indicesCount="
-				+ this.indicesCount + ", boundingBox=" + this.boundingBox + "]";
+		return "SwayLoadedMesh [deformRatio=" + this.deformRatio + ", speedRatio=" + this.speedRatio + ", scaleRatio=" + this.scaleRatio
+				+ ", name=" + this.name + ", vao=" + this.vao + ", vbo=" + this.vbo + ", material=" + this.material + ", vertices="
+				+ this.vertices + ", indices=" + this.indices + ", attribs=" + Arrays.toString(this.attribs) + ", vertexCount="
+				+ this.vertexCount + ", indicesCount=" + this.indicesCount + ", boundingBox=" + this.boundingBox + ", isValid()="
+				+ this.isValid() + "]";
 	}
 
 }

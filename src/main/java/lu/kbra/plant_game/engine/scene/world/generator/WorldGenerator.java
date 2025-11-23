@@ -166,7 +166,7 @@ public class WorldGenerator {
 			System.arraycopy(corners, 0, this.verts, faceCount * 4, 4);
 			System.arraycopy(face.indices(faceCount * 4), 0, this.indices, faceCount * 6, 6);
 			Arrays.fill(this.normals, faceCount * 4, faceCount * 4 + 4, face.normal);
-			Arrays.fill(this.materialIds, faceCount * 4, faceCount * 4 + 4, face.material().getId());
+			Arrays.fill(this.materialIds, faceCount * 4, faceCount * 4 + 4, (byte) face.material().getId());
 			if (face.cellPosition != null) {
 				Arrays
 						.fill(this.objectIds,
@@ -198,15 +198,15 @@ public class WorldGenerator {
 
 	public enum TerrainMaterialType {
 
-		GRASS((byte) 1), DIRT((byte) 2), STONE((byte) 3), WATER((byte) 4), RED((byte) 5), LIGHT_BLUE((byte) 6);
+		GRASS((short) 1), DIRT((short) 2), STONE((short) 3), WATER((short) 4), RED((short) 5), LIGHT_BLUE((short) 6);
 
-		private final byte id;
+		private final short id;
 
-		private TerrainMaterialType(final byte id) {
+		private TerrainMaterialType(final short id) {
 			this.id = id;
 		}
 
-		public byte getId() {
+		public short getId() {
 			return this.id;
 		}
 

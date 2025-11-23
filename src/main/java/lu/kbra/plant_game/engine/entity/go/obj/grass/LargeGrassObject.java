@@ -14,8 +14,19 @@ public class LargeGrassObject extends SwayGameObject {
 		super(str, swayMesh, transform);
 	}
 
-	public LargeGrassObject(final String str, final SwayMesh swayMesh, final float deformRatio, final float speedRatio) {
-		super(str, swayMesh, deformRatio, speedRatio);
+	public LargeGrassObject(
+			final String str,
+			final SwayMesh swayMesh,
+			final float deformRatio,
+			final float speedRatio,
+			final float scaleRatio) {
+		super(str, swayMesh, deformRatio, speedRatio, scaleRatio);
+		// TODO Auto-generated constructor stub
+	}
+
+	public LargeGrassObject(final String str, final SwayMesh swayMesh, final Transform3D transform, final short materialId) {
+		super(str, swayMesh, transform, materialId);
+		// TODO Auto-generated constructor stub
 	}
 
 	public LargeGrassObject(
@@ -23,8 +34,10 @@ public class LargeGrassObject extends SwayGameObject {
 			final SwayMesh swayMesh,
 			final Transform3D transform,
 			final float deformRatio,
-			final float speedRatio) {
-		super(str, swayMesh, transform, deformRatio, speedRatio);
+			final float speedRatio,
+			final float scaleRatio) {
+		super(str, swayMesh, transform, deformRatio, speedRatio, scaleRatio);
+		// TODO Auto-generated constructor stub
 	}
 
 	public LargeGrassObject(
@@ -33,8 +46,23 @@ public class LargeGrassObject extends SwayGameObject {
 			final Transform3D transform,
 			final Vector3i objectId,
 			final float deformRatio,
-			final float speedRatio) {
-		super(str, swayMesh, transform, objectId, deformRatio, speedRatio);
+			final float speedRatio,
+			final float scaleRatio) {
+		super(str, swayMesh, transform, objectId, deformRatio, speedRatio, scaleRatio);
+		// TODO Auto-generated constructor stub
+	}
+
+	public LargeGrassObject(
+			final String str,
+			final SwayMesh swayMesh,
+			final Transform3D transform,
+			final Vector3i objectId,
+			final short materialId,
+			final float deformRatio,
+			final float speedRatio,
+			final float scaleRatio) {
+		super(str, swayMesh, transform, objectId, materialId, deformRatio, speedRatio, scaleRatio);
+		// TODO Auto-generated constructor stub
 	}
 
 	public LargeGrassObject(

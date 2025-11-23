@@ -69,6 +69,7 @@ public class StaticMeshLoader {
 			waitOrCreateLock(meshName);
 
 			if (cache.hasMesh(meshName)) {
+				releaseLock(meshName);
 				throw new SkipThen(cache.getMesh(meshName));
 			}
 

@@ -109,13 +109,16 @@ public class AnimatedMeshLoader {
 			waitOrCreateLock(meshName + "-animated");
 
 			if (cache.hasMesh(meshName + "-animated") && cache.hasMesh(meshName)) {
+				releaseLock(meshName);
+				releaseLock(meshName + "-animated");
 				throw new SkipThen(2, new AnimatedMeshes(cache.getMesh(meshName), (AnimatedMesh) cache.getMesh(meshName + "-animated")));
 			}
 
 			// need to create animated mesh
 			if (cache.hasMesh(meshName)) {
+				releaseLock(meshName);
 				throw new SkipThen(2, new TaskFuture<>(loader, () -> {
-					waitOrCreateLock(meshName + "-animated");
+					// waitOrCreateLock(meshName + "-animated");
 
 					final URI baseURI = URI.create(path);
 					final JSONObject obj = new JSONObject(PCUtils.readStringSource(path));
@@ -125,13 +128,14 @@ public class AnimatedMeshLoader {
 						.then(render,
 								(ThrowingFunction<AnimatedMeshData, AnimatedMeshes, Throwable>) obj -> new AnimatedMeshes(
 										cache.getMesh(meshName),
-										createAnimated(cache, meshName, obj))));
+										createAnimated(cache, meshName + "-animated", obj))));
 			}
 
 			// need to create static mesh
 			if (cache.hasMesh(meshName + "-animated")) {
+				releaseLock(meshName + "-animated");
 				throw new SkipThen(2, new TaskFuture<>(loader, () -> {
-					waitOrCreateLock(meshName);
+					// waitOrCreateLock(meshName);
 
 					final URI baseURI = URI.create(path);
 					final JSONObject obj = new JSONObject(PCUtils.readStringSource(path));

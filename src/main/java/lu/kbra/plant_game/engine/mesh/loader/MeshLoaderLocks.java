@@ -13,36 +13,33 @@ public final class MeshLoaderLocks {
 	private static final Map<String, Object> locks = new ConcurrentHashMap<>();
 	private static final long LOAD_WAIT_TIMEOUT = 1000;
 
-	public static void waitOrCreateLock(String meshName) throws InterruptedException {
+	public static void waitOrCreateLock(final String meshName) throws InterruptedException {
 		final String source = PCUtils.getCallerClassName(true);
 		final AtomicBoolean creator = new AtomicBoolean(false);
 
 		final Object lock = locks.computeIfAbsent(meshName, k -> {
 			creator.set(true);
-			GlobalLogger
-					.log(Level.FINEST,
-							"Thread: " + Thread.currentThread().getName() + " created lock on: " + meshName + " (" + source + ")");
 			return new Object();
 		});
 
 		if (creator.get()) {
+			GlobalLogger
+					.log(Level.FINEST,
+							"Thread: " + Thread.currentThread().getName() + " created lock on: " + meshName + " (" + source + ") "
+									+ PCUtils.toSimpleIdentityString(lock));
 			return;
 		}
 
 		synchronized (lock) {
-			int iter = 0;
-			while (locks.containsKey(meshName) && locks.get(meshName) == lock && iter++ < 5) {
-				GlobalLogger
-						.log(Level.FINEST, "Thread " + Thread.currentThread().getName() + " waiting on: " + meshName + " (" + source + ")");
-				lock.wait(LOAD_WAIT_TIMEOUT);
-			}
-			if (iter > 5) {
-				throw new IllegalStateException("Timeout waiting for mesh: " + meshName);
-			}
+			GlobalLogger
+					.log(Level.FINEST,
+							"Thread " + Thread.currentThread().getName() + " waiting on: " + meshName + " (" + source + ") "
+									+ PCUtils.toSimpleIdentityString(lock));
+			lock.wait(LOAD_WAIT_TIMEOUT);
 		}
 	}
 
-	public static void releaseLock(String meshName) {
+	public static void releaseLock(final String meshName) {
 		final String source = PCUtils.getCallerClassName(true);
 
 		final Object lock = locks.remove(meshName);
@@ -51,9 +48,11 @@ public final class MeshLoaderLocks {
 				lock.notifyAll();
 			}
 			GlobalLogger
-					.log(Level.FINEST, "Thread " + Thread.currentThread().getName() + " released lock: " + meshName + " (" + source + ")");
+					.log(Level.FINEST,
+							"Thread " + Thread.currentThread().getName() + " released lock: " + meshName + " (" + source + ") "
+									+ PCUtils.toSimpleIdentityString(lock));
 		} else {
-			GlobalLogger.severe("Lock wasn't held for: " + meshName + " (" + source + ")");
+			// GlobalLogger.severe("Lock wasn't held for: " + meshName + " (" + source + ")");
 		}
 	}
 

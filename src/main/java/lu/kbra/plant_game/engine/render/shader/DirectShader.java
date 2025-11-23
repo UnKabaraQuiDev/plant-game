@@ -16,7 +16,7 @@ public class DirectShader extends RenderShader {
 		super(AbstractShaderPart.load("classpath:/shaders/gbuffer.vert"), AbstractShaderPart.load("classpath:/shaders/direct.frag"));
 	}
 
-	public DirectShader(AbstractShaderPart... parts) {
+	DirectShader(final AbstractShaderPart... parts) {
 		super(parts);
 	}
 
