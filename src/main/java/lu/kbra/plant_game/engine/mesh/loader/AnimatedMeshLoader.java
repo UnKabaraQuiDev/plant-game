@@ -43,20 +43,21 @@ public class AnimatedMeshLoader {
 			Vector3f startScale, Vector3f endScale) {
 	}
 
-	public static AnimatedMeshData getAnimatedMeshData(String path) {
+	public static AnimatedMeshData getAnimatedMeshData(final String path) {
 		try {
 			final URI baseURI = URI.create(path);
 			final JSONObject obj = new JSONObject(PCUtils.readStringSource(path));
 
 			return readAnimatedMeshData(obj, baseURI);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new RuntimeException("Error while getting animated mesh file from: " + path, e);
 		}
 	}
 
-	public static AnimatedMeshData readAnimatedMeshData(JSONObject obj, URI baseURI) {
-		if (!obj.getBoolean("animated"))
+	public static AnimatedMeshData readAnimatedMeshData(final JSONObject obj, final URI baseURI) {
+		if (!obj.getBoolean("animated")) {
 			return null;
+		}
 
 		final JSONObject meshes = obj.getJSONObject("meshes");
 
@@ -70,6 +71,8 @@ public class AnimatedMeshLoader {
 		final boolean textureMaterial = jsonObj.getBoolean("texture_material");
 		final String texturePath = textureMaterial ? baseURI.resolve(jsonObj.optString("texture_path")).toString()
 				: jsonObj.optString("texture_path");
+		final float deformRatio = jsonObj.optFloat("deform_ratio", 1);
+		final float speedRatio = jsonObj.optFloat("speed_ratio", 1);
 
 		// -- anim
 		final JSONObject animationObj = jsonObj.getJSONObject("animation");
@@ -82,18 +85,21 @@ public class AnimatedMeshLoader {
 
 		final AnimationData animData = new AnimationData(startPosition, endPosition, startRotation, endRotation, startScale, endScale);
 
-		return new AnimatedMeshData(new GenericMeshData(meshFilePath, origin, textureMaterial, texturePath), animData);
+		return new AnimatedMeshData(
+				new GenericMeshData(meshFilePath, origin, textureMaterial, texturePath, deformRatio, speedRatio),
+				animData);
 	}
 
 	public static TaskFuture<?, AnimatedMeshes> getAnimatedFuture(
-			CacheManager cache,
-			String meshName,
-			String path,
-			Dispatcher loader,
-			Dispatcher render) {
+			final CacheManager cache,
+			final String meshName,
+			final String path,
+			final Dispatcher loader,
+			final Dispatcher render) {
 		// if the mesh is available at create time: return it
 		if (cache.hasMesh(meshName + "-animated") && cache.hasMesh(meshName)) {
-			return new TaskFuture<>(loader,
+			return new TaskFuture<>(
+					loader,
 					() -> new AnimatedMeshes(cache.getMesh(meshName), (AnimatedMesh) cache.getMesh(meshName + "-animated")));
 		}
 
@@ -115,9 +121,11 @@ public class AnimatedMeshLoader {
 					final JSONObject obj = new JSONObject(PCUtils.readStringSource(path));
 
 					return readAnimatedMeshData(obj, baseURI);
-				}).then(render, (ThrowingFunction<AnimatedMeshData, AnimatedMeshes, Throwable>) (obj) -> {
-					return new AnimatedMeshes(cache.getMesh(meshName), createAnimated(cache, meshName, obj));
-				}));
+				})
+						.then(render,
+								(ThrowingFunction<AnimatedMeshData, AnimatedMeshes, Throwable>) obj -> new AnimatedMeshes(
+										cache.getMesh(meshName),
+										createAnimated(cache, meshName, obj))));
 			}
 
 			// need to create static mesh
@@ -129,10 +137,11 @@ public class AnimatedMeshLoader {
 					final JSONObject obj = new JSONObject(PCUtils.readStringSource(path));
 
 					return StaticMeshLoader.readStaticMeshData(obj, baseURI);
-				}).then(render, (ThrowingFunction<GenericMeshData, AnimatedMeshes, Throwable>) (obj) -> {
-					return new AnimatedMeshes(StaticMeshLoader.createStatic(cache, meshName, obj),
-							(AnimatedMesh) cache.getMesh(meshName + "-animated"));
-				}));
+				})
+						.then(render,
+								(ThrowingFunction<GenericMeshData, AnimatedMeshes, Throwable>) obj -> new AnimatedMeshes(
+										StaticMeshLoader.createStatic(cache, meshName, obj),
+										(AnimatedMesh) cache.getMesh(meshName + "-animated"))));
 			}
 
 			final URI baseURI = URI.create(path);
@@ -142,14 +151,17 @@ public class AnimatedMeshLoader {
 			final GenericMeshData staticMeshData = StaticMeshLoader.readStaticMeshData(obj, baseURI);
 
 			return new AnimatedMeshesData(staticMeshData, animatedMeshData);
-		}).then(render, (ThrowingFunction<AnimatedMeshesData, Pair<AnimatedMeshesData, Mesh>, Throwable>) (obj) -> {
-			return Pairs.readOnly(obj, StaticMeshLoader.createStatic(cache, meshName, obj.staticMeshData));
-		}).then(render, (ThrowingFunction<Pair<AnimatedMeshesData, Mesh>, AnimatedMeshes, Throwable>) (pair) -> {
-			return new AnimatedMeshes(pair.getValue(), createAnimated(cache, meshName + "-animated", pair.getKey().animatedMeshData()));
-		});
+		})
+				.then(render,
+						(ThrowingFunction<AnimatedMeshesData, Pair<AnimatedMeshesData, Mesh>, Throwable>) obj -> Pairs
+								.readOnly(obj, StaticMeshLoader.createStatic(cache, meshName, obj.staticMeshData)))
+				.then(render,
+						(ThrowingFunction<Pair<AnimatedMeshesData, Mesh>, AnimatedMeshes, Throwable>) pair -> new AnimatedMeshes(
+								pair.getValue(),
+								createAnimated(cache, meshName + "-animated", pair.getKey().animatedMeshData())));
 	}
 
-	public static AnimatedMesh createAnimated(CacheManager cache, String meshName, AnimatedMeshData animatedMeshData) {
+	public static AnimatedMesh createAnimated(final CacheManager cache, final String meshName, final AnimatedMeshData animatedMeshData) {
 		final GenericMeshData meshData = animatedMeshData.animatedMeshData();
 		final AnimatedMesh animatedMesh;
 		if (meshData.textureMaterial()) {

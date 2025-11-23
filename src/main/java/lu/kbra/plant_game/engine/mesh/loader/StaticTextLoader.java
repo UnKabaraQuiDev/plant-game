@@ -56,10 +56,13 @@ public class StaticTextLoader {
 			final Vector2f size,
 			final TextAlignment ta,
 			final int bufferSize) {
-		final TextEmitter te = new TextEmitter(meshName, null,
+		final TextEmitter te = new TextEmitter(
+				meshName,
+				null,
 				bufferSize == -1 ? Math.min(Math.max((int) (text.length() * 1.25), MIN_CHAR_BUFFER_LENGTH), MAX_CHAR_BUFFER_LENGTH)
 						: bufferSize,
-				text, size);
+				text,
+				size);
 		te.setTextAlignment(ta);
 		te.setup();
 		cache.addTextEmitter(te);

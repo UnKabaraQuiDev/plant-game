@@ -12,7 +12,6 @@ import org.json.JSONObject;
 import lu.pcy113.pclib.PCUtils;
 import lu.pcy113.pclib.impl.ThrowingSupplier;
 
-import lu.kbra.plant_game.engine.mesh.TexturedQuadLoadedMesh;
 import lu.kbra.plant_game.engine.util.AdvObjLoader;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.geom.Mesh;
@@ -24,23 +23,24 @@ import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
 
 public class StaticMeshLoader {
 
-	public record GenericMeshData(String filePath, Vector3f origin, boolean textureMaterial, String texturePath) {
+	public record GenericMeshData(String filePath, Vector3f origin, boolean textureMaterial, String texturePath, float deformRatio,
+			float speedRatio) {
 
 	}
 
-	public static GenericMeshData getStaticMeshData(String path) {
+	public static GenericMeshData getStaticMeshData(final String path) {
 		try {
 			final URI baseURI = URI.create(path);
 
 			final JSONObject obj = new JSONObject(PCUtils.readStringSource(path));
 
 			return readStaticMeshData(obj, baseURI);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new RuntimeException("Error while getting static mesh file from: " + path, e);
 		}
 	}
 
-	public static GenericMeshData readStaticMeshData(JSONObject obj, URI baseURI) {
+	public static GenericMeshData readStaticMeshData(final JSONObject obj, final URI baseURI) {
 		final JSONObject meshes = obj.getJSONObject("meshes");
 
 		final JSONObject jsonObj = meshes.getJSONObject("static");
@@ -52,16 +52,18 @@ public class StaticMeshLoader {
 		final boolean textureMaterial = jsonObj.getBoolean("texture_material");
 		final String texturePath = textureMaterial ? baseURI.resolve(jsonObj.optString("texture_path")).toString()
 				: jsonObj.optString("texture_path");
+		final float deformRatio = jsonObj.optFloat("deform_ratio", 1);
+		final float speedRatio = jsonObj.optFloat("speed_ratio", 1);
 
-		return new GenericMeshData(meshFilePath, origin, textureMaterial, texturePath);
+		return new GenericMeshData(meshFilePath, origin, textureMaterial, texturePath, deformRatio, speedRatio);
 	}
 
 	public static TaskFuture<?, Mesh> getStaticFuture(
-			CacheManager cache,
-			String meshName,
-			String path,
-			Dispatcher loader,
-			Dispatcher render) {
+			final CacheManager cache,
+			final String meshName,
+			final String path,
+			final Dispatcher loader,
+			final Dispatcher render) {
 
 		return new TaskFuture<>(loader, (ThrowingSupplier<GenericMeshData, Throwable>) () -> {
 			waitOrCreateLock(meshName);
@@ -71,19 +73,10 @@ public class StaticMeshLoader {
 			}
 
 			return getStaticMeshData(path);
-		}).then(render, (Function<GenericMeshData, Mesh>) (meshData) -> {
-			return createStatic(cache, meshName, meshData);
-		});
+		}).then(render, (Function<GenericMeshData, Mesh>) meshData -> createStatic(cache, meshName, meshData));
 	}
 
-	static Mesh createStaticQuad(CacheManager cache, String meshName, SingleTexture txt) {
-		final Mesh staticMesh = new TexturedQuadLoadedMesh(meshName, txt, GameEngineUtils.normalizeSize(txt.getWidth(), txt.getHeight()));
-		cache.addMesh(staticMesh);
-		releaseLock(meshName);
-		return staticMesh;
-	}
-
-	static Mesh createStatic(CacheManager cache, String meshName, GenericMeshData meshData) {
+	static Mesh createStatic(final CacheManager cache, final String meshName, final GenericMeshData meshData) {
 		final Mesh staticMesh;
 		if (meshData.textureMaterial()) {
 			final SingleTexture txt0 = cache.hasTexture(meshData.texturePath()) ? (SingleTexture) cache.getTexture(meshData.texturePath())

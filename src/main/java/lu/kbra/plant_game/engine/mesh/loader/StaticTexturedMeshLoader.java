@@ -61,7 +61,9 @@ public class StaticTexturedMeshLoader {
 	}
 
 	static TexturedMesh createStaticQuad(CacheManager cache, String meshName, SingleTexture txt) {
-		final TexturedMesh staticMesh = new TexturedQuadLoadedMesh(meshName, txt,
+		final TexturedMesh staticMesh = new TexturedQuadLoadedMesh(
+				meshName,
+				txt,
 				GameEngineUtils.normalizeSize(txt.getWidth(), txt.getHeight()));
 		cache.addMesh(staticMesh);
 		releaseLock(meshName);

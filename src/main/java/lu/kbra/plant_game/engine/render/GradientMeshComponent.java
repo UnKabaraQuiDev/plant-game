@@ -6,15 +6,15 @@ public class GradientMeshComponent extends Component {
 
 	protected GradientMesh gradientMesh;
 
-	public GradientMeshComponent(GradientMesh gradientMesh) {
+	public GradientMeshComponent(final GradientMesh gradientMesh) {
 		this.gradientMesh = gradientMesh;
 	}
 
 	public GradientMesh getGradientMesh() {
-		return gradientMesh;
+		return this.gradientMesh;
 	}
 
-	public void setGradientMesh(GradientQuadMesh gradientMesh) {
+	public void setGradientMesh(final GradientMesh gradientMesh) {
 		this.gradientMesh = gradientMesh;
 	}
 

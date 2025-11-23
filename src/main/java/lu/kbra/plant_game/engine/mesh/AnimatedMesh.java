@@ -25,8 +25,8 @@ public interface AnimatedMesh extends Mesh {
 		final Vector3f scale = new Vector3f();
 		animation.startScale().lerp(animation.endScale(), t, scale);
 
-		if (this instanceof OffsetMesh thisOffset) {
-			final Vector3f origin = thisOffset.getOrigin();
+		if (this instanceof OffsetLoadedMesh thisOffset) {
+			final Vector3f origin = thisOffset.getOffset();
 
 			return target.identity().translate(pos).translate(origin).rotate(rot).scale(scale).translate(new Vector3f(origin).negate());
 		} else {

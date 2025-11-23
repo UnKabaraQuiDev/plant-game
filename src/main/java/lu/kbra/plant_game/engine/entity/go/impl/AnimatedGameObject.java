@@ -20,7 +20,10 @@ public class AnimatedGameObject extends GameObject implements AnimatedTransformO
 	}
 
 	public AnimatedGameObject(String str, Mesh mesh, AnimatedMesh animatedMesh, Transform3D transform) {
-		this(str, mesh, animatedMesh, transform,
+		this(str,
+				mesh,
+				animatedMesh,
+				transform,
 				new Vector3i((int) System.nanoTime(), (int) System.nanoTime() % 20056, (int) System.nanoTime() % 255));
 	}
 

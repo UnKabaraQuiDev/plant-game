@@ -29,7 +29,9 @@ import lu.pcy113.pclib.PCUtils;
 import lu.pcy113.pclib.logger.GlobalLogger;
 import lu.pcy113.pclib.pointer.prim.BooleanPointer;
 
+import lu.kbra.plant_game.PGLogic;
 import lu.kbra.plant_game.engine.entity.go.impl.GameObject;
+import lu.kbra.plant_game.engine.entity.go.impl.SwayOwner;
 import lu.kbra.plant_game.engine.entity.impl.AnimatedMeshComponent;
 import lu.kbra.plant_game.engine.entity.impl.AnimatedTransformOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.TransformedBoundsOwner;
@@ -48,6 +50,7 @@ import lu.kbra.plant_game.engine.render.shader.LineDirectShader;
 import lu.kbra.plant_game.engine.render.shader.LineInstanceDirectShader;
 import lu.kbra.plant_game.engine.render.shader.MaterialComputeShader;
 import lu.kbra.plant_game.engine.render.shader.OutlineShader;
+import lu.kbra.plant_game.engine.render.shader.SwayTransferShader;
 import lu.kbra.plant_game.engine.render.shader.TextDirectShader;
 import lu.kbra.plant_game.engine.render.shader.TextureMaterialComputeShader;
 import lu.kbra.plant_game.engine.render.shader.TransferShader;
@@ -68,6 +71,7 @@ import lu.kbra.standalone.gameengine.graph.composition.buffer.Framebuffer;
 import lu.kbra.standalone.gameengine.graph.shader.ComputeShader;
 import lu.kbra.standalone.gameengine.graph.shader.RenderShader;
 import lu.kbra.standalone.gameengine.graph.texture.SingleTexture;
+import lu.kbra.standalone.gameengine.graph.texture.Texture;
 import lu.kbra.standalone.gameengine.graph.window.Window;
 import lu.kbra.standalone.gameengine.impl.Cleanupable;
 import lu.kbra.standalone.gameengine.impl.GLObject;
@@ -149,6 +153,8 @@ public class DeferredCompositor implements Cleanupable {
 	protected Framebuffer worldFramebuffer;
 	protected TransferShader transferShader;
 	protected InstanceTransferShader instanceTransferShader;
+	protected SwayTransferShader swayTransferShader;
+	protected Texture swayMap;
 	protected Map<Class<? extends Renderable>, RenderShader> worldSceneShaders;
 
 	// ui rendering
@@ -191,6 +197,7 @@ public class DeferredCompositor implements Cleanupable {
 
 		cache.addAbstractShader(this.transferShader = new TransferShader());
 		cache.addAbstractShader(this.instanceTransferShader = new InstanceTransferShader());
+		cache.addAbstractShader(this.swayTransferShader = new SwayTransferShader());
 
 		cache.addAbstractShader(this.materialComputeShader = new MaterialComputeShader());
 		cache.addAbstractShader(this.textureMaterialComputeShader = new TextureMaterialComputeShader());
@@ -216,6 +223,15 @@ public class DeferredCompositor implements Cleanupable {
 		this.fontTexture.genMipMaps();
 		cache.addTexture(this.fontTexture);
 
+		this.swayMap = SingleTexture
+				.loadSingleTexture(cache,
+						SwayTransferShader.SWAY_MAP_TEXTURE_NAME,
+						"classpath:/bakes/noise/sway/512.png",
+						TextureFilter.NEAREST);
+		this.swayMap.setGenerateMipmaps(true);
+		this.swayMap.genMipMaps();
+		cache.addTexture(this.fontTexture);
+
 		this.outputTxt = new SingleTexture(WORLD_FRAMEBUFFER_NAME + ".output", engine.getWindow().getSize());
 		this.outputTxt.setDataType(DataType.UBYTE);
 		this.outputTxt.setFormat(TexelFormat.RGBA);
@@ -237,7 +253,9 @@ public class DeferredCompositor implements Cleanupable {
 						TextEmitter.class,
 						null,
 						InstanceEmitter.class,
-						this.instanceTransferShader);
+						this.instanceTransferShader,
+						SwayMesh.class,
+						this.swayTransferShader);
 
 		this.uiSceneShaders = PCUtils
 				.hashMap(Mesh.class,
@@ -627,6 +645,7 @@ public class DeferredCompositor implements Cleanupable {
 		final RenderShader textEmitterShader = shaders.get(TextEmitter.class);
 		final RenderShader instanceEmitterShader = shaders.get(InstanceEmitter.class);
 		final RenderShader gradientMeshShader = shaders.get(GradientMesh.class);
+		final RenderShader swayMeshShader = shaders.get(SwayMesh.class);
 
 		this.setupUniforms(shaders.values(), scene);
 		this.setupUniforms(Arrays.asList(this.lineDirectShader, this.lineInstanceDirectShader), scene);
@@ -640,6 +659,7 @@ public class DeferredCompositor implements Cleanupable {
 							textEmitterShader,
 							instanceEmitterShader,
 							gradientMeshShader,
+							swayMeshShader,
 							GameEngine.IDENTITY_MATRIX4F);
 		}
 	}
@@ -652,6 +672,7 @@ public class DeferredCompositor implements Cleanupable {
 			final RenderShader textEmitterShader,
 			final RenderShader instanceEmitterShader,
 			final RenderShader gradientMeshShader,
+			final RenderShader swayMeshShader,
 			final Matrix4fc parentTransform) {
 
 		if (!entity.isActive()) {
@@ -679,6 +700,12 @@ public class DeferredCompositor implements Cleanupable {
 		if (gradientMeshShader != null && entity.hasComponentMatching(GradientMeshComponent.class)) {
 			for (final GradientMeshComponent gradientMeshComponent : entity.getComponentsMatching(GradientMeshComponent.class)) {
 				this.renderMesh(gradientMeshComponent.getGradientMesh(), gradientMeshComponent, entity, worldTransform, gradientMeshShader);
+			}
+		}
+
+		if (swayMeshShader != null && entity.hasComponentMatching(SwayMeshComponent.class)) {
+			for (final SwayMeshComponent swayMeshComponent : entity.getComponentsMatching(SwayMeshComponent.class)) {
+				this.renderMesh(swayMeshComponent.getSwayMesh(), swayMeshComponent, entity, worldTransform, swayMeshShader);
 			}
 		}
 
@@ -724,6 +751,7 @@ public class DeferredCompositor implements Cleanupable {
 									textEmitterShader,
 									instanceEmitterShader,
 									gradientMeshShader,
+									swayMeshShader,
 									worldTransform);
 				}
 			}
@@ -880,6 +908,24 @@ public class DeferredCompositor implements Cleanupable {
 			shader
 					.setUniform(DirectShader.TINT,
 							(tintOwner == null || tintOwner.getTint() == null) ? DirectShader.DEFAULT_TINT : tintOwner.getTint());
+		}
+
+		final SwayOwner swayOwner;
+		if (shader.createUniform(SwayTransferShader.DEFORM_RATIO)) {
+			if (entity instanceof final SwayOwner swayEntity) {
+				swayOwner = swayEntity;
+			} else if (mesh instanceof final SwayOwner swayMesh) {
+				swayOwner = swayMesh;
+			} else {
+				swayOwner = null;
+			}
+
+			shader.setUniform(SwayTransferShader.DEFORM_RATIO, swayOwner.getDeformRatio());
+			shader.setUniform(SwayTransferShader.DEFORM_RATIO, swayOwner.getSpeedRatio());
+			shader.setUniform(SwayTransferShader.TIME, (float) PGLogic.TOTAL_TIME());
+
+			System.err.println(swayOwner.getDeformRatio() + " def " + swayOwner.getSpeedRatio() + " spe");
+			this.swayMap.bindUniform(shader.getUniformLocation(SwayTransferShader.SWAY_MAP), 1);
 		}
 
 		final GradientOwner gradientOwner;

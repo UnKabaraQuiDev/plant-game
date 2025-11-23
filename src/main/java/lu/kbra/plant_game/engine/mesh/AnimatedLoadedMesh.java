@@ -10,7 +10,7 @@ import lu.kbra.standalone.gameengine.cache.attrib.UIntAttribArray;
 import lu.kbra.standalone.gameengine.cache.attrib.Vec3fAttribArray;
 import lu.kbra.standalone.gameengine.graph.material.Material;
 
-public class AnimatedLoadedMesh extends OffsetMesh implements AnimatedMesh {
+public class AnimatedLoadedMesh extends OffsetLoadedMesh implements AnimatedMesh {
 
 	private AnimationData animationData;
 

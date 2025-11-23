@@ -24,6 +24,7 @@ import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
 import lu.kbra.plant_game.engine.entity.go.mesh.pipe.PipeMesh;
 import lu.kbra.plant_game.engine.entity.go.mesh.terrain.TerrainMesh;
 import lu.kbra.plant_game.engine.entity.go.obj.energy.SolarPanelObject;
+import lu.kbra.plant_game.engine.entity.go.obj.grass.LargeGrassObject;
 import lu.kbra.plant_game.engine.entity.go.obj.terrain.TerrainObject;
 import lu.kbra.plant_game.engine.entity.go.obj.water.WaterTowerObject;
 import lu.kbra.plant_game.engine.entity.go.obj.water.WaterWheelObject;
@@ -237,6 +238,11 @@ public class WorldLevelScene extends Scene3D {
 					.push();
 
 		}).push();
+
+		GameObjectFactory
+				.create(LargeGrassObject.class, this, new Transform3D(new Vector3f(0, 6, 0)))
+				.then(workers, (Consumer<LargeGrassObject>) m -> System.err.println("GRASS: " + m))
+				.push();
 	}
 
 	public void input(final WindowInputHandler inputHandler, final float dTime, final UpdateFrameState frameState) {

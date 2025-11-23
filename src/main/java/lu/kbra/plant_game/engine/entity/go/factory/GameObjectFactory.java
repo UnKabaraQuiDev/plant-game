@@ -9,6 +9,7 @@ import lu.pcy113.pclib.impl.ThrowingFunction;
 
 import lu.kbra.plant_game.engine.entity.go.impl.AnimatedGameObject;
 import lu.kbra.plant_game.engine.entity.go.impl.GameObject;
+import lu.kbra.plant_game.engine.entity.go.impl.SwayGameObject;
 import lu.kbra.plant_game.engine.mesh.AnimatedMesh;
 import lu.kbra.plant_game.engine.mesh.TexturedMesh;
 import lu.kbra.plant_game.engine.mesh.loader.AnimatedMeshLoader;
@@ -32,26 +33,26 @@ public class GameObjectFactory {
 	private final CacheManager cache;
 	private final Dispatcher loader, render;
 
-	public GameObjectFactory(CacheManager cache, Dispatcher loader, Dispatcher render) {
+	public GameObjectFactory(final CacheManager cache, final Dispatcher loader, final Dispatcher render) {
 		this.cache = cache;
 		this.loader = loader;
 		this.render = render;
 	}
 
-	public <T extends GameObject> TaskFuture<?, T> create_(Class<T> clazz, Object... args) {
-		animatedMesh.computeIfAbsent(clazz, k -> AnimatedGameObject.class.isAssignableFrom(k));
-		dataPath.computeIfAbsent(clazz, k -> {
+	public <T extends GameObject> TaskFuture<?, T> create_(final Class<T> clazz, final Object... args) {
+		this.animatedMesh.computeIfAbsent(clazz, k -> AnimatedGameObject.class.isAssignableFrom(k));
+		this.dataPath.computeIfAbsent(clazz, k -> {
 			if (!k.isAnnotationPresent(DataPath.class)) {
 				throw new IllegalArgumentException(clazz.getName() + " doesn't have @DataPath.");
 			}
 			return k.getAnnotation(DataPath.class).value();
 		});
 
-		if (animatedMesh.get(clazz)) {
+		if (this.animatedMesh.get(clazz)) {
 
 			return AnimatedMeshLoader
-					.getAnimatedFuture(cache, clazz.getName(), dataPath.get(clazz), loader, render)
-					.then(loader, (ThrowingFunction<AnimatedMeshes, T, Throwable>) (meshes) -> {
+					.getAnimatedFuture(this.cache, clazz.getName(), this.dataPath.get(clazz), this.loader, this.render)
+					.then(this.loader, (ThrowingFunction<AnimatedMeshes, T, Throwable>) meshes -> {
 						final T instance = PCUtils
 								.findCompatibleConstructor(clazz,
 										PCUtils
@@ -66,11 +67,26 @@ public class GameObjectFactory {
 												args));
 						return instance;
 					});
+		}
+		if (SwayGameObject.class.isAssignableFrom(clazz)) {
+
+			return StaticSwayMeshLoader
+					.getStaticFuture(this.cache, clazz.getName(), this.dataPath.get(clazz), this.loader, this.render)
+					.then(this.loader, (ThrowingFunction<Mesh, T, Throwable>) mesh -> {
+						final T instance = GameObjectRegistry
+								.create(clazz,
+										PCUtils
+												.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), mesh },
+														args));
+						instance.setMaterialId((short) (mesh instanceof TexturedMesh ? ((TexturedMesh) mesh).getTexture().getGlId() : -1));
+						return instance;
+					});
+
 		} else {
 
 			return StaticMeshLoader
-					.getStaticFuture(cache, clazz.getName(), dataPath.get(clazz), loader, render)
-					.then(loader, (ThrowingFunction<Mesh, T, Throwable>) (mesh) -> {
+					.getStaticFuture(this.cache, clazz.getName(), this.dataPath.get(clazz), this.loader, this.render)
+					.then(this.loader, (ThrowingFunction<Mesh, T, Throwable>) mesh -> {
 						final T instance = GameObjectRegistry
 								.create(clazz,
 										PCUtils
@@ -83,15 +99,15 @@ public class GameObjectFactory {
 		}
 	}
 
-	public <T extends GameObject> TaskFuture<?, T> create_(Class<T> clazz, Scene3D scene, Object... args) {
-		return create_(clazz, args).then(loader, (ThrowingFunction<T, T, Throwable>) scene::addEntity);
+	public <T extends GameObject> TaskFuture<?, T> create_(final Class<T> clazz, final Scene3D scene, final Object... args) {
+		return this.create_(clazz, args).then(this.loader, (ThrowingFunction<T, T, Throwable>) scene::addEntity);
 	}
 
-	public static <T extends GameObject> TaskFuture<?, T> create(Class<T> clazz, Object... args) {
+	public static <T extends GameObject> TaskFuture<?, T> create(final Class<T> clazz, final Object... args) {
 		return INSTANCE.create_(clazz, args);
 	}
 
-	public static <T extends GameObject> TaskFuture<?, T> create(Class<T> clazz, Scene3D scene, Object... args) {
+	public static <T extends GameObject> TaskFuture<?, T> create(final Class<T> clazz, final Scene3D scene, final Object... args) {
 		return INSTANCE.create_(clazz, scene, args);
 	}
 

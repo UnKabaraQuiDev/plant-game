@@ -22,7 +22,8 @@ public class InstanceTransferShader extends RenderShader {
 	public static final String COMPOSITE_OBJECT_ID = "compositeObjectId";
 
 	public InstanceTransferShader() {
-		super(true, AbstractShaderPart.load("classpath:/shaders/gbuffer_inst.vert"),
+		super(true,
+				AbstractShaderPart.load("classpath:/shaders/gbuffer_inst.vert"),
 				AbstractShaderPart.load("classpath:/shaders/gbuffer.frag"));
 		setFaceMode(PolygonMode.FRONT_AND_BACK);
 	}

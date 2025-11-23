@@ -15,9 +15,14 @@ public class TextDirectShader extends DirectShader {
 	public static final String FONT_TEXTURE_NAME = "_FONT";
 
 	public TextDirectShader() {
-		super(AbstractShaderPart.load("classpath:/shaders/gbuffer_inst_text.vert"), AbstractShaderPart
-				.load("classpath:/shaders/text.frag",
-						PCUtils.hashMap("%CHAR_START%", (int) TextEmitter.STRING.charAt(0), "%CHAR_COUNT%", TextEmitter.STRING.length())));
+		super(AbstractShaderPart.load("classpath:/shaders/gbuffer_inst_text.vert"),
+				AbstractShaderPart
+						.load("classpath:/shaders/text.frag",
+								PCUtils
+										.hashMap("%CHAR_START%",
+												(int) TextEmitter.STRING.charAt(0),
+												"%CHAR_COUNT%",
+												TextEmitter.STRING.length())));
 	}
 
 	@Override

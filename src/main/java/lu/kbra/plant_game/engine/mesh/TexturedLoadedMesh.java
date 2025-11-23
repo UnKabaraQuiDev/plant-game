@@ -10,7 +10,7 @@ import lu.kbra.standalone.gameengine.cache.attrib.Vec3fAttribArray;
 import lu.kbra.standalone.gameengine.graph.material.Material;
 import lu.kbra.standalone.gameengine.graph.texture.SingleTexture;
 
-public class TexturedLoadedMesh extends OffsetMesh implements TexturedMesh {
+public class TexturedLoadedMesh extends OffsetLoadedMesh implements TexturedMesh {
 
 	protected SingleTexture texture;
 

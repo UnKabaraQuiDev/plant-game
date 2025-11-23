@@ -27,24 +27,24 @@ public class GameObject extends Entity implements Transform3DOwner, MeshOwner {
 	protected MeshComponent meshComponent;
 	protected Transform3DComponent transformComponent;
 
-	public GameObject(String str, Mesh mesh) {
+	public GameObject(final String str, final Mesh mesh) {
 		this(str, mesh, null);
 	}
 
-	public GameObject(String str, Mesh mesh, Transform3D transform) {
+	public GameObject(final String str, final Mesh mesh, final Transform3D transform) {
 		this(str, mesh, transform, new Vector3i((int) System.nanoTime(), (int) System.nanoTime() % 20056, (int) System.nanoTime() % 255));
 	}
 
-	public GameObject(String str, Mesh mesh, Transform3D transform, Vector3i objectId) {
+	public GameObject(final String str, final Mesh mesh, final Transform3D transform, final Vector3i objectId) {
 		this(str, mesh, transform, objectId, (short) -1);
 	}
 
-	public GameObject(String str, Mesh mesh, Transform3D transform, Vector3i objectId, short materialId) {
-		super(str, new MeshComponent(mesh), transform != null ? new Transform3DComponent(transform) : null);
+	public GameObject(final String str, final Mesh mesh, final Transform3D transform, final Vector3i objectId, final short materialId) {
+		super(str, mesh == null ? null : new MeshComponent(mesh), transform != null ? new Transform3DComponent(transform) : null);
 		if (mesh instanceof TexturedMesh || mesh instanceof MaterialMesh) {
-			entityMaterialId = false;
+			this.entityMaterialId = false;
 		} else if (materialId != -1) {
-			entityMaterialId = true;
+			this.entityMaterialId = true;
 		}
 		this.meshComponent = super.getComponent(MeshComponent.class);
 		this.transformComponent = super.getComponent(Transform3DComponent.class);
@@ -53,60 +53,61 @@ public class GameObject extends Entity implements Transform3DOwner, MeshOwner {
 	}
 
 	public short getMaterialId() {
-		return materialId;
+		return this.materialId;
 	}
 
-	public void setMaterialId(short materialId) {
+	public void setMaterialId(final short materialId) {
 		this.materialId = materialId;
 	}
 
 	public AttributeLocation getObjectIdLocation() {
-		return objectIdLocation;
+		return this.objectIdLocation;
 	}
 
-	public void setObjectIdLocation(AttributeLocation objectIdLocation) {
+	public void setObjectIdLocation(final AttributeLocation objectIdLocation) {
 		this.objectIdLocation = objectIdLocation;
 	}
 
 	public boolean isEntityMaterialId() {
-		return entityMaterialId;
+		return this.entityMaterialId;
 	}
 
-	public void setEntityMaterialId(boolean entityMaterialIdLocation) {
+	public void setEntityMaterialId(final boolean entityMaterialIdLocation) {
 		this.entityMaterialId = entityMaterialIdLocation;
 	}
 
 	public Vector3i getObjectId() {
-		return objectId;
+		return this.objectId;
 	}
 
-	public void setObjectId(Vector3i objectId) {
+	public void setObjectId(final Vector3i objectId) {
 		this.objectId = objectId;
 	}
 
 	public MeshComponent getMeshComponent() {
-		return meshComponent;
+		return this.meshComponent;
 	}
 
 	public Transform3DComponent getTransformComponent() {
-		return transformComponent;
+		return this.transformComponent;
 	}
 
 	@Override
 	public Mesh getMesh() {
-		return meshComponent == null ? null : meshComponent.getMesh();
+		return this.meshComponent == null ? null : this.meshComponent.getMesh();
 	}
 
 	@Override
 	public Transform3D getTransform() {
-		return transformComponent == null ? null : transformComponent.getTransform();
+		return this.transformComponent == null ? null : this.transformComponent.getTransform();
 	}
 
 	@Override
 	public String toString() {
-		return this.getClass().getSimpleName() + " [materialId=" + materialId + ", entityMaterialId=" + entityMaterialId + ", objectId="
-				+ objectId + ", objectIdLocation=" + objectIdLocation + ", getMesh()=" + getMesh() + ", getTransform()=" + getTransform()
-				+ ", getComponents()=" + getComponents().size() + ", isActive()=" + isActive() + "]";
+		return this.getClass().getSimpleName() + " [materialId=" + this.materialId + ", entityMaterialId=" + this.entityMaterialId
+				+ ", objectId=" + this.objectId + ", objectIdLocation=" + this.objectIdLocation + ", getMesh()=" + this.getMesh()
+				+ ", getTransform()=" + this.getTransform() + ", getComponents()=" + this.getComponents().size() + ", isActive()="
+				+ this.isActive() + "]";
 	}
 
 }
