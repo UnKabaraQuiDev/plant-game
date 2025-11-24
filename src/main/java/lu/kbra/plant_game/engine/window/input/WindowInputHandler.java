@@ -22,50 +22,77 @@ public interface WindowInputHandler {
 
 	void onFrameBegin();
 
+	/**
+	 * @param GLFW code
+	 */
 	KeyState getKeyState(int code);
 
+	/**
+	 * @param GLFW code
+	 */
 	KeyState getButtonState(int code);
 
 	default boolean isKeyHeld(final KeyOption code) {
 		return this.isKeyHeld(code.getPhysicalKey());
 	}
 
+	/**
+	 * @param GLFW code
+	 */
 	boolean isKeyHeld(int code);
 
 	default boolean isKeyPressed(final KeyOption code) {
 		return this.isKeyPressed(code.getPhysicalKey());
 	}
 
+	/**
+	 * @param GLFW code
+	 */
 	boolean isKeyPressed(int code);
 
 	default boolean isKeyRepeat(final KeyOption code) {
 		return this.isKeyRepeat(code.getPhysicalKey());
 	}
 
+	/**
+	 * @param GLFW code
+	 */
 	boolean isKeyRepeat(int code);
 
 	default boolean isMouseButtonPressed(final KeyOption code) {
 		return this.isMouseButtonPressed(code.getPhysicalKey());
 	}
 
+	/**
+	 * @param GLFW code
+	 */
 	boolean isMouseButtonPressed(int code);
 
 	default boolean isKeyPressedOnce(final KeyOption code) {
 		return this.isKeyPressedOnce(code.getPhysicalKey());
 	}
 
+	/**
+	 * @param GLFW code
+	 */
 	boolean isKeyPressedOnce(int code);
 
 	default boolean isMouseButtonPressedOnce(final KeyOption code) {
 		return this.isMouseButtonPressedOnce(code.getPhysicalKey());
 	}
 
+	/**
+	 * @param GLFW code
+	 */
 	boolean isMouseButtonPressedOnce(int code);
 
 	default boolean isKeyPressedOrRepeat(final KeyOption code) {
 		return this.isKeyPressedOrRepeat(code.getPhysicalKey());
 	}
 
+	/**
+	 * @param GLFW code
+	 */
 	boolean isKeyPressedOrRepeat(int code);
 
 	Vector2d getMouseScroll();
@@ -74,9 +101,16 @@ public interface WindowInputHandler {
 
 	void setOwner(Thread owner);
 
-	boolean isOwnerThread();
+	default boolean isOwnerThread() {
+		if (this.getOwner() == null) {
+			return true;
+		}
+		return this.getOwner() == Thread.currentThread();
+	}
 
-	void checkOwnerThread();
+	default void checkOwnerThread() {
+		assert this.isOwnerThread() : Thread.currentThread().getName() + " isn't owner !";
+	}
 
 	boolean wasResized();
 
@@ -88,18 +122,27 @@ public interface WindowInputHandler {
 		return this.getButtonName(code.getPhysicalKey());
 	}
 
+	/**
+	 * @param GLFW code
+	 */
 	String getButtonName(int code);
 
 	default String getKeyName(final KeyOption code) {
 		return this.getKeyName(code.getPhysicalKey());
 	}
 
+	/**
+	 * @param GLFW code
+	 */
 	String getKeyName(int code);
 
 	default String getInputName(final KeyOption code) {
 		return this.getInputName(code.getPhysicalKey());
 	}
 
+	/**
+	 * @param GLFW code
+	 */
 	String getInputName(int code);
 
 	int getPressedMouse();

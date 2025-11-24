@@ -8,6 +8,10 @@ import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 public class SwayGameObject extends GameObject implements SwayOwner {
 
+	public static final float DEFAULT_DEFORM_RATIO = 0.1f;
+	public static final float DEFAULT_SPEED_RATIO = 0.1f;
+	public static final float DEFAULT_SCALE_RATIO = 0.1f;
+
 	protected SwayMeshComponent swayMeshComponent;
 
 	protected float deformRatio;
@@ -30,17 +34,17 @@ public class SwayGameObject extends GameObject implements SwayOwner {
 	public SwayGameObject(final String str, final SwayMesh swayMesh, final Transform3D transform) {
 		super(str, null, transform);
 		super.addComponent(this.swayMeshComponent = new SwayMeshComponent(swayMesh));
-		this.deformRatio = 0.1f;
-		this.speedRatio = 0.1f;
-		this.scaleRatio = 0.1f;
+		this.deformRatio = DEFAULT_DEFORM_RATIO;
+		this.speedRatio = DEFAULT_SPEED_RATIO;
+		this.scaleRatio = DEFAULT_SCALE_RATIO;
 	}
 
 	public SwayGameObject(final String str, final SwayMesh swayMesh, final Transform3D transform, final short materialId) {
 		super(str, null, transform, getRandomObjectId(), materialId);
 		super.addComponent(this.swayMeshComponent = new SwayMeshComponent(swayMesh));
-		this.deformRatio = 0.1f;
-		this.speedRatio = 0.1f;
-		this.scaleRatio = 0.1f;
+		this.deformRatio = DEFAULT_DEFORM_RATIO;
+		this.speedRatio = DEFAULT_SPEED_RATIO;
+		this.scaleRatio = DEFAULT_SCALE_RATIO;
 	}
 
 	public SwayGameObject(

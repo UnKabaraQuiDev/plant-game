@@ -31,6 +31,8 @@ import lu.pcy113.pclib.pointer.prim.BooleanPointer;
 
 import lu.kbra.plant_game.PGLogic;
 import lu.kbra.plant_game.engine.entity.go.impl.GameObject;
+import lu.kbra.plant_game.engine.entity.go.impl.SwayInstanceEmitter;
+import lu.kbra.plant_game.engine.entity.go.impl.SwayInstanceEmitterComponent;
 import lu.kbra.plant_game.engine.entity.go.impl.SwayOwner;
 import lu.kbra.plant_game.engine.entity.impl.AnimatedMeshComponent;
 import lu.kbra.plant_game.engine.entity.impl.AnimatedTransformOwner;
@@ -261,7 +263,9 @@ public class DeferredCompositor implements Cleanupable {
 						InstanceEmitter.class,
 						this.instanceTransferShader,
 						SwayMesh.class,
-						this.swayTransferShader);
+						this.swayTransferShader,
+						SwayInstanceEmitter.class,
+						this.swayInstanceTransferShader);
 
 		this.uiSceneShaders = PCUtils
 				.hashMap(Mesh.class,
@@ -275,6 +279,8 @@ public class DeferredCompositor implements Cleanupable {
 						InstanceEmitter.class,
 						this.instanceDirectShader,
 						SwayMesh.class,
+						null,
+						SwayInstanceEmitter.class,
 						null);
 	}
 
@@ -301,6 +307,9 @@ public class DeferredCompositor implements Cleanupable {
 
 			this.resizeFramebuffer(this.worldFramebuffer, this.renderResolution);
 		}
+
+		GL_W.glEnable(GL_W.GL_MULTISAMPLE);
+		assert GL_W.checkError("Enable(MULTISAMPLE)");
 
 		this.deferredPass = true;
 		this.renderWorldScene(cache, worldScene, this.renderResolution, needRegen);
@@ -654,6 +663,7 @@ public class DeferredCompositor implements Cleanupable {
 		final RenderShader instanceEmitterShader = shaders.get(InstanceEmitter.class);
 		final RenderShader gradientMeshShader = shaders.get(GradientMesh.class);
 		final RenderShader swayMeshShader = shaders.get(SwayMesh.class);
+		final RenderShader swayInstanceEmitterShader = shaders.get(SwayInstanceEmitter.class);
 
 		this.setupSceneUniforms(shaders.values(), scene);
 		this.setupSceneUniforms(Arrays.asList(this.lineDirectShader, this.lineInstanceDirectShader), scene);
@@ -668,6 +678,7 @@ public class DeferredCompositor implements Cleanupable {
 							instanceEmitterShader,
 							gradientMeshShader,
 							swayMeshShader,
+							swayInstanceEmitterShader,
 							GameEngine.IDENTITY_MATRIX4F);
 		}
 	}
@@ -681,6 +692,7 @@ public class DeferredCompositor implements Cleanupable {
 			final RenderShader instanceEmitterShader,
 			final RenderShader gradientMeshShader,
 			final RenderShader swayMeshShader,
+			final RenderShader swayInstanceEmitterShader,
 			final Matrix4fc parentTransform) {
 
 		if (!entity.isActive()) {
@@ -743,6 +755,15 @@ public class DeferredCompositor implements Cleanupable {
 			}
 		}
 
+		if (swayInstanceEmitterShader != null && entity.hasComponentMatching(SwayInstanceEmitterComponent.class)) {
+			for (final SwayInstanceEmitterComponent swayInstanceEmitterComponent : entity
+					.getComponentsMatching(SwayInstanceEmitterComponent.class)) {
+				this
+						.renderInstanceEmitter(swayInstanceEmitterComponent
+								.getInstanceEmitter(), swayInstanceEmitterComponent, entity, worldTransform, swayInstanceEmitterShader);
+			}
+		}
+
 		if (entity instanceof final TransformedBoundsOwner tbo) {
 			this.drawDebugBounds(tbo.getTransformedBounds(parentTransform));
 		}
@@ -760,6 +781,7 @@ public class DeferredCompositor implements Cleanupable {
 									instanceEmitterShader,
 									gradientMeshShader,
 									swayMeshShader,
+									swayInstanceEmitterShader,
 									worldTransform);
 				}
 			}
@@ -791,7 +813,7 @@ public class DeferredCompositor implements Cleanupable {
 
 	private void renderInstanceEmitter(
 			final InstanceEmitter obj,
-			final InstanceEmitterComponent component,
+			final Component component,
 			final Entity entity,
 			final Matrix4f transformationMatrix,
 			final RenderShader shader) {
@@ -802,6 +824,102 @@ public class DeferredCompositor implements Cleanupable {
 
 		if (shader.createUniform(RenderShader.TRANSFORMATION_MATRIX)) {
 			shader.setUniform(RenderShader.TRANSFORMATION_MATRIX, transformationMatrix);
+		}
+
+		// duplicate code, maybe don't do this
+		if (entity instanceof TransparentEntity) {
+			GL_W.glEnable(GL_W.GL_BLEND);
+			assert GL_W.checkError("Enable(BLEND)");
+			GL_W.glBlendFunc(GL_W.GL_SRC_ALPHA, GL_W.GL_ONE_MINUS_SRC_ALPHA);
+			assert GL_W.checkError("BlendFunc(SRC_ALPHA, ONE_MINUS_SRC_ALPHA)");
+		} else {
+			GL_W.glDisable(GL_W.GL_BLEND);
+			assert GL_W.checkError("Disable(BLEND)");
+		}
+
+		if (mesh instanceof final TexturedMesh txtMesh && shader.createUniform(DirectShader.TXT0)) {
+			txtMesh.getTexture().bindUniform(shader.getUniformLocation(DirectShader.TXT0), 0);
+		}
+
+		if (shader.createUniform(DirectShader.TINT)) {
+			final TintOwner tintOwner;
+			if (entity instanceof final TintOwner tintEntity) {
+				tintOwner = tintEntity;
+			} else if (mesh instanceof final TintOwner tintMesh) {
+				tintOwner = tintMesh;
+			} else {
+				tintOwner = null;
+			}
+
+			shader
+					.setUniform(DirectShader.TINT,
+							(tintOwner == null || tintOwner.getTint() == null) ? DirectShader.DEFAULT_TINT : tintOwner.getTint());
+		}
+
+		if (shader.createUniform(SwayTransferShader.DEFORM_RATIO)) {
+			final SwayOwner swayOwner;
+			if (entity instanceof final SwayOwner swayEntity) {
+				swayOwner = swayEntity;
+			} else if (mesh instanceof final SwayOwner swayMesh) {
+				swayOwner = swayMesh;
+			} else {
+				swayOwner = null;
+			}
+
+			shader.setUniform(SwayTransferShader.DEFORM_RATIO, swayOwner.getDeformRatio());
+			shader.setUniform(SwayTransferShader.SPEED_RATIO, swayOwner.getSpeedRatio());
+			shader.setUniform(SwayTransferShader.SCALE_RATIO, swayOwner.getScaleRatio());
+			shader.setUniform(SwayTransferShader.TIME, (float) PGLogic.TOTAL_TIME());
+
+			this.swayMap.bindUniform(shader.getUniformLocation(SwayTransferShader.SWAY_MAP), 1);
+		}
+
+		if (entity instanceof final GameObject go && go.isEntityMaterialId()) {
+			// id is in the entity
+			final int matId = go.getMaterialId();
+
+			GL_W.glDisableVertexAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_ID);
+			assert GL_W.checkError("DisableVertexAttribArray(" + GameObject.MESH_ATTRIB_MATERIAL_ID_ID + ")");
+			GL_W.glVertexAttribI1ui(GameObject.MESH_ATTRIB_MATERIAL_ID_ID, matId);
+			assert GL_W.checkError("VertexAttrib1f(" + GameObject.MESH_ATTRIB_MATERIAL_ID_ID + "," + matId + ")");
+		} else if (mesh instanceof final TexturedMesh txtMesh) { // id in the texture id
+			final int txtId = txtMesh.getTexture().getGlId();
+
+			GL_W.glDisableVertexAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_ID);
+			assert GL_W.checkError("DisableVertexAttribArray(" + GameObject.MESH_ATTRIB_MATERIAL_ID_ID + ")");
+			GL_W.glVertexAttribI1ui(GameObject.MESH_ATTRIB_MATERIAL_ID_ID, txtId);
+			assert GL_W.checkError("VertexAttrib1f(" + GameObject.MESH_ATTRIB_MATERIAL_ID_ID + "," + txtId + ")");
+		} else if (mesh instanceof final MaterialMesh matMesh) { // id is in the mesh
+			final int matId = matMesh.getMaterialId();
+
+			GL_W.glDisableVertexAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_ID);
+			assert GL_W.checkError("DisableVertexAttribArray(" + GameObject.MESH_ATTRIB_MATERIAL_ID_ID + ")");
+			GL_W.glVertexAttribI1ui(GameObject.MESH_ATTRIB_MATERIAL_ID_ID, matId);
+			assert GL_W.checkError("VertexAttrib1f(" + GameObject.MESH_ATTRIB_MATERIAL_ID_ID + "," + matId + ")");
+		}
+
+		if (entity instanceof final GameObject go && go.getObjectIdLocation() != AttributeLocation.MESH) {
+			// object id is in the entity
+			final Vector3i objId = go.getObjectId();
+			GL_W.glDisableVertexAttribArray(GameObject.MESH_ATTRIB_OBJECT_ID_ID);
+			assert GL_W.checkError("DisableVertexAttribArray(" + GameObject.MESH_ATTRIB_OBJECT_ID_ID + ")");
+			GL_W.glVertexAttribI3ui(GameObject.MESH_ATTRIB_OBJECT_ID_ID, objId.x, objId.y, objId.z);
+			assert GL_W.checkError("VertexAttrib3f(" + GameObject.MESH_ATTRIB_OBJECT_ID_ID + "," + objId + ")");
+		}
+
+		GL_W.glPolygonMode(PolygonMode.FRONT_AND_BACK.getGlId(), PolygonDrawMode.FILL.getGlId());
+		assert GL_W.checkError("PolygonMode(" + mesh.getPolygonMode() + ", " + mesh.getPolygonDrawMode() + ")");
+
+		if (mesh instanceof final LineMesh lineMesh) {
+			if (lineMesh.isLineSmooth()) {
+				GL_W.glEnable(GL_W.GL_LINE_SMOOTH);
+				assert GL_W.checkError("Enable(LINE_SMOOTH)");
+			} else {
+				GL_W.glDisable(GL_W.GL_LINE_SMOOTH);
+				assert GL_W.checkError("Disable(LINE_SMOOTH)");
+			}
+			GL_W.glLineWidth(lineMesh.getLineWidth());
+			assert GL_W.checkError("Enable(" + lineMesh.getLineWidth() + ")");
 		}
 
 		GL_W
@@ -907,8 +1025,8 @@ public class DeferredCompositor implements Cleanupable {
 			txtMesh.getTexture().bindUniform(shader.getUniformLocation(DirectShader.TXT0), 0);
 		}
 
-		final TintOwner tintOwner;
 		if (shader.createUniform(DirectShader.TINT)) {
+			final TintOwner tintOwner;
 			if (entity instanceof final TintOwner tintEntity) {
 				tintOwner = tintEntity;
 			} else if (mesh instanceof final TintOwner tintMesh) {
@@ -922,8 +1040,8 @@ public class DeferredCompositor implements Cleanupable {
 							(tintOwner == null || tintOwner.getTint() == null) ? DirectShader.DEFAULT_TINT : tintOwner.getTint());
 		}
 
-		final SwayOwner swayOwner;
 		if (shader.createUniform(SwayTransferShader.DEFORM_RATIO)) {
+			final SwayOwner swayOwner;
 			if (entity instanceof final SwayOwner swayEntity) {
 				swayOwner = swayEntity;
 			} else if (mesh instanceof final SwayOwner swayMesh) {
@@ -938,14 +1056,10 @@ public class DeferredCompositor implements Cleanupable {
 			shader.setUniform(SwayTransferShader.TIME, (float) PGLogic.TOTAL_TIME());
 
 			this.swayMap.bindUniform(shader.getUniformLocation(SwayTransferShader.SWAY_MAP), 1);
-
-			System.err
-					.println(((GameObject) swayOwner).getId() + " " + ((GameObject) swayOwner).getMaterialId() + " "
-							+ ((GameObject) swayOwner).isEntityMaterialId());
 		}
 
-		final GradientOwner gradientOwner;
 		if (shader.createUniform(GradientShader.GRADIENT_DIRECTION)) {
+			final GradientOwner gradientOwner;
 			if (entity instanceof final GradientOwner gradientEntity) {
 				gradientOwner = gradientEntity;
 			} else if (mesh instanceof final GradientOwner gradientMesh) {
@@ -987,7 +1101,7 @@ public class DeferredCompositor implements Cleanupable {
 			assert GL_W.checkError("DisableVertexAttribArray(" + GameObject.MESH_ATTRIB_MATERIAL_ID_ID + ")");
 			GL_W.glVertexAttribI1ui(GameObject.MESH_ATTRIB_MATERIAL_ID_ID, txtId);
 			assert GL_W.checkError("VertexAttrib1f(" + GameObject.MESH_ATTRIB_MATERIAL_ID_ID + "," + txtId + ")");
-		} else if (mesh instanceof final MaterialMesh matMesh) { // id is in the material
+		} else if (mesh instanceof final MaterialMesh matMesh) { // id is in the mesh
 			final int matId = matMesh.getMaterialId();
 
 			GL_W.glDisableVertexAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_ID);

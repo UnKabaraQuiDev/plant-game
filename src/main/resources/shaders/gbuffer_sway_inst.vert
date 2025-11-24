@@ -32,20 +32,26 @@ flat out uvec3 bet_ObjectId;
 flat out uint bet_InstanceID;
 
 void main() {
-// untested
-    mat4 modelMatrix = transformationMatrix * in_InstanceMatrix;
+	mat4 modelMatrix = transformationMatrix * in_InstanceMatrix;
+	
 	vec4 worldPos4 = modelMatrix * vec4(in_Position, 1.0);
 	vec3 worldPos = worldPos4.xyz;
+	vec3 localPos = in_Position;
 
-	float sway = texture(swayMap, worldPos.xz * scaleRatio + scrollDirection * speedRatio * time).r * 2 - 1;
+	float sway = texture(swayMap,
+	                     worldPos.xz * scaleRatio 
+	                     + scrollDirection * speedRatio * time).r * 2 - 1;
+	
 	float offset = deformRatio * sway * in_Position.y;
 	
-	vec3 pos = in_Position;
-	pos.x += offset;
-	pos.z += offset;
+	localPos.x += offset;
+	localPos.z += offset;
+
+	worldPos4 = modelMatrix * vec4(localPos, 1.0);
+	worldPos = worldPos4.xyz;
 
 // obj space
-    bet_ObjPos = pos;
+    bet_ObjPos = localPos;
     bet_ObjNormal = normalize(in_Normal);
 
 // world space

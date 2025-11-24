@@ -77,7 +77,7 @@ public class StaticMeshLoader {
 		}).then(render, (Function<GenericMeshData, Mesh>) meshData -> createStatic(cache, meshName, meshData));
 	}
 
-	static Mesh createStatic(final CacheManager cache, final String meshName, final GenericMeshData meshData) {
+	public static Mesh createStatic(final CacheManager cache, final String meshName, final GenericMeshData meshData) {
 		final Mesh staticMesh;
 		if (meshData.textureMaterial()) {
 			final SingleTexture txt0 = cache.hasTexture(meshData.texturePath()) ? (SingleTexture) cache.getTexture(meshData.texturePath())

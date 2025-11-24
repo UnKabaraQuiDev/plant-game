@@ -9,9 +9,9 @@ import java.util.function.Function;
 import lu.pcy113.pclib.impl.ThrowingSupplier;
 
 import lu.kbra.plant_game.engine.mesh.loader.StaticMeshLoader.GenericMeshData;
+import lu.kbra.plant_game.engine.render.SwayMesh;
 import lu.kbra.plant_game.engine.util.AdvObjLoader;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
-import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.graph.texture.SingleTexture;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.SkipThen;
@@ -19,7 +19,7 @@ import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
 
 public class StaticSwayMeshLoader {
 
-	public static TaskFuture<?, Mesh> getStaticFuture(
+	public static TaskFuture<?, SwayMesh> getStaticFuture(
 			final CacheManager cache,
 			final String meshName,
 			final String path,
@@ -35,11 +35,11 @@ public class StaticSwayMeshLoader {
 			}
 
 			return getStaticMeshData(path);
-		}).then(render, (Function<GenericMeshData, Mesh>) meshData -> createStatic(cache, meshName, meshData));
+		}).then(render, (Function<GenericMeshData, SwayMesh>) meshData -> createStatic(cache, meshName, meshData));
 	}
 
-	static Mesh createStatic(final CacheManager cache, final String meshName, final GenericMeshData meshData) {
-		final Mesh staticMesh;
+	static SwayMesh createStatic(final CacheManager cache, final String meshName, final GenericMeshData meshData) {
+		final SwayMesh staticMesh;
 		if (meshData.textureMaterial()) {
 			final SingleTexture txt0 = cache.hasTexture(meshData.texturePath()) ? (SingleTexture) cache.getTexture(meshData.texturePath())
 					: SingleTexture.loadSingleTexture(cache, meshData.texturePath(), meshData.texturePath());
@@ -50,6 +50,8 @@ public class StaticSwayMeshLoader {
 		} else {
 			staticMesh = AdvObjLoader.loadSwayMesh(meshName, null, meshData.filePath(), meshData.deformRatio(), meshData.speedRatio());
 		}
+
+		System.err.println("created mesh: " + staticMesh);
 
 		cache.addMesh(staticMesh);
 		releaseLock(meshName);

@@ -1,5 +1,7 @@
 package lu.kbra.plant_game.engine.scene.world;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
 
@@ -18,16 +20,25 @@ import lu.pcy113.pclib.logger.GlobalLogger;
 
 import lu.kbra.plant_game.engine.UpdateFrameState;
 import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory;
+import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory.InstanceData;
 import lu.kbra.plant_game.engine.entity.go.impl.AnimatedGameObject;
 import lu.kbra.plant_game.engine.entity.go.impl.GameObject;
 import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
 import lu.kbra.plant_game.engine.entity.go.mesh.pipe.PipeMesh;
 import lu.kbra.plant_game.engine.entity.go.mesh.terrain.TerrainMesh;
 import lu.kbra.plant_game.engine.entity.go.obj.energy.SolarPanelObject;
-import lu.kbra.plant_game.engine.entity.go.obj.grass.LargeGrassObject;
 import lu.kbra.plant_game.engine.entity.go.obj.terrain.TerrainObject;
 import lu.kbra.plant_game.engine.entity.go.obj.water.WaterTowerObject;
 import lu.kbra.plant_game.engine.entity.go.obj.water.WaterWheelObject;
+import lu.kbra.plant_game.engine.entity.go.obj_inst.grass.InstanceLargeGrassObject;
+import lu.kbra.plant_game.engine.entity.go.obj_inst.grass.InstanceMediumGrassObject;
+import lu.kbra.plant_game.engine.entity.go.obj_inst.grass.InstanceSmallGrassObject;
+import lu.kbra.plant_game.engine.entity.go.obj_inst.grass.flower.champi.InstanceLargeChampiFlowerObject;
+import lu.kbra.plant_game.engine.entity.go.obj_inst.grass.flower.champi.InstanceMediumChampiFlowerObject;
+import lu.kbra.plant_game.engine.entity.go.obj_inst.grass.flower.champi.InstanceSmallChampiFlowerObject;
+import lu.kbra.plant_game.engine.entity.go.obj_inst.grass.flower.round.InstanceLargeRoundFlowerObject;
+import lu.kbra.plant_game.engine.entity.go.obj_inst.grass.flower.round.InstanceMediumRoundFlowerObject;
+import lu.kbra.plant_game.engine.entity.go.obj_inst.grass.flower.round.InstanceSmallRoundFlowerObject;
 import lu.kbra.plant_game.engine.mesh.data.AttributeLocation;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.scene.world.data.LevelData;
@@ -236,20 +247,71 @@ public class WorldLevelScene extends Scene3D {
 				this.getTerrain().addComponent(new SubEntitiesComponent<GameObject>());
 			}
 			final SubEntitiesComponent subEntities = this.getTerrain().getComponent(SubEntitiesComponent.class);
+			final List<Vector3f> positions = new ArrayList<>();
 			for (int x = 0; x < this.getTerrain().getMesh().getWidth(); x++) {
 				for (int z = 0; z < this.getTerrain().getMesh().getLength(); z++) {
 					final float y = this.getTerrain().getMesh().getCellHeight(x, z);
-					GameObjectFactory
-							.create(LargeGrassObject.class,
-									subEntities,
-									new Transform3D(
-											new Vector3f(x + 0.5f, y, z + 0.5f),
-											new Quaternionf().rotateY((float) (Math.PI / 2 * PCUtils.randomIntRange(0, 3)))),
-									(short) 5)
-							.push();
+					positions.add(new Vector3f(x + 0.5f, y, z + 0.5f));
 				}
 			}
+
+			List<Vector3f> smallPositions = new ArrayList<>();
+			List<Vector3f> mediumPositions = new ArrayList<>();
+			List<Vector3f> largePositions = new ArrayList<>();
+			for (final Vector3f pos : positions) {
+				(switch (PCUtils.randomIntRange(0, 3)) {
+				case 0 -> smallPositions;
+				case 1 -> mediumPositions;
+				case 2 -> largePositions;
+				default -> null;
+				}).add(pos);
+			}
+
+			this.instance(InstanceSmallGrassObject.class, smallPositions, TerrainMaterialType.GRASS);
+			this.instance(InstanceMediumGrassObject.class, mediumPositions, TerrainMaterialType.GRASS);
+			this.instance(InstanceLargeGrassObject.class, largePositions, TerrainMaterialType.GRASS);
+
+			smallPositions = new ArrayList<>();
+			mediumPositions = new ArrayList<>();
+			largePositions = new ArrayList<>();
+			final List<Vector3f> smallPositions1 = new ArrayList<>();
+			final List<Vector3f> mediumPositions1 = new ArrayList<>();
+			final List<Vector3f> largePositions1 = new ArrayList<>();
+
+			for (final Vector3f pos : positions) {
+				(switch (PCUtils.randomIntRange(0, 6)) {
+				case 0 -> smallPositions;
+				case 1 -> mediumPositions;
+				case 2 -> largePositions;
+				case 3 -> smallPositions1;
+				case 4 -> mediumPositions1;
+				case 5 -> largePositions1;
+				default -> null;
+				}).add(pos);
+			}
+
+			this.instance(InstanceSmallChampiFlowerObject.class, smallPositions, TerrainMaterialType.LIGHT_BLUE);
+			this.instance(InstanceMediumChampiFlowerObject.class, mediumPositions, TerrainMaterialType.LIGHT_BLUE);
+			this.instance(InstanceLargeChampiFlowerObject.class, largePositions, TerrainMaterialType.WATER);
+			this.instance(InstanceSmallRoundFlowerObject.class, smallPositions1, TerrainMaterialType.RED);
+			this.instance(InstanceMediumRoundFlowerObject.class, mediumPositions1, TerrainMaterialType.RED);
+			this.instance(InstanceLargeRoundFlowerObject.class, largePositions1, TerrainMaterialType.RED);
+
 		}).push();
+	}
+
+	private <T extends GameObject> TaskFuture<?, T>.TaskState<T> instance(
+			final Class<T> class1,
+			final List<Vector3f> pos,
+			final TerrainMaterialType mt) {
+		return GameObjectFactory
+				.create(class1,
+						this.getTerrain().getSubEntitiesComponent(),
+						new InstanceData(
+								i -> new Transform3D(pos.get(i), new Quaternionf().rotateY((float) (Math.random() * 2 * Math.PI))),
+								pos.size()),
+						mt.getId())
+				.push();
 	}
 
 	public void input(final WindowInputHandler inputHandler, final float dTime, final UpdateFrameState frameState) {
@@ -341,6 +403,7 @@ public class WorldLevelScene extends Scene3D {
 										mousePos,
 										compositor.getWindow().getWidth(),
 										compositor.getWindow().getHeight());
+						System.err.println("candidate: " + pos);
 						if (pos != null) {
 							this.attachedObject.placeDown(this, pos, this.targetRotation);
 							this.targetRotation = Direction.DEFAULT();
