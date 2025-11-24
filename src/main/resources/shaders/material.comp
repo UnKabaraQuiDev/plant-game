@@ -55,5 +55,69 @@ void main() {
 
     vec4 outIds = vec4(ids.r, ids.g, ids.b, ids.a);
 
+	/*if(ids.r == 1 || ids.r == 2) {
+	   	// ----------------------------------------------------------
+		// SMOOTH FALLOFF EDGE HIGHLIGHT
+		// ----------------------------------------------------------
+		
+		vec2 texel = 1.0 / vec2(inputSize);
+		
+		// maximum radius in pixels (e.g. 12px gives thick falloff)
+		int radius = 12;
+		
+		// accumulators
+		float edgeAccum = 0.0;
+		float weightAccum = 0.0;
+		
+		// loop through a circular kernel
+		for (int y = -radius; y <= radius; y++) {
+		    for (int x = -radius; x <= radius; x++) {
+		
+		        float dist = sqrt(float(x * x + y * y));
+		        if (dist > radius)
+		            continue;
+		
+		        // sampling coordinate
+		        ivec2 sampleCoord = screenCoord + ivec2(x, y);
+		
+		        // clamp to range
+		        sampleCoord = clamp(sampleCoord, ivec2(0), inputSize - ivec2(1));
+		
+		        // sample neighboring normal and depth
+		        vec3 nS = texelFetch(uNormalTex, sampleCoord, 0).xyz;
+		        float dS = texelFetch(uDepthTex, sampleCoord, 0).r;
+		
+		        // normal discontinuity
+		        float nd = 1.0 - dot(normal, nS);
+		
+		        // depth discontinuity
+		        float dd = abs(depth - dS);
+		
+		        // raw edge strength
+		        float e = nd + dd;
+		
+		        // falloff weight
+		        // near the center: strong
+		        // near radius: zero
+		        float w = smoothstep(float(radius), float(radius * 0.25), dist);
+		
+		        edgeAccum += e * w;
+		        weightAccum += w;
+		    }
+		}
+		
+		// normalize
+		float edge = edgeAccum / max(weightAccum, 0.0001);
+		
+		// final edge strength shaping
+		edge = smoothstep(0.02, 0.15, edge*0.5);
+		
+		// apply highlight
+		vec3 edgeColor = vec3(outColor * 2);
+		outColor.rgb = mix(outColor.rgb, edgeColor, edge);
+		
+		// ----------------------------------------------------------
+	}*/
+
 	imageStore(uOutputTex, outPixel, outColor);
 }
