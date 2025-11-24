@@ -245,7 +245,7 @@ public class WorldLevelScene extends Scene3D {
 									new Transform3D(
 											new Vector3f(x + 0.5f, y, z + 0.5f),
 											new Quaternionf().rotateY((float) (Math.PI / 2 * PCUtils.randomIntRange(0, 3)))),
-									TerrainMaterialType.DIRT.getId())
+									(short) 5)
 							.push();
 				}
 			}

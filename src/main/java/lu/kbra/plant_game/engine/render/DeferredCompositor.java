@@ -938,6 +938,10 @@ public class DeferredCompositor implements Cleanupable {
 			shader.setUniform(SwayTransferShader.TIME, (float) PGLogic.TOTAL_TIME());
 
 			this.swayMap.bindUniform(shader.getUniformLocation(SwayTransferShader.SWAY_MAP), 1);
+
+			System.err
+					.println(((GameObject) swayOwner).getId() + " " + ((GameObject) swayOwner).getMaterialId() + " "
+							+ ((GameObject) swayOwner).isEntityMaterialId());
 		}
 
 		final GradientOwner gradientOwner;

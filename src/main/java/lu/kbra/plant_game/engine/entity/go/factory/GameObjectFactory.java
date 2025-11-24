@@ -11,7 +11,6 @@ import lu.kbra.plant_game.engine.entity.go.impl.AnimatedGameObject;
 import lu.kbra.plant_game.engine.entity.go.impl.GameObject;
 import lu.kbra.plant_game.engine.entity.go.impl.SwayGameObject;
 import lu.kbra.plant_game.engine.mesh.AnimatedMesh;
-import lu.kbra.plant_game.engine.mesh.TexturedMesh;
 import lu.kbra.plant_game.engine.mesh.loader.AnimatedMeshLoader;
 import lu.kbra.plant_game.engine.mesh.loader.AnimatedMeshLoader.AnimatedMeshes;
 import lu.kbra.plant_game.engine.mesh.loader.StaticMeshLoader;
@@ -79,7 +78,6 @@ public class GameObjectFactory {
 										PCUtils
 												.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), mesh },
 														args));
-						instance.setMaterialId((short) (mesh instanceof TexturedMesh ? ((TexturedMesh) mesh).getTexture().getGlId() : -1));
 						return instance;
 					});
 
@@ -90,7 +88,6 @@ public class GameObjectFactory {
 					final T instance = GameObjectRegistry
 							.create(clazz,
 									PCUtils.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), mesh }, args));
-					instance.setMaterialId((short) (mesh instanceof TexturedMesh ? ((TexturedMesh) mesh).getTexture().getGlId() : -1));
 					return instance;
 				});
 	}

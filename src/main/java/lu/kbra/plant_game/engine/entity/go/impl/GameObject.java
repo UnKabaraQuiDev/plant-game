@@ -32,7 +32,11 @@ public class GameObject extends Entity implements Transform3DOwner, MeshOwner {
 	}
 
 	public GameObject(final String str, final Mesh mesh, final Transform3D transform) {
-		this(str, mesh, transform, new Vector3i((int) System.nanoTime(), (int) System.nanoTime() % 20056, (int) System.nanoTime() % 255));
+		this(str, mesh, transform, getRandomObjectId());
+	}
+
+	public static Vector3i getRandomObjectId() {
+		return new Vector3i((int) System.nanoTime(), (int) System.nanoTime() % 20056, (int) System.nanoTime() % 255);
 	}
 
 	public GameObject(final String str, final Mesh mesh, final Transform3D transform, final Vector3i objectId) {
@@ -43,8 +47,10 @@ public class GameObject extends Entity implements Transform3DOwner, MeshOwner {
 		super(str, mesh == null ? null : new MeshComponent(mesh), transform != null ? new Transform3DComponent(transform) : null);
 		if (mesh instanceof TexturedMesh || mesh instanceof MaterialMesh) {
 			this.entityMaterialId = false;
-		} else if (materialId != -1) {
+		} else if (materialId > 0) {
 			this.entityMaterialId = true;
+		} else {
+			this.entityMaterialId = false;
 		}
 		this.meshComponent = super.getComponent(MeshComponent.class);
 		this.transformComponent = super.getComponent(Transform3DComponent.class);

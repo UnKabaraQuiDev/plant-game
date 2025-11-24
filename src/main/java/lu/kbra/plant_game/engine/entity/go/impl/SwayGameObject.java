@@ -36,9 +36,8 @@ public class SwayGameObject extends GameObject implements SwayOwner {
 	}
 
 	public SwayGameObject(final String str, final SwayMesh swayMesh, final Transform3D transform, final short materialId) {
-		super(str, null, transform);
+		super(str, null, transform, getRandomObjectId(), materialId);
 		super.addComponent(this.swayMeshComponent = new SwayMeshComponent(swayMesh));
-		super.materialId = materialId;
 		this.deformRatio = 0.1f;
 		this.speedRatio = 0.1f;
 		this.scaleRatio = 0.1f;
