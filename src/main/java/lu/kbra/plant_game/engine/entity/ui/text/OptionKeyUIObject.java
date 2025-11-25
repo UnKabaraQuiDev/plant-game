@@ -41,6 +41,11 @@ public class OptionKeyUIObject extends ProgrammaticGrowOnHoverTextUIObject
 		super(str, text, key, dir, transform);
 
 		this.setKeyValue("x");
+		
+		if (transform instanceof final Transform3DPivot t3dp) {
+			final Vector2f textBounds = this.getTextEmitter().getTextBounds();
+			t3dp.scalePivotSet(textBounds.x / 2, 0, textBounds.y / 2);
+		}
 	}
 
 	public OptionKeyUIObject(final String str, final TextEmitter text, final String key, final Scale2dDir dir) {
@@ -105,12 +110,6 @@ public class OptionKeyUIObject extends ProgrammaticGrowOnHoverTextUIObject
 		final String loc = LocalizationService.get("key." + super.getKey());
 		value = "[" + (value == null ? " " : value) + "]";
 		this.getTextEmitter().setText(loc + " ".repeat(Math.max(length - loc.length() - value.length(), 0)) + value);
-
-		final Transform3D transform = this.getTransform();
-		if (transform instanceof final Transform3DPivot t3dp) {
-			final Vector2f textBounds = this.getTextEmitter().getTextBounds();
-			t3dp.scalePivotSet(textBounds.x / 2, 0, textBounds.y / 2);
-		}
 	}
 
 	public KeyOption getKeyOption() {
