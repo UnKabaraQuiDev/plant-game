@@ -73,7 +73,7 @@ public class UIObjectGroup extends UIObject implements ObjectGroup<UIObject> {
 				this.doSort();
 			}
 		}
-		if (e instanceof final ParentAware pa) {
+		if ((Object) e instanceof final ParentAware pa) {
 			pa.setParent(this);
 		}
 		this.recomputeBounds();

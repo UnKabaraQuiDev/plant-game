@@ -302,7 +302,7 @@ public class DeferredCompositor implements Cleanupable {
 			// + divisor);
 			// idk why this uses the option windowSize but ok
 			this.renderResolution.set(engine.getWindow().getOptions().windowSize).div(PCUtils.clamp(1, 100, divisor));
-			this.renderResolution.set(width, height);
+			this.renderResolution.set(width, height).div(2);
 			this.outputResolution.set(width, height);
 
 			this.resizeFramebuffer(this.worldFramebuffer, this.renderResolution);
