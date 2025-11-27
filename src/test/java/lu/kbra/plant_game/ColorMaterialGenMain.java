@@ -9,6 +9,8 @@ import java.util.Map.Entry;
 
 import javax.lang.model.element.Modifier;
 
+import org.joml.Vector4f;
+import org.joml.Vector4fc;
 import org.junit.Test;
 
 import com.squareup.javapoet.ClassName;
@@ -71,10 +73,11 @@ public class ColorMaterialGenMain extends GenMainConsts {
 		final TypeSpec.Builder builder = TypeSpec.enumBuilder(name).addModifiers(Modifier.PUBLIC);
 
 		// store the RGBA as fields
-		builder.addField(float.class, "r", Modifier.PUBLIC, Modifier.FINAL);
-		builder.addField(float.class, "g", Modifier.PUBLIC, Modifier.FINAL);
-		builder.addField(float.class, "b", Modifier.PUBLIC, Modifier.FINAL);
-		builder.addField(float.class, "a", Modifier.PUBLIC, Modifier.FINAL);
+		builder.addField(float.class, "r", Modifier.PRIVATE, Modifier.FINAL);
+		builder.addField(float.class, "g", Modifier.PRIVATE, Modifier.FINAL);
+		builder.addField(float.class, "b", Modifier.PRIVATE, Modifier.FINAL);
+		builder.addField(float.class, "a", Modifier.PRIVATE, Modifier.FINAL);
+		builder.addField(Vector4fc.class, "color", Modifier.PRIVATE, Modifier.FINAL);
 
 		// constructor
 		final MethodSpec ctor = MethodSpec
@@ -87,6 +90,7 @@ public class ColorMaterialGenMain extends GenMainConsts {
 				.addStatement("this.g = g")
 				.addStatement("this.b = b")
 				.addStatement("this.a = a")
+				.addStatement("this.color = new $T(r, g, b, a)", Vector4f.class)
 				.addModifiers(Modifier.PRIVATE)
 				.build();
 
@@ -112,7 +116,8 @@ public class ColorMaterialGenMain extends GenMainConsts {
 				.addStatement("float dr = Math.max(0f, r * 0.7f)")
 				.addStatement("float dg = Math.max(0f, g * 0.7f)")
 				.addStatement("float db = Math.max(0f, b * 0.7f)")
-				.addStatement("return $T.valueOf(dr, dg, db, a)", ClassName.bestGuess(name))
+				.addStatement("final $T c = $T.valueOf(dr, dg, db, a)", ClassName.bestGuess(name), ClassName.bestGuess(name))
+				.addStatement("return c != null ? c : $T.BLACK", ClassName.bestGuess(name))
 				.build();
 
 		// lighter()
@@ -123,20 +128,29 @@ public class ColorMaterialGenMain extends GenMainConsts {
 				.addStatement("float lr = Math.min(1f, r * 1.3f)")
 				.addStatement("float lg = Math.min(1f, g * 1.3f)")
 				.addStatement("float lb = Math.min(1f, b * 1.3f)")
-				.addStatement("return $T.valueOf(lr, lg, lb, a)", ClassName.bestGuess(name))
+				.addStatement("final $T c = $T.valueOf(lr, lg, lb, a)", ClassName.bestGuess(name), ClassName.bestGuess(name))
+				.addStatement("return c != null ? c : $T.WHITE", ClassName.bestGuess(name))
 				.build();
 
 		final MethodSpec getId = MethodSpec
 				.methodBuilder("getId")
 				.addModifiers(Modifier.PUBLIC)
 				.returns(TypeName.SHORT)
-				.addStatement("return (short) ordinal()")
+				.addStatement("return (short) (ordinal() + 1)")
+				.build();
+
+		final MethodSpec getColor = MethodSpec
+				.methodBuilder("getColor")
+				.addModifiers(Modifier.PUBLIC)
+				.returns(TypeName.get(Vector4fc.class))
+				.addStatement("return this.color")
 				.build();
 
 		builder.addMethod(this.createValueOf(name));
 		builder.addMethod(darker);
 		builder.addMethod(lighter);
 		builder.addMethod(getId);
+		builder.addMethod(getColor);
 
 		return builder.build();
 	}
@@ -155,19 +169,8 @@ public class ColorMaterialGenMain extends GenMainConsts {
 				.addStatement("return m")
 				.endControlFlow()
 				.endControlFlow()
-				.addStatement("throw new IllegalArgumentException(\"no match\")")
+				.addStatement("return null")
 				.build();
 	}
 
-	private String toEnumName(final Color c) {
-		return c
-				.toString()
-				.replace("java.awt.Color", "")
-				.replace("[", "")
-				.replace("]", "")
-				.replace("=", "_")
-				.replace(",", "_")
-				.replace(" ", "")
-				.toUpperCase();
-	}
 }

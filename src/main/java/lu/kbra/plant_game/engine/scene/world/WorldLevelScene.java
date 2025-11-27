@@ -318,7 +318,7 @@ public class WorldLevelScene extends Scene3D {
 						new InstanceData(
 								i -> new Transform3D(pos.get(i), new Quaternionf().rotateY((float) (Math.random() * 2 * Math.PI))),
 								pos.size()),
-						mt.ordinal())
+						mt.getId())
 				.push();
 	}
 

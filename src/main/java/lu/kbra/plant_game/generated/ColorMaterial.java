@@ -1,6 +1,9 @@
 // @formatter:off
 package lu.kbra.plant_game.generated;
 
+import org.joml.Vector4f;
+import org.joml.Vector4fc;
+
 public enum ColorMaterial {
 	DARK_BLACK(0.0f, 0.0f, 0.0f, 1f),
 
@@ -82,19 +85,22 @@ public enum ColorMaterial {
 
 	DARK_ORANGE(0.69803923f, 0.54901963f, 0.0f, 1f);
 
-	public final float r;
+	private final float r;
 
-	public final float g;
+	private final float g;
 
-	public final float b;
+	private final float b;
 
-	public final float a;
+	private final float a;
+
+	private final Vector4fc color;
 
 	private ColorMaterial(float r, float g, float b, float a) {
 		this.r = r;
 		this.g = g;
 		this.b = b;
 		this.a = a;
+		this.color = new Vector4f(r, g, b, a);
 	}
 
 	public static ColorMaterial valueOf(float r, float g, float b, float a) {
@@ -103,24 +109,30 @@ public enum ColorMaterial {
 				return m;
 			}
 		}
-		throw new IllegalArgumentException("no match");
+		return null;
 	}
 
 	public ColorMaterial darker() {
 		float dr = Math.max(0f, r * 0.7f);
 		float dg = Math.max(0f, g * 0.7f);
 		float db = Math.max(0f, b * 0.7f);
-		return ColorMaterial.valueOf(dr, dg, db, a);
+		final ColorMaterial c = ColorMaterial.valueOf(dr, dg, db, a);
+		return c != null ? c : ColorMaterial.BLACK;
 	}
 
 	public ColorMaterial lighter() {
 		float lr = Math.min(1f, r * 1.3f);
 		float lg = Math.min(1f, g * 1.3f);
 		float lb = Math.min(1f, b * 1.3f);
-		return ColorMaterial.valueOf(lr, lg, lb, a);
+		final ColorMaterial c = ColorMaterial.valueOf(lr, lg, lb, a);
+		return c != null ? c : ColorMaterial.WHITE;
 	}
 
 	public short getId() {
-		return (short) ordinal();
+		return (short) (ordinal() + 1);
+	}
+
+	public Vector4fc getColor() {
+		return this.color;
 	}
 }

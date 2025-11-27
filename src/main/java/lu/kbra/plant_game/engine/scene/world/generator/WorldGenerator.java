@@ -106,7 +106,7 @@ public class WorldGenerator {
 			if (ia == null) {
 				ia = verts.size();
 				verts.add(a);
-				mats.add((byte) e.material.ordinal());
+				mats.add((byte) e.material.getId());
 				indexMap.put(a, ia);
 			}
 
@@ -114,7 +114,7 @@ public class WorldGenerator {
 			if (ib == null) {
 				ib = verts.size();
 				verts.add(b);
-				mats.add((byte) e.material.ordinal());
+				mats.add((byte) e.material.darker().getId());
 				indexMap.put(b, ib);
 			}
 
@@ -123,7 +123,7 @@ public class WorldGenerator {
 		}
 
 		this.edgeVertices = verts.toArray(new Vector3f[0]);
-		this.edgeMaterialIds = PCUtils.byteListToPrimitive(this.edges.parallelStream().map(c -> (byte) c.material.ordinal()).toList());
+		this.edgeMaterialIds = PCUtils.byteListToPrimitive(mats);
 		this.edgeIndices = new int[inds.size()];
 		for (int i = 0; i < inds.size(); i++) {
 			this.edgeIndices[i] = inds.get(i);
@@ -275,7 +275,7 @@ public class WorldGenerator {
 			System.arraycopy(corners, 0, this.verts, faceCount * 4, 4);
 			System.arraycopy(face.indices(faceCount * 4), 0, this.indices, faceCount * 6, 6);
 			Arrays.fill(this.normals, faceCount * 4, faceCount * 4 + 4, face.normal);
-			Arrays.fill(this.materialIds, faceCount * 4, faceCount * 4 + 4, (byte) face.material().ordinal());
+			Arrays.fill(this.materialIds, faceCount * 4, faceCount * 4 + 4, (byte) face.material().getId());
 			if (face.cellPosition != null) {
 				Arrays
 						.fill(this.objectIds,

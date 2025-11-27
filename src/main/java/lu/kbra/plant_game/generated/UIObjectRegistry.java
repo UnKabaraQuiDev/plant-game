@@ -1,17 +1,15 @@
 // @formatter:off
 package lu.kbra.plant_game.generated;
 
+import java.lang.Class;
+import java.lang.Object;
+import java.lang.String;
+import java.lang.SuppressWarnings;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
-import org.joml.Vector2f;
-import org.joml.Vector4f;
-
-import lu.pcy113.pclib.impl.TriConsumer;
-
 import lu.kbra.plant_game.engine.entity.ui.btn.BackButtonUIObject;
 import lu.kbra.plant_game.engine.entity.ui.btn.MoneyUIObject;
 import lu.kbra.plant_game.engine.entity.ui.btn.OptionsButtonUIObject;
@@ -51,6 +49,9 @@ import lu.kbra.standalone.gameengine.geom.QuadMesh;
 import lu.kbra.standalone.gameengine.objs.entity.Component;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
+import lu.pcy113.pclib.impl.TriConsumer;
+import org.joml.Vector2f;
+import org.joml.Vector4f;
 
 public class UIObjectRegistry {
 	private static final Map<Class<? extends UIObject>, List<InternalConstructorFunction<UIObject>>> UI_OBJECT_CONSTRUCTORS;
