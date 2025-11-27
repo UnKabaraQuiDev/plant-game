@@ -2,7 +2,9 @@ package lu.kbra.plant_game.engine.scene.world.generator;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import org.joml.SimplexNoise;
@@ -12,8 +14,12 @@ import org.joml.Vector3f;
 import org.joml.Vector3fc;
 import org.joml.Vector3i;
 
+import lu.pcy113.pclib.PCUtils;
+
 import lu.kbra.plant_game.engine.entity.go.impl.GameObject;
+import lu.kbra.plant_game.engine.entity.go.mesh.terrain.TerrainEdgeMesh;
 import lu.kbra.plant_game.engine.entity.go.mesh.terrain.TerrainMesh;
+import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.standalone.gameengine.GameEngine;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.cache.attrib.UByteAttribArray;
@@ -28,14 +34,19 @@ public class WorldGenerator {
 	private int width = 10, length = 15, maxHeight = 5;
 
 	private final List<SquareFace> faces = new ArrayList<>();
+	private final List<Edge> edges = new ArrayList<>();
+	private SquareFace[][] topFaces;
 	private Vector3f[] verts;
 	private int[] indices;
 	private Vector3f[] normals;
 	private byte[] materialIds;
 	private Vector3i[] objectIds;
+	private Vector3f[] edgeVertices;
+	private int[] edgeIndices;
+	private byte[] edgeMaterialIds;
 
 	private int meshId;
-	protected TerrainMaterialType[][] materialType;
+	protected ColorMaterial[][] materialType;
 	protected Integer[][] noiseCompute;
 
 	public WorldGenerator(final int width, final int length, final int maxHeight) {
@@ -60,6 +71,7 @@ public class WorldGenerator {
 	public void compute() {
 		this.generateFaces();
 		this.generateVerts();
+		this.generateEdges();
 	}
 
 	public TerrainMesh generateMesh(final CacheManager cache) {
@@ -80,22 +92,73 @@ public class WorldGenerator {
 		return mesh;
 	}
 
+	public TerrainEdgeMesh generateEdgeMesh(final CacheManager cache) {
+		final Map<Vector3f, Integer> indexMap = new HashMap<>();
+		final List<Vector3f> verts = new ArrayList<>();
+		final List<Integer> inds = new ArrayList<>();
+		final List<Byte> mats = new ArrayList<>();
+
+		for (final Edge e : this.edges) {
+			final Vector3f a = e.p1();
+			final Vector3f b = e.p2();
+
+			Integer ia = indexMap.get(a);
+			if (ia == null) {
+				ia = verts.size();
+				verts.add(a);
+				mats.add((byte) e.material.ordinal());
+				indexMap.put(a, ia);
+			}
+
+			Integer ib = indexMap.get(b);
+			if (ib == null) {
+				ib = verts.size();
+				verts.add(b);
+				mats.add((byte) e.material.ordinal());
+				indexMap.put(b, ib);
+			}
+
+			inds.add(ia);
+			inds.add(ib);
+		}
+
+		this.edgeVertices = verts.toArray(new Vector3f[0]);
+		this.edgeMaterialIds = PCUtils.byteListToPrimitive(this.edges.parallelStream().map(c -> (byte) c.material.ordinal()).toList());
+		this.edgeIndices = new int[inds.size()];
+		for (int i = 0; i < inds.size(); i++) {
+			this.edgeIndices[i] = inds.get(i);
+		}
+
+		return new TerrainEdgeMesh(
+				"terrain_edges-" + this.width + "x" + this.length + "@" + System.identityHashCode(this),
+				new Vec3fAttribArray(Mesh.ATTRIB_VERTICES_NAME, Mesh.ATTRIB_VERTICES_ID, 1, this.edgeVertices),
+				new UIntAttribArray(Mesh.ATTRIB_INDICES_NAME, Mesh.ATTRIB_INDICES_ID, 1, this.edgeIndices, BufferType.ELEMENT_ARRAY),
+				new UByteAttribArray(
+						GameObject.MESH_ATTRIB_MATERIAL_ID_NAME,
+						GameObject.MESH_ATTRIB_MATERIAL_ID_ID,
+						1,
+						this.edgeMaterialIds));
+	}
+
 	protected void generateFaces() {
-		this.materialType = new TerrainMaterialType[this.width][this.length];
+		this.materialType = new ColorMaterial[this.width][this.length];
+		this.topFaces = new SquareFace[this.width][this.length];
 
 		for (int x = 0; x < this.width; x++) {
 			for (int z = 0; z < this.length; z++) {
 				final int cellHeight = this.getCellHeight(x, z);
 
-				this.faces
-						.add(new SquareFace(
-								new Vector2i(x, z),
-								new Vector3f(x, cellHeight, z),
-								new Vector3f(x + 1, cellHeight, z + 1),
-								GameEngine.Y_POS,
-								cellHeight < 0 ? TerrainMaterialType.STONE : TerrainMaterialType.GRASS));
+				final SquareFace face = new SquareFace(
+						new Vector2i(x, z),
+						new Vector3f(x, cellHeight, z),
+						new Vector3f(x + 1, cellHeight, z + 1),
+						GameEngine.Y_POS,
+						cellHeight < 0 ? ColorMaterial.GRAY : ColorMaterial.DARK_GREEN);
 
-				this.materialType[x][z] = cellHeight < 0 ? TerrainMaterialType.WATER : TerrainMaterialType.GRASS;
+				this.faces.add(face);
+
+				this.materialType[x][z] = cellHeight < 0 ? ColorMaterial.BLUE : ColorMaterial.DARK_GREEN;
+				this.topFaces[x][z] = face;
 
 				final int cellHeightXPos = this.getCellHeight(x + 1, z);
 				if (cellHeight > cellHeightXPos) {
@@ -106,7 +169,7 @@ public class WorldGenerator {
 										new Vector3f(x + 1, y, z),
 										new Vector3f(x + 1, y + 1, z + 1),
 										GameEngine.X_POS,
-										TerrainMaterialType.DIRT));
+										ColorMaterial.BROWN));
 					}
 				}
 
@@ -119,7 +182,7 @@ public class WorldGenerator {
 										new Vector3f(x, y, z + 1),
 										new Vector3f(x + 1, y + 1, z + 1),
 										GameEngine.Z_POS,
-										TerrainMaterialType.DIRT));
+										ColorMaterial.BROWN));
 					}
 				}
 
@@ -132,7 +195,7 @@ public class WorldGenerator {
 										new Vector3f(x, y, z),
 										new Vector3f(x, y + 1, z + 1),
 										GameEngine.X_NEG,
-										TerrainMaterialType.DIRT));
+										ColorMaterial.BROWN));
 					}
 				}
 
@@ -145,7 +208,53 @@ public class WorldGenerator {
 										new Vector3f(x, y, z),
 										new Vector3f(x + 1, y + 1, z),
 										GameEngine.Z_NEG,
-										TerrainMaterialType.DIRT));
+										ColorMaterial.BROWN));
+					}
+				}
+			}
+		}
+	}
+
+	protected void generateEdges() {
+		for (int x = 0; x < this.width; x++) {
+			for (int z = 0; z < this.length; z++) {
+				final int h = this.getCellHeight(x, z);
+				final ColorMaterial mat = this.getCellMaterial(x, z);
+
+				// Horizontal edge on X axis
+				if (x + 1 < this.width) {
+					final int hx = this.getCellHeight(x + 1, z);
+					if (h != hx) {
+						final int top = Math.max(h, hx);
+						this.edges.add(new Edge(new Vector3f(x + 1, top, z), new Vector3f(x + 1, top, z + 1), mat));
+					}
+				}
+
+				// Horizontal edge on Z axis
+				if (z + 1 < this.length) {
+					final int hz = this.getCellHeight(x, z + 1);
+					if (h != hz) {
+						final int top = Math.max(h, hz);
+						this.edges.add(new Edge(new Vector3f(x, top, z + 1), new Vector3f(x + 1, top, z + 1), mat));
+					}
+				}
+
+				// Vertical edges, only when the height varies around the column
+				final int hXPos = this.getCellHeight(x + 1, z);
+				final int hXNeg = this.getCellHeight(x - 1, z);
+				final int hZPos = this.getCellHeight(x, z + 1);
+				final int hZNeg = this.getCellHeight(x, z - 1);
+
+				final boolean sameX = (h == hXPos && h == hXNeg);
+				final boolean sameZ = (h == hZPos && h == hZNeg);
+
+				if (!sameX || !sameZ) {
+					final int base = Math.min(Math.min(h, hXPos), Math.min(hXNeg, hZPos));
+					final int base2 = Math.min(base, hZNeg);
+					final int top = h;
+
+					if (top > base2) {
+						this.edges.add(new Edge(new Vector3f(x, base2, z), new Vector3f(x, top, z), mat));
 					}
 				}
 			}
@@ -166,7 +275,7 @@ public class WorldGenerator {
 			System.arraycopy(corners, 0, this.verts, faceCount * 4, 4);
 			System.arraycopy(face.indices(faceCount * 4), 0, this.indices, faceCount * 6, 6);
 			Arrays.fill(this.normals, faceCount * 4, faceCount * 4 + 4, face.normal);
-			Arrays.fill(this.materialIds, faceCount * 4, faceCount * 4 + 4, (byte) face.material().getId());
+			Arrays.fill(this.materialIds, faceCount * 4, faceCount * 4 + 4, (byte) face.material().ordinal());
 			if (face.cellPosition != null) {
 				Arrays
 						.fill(this.objectIds,
@@ -192,27 +301,23 @@ public class WorldGenerator {
 		return this.noiseCompute[x][z];
 	}
 
+	public ColorMaterial getCellMaterial(final int x, final int z) {
+		if (x >= this.width || z >= this.length || x < 0 || z < 0) {
+			return null;
+		}
+
+		return this.topFaces[x][z].material;
+	}
+
 	protected Integer genNoise(final int x, final int z) {
 		return Math.round(SimplexNoise.noise(x + 0.5f, z + 0.5f));
 	}
 
-	public enum TerrainMaterialType {
-
-		GRASS((short) 1), DIRT((short) 2), STONE((short) 3), WATER((short) 4), RED((short) 5), LIGHT_BLUE((short) 6);
-
-		private final short id;
-
-		private TerrainMaterialType(final short id) {
-			this.id = id;
-		}
-
-		public short getId() {
-			return this.id;
-		}
+	public record Edge(Vector3f p1, Vector3f p2, ColorMaterial material) {
 
 	}
 
-	public record SquareFace(Vector2ic cellPosition, Vector3fc corner1, Vector3fc corner2, Vector3fc normal, TerrainMaterialType material) {
+	public record SquareFace(Vector2ic cellPosition, Vector3fc corner1, Vector3fc corner2, Vector3fc normal, ColorMaterial material) {
 		public Vector3f[] corners() {
 			// Extract coordinates
 			final float x1 = this.corner1.x(), y1 = this.corner1.y(), z1 = this.corner1.z();

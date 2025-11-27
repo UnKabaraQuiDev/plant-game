@@ -45,6 +45,8 @@ void main() {
 		color = vec3(1, 0.3, 0.3);
 	} else if (ids.r == 6) {
 		color = vec3(0.67, 0.847, 0.902);
+	} else if (ids.r == 7) {
+		color = vec3(0.024, 0.251, 0.169);
 	} else {
 		return;
 	}

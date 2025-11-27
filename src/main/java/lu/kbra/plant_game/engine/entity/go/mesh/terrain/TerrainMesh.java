@@ -1,6 +1,6 @@
 package lu.kbra.plant_game.engine.entity.go.mesh.terrain;
 
-import lu.kbra.plant_game.engine.scene.world.generator.WorldGenerator.TerrainMaterialType;
+import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.standalone.gameengine.cache.attrib.AttribArray;
 import lu.kbra.standalone.gameengine.cache.attrib.UIntAttribArray;
 import lu.kbra.standalone.gameengine.cache.attrib.Vec3fAttribArray;
@@ -14,7 +14,7 @@ public class TerrainMesh extends LoadedMesh {
 	private final int maxHeight;
 
 	private final Integer[][] cellHeight;
-	private final TerrainMaterialType[][] materialType;
+	private final ColorMaterial[][] materialType;
 
 	public TerrainMesh(
 			final String name,
@@ -23,7 +23,7 @@ public class TerrainMesh extends LoadedMesh {
 			final int length,
 			final int maxHeight,
 			final Integer[][] cellHeight,
-			final TerrainMaterialType[][] materialType,
+			final ColorMaterial[][] materialType,
 			final Vec3fAttribArray vertices,
 			final UIntAttribArray indices,
 			final AttribArray... attribs) {
@@ -64,11 +64,11 @@ public class TerrainMesh extends LoadedMesh {
 		return this.length;
 	}
 
-	public TerrainMaterialType getCellMaterial(final int x, final int z) {
+	public ColorMaterial getCellMaterial(final int x, final int z) {
 		return this.materialType[x][z];
 	}
 
-	public TerrainMaterialType[][] getMaterialTypes() {
+	public ColorMaterial[][] getMaterialTypes() {
 		return this.materialType;
 	}
 
