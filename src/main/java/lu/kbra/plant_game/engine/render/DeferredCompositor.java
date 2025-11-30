@@ -713,7 +713,6 @@ public class DeferredCompositor implements Cleanupable {
 
 		if (meshShader != null && entity.hasComponentMatching(MeshComponent.class)) {
 			for (final MeshComponent meshComponent : entity.getComponentsMatching(MeshComponent.class)) {
-				System.err.println(meshComponent.getMesh());
 				this.renderMesh(meshComponent.getMesh(), meshComponent, entity, worldTransform, meshShader);
 			}
 		}

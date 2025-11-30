@@ -41,7 +41,7 @@ public class OptionKeyUIObject extends ProgrammaticGrowOnHoverTextUIObject
 		super(str, text, key, dir, transform);
 
 		this.setKeyValue("x");
-		
+
 		if (transform instanceof final Transform3DPivot t3dp) {
 			final Vector2f textBounds = this.getTextEmitter().getTextBounds();
 			t3dp.scalePivotSet(textBounds.x / 2, 0, textBounds.y / 2);
@@ -76,6 +76,8 @@ public class OptionKeyUIObject extends ProgrammaticGrowOnHoverTextUIObject
 		if (this.awaitInput == State.WAITING_RELEASE && !inputHandler.isMouseButtonPressed(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
 			this.awaitInput = State.WAITING_INPUT;
 		}
+
+		System.err.println(inputHandler.getPressedKey() + " " + inputHandler.getPressedKeyChar());
 
 		final boolean dirty;
 		if (inputHandler.hasPressedKey()) {

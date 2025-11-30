@@ -62,12 +62,12 @@ public class DefaultInputHandler implements WindowInputHandler {
 		System.arraycopy(this.currMouse, 0, this.prevMouse, 0, this.currMouse.length);
 
 		for (int i = 0; i < this.currKeys.length; i++) {
-			final KeyState s = this.getKeyState(i);
+			final KeyState s = this.window.getKeyState(i);
 			this.currKeys[i] = (s == KeyState.PRESS || s == KeyState.REPEAT);
 		}
 
 		for (int i = 0; i < this.currMouse.length; i++) {
-			final KeyState s = this.getButtonState(i);
+			final KeyState s = this.window.getMouseButtonState(i);
 			this.currMouse[i] = (s == KeyState.PRESS || s == KeyState.REPEAT);
 		}
 

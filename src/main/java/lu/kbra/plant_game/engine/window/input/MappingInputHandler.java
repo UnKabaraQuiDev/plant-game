@@ -87,62 +87,6 @@ public class MappingInputHandler extends DefaultInputHandler {
 	/* --------------------------------------------------------- */
 
 	@Override
-	public boolean isKeyHeld(final int logical) {
-		if (!this.isKeyMapped(logical)) {
-			return false;
-		}
-		return super.isKeyHeld(this.getMappedKey(logical));
-	}
-
-	@Override
-	public boolean isKeyPressed(final int logical) {
-		if (!this.isKeyMapped(logical)) {
-			return false;
-		}
-		return super.isKeyPressed(this.getMappedKey(logical));
-	}
-
-	@Override
-	public boolean isKeyRepeat(final int logical) {
-		if (!this.isKeyMapped(logical)) {
-			return false;
-		}
-		return super.isKeyRepeat(this.getMappedKey(logical));
-	}
-
-	@Override
-	public boolean isKeyPressedOnce(final int logical) {
-		if (!this.isKeyMapped(logical)) {
-			return false;
-		}
-		return super.isKeyPressedOnce(this.getMappedKey(logical));
-	}
-
-	@Override
-	public boolean isKeyPressedOrRepeat(final int logical) {
-		if (!this.isKeyMapped(logical)) {
-			return false;
-		}
-		return super.isKeyPressedOrRepeat(this.getMappedKey(logical));
-	}
-
-	@Override
-	public boolean isMouseButtonPressed(final int logical) {
-		if (!this.isMouseMapped(logical)) {
-			return false;
-		}
-		return super.isMouseButtonPressed(this.getMappedMouse(logical));
-	}
-
-	@Override
-	public boolean isMouseButtonPressedOnce(final int logical) {
-		if (!this.isMouseMapped(logical)) {
-			return false;
-		}
-		return super.isMouseButtonPressedOnce(this.getMappedMouse(logical));
-	}
-
-	@Override
 	public KeyState getKeyState(final int logical) {
 		if (!this.isKeyMapped(logical)) {
 			return KeyState.RELEASE;
