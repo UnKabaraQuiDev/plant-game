@@ -239,24 +239,34 @@ public class WorldGenerator {
 					}
 				}
 
-				// Vertical edges, only when the height varies around the column
-				final int hXPos = this.getCellHeight(x + 1, z);
-				final int hXNeg = this.getCellHeight(x - 1, z);
-				final int hZPos = this.getCellHeight(x, z + 1);
-				final int hZNeg = this.getCellHeight(x, z - 1);
-
-				final boolean sameX = (h == hXPos && h == hXNeg);
-				final boolean sameZ = (h == hZPos && h == hZNeg);
-
-				if (!sameX || !sameZ) {
-					final int base = Math.min(Math.min(h, hXPos), Math.min(hXNeg, hZPos));
-					final int base2 = Math.min(base, hZNeg);
-					final int top = h;
-
-					if (top > base2) {
-						this.edges.add(new Edge(new Vector3f(x, base2, z), new Vector3f(x, top, z), mat));
-					}
-				}
+				/*
+				 * if (x == 0 || x == this.width - 1 || z == 0 || z == this.length + 1) { continue; }
+				 * 
+				 * final int hX = this.getCellHeight(x - 1, z - 1); final int hX1 = this.getCellHeight(x, z - 1);
+				 * final int hX2 = this.getCellHeight(x - 1, z);
+				 * 
+				 * if (hX != hX2 && hX != hX1) { final int min = Math.min(Math.min(hX, hX1), hX2); final int max =
+				 * Math.max(h, hX);
+				 * 
+				 * this.edges.add(new Edge(new Vector3f(x, min, z), new Vector3f(x, max, z), mat)); }
+				 * 
+				 * if (true) { continue; }
+				 * 
+				 * final int hXPos = this.getCellHeight(x + 1, z); final int hZPos = this.getCellHeight(x, z + 1);
+				 * final int hXPos1 = this.getCellHeight(x - 1, z); final int hZPos1 = this.getCellHeight(x, z - 1);
+				 * final int hXPos2 = this.getCellHeight(x - 1, z - 1); final int hZPos2 = this.getCellHeight(x - 1,
+				 * z - 1); final int hXPos3 = this.getCellHeight(x + 1, z + 1); final int hZPos3 =
+				 * this.getCellHeight(x + 1, z + 1);
+				 * 
+				 * final int diffCount = (hXPos1 != h ? 1 : 0) + (hZPos1 != h ? 1 : 0) + (hXPos != h ? 1 : 0) +
+				 * (hZPos != h ? 1 : 0) + (hXPos2 != h ? 1 : 0) + (hZPos2 != h ? 1 : 0) + (hXPos3 != h ? 1 : 0) +
+				 * (hZPos3 != h ? 1 : 0);
+				 * 
+				 * if (diffCount == 3) { final int min = Math.min(Math.min(h, hXPos), hZPos); final int max =
+				 * Math.max(Math.max(h, hXPos), hZPos);
+				 * 
+				 * this.edges.add(new Edge(new Vector3f(x, min, z), new Vector3f(x, max, z), mat)); }
+				 */
 			}
 		}
 	}

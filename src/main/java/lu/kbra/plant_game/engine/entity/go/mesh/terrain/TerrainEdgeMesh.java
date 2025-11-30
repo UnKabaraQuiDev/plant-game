@@ -23,7 +23,7 @@ public class TerrainEdgeMesh extends LoadedMesh implements LineMesh {
 
 	@Override
 	public float getLineWidth() {
-		return 1.5f;
+		return 2.5f;
 	}
 
 	@Override
