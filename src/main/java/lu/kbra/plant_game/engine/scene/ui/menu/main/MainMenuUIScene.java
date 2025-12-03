@@ -68,20 +68,13 @@ public class MainMenuUIScene extends UIScene {
 	protected Vector3f[] restPositions = { new Vector3f(), null, new Vector3f(5, 0, 0), null };
 
 	protected OffsetUIObjectGroup mainMenuGroup = new OffsetUIObjectGroup("main", new Transform3D(new Vector3f(this.restPositions[MAIN])));
-	protected LayoutOffsetUIObjectGroup mainLeftMenuGroup = new LayoutOffsetUIObjectGroup(
-			"main.left",
-			new MarginFlowLayout(true, 0.02f, 0.3f, 0, 0.5f, 0.5f, MarginFlowLayout.LEFT),
-			this.mainMenuGroup);
-	protected LayoutOffsetUIObjectGroup mainButtonsMenuGroup = new LayoutOffsetUIObjectGroup(
-			"main.buttons",
-			new FlowLayout(true, 0.02f),
+	protected LayoutOffsetUIObjectGroup mainLeftMenuGroup = new LayoutOffsetUIObjectGroup("main.left",
+			new MarginFlowLayout(true, 0.02f, 0.3f, 0, 0.5f, 0.5f, MarginFlowLayout.LEFT), this.mainMenuGroup);
+	protected LayoutOffsetUIObjectGroup mainButtonsMenuGroup = new LayoutOffsetUIObjectGroup("main.buttons", new FlowLayout(true, 0.02f),
 			this.mainLeftMenuGroup);
-	protected OffsetUIObjectGroup optionsMenuGroup = new OffsetUIObjectGroup(
-			"option",
+	protected OffsetUIObjectGroup optionsMenuGroup = new OffsetUIObjectGroup("option",
 			new Transform3D(new Vector3f(this.restPositions[OPTIONS])));
-	protected LayoutOffsetUIObjectGroup optionsEntriesMenuGroup = new LayoutOffsetUIObjectGroup(
-			"option.keys",
-			new FlowLayout(true, 0.0f),
+	protected LayoutOffsetUIObjectGroup optionsEntriesMenuGroup = new LayoutOffsetUIObjectGroup("option.keys", new FlowLayout(true, 0.0f),
 			this.optionsMenuGroup);
 
 	protected OffsetUIObjectGroup[] groups = new OffsetUIObjectGroup[] { this.mainMenuGroup, null, this.optionsMenuGroup, null };
@@ -119,15 +112,13 @@ public class MainMenuUIScene extends UIScene {
 	private void buildOptionsMenu(final Dispatcher workers, final Dispatcher renderDispatcher) {
 		final TextData uiSmallLeftTextData = new TextData(new Vector2f(0.1f), TextAlignment.TEXT_CENTER, -1);
 
-		final LayoutOffsetUIObjectGroup optionsVolumeGroup = new LayoutOffsetUIObjectGroup(
-				"options.volume",
+		final LayoutOffsetUIObjectGroup optionsVolumeGroup = new LayoutOffsetUIObjectGroup("options.volume",
 				new EdgeStickLayout(true, 0, uiSmallLeftTextData.getCharSize().x() * OPTIONS_COLUMN_COUNT));
 
 		this.optionsEntriesMenuGroup.add(optionsVolumeGroup);
 		this.optionsEntriesMenuGroup.add(UIObjectFactory.createVerticalSpacer(2 * uiSmallLeftTextData.getCharSize().y()));
 
-		final ListTriggerLatch<OptionKeyUIObject> optionKeyGroupLatch = new ListTriggerLatch<>(
-				StandardKeyOption.values().length,
+		final ListTriggerLatch<OptionKeyUIObject> optionKeyGroupLatch = new ListTriggerLatch<>(StandardKeyOption.values().length,
 				l -> workers.post(() -> {
 					l.forEach(this.optionsEntriesMenuGroup::add);
 					this.updateKeys();
@@ -148,11 +139,8 @@ public class MainMenuUIScene extends UIScene {
 		uiSmallLeftTextData.setName(null);
 
 		/* volume */
-		final ListTriggerLatch<UIObject> optionsVolumeGroupLatch = new TextSliderListTriggerLatch<>(
-				workers,
-				optionsVolumeGroup,
-				VolumeTextUIObject.class,
-				VolumeSliderUIObject.class);
+		final ListTriggerLatch<UIObject> optionsVolumeGroupLatch = new TextSliderListTriggerLatch<>(workers, optionsVolumeGroup,
+				VolumeTextUIObject.class, VolumeSliderUIObject.class);
 
 		uiSmallLeftTextData.setTextAlignment(TextAlignment.TEXT_LEFT);
 		UIObjectFactory.create(VolumeTextUIObject.class, optionsVolumeGroupLatch, uiSmallLeftTextData, new Transform3DPivot()).push();
@@ -193,9 +181,7 @@ public class MainMenuUIScene extends UIScene {
 		UIObjectFactory
 				.create(GradientQuadUIObject.class,
 						this.optionsMenuGroup,
-						new Transform3D(
-								new Vector3f(0, GRADIENT_DEPTH, 0),
-								new Quaternionf().rotateY((float) Math.PI),
+						new Transform3D(new Vector3f(0, GRADIENT_DEPTH, 0), new Quaternionf().rotateY((float) Math.PI),
 								new Vector3f(2.5f, 1, 2)),
 						GradientDirection.UV_X,
 						GameEngineUtils.hexToColorToVec4f("317dac8c"))

@@ -121,7 +121,7 @@ public class WorldLevelScene extends Scene3D {
 			GlobalLogger.info("Creating entity...");
 			final long time = PCUtils.nanoTime((Runnable) () -> {
 				final TerrainObject terrainEntity = new TerrainObject("terrain", meshes.getKey());
-				terrainEntity.getSubEntitiesComponent().addEntity(new GameObject("terrain-edges", meshes.getValue(), new Transform3D()));
+				// terrainEntity.getSubEntitiesComponent().addEntity(new GameObject("terrain-edges", meshes.getValue(), new Transform3D()));
 				terrainEntity.getTransform().getTranslation().set(-meshes.getKey().getWidth() / 2, 0, -meshes.getKey().getLength() / 2);
 				terrainEntity.getTransform().updateMatrix();
 				this.setTerrain(terrainEntity);
