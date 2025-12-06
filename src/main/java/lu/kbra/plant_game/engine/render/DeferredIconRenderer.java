@@ -6,6 +6,7 @@ import lu.kbra.plant_game.engine.entity.go.impl.GameObject;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.standalone.gameengine.GameEngine;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
+import lu.kbra.standalone.gameengine.generated.gl_wrapper.GL_W;
 import lu.kbra.standalone.gameengine.geom.BoundingBox;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.graph.texture.SingleTexture;
@@ -13,7 +14,6 @@ import lu.kbra.standalone.gameengine.utils.gl.consts.DataType;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TexelFormat;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TexelInternalFormat;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextureFilter;
-import lu.kbra.standalone.gameengine.utils.gl.wrapper.GL_W;
 
 public class DeferredIconRenderer extends DeferredCompositor {
 
