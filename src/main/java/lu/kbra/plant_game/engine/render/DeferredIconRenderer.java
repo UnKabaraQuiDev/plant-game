@@ -106,8 +106,7 @@ public class DeferredIconRenderer extends DeferredCompositor {
 						texture.getWidth(),
 						texture.getHeight(),
 						1);
-		assert GL_W.checkError("CopyImageSubData()");
-
+		
 		return texture;
 	}
 
