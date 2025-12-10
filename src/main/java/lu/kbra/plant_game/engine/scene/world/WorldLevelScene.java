@@ -30,6 +30,7 @@ import lu.kbra.plant_game.engine.entity.go.mesh.terrain.TerrainEdgeMesh;
 import lu.kbra.plant_game.engine.entity.go.mesh.terrain.TerrainMesh;
 import lu.kbra.plant_game.engine.entity.go.obj.energy.SolarPanelObject;
 import lu.kbra.plant_game.engine.entity.go.obj.terrain.TerrainObject;
+import lu.kbra.plant_game.engine.entity.go.obj.water.WaterSprinklerObject5x5;
 import lu.kbra.plant_game.engine.entity.go.obj.water.WaterTowerObject;
 import lu.kbra.plant_game.engine.entity.go.obj.water.WaterWheelObject;
 import lu.kbra.plant_game.engine.entity.go.obj_inst.grass.InstanceLargeGrassObject;
@@ -158,9 +159,7 @@ public class WorldLevelScene extends Scene3D {
 					indices[i * 2 + 1] = i + 1;
 				}
 
-				final PipeMesh mesh = new PipeMesh(
-						"pipe-" + "@" + System.identityHashCode(this),
-						12,
+				final PipeMesh mesh = new PipeMesh("pipe-" + "@" + System.identityHashCode(this), 12,
 						new Vec3fAttribArray(Mesh.ATTRIB_VERTICES_NAME, Mesh.ATTRIB_VERTICES_ID, 1, pos),
 						new UIntAttribArray(Mesh.ATTRIB_INDICES_NAME, Mesh.ATTRIB_INDICES_ID, 1, indices, BufferType.ELEMENT_ARRAY));
 				mesh.setEffectiveLength(index);
@@ -189,9 +188,7 @@ public class WorldLevelScene extends Scene3D {
 			new TaskFuture<>(renderDispatcher, () -> {
 				GlobalLogger.info("Generating water mesh...");
 				final Pair<Mesh, Long> meshTime = PCUtils
-						.nanoTime(() -> new LoadedQuadMesh(
-								"water",
-								null,
+						.nanoTime(() -> new LoadedQuadMesh("water", null,
 								new Vector2f(this.getTerrain().getMesh().getWidth(), this.getTerrain().getMesh().getLength())));
 				this.getCache().addMesh(meshTime.getKey());
 				GlobalLogger.info("Water mesh generated in " + (meshTime.getValue() / 1e6) + " ms");
@@ -199,12 +196,8 @@ public class WorldLevelScene extends Scene3D {
 			})
 					.then(workers,
 							(ThrowingConsumer<Mesh, Throwable>) mesh -> this
-									.setWaterLevel(new GameObject(
-											"water",
-											mesh,
-											new Transform3D(new Vector3f(0, 0.9f, 0)),
-											new Vector3i(2, 0, 0),
-											ColorMaterial.BLUE.getId())))
+									.setWaterLevel(new GameObject("water", mesh, new Transform3D(new Vector3f(0, 0.9f, 0)),
+											new Vector3i(2, 0, 0), ColorMaterial.BLUE.getId())))
 					.push();
 
 			GameObjectFactory
@@ -248,6 +241,13 @@ public class WorldLevelScene extends Scene3D {
 					.create(WaterWheelObject.class, this, new Transform3D())
 					.then(workers,
 							(ThrowingConsumer<WaterWheelObject, Throwable>) obj -> obj.placeDown(this, new Vector2i(13, 8), Direction.WEST))
+					.push();
+
+			GameObjectFactory
+					.create(WaterSprinklerObject5x5.class, this, new Transform3D())
+					.then(workers,
+							(ThrowingConsumer<WaterSprinklerObject5x5, Throwable>) obj -> obj
+									.placeDown(this, new Vector2i(15, 8), Direction.WEST))
 					.push();
 
 			if (!this.getTerrain().hasComponentMatching(SubEntitiesComponent.class)) {
@@ -316,8 +316,7 @@ public class WorldLevelScene extends Scene3D {
 		return GameObjectFactory
 				.create(class1,
 						this.getTerrain().getSubEntitiesComponent(),
-						new InstanceData(
-								i -> new Transform3D(pos.get(i), new Quaternionf().rotateY((float) (Math.random() * 2 * Math.PI))),
+						new InstanceData(i -> new Transform3D(pos.get(i), new Quaternionf().rotateY((float) (Math.random() * 2 * Math.PI))),
 								pos.size()),
 						mt.getId())
 				.push();
@@ -376,9 +375,7 @@ public class WorldLevelScene extends Scene3D {
 					this.moveObjectTaskState = new TaskFuture<Void, Void>(workers, () -> {
 						compositor.pollObjectId(true);
 
-						final Vector3i ids = new Vector3i(
-								compositor.getObjectId().y,
-								compositor.getObjectId().z,
+						final Vector3i ids = new Vector3i(compositor.getObjectId().y, compositor.getObjectId().z,
 								compositor.getObjectId().w);
 
 						super.getEntities()

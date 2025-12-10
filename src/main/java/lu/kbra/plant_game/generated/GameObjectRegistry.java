@@ -22,6 +22,7 @@ import lu.kbra.plant_game.engine.entity.go.obj.flower.round.SmallRoundFlowerObje
 import lu.kbra.plant_game.engine.entity.go.obj.grass.LargeGrassObject;
 import lu.kbra.plant_game.engine.entity.go.obj.grass.MediumGrassObject;
 import lu.kbra.plant_game.engine.entity.go.obj.grass.SmallGrassObject;
+import lu.kbra.plant_game.engine.entity.go.obj.water.WaterSprinklerObject5x5;
 import lu.kbra.plant_game.engine.entity.go.obj.water.WaterTowerObject;
 import lu.kbra.plant_game.engine.entity.go.obj.water.WaterWheelObject;
 import lu.kbra.plant_game.engine.entity.go.obj_inst.grass.InstanceLargeGrassObject;
@@ -69,6 +70,14 @@ public class GameObjectRegistry {
 		listWaterWheelObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class, AnimatedMesh.class, Transform3D.class, Vector3i.class}, (Object[] arr) -> (GameObject) new WaterWheelObject((String) arr[0], (Mesh) arr[1], (AnimatedMesh) arr[2], (Transform3D) arr[3], (Vector3i) arr[4])));
 		listWaterWheelObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class, AnimatedMesh.class, Transform3D.class, Vector3i.class, short.class}, (Object[] arr) -> (GameObject) new WaterWheelObject((String) arr[0], (Mesh) arr[1], (AnimatedMesh) arr[2], (Transform3D) arr[3], (Vector3i) arr[4], (short) arr[5])));
 		GAME_OBJECT_CONSTRUCTORS.put(WaterWheelObject.class, listWaterWheelObject);
+
+		/*                 WaterSprinklerObject5x5                 */
+		final List<InternalConstructorFunction<GameObject>> listWaterSprinklerObject5x5 = new ArrayList<>();
+		listWaterSprinklerObject5x5.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class, AnimatedMesh.class}, (Object[] arr) -> (GameObject) new WaterSprinklerObject5x5((String) arr[0], (Mesh) arr[1], (AnimatedMesh) arr[2])));
+		listWaterSprinklerObject5x5.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class, AnimatedMesh.class, Transform3D.class}, (Object[] arr) -> (GameObject) new WaterSprinklerObject5x5((String) arr[0], (Mesh) arr[1], (AnimatedMesh) arr[2], (Transform3D) arr[3])));
+		listWaterSprinklerObject5x5.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class, AnimatedMesh.class, Transform3D.class, Vector3i.class}, (Object[] arr) -> (GameObject) new WaterSprinklerObject5x5((String) arr[0], (Mesh) arr[1], (AnimatedMesh) arr[2], (Transform3D) arr[3], (Vector3i) arr[4])));
+		listWaterSprinklerObject5x5.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class, AnimatedMesh.class, Transform3D.class, Vector3i.class, short.class}, (Object[] arr) -> (GameObject) new WaterSprinklerObject5x5((String) arr[0], (Mesh) arr[1], (AnimatedMesh) arr[2], (Transform3D) arr[3], (Vector3i) arr[4], (short) arr[5])));
+		GAME_OBJECT_CONSTRUCTORS.put(WaterSprinklerObject5x5.class, listWaterSprinklerObject5x5);
 
 		/*                 SmallGrassObject                 */
 		final List<InternalConstructorFunction<GameObject>> listSmallGrassObject = new ArrayList<>();

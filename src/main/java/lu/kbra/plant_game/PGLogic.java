@@ -55,7 +55,7 @@ public class PGLogic extends GameLogic {
 		this.uiScene.init(this.WORKERS, this.RENDER_DISPATCHER);
 		this.worldScene.init(this.WORKERS, this.RENDER_DISPATCHER);
 
-		// this.uiScene = null;
+		this.uiScene = null;
 	}
 
 	private final UpdateFrameState frameState = new UpdateFrameState();
