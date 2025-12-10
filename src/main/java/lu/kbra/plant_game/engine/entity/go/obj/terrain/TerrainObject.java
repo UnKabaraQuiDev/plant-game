@@ -20,6 +20,9 @@ public class TerrainObject extends GameObject {
 
 	protected SubEntitiesComponent<GameObject> subEntitiesComponent;
 
+	protected TerrainEdgeObject terrainEdgeObject;
+	protected TerrainHighlightObject terrainHighlightObject;
+
 	public TerrainObject(final String str, final TerrainMesh mesh) {
 		super(str, mesh, new Transform3D());
 		this.setEntityMaterialId(false);
@@ -29,7 +32,7 @@ public class TerrainObject extends GameObject {
 
 	public Vector2i pickTerrainCell(final Camera3D cam, final Vector2f mousePos, final int windowWidth, final int windowHeight) {
 		final TerrainMesh tMesh = this.getMesh();
-		final int cellSize = tMesh.getCellSize();
+		final float cellSize = tMesh.getCellSize();
 
 		// 1. Convert mouse to NDC [-1,1]
 		final float ndcX = (mousePos.x / windowWidth) * 2f - 1f;
@@ -60,11 +63,11 @@ public class TerrainObject extends GameObject {
 
 		// Convert hit point on XZ plane to grid
 		// Ray-plane intersection at Y = max height
-		final int yMax = tMesh.getMaxHeight() * cellSize;
-		final int yMin = tMesh.getMinHeight() * cellSize;
+		final float yMax = tMesh.getMaxHeight() * cellSize;
+		final float yMin = tMesh.getMinHeight() * cellSize;
 
 		// Sweep from top to bottom
-		for (int yLevel = yMax; yLevel >= yMin; yLevel--) {
+		for (float yLevel = yMax; yLevel >= yMin; yLevel -= cellSize) {
 			final float levelY = yLevel * cellSize;
 
 			if (localDir.y == 0f) {
@@ -78,8 +81,8 @@ public class TerrainObject extends GameObject {
 
 			final Vector3f hitLocal = new Vector3f(localOrigin.x + localDir.x * t, levelY, localOrigin.z + localDir.z * t);
 
-			final int gridX = Math.floorDiv((int) hitLocal.x, tMesh.getCellSize());
-			final int gridZ = Math.floorDiv((int) hitLocal.z, tMesh.getCellSize());
+			final int gridX = (int) Math.floor(hitLocal.x / cellSize);
+			final int gridZ = (int) Math.floor(hitLocal.z / cellSize);
 
 			if (!tMesh.isInBounds(gridX, gridZ)) {
 				continue;
@@ -93,6 +96,13 @@ public class TerrainObject extends GameObject {
 		}
 
 		return null; // nothing hit
+	}
+
+	public Vector3f getCellPosition(final Vector2i tile) {
+		final Vector3f meshTranslation = super.getTransform().getTranslation();
+		final int cellHeight = this.getMesh().getCellHeight(tile.x, tile.y);
+		return new Vector3f(meshTranslation.x + tile.x + 0.5f, meshTranslation.y + cellHeight, meshTranslation.z + tile.y + 0.5f)
+				.mul(this.getMesh().getCellSize());
 	}
 
 	@Override
@@ -110,6 +120,24 @@ public class TerrainObject extends GameObject {
 
 	public Object getSubEntitiesLock() {
 		return this.subEntitiesComponent == null ? null : this.subEntitiesComponent.getEntitiesLock();
+	}
+
+	public void setTerrainHighlightEntity(final TerrainHighlightObject terrainHighlightObject) {
+		this.getSubEntitiesComponent().replace(this.terrainHighlightObject, terrainHighlightObject);
+		this.terrainHighlightObject = terrainHighlightObject;
+	}
+
+	public void setTerrainEdgeEntity(final TerrainEdgeObject terrainEdgeObject) {
+		this.getSubEntitiesComponent().replace(this.terrainEdgeObject, terrainEdgeObject);
+		this.terrainEdgeObject = terrainEdgeObject;
+	}
+
+	public TerrainEdgeObject getTerrainEdgeObject() {
+		return this.terrainEdgeObject;
+	}
+
+	public TerrainHighlightObject getTerrainHighlightObject() {
+		return this.terrainHighlightObject;
 	}
 
 }

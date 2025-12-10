@@ -1,6 +1,7 @@
 package lu.kbra.plant_game.engine.entity.go.impl;
 
 import org.joml.Vector3i;
+import org.joml.Vector3ic;
 
 import lu.kbra.plant_game.engine.entity.impl.MeshOwner;
 import lu.kbra.plant_game.engine.entity.impl.Transform3DOwner;
@@ -22,7 +23,7 @@ public class GameObject extends Entity implements Transform3DOwner, MeshOwner {
 
 	protected short materialId = -1;
 	protected boolean entityMaterialId = false;
-	protected Vector3i objectId;
+	protected Vector3ic objectId;
 	protected AttributeLocation objectIdLocation = AttributeLocation.ENTITY; // object id in mesh data
 	protected MeshComponent meshComponent;
 	protected Transform3DComponent transformComponent;
@@ -35,15 +36,15 @@ public class GameObject extends Entity implements Transform3DOwner, MeshOwner {
 		this(str, mesh, transform, getRandomObjectId());
 	}
 
-	public static Vector3i getRandomObjectId() {
+	public static Vector3ic getRandomObjectId() {
 		return new Vector3i((int) System.nanoTime(), (int) System.nanoTime() % 20056, (int) System.nanoTime() % 255);
 	}
 
-	public GameObject(final String str, final Mesh mesh, final Transform3D transform, final Vector3i objectId) {
+	public GameObject(final String str, final Mesh mesh, final Transform3D transform, final Vector3ic objectId) {
 		this(str, mesh, transform, objectId, (short) -1);
 	}
 
-	public GameObject(final String str, final Mesh mesh, final Transform3D transform, final Vector3i objectId, final short materialId) {
+	public GameObject(final String str, final Mesh mesh, final Transform3D transform, final Vector3ic objectId, final short materialId) {
 		super(str, mesh == null ? null : new MeshComponent(mesh), transform != null ? new Transform3DComponent(transform) : null);
 		if (mesh instanceof TexturedMesh || mesh instanceof MaterialMesh) {
 			this.entityMaterialId = false;
@@ -82,7 +83,7 @@ public class GameObject extends Entity implements Transform3DOwner, MeshOwner {
 		this.entityMaterialId = entityMaterialIdLocation;
 	}
 
-	public Vector3i getObjectId() {
+	public Vector3ic getObjectId() {
 		return this.objectId;
 	}
 

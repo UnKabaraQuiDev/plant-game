@@ -26,12 +26,14 @@ import lu.kbra.standalone.gameengine.cache.attrib.UByteAttribArray;
 import lu.kbra.standalone.gameengine.cache.attrib.UIntAttribArray;
 import lu.kbra.standalone.gameengine.cache.attrib.Vec3fAttribArray;
 import lu.kbra.standalone.gameengine.cache.attrib.Vec3iAttribArray;
+import lu.kbra.standalone.gameengine.geom.LineLoadedMesh;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.utils.gl.consts.BufferType;
 
 public class WorldGenerator {
 
 	private int width = 10, length = 15, maxHeight = 5;
+	private final float cellSize = 1f;
 
 	private final List<SquareFace> faces = new ArrayList<>();
 	private final List<Edge> edges = new ArrayList<>();
@@ -140,6 +142,35 @@ public class WorldGenerator {
 						this.edgeMaterialIds));
 	}
 
+	public Mesh generateHighlightMesh(final CacheManager cache) {
+		final float height = 0.1f;
+		final float dist = 0.6f;
+		final float far = 3 * dist;
+
+		final Vector3f[] edgeVertices = {
+				new Vector3f(-dist * this.cellSize, height, -far * this.cellSize), // 0
+				new Vector3f(-dist * this.cellSize, height, far * this.cellSize), // 1
+
+				new Vector3f(dist * this.cellSize, height, -far * this.cellSize), // 2
+				new Vector3f(dist * this.cellSize, height, far * this.cellSize), // 3
+
+				new Vector3f(-far * this.cellSize, height, -dist * this.cellSize), // 4
+				new Vector3f(far * this.cellSize, height, -dist * this.cellSize), // 5
+
+				new Vector3f(-far * this.cellSize, height, dist * this.cellSize), // 6
+				new Vector3f(far * this.cellSize, height, dist * this.cellSize), // 7
+		};
+
+		final int[] edgeIndices = { 0, 1, 2, 3, 4, 5, 6, 7 };
+
+		return new LineLoadedMesh(
+				"terrain_highlight-3x3@" + System.identityHashCode(this),
+				null,
+				1f,
+				new Vec3fAttribArray(Mesh.ATTRIB_VERTICES_NAME, Mesh.ATTRIB_VERTICES_ID, 1, edgeVertices),
+				new UIntAttribArray(Mesh.ATTRIB_INDICES_NAME, Mesh.ATTRIB_INDICES_ID, 1, edgeIndices, BufferType.ELEMENT_ARRAY));
+	}
+
 	protected void generateFaces() {
 		this.materialType = new ColorMaterial[this.width][this.length];
 		this.topFaces = new SquareFace[this.width][this.length];
@@ -238,35 +269,6 @@ public class WorldGenerator {
 						this.edges.add(new Edge(new Vector3f(x, top, z + 1), new Vector3f(x + 1, top, z + 1), mat));
 					}
 				}
-
-				/*
-				 * if (x == 0 || x == this.width - 1 || z == 0 || z == this.length + 1) { continue; }
-				 * 
-				 * final int hX = this.getCellHeight(x - 1, z - 1); final int hX1 = this.getCellHeight(x, z - 1);
-				 * final int hX2 = this.getCellHeight(x - 1, z);
-				 * 
-				 * if (hX != hX2 && hX != hX1) { final int min = Math.min(Math.min(hX, hX1), hX2); final int max =
-				 * Math.max(h, hX);
-				 * 
-				 * this.edges.add(new Edge(new Vector3f(x, min, z), new Vector3f(x, max, z), mat)); }
-				 * 
-				 * if (true) { continue; }
-				 * 
-				 * final int hXPos = this.getCellHeight(x + 1, z); final int hZPos = this.getCellHeight(x, z + 1);
-				 * final int hXPos1 = this.getCellHeight(x - 1, z); final int hZPos1 = this.getCellHeight(x, z - 1);
-				 * final int hXPos2 = this.getCellHeight(x - 1, z - 1); final int hZPos2 = this.getCellHeight(x - 1,
-				 * z - 1); final int hXPos3 = this.getCellHeight(x + 1, z + 1); final int hZPos3 =
-				 * this.getCellHeight(x + 1, z + 1);
-				 * 
-				 * final int diffCount = (hXPos1 != h ? 1 : 0) + (hZPos1 != h ? 1 : 0) + (hXPos != h ? 1 : 0) +
-				 * (hZPos != h ? 1 : 0) + (hXPos2 != h ? 1 : 0) + (hZPos2 != h ? 1 : 0) + (hXPos3 != h ? 1 : 0) +
-				 * (hZPos3 != h ? 1 : 0);
-				 * 
-				 * if (diffCount == 3) { final int min = Math.min(Math.min(h, hXPos), hZPos); final int max =
-				 * Math.max(Math.max(h, hXPos), hZPos);
-				 * 
-				 * this.edges.add(new Edge(new Vector3f(x, min, z), new Vector3f(x, max, z), mat)); }
-				 */
 			}
 		}
 	}

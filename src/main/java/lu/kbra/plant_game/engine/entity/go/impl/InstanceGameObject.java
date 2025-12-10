@@ -1,6 +1,6 @@
 package lu.kbra.plant_game.engine.entity.go.impl;
 
-import org.joml.Vector3i;
+import org.joml.Vector3ic;
 
 import lu.kbra.standalone.gameengine.geom.instance.InstanceEmitter;
 import lu.kbra.standalone.gameengine.objs.entity.components.InstanceEmitterComponent;
@@ -14,7 +14,7 @@ public class InstanceGameObject extends GameObject {
 			final String str,
 			final InstanceEmitter instanceEmitter,
 			final Transform3D transform,
-			final Vector3i objectId,
+			final Vector3ic objectId,
 			final short materialId) {
 		super(str, null, transform, objectId, materialId);
 		if (instanceEmitter != null) {
@@ -26,7 +26,7 @@ public class InstanceGameObject extends GameObject {
 			final String str,
 			final InstanceEmitter instanceEmitter,
 			final Transform3D transform,
-			final Vector3i objectId) {
+			final Vector3ic objectId) {
 		super(str, null, transform, objectId, (short) -1);
 		if (instanceEmitter != null) {
 			super.addComponent(this.instanceEmitterComponent = new InstanceEmitterComponent(instanceEmitter));

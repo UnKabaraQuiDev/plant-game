@@ -4,7 +4,7 @@ import static lu.kbra.plant_game.engine.entity.go.impl.SwayGameObject.DEFAULT_DE
 import static lu.kbra.plant_game.engine.entity.go.impl.SwayGameObject.DEFAULT_SCALE_RATIO;
 import static lu.kbra.plant_game.engine.entity.go.impl.SwayGameObject.DEFAULT_SPEED_RATIO;
 
-import org.joml.Vector3i;
+import org.joml.Vector3ic;
 
 import lu.kbra.standalone.gameengine.geom.instance.InstanceEmitter;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
@@ -64,7 +64,7 @@ public class InstanceSwayGameObject extends InstanceGameObject implements SwayOw
 			final String str,
 			final SwayInstanceEmitter instanceEmitter,
 			final Transform3D transform,
-			final Vector3i objectId,
+			final Vector3ic objectId,
 			final float deformRatio,
 			final float speedRatio,
 			final float scaleRatio) {
@@ -75,7 +75,7 @@ public class InstanceSwayGameObject extends InstanceGameObject implements SwayOw
 			final String str,
 			final SwayInstanceEmitter instanceEmitter,
 			final Transform3D transform,
-			final Vector3i objectId,
+			final Vector3ic objectId,
 			final short materialId,
 			final float deformRatio,
 			final float speedRatio,

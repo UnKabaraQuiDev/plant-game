@@ -5,9 +5,6 @@ import lu.kbra.standalone.gameengine.cache.attrib.UIntAttribArray;
 import lu.kbra.standalone.gameengine.cache.attrib.Vec3fAttribArray;
 import lu.kbra.standalone.gameengine.geom.LineMesh;
 import lu.kbra.standalone.gameengine.geom.LoadedMesh;
-import lu.kbra.standalone.gameengine.utils.gl.consts.BeginMode;
-import lu.kbra.standalone.gameengine.utils.gl.consts.PolygonDrawMode;
-import lu.kbra.standalone.gameengine.utils.gl.consts.PolygonMode;
 
 public class TerrainEdgeMesh extends LoadedMesh implements LineMesh {
 
@@ -24,21 +21,6 @@ public class TerrainEdgeMesh extends LoadedMesh implements LineMesh {
 	@Override
 	public float getLineWidth() {
 		return 2.5f;
-	}
-
-	@Override
-	public PolygonDrawMode getPolygonDrawMode() {
-		return PolygonDrawMode.LINE;
-	}
-
-	@Override
-	public PolygonMode getPolygonMode() {
-		return PolygonMode.FRONT_AND_BACK;
-	}
-
-	@Override
-	public BeginMode getBeginMode() {
-		return BeginMode.LINES;
 	}
 
 }

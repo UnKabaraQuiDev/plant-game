@@ -72,7 +72,7 @@ public class TerrainMesh extends LoadedMesh {
 		return this.materialType;
 	}
 
-	public int getCellSize() {
+	public float getCellSize() {
 		return 1;
 	}
 

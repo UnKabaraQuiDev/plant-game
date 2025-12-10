@@ -1,9 +1,9 @@
 package lu.kbra.plant_game.engine.entity.go.impl;
 
 import org.joml.Vector2i;
-import org.joml.Vector3f;
 
 import lu.kbra.plant_game.engine.entity.go.mesh.terrain.TerrainMesh;
+import lu.kbra.plant_game.engine.entity.go.obj.terrain.TerrainObject;
 import lu.kbra.plant_game.engine.entity.impl.Transform3DOwner;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.standalone.gameengine.impl.UniqueID;
@@ -17,15 +17,15 @@ public interface PlaceableObject extends Transform3DOwner, UniqueID, SceneEntity
 
 	Vector2i getOriginOffset();
 
-	default boolean isPlaceable(WorldLevelScene scene, Vector2i tile, Direction rotation) {
-		final TerrainMesh mesh = (TerrainMesh) scene.getTerrain().getMesh();
+	default boolean isPlaceable(final WorldLevelScene scene, final Vector2i tile, final Direction rotation) {
+		final TerrainMesh mesh = scene.getTerrain().getMesh();
 		final int firstLevel = mesh.getCellHeight(tile.x, tile.y);
 
 		if (firstLevel <= scene.getWaterLevel().getTransform().getTranslation().y) {
 			return false;
 		}
 
-		final Vector2i footprint = getFootprint(), offset = getOriginOffset();
+		final Vector2i footprint = this.getFootprint(), offset = this.getOriginOffset();
 
 		final int startX = tile.x - offset.x;
 		final int endX = tile.x + (footprint.x - 1 - offset.x);
@@ -48,17 +48,11 @@ public interface PlaceableObject extends Transform3DOwner, UniqueID, SceneEntity
 		return true;
 	}
 
-	default void placeDown(WorldLevelScene scene, Vector2i tile, Direction rotation) {
-		final Transform3D transform = getTransform();
-
-		final TerrainMesh mesh = (TerrainMesh) scene.getTerrain().getMesh();
-		final Vector3f meshTranslation = scene.getTerrain().getTransform().getTranslation();
-		final int cellHeight = mesh.getCellHeight(tile.x, tile.y);
+	default void placeDown(final TerrainObject terrain, final Vector2i tile, final Direction rotation) {
+		final Transform3D transform = this.getTransform();
 
 		rotation.rotate(transform.getRotation());
-		transform
-				.getTranslation()
-				.set(meshTranslation.x + tile.x + 0.5f, +meshTranslation.y + cellHeight, meshTranslation.z + tile.y + 0.5f);
+		transform.translationSet(terrain.getCellPosition(tile));
 
 		transform.updateMatrix();
 	}

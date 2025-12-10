@@ -17,26 +17,40 @@ public class WaterWheelObject extends AnimatedGameObject implements PlaceableObj
 
 	protected long waterLevel;
 
-	public WaterWheelObject(String str, Mesh mesh, AnimatedMesh animatedMesh, Transform3D transform, Vector3i objectId, short materialId) {
+	public WaterWheelObject(
+			final String str,
+			final Mesh mesh,
+			final AnimatedMesh animatedMesh,
+			final Transform3D transform,
+			final Vector3i objectId,
+			final short materialId) {
 		super(str, mesh, animatedMesh, transform, objectId, materialId);
 	}
 
-	public WaterWheelObject(String str, Mesh mesh, AnimatedMesh animatedMesh, Transform3D transform, Vector3i objectId) {
+	public WaterWheelObject(
+			final String str,
+			final Mesh mesh,
+			final AnimatedMesh animatedMesh,
+			final Transform3D transform,
+			final Vector3i objectId) {
 		super(str, mesh, animatedMesh, transform, objectId);
 	}
 
-	public WaterWheelObject(String str, Mesh mesh, AnimatedMesh animatedMesh, Transform3D transform) {
+	public WaterWheelObject(final String str, final Mesh mesh, final AnimatedMesh animatedMesh, final Transform3D transform) {
 		super(str, mesh, animatedMesh, transform);
 	}
 
-	public WaterWheelObject(String str, Mesh mesh, AnimatedMesh animatedMesh) {
+	public WaterWheelObject(final String str, final Mesh mesh, final AnimatedMesh animatedMesh) {
 		super(str, mesh, animatedMesh);
 	}
 
 	@Override
-	public Matrix4f computeAnimatedTransform(float t) {
-		getTransform().getMatrix().mul(animatedTransform.identity().rotateZ((float) Math.toRadians(t * 25)), animatedTransform);
-		return animatedTransform;
+	public Matrix4f computeAnimatedTransform(final float t) {
+		this
+				.getTransform()
+				.getMatrix()
+				.mul(this.animatedTransform.identity().rotateZ((float) Math.toRadians(t * 25)), this.animatedTransform);
+		return this.animatedTransform;
 	}
 
 	@Override
@@ -51,21 +65,21 @@ public class WaterWheelObject extends AnimatedGameObject implements PlaceableObj
 
 	@Override
 	public long getWater() {
-		return waterLevel;
+		return this.waterLevel;
 	}
 
 	@Override
-	public boolean hasWater(long val) {
-		return waterLevel >= val;
+	public boolean hasWater(final long val) {
+		return this.waterLevel >= val;
 	}
 
 	@Override
-	public void addWater(long val) {
+	public void addWater(final long val) {
 		this.waterLevel += val;
 	}
 
 	@Override
-	public void removeWater(long val) {
+	public void removeWater(final long val) {
 		this.waterLevel -= val;
 	}
 

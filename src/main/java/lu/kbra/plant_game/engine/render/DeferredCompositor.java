@@ -19,9 +19,11 @@ import org.joml.Matrix4fc;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
-import org.joml.Vector3i;
+import org.joml.Vector3ic;
 import org.joml.Vector4f;
+import org.joml.Vector4fc;
 import org.joml.Vector4i;
+import org.joml.Vector4ic;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 
@@ -192,7 +194,7 @@ public class DeferredCompositor implements Cleanupable {
 
 	// highlights
 	protected volatile boolean outlineChanged = false;
-	protected Map<Vector3i, Vector4f> outlinedObjects = new ConcurrentHashMap<>();
+	protected Map<Vector3ic, Vector4fc> outlinedObjects = new ConcurrentHashMap<>();
 	protected OutlineShader outlineShader;
 
 	public DeferredCompositor(final GameEngine engine, final Thread ownerThread) {
@@ -309,7 +311,7 @@ public class DeferredCompositor implements Cleanupable {
 		}
 
 		GL_W.glEnable(GL_W.GL_MULTISAMPLE);
-		
+
 		this.deferredPass = true;
 		this.renderWorldScene(cache, worldScene, this.renderResolution, needRegen);
 		this.deferredPass = false;
@@ -335,11 +337,11 @@ public class DeferredCompositor implements Cleanupable {
 
 	protected void renderUi(final CacheManager cache, final UIScene uiScene, final Vector2i outputResolution, final boolean needRegen) {
 		GL_W.glBindFramebuffer(GL_W.GL_FRAMEBUFFER, 0);
-		
+
 		GL_W.glViewport(0, 0, outputResolution.x, outputResolution.y);
-		
+
 		GL_W.glDisable(GL_W.GL_CULL_FACE);
-		
+
 		synchronized (uiScene.getEntitiesLock()) {
 			this.renderScene(uiScene, this.uiSceneShaders);
 		}
@@ -356,7 +358,7 @@ public class DeferredCompositor implements Cleanupable {
 
 	protected void renderOutlines(final CacheManager cache, final Vector2i resolution, final boolean needRegen) {
 		GL_W.glViewport(0, 0, resolution.x, resolution.y);
-		
+
 		final int groupsX = (resolution.x + 15) / 16;
 		final int groupsY = (resolution.y + 15) / 16;
 
@@ -368,9 +370,9 @@ public class DeferredCompositor implements Cleanupable {
 		this.setupOutlineInputs(this.outlineShader, resolution, needRegen);
 
 		GL_W.glDispatchCompute(groupsX, groupsY, 1);
-		
+
 		GL_W.glMemoryBarrier(GL_W.GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-		
+
 		this.outlineShader.unbind();
 	}
 
@@ -384,10 +386,10 @@ public class DeferredCompositor implements Cleanupable {
 		if (this.outlineChanged) {
 			synchronized (this.outlinedObjects) {
 				computeShader.setUniform(OutlineShader.CURRENT_TARGET_COUNT, this.outlinedObjects.size());
-				final Vector3i[] ids = new Vector3i[this.outlinedObjects.size()];
-				final Vector4f[] colors = new Vector4f[this.outlinedObjects.size()];
+				final Vector3ic[] ids = new Vector3ic[this.outlinedObjects.size()];
+				final Vector4fc[] colors = new Vector4fc[this.outlinedObjects.size()];
 				int i = 0;
-				for (final Entry<Vector3i, Vector4f> evv : this.outlinedObjects.entrySet()) {
+				for (final Entry<Vector3ic, Vector4fc> evv : this.outlinedObjects.entrySet()) {
 					ids[i] = evv.getKey();
 					colors[i] = evv.getValue();
 					i++;
@@ -406,7 +408,7 @@ public class DeferredCompositor implements Cleanupable {
 							0,
 							GL_W.GL_READ_WRITE,
 							this.outputTxt.getInternalFormat().getGlId());
-			
+
 			this.posTexture.bindUniform(computeShader.getUniformLocation("uPosTex"), 0);
 			this.normalTexture.bindUniform(computeShader.getUniformLocation("uNormalTex"), 1);
 			this.uvTexture.bindUniform(computeShader.getUniformLocation("uUvTex"), 2);
@@ -429,19 +431,19 @@ public class DeferredCompositor implements Cleanupable {
 		SCREEN.bind();
 
 		GL_W.glDisable(GL_W.GL_CULL_FACE);
-				GL_W.glDisable(GL_W.GL_DEPTH_TEST);
-		
+		GL_W.glDisable(GL_W.GL_DEPTH_TEST);
+
 		GL_W.glBindFramebuffer(GL_W.GL_FRAMEBUFFER, 0);
-				GL_W.glViewport(0, 0, resolution.x, resolution.y);
-				GL_W.glClearColor(this.backgroundColor.x, this.backgroundColor.y, this.backgroundColor.z, this.backgroundColor.w);
-				GL_W.glClear(GL_W.GL_COLOR_BUFFER_BIT | GL_W.GL_DEPTH_BUFFER_BIT);
-		
+		GL_W.glViewport(0, 0, resolution.x, resolution.y);
+		GL_W.glClearColor(this.backgroundColor.x, this.backgroundColor.y, this.backgroundColor.z, this.backgroundColor.w);
+		GL_W.glClear(GL_W.GL_COLOR_BUFFER_BIT | GL_W.GL_DEPTH_BUFFER_BIT);
+
 		GL_W.glPolygonMode(PolygonMode.FRONT_AND_BACK.getGlId(), PolygonDrawMode.FILL.getGlId());
-		
+
 		GL_W.glDrawElements(this.blitShader.getBeginMode().getGlId(), SCREEN.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
-		
+
 		GL_W.glEnable(GL_W.GL_DEPTH_TEST);
-		
+
 		SCREEN.unbind();
 
 		this.blitShader.unbind();
@@ -464,10 +466,10 @@ public class DeferredCompositor implements Cleanupable {
 							this.outputTxt.getFormat().getGlId(),
 							this.outputTxt.getDataType().getGlId(),
 							new float[] { 0, 0, 0, 0 });
-					}
+		}
 
 		GL_W.glViewport(0, 0, resolution.x, resolution.y);
-		
+
 		final int groupsX = (resolution.x + 15) / 16;
 		final int groupsY = (resolution.y + 15) / 16;
 
@@ -481,9 +483,9 @@ public class DeferredCompositor implements Cleanupable {
 		this.setupMaterialInputs(this.materialComputeShader, worldScene, resolution, needRegen);
 
 		GL_W.glDispatchCompute(groupsX, groupsY, 1);
-		
+
 		GL_W.glMemoryBarrier(GL_W.GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-		
+
 		// txt materials
 
 		this.textureMaterialComputeShader.bind();
@@ -517,11 +519,11 @@ public class DeferredCompositor implements Cleanupable {
 							this.textureMaterialComputeShader.storeUniformUnsigned(currentMaterialIdLoc, tid);
 
 							GL_W.glDispatchCompute(groupsX, groupsY, 1);
-							
+
 							alreadyRendered.add(tid);
 
 							GL_W.glMemoryBarrier(GL_W.GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-													}
+						}
 					}
 				}
 
@@ -548,11 +550,11 @@ public class DeferredCompositor implements Cleanupable {
 							this.textureMaterialComputeShader.storeUniformUnsigned(currentMaterialIdLoc, tid);
 
 							GL_W.glDispatchCompute(groupsX, groupsY, 1);
-							
+
 							alreadyRendered.add(tid);
 
 							GL_W.glMemoryBarrier(GL_W.GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-													}
+						}
 					}
 				}
 			}
@@ -586,7 +588,7 @@ public class DeferredCompositor implements Cleanupable {
 							0,
 							GL_W.GL_WRITE_ONLY,
 							this.outputTxt.getInternalFormat().getGlId());
-			
+
 			this.posTexture.bindUniform(computeShader.getUniformLocation("uPosTex"), 0);
 			this.normalTexture.bindUniform(computeShader.getUniformLocation("uNormalTex"), 1);
 			this.uvTexture.bindUniform(computeShader.getUniformLocation("uUvTex"), 2);
@@ -606,14 +608,14 @@ public class DeferredCompositor implements Cleanupable {
 		this.worldFramebuffer.bind();
 
 		GL_W.glViewport(0, 0, resolution.x, resolution.y);
-		
+
 		GL_W.glEnable(GL_W.GL_DEPTH_TEST);
-				GL_W.glEnable(GL_W.GL_CULL_FACE);
-				GL_W.glCullFace(GL_W.GL_BACK);
-		
+		GL_W.glEnable(GL_W.GL_CULL_FACE);
+		GL_W.glCullFace(GL_W.GL_BACK);
+
 		GL_W.glClearColor(0, 0, 0, 1);
-				GL_W.glClear(GL_W.GL_COLOR_BUFFER_BIT | GL_W.GL_DEPTH_BUFFER_BIT);
-		
+		GL_W.glClear(GL_W.GL_COLOR_BUFFER_BIT | GL_W.GL_DEPTH_BUFFER_BIT);
+
 		this.transferShader.bind();
 
 		synchronized (worldScene.getEntitiesLock()) {
@@ -776,7 +778,7 @@ public class DeferredCompositor implements Cleanupable {
 			}
 		}
 
-			}
+	}
 
 	private void renderInstanceEmitter(
 			final InstanceEmitter obj,
@@ -796,10 +798,10 @@ public class DeferredCompositor implements Cleanupable {
 		// duplicate code, maybe don't do this
 		if (entity instanceof TransparentEntity) {
 			GL_W.glEnable(GL_W.GL_BLEND);
-						GL_W.glBlendFunc(GL_W.GL_SRC_ALPHA, GL_W.GL_ONE_MINUS_SRC_ALPHA);
-					} else {
+			GL_W.glBlendFunc(GL_W.GL_SRC_ALPHA, GL_W.GL_ONE_MINUS_SRC_ALPHA);
+		} else {
 			GL_W.glDisable(GL_W.GL_BLEND);
-					}
+		}
 
 		if (mesh instanceof final TexturedMesh txtMesh && shader.createUniform(DirectShader.TXT0)) {
 			txtMesh.getTexture().bindUniform(shader.getUniformLocation(DirectShader.TXT0), 0);
@@ -843,36 +845,36 @@ public class DeferredCompositor implements Cleanupable {
 			final int matId = go.getMaterialId();
 
 			GL_W.glDisableVertexAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_ID);
-						GL_W.glVertexAttribI1ui(GameObject.MESH_ATTRIB_MATERIAL_ID_ID, matId);
-					} else if (mesh instanceof final TexturedMesh txtMesh) { // id in the texture id
+			GL_W.glVertexAttribI1ui(GameObject.MESH_ATTRIB_MATERIAL_ID_ID, matId);
+		} else if (mesh instanceof final TexturedMesh txtMesh) { // id in the texture id
 			final int txtId = txtMesh.getTexture().getGlId();
 
 			GL_W.glDisableVertexAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_ID);
-						GL_W.glVertexAttribI1ui(GameObject.MESH_ATTRIB_MATERIAL_ID_ID, txtId);
-					} else if (mesh instanceof final MaterialMesh matMesh) { // id is in the mesh
+			GL_W.glVertexAttribI1ui(GameObject.MESH_ATTRIB_MATERIAL_ID_ID, txtId);
+		} else if (mesh instanceof final MaterialMesh matMesh) { // id is in the mesh
 			final int matId = matMesh.getMaterialId();
 
 			GL_W.glDisableVertexAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_ID);
-						GL_W.glVertexAttribI1ui(GameObject.MESH_ATTRIB_MATERIAL_ID_ID, matId);
-					}
+			GL_W.glVertexAttribI1ui(GameObject.MESH_ATTRIB_MATERIAL_ID_ID, matId);
+		}
 
 		if (entity instanceof final GameObject go && go.getObjectIdLocation() != AttributeLocation.MESH) {
 			// object id is in the entity
-			final Vector3i objId = go.getObjectId();
+			final Vector3ic objId = go.getObjectId();
 			GL_W.glDisableVertexAttribArray(GameObject.MESH_ATTRIB_OBJECT_ID_ID);
-						GL_W.glVertexAttribI3ui(GameObject.MESH_ATTRIB_OBJECT_ID_ID, objId.x, objId.y, objId.z);
-					}
+			GL_W.glVertexAttribI3ui(GameObject.MESH_ATTRIB_OBJECT_ID_ID, objId.x(), objId.y(), objId.z());
+		}
 
 		GL_W.glPolygonMode(PolygonMode.FRONT_AND_BACK.getGlId(), PolygonDrawMode.FILL.getGlId());
-		
+
 		if (mesh instanceof final LineMesh lineMesh) {
 			if (lineMesh.isLineSmooth()) {
 				GL_W.glEnable(GL_W.GL_LINE_SMOOTH);
-							} else {
+			} else {
 				GL_W.glDisable(GL_W.GL_LINE_SMOOTH);
-							}
+			}
 			GL_W.glLineWidth(lineMesh.getLineWidth());
-					}
+		}
 
 		GL_W
 				.glDrawElementsInstanced(shader.getBeginMode().getGlId(),
@@ -880,7 +882,7 @@ public class DeferredCompositor implements Cleanupable {
 						GL_W.GL_UNSIGNED_INT,
 						0,
 						obj.getParticleCount());
-		
+
 		this.drawDebugTrianglesInstanced(mesh, transformationMatrix, obj);
 
 		shader.unbind();
@@ -919,23 +921,23 @@ public class DeferredCompositor implements Cleanupable {
 		shader.setUniformUnsigned(TextDirectShader.TEXT_LENGTH, obj.getCharCount());
 
 		GL_W.glDisable(GL_W.GL_CULL_FACE);
-				if (transparent) {
+		if (transparent) {
 			GL_W.glEnable(GL_W.GL_BLEND);
-					} else {
+		} else {
 			GL_W.glDisable(GL_W.GL_BLEND);
-					}
+		}
 		GL_W.glBlendFunc(GL_W.GL_SRC_ALPHA, GL_W.GL_ONE_MINUS_SRC_ALPHA);
-		
+
 		GL_W
 				.glDrawElementsInstanced(shader.getBeginMode().getGlId(),
 						mesh.getIndicesCount(),
 						GL_W.GL_UNSIGNED_INT,
 						0,
 						instances.getParticleCount());
-		
+
 		GL_W.glDisable(GL_W.GL_BLEND);
-				GL_W.glEnable(GL_W.GL_CULL_FACE);
-		
+		GL_W.glEnable(GL_W.GL_CULL_FACE);
+
 		this.drawDebugTrianglesText(mesh, transformationMatrix, obj);
 
 		instances.unbind();
@@ -957,10 +959,10 @@ public class DeferredCompositor implements Cleanupable {
 
 		if (entity instanceof TransparentEntity) {
 			GL_W.glEnable(GL_W.GL_BLEND);
-						GL_W.glBlendFunc(GL_W.GL_SRC_ALPHA, GL_W.GL_ONE_MINUS_SRC_ALPHA);
-					} else {
+			GL_W.glBlendFunc(GL_W.GL_SRC_ALPHA, GL_W.GL_ONE_MINUS_SRC_ALPHA);
+		} else {
 			GL_W.glDisable(GL_W.GL_BLEND);
-					}
+		}
 
 		if (mesh instanceof final TexturedMesh txtMesh && shader.createUniform(DirectShader.TXT0)) {
 			txtMesh.getTexture().bindUniform(shader.getUniformLocation(DirectShader.TXT0), 0);
@@ -1032,39 +1034,39 @@ public class DeferredCompositor implements Cleanupable {
 			final int matId = go.getMaterialId();
 
 			GL_W.glDisableVertexAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_ID);
-						GL_W.glVertexAttribI1ui(GameObject.MESH_ATTRIB_MATERIAL_ID_ID, matId);
-					} else if (mesh instanceof final TexturedMesh txtMesh) { // id in the texture id
+			GL_W.glVertexAttribI1ui(GameObject.MESH_ATTRIB_MATERIAL_ID_ID, matId);
+		} else if (mesh instanceof final TexturedMesh txtMesh) { // id in the texture id
 			final int txtId = txtMesh.getTexture().getGlId();
 
 			GL_W.glDisableVertexAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_ID);
-						GL_W.glVertexAttribI1ui(GameObject.MESH_ATTRIB_MATERIAL_ID_ID, txtId);
-					} else if (mesh instanceof final MaterialMesh matMesh) { // id is in the mesh
+			GL_W.glVertexAttribI1ui(GameObject.MESH_ATTRIB_MATERIAL_ID_ID, txtId);
+		} else if (mesh instanceof final MaterialMesh matMesh) { // id is in the mesh
 			final int matId = matMesh.getMaterialId();
 
 			GL_W.glDisableVertexAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_ID);
-						GL_W.glVertexAttribI1ui(GameObject.MESH_ATTRIB_MATERIAL_ID_ID, matId);
-					}
+			GL_W.glVertexAttribI1ui(GameObject.MESH_ATTRIB_MATERIAL_ID_ID, matId);
+		}
 
 		if (entity instanceof final GameObject go && go.getObjectIdLocation() != AttributeLocation.MESH) {
 			// object id is in the entity
-			final Vector3i objId = go.getObjectId();
+			final Vector3ic objId = go.getObjectId();
 			GL_W.glDisableVertexAttribArray(GameObject.MESH_ATTRIB_OBJECT_ID_ID);
-						GL_W.glVertexAttribI3ui(GameObject.MESH_ATTRIB_OBJECT_ID_ID, objId.x, objId.y, objId.z);
-					}
+			GL_W.glVertexAttribI3ui(GameObject.MESH_ATTRIB_OBJECT_ID_ID, objId.x(), objId.y(), objId.z());
+		}
 
 		GL_W.glPolygonMode(PolygonMode.FRONT_AND_BACK.getGlId(), PolygonDrawMode.FILL.getGlId());
-		
+
 		if (mesh instanceof final LineMesh lineMesh) {
 			if (lineMesh.isLineSmooth()) {
 				GL_W.glEnable(GL_W.GL_LINE_SMOOTH);
-							} else {
+			} else {
 				GL_W.glDisable(GL_W.GL_LINE_SMOOTH);
-							}
+			}
 			GL_W.glLineWidth(lineMesh.getLineWidth());
-					}
+		}
 
 		GL_W.glDrawElements(mesh.getBeginMode().getGlId(), mesh.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
-		
+
 		this.drawDebugTriangles(mesh, transformationMatrix);
 
 		mesh.unbind();
@@ -1078,16 +1080,16 @@ public class DeferredCompositor implements Cleanupable {
 			this.lineDirectShader.setUniform(RenderShader.TRANSFORMATION_MATRIX, transformationMatrix);
 
 			GL_W.glEnable(GL_W.GL_LINE_SMOOTH);
-						GL_W.glLineWidth(DEBUG_TRIANGLES_LINE_WIDTH);
-						GL_W.glDisable(GL_W.GL_DEPTH_TEST);
-			
+			GL_W.glLineWidth(DEBUG_TRIANGLES_LINE_WIDTH);
+			GL_W.glDisable(GL_W.GL_DEPTH_TEST);
+
 			GL_W.glPolygonMode(PolygonMode.FRONT_AND_BACK.getGlId(), PolygonDrawMode.LINE.getGlId());
-			
+
 			GL_W.glDrawElements(this.lineDirectShader.getBeginMode().getGlId(), mesh.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
-			
+
 			GL_W.glEnable(GL_W.GL_DEPTH_TEST);
-						GL_W.glPolygonMode(GL_W.GL_FRONT_AND_BACK, GL_W.GL_FILL);
-					}
+			GL_W.glPolygonMode(GL_W.GL_FRONT_AND_BACK, GL_W.GL_FILL);
+		}
 	}
 
 	private void drawDebugTrianglesInstanced(final Mesh mesh, final Matrix4f transformationMatrix, final InstanceEmitter instances) {
@@ -1098,21 +1100,21 @@ public class DeferredCompositor implements Cleanupable {
 			this.lineInstanceDirectShader.setUniform(RenderShader.TRANSFORMATION_MATRIX, transformationMatrix);
 
 			GL_W.glEnable(GL_W.GL_LINE_SMOOTH);
-						GL_W.glLineWidth(DEBUG_TRIANGLES_LINE_WIDTH);
-						GL_W.glDisable(GL_W.GL_DEPTH_TEST);
-			
+			GL_W.glLineWidth(DEBUG_TRIANGLES_LINE_WIDTH);
+			GL_W.glDisable(GL_W.GL_DEPTH_TEST);
+
 			GL_W.glPolygonMode(GL_W.GL_FRONT_AND_BACK, GL_W.GL_LINE);
-			
+
 			GL_W
 					.glDrawElementsInstanced(this.lineInstanceDirectShader.getBeginMode().getGlId(),
 							mesh.getIndicesCount(),
 							GL_W.GL_UNSIGNED_INT,
 							0,
 							instances.getParticleCount());
-			
+
 			GL_W.glEnable(GL_W.GL_DEPTH_TEST);
-						GL_W.glPolygonMode(GL_W.GL_FRONT_AND_BACK, GL_W.GL_FILL);
-					}
+			GL_W.glPolygonMode(GL_W.GL_FRONT_AND_BACK, GL_W.GL_FILL);
+		}
 	}
 
 	private void drawDebugTrianglesText(final Mesh mesh, final Matrix4f transformationMatrix, final TextEmitter emitter) {
@@ -1123,21 +1125,21 @@ public class DeferredCompositor implements Cleanupable {
 			this.lineInstanceDirectShader.setUniform(RenderShader.TRANSFORMATION_MATRIX, transformationMatrix);
 
 			GL_W.glEnable(GL_W.GL_LINE_SMOOTH);
-						GL_W.glLineWidth(DEBUG_TRIANGLES_LINE_WIDTH);
-						GL_W.glDisable(GL_W.GL_DEPTH_TEST);
-			
+			GL_W.glLineWidth(DEBUG_TRIANGLES_LINE_WIDTH);
+			GL_W.glDisable(GL_W.GL_DEPTH_TEST);
+
 			GL_W.glPolygonMode(GL_W.GL_FRONT_AND_BACK, GL_W.GL_LINE);
-			
+
 			GL_W
 					.glDrawElementsInstanced(this.lineInstanceDirectShader.getBeginMode().getGlId(),
 							mesh.getIndicesCount(),
 							GL_W.GL_UNSIGNED_INT,
 							0,
 							emitter.getStringLength());
-			
+
 			GL_W.glEnable(GL_W.GL_DEPTH_TEST);
-						GL_W.glPolygonMode(GL_W.GL_FRONT_AND_BACK, GL_W.GL_FILL);
-					}
+			GL_W.glPolygonMode(GL_W.GL_FRONT_AND_BACK, GL_W.GL_FILL);
+		}
 	}
 
 	private void drawDebugBounds(final Shape shape) {
@@ -1158,16 +1160,16 @@ public class DeferredCompositor implements Cleanupable {
 			this.lineDirectShader.setUniform(LineDirectShader.TINT, DEBUG_BOUNDS_COLOR);
 
 			GL_W.glEnable(GL_W.GL_LINE_SMOOTH);
-						GL_W.glLineWidth(DEBUG_BOUNDS_LINE_WIDTH);
-						GL_W.glDisable(GL_W.GL_DEPTH_TEST);
-			
+			GL_W.glLineWidth(DEBUG_BOUNDS_LINE_WIDTH);
+			GL_W.glDisable(GL_W.GL_DEPTH_TEST);
+
 			GL_W.glPolygonMode(PolygonMode.FRONT_AND_BACK.getGlId(), PolygonDrawMode.LINE.getGlId());
-			
+
 			GL_W.glDrawElements(this.lineDirectShader.getBeginMode().getGlId(), QUAD.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
-			
+
 			GL_W.glEnable(GL_W.GL_DEPTH_TEST);
-						GL_W.glPolygonMode(GL_W.GL_FRONT_AND_BACK, GL_W.GL_FILL);
-					}
+			GL_W.glPolygonMode(GL_W.GL_FRONT_AND_BACK, GL_W.GL_FILL);
+		}
 	}
 
 	protected void resizeFramebuffer(final Framebuffer fb, final Vector2i resolution) {
@@ -1270,7 +1272,7 @@ public class DeferredCompositor implements Cleanupable {
 		return !this.awaitingObjectIdPtr.getValue();
 	}
 
-	public Vector4i getObjectId() {
+	public Vector4ic getObjectId() {
 		return this.objectId;
 	}
 
@@ -1288,7 +1290,7 @@ public class DeferredCompositor implements Cleanupable {
 
 		this.worldFramebuffer.bind(GL_W.GL_READ_FRAMEBUFFER);
 		GL_W.glReadBuffer(FrameBufferAttachment.COLOR_FIRST.getGlId() + WORLD_FRAMEBUFFER_IDS_IDX);
-				final IntBuffer pixel = BufferUtils.createIntBuffer(4);
+		final IntBuffer pixel = BufferUtils.createIntBuffer(4);
 		GL11.glReadPixels(x, y, 1, 1, this.idsTexture.getFormat().getGlId(), this.idsTexture.getDataType().getGlId(), pixel);
 		assert GL_W
 				.checkError(
@@ -1329,7 +1331,7 @@ public class DeferredCompositor implements Cleanupable {
 		this.outlineChanged = true;
 	}
 
-	public Vector4f getOutline(final SceneEntity e) {
+	public Vector4fc getOutline(final SceneEntity e) {
 		if (e == null) {
 			return null;
 		}

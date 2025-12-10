@@ -11,10 +11,10 @@ import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-@DataPath("classpath:/models/water-sprinkler-5x5.json")
-public class WaterSprinklerObject5x5 extends AnimatedGameObject implements PlaceableObject {
+@DataPath("classpath:/models/water-sprinkler-7x7.json")
+public class WaterSprinklerObject7x7 extends AnimatedGameObject implements PlaceableObject {
 
-	public WaterSprinklerObject5x5(
+	public WaterSprinklerObject7x7(
 			final String str,
 			final Mesh mesh,
 			final AnimatedMesh animatedMesh,
@@ -24,7 +24,7 @@ public class WaterSprinklerObject5x5 extends AnimatedGameObject implements Place
 		super(str, mesh, animatedMesh, transform, objectId, materialId);
 	}
 
-	public WaterSprinklerObject5x5(
+	public WaterSprinklerObject7x7(
 			final String str,
 			final Mesh mesh,
 			final AnimatedMesh animatedMesh,
@@ -33,11 +33,11 @@ public class WaterSprinklerObject5x5 extends AnimatedGameObject implements Place
 		super(str, mesh, animatedMesh, transform, objectId);
 	}
 
-	public WaterSprinklerObject5x5(final String str, final Mesh mesh, final AnimatedMesh animatedMesh, final Transform3D transform) {
+	public WaterSprinklerObject7x7(final String str, final Mesh mesh, final AnimatedMesh animatedMesh, final Transform3D transform) {
 		super(str, mesh, animatedMesh, transform);
 	}
 
-	public WaterSprinklerObject5x5(final String str, final Mesh mesh, final AnimatedMesh animatedMesh) {
+	public WaterSprinklerObject7x7(final String str, final Mesh mesh, final AnimatedMesh animatedMesh) {
 		super(str, mesh, animatedMesh);
 	}
 
