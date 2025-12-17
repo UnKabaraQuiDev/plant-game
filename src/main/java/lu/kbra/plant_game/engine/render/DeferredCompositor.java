@@ -27,10 +27,6 @@ import org.joml.Vector4ic;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 
-import lu.pcy113.pclib.PCUtils;
-import lu.pcy113.pclib.logger.GlobalLogger;
-import lu.pcy113.pclib.pointer.prim.BooleanPointer;
-
 import lu.kbra.plant_game.PGLogic;
 import lu.kbra.plant_game.engine.entity.go.impl.GameObject;
 import lu.kbra.plant_game.engine.entity.go.impl.SwayInstanceEmitter;
@@ -105,6 +101,9 @@ import lu.kbra.standalone.gameengine.utils.gl.consts.TexelInternalFormat;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextureFilter;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextureType;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextureWrap;
+import lu.pcy113.pclib.PCUtils;
+import lu.pcy113.pclib.logger.GlobalLogger;
+import lu.pcy113.pclib.pointer.prim.BooleanPointer;
 
 public class DeferredCompositor implements Cleanupable {
 
@@ -135,19 +134,13 @@ public class DeferredCompositor implements Cleanupable {
 	public static final String DEBUG_BOUNDS_LINE_WIDTH_PROPERTY = DeferredCompositor.class.getSimpleName() + ".debug_bounds.line_width";
 	public static float DEBUG_BOUNDS_LINE_WIDTH = Float.parseFloat(System.getProperty(DEBUG_BOUNDS_LINE_WIDTH_PROPERTY, "1"));
 
-	private static Mesh SCREEN = new LoadedMesh(
-			PASS_SCREEN,
-			null,
-			new Vec3fAttribArray(
-					"pos",
-					0,
-					1,
+	public static final String GL_LINE_SMOOTHING_PROPERTY = DeferredCompositor.class.getSimpleName() + ".gl_line_smoothing";
+	public static final boolean GL_LINE_SMOOTHING = Boolean.getBoolean(GL_LINE_SMOOTHING_PROPERTY);
+
+	private static Mesh SCREEN = new LoadedMesh(PASS_SCREEN, null,
+			new Vec3fAttribArray("pos", 0, 1,
 					new Vector3f[] { new Vector3f(-1, 1, 0), new Vector3f(1, 1, 0), new Vector3f(1, -1, 0), new Vector3f(-1, -1, 0) }),
-			new UIntAttribArray("ind", -1, 1, new int[] { 0, 1, 2, 0, 2, 3 }, BufferType.ELEMENT_ARRAY),
-			new Vec2fAttribArray(
-					"uv",
-					1,
-					1,
+			new UIntAttribArray("ind", -1, 1, new int[] { 0, 1, 2, 0, 2, 3 }, BufferType.ELEMENT_ARRAY), new Vec2fAttribArray("uv", 1, 1,
 					new Vector2f[] { new Vector2f(0, 1), new Vector2f(1, 1), new Vector2f(1, 0), new Vector2f(0, 0) }));
 	private static QuadMesh QUAD = new LoadedQuadMesh(PASS_BOUNDS, null, new Vector2f(1));
 
@@ -351,8 +344,11 @@ public class DeferredCompositor implements Cleanupable {
 		if (mesh == null) {
 			throw new NullPointerException("Mesh is null on: " + source.getClass().getSimpleName() + " in " + entity.getId());
 		}
-		if (!mesh.isValid()) {
-			throw new IllegalStateException("Mesh: " + mesh + " in " + entity.getId() + " isn't valid.");
+		synchronized (mesh) {
+			final String txtMesh = Objects.toString(mesh);
+			if (!mesh.isValid()) {
+				throw new IllegalStateException("Mesh: " + txtMesh + " in " + entity.getId() + " isn't valid.");
+			}
 		}
 	}
 
@@ -868,10 +864,12 @@ public class DeferredCompositor implements Cleanupable {
 		GL_W.glPolygonMode(PolygonMode.FRONT_AND_BACK.getGlId(), PolygonDrawMode.FILL.getGlId());
 
 		if (mesh instanceof final LineMesh lineMesh) {
-			if (lineMesh.isLineSmooth()) {
-				GL_W.glEnable(GL_W.GL_LINE_SMOOTH);
-			} else {
-				GL_W.glDisable(GL_W.GL_LINE_SMOOTH);
+			if (GL_LINE_SMOOTHING) {
+				if (lineMesh.isLineSmooth()) {
+					GL_W.glEnable(GL_W.GL_LINE_SMOOTH);
+				} else {
+					GL_W.glDisable(GL_W.GL_LINE_SMOOTH);
+				}
 			}
 			GL_W.glLineWidth(lineMesh.getLineWidth());
 		}
@@ -1057,10 +1055,12 @@ public class DeferredCompositor implements Cleanupable {
 		GL_W.glPolygonMode(PolygonMode.FRONT_AND_BACK.getGlId(), PolygonDrawMode.FILL.getGlId());
 
 		if (mesh instanceof final LineMesh lineMesh) {
-			if (lineMesh.isLineSmooth()) {
-				GL_W.glEnable(GL_W.GL_LINE_SMOOTH);
-			} else {
-				GL_W.glDisable(GL_W.GL_LINE_SMOOTH);
+			if (GL_LINE_SMOOTHING) {
+				if (lineMesh.isLineSmooth()) {
+					GL_W.glEnable(GL_W.GL_LINE_SMOOTH);
+				} else {
+					GL_W.glDisable(GL_W.GL_LINE_SMOOTH);
+				}
 			}
 			GL_W.glLineWidth(lineMesh.getLineWidth());
 		}
@@ -1079,7 +1079,9 @@ public class DeferredCompositor implements Cleanupable {
 			this.lineDirectShader.setUniform(LineDirectShader.TINT, DEBUG_TRIANGLE_COLOR);
 			this.lineDirectShader.setUniform(RenderShader.TRANSFORMATION_MATRIX, transformationMatrix);
 
-			GL_W.glEnable(GL_W.GL_LINE_SMOOTH);
+			if (GL_LINE_SMOOTHING) {
+				GL_W.glEnable(GL_W.GL_LINE_SMOOTH);
+			}
 			GL_W.glLineWidth(DEBUG_TRIANGLES_LINE_WIDTH);
 			GL_W.glDisable(GL_W.GL_DEPTH_TEST);
 
@@ -1099,7 +1101,9 @@ public class DeferredCompositor implements Cleanupable {
 			this.lineInstanceDirectShader.setUniform(LineDirectShader.TINT, DEBUG_TRIANGLE_COLOR);
 			this.lineInstanceDirectShader.setUniform(RenderShader.TRANSFORMATION_MATRIX, transformationMatrix);
 
-			GL_W.glEnable(GL_W.GL_LINE_SMOOTH);
+			if (GL_LINE_SMOOTHING) {
+				GL_W.glEnable(GL_W.GL_LINE_SMOOTH);
+			}
 			GL_W.glLineWidth(DEBUG_TRIANGLES_LINE_WIDTH);
 			GL_W.glDisable(GL_W.GL_DEPTH_TEST);
 
@@ -1124,7 +1128,9 @@ public class DeferredCompositor implements Cleanupable {
 			this.lineInstanceDirectShader.setUniform(LineDirectShader.TINT, DEBUG_TRIANGLE_COLOR);
 			this.lineInstanceDirectShader.setUniform(RenderShader.TRANSFORMATION_MATRIX, transformationMatrix);
 
-			GL_W.glEnable(GL_W.GL_LINE_SMOOTH);
+			if (GL_LINE_SMOOTHING) {
+				GL_W.glEnable(GL_W.GL_LINE_SMOOTH);
+			}
 			GL_W.glLineWidth(DEBUG_TRIANGLES_LINE_WIDTH);
 			GL_W.glDisable(GL_W.GL_DEPTH_TEST);
 
@@ -1159,7 +1165,9 @@ public class DeferredCompositor implements Cleanupable {
 			this.lineDirectShader.setUniform(RenderShader.TRANSFORMATION_MATRIX, transform);
 			this.lineDirectShader.setUniform(LineDirectShader.TINT, DEBUG_BOUNDS_COLOR);
 
-			GL_W.glEnable(GL_W.GL_LINE_SMOOTH);
+			if (GL_LINE_SMOOTHING) {
+				GL_W.glEnable(GL_W.GL_LINE_SMOOTH);
+			}
 			GL_W.glLineWidth(DEBUG_BOUNDS_LINE_WIDTH);
 			GL_W.glDisable(GL_W.GL_DEPTH_TEST);
 

@@ -9,9 +9,6 @@ import java.util.function.Function;
 import org.joml.Vector3f;
 import org.json.JSONObject;
 
-import lu.pcy113.pclib.PCUtils;
-import lu.pcy113.pclib.impl.ThrowingSupplier;
-
 import lu.kbra.plant_game.engine.util.AdvObjLoader;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.geom.Mesh;
@@ -20,6 +17,9 @@ import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.SkipThen;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
 import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
+import lu.pcy113.pclib.PCUtils;
+import lu.pcy113.pclib.impl.ThrowingSupplier;
+import lu.pcy113.pclib.logger.GlobalLogger;
 
 public class StaticMeshLoader {
 
@@ -68,8 +68,10 @@ public class StaticMeshLoader {
 		return new TaskFuture<>(loader, (ThrowingSupplier<GenericMeshData, Throwable>) () -> {
 			waitOrCreateLock(meshName);
 
+			GlobalLogger.info("cache: " + meshName + " " + cache.hasMesh(meshName));
 			if (cache.hasMesh(meshName)) {
 				releaseLock(meshName);
+				System.err.println("mesh already there");
 				throw new SkipThen(cache.getMesh(meshName));
 			}
 
@@ -83,11 +85,15 @@ public class StaticMeshLoader {
 			final SingleTexture txt0 = cache.hasTexture(meshData.texturePath()) ? (SingleTexture) cache.getTexture(meshData.texturePath())
 					: SingleTexture.loadSingleTexture(cache, meshData.texturePath(), meshData.texturePath());
 
+			System.err.println("creating static mesh: " + meshName);
 			staticMesh = AdvObjLoader.loadTexturedMesh(meshName, null, meshData.filePath(), meshData.origin(), txt0);
 		} else {
 			staticMesh = AdvObjLoader.loadOffsetMesh(meshName, null, meshData.filePath(), meshData.origin());
 		}
 
+		if (cache.hasMesh(meshName)) {
+			throw new IllegalStateException("Mesh already exists.");
+		}
 		cache.addMesh(staticMesh);
 		releaseLock(meshName);
 		return staticMesh;

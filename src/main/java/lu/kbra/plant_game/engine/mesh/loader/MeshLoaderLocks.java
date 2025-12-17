@@ -11,7 +11,7 @@ import lu.pcy113.pclib.logger.GlobalLogger;
 public final class MeshLoaderLocks {
 
 	private static final Map<String, Object> locks = new ConcurrentHashMap<>();
-	private static final long LOAD_WAIT_TIMEOUT = 1000;
+	private static final long LOAD_WAIT_TIMEOUT = 5000;
 
 	public static void waitOrCreateLock(final String meshName) throws InterruptedException {
 		final String source = PCUtils.getCallerClassName(true);
@@ -33,7 +33,7 @@ public final class MeshLoaderLocks {
 		synchronized (lock) {
 			GlobalLogger
 					.log(Level.FINEST,
-							"Thread " + Thread.currentThread().getName() + " waiting on: " + meshName + " (" + source + ") "
+							"Thread: " + Thread.currentThread().getName() + " waiting on: " + meshName + " (" + source + ") "
 									+ PCUtils.toSimpleIdentityString(lock));
 			lock.wait(LOAD_WAIT_TIMEOUT);
 		}
