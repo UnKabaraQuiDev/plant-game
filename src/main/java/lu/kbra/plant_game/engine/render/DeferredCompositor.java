@@ -27,6 +27,10 @@ import org.joml.Vector4ic;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 
+import lu.pcy113.pclib.PCUtils;
+import lu.pcy113.pclib.logger.GlobalLogger;
+import lu.pcy113.pclib.pointer.prim.BooleanPointer;
+
 import lu.kbra.plant_game.PGLogic;
 import lu.kbra.plant_game.engine.entity.go.impl.GameObject;
 import lu.kbra.plant_game.engine.entity.go.impl.SwayInstanceEmitter;
@@ -34,7 +38,6 @@ import lu.kbra.plant_game.engine.entity.go.impl.SwayInstanceEmitterComponent;
 import lu.kbra.plant_game.engine.entity.go.impl.SwayOwner;
 import lu.kbra.plant_game.engine.entity.impl.AnimatedMeshComponent;
 import lu.kbra.plant_game.engine.entity.impl.AnimatedTransformOwner;
-import lu.kbra.plant_game.engine.entity.ui.impl.TransformedBoundsOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.TransparentEntity;
 import lu.kbra.plant_game.engine.mesh.AnimatedMesh;
 import lu.kbra.plant_game.engine.mesh.MaterialMesh;
@@ -101,11 +104,13 @@ import lu.kbra.standalone.gameengine.utils.gl.consts.TexelInternalFormat;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextureFilter;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextureType;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextureWrap;
-import lu.pcy113.pclib.PCUtils;
-import lu.pcy113.pclib.logger.GlobalLogger;
-import lu.pcy113.pclib.pointer.prim.BooleanPointer;
 
 public class DeferredCompositor implements Cleanupable {
+
+	private static final String SWAY_NOISE_PATH = System
+			.getProperty(DeferredCompositor.class.getSimpleName() + ".path.sway_noise", "classpath:/bakes/noise/sway/512.png");
+	private static final String FONT_PATH = System
+			.getProperty(DeferredCompositor.class.getSimpleName() + ".path.font", "classpath:/bakes/fonts/QuinqueFive.ttf/48.png");
 
 	private static final String WORLD_FRAMEBUFFER_NAME = "_WORLD_FRAMEBUFFER";
 	private static final int WORLD_FRAMEBUFFER_POS_IDX = 0;
@@ -137,10 +142,19 @@ public class DeferredCompositor implements Cleanupable {
 	public static final String GL_LINE_SMOOTHING_PROPERTY = DeferredCompositor.class.getSimpleName() + ".gl_line_smoothing";
 	public static final boolean GL_LINE_SMOOTHING = Boolean.getBoolean(GL_LINE_SMOOTHING_PROPERTY);
 
-	private static Mesh SCREEN = new LoadedMesh(PASS_SCREEN, null,
-			new Vec3fAttribArray("pos", 0, 1,
+	private static Mesh SCREEN = new LoadedMesh(
+			PASS_SCREEN,
+			null,
+			new Vec3fAttribArray(
+					"pos",
+					0,
+					1,
 					new Vector3f[] { new Vector3f(-1, 1, 0), new Vector3f(1, 1, 0), new Vector3f(1, -1, 0), new Vector3f(-1, -1, 0) }),
-			new UIntAttribArray("ind", -1, 1, new int[] { 0, 1, 2, 0, 2, 3 }, BufferType.ELEMENT_ARRAY), new Vec2fAttribArray("uv", 1, 1,
+			new UIntAttribArray("ind", -1, 1, new int[] { 0, 1, 2, 0, 2, 3 }, BufferType.ELEMENT_ARRAY),
+			new Vec2fAttribArray(
+					"uv",
+					1,
+					1,
 					new Vector2f[] { new Vector2f(0, 1), new Vector2f(1, 1), new Vector2f(1, 0), new Vector2f(0, 0) }));
 	private static QuadMesh QUAD = new LoadedQuadMesh(PASS_BOUNDS, null, new Vector2f(1));
 
@@ -164,6 +178,7 @@ public class DeferredCompositor implements Cleanupable {
 	protected InstanceDirectShader instanceDirectShader;
 	protected TextDirectShader textDirectShader;
 	protected Map<Class<? extends Renderable>, RenderShader> uiSceneShaders;
+	protected SingleTexture whiteTexture;
 
 	// material passes
 	protected Vector4f backgroundColor = new Vector4f(0, 0, 0, 1);
@@ -190,6 +205,7 @@ public class DeferredCompositor implements Cleanupable {
 	protected Map<Vector3ic, Vector4fc> outlinedObjects = new ConcurrentHashMap<>();
 	protected OutlineShader outlineShader;
 
+	@SuppressWarnings("unused")
 	public DeferredCompositor(final GameEngine engine, final Thread ownerThread) {
 		final CacheManager cache = engine.getCache();
 		this.ownerThread = ownerThread;
@@ -215,11 +231,7 @@ public class DeferredCompositor implements Cleanupable {
 		cache.addAbstractShader(this.lineDirectShader = new LineDirectShader());
 		cache.addAbstractShader(this.lineInstanceDirectShader = new LineInstanceDirectShader());
 
-		this.fontTexture = SingleTexture
-				.loadSingleTexture(cache,
-						TextDirectShader.FONT_TEXTURE_NAME,
-						"classpath:/bakes/fonts/QuinqueFive.ttf/48.png",
-						TextureFilter.NEAREST);
+		this.fontTexture = SingleTexture.loadSingleTexture(cache, TextDirectShader.FONT_TEXTURE_NAME, FONT_PATH, TextureFilter.NEAREST);
 		this.fontTexture.setGenerateMipmaps(true);
 		this.fontTexture.genMipMaps();
 		cache.addTexture(this.fontTexture);
@@ -227,7 +239,7 @@ public class DeferredCompositor implements Cleanupable {
 		this.swayMap = SingleTexture
 				.loadSingleTexture(cache,
 						SwayTransferShader.SWAY_MAP_TEXTURE_NAME,
-						"classpath:/bakes/noise/sway/512.png",
+						SWAY_NOISE_PATH,
 						TextureFilter.LINEAR,
 						TextureType.TXT2D,
 						TextureWrap.REPEAT);
@@ -730,9 +742,9 @@ public class DeferredCompositor implements Cleanupable {
 			}
 		}
 
-		if (entity instanceof final TransformedBoundsOwner tbo) {
-			this.drawDebugBounds(tbo.getTransformedBounds(parentTransform));
-		}
+//		if (entity instanceof final TransformedBoundsOwner tbo) {
+//			this.drawDebugBounds(tbo.getTransformedBounds(parentTransform));
+//		}
 
 		if (entity.hasComponentMatching(SubEntitiesComponent.class)) {
 			final SubEntitiesComponent<?> subEntitiesComponent = entity.getComponentMatching(SubEntitiesComponent.class);
@@ -1052,8 +1064,6 @@ public class DeferredCompositor implements Cleanupable {
 			GL_W.glVertexAttribI3ui(GameObject.MESH_ATTRIB_OBJECT_ID_ID, objId.x(), objId.y(), objId.z());
 		}
 
-		GL_W.glPolygonMode(PolygonMode.FRONT_AND_BACK.getGlId(), PolygonDrawMode.FILL.getGlId());
-
 		if (mesh instanceof final LineMesh lineMesh) {
 			if (GL_LINE_SMOOTHING) {
 				if (lineMesh.isLineSmooth()) {
@@ -1063,7 +1073,11 @@ public class DeferredCompositor implements Cleanupable {
 				}
 			}
 			GL_W.glLineWidth(lineMesh.getLineWidth());
+		} else if (GL_LINE_SMOOTHING) {
+			GL_W.glDisable(GL_W.GL_LINE_SMOOTH);
 		}
+
+		GL_W.glPolygonMode(mesh.getPolygonMode().getGlId(), mesh.getPolygonDrawMode().getGlId());
 
 		GL_W.glDrawElements(mesh.getBeginMode().getGlId(), mesh.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
 

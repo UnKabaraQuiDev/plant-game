@@ -8,7 +8,7 @@ import lu.kbra.plant_game.engine.entity.impl.Transform3DOwner;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.standalone.gameengine.impl.UniqueID;
 import lu.kbra.standalone.gameengine.objs.entity.SceneEntity;
-import lu.kbra.standalone.gameengine.utils.gl.consts.Direction;
+import lu.kbra.standalone.gameengine.utils.consts.Direction;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 public interface PlaceableObject extends Transform3DOwner, UniqueID, SceneEntity {

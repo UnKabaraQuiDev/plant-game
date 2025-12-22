@@ -1,4 +1,4 @@
-package lu.kbra.plant_game.engine.entity.go.obj_inst.grass.flower.round;
+package lu.kbra.plant_game.engine.entity.go.obj_inst.champi;
 
 import org.joml.Vector3i;
 
@@ -7,10 +7,10 @@ import lu.kbra.plant_game.engine.entity.go.impl.SwayInstanceEmitter;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-@DataPath("classpath:/models/flower_round_small.json")
-public class InstanceSmallRoundFlowerObject extends InstanceSwayGameObject {
+@DataPath("classpath:/models/champi_medium.json")
+public class InstanceMediumChampiFlowerObject extends InstanceSwayGameObject {
 
-	public InstanceSmallRoundFlowerObject(
+	public InstanceMediumChampiFlowerObject(
 			final String str,
 			final SwayInstanceEmitter instanceEmitter,
 			final float deformRatio,
@@ -20,12 +20,12 @@ public class InstanceSmallRoundFlowerObject extends InstanceSwayGameObject {
 		// TODO Auto-generated constructor stub
 	}
 
-	public InstanceSmallRoundFlowerObject(final String str, final SwayInstanceEmitter instanceEmitter, final short materialId) {
+	public InstanceMediumChampiFlowerObject(final String str, final SwayInstanceEmitter instanceEmitter, final short materialId) {
 		super(str, instanceEmitter, materialId);
 		// TODO Auto-generated constructor stub
 	}
 
-	public InstanceSmallRoundFlowerObject(
+	public InstanceMediumChampiFlowerObject(
 			final String str,
 			final SwayInstanceEmitter instanceEmitter,
 			final Transform3D transform,
@@ -34,7 +34,7 @@ public class InstanceSmallRoundFlowerObject extends InstanceSwayGameObject {
 		// TODO Auto-generated constructor stub
 	}
 
-	public InstanceSmallRoundFlowerObject(
+	public InstanceMediumChampiFlowerObject(
 			final String str,
 			final SwayInstanceEmitter instanceEmitter,
 			final Transform3D transform,
@@ -46,7 +46,7 @@ public class InstanceSmallRoundFlowerObject extends InstanceSwayGameObject {
 		// TODO Auto-generated constructor stub
 	}
 
-	public InstanceSmallRoundFlowerObject(
+	public InstanceMediumChampiFlowerObject(
 			final String str,
 			final SwayInstanceEmitter instanceEmitter,
 			final Transform3D transform,
@@ -59,12 +59,12 @@ public class InstanceSmallRoundFlowerObject extends InstanceSwayGameObject {
 		// TODO Auto-generated constructor stub
 	}
 
-	public InstanceSmallRoundFlowerObject(final String str, final SwayInstanceEmitter instanceEmitter, final Transform3D transform) {
+	public InstanceMediumChampiFlowerObject(final String str, final SwayInstanceEmitter instanceEmitter, final Transform3D transform) {
 		super(str, instanceEmitter, transform);
 		// TODO Auto-generated constructor stub
 	}
 
-	public InstanceSmallRoundFlowerObject(final String str, final SwayInstanceEmitter instanceEmitter) {
+	public InstanceMediumChampiFlowerObject(final String str, final SwayInstanceEmitter instanceEmitter) {
 		super(str, instanceEmitter);
 		// TODO Auto-generated constructor stub
 	}

@@ -1,4 +1,4 @@
-package lu.kbra.plant_game.engine.entity.go.obj_inst.grass.flower.round;
+package lu.kbra.plant_game.engine.entity.go.obj_inst.round;
 
 import org.joml.Vector3i;
 

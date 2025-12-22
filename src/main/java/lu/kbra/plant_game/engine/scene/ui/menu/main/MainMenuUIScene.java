@@ -24,6 +24,7 @@ import lu.kbra.plant_game.engine.entity.ui.impl.AbsoluteTransformOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.Scale2dDir;
 import lu.kbra.plant_game.engine.entity.ui.impl.TextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.UIObject;
+import lu.kbra.plant_game.engine.entity.ui.scroller.ScrollBarUIObject;
 import lu.kbra.plant_game.engine.entity.ui.slider.VolumeSliderUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.OptionKeyUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.ProgrammaticTextUIObject;
@@ -40,10 +41,12 @@ import lu.kbra.plant_game.engine.scene.ui.layout.MarginFlowLayout;
 import lu.kbra.plant_game.engine.window.input.MappingInputHandler;
 import lu.kbra.plant_game.engine.window.input.StandardKeyOption;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
+import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.WorkerDispatcher;
 import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
+import lu.kbra.standalone.gameengine.utils.consts.Direction;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextAlignment;
 import lu.kbra.standalone.gameengine.utils.interpolation.Interpolators;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
@@ -59,15 +62,18 @@ public class MainMenuUIScene extends UIScene {
 	public static final float GRADIENT_DEPTH = -0.1f;
 
 	public static final float OPTIONS_SCROLL_SPEED = 0.1f;
+	public static final float PLAY_SCROLL_SPEED = 0.1f;
 	public static final int OPTIONS_COLUMN_COUNT = 25;
 
 	protected int currentGroup = 0;
 	protected int targetGroup = 0;
 	protected float progress = 0;
 
-	protected Vector3f[] restPositions = { new Vector3f(), null, new Vector3f(5, 0, 0), null };
+	protected Vector3f[] restPositions = { new Vector3f(), new Vector3f(0, 5, 0), new Vector3f(5, 0, 0), null };
+	protected ScrollBarUIObject[] scrollBars = { null, null, null, null };
 
 	protected OffsetUIObjectGroup mainMenuGroup = new OffsetUIObjectGroup("main", new Transform3D(new Vector3f(this.restPositions[MAIN])));
+
 	protected LayoutOffsetUIObjectGroup mainLeftMenuGroup = new LayoutOffsetUIObjectGroup(
 			"main.left",
 			new MarginFlowLayout(true, 0.02f, 0.3f, 0, 0.5f, 0.5f, MarginFlowLayout.LEFT),
@@ -76,6 +82,7 @@ public class MainMenuUIScene extends UIScene {
 			"main.buttons",
 			new FlowLayout(true, 0.02f),
 			this.mainLeftMenuGroup);
+
 	protected OffsetUIObjectGroup optionsMenuGroup = new OffsetUIObjectGroup(
 			"option",
 			new Transform3D(new Vector3f(this.restPositions[OPTIONS])));
@@ -84,7 +91,14 @@ public class MainMenuUIScene extends UIScene {
 			new FlowLayout(true, 0.0f),
 			this.optionsMenuGroup);
 
-	protected OffsetUIObjectGroup[] groups = new OffsetUIObjectGroup[] { this.mainMenuGroup, null, this.optionsMenuGroup, null };
+	protected OffsetUIObjectGroup playMenuGroup = new OffsetUIObjectGroup("play", new Transform3D(new Vector3f(this.restPositions[PLAY])));
+	protected OffsetUIObjectGroup playContentMenuGroup = new OffsetUIObjectGroup("play.content", this.playMenuGroup);
+
+	protected OffsetUIObjectGroup[] groups = new OffsetUIObjectGroup[] {
+			this.mainMenuGroup,
+			this.playMenuGroup,
+			this.optionsMenuGroup,
+			null };
 
 	protected CursorUIObject cursor;
 
@@ -98,13 +112,16 @@ public class MainMenuUIScene extends UIScene {
 
 	@Override
 	public void init(final Dispatcher workers, final Dispatcher renderDispatcher) {
-		super.addEntities(this.mainMenuGroup, this.optionsMenuGroup);
+		super.addEntities(this.mainMenuGroup, this.optionsMenuGroup, this.playMenuGroup);
 
-		/** main menu */
+		/* main menu */
 		this.buildMainMenu(workers, renderDispatcher);
 
 		/* option content */
 		this.buildOptionsMenu(workers, renderDispatcher);
+
+		/* play content */
+		this.buildPlayMenu(workers, renderDispatcher);
 
 		/* common */
 		UIObjectFactory
@@ -113,6 +130,20 @@ public class MainMenuUIScene extends UIScene {
 					btn.forceCirclingMouse();
 					this.cursor = btn;
 				})
+				.push();
+	}
+
+	private void buildPlayMenu(final Dispatcher workers, final Dispatcher renderDispatcher) {
+		UIObjectFactory
+				.create(ScrollBarUIObject.class,
+						this.playMenuGroup,
+						new Transform3D(),
+						ColorMaterial.GRAY,
+						Direction.EAST,
+						new Vector2f(-1, 1),
+						new Vector2f(0.05f, 0.2f),
+						PLAY_SCROLL_SPEED)
+				.then(workers, (Consumer<ScrollBarUIObject>) obj -> this.scrollBars[PLAY] = obj)
 				.push();
 	}
 
@@ -157,6 +188,18 @@ public class MainMenuUIScene extends UIScene {
 		uiSmallLeftTextData.setTextAlignment(TextAlignment.TEXT_LEFT);
 		UIObjectFactory.create(VolumeTextUIObject.class, optionsVolumeGroupLatch, uiSmallLeftTextData, new Transform3DPivot()).push();
 		UIObjectFactory.create(VolumeSliderUIObject.class, optionsVolumeGroupLatch, uiSmallLeftTextData, new Transform3DPivot()).push();
+
+		UIObjectFactory
+				.create(ScrollBarUIObject.class,
+						this.optionsMenuGroup,
+						new Transform3D(),
+						ColorMaterial.GRAY,
+						Direction.NORTH,
+						new Vector2f(0.8f, -0.8f),
+						new Vector2f(0.05f, 0.2f),
+						OPTIONS_SCROLL_SPEED)
+				.then(workers, (Consumer<ScrollBarUIObject>) obj -> this.scrollBars[OPTIONS] = obj)
+				.push();
 	}
 
 	private void buildMainMenu(final Dispatcher workers, final Dispatcher renderDispatcher) {
@@ -262,10 +305,14 @@ public class MainMenuUIScene extends UIScene {
 			this.mainLeftMenuGroup.doLayout();
 		}
 
-		this.optionsEntriesMenuGroup
-				.getTransform()
-				.translationAdd(0, 0, (float) inputHandler.getMouseScroll().y * OPTIONS_SCROLL_SPEED)
-				.updateMatrix();
+		if (this.currentGroup == OPTIONS) {
+			this.scrollBars[OPTIONS].addScroll((float) inputHandler.getMouseScroll().y);
+			this.optionsEntriesMenuGroup.getTransform().translationSet(0, 0, this.scrollBars[OPTIONS].getScroll() * 2 - 1).updateMatrix();
+		} else if (this.currentGroup == PLAY) {
+			this.scrollBars[PLAY].addScroll((float) inputHandler.getMouseScroll().y + (float) inputHandler.getMouseScroll().x);
+			this.playContentMenuGroup.getTransform().translationSet(this.scrollBars[PLAY].getScroll(), 0, 0).updateMatrix();
+		}
+
 		frameState.uiSceneCaughtMouseInput = true;
 
 		if (this.cursor != null) {

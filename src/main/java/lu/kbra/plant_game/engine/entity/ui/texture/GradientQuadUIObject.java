@@ -153,13 +153,13 @@ public class GradientQuadUIObject extends QuadUIObject implements TintOwner, Gra
 	}
 
 	@Override
-	public Vector4f getTint() {
+	public Vector4fc getTint() {
 		return this.tint;
 	}
 
 	@Override
-	public void setTint(final Vector4f tint) {
-		this.tint = tint;
+	public void setTint(final Vector4fc tint) {
+		this.tint.set(tint);
 	}
 
 	public GradientMeshComponent getGradientMeshComponent() {

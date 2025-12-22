@@ -13,6 +13,14 @@ import org.joml.Vector3i;
 import org.joml.Vector3ic;
 import org.joml.Vector4f;
 
+import lu.pcy113.pclib.PCUtils;
+import lu.pcy113.pclib.datastructure.pair.Pair;
+import lu.pcy113.pclib.datastructure.triplet.Triplet;
+import lu.pcy113.pclib.datastructure.triplet.Triplets;
+import lu.pcy113.pclib.impl.ThrowingConsumer;
+import lu.pcy113.pclib.impl.ThrowingFunction;
+import lu.pcy113.pclib.logger.GlobalLogger;
+
 import lu.kbra.plant_game.engine.UpdateFrameState;
 import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory;
 import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory.InstanceData;
@@ -31,15 +39,15 @@ import lu.kbra.plant_game.engine.entity.go.obj.water.WaterSprinklerObject5x5;
 import lu.kbra.plant_game.engine.entity.go.obj.water.WaterSprinklerObject7x7;
 import lu.kbra.plant_game.engine.entity.go.obj.water.WaterTowerObject;
 import lu.kbra.plant_game.engine.entity.go.obj.water.WaterWheelObject;
+import lu.kbra.plant_game.engine.entity.go.obj_inst.champi.InstanceLargeChampiFlowerObject;
+import lu.kbra.plant_game.engine.entity.go.obj_inst.champi.InstanceMediumChampiFlowerObject;
+import lu.kbra.plant_game.engine.entity.go.obj_inst.champi.InstanceSmallChampiFlowerObject;
 import lu.kbra.plant_game.engine.entity.go.obj_inst.grass.InstanceLargeGrassObject;
 import lu.kbra.plant_game.engine.entity.go.obj_inst.grass.InstanceMediumGrassObject;
 import lu.kbra.plant_game.engine.entity.go.obj_inst.grass.InstanceSmallGrassObject;
-import lu.kbra.plant_game.engine.entity.go.obj_inst.grass.flower.champi.InstanceLargeChampiFlowerObject;
-import lu.kbra.plant_game.engine.entity.go.obj_inst.grass.flower.champi.InstanceMediumChampiFlowerObject;
-import lu.kbra.plant_game.engine.entity.go.obj_inst.grass.flower.champi.InstanceSmallChampiFlowerObject;
-import lu.kbra.plant_game.engine.entity.go.obj_inst.grass.flower.round.InstanceLargeRoundFlowerObject;
-import lu.kbra.plant_game.engine.entity.go.obj_inst.grass.flower.round.InstanceMediumRoundFlowerObject;
-import lu.kbra.plant_game.engine.entity.go.obj_inst.grass.flower.round.InstanceSmallRoundFlowerObject;
+import lu.kbra.plant_game.engine.entity.go.obj_inst.round.InstanceLargeRoundFlowerObject;
+import lu.kbra.plant_game.engine.entity.go.obj_inst.round.InstanceMediumRoundFlowerObject;
+import lu.kbra.plant_game.engine.entity.go.obj_inst.round.InstanceSmallRoundFlowerObject;
 import lu.kbra.plant_game.engine.mesh.data.AttributeLocation;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.scene.world.data.LevelData;
@@ -59,16 +67,9 @@ import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
 import lu.kbra.standalone.gameengine.objs.entity.Entity;
 import lu.kbra.standalone.gameengine.scene.Scene3D;
 import lu.kbra.standalone.gameengine.scene.camera.Camera3D;
+import lu.kbra.standalone.gameengine.utils.consts.Direction;
 import lu.kbra.standalone.gameengine.utils.gl.consts.BufferType;
-import lu.kbra.standalone.gameengine.utils.gl.consts.Direction;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
-import lu.pcy113.pclib.PCUtils;
-import lu.pcy113.pclib.datastructure.pair.Pair;
-import lu.pcy113.pclib.datastructure.triplet.Triplet;
-import lu.pcy113.pclib.datastructure.triplet.Triplets;
-import lu.pcy113.pclib.impl.ThrowingConsumer;
-import lu.pcy113.pclib.impl.ThrowingFunction;
-import lu.pcy113.pclib.logger.GlobalLogger;
 
 public class WorldLevelScene extends Scene3D {
 
@@ -138,8 +139,12 @@ public class WorldLevelScene extends Scene3D {
 						final TerrainObject terrainEntity = new TerrainObject("terrain", meshes.getFirst());
 						terrainEntity.setTerrainEdgeEntity(new TerrainEdgeObject("terrain-edges", meshes.getSecond(), new Transform3D()));
 						terrainEntity
-								.setTerrainHighlightEntity(new TerrainHighlightObject("terrain-highlight", meshes.getThird(),
-										new Transform3D(new Vector3f(0, 10, 0)), GameEngine.IDENTITY_VECTOR3I, ColorMaterial.CYAN.getId()));
+								.setTerrainHighlightEntity(new TerrainHighlightObject(
+										"terrain-highlight",
+										meshes.getThird(),
+										new Transform3D(new Vector3f(0, 10, 0)),
+										GameEngine.IDENTITY_VECTOR3I,
+										ColorMaterial.CYAN.getId()));
 						terrainEntity.getTerrainHighlightObject().setActive(false);
 						terrainEntity
 								.getTransform()
@@ -180,9 +185,16 @@ public class WorldLevelScene extends Scene3D {
 							indices[i * 2 + 1] = i + 1;
 						}
 
-						final PipeMesh mesh = new PipeMesh("pipe-" + "@" + System.identityHashCode(this), 12,
-								new Vec3fAttribArray(Mesh.ATTRIB_VERTICES_NAME, Mesh.ATTRIB_VERTICES_ID, 1, pos), new UIntAttribArray(
-										Mesh.ATTRIB_INDICES_NAME, Mesh.ATTRIB_INDICES_ID, 1, indices, BufferType.ELEMENT_ARRAY));
+						final PipeMesh mesh = new PipeMesh(
+								"pipe-" + "@" + System.identityHashCode(this),
+								12,
+								new Vec3fAttribArray(Mesh.ATTRIB_VERTICES_NAME, Mesh.ATTRIB_VERTICES_ID, 1, pos),
+								new UIntAttribArray(
+										Mesh.ATTRIB_INDICES_NAME,
+										Mesh.ATTRIB_INDICES_ID,
+										1,
+										indices,
+										BufferType.ELEMENT_ARRAY));
 						mesh.setEffectiveLength(index);
 						this.worldCache.addMesh(mesh);
 						this.terrain
@@ -210,7 +222,9 @@ public class WorldLevelScene extends Scene3D {
 					new TaskFuture<>(renderDispatcher, () -> {
 						GlobalLogger.info("Generating water mesh...");
 						final Pair<Mesh, Long> meshTime = PCUtils
-								.nanoTime(() -> new LoadedQuadMesh("water", null,
+								.nanoTime(() -> new LoadedQuadMesh(
+										"water",
+										null,
 										new Vector2f(this.getTerrain().getMesh().getWidth(), this.getTerrain().getMesh().getLength())));
 						this.getCache().addMesh(meshTime.getKey());
 						GlobalLogger.info("Water mesh generated in " + (meshTime.getValue() / 1e6) + " ms");
@@ -218,8 +232,12 @@ public class WorldLevelScene extends Scene3D {
 					})
 							.then(workers,
 									(ThrowingConsumer<Mesh, Throwable>) mesh -> this
-											.setWaterLevel(new GameObject("water", mesh, new Transform3D(new Vector3f(0, 0.9f, 0)),
-													new Vector3i(2, 0, 0), ColorMaterial.BLUE.getId())))
+											.setWaterLevel(new GameObject(
+													"water",
+													mesh,
+													new Transform3D(new Vector3f(0, 0.9f, 0)),
+													new Vector3i(2, 0, 0),
+													ColorMaterial.BLUE.getId())))
 							.push();
 
 					GameObjectFactory
@@ -334,12 +352,12 @@ public class WorldLevelScene extends Scene3D {
 						}).add(pos);
 					}
 
-					this.instance(InstanceSmallChampiFlowerObject.class, smallPositions, ColorMaterial.LIGHT_BLUE);
-					this.instance(InstanceMediumChampiFlowerObject.class, mediumPositions, ColorMaterial.LIGHT_BLUE);
-					this.instance(InstanceLargeChampiFlowerObject.class, largePositions, ColorMaterial.BLUE);
-					this.instance(InstanceSmallRoundFlowerObject.class, smallPositions1, ColorMaterial.RED);
-					this.instance(InstanceMediumRoundFlowerObject.class, mediumPositions1, ColorMaterial.RED);
-					this.instance(InstanceLargeRoundFlowerObject.class, largePositions1, ColorMaterial.RED);
+					this.instance(InstanceSmallChampiFlowerObject.class, smallPositions, ColorMaterial.LIGHT_CYAN);
+					this.instance(InstanceMediumChampiFlowerObject.class, mediumPositions, ColorMaterial.LIGHT_MAGENTA);
+					this.instance(InstanceLargeChampiFlowerObject.class, largePositions, ColorMaterial.LIGHT_ORANGE);
+					this.instance(InstanceSmallRoundFlowerObject.class, smallPositions1, ColorMaterial.LIGHT_YELLOW);
+					this.instance(InstanceMediumRoundFlowerObject.class, mediumPositions1, ColorMaterial.WHITE);
+					this.instance(InstanceLargeRoundFlowerObject.class, largePositions1, ColorMaterial.LIGHT_PINK);
 
 				})
 				.push();
@@ -352,7 +370,8 @@ public class WorldLevelScene extends Scene3D {
 		return GameObjectFactory
 				.create(class1,
 						this.getTerrain().getSubEntitiesComponent(),
-						new InstanceData(i -> new Transform3D(pos.get(i), new Quaternionf().rotateY((float) (Math.random() * 2 * Math.PI))),
+						new InstanceData(
+								i -> new Transform3D(pos.get(i), new Quaternionf().rotateY((float) (Math.random() * 2 * Math.PI))),
 								pos.size()),
 						mt.getId())
 				.push();
@@ -411,7 +430,9 @@ public class WorldLevelScene extends Scene3D {
 					this.moveObjectTaskState = new TaskFuture<Void, Void>(workers, () -> {
 						compositor.pollObjectId(true);
 
-						final Vector3ic ids = new Vector3i(compositor.getObjectId().y(), compositor.getObjectId().z(),
+						final Vector3ic ids = new Vector3i(
+								compositor.getObjectId().y(),
+								compositor.getObjectId().z(),
 								compositor.getObjectId().w());
 
 						super.getEntities()

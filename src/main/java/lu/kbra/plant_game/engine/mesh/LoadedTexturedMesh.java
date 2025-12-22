@@ -10,11 +10,11 @@ import lu.kbra.standalone.gameengine.cache.attrib.Vec3fAttribArray;
 import lu.kbra.standalone.gameengine.graph.material.Material;
 import lu.kbra.standalone.gameengine.graph.texture.SingleTexture;
 
-public class TexturedLoadedMesh extends OffsetLoadedMesh implements TexturedMesh {
+public class LoadedTexturedMesh extends OffsetLoadedMesh implements TexturedMesh {
 
 	protected SingleTexture texture;
 
-	public TexturedLoadedMesh(String name, Material material, Vector3f origin, SingleTexture texture, Vec3fAttribArray vertices,
+	public LoadedTexturedMesh(String name, Material material, Vector3f origin, SingleTexture texture, Vec3fAttribArray vertices,
 			UIntAttribArray indices, AttribArray... attribs) {
 		super(name, material, origin, vertices, indices, attribs);
 		this.texture = texture;

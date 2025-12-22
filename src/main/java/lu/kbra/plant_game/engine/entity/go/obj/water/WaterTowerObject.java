@@ -15,15 +15,15 @@ public class WaterTowerObject extends GameObject implements PlaceableObject, Wat
 
 	protected long waterLevel;
 
-	public WaterTowerObject(String str, Mesh mesh, Transform3D transform, Vector3i objectId) {
+	public WaterTowerObject(final String str, final Mesh mesh, final Transform3D transform, final Vector3i objectId) {
 		super(str, mesh, transform, objectId);
 	}
 
-	public WaterTowerObject(String str, Mesh mesh, Transform3D transform) {
+	public WaterTowerObject(final String str, final Mesh mesh, final Transform3D transform) {
 		super(str, mesh, transform);
 	}
 
-	public WaterTowerObject(String str, Mesh mesh) {
+	public WaterTowerObject(final String str, final Mesh mesh) {
 		super(str, mesh);
 	}
 
@@ -39,21 +39,21 @@ public class WaterTowerObject extends GameObject implements PlaceableObject, Wat
 
 	@Override
 	public long getWater() {
-		return waterLevel;
+		return this.waterLevel;
 	}
 
 	@Override
-	public boolean hasWater(long val) {
-		return waterLevel >= val;
+	public boolean hasWater(final long val) {
+		return this.waterLevel >= val;
 	}
 
 	@Override
-	public void addWater(long val) {
+	public void addWater(final long val) {
 		this.waterLevel += val;
 	}
 
 	@Override
-	public void removeWater(long val) {
+	public void removeWater(final long val) {
 		this.waterLevel -= val;
 	}
 

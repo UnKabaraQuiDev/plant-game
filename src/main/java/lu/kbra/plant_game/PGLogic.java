@@ -3,6 +3,8 @@ package lu.kbra.plant_game;
 import java.io.File;
 import java.util.Locale;
 
+import org.lwjgl.glfw.GLFW;
+
 import lu.kbra.plant_game.engine.UpdateFrameState;
 import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
@@ -55,7 +57,7 @@ public class PGLogic extends GameLogic {
 		this.uiScene.init(this.WORKERS, this.RENDER_DISPATCHER);
 		this.worldScene.init(this.WORKERS, this.RENDER_DISPATCHER);
 
-		this.uiScene = null;
+		// this.uiScene = null;
 	}
 
 	private final UpdateFrameState frameState = new UpdateFrameState();
@@ -69,6 +71,12 @@ public class PGLogic extends GameLogic {
 			this.uiScene.input(this.inputHandler, dTime, this.frameState);
 		}
 		this.worldScene.input(this.inputHandler, dTime, this.frameState);
+
+		if (this.inputHandler.isKeyPressedOnce(GLFW.GLFW_KEY_H)) {
+			this.uiScene.getCache().dump(System.out);
+			this.worldScene.getCache().dump(System.out);
+			super.cache.dump(System.out);
+		}
 	}
 
 	@Override

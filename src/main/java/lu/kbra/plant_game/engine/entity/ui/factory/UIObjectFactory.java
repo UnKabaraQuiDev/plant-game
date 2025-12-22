@@ -14,8 +14,10 @@ import lu.kbra.plant_game.engine.entity.ui.impl.AnimatedUIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.TextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.TextureUIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.UIObject;
+import lu.kbra.plant_game.engine.entity.ui.scroller.FlatQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.texture.GradientQuadUIObject;
 import lu.kbra.plant_game.engine.mesh.TexturedMesh;
+import lu.kbra.plant_game.engine.mesh.TexturedQuadMesh;
 import lu.kbra.plant_game.engine.mesh.loader.AnimatedMeshLoader;
 import lu.kbra.plant_game.engine.mesh.loader.AnimatedMeshLoader.AnimatedMeshes;
 import lu.kbra.plant_game.engine.mesh.loader.StaticMeshLoader;
@@ -127,6 +129,11 @@ public class UIObjectFactory {
 
 		final String cDataPath = this.dataPath.get(clazz);
 
+		if (this.animatedMesh.get(clazz)) {
+			PCUtils.throwUnsupported();
+			return null;
+		}
+
 		if (cDataPath.endsWith("json")) { // data file
 
 			PCUtils.throwUnsupported();
@@ -193,12 +200,6 @@ public class UIObjectFactory {
 		}
 		if (TextureUIObject.class.isAssignableFrom(clazz) && cDataPath.startsWith("image:")) {
 
-			if (this.animatedMesh.get(clazz)) {
-
-				PCUtils.throwUnsupported();
-				return null;
-
-			}
 			final String txtPath = cDataPath.substring(cDataPath.indexOf(":") + 1);
 
 			return StaticTexturedMeshLoader
@@ -222,30 +223,40 @@ public class UIObjectFactory {
 			});
 
 		}
-		if (!GradientQuadUIObject.class.isAssignableFrom(clazz)) {
+		if (GradientQuadUIObject.class.isAssignableFrom(clazz)) {
 
-			PCUtils.throwUnsupported(clazz.getName() + " & " + cDataPath);
-			return null;
+			return StaticGradientMeshLoader
+					.getStaticFuture(this.cache,
+							cDataPath.isBlank() ? GradientQuadUIObject.class.getName() : cDataPath,
+							cDataPath,
+							this.loader,
+							this.render)
+					.then(this.loader, (ThrowingFunction<GradientMesh, T, Throwable>) mesh -> {
+						final T instance = UIObjectRegistry
+								.create(clazz,
+										PCUtils
+												.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), mesh },
+														args));
+						return instance;
+					});
 
 		}
-		if (this.animatedMesh.get(clazz)) {
+		if (FlatQuadUIObject.class.isAssignableFrom(clazz)) {
 
-			PCUtils.throwUnsupported();
-			return null;
+			return StaticFlatMeshLoader
+					.getStaticFuture(this.cache, this.loader, this.render)
+					.then(this.loader, (ThrowingFunction<TexturedQuadMesh, T, Throwable>) mesh -> {
+						final T instance = UIObjectRegistry
+								.create(clazz,
+										PCUtils
+												.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), mesh },
+														args));
+						return instance;
+					});
 
 		}
-		return StaticGradientMeshLoader
-				.getStaticFuture(this.cache,
-						cDataPath.isBlank() ? GradientQuadUIObject.class.getName() : cDataPath,
-						cDataPath,
-						this.loader,
-						this.render)
-				.then(this.loader, (ThrowingFunction<GradientMesh, T, Throwable>) mesh -> {
-					final T instance = UIObjectRegistry
-							.create(clazz,
-									PCUtils.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), mesh }, args));
-					return instance;
-				});
+		PCUtils.throwUnsupported();
+		return null;
 	}
 
 	public <T extends UIObject> TaskFuture<?, T> create_(final Class<T> clazz, final UIScene scene, final Object... args) {

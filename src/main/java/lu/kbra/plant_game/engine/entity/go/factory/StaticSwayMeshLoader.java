@@ -51,8 +51,6 @@ public class StaticSwayMeshLoader {
 			staticMesh = AdvObjLoader.loadSwayMesh(meshName, null, meshData.filePath(), meshData.deformRatio(), meshData.speedRatio());
 		}
 
-		System.err.println("created mesh: " + staticMesh);
-
 		cache.addMesh(staticMesh);
 		releaseLock(meshName);
 		return staticMesh;

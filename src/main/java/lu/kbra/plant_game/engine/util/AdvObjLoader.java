@@ -6,7 +6,7 @@ import lu.kbra.plant_game.engine.mesh.AnimatedLoadedMesh;
 import lu.kbra.plant_game.engine.mesh.AnimatedTexturedLoadedMesh;
 import lu.kbra.plant_game.engine.mesh.OffsetLoadedMesh;
 import lu.kbra.plant_game.engine.mesh.SwayLoadedMesh;
-import lu.kbra.plant_game.engine.mesh.TexturedLoadedMesh;
+import lu.kbra.plant_game.engine.mesh.LoadedTexturedMesh;
 import lu.kbra.plant_game.engine.mesh.TexturedSwayLoadedMesh;
 import lu.kbra.plant_game.engine.mesh.loader.AnimatedMeshLoader.AnimationData;
 import lu.kbra.standalone.gameengine.geom.utils.ObjLoader;
@@ -46,7 +46,7 @@ public class AdvObjLoader {
 						t -> new AnimatedLoadedMesh(t.name(), null, origin, animationData, t.vertices(), t.indices(), t.attribs()));
 	}
 
-	public static TexturedLoadedMesh loadTexturedMesh(
+	public static LoadedTexturedMesh loadTexturedMesh(
 			final String name,
 			final Material material,
 			final String path,
@@ -56,7 +56,7 @@ public class AdvObjLoader {
 				.loadMesh(name,
 						material,
 						path,
-						t -> new TexturedLoadedMesh(t.name(), null, origin, texture, t.vertices(), t.indices(), t.attribs()));
+						t -> new LoadedTexturedMesh(t.name(), null, origin, texture, t.vertices(), t.indices(), t.attribs()));
 	}
 
 	public static TexturedSwayLoadedMesh loadTexturedSwayMesh(

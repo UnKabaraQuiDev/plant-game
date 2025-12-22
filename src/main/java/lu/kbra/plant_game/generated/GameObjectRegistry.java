@@ -27,15 +27,15 @@ import lu.kbra.plant_game.engine.entity.go.obj.water.WaterSprinklerObject5x5;
 import lu.kbra.plant_game.engine.entity.go.obj.water.WaterSprinklerObject7x7;
 import lu.kbra.plant_game.engine.entity.go.obj.water.WaterTowerObject;
 import lu.kbra.plant_game.engine.entity.go.obj.water.WaterWheelObject;
+import lu.kbra.plant_game.engine.entity.go.obj_inst.champi.InstanceLargeChampiFlowerObject;
+import lu.kbra.plant_game.engine.entity.go.obj_inst.champi.InstanceMediumChampiFlowerObject;
+import lu.kbra.plant_game.engine.entity.go.obj_inst.champi.InstanceSmallChampiFlowerObject;
 import lu.kbra.plant_game.engine.entity.go.obj_inst.grass.InstanceLargeGrassObject;
 import lu.kbra.plant_game.engine.entity.go.obj_inst.grass.InstanceMediumGrassObject;
 import lu.kbra.plant_game.engine.entity.go.obj_inst.grass.InstanceSmallGrassObject;
-import lu.kbra.plant_game.engine.entity.go.obj_inst.grass.flower.champi.InstanceLargeChampiFlowerObject;
-import lu.kbra.plant_game.engine.entity.go.obj_inst.grass.flower.champi.InstanceMediumChampiFlowerObject;
-import lu.kbra.plant_game.engine.entity.go.obj_inst.grass.flower.champi.InstanceSmallChampiFlowerObject;
-import lu.kbra.plant_game.engine.entity.go.obj_inst.grass.flower.round.InstanceLargeRoundFlowerObject;
-import lu.kbra.plant_game.engine.entity.go.obj_inst.grass.flower.round.InstanceMediumRoundFlowerObject;
-import lu.kbra.plant_game.engine.entity.go.obj_inst.grass.flower.round.InstanceSmallRoundFlowerObject;
+import lu.kbra.plant_game.engine.entity.go.obj_inst.round.InstanceLargeRoundFlowerObject;
+import lu.kbra.plant_game.engine.entity.go.obj_inst.round.InstanceMediumRoundFlowerObject;
+import lu.kbra.plant_game.engine.entity.go.obj_inst.round.InstanceSmallRoundFlowerObject;
 import lu.kbra.plant_game.engine.mesh.AnimatedMesh;
 import lu.kbra.plant_game.engine.render.SwayMesh;
 import lu.kbra.plant_game.engine.util.InternalConstructorFunction;
@@ -196,16 +196,16 @@ public class GameObjectRegistry {
 		listMediumRoundFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayMesh.class, Transform3D.class, Vector3i.class, short.class, float.class, float.class, float.class}, (Object[] arr) -> (GameObject) new MediumRoundFlowerObject((String) arr[0], (SwayMesh) arr[1], (Transform3D) arr[2], (Vector3i) arr[3], (short) arr[4], (float) arr[5], (float) arr[6], (float) arr[7])));
 		GAME_OBJECT_CONSTRUCTORS.put(MediumRoundFlowerObject.class, listMediumRoundFlowerObject);
 
-		/*                 InstanceMediumRoundFlowerObject                 */
-		final List<InternalConstructorFunction<GameObject>> listInstanceMediumRoundFlowerObject = new ArrayList<>();
-		listInstanceMediumRoundFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class}, (Object[] arr) -> (GameObject) new InstanceMediumRoundFlowerObject((String) arr[0], (SwayInstanceEmitter) arr[1])));
-		listInstanceMediumRoundFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class, Transform3D.class}, (Object[] arr) -> (GameObject) new InstanceMediumRoundFlowerObject((String) arr[0], (SwayInstanceEmitter) arr[1], (Transform3D) arr[2])));
-		listInstanceMediumRoundFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class, short.class}, (Object[] arr) -> (GameObject) new InstanceMediumRoundFlowerObject((String) arr[0], (SwayInstanceEmitter) arr[1], (short) arr[2])));
-		listInstanceMediumRoundFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class, Transform3D.class, short.class}, (Object[] arr) -> (GameObject) new InstanceMediumRoundFlowerObject((String) arr[0], (SwayInstanceEmitter) arr[1], (Transform3D) arr[2], (short) arr[3])));
-		listInstanceMediumRoundFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class, float.class, float.class, float.class}, (Object[] arr) -> (GameObject) new InstanceMediumRoundFlowerObject((String) arr[0], (SwayInstanceEmitter) arr[1], (float) arr[2], (float) arr[3], (float) arr[4])));
-		listInstanceMediumRoundFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class, Transform3D.class, Vector3i.class, float.class, float.class, float.class}, (Object[] arr) -> (GameObject) new InstanceMediumRoundFlowerObject((String) arr[0], (SwayInstanceEmitter) arr[1], (Transform3D) arr[2], (Vector3i) arr[3], (float) arr[4], (float) arr[5], (float) arr[6])));
-		listInstanceMediumRoundFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class, Transform3D.class, Vector3i.class, short.class, float.class, float.class, float.class}, (Object[] arr) -> (GameObject) new InstanceMediumRoundFlowerObject((String) arr[0], (SwayInstanceEmitter) arr[1], (Transform3D) arr[2], (Vector3i) arr[3], (short) arr[4], (float) arr[5], (float) arr[6], (float) arr[7])));
-		GAME_OBJECT_CONSTRUCTORS.put(InstanceMediumRoundFlowerObject.class, listInstanceMediumRoundFlowerObject);
+		/*                 InstanceLargeRoundFlowerObject                 */
+		final List<InternalConstructorFunction<GameObject>> listInstanceLargeRoundFlowerObject = new ArrayList<>();
+		listInstanceLargeRoundFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class}, (Object[] arr) -> (GameObject) new InstanceLargeRoundFlowerObject((String) arr[0], (SwayInstanceEmitter) arr[1])));
+		listInstanceLargeRoundFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class, Transform3D.class}, (Object[] arr) -> (GameObject) new InstanceLargeRoundFlowerObject((String) arr[0], (SwayInstanceEmitter) arr[1], (Transform3D) arr[2])));
+		listInstanceLargeRoundFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class, short.class}, (Object[] arr) -> (GameObject) new InstanceLargeRoundFlowerObject((String) arr[0], (SwayInstanceEmitter) arr[1], (short) arr[2])));
+		listInstanceLargeRoundFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class, Transform3D.class, short.class}, (Object[] arr) -> (GameObject) new InstanceLargeRoundFlowerObject((String) arr[0], (SwayInstanceEmitter) arr[1], (Transform3D) arr[2], (short) arr[3])));
+		listInstanceLargeRoundFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class, float.class, float.class, float.class}, (Object[] arr) -> (GameObject) new InstanceLargeRoundFlowerObject((String) arr[0], (SwayInstanceEmitter) arr[1], (float) arr[2], (float) arr[3], (float) arr[4])));
+		listInstanceLargeRoundFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class, Transform3D.class, Vector3i.class, float.class, float.class, float.class}, (Object[] arr) -> (GameObject) new InstanceLargeRoundFlowerObject((String) arr[0], (SwayInstanceEmitter) arr[1], (Transform3D) arr[2], (Vector3i) arr[3], (float) arr[4], (float) arr[5], (float) arr[6])));
+		listInstanceLargeRoundFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class, Transform3D.class, Vector3i.class, short.class, float.class, float.class, float.class}, (Object[] arr) -> (GameObject) new InstanceLargeRoundFlowerObject((String) arr[0], (SwayInstanceEmitter) arr[1], (Transform3D) arr[2], (Vector3i) arr[3], (short) arr[4], (float) arr[5], (float) arr[6], (float) arr[7])));
+		GAME_OBJECT_CONSTRUCTORS.put(InstanceLargeRoundFlowerObject.class, listInstanceLargeRoundFlowerObject);
 
 		/*                 InstanceSmallGrassObject                 */
 		final List<InternalConstructorFunction<GameObject>> listInstanceSmallGrassObject = new ArrayList<>();
@@ -229,17 +229,6 @@ public class GameObjectRegistry {
 		listInstanceSmallRoundFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class, Transform3D.class, Vector3i.class, short.class, float.class, float.class, float.class}, (Object[] arr) -> (GameObject) new InstanceSmallRoundFlowerObject((String) arr[0], (SwayInstanceEmitter) arr[1], (Transform3D) arr[2], (Vector3i) arr[3], (short) arr[4], (float) arr[5], (float) arr[6], (float) arr[7])));
 		GAME_OBJECT_CONSTRUCTORS.put(InstanceSmallRoundFlowerObject.class, listInstanceSmallRoundFlowerObject);
 
-		/*                 InstanceLargeRoundFlowerObject                 */
-		final List<InternalConstructorFunction<GameObject>> listInstanceLargeRoundFlowerObject = new ArrayList<>();
-		listInstanceLargeRoundFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class}, (Object[] arr) -> (GameObject) new InstanceLargeRoundFlowerObject((String) arr[0], (SwayInstanceEmitter) arr[1])));
-		listInstanceLargeRoundFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class, Transform3D.class}, (Object[] arr) -> (GameObject) new InstanceLargeRoundFlowerObject((String) arr[0], (SwayInstanceEmitter) arr[1], (Transform3D) arr[2])));
-		listInstanceLargeRoundFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class, short.class}, (Object[] arr) -> (GameObject) new InstanceLargeRoundFlowerObject((String) arr[0], (SwayInstanceEmitter) arr[1], (short) arr[2])));
-		listInstanceLargeRoundFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class, Transform3D.class, short.class}, (Object[] arr) -> (GameObject) new InstanceLargeRoundFlowerObject((String) arr[0], (SwayInstanceEmitter) arr[1], (Transform3D) arr[2], (short) arr[3])));
-		listInstanceLargeRoundFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class, float.class, float.class, float.class}, (Object[] arr) -> (GameObject) new InstanceLargeRoundFlowerObject((String) arr[0], (SwayInstanceEmitter) arr[1], (float) arr[2], (float) arr[3], (float) arr[4])));
-		listInstanceLargeRoundFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class, Transform3D.class, Vector3i.class, float.class, float.class, float.class}, (Object[] arr) -> (GameObject) new InstanceLargeRoundFlowerObject((String) arr[0], (SwayInstanceEmitter) arr[1], (Transform3D) arr[2], (Vector3i) arr[3], (float) arr[4], (float) arr[5], (float) arr[6])));
-		listInstanceLargeRoundFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class, Transform3D.class, Vector3i.class, short.class, float.class, float.class, float.class}, (Object[] arr) -> (GameObject) new InstanceLargeRoundFlowerObject((String) arr[0], (SwayInstanceEmitter) arr[1], (Transform3D) arr[2], (Vector3i) arr[3], (short) arr[4], (float) arr[5], (float) arr[6], (float) arr[7])));
-		GAME_OBJECT_CONSTRUCTORS.put(InstanceLargeRoundFlowerObject.class, listInstanceLargeRoundFlowerObject);
-
 		/*                 InstanceLargeGrassObject                 */
 		final List<InternalConstructorFunction<GameObject>> listInstanceLargeGrassObject = new ArrayList<>();
 		listInstanceLargeGrassObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class}, (Object[] arr) -> (GameObject) new InstanceLargeGrassObject((String) arr[0], (SwayInstanceEmitter) arr[1])));
@@ -262,6 +251,17 @@ public class GameObjectRegistry {
 		listInstanceLargeChampiFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class, Transform3D.class, Vector3i.class, short.class, float.class, float.class, float.class}, (Object[] arr) -> (GameObject) new InstanceLargeChampiFlowerObject((String) arr[0], (SwayInstanceEmitter) arr[1], (Transform3D) arr[2], (Vector3i) arr[3], (short) arr[4], (float) arr[5], (float) arr[6], (float) arr[7])));
 		GAME_OBJECT_CONSTRUCTORS.put(InstanceLargeChampiFlowerObject.class, listInstanceLargeChampiFlowerObject);
 
+		/*                 InstanceMediumRoundFlowerObject                 */
+		final List<InternalConstructorFunction<GameObject>> listInstanceMediumRoundFlowerObject = new ArrayList<>();
+		listInstanceMediumRoundFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class}, (Object[] arr) -> (GameObject) new InstanceMediumRoundFlowerObject((String) arr[0], (SwayInstanceEmitter) arr[1])));
+		listInstanceMediumRoundFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class, Transform3D.class}, (Object[] arr) -> (GameObject) new InstanceMediumRoundFlowerObject((String) arr[0], (SwayInstanceEmitter) arr[1], (Transform3D) arr[2])));
+		listInstanceMediumRoundFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class, short.class}, (Object[] arr) -> (GameObject) new InstanceMediumRoundFlowerObject((String) arr[0], (SwayInstanceEmitter) arr[1], (short) arr[2])));
+		listInstanceMediumRoundFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class, Transform3D.class, short.class}, (Object[] arr) -> (GameObject) new InstanceMediumRoundFlowerObject((String) arr[0], (SwayInstanceEmitter) arr[1], (Transform3D) arr[2], (short) arr[3])));
+		listInstanceMediumRoundFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class, float.class, float.class, float.class}, (Object[] arr) -> (GameObject) new InstanceMediumRoundFlowerObject((String) arr[0], (SwayInstanceEmitter) arr[1], (float) arr[2], (float) arr[3], (float) arr[4])));
+		listInstanceMediumRoundFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class, Transform3D.class, Vector3i.class, float.class, float.class, float.class}, (Object[] arr) -> (GameObject) new InstanceMediumRoundFlowerObject((String) arr[0], (SwayInstanceEmitter) arr[1], (Transform3D) arr[2], (Vector3i) arr[3], (float) arr[4], (float) arr[5], (float) arr[6])));
+		listInstanceMediumRoundFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class, Transform3D.class, Vector3i.class, short.class, float.class, float.class, float.class}, (Object[] arr) -> (GameObject) new InstanceMediumRoundFlowerObject((String) arr[0], (SwayInstanceEmitter) arr[1], (Transform3D) arr[2], (Vector3i) arr[3], (short) arr[4], (float) arr[5], (float) arr[6], (float) arr[7])));
+		GAME_OBJECT_CONSTRUCTORS.put(InstanceMediumRoundFlowerObject.class, listInstanceMediumRoundFlowerObject);
+
 		/*                 InstanceSmallChampiFlowerObject                 */
 		final List<InternalConstructorFunction<GameObject>> listInstanceSmallChampiFlowerObject = new ArrayList<>();
 		listInstanceSmallChampiFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class}, (Object[] arr) -> (GameObject) new InstanceSmallChampiFlowerObject((String) arr[0], (SwayInstanceEmitter) arr[1])));
@@ -273,17 +273,6 @@ public class GameObjectRegistry {
 		listInstanceSmallChampiFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class, Transform3D.class, Vector3i.class, short.class, float.class, float.class, float.class}, (Object[] arr) -> (GameObject) new InstanceSmallChampiFlowerObject((String) arr[0], (SwayInstanceEmitter) arr[1], (Transform3D) arr[2], (Vector3i) arr[3], (short) arr[4], (float) arr[5], (float) arr[6], (float) arr[7])));
 		GAME_OBJECT_CONSTRUCTORS.put(InstanceSmallChampiFlowerObject.class, listInstanceSmallChampiFlowerObject);
 
-		/*                 InstanceMediumChampiFlowerObject                 */
-		final List<InternalConstructorFunction<GameObject>> listInstanceMediumChampiFlowerObject = new ArrayList<>();
-		listInstanceMediumChampiFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class}, (Object[] arr) -> (GameObject) new InstanceMediumChampiFlowerObject((String) arr[0], (SwayInstanceEmitter) arr[1])));
-		listInstanceMediumChampiFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class, Transform3D.class}, (Object[] arr) -> (GameObject) new InstanceMediumChampiFlowerObject((String) arr[0], (SwayInstanceEmitter) arr[1], (Transform3D) arr[2])));
-		listInstanceMediumChampiFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class, short.class}, (Object[] arr) -> (GameObject) new InstanceMediumChampiFlowerObject((String) arr[0], (SwayInstanceEmitter) arr[1], (short) arr[2])));
-		listInstanceMediumChampiFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class, Transform3D.class, short.class}, (Object[] arr) -> (GameObject) new InstanceMediumChampiFlowerObject((String) arr[0], (SwayInstanceEmitter) arr[1], (Transform3D) arr[2], (short) arr[3])));
-		listInstanceMediumChampiFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class, float.class, float.class, float.class}, (Object[] arr) -> (GameObject) new InstanceMediumChampiFlowerObject((String) arr[0], (SwayInstanceEmitter) arr[1], (float) arr[2], (float) arr[3], (float) arr[4])));
-		listInstanceMediumChampiFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class, Transform3D.class, Vector3i.class, float.class, float.class, float.class}, (Object[] arr) -> (GameObject) new InstanceMediumChampiFlowerObject((String) arr[0], (SwayInstanceEmitter) arr[1], (Transform3D) arr[2], (Vector3i) arr[3], (float) arr[4], (float) arr[5], (float) arr[6])));
-		listInstanceMediumChampiFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class, Transform3D.class, Vector3i.class, short.class, float.class, float.class, float.class}, (Object[] arr) -> (GameObject) new InstanceMediumChampiFlowerObject((String) arr[0], (SwayInstanceEmitter) arr[1], (Transform3D) arr[2], (Vector3i) arr[3], (short) arr[4], (float) arr[5], (float) arr[6], (float) arr[7])));
-		GAME_OBJECT_CONSTRUCTORS.put(InstanceMediumChampiFlowerObject.class, listInstanceMediumChampiFlowerObject);
-
 		/*                 InstanceMediumGrassObject                 */
 		final List<InternalConstructorFunction<GameObject>> listInstanceMediumGrassObject = new ArrayList<>();
 		listInstanceMediumGrassObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class}, (Object[] arr) -> (GameObject) new InstanceMediumGrassObject((String) arr[0], (SwayInstanceEmitter) arr[1])));
@@ -294,6 +283,17 @@ public class GameObjectRegistry {
 		listInstanceMediumGrassObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class, Transform3D.class, Vector3i.class, float.class, float.class, float.class}, (Object[] arr) -> (GameObject) new InstanceMediumGrassObject((String) arr[0], (SwayInstanceEmitter) arr[1], (Transform3D) arr[2], (Vector3i) arr[3], (float) arr[4], (float) arr[5], (float) arr[6])));
 		listInstanceMediumGrassObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class, Transform3D.class, Vector3i.class, short.class, float.class, float.class, float.class}, (Object[] arr) -> (GameObject) new InstanceMediumGrassObject((String) arr[0], (SwayInstanceEmitter) arr[1], (Transform3D) arr[2], (Vector3i) arr[3], (short) arr[4], (float) arr[5], (float) arr[6], (float) arr[7])));
 		GAME_OBJECT_CONSTRUCTORS.put(InstanceMediumGrassObject.class, listInstanceMediumGrassObject);
+
+		/*                 InstanceMediumChampiFlowerObject                 */
+		final List<InternalConstructorFunction<GameObject>> listInstanceMediumChampiFlowerObject = new ArrayList<>();
+		listInstanceMediumChampiFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class}, (Object[] arr) -> (GameObject) new InstanceMediumChampiFlowerObject((String) arr[0], (SwayInstanceEmitter) arr[1])));
+		listInstanceMediumChampiFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class, Transform3D.class}, (Object[] arr) -> (GameObject) new InstanceMediumChampiFlowerObject((String) arr[0], (SwayInstanceEmitter) arr[1], (Transform3D) arr[2])));
+		listInstanceMediumChampiFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class, short.class}, (Object[] arr) -> (GameObject) new InstanceMediumChampiFlowerObject((String) arr[0], (SwayInstanceEmitter) arr[1], (short) arr[2])));
+		listInstanceMediumChampiFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class, Transform3D.class, short.class}, (Object[] arr) -> (GameObject) new InstanceMediumChampiFlowerObject((String) arr[0], (SwayInstanceEmitter) arr[1], (Transform3D) arr[2], (short) arr[3])));
+		listInstanceMediumChampiFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class, float.class, float.class, float.class}, (Object[] arr) -> (GameObject) new InstanceMediumChampiFlowerObject((String) arr[0], (SwayInstanceEmitter) arr[1], (float) arr[2], (float) arr[3], (float) arr[4])));
+		listInstanceMediumChampiFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class, Transform3D.class, Vector3i.class, float.class, float.class, float.class}, (Object[] arr) -> (GameObject) new InstanceMediumChampiFlowerObject((String) arr[0], (SwayInstanceEmitter) arr[1], (Transform3D) arr[2], (Vector3i) arr[3], (float) arr[4], (float) arr[5], (float) arr[6])));
+		listInstanceMediumChampiFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class, Transform3D.class, Vector3i.class, short.class, float.class, float.class, float.class}, (Object[] arr) -> (GameObject) new InstanceMediumChampiFlowerObject((String) arr[0], (SwayInstanceEmitter) arr[1], (Transform3D) arr[2], (Vector3i) arr[3], (short) arr[4], (float) arr[5], (float) arr[6], (float) arr[7])));
+		GAME_OBJECT_CONSTRUCTORS.put(InstanceMediumChampiFlowerObject.class, listInstanceMediumChampiFlowerObject);
 
 	}
 

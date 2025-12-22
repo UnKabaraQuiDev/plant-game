@@ -1,11 +1,11 @@
 package lu.kbra.plant_game.engine.mesh;
 
-import org.joml.Vector4f;
+import org.joml.Vector4fc;
 
 public interface TintOwner {
 
-	Vector4f getTint();
+	Vector4fc getTint();
 
-	void setTint(Vector4f tint);
+	void setTint(Vector4fc tint);
 
 }

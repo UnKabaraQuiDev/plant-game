@@ -69,7 +69,6 @@ public class StaticSwayInstanceLoader {
 			final SwayMesh mesh,
 			final int bufferSize,
 			final Function<Integer, Transform> transform) {
-		System.err.println("got instance mesh: " + mesh);
 		final SwayInstanceEmitter te = new SwayInstanceEmitter(
 				name,
 				mesh,

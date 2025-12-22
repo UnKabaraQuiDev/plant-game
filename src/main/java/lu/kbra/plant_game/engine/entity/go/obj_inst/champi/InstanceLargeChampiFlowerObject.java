@@ -1,4 +1,4 @@
-package lu.kbra.plant_game.engine.entity.go.obj_inst.grass.flower.champi;
+package lu.kbra.plant_game.engine.entity.go.obj_inst.champi;
 
 import org.joml.Vector3i;
 
