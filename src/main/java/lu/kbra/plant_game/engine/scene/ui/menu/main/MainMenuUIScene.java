@@ -6,6 +6,7 @@ import java.util.function.Consumer;
 import org.joml.Quaternionf;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
 import lu.pcy113.pclib.PCUtils;
 import lu.pcy113.pclib.concurrency.ListTriggerLatch;
@@ -19,7 +20,10 @@ import lu.kbra.plant_game.engine.entity.ui.btn.QuitButtonUIObject;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory.TextData;
 import lu.kbra.plant_game.engine.entity.ui.group.LayoutOffsetUIObjectGroup;
+import lu.kbra.plant_game.engine.entity.ui.group.LayoutScrollDrivenUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.group.OffsetUIObjectGroup;
+import lu.kbra.plant_game.engine.entity.ui.group.ScrollContainerUIObjectGroup;
+import lu.kbra.plant_game.engine.entity.ui.group.ScrollDrivenUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.impl.AbsoluteTransformOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.Scale2dDir;
 import lu.kbra.plant_game.engine.entity.ui.impl.TextUIObject;
@@ -69,7 +73,7 @@ public class MainMenuUIScene extends UIScene {
 	protected int targetGroup = 0;
 	protected float progress = 0;
 
-	protected Vector3f[] restPositions = { new Vector3f(), new Vector3f(0, 5, 0), new Vector3f(5, 0, 0), null };
+	protected Vector3fc[] restPositions = { new Vector3f(), new Vector3f(0, 5, 0), new Vector3f(5, 0, 0), null };
 	protected ScrollBarUIObject[] scrollBars = { null, null, null, null };
 
 	protected OffsetUIObjectGroup mainMenuGroup = new OffsetUIObjectGroup("main", new Transform3D(new Vector3f(this.restPositions[MAIN])));
@@ -86,13 +90,23 @@ public class MainMenuUIScene extends UIScene {
 	protected OffsetUIObjectGroup optionsMenuGroup = new OffsetUIObjectGroup(
 			"option",
 			new Transform3D(new Vector3f(this.restPositions[OPTIONS])));
-	protected LayoutOffsetUIObjectGroup optionsEntriesMenuGroup = new LayoutOffsetUIObjectGroup(
+	protected LayoutScrollDrivenUIObjectGroup optionsEntriesMenuGroup = new LayoutScrollDrivenUIObjectGroup(
 			"option.keys",
-			new FlowLayout(true, 0.0f),
-			this.optionsMenuGroup);
+			this.optionsMenuGroup,
+			Direction.SOUTH,
+			0.05f,
+			() -> this.scrollBars[OPTIONS],
+			new FlowLayout(true, 0.0f));
 
-	protected OffsetUIObjectGroup playMenuGroup = new OffsetUIObjectGroup("play", new Transform3D(new Vector3f(this.restPositions[PLAY])));
-	protected OffsetUIObjectGroup playContentMenuGroup = new OffsetUIObjectGroup("play.content", this.playMenuGroup);
+	protected ScrollContainerUIObjectGroup playMenuGroup = new OffsetUIObjectGroup(
+			"play",
+			new Transform3D(new Vector3f(this.restPositions[PLAY])));
+	protected ScrollDrivenUIObjectGroup playContentMenuGroup = new ScrollDrivenUIObjectGroup(
+			"play.content",
+			this.playMenuGroup,
+			Direction.EAST,
+			0.05f,
+			() -> this.scrollBars[PLAY]);
 
 	protected OffsetUIObjectGroup[] groups = new OffsetUIObjectGroup[] {
 			this.mainMenuGroup,
@@ -144,6 +158,12 @@ public class MainMenuUIScene extends UIScene {
 						new Vector2f(0.05f, 0.2f),
 						PLAY_SCROLL_SPEED)
 				.then(workers, (Consumer<ScrollBarUIObject>) obj -> this.scrollBars[PLAY] = obj)
+				.push();
+
+		UIObjectFactory
+				.create(CursorUIObject.class,
+						this.playContentMenuGroup,
+						new Transform3D(new Vector3f(0, 0.01f, 0.25f), new Quaternionf(), new Vector3f(0.15f)))
 				.push();
 	}
 
@@ -306,11 +326,23 @@ public class MainMenuUIScene extends UIScene {
 		}
 
 		if (this.currentGroup == OPTIONS) {
-			this.scrollBars[OPTIONS].addScroll((float) inputHandler.getMouseScroll().y);
-			this.optionsEntriesMenuGroup.getTransform().translationSet(0, 0, this.scrollBars[OPTIONS].getScroll() * 2 - 1).updateMatrix();
+			this.scrollBars[OPTIONS].addScrollPosition((float) inputHandler.getMouseScroll().y);
+//			final Rectangle2D bounds = this.optionsEntriesMenuGroup.getBounds().getBounds2D();
+//			if (bounds.getHeight() < 2) { // disable scrollbar if option pane fit in the screen
+//				this.scrollBars[OPTIONS].setActive(false);
+//				this.optionsEntriesMenuGroup.getTransform().translationSet(0, 0, (float) (-bounds.getCenterY())).updateMatrix();
+//			} else { // TODO: fix this logic, it should clamp at the top and bottom with a margin
+//				this.optionsEntriesMenuGroup
+//						.getTransform()
+//						.translationSet(0,
+//								0,
+//								(float) (-bounds.getCenterY() + PCUtils
+//										.map(this.scrollBars[OPTIONS].getScrollRatio(), 0, 1, -bounds.getCenterY(), bounds.getCenterY())))
+//						.updateMatrix();
+//			}
 		} else if (this.currentGroup == PLAY) {
-			this.scrollBars[PLAY].addScroll((float) inputHandler.getMouseScroll().y + (float) inputHandler.getMouseScroll().x);
-			this.playContentMenuGroup.getTransform().translationSet(this.scrollBars[PLAY].getScroll(), 0, 0).updateMatrix();
+			this.scrollBars[PLAY].addScrollPosition((float) inputHandler.getMouseScroll().y + (float) inputHandler.getMouseScroll().x);
+			this.playContentMenuGroup.getTransform().translationSet(this.scrollBars[PLAY].getScrollRatio(), 0, 0).updateMatrix();
 		}
 
 		frameState.uiSceneCaughtMouseInput = true;

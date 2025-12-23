@@ -98,8 +98,8 @@ public class ScrollBarUIObject extends FlatQuadUIObject {
 		this.speed = speed;
 	}
 
-	public void addScroll(final float f) {
-		if (!this.hasTransform()) {
+	public void addScrollPosition(final float f) {
+		if (!this.hasTransform() || !this.isActive()) {
 			return;
 		}
 
@@ -116,7 +116,7 @@ public class ScrollBarUIObject extends FlatQuadUIObject {
 		this.getTransform().updateMatrix();
 	}
 
-	public float getScroll() {
+	public float getScrollRatio() {
 		if (!this.hasTransform()) {
 			return 0;
 		}
@@ -129,6 +129,39 @@ public class ScrollBarUIObject extends FlatQuadUIObject {
 		}
 
 		return 0;
+	}
+
+	public float setScrollRatio(final float t) {
+		if (!this.hasTransform()) {
+			return 0;
+		}
+
+		if (this.dir.isVertical()) {
+			this.getTransform().getTranslation().z = PCUtils.map(t, 0f, 1f, this.scrollBounds.x(), this.scrollBounds.y());
+		} else if (this.dir.isHorizontal()) {
+			this.getTransform().getTranslation().x = PCUtils.map(t, 0f, 1f, this.scrollBounds.x(), this.scrollBounds.y());
+		}
+
+		this.getTransform().updateMatrix();
+
+		return 0;
+	}
+
+	public void setScrollPosition(final float t) {
+		if (!this.hasTransform() || !this.isActive()) {
+			return;
+		}
+
+		if (this.dir.isVertical()) {
+			this.getTransform().getTranslation().z = PCUtils.clampRange(this.scrollBounds.x(), this.scrollBounds.y(), t);
+			this.getTransform().getTranslation().x = 1f - this.getBounds().width * this.getTransform().getScale().x;
+			// TODO: this should be enforced by the layout
+		} else if (this.dir.isHorizontal()) {
+			this.getTransform().getTranslation().x = PCUtils.clampRange(this.scrollBounds.x(), this.scrollBounds.y(), t);
+			this.getTransform().getTranslation().z = 1f - this.getBounds().height * this.getTransform().getScale().z;
+		}
+
+		this.getTransform().updateMatrix();
 	}
 
 	@Override
