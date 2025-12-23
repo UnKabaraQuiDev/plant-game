@@ -2,6 +2,7 @@ package lu.kbra.plant_game.engine.render;
 
 import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
+import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.Arrays;
 import java.util.Collection;
@@ -40,6 +41,7 @@ import lu.kbra.plant_game.engine.entity.go.impl.SwayInstanceEmitterComponent;
 import lu.kbra.plant_game.engine.entity.go.impl.SwayOwner;
 import lu.kbra.plant_game.engine.entity.impl.AnimatedMeshComponent;
 import lu.kbra.plant_game.engine.entity.impl.AnimatedTransformOwner;
+import lu.kbra.plant_game.engine.entity.ui.impl.TransformedBoundsOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.TransparentEntity;
 import lu.kbra.plant_game.engine.mesh.AnimatedMesh;
 import lu.kbra.plant_game.engine.mesh.MaterialMesh;
@@ -144,6 +146,9 @@ public class DeferredCompositor implements Cleanupable {
 	public static final String GL_LINE_SMOOTHING_PROPERTY = DeferredCompositor.class.getSimpleName() + ".gl_line_smoothing";
 	public static final boolean GL_LINE_SMOOTHING = Boolean.getBoolean(GL_LINE_SMOOTHING_PROPERTY);
 
+	public static final String GL_LINE_WIDTH_CHECK_PROPERTY = DeferredCompositor.class.getSimpleName() + ".gl_line_width_check";
+	public static final boolean GL_LINE_WIDTH_CHECK = Boolean.getBoolean(GL_LINE_WIDTH_CHECK_PROPERTY);
+
 	private static Mesh SCREEN = new LoadedMesh(
 			PASS_SCREEN,
 			null,
@@ -207,7 +212,6 @@ public class DeferredCompositor implements Cleanupable {
 	protected Map<Vector3ic, Vector4fc> outlinedObjects = new ConcurrentHashMap<>();
 	protected OutlineShader outlineShader;
 
-	@SuppressWarnings("unused")
 	public DeferredCompositor(final GameEngine engine, final Thread ownerThread) {
 		final CacheManager cache = engine.getCache();
 		this.ownerThread = ownerThread;
@@ -744,9 +748,9 @@ public class DeferredCompositor implements Cleanupable {
 			}
 		}
 
-//		if (entity instanceof final TransformedBoundsOwner tbo) {
-//			this.drawDebugBounds(tbo.getTransformedBounds(parentTransform));
-//		}
+		if (entity instanceof final TransformedBoundsOwner tbo) {
+			this.drawDebugBounds(tbo.getTransformedBounds(parentTransform));
+		}
 
 		if (entity.hasComponentMatching(SubEntitiesComponent.class)) {
 			final SubEntitiesComponent<?> subEntitiesComponent = entity.getComponentMatching(SubEntitiesComponent.class);
@@ -1073,6 +1077,17 @@ public class DeferredCompositor implements Cleanupable {
 					GL_W.glEnable(GL_W.GL_LINE_SMOOTH);
 				} else {
 					GL_W.glDisable(GL_W.GL_LINE_SMOOTH);
+				}
+			}
+			if (GL_LINE_WIDTH_CHECK) {
+				final FloatBuffer range = BufferUtils.createFloatBuffer(2);
+				GL_W.glGetFloatv(GL_W.GL_ALIASED_LINE_WIDTH_RANGE, range);
+
+				final float min = range.get(0);
+				final float max = range.get(1);
+
+				if (lineMesh.getLineWidth() < min || lineMesh.getLineWidth() > max) {
+					GlobalLogger.severe("Width out of range: " + lineMesh.getLineWidth() + " [" + min + ", " + max + "].");
 				}
 			}
 			GL_W.glLineWidth(lineMesh.getLineWidth());

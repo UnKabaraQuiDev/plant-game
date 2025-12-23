@@ -87,7 +87,7 @@ public class MainMenuUIScene extends UIScene {
 	protected int targetGroup = 0;
 	protected float progress = 0;
 
-	protected Vector3fc[] restPositions = { new Vector3f(), new Vector3f(0, 0, 5), new Vector3f(5, 0, 0), null };
+	protected Vector3fc[] restPositions = { new Vector3f(), new Vector3f(5, 0, 5), new Vector3f(5, 0, 0), null };
 
 	protected OffsetUIObjectGroup mainMenuGroup = new OffsetUIObjectGroup("main", new Transform3D(new Vector3f(this.restPositions[MAIN])));
 
@@ -113,7 +113,7 @@ public class MainMenuUIScene extends UIScene {
 			"play",
 			this.restPositions[PLAY],
 			Direction.EAST,
-			0.05f);
+			0.00f);
 	protected ScrollDrivenUIObjectGroup playContentMenuGroup = this.playMenuGroup.getScrollContent();
 
 	protected OffsetUIObjectGroup[] groups = new OffsetUIObjectGroup[] {
@@ -171,6 +171,7 @@ public class MainMenuUIScene extends UIScene {
 		final int count = 5;
 		final ListTriggerLatch<LevelButtonUIObject> btns = new ListTriggerLatch<>(count, list -> {
 			Collections.sort(list);
+			this.playContentMenuGroup.addAll(list);
 
 			new TaskFuture<>(workers, () -> {
 				final Vector3f[] pos = new Vector3f[12];
@@ -195,16 +196,20 @@ public class MainMenuUIScene extends UIScene {
 						(SingleTexture) this.uiCache.getTexture(StaticFlatMeshLoader.TEXTURE_NAME),
 						new Vec3fAttribArray(Mesh.ATTRIB_VERTICES_NAME, Mesh.ATTRIB_VERTICES_ID, 1, pos),
 						new UIntAttribArray(Mesh.ATTRIB_INDICES_NAME, Mesh.ATTRIB_INDICES_ID, 1, indices, BufferType.ELEMENT_ARRAY));
-				mesh.setLineWidth(50);
+				mesh.setLineWidth(100);
 				mesh.setEffectiveLength(list.size() * 2 - 2);
 				this.uiCache.addMesh(mesh);
+				// TODO: replace this with a triangle-based mesh
 
 				return mesh;
 			}).then(workers, (Consumer<TimelineMesh>) (final TimelineMesh mesh) -> {
 				this.playContentMenuGroup.add(new MeshUIObject("meshName", mesh, new Transform3D(new Vector3f(0, -0.1f, 0))));
+				this.playContentMenuGroup.recomputeBounds();
+				this.playContentMenuGroup
+						.getTransform()
+						.getTranslation().z = (float) -this.playContentMenuGroup.getBounds().getBounds2D().getCenterY();
+				this.playContentMenuGroup.getTransform().updateMatrix();
 			}).push();
-
-			this.playMenuGroup.addAll(list);
 		});
 
 		final float startPosX = -1;
@@ -388,6 +393,7 @@ public class MainMenuUIScene extends UIScene {
 			scrollContainer.updateScrollBar();
 			scrollContainer.getScrollBar().addScrollPosition((float) inputHandler.getMouseScroll().y);
 		}
+		current.recomputeBounds();
 
 		frameState.uiSceneCaughtMouseInput = true;
 

@@ -16,9 +16,10 @@ import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 public class ScrollBarUIObject extends FlatQuadUIObject {
 
 	protected final Direction dir;
-	protected final Vector2f scrollBounds;
+	protected Vector2f range;
 	protected final Vector2f size;
 	protected float speed = 1f;
+	protected float margin = 0.00f;
 
 	public ScrollBarUIObject(
 			final String str,
@@ -39,7 +40,7 @@ public class ScrollBarUIObject extends FlatQuadUIObject {
 			this.getTransform().updateMatrix();
 		}
 		this.dir = dir;
-		this.scrollBounds = bounds;
+		this.range = bounds;
 		this.size = size;
 		this.speed = speed;
 	}
@@ -78,26 +79,6 @@ public class ScrollBarUIObject extends FlatQuadUIObject {
 		this(str, mesh, transform, color, dir, bounds, size, 1f);
 	}
 
-	public void setColorMaterial(final ColorMaterial mt) {
-		super.setTint(mt.getColor());
-	}
-
-	public void setScrollBounds(final Vector2fc b) {
-		this.scrollBounds.set(b);
-	}
-
-	public Vector2f getScrollBounds() {
-		return this.scrollBounds;
-	}
-
-	public float getSpeed() {
-		return this.speed;
-	}
-
-	public void setSpeed(final float speed) {
-		this.speed = speed;
-	}
-
 	public void addScrollPosition(final float f) {
 		if (!this.hasTransform() || !this.isActive()) {
 			return;
@@ -105,12 +86,13 @@ public class ScrollBarUIObject extends FlatQuadUIObject {
 
 		if (this.dir.isVertical()) {
 			this.getTransform().getTranslation().z = PCUtils
-					.clampRange(this.scrollBounds.x(), this.scrollBounds.y(), this.getTransform().getTranslation().z() - f * this.speed);
-			this.getTransform().getTranslation().x = 1f - this.getBounds().width * this.getTransform().getScale().x;
+					.clampRange(this.range.x(), this.range.y(), this.getTransform().getTranslation().z() - f * this.speed);
+			// TODO: this should be enforced by the layout
+			this.getTransform().getTranslation().x = 1f - this.margin;
 		} else if (this.dir.isHorizontal()) {
 			this.getTransform().getTranslation().x = PCUtils
-					.clampRange(this.scrollBounds.x(), this.scrollBounds.y(), this.getTransform().getTranslation().x() + f * this.speed);
-			this.getTransform().getTranslation().z = 1f - this.getBounds().height * this.getTransform().getScale().z;
+					.clampRange(this.range.x(), this.range.y(), this.getTransform().getTranslation().x() + f * this.speed);
+			this.getTransform().getTranslation().z = 1f - this.margin;
 		}
 
 		this.getTransform().updateMatrix();
@@ -122,10 +104,10 @@ public class ScrollBarUIObject extends FlatQuadUIObject {
 		}
 
 		if (this.dir.isVertical()) {
-			return PCUtils.map(this.getTransform().getTranslation().z, this.scrollBounds.x(), this.scrollBounds.y(), 0f, 1f);
+			return PCUtils.map(this.getTransform().getTranslation().z, this.range.x(), this.range.y(), 0f, 1f);
 		}
 		if (this.dir.isHorizontal()) {
-			return PCUtils.map(this.getTransform().getTranslation().x, this.scrollBounds.x(), this.scrollBounds.y(), 0f, 1f);
+			return PCUtils.map(this.getTransform().getTranslation().x, this.range.x(), this.range.y(), 0f, 1f);
 		}
 
 		return 0;
@@ -137,9 +119,9 @@ public class ScrollBarUIObject extends FlatQuadUIObject {
 		}
 
 		if (this.dir.isVertical()) {
-			this.getTransform().getTranslation().z = PCUtils.map(t, 0f, 1f, this.scrollBounds.x(), this.scrollBounds.y());
+			this.getTransform().getTranslation().z = PCUtils.map(t, 0f, 1f, this.range.x(), this.range.y());
 		} else if (this.dir.isHorizontal()) {
-			this.getTransform().getTranslation().x = PCUtils.map(t, 0f, 1f, this.scrollBounds.x(), this.scrollBounds.y());
+			this.getTransform().getTranslation().x = PCUtils.map(t, 0f, 1f, this.range.x(), this.range.y());
 		}
 
 		this.getTransform().updateMatrix();
@@ -153,20 +135,56 @@ public class ScrollBarUIObject extends FlatQuadUIObject {
 		}
 
 		if (this.dir.isVertical()) {
-			this.getTransform().getTranslation().z = PCUtils.clampRange(this.scrollBounds.x(), this.scrollBounds.y(), t);
-			this.getTransform().getTranslation().x = 1f - this.getBounds().width * this.getTransform().getScale().x;
+			this.getTransform().getTranslation().z = PCUtils.clampRange(this.range.x(), this.range.y(), t);
+			this.getTransform().getTranslation().x = 1f - this.margin;
 			// TODO: this should be enforced by the layout
 		} else if (this.dir.isHorizontal()) {
-			this.getTransform().getTranslation().x = PCUtils.clampRange(this.scrollBounds.x(), this.scrollBounds.y(), t);
-			this.getTransform().getTranslation().z = 1f - this.getBounds().height * this.getTransform().getScale().z;
+			this.getTransform().getTranslation().x = PCUtils.clampRange(this.range.x(), this.range.y(), t);
+			this.getTransform().getTranslation().z = 1f - this.margin;
 		}
 
 		this.getTransform().updateMatrix();
 	}
 
+	public void setColorMaterial(final ColorMaterial mt) {
+		super.setTint(mt.getColor());
+	}
+
+	public void setScrollBounds(final Vector2fc b) {
+		this.range.set(b);
+	}
+
+	public float getSpeed() {
+		return this.speed;
+	}
+
+	public void setSpeed(final float speed) {
+		this.speed = speed;
+	}
+
+	public Vector2fc getRange() {
+		return this.range;
+	}
+
+	public void setRange(final Vector2fc v) {
+		if (this.range == null) {
+			this.range = new Vector2f(v);
+		} else {
+			this.range.set(v);
+		}
+	}
+
+	public float getMargin() {
+		return this.margin;
+	}
+
+	public void setMargin(final float margin) {
+		this.margin = margin;
+	}
+
 	@Override
 	public String toString() {
-		return "ScrollBarUIObject [dir=" + this.dir + ", bounds=" + this.scrollBounds + ", size=" + this.size + ", color=" + this.color
+		return "ScrollBarUIObject [dir=" + this.dir + ", bounds=" + this.range + ", size=" + this.size + ", color=" + this.color
 				+ ", active=" + this.active + ", name=" + this.name + "]";
 	}
 
