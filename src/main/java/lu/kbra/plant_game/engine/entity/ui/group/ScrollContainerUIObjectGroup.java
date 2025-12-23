@@ -1,5 +1,7 @@
 package lu.kbra.plant_game.engine.entity.ui.group;
 
+import org.joml.Vector3fc;
+
 import lu.kbra.plant_game.engine.entity.ui.impl.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.scroller.ScrollBarUIObject;
 import lu.kbra.plant_game.engine.scene.ui.layout.Layout;
@@ -40,6 +42,22 @@ public class ScrollContainerUIObjectGroup extends OffsetUIObjectGroup {
 
 	public ScrollContainerUIObjectGroup(
 			final String str,
+			final Vector3fc pos,
+			final Direction dir,
+			final float margin,
+			final UIObject... values) {
+		super(str, new Transform3D(pos), values);
+		this.scrollContent = new ScrollDrivenUIObjectGroup(
+				str + ".scroll-content",
+				this,
+				() -> this.scrollBar == null ? 0 : this.scrollBar.getScrollRatio(),
+				dir,
+				margin,
+				values);
+	}
+
+	public ScrollContainerUIObjectGroup(
+			final String str,
 			final UIObjectGroup parent,
 			final Direction dir,
 			final float margin,
@@ -91,6 +109,24 @@ public class ScrollContainerUIObjectGroup extends OffsetUIObjectGroup {
 
 	public ScrollContainerUIObjectGroup(
 			final String str,
+			final Vector3fc pos,
+			final Direction dir,
+			final float margin,
+			final Layout layout,
+			final UIObject... values) {
+		super(str, new Transform3D(pos), values);
+		this.scrollContent = new LayoutScrollDrivenUIObjectGroup(
+				str + ".scroll-content",
+				this,
+				() -> this.scrollBar == null ? 0 : this.scrollBar.getScrollRatio(),
+				dir,
+				margin,
+				layout,
+				values);
+	}
+
+	public ScrollContainerUIObjectGroup(
+			final String str,
 			final UIObjectGroup parent,
 			final Direction dir,
 			final float margin,
@@ -105,6 +141,13 @@ public class ScrollContainerUIObjectGroup extends OffsetUIObjectGroup {
 				margin,
 				layout,
 				values);
+	}
+
+	public void updateScrollBar() {
+		if (this.scrollBar == null) {
+			return;
+		}
+		this.scrollBar.setActive(this.scrollContent.needsScrollBar());
 	}
 
 	public ScrollBarUIObject getScrollBar() {

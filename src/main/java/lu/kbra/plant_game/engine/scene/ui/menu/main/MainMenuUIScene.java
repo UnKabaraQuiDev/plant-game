@@ -74,7 +74,6 @@ public class MainMenuUIScene extends UIScene {
 	protected float progress = 0;
 
 	protected Vector3fc[] restPositions = { new Vector3f(), new Vector3f(0, 5, 0), new Vector3f(5, 0, 0), null };
-	protected ScrollBarUIObject[] scrollBars = { null, null, null, null };
 
 	protected OffsetUIObjectGroup mainMenuGroup = new OffsetUIObjectGroup("main", new Transform3D(new Vector3f(this.restPositions[MAIN])));
 
@@ -87,26 +86,21 @@ public class MainMenuUIScene extends UIScene {
 			new FlowLayout(true, 0.02f),
 			this.mainLeftMenuGroup);
 
-	protected OffsetUIObjectGroup optionsMenuGroup = new OffsetUIObjectGroup(
-			"option",
-			new Transform3D(new Vector3f(this.restPositions[OPTIONS])));
-	protected LayoutScrollDrivenUIObjectGroup optionsEntriesMenuGroup = new LayoutScrollDrivenUIObjectGroup(
-			"option.keys",
-			this.optionsMenuGroup,
+	protected ScrollContainerUIObjectGroup optionsMenuGroup = new ScrollContainerUIObjectGroup(
+			"options",
+			this.restPositions[OPTIONS],
 			Direction.SOUTH,
 			0.05f,
-			() -> this.scrollBars[OPTIONS],
 			new FlowLayout(true, 0.0f));
+	protected LayoutScrollDrivenUIObjectGroup optionsEntriesMenuGroup = (LayoutScrollDrivenUIObjectGroup) this.optionsMenuGroup
+			.getScrollContent();
 
-	protected ScrollContainerUIObjectGroup playMenuGroup = new OffsetUIObjectGroup(
+	protected ScrollContainerUIObjectGroup playMenuGroup = new ScrollContainerUIObjectGroup(
 			"play",
-			new Transform3D(new Vector3f(this.restPositions[PLAY])));
-	protected ScrollDrivenUIObjectGroup playContentMenuGroup = new ScrollDrivenUIObjectGroup(
-			"play.content",
-			this.playMenuGroup,
+			this.restPositions[PLAY],
 			Direction.EAST,
-			0.05f,
-			() -> this.scrollBars[PLAY]);
+			0.05f);
+	protected ScrollDrivenUIObjectGroup playContentMenuGroup = this.playMenuGroup.getScrollContent();
 
 	protected OffsetUIObjectGroup[] groups = new OffsetUIObjectGroup[] {
 			this.mainMenuGroup,
@@ -157,7 +151,7 @@ public class MainMenuUIScene extends UIScene {
 						new Vector2f(-1, 1),
 						new Vector2f(0.05f, 0.2f),
 						PLAY_SCROLL_SPEED)
-				.then(workers, (Consumer<ScrollBarUIObject>) obj -> this.scrollBars[PLAY] = obj)
+				.then(workers, (Consumer<ScrollBarUIObject>) this.playMenuGroup::setScrollBar)
 				.push();
 
 		UIObjectFactory
@@ -218,7 +212,7 @@ public class MainMenuUIScene extends UIScene {
 						new Vector2f(0.8f, -0.8f),
 						new Vector2f(0.05f, 0.2f),
 						OPTIONS_SCROLL_SPEED)
-				.then(workers, (Consumer<ScrollBarUIObject>) obj -> this.scrollBars[OPTIONS] = obj)
+				.then(workers, (Consumer<ScrollBarUIObject>) this.optionsMenuGroup::setScrollBar)
 				.push();
 	}
 
@@ -325,24 +319,10 @@ public class MainMenuUIScene extends UIScene {
 			this.mainLeftMenuGroup.doLayout();
 		}
 
-		if (this.currentGroup == OPTIONS) {
-			this.scrollBars[OPTIONS].addScrollPosition((float) inputHandler.getMouseScroll().y);
-//			final Rectangle2D bounds = this.optionsEntriesMenuGroup.getBounds().getBounds2D();
-//			if (bounds.getHeight() < 2) { // disable scrollbar if option pane fit in the screen
-//				this.scrollBars[OPTIONS].setActive(false);
-//				this.optionsEntriesMenuGroup.getTransform().translationSet(0, 0, (float) (-bounds.getCenterY())).updateMatrix();
-//			} else { // TODO: fix this logic, it should clamp at the top and bottom with a margin
-//				this.optionsEntriesMenuGroup
-//						.getTransform()
-//						.translationSet(0,
-//								0,
-//								(float) (-bounds.getCenterY() + PCUtils
-//										.map(this.scrollBars[OPTIONS].getScrollRatio(), 0, 1, -bounds.getCenterY(), bounds.getCenterY())))
-//						.updateMatrix();
-//			}
-		} else if (this.currentGroup == PLAY) {
-			this.scrollBars[PLAY].addScrollPosition((float) inputHandler.getMouseScroll().y + (float) inputHandler.getMouseScroll().x);
-			this.playContentMenuGroup.getTransform().translationSet(this.scrollBars[PLAY].getScrollRatio(), 0, 0).updateMatrix();
+		final OffsetUIObjectGroup current = this.groups[this.currentGroup];
+		if (current instanceof final ScrollContainerUIObjectGroup scrollContainer && scrollContainer.getScrollBar() != null) {
+			scrollContainer.updateScrollBar();
+			scrollContainer.getScrollBar().addScrollPosition((float) inputHandler.getMouseScroll().y);
 		}
 
 		frameState.uiSceneCaughtMouseInput = true;
