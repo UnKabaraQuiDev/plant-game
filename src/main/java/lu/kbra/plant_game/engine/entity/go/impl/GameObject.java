@@ -14,7 +14,7 @@ import lu.kbra.standalone.gameengine.objs.entity.components.MeshComponent;
 import lu.kbra.standalone.gameengine.objs.entity.components.Transform3DComponent;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-public class GameObject extends Entity implements Transform3DOwner, MeshOwner {
+public class GameObject extends Entity implements Transform3DOwner, MeshOwner, MaterialOwner, ObjectIdOwner {
 
 	public static final int MESH_ATTRIB_MATERIAL_ID_ID = 3;
 	public static final int MESH_ATTRIB_OBJECT_ID_ID = 4;
@@ -59,6 +59,7 @@ public class GameObject extends Entity implements Transform3DOwner, MeshOwner {
 		this.materialId = materialId;
 	}
 
+	@Override
 	public short getMaterialId() {
 		return this.materialId;
 	}
@@ -67,6 +68,7 @@ public class GameObject extends Entity implements Transform3DOwner, MeshOwner {
 		this.materialId = materialId;
 	}
 
+	@Override
 	public AttributeLocation getObjectIdLocation() {
 		return this.objectIdLocation;
 	}
@@ -75,6 +77,7 @@ public class GameObject extends Entity implements Transform3DOwner, MeshOwner {
 		this.objectIdLocation = objectIdLocation;
 	}
 
+	@Override
 	public boolean isEntityMaterialId() {
 		return this.entityMaterialId;
 	}
@@ -83,6 +86,7 @@ public class GameObject extends Entity implements Transform3DOwner, MeshOwner {
 		this.entityMaterialId = entityMaterialIdLocation;
 	}
 
+	@Override
 	public Vector3ic getObjectId() {
 		return this.objectId;
 	}

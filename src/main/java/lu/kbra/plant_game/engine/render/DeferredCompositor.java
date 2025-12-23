@@ -33,6 +33,8 @@ import lu.pcy113.pclib.pointer.prim.BooleanPointer;
 
 import lu.kbra.plant_game.PGLogic;
 import lu.kbra.plant_game.engine.entity.go.impl.GameObject;
+import lu.kbra.plant_game.engine.entity.go.impl.MaterialOwner;
+import lu.kbra.plant_game.engine.entity.go.impl.ObjectIdOwner;
 import lu.kbra.plant_game.engine.entity.go.impl.SwayInstanceEmitter;
 import lu.kbra.plant_game.engine.entity.go.impl.SwayInstanceEmitterComponent;
 import lu.kbra.plant_game.engine.entity.go.impl.SwayOwner;
@@ -68,8 +70,8 @@ import lu.kbra.standalone.gameengine.cache.attrib.Vec3fAttribArray;
 import lu.kbra.standalone.gameengine.generated.gl_wrapper.GL_W;
 import lu.kbra.standalone.gameengine.geom.LineMesh;
 import lu.kbra.standalone.gameengine.geom.LoadedMesh;
-import lu.kbra.standalone.gameengine.geom.LoadedQuadMesh;
 import lu.kbra.standalone.gameengine.geom.Mesh;
+import lu.kbra.standalone.gameengine.geom.QuadLoadedMesh;
 import lu.kbra.standalone.gameengine.geom.QuadMesh;
 import lu.kbra.standalone.gameengine.geom.instance.InstanceEmitter;
 import lu.kbra.standalone.gameengine.graph.composition.buffer.Framebuffer;
@@ -156,7 +158,7 @@ public class DeferredCompositor implements Cleanupable {
 					1,
 					1,
 					new Vector2f[] { new Vector2f(0, 1), new Vector2f(1, 1), new Vector2f(1, 0), new Vector2f(0, 0) }));
-	private static QuadMesh QUAD = new LoadedQuadMesh(PASS_BOUNDS, null, new Vector2f(1));
+	private static QuadMesh QUAD = new QuadLoadedMesh(PASS_BOUNDS, null, new Vector2f(1));
 
 	protected Thread ownerThread;
 	protected Window window;
@@ -1039,9 +1041,9 @@ public class DeferredCompositor implements Cleanupable {
 									: gradientOwner.getEndColor());
 		}
 
-		if (entity instanceof final GameObject go && go.isEntityMaterialId()) {
+		if (entity instanceof final MaterialOwner mo && mo.isEntityMaterialId()) {
 			// id is in the entity
-			final int matId = go.getMaterialId();
+			final int matId = mo.getMaterialId();
 
 			GL_W.glDisableVertexAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_ID);
 			GL_W.glVertexAttribI1ui(GameObject.MESH_ATTRIB_MATERIAL_ID_ID, matId);
@@ -1057,9 +1059,10 @@ public class DeferredCompositor implements Cleanupable {
 			GL_W.glVertexAttribI1ui(GameObject.MESH_ATTRIB_MATERIAL_ID_ID, matId);
 		}
 
-		if (entity instanceof final GameObject go && go.getObjectIdLocation() != AttributeLocation.MESH) {
+		if (entity instanceof final ObjectIdOwner oio && oio.getObjectIdLocation() != AttributeLocation.MESH) {
 			// object id is in the entity
-			final Vector3ic objId = go.getObjectId();
+			final Vector3ic objId = oio.getObjectId();
+
 			GL_W.glDisableVertexAttribArray(GameObject.MESH_ATTRIB_OBJECT_ID_ID);
 			GL_W.glVertexAttribI3ui(GameObject.MESH_ATTRIB_OBJECT_ID_ID, objId.x(), objId.y(), objId.z());
 		}

@@ -4,11 +4,11 @@ import java.util.Arrays;
 
 import org.joml.Vector2fc;
 
-import lu.kbra.standalone.gameengine.geom.LoadedQuadMesh;
+import lu.kbra.standalone.gameengine.geom.QuadLoadedMesh;
 import lu.kbra.standalone.gameengine.graph.material.Material;
 import lu.kbra.standalone.gameengine.graph.texture.SingleTexture;
 
-public class LoadedTexturedQuadMesh extends LoadedQuadMesh implements TexturedQuadMesh {
+public class LoadedTexturedQuadMesh extends QuadLoadedMesh implements TexturedQuadMesh {
 
 	protected SingleTexture texture;
 

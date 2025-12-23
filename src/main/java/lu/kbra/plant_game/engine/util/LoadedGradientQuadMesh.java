@@ -7,11 +7,11 @@ import org.joml.Vector4fc;
 
 import lu.kbra.plant_game.engine.render.GradientDirection;
 import lu.kbra.plant_game.engine.render.GradientQuadMesh;
-import lu.kbra.standalone.gameengine.geom.LoadedQuadMesh;
+import lu.kbra.standalone.gameengine.geom.QuadLoadedMesh;
 import lu.kbra.standalone.gameengine.graph.material.Material;
 import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
 
-public class LoadedGradientQuadMesh extends LoadedQuadMesh implements GradientQuadMesh {
+public class LoadedGradientQuadMesh extends QuadLoadedMesh implements GradientQuadMesh {
 
 	protected Vector4f startColor;
 	protected Vector4f endColor;

@@ -1,7 +1,9 @@
 package lu.kbra.plant_game.engine.scene.ui.menu.main;
 
+import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.joml.Quaternionf;
 import org.joml.Vector2f;
@@ -10,13 +12,17 @@ import org.joml.Vector3fc;
 
 import lu.pcy113.pclib.PCUtils;
 import lu.pcy113.pclib.concurrency.ListTriggerLatch;
+import lu.pcy113.pclib.datastructure.pair.Pairs;
+import lu.pcy113.pclib.datastructure.pair.ReadOnlyPair;
 
 import lu.kbra.plant_game.PGLogic;
 import lu.kbra.plant_game.engine.UpdateFrameState;
 import lu.kbra.plant_game.engine.entity.ui.btn.BackButtonUIObject;
+import lu.kbra.plant_game.engine.entity.ui.btn.LevelButtonUIObject;
 import lu.kbra.plant_game.engine.entity.ui.btn.OptionsButtonUIObject;
 import lu.kbra.plant_game.engine.entity.ui.btn.PlayButtonUIObject;
 import lu.kbra.plant_game.engine.entity.ui.btn.QuitButtonUIObject;
+import lu.kbra.plant_game.engine.entity.ui.factory.StaticFlatMeshLoader;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory.TextData;
 import lu.kbra.plant_game.engine.entity.ui.group.LayoutOffsetUIObjectGroup;
@@ -25,9 +31,11 @@ import lu.kbra.plant_game.engine.entity.ui.group.OffsetUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.group.ScrollContainerUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.group.ScrollDrivenUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.impl.AbsoluteTransformOwner;
+import lu.kbra.plant_game.engine.entity.ui.impl.MeshUIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.Scale2dDir;
 import lu.kbra.plant_game.engine.entity.ui.impl.TextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.UIObject;
+import lu.kbra.plant_game.engine.entity.ui.mesh.line.TimelineMesh;
 import lu.kbra.plant_game.engine.entity.ui.scroller.ScrollBarUIObject;
 import lu.kbra.plant_game.engine.entity.ui.slider.VolumeSliderUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.OptionKeyUIObject;
@@ -47,10 +55,16 @@ import lu.kbra.plant_game.engine.window.input.StandardKeyOption;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
+import lu.kbra.standalone.gameengine.cache.attrib.UIntAttribArray;
+import lu.kbra.standalone.gameengine.cache.attrib.Vec3fAttribArray;
+import lu.kbra.standalone.gameengine.geom.Mesh;
+import lu.kbra.standalone.gameengine.graph.texture.SingleTexture;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
+import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
 import lu.kbra.standalone.gameengine.impl.future.WorkerDispatcher;
 import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
 import lu.kbra.standalone.gameengine.utils.consts.Direction;
+import lu.kbra.standalone.gameengine.utils.gl.consts.BufferType;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextAlignment;
 import lu.kbra.standalone.gameengine.utils.interpolation.Interpolators;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
@@ -73,7 +87,7 @@ public class MainMenuUIScene extends UIScene {
 	protected int targetGroup = 0;
 	protected float progress = 0;
 
-	protected Vector3fc[] restPositions = { new Vector3f(), new Vector3f(0, 5, 0), new Vector3f(5, 0, 0), null };
+	protected Vector3fc[] restPositions = { new Vector3f(), new Vector3f(0, 0, 5), new Vector3f(5, 0, 0), null };
 
 	protected OffsetUIObjectGroup mainMenuGroup = new OffsetUIObjectGroup("main", new Transform3D(new Vector3f(this.restPositions[MAIN])));
 
@@ -154,11 +168,61 @@ public class MainMenuUIScene extends UIScene {
 				.then(workers, (Consumer<ScrollBarUIObject>) this.playMenuGroup::setScrollBar)
 				.push();
 
-		UIObjectFactory
-				.create(CursorUIObject.class,
-						this.playContentMenuGroup,
-						new Transform3D(new Vector3f(0, 0.01f, 0.25f), new Quaternionf(), new Vector3f(0.15f)))
-				.push();
+		final int count = 5;
+		final ListTriggerLatch<LevelButtonUIObject> btns = new ListTriggerLatch<>(count, list -> {
+			Collections.sort(list);
+
+			new TaskFuture<>(workers, () -> {
+				final Vector3f[] pos = new Vector3f[12];
+				for (int i = 0; i < list.size(); i++) {
+//					final Rectangle2D bounds = list.get(i).getTransformedBounds().getBounds2D();
+					pos[i] = list.get(i).getTransform().getTranslation();
+				}
+				final int[] indices = new int[pos.length * 2 + 2];
+				for (int i = 0; i < pos.length - 1; i++) {
+					indices[i * 2 + 0] = i;
+					indices[i * 2 + 1] = i + 1;
+				}
+
+				return Pairs.readOnly(pos, indices);
+			}).then(renderDispatcher, (Function<ReadOnlyPair<Vector3f[], int[]>, TimelineMesh>) pair -> {
+				final Vector3f[] pos = pair.getKey();
+				final int[] indices = pair.getValue();
+
+				final TimelineMesh mesh = new TimelineMesh(
+						"timeline@" + System.identityHashCode(this),
+						13,
+						(SingleTexture) this.uiCache.getTexture(StaticFlatMeshLoader.TEXTURE_NAME),
+						new Vec3fAttribArray(Mesh.ATTRIB_VERTICES_NAME, Mesh.ATTRIB_VERTICES_ID, 1, pos),
+						new UIntAttribArray(Mesh.ATTRIB_INDICES_NAME, Mesh.ATTRIB_INDICES_ID, 1, indices, BufferType.ELEMENT_ARRAY));
+				mesh.setLineWidth(50);
+				mesh.setEffectiveLength(list.size() * 2 - 2);
+				this.uiCache.addMesh(mesh);
+
+				return mesh;
+			}).then(workers, (Consumer<TimelineMesh>) (final TimelineMesh mesh) -> {
+				this.playContentMenuGroup.add(new MeshUIObject("meshName", mesh, new Transform3D(new Vector3f(0, -0.1f, 0))));
+			}).push();
+
+			this.playMenuGroup.addAll(list);
+		});
+
+		final float startPosX = -1;
+		for (int i = 0; i < count; i++) {
+			UIObjectFactory
+					.create(LevelButtonUIObject.class,
+							btns,
+							new Transform3D(
+									new Vector3f(startPosX + 0.6f * i, 0, (0.6f * i) % (2 - 0.5f) - 1),
+									new Quaternionf().rotateY((float) Math.random()),
+									new Vector3f(0.5f)),
+							"lvl" + i)
+//					.then(workers, (Function<LevelButtonUIObject, LevelButtonUIObject>) b -> {
+//						b.setActive(false);
+//						return b;
+//					})
+					.push();
+		}
 	}
 
 	private void buildOptionsMenu(final Dispatcher workers, final Dispatcher renderDispatcher) {

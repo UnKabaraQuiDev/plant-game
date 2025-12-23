@@ -9,7 +9,7 @@ import lu.kbra.plant_game.engine.entity.ui.impl.AbsoluteTransformOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsUpdate;
 import lu.kbra.plant_game.engine.entity.ui.impl.TextureUIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.UIObject;
-import lu.kbra.plant_game.engine.mesh.TexturedQuadLoadedMesh;
+import lu.kbra.plant_game.engine.mesh.TexturedQuadMesh;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.standalone.gameengine.scene.Scene;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
@@ -23,11 +23,11 @@ public class CursorUIObject extends TextureUIObject implements NeedsUpdate {
 	protected float snapPhase = 0;
 	protected float offsetX = 0;
 
-	public CursorUIObject(final String str, final TexturedQuadLoadedMesh mesh) {
+	public CursorUIObject(final String str, final TexturedQuadMesh mesh) {
 		super(str, mesh);
 	}
 
-	public CursorUIObject(final String str, final TexturedQuadLoadedMesh mesh, final Transform3D transform) {
+	public CursorUIObject(final String str, final TexturedQuadMesh mesh, final Transform3D transform) {
 		super(str, mesh, transform);
 	}
 

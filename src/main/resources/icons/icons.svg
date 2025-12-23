@@ -26,13 +26,13 @@
      inkscape:deskcolor="#cccccc"
      inkscape:document-units="px"
      showgrid="true"
-     inkscape:zoom="2.3201942"
-     inkscape:cx="220.88668"
-     inkscape:cy="89.432169"
-     inkscape:window-width="1862"
-     inkscape:window-height="1014"
-     inkscape:window-x="58"
-     inkscape:window-y="29"
+     inkscape:zoom="6.5625002"
+     inkscape:cx="550.09522"
+     inkscape:cy="39.923808"
+     inkscape:window-width="1920"
+     inkscape:window-height="992"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
      inkscape:window-maximized="1"
      inkscape:current-layer="layer8">
     <inkscape:grid
@@ -107,6 +107,15 @@
        margin="0"
        bleed="0"
        inkscape:label="large_logo" />
+    <inkscape:page
+       x="518"
+       y="0"
+       width="64"
+       height="64"
+       id="page4"
+       margin="0"
+       bleed="0"
+       inkscape:label="star" />
   </sodipodi:namedview>
   <defs
      id="defs429">
@@ -340,9 +349,9 @@
          transform="translate(204.21557,29.311549)"><tspan
            x="428.19336"
            y="191.22929"
-           id="tspan2"><tspan
+           id="tspan6"><tspan
              style="font-weight:normal;font-family:'Days One';-inkscape-font-specification:'Days One'"
-             id="tspan1">SATISFACTORY</tspan></tspan></text>
+             id="tspan5">SATISFACTORY</tspan></tspan></text>
       <rect
          style="fill:#000000;stroke-width:4.23273;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.7;paint-order:markers fill stroke"
          id="rect5"
@@ -357,10 +366,26 @@
          transform="matrix(0.71304789,-0.09672292,0.09672292,0.71304789,325.84954,-42.947042)"><tspan
            x="873.9067"
            y="508.33805"
-           id="tspan4"><tspan
+           id="tspan8"><tspan
              style="font-weight:bold;font-family:Purisa;-inkscape-font-specification:'Purisa Bold'"
-             id="tspan3">PLANT</tspan></tspan></text>
+             id="tspan7">PLANT</tspan></tspan></text>
     </g>
+    <path
+       sodipodi:type="star"
+       style="fill:#ffffff;stroke-width:10;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.7;fill-opacity:1"
+       id="path4"
+       inkscape:flatsided="false"
+       sodipodi:sides="5"
+       sodipodi:cx="550"
+       sodipodi:cy="32"
+       sodipodi:r1="31.277401"
+       sodipodi:r2="15.638701"
+       sodipodi:arg1="-1.5707963"
+       sodipodi:arg2="-0.9424778"
+       inkscape:rounded="0"
+       inkscape:randomized="0"
+       d="m 550,0.72259903 9.1922,18.62542597 20.55438,2.986727 -14.87329,14.497872 3.5111,20.471325 L 550,47.638701 531.6156,57.303948 535.12671,36.832625 520.25342,22.334751 540.8078,19.348025 Z"
+       inkscape:transform-center-y="-2.986726" />
   </g>
   <g
      inkscape:groupmode="layer"

@@ -60,8 +60,8 @@ import lu.kbra.standalone.gameengine.GameEngine;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.cache.attrib.UIntAttribArray;
 import lu.kbra.standalone.gameengine.cache.attrib.Vec3fAttribArray;
-import lu.kbra.standalone.gameengine.geom.LoadedQuadMesh;
 import lu.kbra.standalone.gameengine.geom.Mesh;
+import lu.kbra.standalone.gameengine.geom.QuadLoadedMesh;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
 import lu.kbra.standalone.gameengine.objs.entity.Entity;
@@ -217,12 +217,12 @@ public class WorldLevelScene extends Scene3D {
 						}
 
 						System.err.println("created pipe");
-					});// .push();
+					}); // .push();
 
 					new TaskFuture<>(renderDispatcher, () -> {
 						GlobalLogger.info("Generating water mesh...");
 						final Pair<Mesh, Long> meshTime = PCUtils
-								.nanoTime(() -> new LoadedQuadMesh(
+								.nanoTime(() -> new QuadLoadedMesh(
 										"water",
 										null,
 										new Vector2f(this.getTerrain().getMesh().getWidth(), this.getTerrain().getMesh().getLength())));

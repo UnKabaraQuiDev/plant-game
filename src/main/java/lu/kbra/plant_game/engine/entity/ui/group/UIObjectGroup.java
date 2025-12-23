@@ -73,7 +73,7 @@ public class UIObjectGroup extends UIObject implements ObjectGroup<UIObject> {
 				this.doSort();
 			}
 		}
-		if ((Object) e instanceof final ParentAware pa) {
+		if (e instanceof final ParentAware pa) {
 			pa.setParent(this);
 		}
 		this.recomputeBounds();
@@ -96,7 +96,7 @@ public class UIObjectGroup extends UIObject implements ObjectGroup<UIObject> {
 	public boolean addAll(final Collection<? extends UIObject> c) {
 		final boolean result;
 		synchronized (this.getSubEntitiesLock()) {
-			result = this.getSubEntities().addAll(c);
+			result = this.getSubEntitiesComponent().getEntities().addAll(c);
 			if (c.parallelStream().anyMatch(IndexedMenuElement.class::isInstance)) {
 				this.doSort();
 			}
@@ -110,7 +110,8 @@ public class UIObjectGroup extends UIObject implements ObjectGroup<UIObject> {
 	public boolean addAll(final ObjectGroup<? extends UIObject> c) {
 		final boolean result;
 		synchronized (this.getSubEntitiesLock()) {
-			result = this.getSubEntities().addAll(c.getSubEntities());
+			final List<UIObject> list = this.getSubEntitiesComponent().getEntities();
+			result = c.stream().map(list::add).collect(Collectors.reducing(false, (a, b) -> (a || b)));
 			if (c.parallelStream().anyMatch(IndexedMenuElement.class::isInstance)) {
 				this.doSort();
 			}
