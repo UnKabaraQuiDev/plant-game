@@ -1,6 +1,6 @@
 package lu.kbra.plant_game.engine.util.exceptions;
 
-import lu.kbra.plant_game.engine.entity.ui.impl.UIObject;
+import lu.kbra.plant_game.engine.entity.ui.UIObject;
 
 public class UIObjectNotFound extends RuntimeException {
 

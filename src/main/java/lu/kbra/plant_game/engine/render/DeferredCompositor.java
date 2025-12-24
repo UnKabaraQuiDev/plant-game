@@ -33,7 +33,7 @@ import lu.pcy113.pclib.logger.GlobalLogger;
 import lu.pcy113.pclib.pointer.prim.BooleanPointer;
 
 import lu.kbra.plant_game.PGLogic;
-import lu.kbra.plant_game.engine.entity.go.impl.GameObject;
+import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.entity.go.impl.MaterialOwner;
 import lu.kbra.plant_game.engine.entity.go.impl.ObjectIdOwner;
 import lu.kbra.plant_game.engine.entity.go.impl.SwayInstanceEmitter;

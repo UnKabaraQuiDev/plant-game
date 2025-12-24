@@ -1,10 +1,12 @@
-package lu.kbra.plant_game.engine.entity.ui.impl;
+package lu.kbra.plant_game.engine.entity.ui;
 
 import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
 
 import lu.kbra.plant_game.engine.entity.impl.MeshOwner;
 import lu.kbra.plant_game.engine.entity.impl.Transform3DOwner;
+import lu.kbra.plant_game.engine.entity.ui.impl.TransformedBoundsOwner;
+import lu.kbra.plant_game.engine.entity.ui.impl.TransparentEntity;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.objs.entity.Entity;
 import lu.kbra.standalone.gameengine.objs.entity.ParentAware;

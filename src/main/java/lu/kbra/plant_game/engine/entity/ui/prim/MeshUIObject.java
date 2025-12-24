@@ -1,7 +1,8 @@
-package lu.kbra.plant_game.engine.entity.ui.impl;
+package lu.kbra.plant_game.engine.entity.ui.prim;
 
 import java.awt.geom.Rectangle2D;
 
+import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.utils.geo.GeoPlane;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;

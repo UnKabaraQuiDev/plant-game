@@ -1,9 +1,10 @@
-package lu.kbra.plant_game.engine.entity.ui.impl;
+package lu.kbra.plant_game.engine.entity.ui.prim;
 
 import java.awt.geom.Rectangle2D;
 
 import javax.swing.GroupLayout.Alignment;
 
+import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.standalone.gameengine.geom.QuadMesh;
 import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;

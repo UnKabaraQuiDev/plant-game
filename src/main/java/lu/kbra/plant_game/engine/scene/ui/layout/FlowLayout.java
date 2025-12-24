@@ -3,7 +3,7 @@ package lu.kbra.plant_game.engine.scene.ui.layout;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
 
-import lu.kbra.plant_game.engine.entity.ui.impl.UIObject;
+import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 public class FlowLayout implements Layout {

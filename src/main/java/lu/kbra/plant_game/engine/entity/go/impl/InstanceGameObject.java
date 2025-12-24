@@ -2,6 +2,7 @@ package lu.kbra.plant_game.engine.entity.go.impl;
 
 import org.joml.Vector3ic;
 
+import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.standalone.gameengine.geom.instance.InstanceEmitter;
 import lu.kbra.standalone.gameengine.objs.entity.components.InstanceEmitterComponent;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;

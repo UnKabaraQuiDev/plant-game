@@ -4,7 +4,7 @@ import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
 
-import lu.kbra.plant_game.engine.entity.ui.impl.UIObject;
+import lu.kbra.plant_game.engine.entity.ui.UIObject;
 
 public class MarginFlowLayout extends FlowLayout {
 

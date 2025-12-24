@@ -4,7 +4,7 @@ import org.joml.Matrix4f;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
 
-import lu.kbra.plant_game.engine.entity.go.impl.AnimatedGameObject;
+import lu.kbra.plant_game.engine.entity.go.AnimatedGameObject;
 import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
 import lu.kbra.plant_game.engine.entity.go.impl.WaterContainer;
 import lu.kbra.plant_game.engine.mesh.AnimatedMesh;

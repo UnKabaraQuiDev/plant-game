@@ -1,6 +1,6 @@
 package lu.kbra.plant_game.engine.entity.ui.btn;
 
-import lu.kbra.plant_game.engine.entity.ui.impl.TextureUIObject;
+import lu.kbra.plant_game.engine.entity.ui.texture.TextureUIObject;
 import lu.kbra.plant_game.engine.mesh.TexturedQuadMesh;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;

@@ -7,7 +7,7 @@ import lu.pcy113.pclib.PCUtils;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsClick;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsUpdate;
 import lu.kbra.plant_game.engine.entity.ui.impl.TextureOption;
-import lu.kbra.plant_game.engine.entity.ui.impl.TextureUIObject;
+import lu.kbra.plant_game.engine.entity.ui.texture.TextureUIObject;
 import lu.kbra.plant_game.engine.mesh.TexturedQuadMesh;
 import lu.kbra.plant_game.engine.mesh.TintOwner;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;

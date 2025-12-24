@@ -8,8 +8,8 @@ import java.util.function.Function;
 import lu.pcy113.pclib.PCUtils;
 import lu.pcy113.pclib.impl.ThrowingFunction;
 
-import lu.kbra.plant_game.engine.entity.go.impl.AnimatedGameObject;
-import lu.kbra.plant_game.engine.entity.go.impl.GameObject;
+import lu.kbra.plant_game.engine.entity.go.AnimatedGameObject;
+import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.entity.go.impl.InstanceGameObject;
 import lu.kbra.plant_game.engine.entity.go.impl.InstanceSwayGameObject;
 import lu.kbra.plant_game.engine.entity.go.impl.SwayGameObject;

@@ -10,7 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import lu.kbra.plant_game.engine.entity.go.impl.GameObject;
+
+import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.entity.go.impl.SwayInstanceEmitter;
 import lu.kbra.plant_game.engine.entity.go.obj.energy.SolarPanelObject;
 import lu.kbra.plant_game.engine.entity.go.obj.flower.champi.LargeChampiFlowerObject;

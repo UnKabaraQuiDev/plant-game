@@ -1,8 +1,10 @@
-package lu.kbra.plant_game.engine.entity.go.impl;
+package lu.kbra.plant_game.engine.entity.go;
 
 import org.joml.Vector3i;
 import org.joml.Vector3ic;
 
+import lu.kbra.plant_game.engine.entity.go.impl.MaterialOwner;
+import lu.kbra.plant_game.engine.entity.go.impl.ObjectIdOwner;
 import lu.kbra.plant_game.engine.entity.impl.MeshOwner;
 import lu.kbra.plant_game.engine.entity.impl.Transform3DOwner;
 import lu.kbra.plant_game.engine.mesh.MaterialMesh;

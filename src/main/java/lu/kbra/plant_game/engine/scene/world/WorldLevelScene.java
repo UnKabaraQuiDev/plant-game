@@ -22,10 +22,10 @@ import lu.pcy113.pclib.impl.ThrowingFunction;
 import lu.pcy113.pclib.logger.GlobalLogger;
 
 import lu.kbra.plant_game.engine.UpdateFrameState;
+import lu.kbra.plant_game.engine.entity.go.AnimatedGameObject;
+import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory;
 import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory.InstanceData;
-import lu.kbra.plant_game.engine.entity.go.impl.AnimatedGameObject;
-import lu.kbra.plant_game.engine.entity.go.impl.GameObject;
 import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
 import lu.kbra.plant_game.engine.entity.go.mesh.pipe.PipeMesh;
 import lu.kbra.plant_game.engine.entity.go.mesh.terrain.TerrainEdgeMesh;

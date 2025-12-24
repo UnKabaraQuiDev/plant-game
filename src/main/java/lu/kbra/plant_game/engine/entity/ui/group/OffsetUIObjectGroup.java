@@ -1,8 +1,8 @@
 package lu.kbra.plant_game.engine.entity.ui.group;
 
 import lu.kbra.plant_game.engine.entity.impl.Transform3DOwner;
+import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.TransformedBoundsOwner;
-import lu.kbra.plant_game.engine.entity.ui.impl.UIObject;
 import lu.kbra.standalone.gameengine.objs.entity.components.Transform3DComponent;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 

@@ -8,7 +8,7 @@ import lu.kbra.plant_game.PGLogic;
 import lu.kbra.plant_game.engine.entity.ui.impl.Focusable;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsClick;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsInput;
-import lu.kbra.plant_game.engine.entity.ui.impl.TextUIObject;
+import lu.kbra.plant_game.engine.entity.ui.text.TextUIObject;
 import lu.kbra.plant_game.engine.util.annotation.BufferSize;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;

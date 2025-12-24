@@ -6,7 +6,7 @@ import static lu.kbra.plant_game.engine.mesh.loader.MeshLoaderLocks.waitOrCreate
 import lu.pcy113.pclib.impl.ThrowingFunction;
 import lu.pcy113.pclib.impl.ThrowingSupplier;
 
-import lu.kbra.plant_game.engine.entity.ui.impl.QuadUIObject;
+import lu.kbra.plant_game.engine.entity.ui.prim.QuadUIObject;
 import lu.kbra.plant_game.engine.mesh.LoadedTexturedQuadMesh;
 import lu.kbra.plant_game.engine.mesh.TexturedQuadMesh;
 import lu.kbra.standalone.gameengine.GameEngine;

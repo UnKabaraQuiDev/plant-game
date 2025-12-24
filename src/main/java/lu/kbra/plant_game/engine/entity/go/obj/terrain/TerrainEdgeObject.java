@@ -2,7 +2,7 @@ package lu.kbra.plant_game.engine.entity.go.obj.terrain;
 
 import org.joml.Vector3i;
 
-import lu.kbra.plant_game.engine.entity.go.impl.GameObject;
+import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.entity.go.mesh.terrain.TerrainEdgeMesh;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 

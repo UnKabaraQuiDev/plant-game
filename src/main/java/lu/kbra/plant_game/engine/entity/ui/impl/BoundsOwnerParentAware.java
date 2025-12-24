@@ -1,6 +1,5 @@
-package lu.kbra.plant_game.engine.scene.ui.menu.main;
+package lu.kbra.plant_game.engine.entity.ui.impl;
 
-import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwner;
 import lu.kbra.standalone.gameengine.objs.entity.ParentAware;
 
 public interface BoundsOwnerParentAware extends ParentAware {

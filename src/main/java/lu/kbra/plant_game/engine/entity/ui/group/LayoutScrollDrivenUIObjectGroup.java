@@ -2,7 +2,7 @@ package lu.kbra.plant_game.engine.entity.ui.group;
 
 import java.util.function.Supplier;
 
-import lu.kbra.plant_game.engine.entity.ui.impl.UIObject;
+import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.scene.ui.layout.Layout;
 import lu.kbra.plant_game.engine.scene.ui.layout.LayoutParent;
 import lu.kbra.standalone.gameengine.objs.entity.ParentAware;

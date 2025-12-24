@@ -1,5 +1,6 @@
-package lu.kbra.plant_game.engine.entity.ui.impl;
+package lu.kbra.plant_game.engine.entity.ui.texture;
 
+import lu.kbra.plant_game.engine.entity.ui.prim.QuadUIObject;
 import lu.kbra.plant_game.engine.mesh.TexturedQuadMesh;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 

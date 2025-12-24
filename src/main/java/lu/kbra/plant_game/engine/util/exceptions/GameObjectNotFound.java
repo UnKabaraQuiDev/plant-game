@@ -1,6 +1,6 @@
 package lu.kbra.plant_game.engine.util.exceptions;
 
-import lu.kbra.plant_game.engine.entity.go.impl.GameObject;
+import lu.kbra.plant_game.engine.entity.go.GameObject;
 
 public class GameObjectNotFound extends RuntimeException {
 

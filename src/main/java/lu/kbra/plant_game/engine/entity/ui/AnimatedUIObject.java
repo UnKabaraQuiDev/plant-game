@@ -1,4 +1,4 @@
-package lu.kbra.plant_game.engine.entity.ui.impl;
+package lu.kbra.plant_game.engine.entity.ui;
 
 import org.joml.Matrix4f;
 
