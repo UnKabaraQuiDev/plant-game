@@ -64,6 +64,7 @@ public class ScrollDrivenUIObjectGroup extends OffsetUIObjectGroup implements Ne
 			return;
 		}
 
+//		this.recomputeBounds();
 		final Rectangle2D bounds = this.getBounds().getBounds2D();
 		final Rectangle2D sceneBounds = ((BoundsOwner) scene).getBounds().getBounds2D();
 
@@ -81,15 +82,14 @@ public class ScrollDrivenUIObjectGroup extends OffsetUIObjectGroup implements Ne
 		final float ratio = this.scrollRatioSupplier.get();
 
 		if (this.dir.isHorizontal()) {
-			final float min = (float) (-sceneBounds.getWidth() / 2 + this.margin);
-			final float max = (float) (sceneBounds.getWidth() / 2 - this.margin);
+			final float min = (float) (sceneBounds.getMinX() + this.margin);
+			final float max = (float) (sceneBounds.getMaxX() - this.margin);
+			final float objMin = (float) bounds.getMinX();
+			final float objMax = (float) bounds.getMaxX();
+			final float originMin = min - objMin - (float) bounds.getCenterX();
+			final float originMax = max - objMax + (float) bounds.getCenterX();
 
-			System.err
-					.println(this.getTransform().getTranslation().x + " (" + sceneBounds.getWidth() + ") " + min + "-" + max + " - min/max:"
-							+ bounds.getMinX() + "-" + bounds.getMaxX() + " x:" + bounds.getX() + " : " + (max - (float) bounds.getMinX())
-							+ " - " + (min + (float) bounds.getMaxX()));
-
-			this.getTransform().getTranslation().x = PCUtils.map(ratio, 0, 1, min, max);
+			this.getTransform().getTranslation().x = PCUtils.map(ratio, 1, 0, originMin, originMax);
 		} else if (this.dir.isVertical()) {
 			final float min = (float) (sceneBounds.getMinY() + this.margin);
 			final float max = (float) (sceneBounds.getMaxY() - this.margin);

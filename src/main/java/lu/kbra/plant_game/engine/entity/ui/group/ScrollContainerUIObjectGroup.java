@@ -5,9 +5,9 @@ import java.awt.geom.Rectangle2D;
 import org.joml.Vector2f;
 import org.joml.Vector3fc;
 
+import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.scroller.ScrollBarUIObject;
-import lu.kbra.plant_game.engine.scene.ui.UIScene;
 import lu.kbra.plant_game.engine.scene.ui.layout.Layout;
 import lu.kbra.standalone.gameengine.objs.entity.SceneParentAware;
 import lu.kbra.standalone.gameengine.utils.consts.Direction;
@@ -153,12 +153,11 @@ public class ScrollContainerUIObjectGroup extends OffsetUIObjectGroup implements
 			return;
 		}
 		this.scrollBar.setActive(this.scrollContent.needsScrollBar());
-		final Rectangle2D sceneBounds = ((UIScene) this.getSceneParent()).getBounds().getBounds2D();
-		System.err.println(sceneBounds);
+		final Rectangle2D sceneBounds = ((BoundsOwner) this.getSceneParent()).getBounds().getBounds2D();
 		this.scrollBar
 				.setRange(new Vector2f(
-						(float) sceneBounds.getMinX() + this.scrollBar.getMargin(),
-						(float) sceneBounds.getMaxX() - this.scrollBar.getMargin()));
+						(float) sceneBounds.getMinX() + this.scrollBar.getMargin() - (float) sceneBounds.getCenterX(),
+						(float) sceneBounds.getMaxX() - this.scrollBar.getMargin() + (float) sceneBounds.getCenterX()));
 	}
 
 	public ScrollBarUIObject getScrollBar() {

@@ -19,6 +19,7 @@ import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 public interface TransformedBoundsOwner extends BoundsOwner, Transform3DOwner {
 
+	@Deprecated
 	default Shape getLocalTransformedBounds() {
 		final Shape bounds = this.getBounds();
 

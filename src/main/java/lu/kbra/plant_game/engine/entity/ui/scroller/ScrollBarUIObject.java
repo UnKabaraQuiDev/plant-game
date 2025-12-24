@@ -170,7 +170,9 @@ public class ScrollBarUIObject extends FlatQuadUIObject {
 		if (this.range == null) {
 			this.range = new Vector2f(v);
 		} else {
+			final float ratio = this.getScrollRatio();
 			this.range.set(v);
+			this.setScrollRatio(ratio);
 		}
 	}
 
