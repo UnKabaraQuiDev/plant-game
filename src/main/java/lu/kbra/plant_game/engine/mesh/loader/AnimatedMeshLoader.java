@@ -16,7 +16,7 @@ import lu.pcy113.pclib.impl.ThrowingFunction;
 
 import lu.kbra.plant_game.engine.mesh.AnimatedMesh;
 import lu.kbra.plant_game.engine.mesh.loader.StaticMeshLoader.GenericMeshData;
-import lu.kbra.plant_game.engine.util.AdvObjLoader;
+import lu.kbra.plant_game.engine.util.DelegatingObjLoader;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.graph.texture.SingleTexture;
@@ -172,10 +172,10 @@ public class AnimatedMeshLoader {
 			final SingleTexture txt0 = cache.hasTexture(meshData.texturePath()) ? (SingleTexture) cache.getTexture(meshData.texturePath())
 					: SingleTexture.loadSingleTexture(cache, meshData.texturePath(), meshData.texturePath());
 
-			animatedMesh = AdvObjLoader
+			animatedMesh = DelegatingObjLoader
 					.loadAnimatedTexturedMesh(meshName, null, meshData.filePath(), meshData.origin(), txt0, animatedMeshData.animData());
 		} else {
-			animatedMesh = AdvObjLoader
+			animatedMesh = DelegatingObjLoader
 					.loadAnimatedMesh(meshName, null, meshData.filePath(), meshData.origin(), animatedMeshData.animData());
 		}
 

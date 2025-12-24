@@ -12,7 +12,7 @@ import lu.pcy113.pclib.impl.ThrowingSupplier;
 import lu.kbra.plant_game.engine.mesh.loader.StaticMeshLoader.GenericMeshData;
 import lu.kbra.plant_game.engine.render.GradientMesh;
 import lu.kbra.plant_game.engine.render.GradientQuadMesh;
-import lu.kbra.plant_game.engine.util.AdvObjLoader;
+import lu.kbra.plant_game.engine.util.DelegatingObjLoader;
 import lu.kbra.plant_game.engine.util.LoadedGradientQuadMesh;
 import lu.kbra.standalone.gameengine.GameEngine;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
@@ -71,7 +71,7 @@ public class StaticGradientMeshLoader {
 	}
 
 	static GradientMesh createStatic(CacheManager cache, String meshName, GenericMeshData meshData) {
-		final GradientMesh texturedMesh = AdvObjLoader.loadGradientMesh(meshName, null, meshData.filePath());
+		final GradientMesh texturedMesh = DelegatingObjLoader.loadGradientMesh(meshName, null, meshData.filePath());
 
 		cache.addMesh(texturedMesh);
 		releaseLock(meshName);

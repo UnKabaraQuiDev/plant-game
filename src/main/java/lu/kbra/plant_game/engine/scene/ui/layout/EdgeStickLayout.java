@@ -1,4 +1,4 @@
-package lu.kbra.plant_game.engine.scene.ui.menu.main;
+package lu.kbra.plant_game.engine.scene.ui.layout;
 
 import java.awt.geom.Rectangle2D;
 import java.util.List;
@@ -6,7 +6,7 @@ import java.util.List;
 import lu.pcy113.pclib.PCUtils;
 
 import lu.kbra.plant_game.engine.entity.ui.impl.UIObject;
-import lu.kbra.plant_game.engine.scene.ui.layout.FlowLayout;
+import lu.kbra.plant_game.engine.scene.ui.menu.main.BoundsOwnerParentAware;
 import lu.kbra.standalone.gameengine.objs.entity.SceneParentAware;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 

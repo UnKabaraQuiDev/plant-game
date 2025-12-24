@@ -4,6 +4,7 @@ import org.joml.Vector3f;
 
 import lu.kbra.plant_game.engine.mesh.AnimatedLoadedMesh;
 import lu.kbra.plant_game.engine.mesh.AnimatedTexturedLoadedMesh;
+import lu.kbra.plant_game.engine.mesh.GradientLoadedMesh;
 import lu.kbra.plant_game.engine.mesh.OffsetLoadedMesh;
 import lu.kbra.plant_game.engine.mesh.SwayLoadedMesh;
 import lu.kbra.plant_game.engine.mesh.LoadedTexturedMesh;
@@ -13,7 +14,7 @@ import lu.kbra.standalone.gameengine.geom.utils.ObjLoader;
 import lu.kbra.standalone.gameengine.graph.material.Material;
 import lu.kbra.standalone.gameengine.graph.texture.SingleTexture;
 
-public class AdvObjLoader {
+public class DelegatingObjLoader {
 
 	public static OffsetLoadedMesh loadOffsetMesh(final String name, final Material material, final String path, final Vector3f origin) {
 		return ObjLoader

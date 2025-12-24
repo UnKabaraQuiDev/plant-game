@@ -10,7 +10,7 @@ import lu.pcy113.pclib.impl.ThrowingSupplier;
 
 import lu.kbra.plant_game.engine.mesh.loader.StaticMeshLoader.GenericMeshData;
 import lu.kbra.plant_game.engine.render.SwayMesh;
-import lu.kbra.plant_game.engine.util.AdvObjLoader;
+import lu.kbra.plant_game.engine.util.DelegatingObjLoader;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.graph.texture.SingleTexture;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
@@ -45,10 +45,10 @@ public class StaticSwayMeshLoader {
 					: SingleTexture.loadSingleTexture(cache, meshData.texturePath(), meshData.texturePath());
 
 			// Maybe include as offset mesh idk
-			staticMesh = AdvObjLoader
+			staticMesh = DelegatingObjLoader
 					.loadTexturedSwayMesh(meshName, null, meshData.filePath(), meshData.deformRatio(), meshData.speedRatio(), txt0);
 		} else {
-			staticMesh = AdvObjLoader.loadSwayMesh(meshName, null, meshData.filePath(), meshData.deformRatio(), meshData.speedRatio());
+			staticMesh = DelegatingObjLoader.loadSwayMesh(meshName, null, meshData.filePath(), meshData.deformRatio(), meshData.speedRatio());
 		}
 
 		cache.addMesh(staticMesh);
