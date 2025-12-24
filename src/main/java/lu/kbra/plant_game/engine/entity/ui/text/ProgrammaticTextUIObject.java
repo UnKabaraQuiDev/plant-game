@@ -19,6 +19,14 @@ public class ProgrammaticTextUIObject extends TextUIObject implements Programmat
 		this.key = key;
 	}
 
+	public void setText(final String txt) {
+		super.getTextEmitter().setText(txt);
+	}
+
+	public void updateText() {
+		super.getTextEmitter().updateText();
+	}
+
 	@Override
 	public String getKey() {
 		return this.key;

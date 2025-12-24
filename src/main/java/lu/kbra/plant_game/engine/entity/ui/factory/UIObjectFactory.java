@@ -1,7 +1,9 @@
 package lu.kbra.plant_game.engine.entity.ui.factory;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.joml.Vector2f;
 
@@ -11,11 +13,12 @@ import lu.pcy113.pclib.impl.ThrowingFunction;
 
 import lu.kbra.plant_game.engine.entity.ui.AnimatedUIObject;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
+import lu.kbra.plant_game.engine.entity.ui.gradient.GradientQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.group.ObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.layout.SpacerUIObject;
 import lu.kbra.plant_game.engine.entity.ui.scroller.FlatQuadUIObject;
+import lu.kbra.plant_game.engine.entity.ui.text.ProgrammaticTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.TextUIObject;
-import lu.kbra.plant_game.engine.entity.ui.texture.GradientQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.texture.TextureUIObject;
 import lu.kbra.plant_game.engine.locale.NoMeshObject;
 import lu.kbra.plant_game.engine.mesh.TexturedMesh;
@@ -171,6 +174,8 @@ public class UIObjectFactory {
 
 			final String key = cDataPath.substring(cDataPath.indexOf(":") + 1);
 
+			System.err.println("args: " + Arrays.toString(args));
+
 			TextData td;
 			final Object[] nargs;
 			if (args.length > 0 && args[0] instanceof final TextData vvec) {
@@ -188,8 +193,28 @@ public class UIObjectFactory {
 				}
 			}
 
+			final String uName = td.name == null ? clazz.getSimpleName() + "@" + System.nanoTime() : td.name;
+
+			if (ProgrammaticTextUIObject.class.isAssignableFrom(clazz)) {
+				return StaticTextLoader
+						.getFuture(this.cache, uName, key, td, this.loader, this.render)
+						.then(this.loader, (ThrowingFunction<TextEmitter, T, Throwable>) te -> {
+							final T instance = UIObjectRegistry
+									.create(clazz,
+											PCUtils
+													.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), te },
+															nargs));
+							return instance;
+						})
+						.then(this.render, (Function<T, T>) t -> {
+							System.err.println("UPDATING TEXT: " + t);
+							((ProgrammaticTextUIObject) t).updateText();
+							return t;
+						});
+			}
+
 			return StaticTextLoader
-					.getFuture(this.cache, td.name == null ? key : td.name, key, td, this.loader, this.render)
+					.getFuture(this.cache, uName, key, td, this.loader, this.render)
 					.then(this.loader, (ThrowingFunction<TextEmitter, T, Throwable>) te -> {
 						final T instance = UIObjectRegistry
 								.create(clazz,

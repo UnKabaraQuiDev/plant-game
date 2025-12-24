@@ -29,6 +29,7 @@ import lu.kbra.plant_game.engine.entity.ui.impl.NeedsHover;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsInput;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsUpdate;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
+import lu.kbra.plant_game.engine.scene.ui.layout.LayoutParent;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.GameEngine;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
@@ -78,6 +79,11 @@ public class UIScene extends Scene3D implements BoundsOwner {
 			this.focused = null;
 		}
 
+		final boolean resized = inputHandler.wasResized();
+		if (resized) {
+			this.camera.getProjection().update(inputHandler.getWindowSize());
+		}
+
 		synchronized (super.getEntitiesLock()) {
 			for (final Entity e : this) {
 				this
@@ -88,6 +94,10 @@ public class UIScene extends Scene3D implements BoundsOwner {
 								new Point2D.Float(mouseWorld2D.x, mouseWorld2D.y),
 								newHovered,
 								GameEngine.IDENTITY_MATRIX4F);
+
+				if (resized && e instanceof final LayoutParent lp) {
+					lp.doLayout();
+				}
 			}
 		}
 

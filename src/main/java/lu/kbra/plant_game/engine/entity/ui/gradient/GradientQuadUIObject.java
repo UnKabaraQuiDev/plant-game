@@ -1,4 +1,4 @@
-package lu.kbra.plant_game.engine.entity.ui.texture;
+package lu.kbra.plant_game.engine.entity.ui.gradient;
 
 import javax.swing.GroupLayout.Alignment;
 

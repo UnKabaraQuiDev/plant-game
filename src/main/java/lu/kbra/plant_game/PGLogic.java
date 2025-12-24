@@ -12,6 +12,7 @@ import lu.kbra.plant_game.engine.locale.LocalizationService;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
 import lu.kbra.plant_game.engine.scene.ui.menu.main.MainMenuUIScene;
+import lu.kbra.plant_game.engine.scene.ui.overlay.OverlayUIScene;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.plant_game.engine.window.input.MappingInputHandler;
 import lu.kbra.standalone.gameengine.impl.GameLogic;
@@ -26,6 +27,7 @@ public class PGLogic extends GameLogic {
 
 	private WorldLevelScene worldScene;
 	private MainMenuUIScene mainMenuUIScene;
+	private OverlayUIScene overlayUIScene;
 	private UIScene uiScene;
 	private DeferredCompositor compositor;
 
@@ -48,6 +50,7 @@ public class PGLogic extends GameLogic {
 		this.worldScene = new WorldLevelScene("world", this.cache);
 
 		this.mainMenuUIScene = new MainMenuUIScene(this.cache);
+		this.overlayUIScene = new OverlayUIScene(this.cache);
 		this.uiScene = this.mainMenuUIScene;
 
 		UIObjectFactory.INSTANCE = new UIObjectFactory(this.mainMenuUIScene.getCache(), this.WORKERS, this.RENDER_DISPATCHER);
@@ -55,9 +58,11 @@ public class PGLogic extends GameLogic {
 		LocalizationService.INSTANCE = new LocalizationService(Locale.US);
 
 		this.uiScene.init(this.WORKERS, this.RENDER_DISPATCHER);
+		this.overlayUIScene.init(this.WORKERS, this.RENDER_DISPATCHER);
 		this.worldScene.init(this.WORKERS, this.RENDER_DISPATCHER);
 
 		// this.uiScene = null;
+		this.uiScene = this.overlayUIScene;
 	}
 
 	private final UpdateFrameState frameState = new UpdateFrameState();
@@ -75,6 +80,7 @@ public class PGLogic extends GameLogic {
 		if (this.inputHandler.isKeyPressedOnce(GLFW.GLFW_KEY_H)) {
 			this.uiScene.getCache().dump(System.out);
 			this.worldScene.getCache().dump(System.out);
+			this.overlayUIScene.getCache().dump(System.out);
 			super.cache.dump(System.out);
 		}
 	}

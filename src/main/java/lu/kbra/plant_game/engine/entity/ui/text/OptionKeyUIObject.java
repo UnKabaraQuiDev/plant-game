@@ -4,9 +4,9 @@ import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
 
 import lu.kbra.plant_game.PGLogic;
-import lu.kbra.plant_game.engine.entity.ui.btn.IndexedMenuElement;
 import lu.kbra.plant_game.engine.entity.ui.impl.AbsoluteTransformOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.Focusable;
+import lu.kbra.plant_game.engine.entity.ui.impl.IndexedMenuElement;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsClick;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsInput;
 import lu.kbra.plant_game.engine.entity.ui.impl.Scale2dDir;
@@ -60,7 +60,7 @@ public class OptionKeyUIObject extends ProgrammaticGrowOnHoverTextUIObject
 		this.focused = true;
 		this.setKeyValue(" ");
 		PGLogic.INSTANCE.RENDER_DISPATCHER.post(() -> {
-			this.getTextEmitter().updateText();
+			super.updateText();
 			this.awaitInput = State.WAITING_RELEASE;
 		});
 	}
@@ -76,8 +76,6 @@ public class OptionKeyUIObject extends ProgrammaticGrowOnHoverTextUIObject
 		if (this.awaitInput == State.WAITING_RELEASE && !inputHandler.isMouseButtonPressed(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
 			this.awaitInput = State.WAITING_INPUT;
 		}
-
-		System.err.println(inputHandler.getPressedKey() + " " + inputHandler.getPressedKeyChar());
 
 		final boolean dirty;
 		if (inputHandler.hasPressedKey()) {
@@ -100,7 +98,7 @@ public class OptionKeyUIObject extends ProgrammaticGrowOnHoverTextUIObject
 
 		if (dirty) {
 			PGLogic.INSTANCE.RENDER_DISPATCHER.post(() -> {
-				this.getTextEmitter().updateText();
+				super.updateText();
 				this.awaitInput = State.IDLE;
 				this.focused = false;
 			});
@@ -111,7 +109,7 @@ public class OptionKeyUIObject extends ProgrammaticGrowOnHoverTextUIObject
 		final int length = this.getTextEmitter().getBufferLength();
 		final String loc = LocalizationService.get("key." + super.getKey());
 		value = "[" + (value == null ? " " : value) + "]";
-		this.getTextEmitter().setText(loc + " ".repeat(Math.max(length - loc.length() - value.length(), 0)) + value);
+		super.setText(loc + " ".repeat(Math.max(length - loc.length() - value.length(), 0)) + value);
 	}
 
 	public KeyOption getKeyOption() {

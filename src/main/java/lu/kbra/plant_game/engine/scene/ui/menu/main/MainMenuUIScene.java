@@ -26,6 +26,7 @@ import lu.kbra.plant_game.engine.entity.ui.btn.QuitButtonUIObject;
 import lu.kbra.plant_game.engine.entity.ui.factory.StaticFlatMeshLoader;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory.TextData;
+import lu.kbra.plant_game.engine.entity.ui.gradient.GradientQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.group.LayoutOffsetUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.group.LayoutScrollDrivenUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.group.OffsetUIObjectGroup;
@@ -43,7 +44,6 @@ import lu.kbra.plant_game.engine.entity.ui.text.TextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.VolumeTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.textinput.TextFieldUIObject;
 import lu.kbra.plant_game.engine.entity.ui.texture.CursorUIObject;
-import lu.kbra.plant_game.engine.entity.ui.texture.GradientQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.texture.LargeLogoUIObject;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.render.GradientDirection;
@@ -382,13 +382,6 @@ public class MainMenuUIScene extends UIScene {
 	public void input(final WindowInputHandler inputHandler, final float dTime, final UpdateFrameState frameState) {
 		super.input(inputHandler, dTime, frameState);
 
-		if (inputHandler.wasResized()) {
-			this.camera.getProjection().update(inputHandler.getWindowSize());
-
-			this.optionsEntriesMenuGroup.doLayout();
-			this.mainLeftMenuGroup.doLayout();
-		}
-
 		final OffsetUIObjectGroup current = this.groups[this.currentGroup];
 		if (current instanceof final ScrollContainerUIObjectGroup scrollContainer && scrollContainer.getScrollBar() != null) {
 			scrollContainer.updateScrollBar();
@@ -437,6 +430,7 @@ public class MainMenuUIScene extends UIScene {
 			this.cursor.setSnapAngle(Math.abs(Math.min(z1, z2) - Math.max(z1, z2)));
 		}
 
+		// TODO: This should be managed by layout or self-managed
 		if (this.greenGradient != null) {
 			this.greenGradient.getTransform().getTranslation().x = -this.camera.getProjection().getAspectRatio()
 					+ (this.greenGradient.getTransform().getScale().x * (float) (this.greenGradient.getBounds().getWidth() / 2));

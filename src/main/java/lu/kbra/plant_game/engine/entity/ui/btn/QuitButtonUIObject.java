@@ -5,6 +5,7 @@ import org.joml.Vector4fc;
 
 import lu.kbra.plant_game.PGLogic;
 import lu.kbra.plant_game.engine.entity.ui.impl.AbsoluteTransformedBoundsOwner;
+import lu.kbra.plant_game.engine.entity.ui.impl.IndexedMenuElement;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsClick;
 import lu.kbra.plant_game.engine.entity.ui.impl.Scale2dDir;
 import lu.kbra.plant_game.engine.entity.ui.text.GrowOnHoverTextUIObject;

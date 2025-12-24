@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
-import lu.kbra.plant_game.engine.entity.ui.btn.IndexedMenuElement;
+import lu.kbra.plant_game.engine.entity.ui.impl.IndexedMenuElement;
 import lu.kbra.standalone.gameengine.objs.entity.Component;
 import lu.kbra.standalone.gameengine.objs.entity.ParentAware;
 import lu.kbra.standalone.gameengine.objs.entity.components.SubEntitiesComponent;
