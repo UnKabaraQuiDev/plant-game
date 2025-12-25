@@ -27,20 +27,7 @@ public class FlowLayout implements Layout {
 
 			final Rectangle2D bounds = child.getLocalTransformedBounds().getBounds2D();
 
-			System.err.println(child + " " + bounds);
-
-//			final float scaleY;
-//			final float scaleX;
-//			if (child.hasTransform()) {
-//				final Transform3D transform = child.getTransform();
-//				scaleX = transform.getScale().x();
-//				scaleY = transform.getScale().y();
-//			} else {
-//				scaleX = 1f;
-//				scaleY = 1f;
-//			}
-
-			child.getTransform().translationSet(offsetX, 0, offsetY - (float) bounds.getMinY()).updateMatrix();
+			child.getTransform().translationSet(offsetX - (float) bounds.getMinX(), 0, offsetY - (float) bounds.getMinY()).updateMatrix();
 
 			if (this.vertical) {
 				offsetY += bounds.getHeight() + this.gap;

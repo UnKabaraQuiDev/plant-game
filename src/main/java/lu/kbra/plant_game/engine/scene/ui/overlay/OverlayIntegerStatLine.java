@@ -24,8 +24,10 @@ import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup {
 
+	public static final float POPUP_TEXT_SCALE = 0.8f;
 	public static final int MAX_ITEMS = 4;
 	public static final int VALUE_LENGTH = 5, POPUP_LENGTH = 3;
+	public static final ColorMaterial DEFAULT_TEXT_COLOR = ColorMaterial.WHITE;
 
 	protected TextureUIObject icon;
 	protected IntegerTextUIObject value;
@@ -36,16 +38,20 @@ public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup {
 			return 0;
 		}
 
-		final int r1 = o1 instanceof SpacerUIObject ? 3
-				: (o1 == this.icon) ? 0
+		final int r1 = (o1 == this.icon) ? 0
 				: (o1 == this.value) ? 1
-				: (o1 == this.popup) ? 2
+				: (o1 instanceof SpacerUIObject) ? 2
+				: (o1 == this.popup) ? 3
 				: 4;
-		final int r2 = o2 instanceof SpacerUIObject ? 3
-				: (o2 == this.icon) ? 0
+
+		final int r2 = (o2 == this.icon) ? 0
 				: (o2 == this.value) ? 1
-				: (o2 == this.popup) ? 2
+				: (o2 instanceof SpacerUIObject) ? 2
+				: (o2 == this.popup) ? 3
 				: 4;
+
+		assert r1 != 4 : o1;
+		assert r2 != 4 : o2;
 
 		return Integer.compare(r1, r2);
 	};
@@ -76,13 +82,13 @@ public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup {
 
 		final FutureTriggerLatch<OverlayIntegerStatLine> latch = new FutureTriggerLatch<OverlayIntegerStatLine>(3, this);
 
-		UIObjectFactory.create(iconClazz, this, new Transform3D().scaleMul(iconHeightRatio)).then(workers, (Consumer<T>) obj -> {
+		UIObjectFactory.create(iconClazz, new Transform3D().scaleMul(iconHeightRatio)).then(workers, (Consumer<T>) obj -> {
 			this.icon = obj;
+			this.add(obj);
 			latch.countDown();
 		}).push();
 		UIObjectFactory
 				.create(valueClazz,
-						this,
 						td,
 						this.getId() + "-value",
 						0,
@@ -90,10 +96,11 @@ public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup {
 						true, // padding
 						false, // padding zero
 						VALUE_LENGTH,
-						ColorMaterial.BLACK,
+						DEFAULT_TEXT_COLOR,
 						new Transform3D().scaleMul(textHeightRatio))
 				.then(workers, (Consumer<V>) obj -> {
 					this.value = obj;
+					this.add(obj);
 					latch.countDown();
 				})
 				.push();
@@ -104,15 +111,15 @@ public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup {
 
 		UIObjectFactory
 				.create(popupClazz,
-						this,
 						td,
 						this.getId() + "-popup",
-						ColorMaterial.LIGHT_GREEN,
-						ColorMaterial.BLACK,
+						DEFAULT_TEXT_COLOR,
 						ColorMaterial.RED,
-						new Transform3D().scaleMul(textHeightRatio))
+						ColorMaterial.LIGHT_GREEN,
+						new Transform3D().scaleMul(textHeightRatio * POPUP_TEXT_SCALE))
 				.then(workers, (Consumer<P>) obj -> {
 					this.popup = obj;
+					this.add(obj);
 					latch.countDown();
 				})
 				.push();
@@ -122,9 +129,7 @@ public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup {
 
 	@Override
 	public void doSort() {
-		synchronized (this.getSubEntitiesLock()) {
-			this.getSubEntitiesComponent().getEntities().sort(this.comparator);
-		}
+		this.getSubEntitiesComponent().sort(this.comparator);
 	}
 
 	public TextureUIObject getIcon() {

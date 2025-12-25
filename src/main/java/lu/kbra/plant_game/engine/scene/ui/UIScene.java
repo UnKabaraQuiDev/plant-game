@@ -1,6 +1,5 @@
 package lu.kbra.plant_game.engine.scene.ui;
 
-import java.awt.Shape;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.Comparator;
@@ -218,7 +217,7 @@ public class UIScene extends Scene3D implements BoundsOwner {
 	}
 
 	@Override
-	public Shape getBounds() {
+	public Rectangle2D.Float getBounds() {
 		final float width = this.getCamera().getProjection().getAspectRatio();
 		return new Rectangle2D.Float(-width / 2, -1, width, 2);
 	}

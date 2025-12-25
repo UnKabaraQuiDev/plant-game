@@ -127,9 +127,7 @@ public class UIObjectGroup extends UIObject implements ObjectGroup<UIObject> {
 
 	@Override
 	public void doSort() {
-		synchronized (this.getSubEntitiesLock()) {
-			this.getSubEntitiesComponent().getEntities().sort(INDEX_COMPARATOR);
-		}
+		this.getSubEntitiesComponent().sort(INDEX_COMPARATOR);
 	}
 
 	@Override

@@ -41,14 +41,16 @@ public class SignedIntegerTextUIObject extends IntegerTextUIObject {
 
 	@Override
 	public void updateTextContent() {
-		super.updateTextContent();
 		if (this.value < 0) {
 			super.setColorMaterial(this.negativeColor);
-		} else if (this.value == 0) {
-			super.setColorMaterial(this.neutralColor);
 		} else if (this.value > 0) {
 			super.setColorMaterial(this.positiveColor);
+		} else {
+			super.setColorMaterial(this.neutralColor);
 		}
+		System.err.println(this.negativeColor + " " + this.positiveColor + " " + this.neutralColor);
+		System.err.println("mat: " + super.getColorMaterial());
+		super.updateTextContent();
 	}
 
 	public ColorMaterial getNeutralColor() {

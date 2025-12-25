@@ -1,11 +1,8 @@
 package lu.kbra.plant_game.engine.entity.ui.text;
 
-import org.joml.Vector4fc;
-
 import lu.pcy113.pclib.PCUtils;
 
 import lu.kbra.plant_game.PGLogic;
-import lu.kbra.plant_game.engine.mesh.TintOwner;
 import lu.kbra.plant_game.engine.util.annotation.BufferSize;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.plant_game.generated.ColorMaterial;
@@ -14,7 +11,7 @@ import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 @DataPath("localization:string-placeholder")
 @BufferSize(10)
-public class IntegerTextUIObject extends ProgrammaticTextUIObject implements TintOwner {
+public class IntegerTextUIObject extends ProgrammaticTextUIObject {
 
 	protected final String key;
 	protected int value;
@@ -22,7 +19,7 @@ public class IntegerTextUIObject extends ProgrammaticTextUIObject implements Tin
 	protected boolean padding = false;
 	protected boolean paddingZero = false;
 	protected int paddingLength = 4;
-	protected ColorMaterial colorMaterial;
+	protected ColorMaterial colorMaterial = ColorMaterial.WHITE;
 
 	public IntegerTextUIObject(final String str, final TextEmitter text, final String key) {
 		super(str, text, key);
@@ -178,11 +175,9 @@ public class IntegerTextUIObject extends ProgrammaticTextUIObject implements Tin
 												this.paddingZero ? "0" : " ",
 												this.paddingLength + (this.forceSign ? -1 : 0))
 								: Integer.toString(this.value)));
-	}
-
-	@Override
-	public void updateText() {
-		super.updateText();
+		if (this.colorMaterial != null) {
+			this.getTextEmitter().setForegroundColor(this.colorMaterial.getColor());
+		}
 	}
 
 	public int getValue() {
@@ -223,16 +218,6 @@ public class IntegerTextUIObject extends ProgrammaticTextUIObject implements Tin
 
 	public void setPaddingLength(final int paddingLength) {
 		this.paddingLength = paddingLength;
-	}
-
-	@Override
-	public Vector4fc getTint() {
-		return this.colorMaterial.getColor();
-	}
-
-	@Override
-	public void setTint(final Vector4fc tint) {
-		throw new UnsupportedOperationException();
 	}
 
 	public ColorMaterial getColorMaterial() {

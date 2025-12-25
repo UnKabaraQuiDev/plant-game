@@ -1,12 +1,14 @@
 package lu.kbra.plant_game.engine.scene.ui.overlay;
 
+import java.awt.geom.Rectangle2D;
+
 import lu.kbra.plant_game.engine.UpdateFrameState;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
-import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
-import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory.TextData;
 import lu.kbra.plant_game.engine.entity.ui.group.LayoutOffsetUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.text.IntegerTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.SignedIntegerTextUIObject;
+import lu.kbra.plant_game.engine.entity.ui.texture.EnergyIconUIObject;
+import lu.kbra.plant_game.engine.entity.ui.texture.MoneyIconUIObject;
 import lu.kbra.plant_game.engine.entity.ui.texture.WaterIconUIObject;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
@@ -15,7 +17,6 @@ import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.WorkerDispatcher;
-import lu.kbra.standalone.gameengine.utils.gl.consts.TextAlignment;
 
 public class OverlayUIScene extends UIScene {
 
@@ -34,10 +35,7 @@ public class OverlayUIScene extends UIScene {
 
 		final float iconScale = 0.1f, textScale = iconScale * 2;
 
-		final TextData td = new TextData(UIObjectFactory.DEFAULT_CHAR_SIZE, TextAlignment.TEXT_RIGHT, 4);
-
 		final OverlayIntegerStatLine waterGroup = new OverlayIntegerStatLine("water");
-
 		waterGroup
 				.init(workers,
 						renderDispatcher,
@@ -45,63 +43,54 @@ public class OverlayUIScene extends UIScene {
 						WaterIconUIObject.class,
 						IntegerTextUIObject.class,
 						SignedIntegerTextUIObject.class)
-				.then(water -> {
-					water.getValue().setValue(1000).flushValue();
+				.then(obj -> {
+					obj.getValue().setValue(1000).flushValue();
 
-					water.getPopup().setValue(999).flushValue();
+					obj.getPopup().setValue(999).flushValue();
 				});
-
 		this.statsGroup.add(waterGroup);
 
-//		this.<MoneyIconUIObject>add(workers, MoneyIconUIObject.class, obj -> this.moneyIcon = obj, new Transform3D().scaleMul(iconScale));
-//		this
-//				.<EnergyIconUIObject>add(workers,
-//						EnergyIconUIObject.class,
-//						obj -> this.energyIcon = obj,
-//						new Transform3D().scaleMul(iconScale));
-//
-//		this
-//				.<IntegerTextUIObject>add(workers,
-//						IntegerTextUIObject.class,
-//						obj -> this.moneyText = obj,
-//						td,
-//						"money-count",
-//						new Transform3D().scaleMul(textScale));
-//		this
-//				.<IntegerTextUIObject>add(workers,
-//						IntegerTextUIObject.class,
-//						obj -> this.energyText = obj,
-//						td,
-//						"energy-count",
-//						new Transform3D().scaleMul(textScale));
+		final OverlayIntegerStatLine moneyGroup = new OverlayIntegerStatLine("money");
+		moneyGroup
+				.init(workers,
+						renderDispatcher,
+						textScale,
+						MoneyIconUIObject.class,
+						IntegerTextUIObject.class,
+						SignedIntegerTextUIObject.class)
+				.then(obj -> {
+					obj.getValue().setValue(65).flushValue();
 
-		td.setBufferSize(3);
+					obj.getPopup().setValue(10).flushValue();
+				});
+		this.statsGroup.add(moneyGroup);
 
-//		this
-//				.<SignedIntegerTextUIObject>add(workers,
-//						SignedIntegerTextUIObject.class,
-//						obj -> this.moneyPopupText = obj,
-//						td,
-//						"money-popup",
-//						ColorMaterial.LIGHT_GREEN,
-//						ColorMaterial.BLACK,
-//						ColorMaterial.RED,
-//						new Transform3D().scaleMul(textScale));
-//		this
-//				.<SignedIntegerTextUIObject>add(workers,
-//						SignedIntegerTextUIObject.class,
-//						obj -> this.energyPopupText = obj,
-//						td,
-//						"energy-popup",
-//						ColorMaterial.LIGHT_GREEN,
-//						ColorMaterial.BLACK,
-//						ColorMaterial.RED,
-//						new Transform3D().scaleMul(textScale));
+		final OverlayIntegerStatLine energyGroup = new OverlayIntegerStatLine("energy");
+		energyGroup
+				.init(workers,
+						renderDispatcher,
+						textScale,
+						EnergyIconUIObject.class,
+						IntegerTextUIObject.class,
+						SignedIntegerTextUIObject.class)
+				.then(obj -> {
+					obj.getValue().setValue(99999).flushValue();
+
+					obj.getPopup().setValue(100).flushValue();
+				});
+		this.statsGroup.add(energyGroup);
 	}
 
 	@Override
 	public void input(final WindowInputHandler inputHandler, final float dTime, final UpdateFrameState frameState) {
 		super.input(inputHandler, dTime, frameState);
+
+		if (inputHandler.wasResized()) {
+			this.statsGroup.doLayout();
+			final Rectangle2D bounds = this.statsGroup.getLocalTransformedBounds().getBounds2D();
+			this.statsGroup.getTransform().getTranslation().x = (float) super.getBounds().getMinX();
+			this.statsGroup.getTransform().updateMatrix();
+		}
 	}
 
 	@Override
