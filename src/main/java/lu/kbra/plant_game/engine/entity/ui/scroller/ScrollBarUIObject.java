@@ -6,6 +6,7 @@ import org.joml.Vector4f;
 
 import lu.pcy113.pclib.PCUtils;
 
+import lu.kbra.plant_game.engine.entity.ui.prim.FlatQuadUIObject;
 import lu.kbra.plant_game.engine.mesh.TexturedQuadMesh;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.plant_game.generated.ColorMaterial;

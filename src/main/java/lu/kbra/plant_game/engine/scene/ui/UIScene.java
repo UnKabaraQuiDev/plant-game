@@ -43,7 +43,9 @@ import lu.kbra.standalone.gameengine.scene.camera.Camera;
 public class UIScene extends Scene3D implements BoundsOwner {
 
 	public static final Comparator<Entity> DEPTH_COMPARATOR = Comparator
-			.comparing((final Entity e) -> e instanceof Transform3DOwner ? ((Transform3DOwner) e).getTransform().getTranslation().y : 0f);
+			.comparing((final Entity e) -> e instanceof Transform3DOwner && ((Transform3DOwner) e).hasTransform()
+					? ((Transform3DOwner) e).getTransform().getTranslation().y
+					: 0f);
 
 	protected final CacheManager uiCache;
 

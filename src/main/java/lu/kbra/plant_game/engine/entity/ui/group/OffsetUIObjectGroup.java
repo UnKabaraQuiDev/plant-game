@@ -3,6 +3,7 @@ package lu.kbra.plant_game.engine.entity.ui.group;
 import lu.kbra.plant_game.engine.entity.impl.Transform3DOwner;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.TransformedBoundsOwner;
+import lu.kbra.plant_game.engine.scene.ui.UIScene;
 import lu.kbra.standalone.gameengine.objs.entity.components.Transform3DComponent;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
@@ -16,9 +17,23 @@ public class OffsetUIObjectGroup extends UIObjectGroup implements Transform3DOwn
 	}
 
 	public OffsetUIObjectGroup(final String str, final UIObjectGroup parent, final UIObject... values) {
-		super(str, values);
+		super(str, parent, values);
 		super.addComponent(this.transform3dComponent = new Transform3DComponent());
-		parent.add(this);
+	}
+
+	public OffsetUIObjectGroup(final String str, final UIScene parent, final UIObject... values) {
+		super(str, parent, values);
+		super.addComponent(this.transform3dComponent = new Transform3DComponent());
+	}
+
+	public OffsetUIObjectGroup(final String str, final UIObjectGroup parent, final Transform3D transform, final UIObject... values) {
+		super(str, parent, values);
+		super.addComponent(this.transform3dComponent = new Transform3DComponent(transform));
+	}
+
+	public OffsetUIObjectGroup(final String str, final UIScene parent, final Transform3D transform, final UIObject... values) {
+		super(str, parent, values);
+		super.addComponent(this.transform3dComponent = new Transform3DComponent(transform));
 	}
 
 	public OffsetUIObjectGroup(final String str, final Transform3D transform, final UIObject... values) {

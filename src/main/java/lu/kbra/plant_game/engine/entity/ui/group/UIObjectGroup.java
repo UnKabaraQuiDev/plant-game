@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.IndexOwner;
+import lu.kbra.plant_game.engine.scene.ui.UIScene;
 import lu.kbra.standalone.gameengine.objs.entity.Component;
 import lu.kbra.standalone.gameengine.objs.entity.ParentAware;
 import lu.kbra.standalone.gameengine.objs.entity.components.SubEntitiesComponent;
@@ -43,6 +44,16 @@ public class UIObjectGroup extends UIObject implements ObjectGroup<UIObject> {
 		super(str, null);
 		super.addComponent(this.subEntitiesComponent = new SubEntitiesComponent<>(
 				Arrays.stream(values).collect(Collectors.toCollection(ArrayList::new))));
+	}
+
+	public UIObjectGroup(final String str, final UIObjectGroup parent, final UIObject... values) {
+		this(str, values);
+		parent.add(this);
+	}
+
+	public UIObjectGroup(final String str, final UIScene parent, final UIObject... values) {
+		this(str, values);
+		parent.addEntity(this);
 	}
 
 	@Override

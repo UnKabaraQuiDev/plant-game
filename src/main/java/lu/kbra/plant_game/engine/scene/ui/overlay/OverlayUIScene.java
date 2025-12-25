@@ -2,8 +2,11 @@ package lu.kbra.plant_game.engine.scene.ui.overlay;
 
 import java.awt.geom.Rectangle2D;
 
+import lu.kbra.plant_game.PGLogic;
 import lu.kbra.plant_game.engine.UpdateFrameState;
+import lu.kbra.plant_game.engine.entity.ui.bar.ProgressBarUIObject;
 import lu.kbra.plant_game.engine.entity.ui.group.LayoutOffsetUIObjectGroup;
+import lu.kbra.plant_game.engine.entity.ui.prim.FlatQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.IntegerTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.SignedIntegerTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.texture.EnergyIconUIObject;
@@ -16,6 +19,8 @@ import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.WorkerDispatcher;
+import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
+import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 public class OverlayUIScene extends UIScene {
 
@@ -23,6 +28,7 @@ public class OverlayUIScene extends UIScene {
 
 	protected final LayoutOffsetUIObjectGroup statsGroup = new LayoutOffsetUIObjectGroup("stats", new FlowLayout(true, 0.08f));
 	protected OverlayIntegerStatLine waterGroup, moneyGroup, energyGroup;
+	protected ProgressBarUIObject progressBar;
 
 	public OverlayUIScene(final CacheManager parent) {
 		super("game-overlay", parent);
@@ -78,6 +84,9 @@ public class OverlayUIScene extends UIScene {
 					obj.getPopup().setValue(100).flushValue();
 				});
 		this.statsGroup.add(this.energyGroup);
+
+		this.progressBar = new ProgressBarUIObject("...", this, new Transform3D(), 0.02f, 0.5f);
+		this.progressBar.init(workers, renderDispatcher, FlatQuadUIObject.class, FlatQuadUIObject.class);
 	}
 
 	@Override
@@ -91,6 +100,10 @@ public class OverlayUIScene extends UIScene {
 		this.statsGroup.getTransform().scaleSet(0.35f);
 		this.statsGroup.getTransform().updateMatrix();
 //		}
+
+		this.progressBar.getTransform().scaleSet(2, 1, 0.1f).update();
+		this.progressBar.setForegroundColor(GameEngineUtils.hsvToColorToVec4f((float) Math.sin(PGLogic.TOTAL_TIME()), 1, 1, 1));
+		this.progressBar.setValue((float) Math.sin(PGLogic.TOTAL_TIME()) / 2 + 0.5f).updateScaling();
 	}
 
 	@Override

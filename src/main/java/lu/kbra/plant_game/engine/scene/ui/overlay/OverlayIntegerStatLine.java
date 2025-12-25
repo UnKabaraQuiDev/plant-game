@@ -1,16 +1,15 @@
 package lu.kbra.plant_game.engine.scene.ui.overlay;
 
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.function.Consumer;
 
 import lu.pcy113.pclib.concurrency.FutureTriggerLatch;
 
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
+import lu.kbra.plant_game.engine.entity.ui.bar.LimitedObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory.TextData;
 import lu.kbra.plant_game.engine.entity.ui.group.LayoutOffsetUIObjectGroup;
-import lu.kbra.plant_game.engine.entity.ui.group.ObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.group.UIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.layout.SpacerUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.IntegerTextUIObject;
@@ -22,10 +21,9 @@ import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextAlignment;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup {
+public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup implements LimitedObjectGroup<UIObject> {
 
 	public static final float POPUP_TEXT_SCALE = 0.6f;
-	public static final int MAX_ITEMS = 4;
 	public static final int VALUE_LENGTH = 5, POPUP_LENGTH = 3;
 	public static final ColorMaterial DEFAULT_TEXT_COLOR = ColorMaterial.WHITE;
 	public static final float gap = 0.08f;
@@ -108,8 +106,6 @@ public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup {
 
 		td.setBufferSize(POPUP_LENGTH + 1);
 
-//		this.add(UIObjectFactory.createSpacer(height / 2, height));
-
 		UIObjectFactory
 				.create(popupClazz,
 						td,
@@ -146,35 +142,7 @@ public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup {
 	}
 
 	@Override
-	public <V extends UIObject> V add(final V e) {
-		if (this.size() >= MAX_ITEMS) {
-			throw new UnsupportedOperationException("Max. " + MAX_ITEMS + " columns: " + this.getSubEntities());
-		}
-		return super.add(e);
+	public int getMaxItems() {
+		return 3;
 	}
-
-	@Override
-	public boolean addAll(final Collection<? extends UIObject> c) {
-		if (this.size() >= MAX_ITEMS || this.size() + c.size() > MAX_ITEMS) {
-			throw new UnsupportedOperationException("Max. " + MAX_ITEMS + " columns: " + this.getSubEntities());
-		}
-		return super.addAll(c);
-	}
-
-	@Override
-	public <V extends UIObject> V[] addAll(final V... e) {
-		if (this.size() >= MAX_ITEMS || this.size() + e.length > MAX_ITEMS) {
-			throw new UnsupportedOperationException("Max. " + MAX_ITEMS + " columns: " + this.getSubEntities());
-		}
-		return super.addAll(e);
-	}
-
-	@Override
-	public boolean addChildren(final ObjectGroup<? extends UIObject> c) {
-		if (this.size() >= MAX_ITEMS || this.size() + c.size() > MAX_ITEMS) {
-			throw new UnsupportedOperationException("Max. " + MAX_ITEMS + " columns: " + this.getSubEntities());
-		}
-		return super.addChildren(c);
-	}
-
 }

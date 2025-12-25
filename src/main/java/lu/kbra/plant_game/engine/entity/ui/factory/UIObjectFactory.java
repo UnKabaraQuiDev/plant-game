@@ -15,7 +15,7 @@ import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.gradient.GradientQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.group.ObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.layout.SpacerUIObject;
-import lu.kbra.plant_game.engine.entity.ui.scroller.FlatQuadUIObject;
+import lu.kbra.plant_game.engine.entity.ui.prim.FlatQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.ProgrammaticTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.TextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.texture.TextureUIObject;
@@ -190,17 +190,13 @@ public class UIObjectFactory {
 				}
 			}
 
-			final String uName = td.name == null ? clazz.getSimpleName() + "@" + System.nanoTime() : td.name;
+			final String uName = td.name == null ? clazz.getSimpleName() + "#" + System.nanoTime() : td.name;
 
 			if (ProgrammaticTextUIObject.class.isAssignableFrom(clazz)) {
 				return StaticTextLoader
 						.getFuture(this.cache, uName, key, td, this.loader, this.render)
 						.then(this.loader, (ThrowingFunction<TextEmitter, T, Throwable>) te -> {
-							final T instance = UIObjectRegistry
-									.create(clazz,
-											PCUtils
-													.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), te },
-															nargs));
+							final T instance = UIObjectRegistry.create(clazz, PCUtils.combineArrays(new Object[] { uName, te }, nargs));
 							return instance;
 						})
 						.then(this.render, (Function<T, T>) t -> {
