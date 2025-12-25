@@ -4,7 +4,6 @@ import java.awt.geom.Rectangle2D;
 import java.util.List;
 
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
-import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 public class FlowLayout implements Layout {
 
@@ -17,7 +16,7 @@ public class FlowLayout implements Layout {
 	}
 
 	@Override
-	public void doLayout(final List<UIObject> children, final float aspectRatio) {
+	public void doLayout(final List<UIObject> children) {
 		float offsetX = 0;
 		float offsetY = 0;
 
@@ -26,25 +25,27 @@ public class FlowLayout implements Layout {
 				continue;
 			}
 
-			final Rectangle2D bounds = child.getBounds().getBounds2D();
+			final Rectangle2D bounds = child.getLocalTransformedBounds().getBounds2D();
 
-			final float scaleY;
-			final float scaleX;
-			if (child.hasTransform()) {
-				final Transform3D transform = child.getTransform();
-				scaleX = transform.getScale().x();
-				scaleY = transform.getScale().y();
-			} else {
-				scaleX = 1f;
-				scaleY = 1f;
-			}
+			System.err.println(child + " " + bounds);
 
-			child.getTransform().translationSet(offsetX, 0, offsetY - (float) bounds.getMinY() * scaleY).updateMatrix();
+//			final float scaleY;
+//			final float scaleX;
+//			if (child.hasTransform()) {
+//				final Transform3D transform = child.getTransform();
+//				scaleX = transform.getScale().x();
+//				scaleY = transform.getScale().y();
+//			} else {
+//				scaleX = 1f;
+//				scaleY = 1f;
+//			}
+
+			child.getTransform().translationSet(offsetX, 0, offsetY - (float) bounds.getMinY()).updateMatrix();
 
 			if (this.vertical) {
-				offsetY += bounds.getHeight() * scaleY + this.gap;
+				offsetY += bounds.getHeight() + this.gap;
 			} else {
-				offsetX += bounds.getWidth() * scaleX + this.gap;
+				offsetX += bounds.getWidth() + this.gap;
 			}
 		}
 	}

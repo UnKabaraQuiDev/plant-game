@@ -1,7 +1,7 @@
 package lu.kbra.plant_game.engine.entity.ui.btn;
 
 import lu.kbra.plant_game.engine.entity.ui.impl.AbsoluteTransformedBoundsOwner;
-import lu.kbra.plant_game.engine.entity.ui.impl.IndexedMenuElement;
+import lu.kbra.plant_game.engine.entity.ui.impl.IndexOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsClick;
 import lu.kbra.plant_game.engine.entity.ui.impl.Scale2dDir;
 import lu.kbra.plant_game.engine.entity.ui.text.GrowOnHoverTextUIObject;
@@ -14,7 +14,7 @@ import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3DPivot;
 
 @DataPath("localization:btn.play")
-public class PlayButtonUIObject extends GrowOnHoverTextUIObject implements NeedsClick, IndexedMenuElement, AbsoluteTransformedBoundsOwner {
+public class PlayButtonUIObject extends GrowOnHoverTextUIObject implements NeedsClick, IndexOwner, AbsoluteTransformedBoundsOwner {
 
 	public PlayButtonUIObject(final String str, final TextEmitter text) {
 		super(str, text, Scale2dDir.HORIZONTAL);

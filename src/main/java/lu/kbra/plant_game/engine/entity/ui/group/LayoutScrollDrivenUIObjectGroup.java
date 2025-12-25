@@ -68,12 +68,11 @@ public class LayoutScrollDrivenUIObjectGroup extends ScrollDrivenUIObjectGroup i
 				if (e instanceof final LayoutParent lp) {
 					lp.doLayout();
 				}
-				if (e instanceof final UIObjectGroup objGroup) {
-					objGroup.recomputeBounds();
-				}
 			});
 		}
-		this.layout.doLayout(this.getSubEntities(), this.getSceneParent().getCamera().getProjection().getAspectRatio());
+		if (this.layout != null) {
+			this.layout.doLayout(this.getSubEntities());
+		}
 		this.recomputeBounds();
 	}
 

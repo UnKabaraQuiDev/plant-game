@@ -13,23 +13,25 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
-import lu.kbra.plant_game.engine.entity.ui.impl.IndexedMenuElement;
+import lu.kbra.plant_game.engine.entity.ui.impl.IndexOwner;
 import lu.kbra.standalone.gameengine.objs.entity.Component;
 import lu.kbra.standalone.gameengine.objs.entity.ParentAware;
 import lu.kbra.standalone.gameengine.objs.entity.components.SubEntitiesComponent;
 
 public class UIObjectGroup extends UIObject implements ObjectGroup<UIObject> {
 
+	public static final Comparator<UIObject> INDEX_COMPARATOR = Comparator.comparingInt(b -> {
+		if (b instanceof final IndexOwner ime) {
+			return ime.getIndex();
+		}
+		return 0;
+	});
+
 	protected SubEntitiesComponent<UIObject> subEntitiesComponent;
 
 	protected Shape bounds;
 
 	protected Object parent;
-
-	public UIObjectGroup(final String str, final Component... cs) {
-		super(str, null);
-		super.addComponent(this.subEntitiesComponent = new SubEntitiesComponent<>());
-	}
 
 	public UIObjectGroup(final String str, final List<UIObject> entities, final Component... cs) {
 		super(str, null);
@@ -69,9 +71,8 @@ public class UIObjectGroup extends UIObject implements ObjectGroup<UIObject> {
 	public <V extends UIObject> V add(final V e) {
 		synchronized (this.getSubEntitiesLock()) {
 			this.getSubEntitiesComponent().getEntities().add(e);
-			if (e instanceof IndexedMenuElement) {
-				this.doSort();
-			}
+
+			this.doSort();
 		}
 		if (e instanceof final ParentAware pa) {
 			pa.setParent(this);
@@ -81,15 +82,20 @@ public class UIObjectGroup extends UIObject implements ObjectGroup<UIObject> {
 	}
 
 	@Override
-	public void doSort() {
+	public <V extends UIObject> V[] addAll(final V... e) {
 		synchronized (this.getSubEntitiesLock()) {
-			this.getSubEntitiesComponent().getEntities().sort(Comparator.comparingInt(b -> {
-				if (b instanceof final IndexedMenuElement ime) {
-					return ime.getIndex();
+			for (final V v : e) {
+				this.getSubEntitiesComponent().getEntities().add(v);
+				if (v instanceof final ParentAware pa) {
+					pa.setParent(this);
 				}
-				return 0;
-			}));
+			}
+
+			this.doSort();
 		}
+
+		this.recomputeBounds();
+		return e;
 	}
 
 	@Override
@@ -97,9 +103,8 @@ public class UIObjectGroup extends UIObject implements ObjectGroup<UIObject> {
 		final boolean result;
 		synchronized (this.getSubEntitiesLock()) {
 			result = this.getSubEntitiesComponent().getEntities().addAll(c);
-			if (c.parallelStream().anyMatch(IndexedMenuElement.class::isInstance)) {
-				this.doSort();
-			}
+
+			this.doSort();
 		}
 		c.stream().filter(ParentAware.class::isInstance).forEach(b -> b.setParent(this));
 		this.recomputeBounds();
@@ -107,18 +112,24 @@ public class UIObjectGroup extends UIObject implements ObjectGroup<UIObject> {
 	}
 
 	@Override
-	public boolean addAll(final ObjectGroup<? extends UIObject> c) {
+	public boolean addChildren(final ObjectGroup<? extends UIObject> c) {
 		final boolean result;
 		synchronized (this.getSubEntitiesLock()) {
 			final List<UIObject> list = this.getSubEntitiesComponent().getEntities();
 			result = c.stream().map(list::add).collect(Collectors.reducing(false, (a, b) -> (a || b)));
-			if (c.parallelStream().anyMatch(IndexedMenuElement.class::isInstance)) {
-				this.doSort();
-			}
+
+			this.doSort();
 		}
 		c.getSubEntities().stream().filter(ParentAware.class::isInstance).forEach(b -> b.setParent(this));
 		this.recomputeBounds();
 		return result;
+	}
+
+	@Override
+	public void doSort() {
+		synchronized (this.getSubEntitiesLock()) {
+			this.getSubEntitiesComponent().getEntities().sort(INDEX_COMPARATOR);
+		}
 	}
 
 	@Override

@@ -13,11 +13,13 @@ public interface ObjectGroup<T extends Entity> extends Iterable<T>, ParentAware 
 
 	T get(int index);
 
-	boolean addAll(ObjectGroup<? extends UIObject> c);
+	boolean addChildren(ObjectGroup<? extends UIObject> c);
 
 	boolean addAll(Collection<? extends UIObject> c);
 
 	<V extends T> V add(V e);
+
+	<V extends T> V[] addAll(V... e);
 
 	boolean contains(UIObject o);
 

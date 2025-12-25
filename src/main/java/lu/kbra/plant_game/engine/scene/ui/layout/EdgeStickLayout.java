@@ -22,7 +22,7 @@ public class EdgeStickLayout extends FlowLayout implements BoundsOwnerParentAwar
 	}
 
 	@Override
-	public void doLayout(final List<UIObject> children, final float aspectRatio) {
+	public void doLayout(final List<UIObject> children) {
 		if (children.isEmpty()) {
 			return;
 		}

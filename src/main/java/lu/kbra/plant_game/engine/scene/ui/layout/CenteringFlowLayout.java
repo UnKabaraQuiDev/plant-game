@@ -17,7 +17,7 @@ public class CenteringFlowLayout extends FlowLayout implements SceneParentAware 
 	}
 
 	@Override
-	public void doLayout(final List<UIObject> children, final float aspectRatio) {
+	public void doLayout(final List<UIObject> children) {
 		if (children == null || children.isEmpty()) {
 			return;
 		}

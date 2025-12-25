@@ -1,6 +1,6 @@
 package lu.kbra.plant_game.engine.entity.ui.impl;
 
-public interface IndexedMenuElement {
+public interface IndexOwner {
 
 	int getIndex();
 

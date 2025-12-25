@@ -19,21 +19,22 @@ import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 public interface TransformedBoundsOwner extends BoundsOwner, Transform3DOwner {
 
-	@Deprecated
 	default Shape getLocalTransformedBounds() {
 		final Shape bounds = this.getBounds();
 
 		final Transform3D transform = this.getTransform();
-		final Vector3fc pos3 = transform == null ? GameEngine.ZERO : transform.getTranslation();
+//		final Vector3fc pos3 = transform == null ? GameEngine.ZERO : transform.getTranslation();
+		final Vector3fc scale = transform == null ? GameEngine.IDENTITY_VECTOR3F : transform.getScale();
 		final Quaternionfc rotation = transform == null ? GameEngine.IDENTITY_QUATERNIONF : transform.getRotation();
 
-		final Vector2fc pos = GeoPlane.XZ.projectToPlane(pos3);
+//		final Vector2fc pos = GeoPlane.XZ.projectToPlane(pos3);
 
 		final float angleY = rotation.getEulerAnglesXYZ(new Vector3f()).y;
 
 		final AffineTransform affine = new AffineTransform();
-		affine.translate(pos.x(), pos.y());
+//		affine.translate(pos.x(), pos.y());
 		affine.rotate(-angleY);
+		affine.scale(scale.x(), scale.z());
 
 		return affine.createTransformedShape(bounds);
 	}

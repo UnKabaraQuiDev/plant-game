@@ -171,12 +171,12 @@ public class IntegerTextUIObject extends ProgrammaticTextUIObject implements Tin
 
 	public void updateTextContent() {
 		super.getTextEmitter()
-				.setText(
-						(this.forceSign && this.value >= 0 ? "+" : "") + (this.padding
+				.setText((this.forceSign && this.value >= 0 ? "+" : "")
+						+ (this.padding
 								? PCUtils
 										.leftPadString(Integer.toString(this.value),
 												this.paddingZero ? "0" : " ",
-												this.paddingLength + (this.forceSign && this.value >= 0 ? -1 : 0))
+												this.paddingLength + (this.forceSign ? -1 : 0))
 								: Integer.toString(this.value)));
 	}
 
@@ -189,13 +189,14 @@ public class IntegerTextUIObject extends ProgrammaticTextUIObject implements Tin
 		return this.value;
 	}
 
-	public void setValue(final int value) {
+	public IntegerTextUIObject setValue(final int value) {
 		this.value = value;
+		return this;
 	}
 
 	public void flushValue() {
+		this.updateTextContent();
 		PGLogic.INSTANCE.RENDER_DISPATCHER.post(() -> {
-			this.updateTextContent();
 			this.updateText();
 		});
 	}

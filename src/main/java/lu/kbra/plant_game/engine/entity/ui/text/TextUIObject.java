@@ -28,9 +28,7 @@ public class TextUIObject extends UIObject {
 	public Shape getBounds() {
 		assert this.textEmitterComponent.getTextEmitter().getLineCount() == 1;
 		return GameEngineUtils
-				.toRectangleBounds(this.textEmitterComponent.getTextEmitter().getTextBounds(),
-						this.textEmitterComponent.getTextEmitter().getTextAlignment().asSwingAlignment(),
-						Alignment.CENTER);
+				.toRectangleBounds(this.textEmitterComponent.getTextEmitter().getTextBounds(), Alignment.LEADING, Alignment.CENTER);
 	}
 
 	public TextEmitterComponent getTextEmitterComponent() {

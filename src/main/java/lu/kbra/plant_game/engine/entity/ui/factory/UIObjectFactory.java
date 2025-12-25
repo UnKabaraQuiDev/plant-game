@@ -334,4 +334,8 @@ public class UIObjectFactory {
 		return new SpacerUIObject("spacer-" + System.nanoTime() % 200_000, null, new Transform3D(), new Vector2f(x, y));
 	}
 
+	public static UIObject createSpacer(final float s) {
+		return new SpacerUIObject("spacer-" + System.nanoTime() % 200_000, null, new Transform3D(), new Vector2f(s));
+	}
+
 }

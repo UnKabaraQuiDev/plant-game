@@ -5,7 +5,7 @@ import org.joml.Vector4fc;
 
 import lu.kbra.plant_game.PGLogic;
 import lu.kbra.plant_game.engine.entity.ui.impl.AbsoluteTransformedBoundsOwner;
-import lu.kbra.plant_game.engine.entity.ui.impl.IndexedMenuElement;
+import lu.kbra.plant_game.engine.entity.ui.impl.IndexOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsClick;
 import lu.kbra.plant_game.engine.entity.ui.impl.Scale2dDir;
 import lu.kbra.plant_game.engine.entity.ui.text.GrowOnHoverTextUIObject;
@@ -16,7 +16,7 @@ import lu.kbra.standalone.gameengine.scene.Scene;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 @DataPath("localization:btn.quit")
-public class QuitButtonUIObject extends GrowOnHoverTextUIObject implements NeedsClick, IndexedMenuElement, AbsoluteTransformedBoundsOwner {
+public class QuitButtonUIObject extends GrowOnHoverTextUIObject implements NeedsClick, IndexOwner, AbsoluteTransformedBoundsOwner {
 
 	public static final Vector4fc TARGET_RED = new Vector4f(1, 0.25f, 0.25f, 1);
 
