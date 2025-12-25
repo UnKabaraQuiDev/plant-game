@@ -1,6 +1,5 @@
 package lu.kbra.plant_game.engine.entity.ui.factory;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -174,8 +173,6 @@ public class UIObjectFactory {
 
 			final String key = cDataPath.substring(cDataPath.indexOf(":") + 1);
 
-			System.err.println("args: " + Arrays.toString(args));
-
 			TextData td;
 			final Object[] nargs;
 			if (args.length > 0 && args[0] instanceof final TextData vvec) {
@@ -207,7 +204,6 @@ public class UIObjectFactory {
 							return instance;
 						})
 						.then(this.render, (Function<T, T>) t -> {
-							System.err.println("UPDATING TEXT: " + t);
 							((ProgrammaticTextUIObject) t).updateText();
 							return t;
 						});

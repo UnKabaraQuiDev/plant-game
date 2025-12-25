@@ -48,8 +48,6 @@ public class SignedIntegerTextUIObject extends IntegerTextUIObject {
 		} else {
 			super.setColorMaterial(this.neutralColor);
 		}
-		System.err.println(this.negativeColor + " " + this.positiveColor + " " + this.neutralColor);
-		System.err.println("mat: " + super.getColorMaterial());
 		super.updateTextContent();
 	}
 

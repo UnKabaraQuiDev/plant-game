@@ -35,8 +35,6 @@ public class StaticTextLoader {
 		final int bufferSize = td.getBufferSize();
 
 		return new TaskFuture<>(loader, (ThrowingSupplier<String, Throwable>) () -> {
-			System.err.println("creating text: " + meshName + " " + key);
-
 			waitOrCreateLock(meshName);
 
 			if (cache.hasTextEmitter(meshName)) {

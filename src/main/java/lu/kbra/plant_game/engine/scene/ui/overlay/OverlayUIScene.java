@@ -3,7 +3,6 @@ package lu.kbra.plant_game.engine.scene.ui.overlay;
 import java.awt.geom.Rectangle2D;
 
 import lu.kbra.plant_game.engine.UpdateFrameState;
-import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.group.LayoutOffsetUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.text.IntegerTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.SignedIntegerTextUIObject;
@@ -20,10 +19,10 @@ import lu.kbra.standalone.gameengine.impl.future.WorkerDispatcher;
 
 public class OverlayUIScene extends UIScene {
 
-	private final LayoutOffsetUIObjectGroup statsGroup = new LayoutOffsetUIObjectGroup("stats", new FlowLayout(true, 0.01f));
-	private UIObject waterIcon, moneyIcon, energyIcon;
-	private IntegerTextUIObject waterText, moneyText, energyText;
-	private SignedIntegerTextUIObject waterPopupText, moneyPopupText, energyPopupText;
+	protected final float margin = 0.02f;
+
+	protected final LayoutOffsetUIObjectGroup statsGroup = new LayoutOffsetUIObjectGroup("stats", new FlowLayout(true, 0.08f));
+	protected OverlayIntegerStatLine waterGroup, moneyGroup, energyGroup;
 
 	public OverlayUIScene(final CacheManager parent) {
 		super("game-overlay", parent);
@@ -35,8 +34,8 @@ public class OverlayUIScene extends UIScene {
 
 		final float iconScale = 0.1f, textScale = iconScale * 2;
 
-		final OverlayIntegerStatLine waterGroup = new OverlayIntegerStatLine("water");
-		waterGroup
+		this.waterGroup = new OverlayIntegerStatLine("water");
+		this.waterGroup
 				.init(workers,
 						renderDispatcher,
 						textScale,
@@ -48,10 +47,10 @@ public class OverlayUIScene extends UIScene {
 
 					obj.getPopup().setValue(999).flushValue();
 				});
-		this.statsGroup.add(waterGroup);
+		this.statsGroup.add(this.waterGroup);
 
-		final OverlayIntegerStatLine moneyGroup = new OverlayIntegerStatLine("money");
-		moneyGroup
+		this.moneyGroup = new OverlayIntegerStatLine("money");
+		this.moneyGroup
 				.init(workers,
 						renderDispatcher,
 						textScale,
@@ -63,10 +62,10 @@ public class OverlayUIScene extends UIScene {
 
 					obj.getPopup().setValue(10).flushValue();
 				});
-		this.statsGroup.add(moneyGroup);
+		this.statsGroup.add(this.moneyGroup);
 
-		final OverlayIntegerStatLine energyGroup = new OverlayIntegerStatLine("energy");
-		energyGroup
+		this.energyGroup = new OverlayIntegerStatLine("energy");
+		this.energyGroup
 				.init(workers,
 						renderDispatcher,
 						textScale,
@@ -78,19 +77,20 @@ public class OverlayUIScene extends UIScene {
 
 					obj.getPopup().setValue(100).flushValue();
 				});
-		this.statsGroup.add(energyGroup);
+		this.statsGroup.add(this.energyGroup);
 	}
 
 	@Override
 	public void input(final WindowInputHandler inputHandler, final float dTime, final UpdateFrameState frameState) {
 		super.input(inputHandler, dTime, frameState);
 
-		if (inputHandler.wasResized()) {
-			this.statsGroup.doLayout();
-			final Rectangle2D bounds = this.statsGroup.getLocalTransformedBounds().getBounds2D();
-			this.statsGroup.getTransform().getTranslation().x = (float) super.getBounds().getMinX();
-			this.statsGroup.getTransform().updateMatrix();
-		}
+//		if (inputHandler.wasResized()) {
+		final Rectangle2D bounds = this.statsGroup.getBounds().getBounds2D();
+		this.statsGroup.getTransform().getTranslation().x = -(float) super.getBounds().getWidth() - (float) bounds.getMinX() + this.margin;
+		this.statsGroup.getTransform().getTranslation().z = -1f + this.margin;
+		this.statsGroup.getTransform().scaleSet(0.35f);
+		this.statsGroup.getTransform().updateMatrix();
+//		}
 	}
 
 	@Override

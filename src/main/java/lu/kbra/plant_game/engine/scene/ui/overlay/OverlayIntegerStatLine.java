@@ -24,10 +24,11 @@ import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup {
 
-	public static final float POPUP_TEXT_SCALE = 0.8f;
+	public static final float POPUP_TEXT_SCALE = 0.6f;
 	public static final int MAX_ITEMS = 4;
 	public static final int VALUE_LENGTH = 5, POPUP_LENGTH = 3;
 	public static final ColorMaterial DEFAULT_TEXT_COLOR = ColorMaterial.WHITE;
+	public static final float gap = 0.08f;
 
 	protected TextureUIObject icon;
 	protected IntegerTextUIObject value;
@@ -57,15 +58,15 @@ public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup {
 	};
 
 	public OverlayIntegerStatLine(final String str, final Transform3D transform, final UIObject... values) {
-		super(str, new FlowLayout(false, 0f), transform, values);
+		super(str, new FlowLayout(false, gap), transform, values);
 	}
 
 	public OverlayIntegerStatLine(final String str, final UIObject... values) {
-		super(str, new FlowLayout(false, 0f), values);
+		super(str, new FlowLayout(false, gap), values);
 	}
 
 	public OverlayIntegerStatLine(final String str, final UIObjectGroup parent, final UIObject... values) {
-		super(str, new FlowLayout(false, 0f), parent, values);
+		super(str, new FlowLayout(false, gap), parent, values);
 	}
 
 	public <T extends TextureUIObject, V extends IntegerTextUIObject, P extends SignedIntegerTextUIObject> FutureTriggerLatch<OverlayIntegerStatLine> init(
@@ -107,13 +108,13 @@ public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup {
 
 		td.setBufferSize(POPUP_LENGTH + 1);
 
-		this.add(UIObjectFactory.createSpacer(height));
+//		this.add(UIObjectFactory.createSpacer(height / 2, height));
 
 		UIObjectFactory
 				.create(popupClazz,
 						td,
 						this.getId() + "-popup",
-						DEFAULT_TEXT_COLOR,
+						ColorMaterial.GRAY,
 						ColorMaterial.RED,
 						ColorMaterial.LIGHT_GREEN,
 						new Transform3D().scaleMul(textHeightRatio * POPUP_TEXT_SCALE))

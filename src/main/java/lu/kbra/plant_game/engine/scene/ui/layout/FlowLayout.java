@@ -8,10 +8,17 @@ import lu.kbra.plant_game.engine.entity.ui.UIObject;
 public class FlowLayout implements Layout {
 
 	protected boolean vertical = true;
+	protected boolean center = true;
 	protected float gap = 0.0f;
 
 	public FlowLayout(final boolean vertical, final float gap) {
 		this.vertical = vertical;
+		this.gap = gap;
+	}
+
+	public FlowLayout(final boolean vertical, final boolean center, final float gap) {
+		this.vertical = vertical;
+		this.center = center;
 		this.gap = gap;
 	}
 
@@ -27,7 +34,18 @@ public class FlowLayout implements Layout {
 
 			final Rectangle2D bounds = child.getLocalTransformedBounds().getBounds2D();
 
-			child.getTransform().translationSet(offsetX - (float) bounds.getMinX(), 0, offsetY - (float) bounds.getMinY()).updateMatrix();
+			if (this.center) {
+				if (this.vertical) {
+					child.getTransform().translationSet(offsetX, 0, offsetY - (float) bounds.getMinY()).updateMatrix();
+				} else {
+					child.getTransform().translationSet(offsetX - (float) bounds.getMinX(), 0, offsetY).updateMatrix();
+				}
+			} else {
+				child
+						.getTransform()
+						.translationSet(offsetX - (float) bounds.getMinX(), 0, offsetY - (float) bounds.getMinY())
+						.updateMatrix();
+			}
 
 			if (this.vertical) {
 				offsetY += bounds.getHeight() + this.gap;
