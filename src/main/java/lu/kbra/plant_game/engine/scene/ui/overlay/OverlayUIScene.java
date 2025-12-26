@@ -96,9 +96,14 @@ public class OverlayUIScene extends UIScene implements LayoutParent, PaddingOwne
 				});
 		this.statsGroup.add(this.energyGroup);
 
-		this.progressBar = new ProgressBarUIObject("...", this, new Transform3DShear().shearSet(GeoAxis.Z, GeoAxis.X, -0.8f), 0.01f, 0.5f);
+		this.progressBar = new ProgressBarUIObject(
+				"...",
+				this,
+				new Transform3DShear().shearSet(GeoAxis.Z, GeoAxis.X, -0.8f).scaleSet(1.8f, 1, 0.05f),
+				0.01f,
+				0.5f);
 		this.progressBar.init(workers, renderDispatcher, FlatQuadUIObject.class, FlatQuadUIObject.class);
-		this.progressBar.addComponent(new AnchorComponent(Anchor.TOP_CENTER, Anchor.TOP_CENTER));
+		this.progressBar.addComponent(new AnchorComponent(Anchor.TOP_RIGHT, Anchor.TOP_RIGHT));
 	}
 
 	@Override
@@ -121,9 +126,10 @@ public class OverlayUIScene extends UIScene implements LayoutParent, PaddingOwne
 //		this.statsGroup.getTransform().scaleSet(0.35f);
 //		alignAnchors(this.statsGroup.getTransform(), objBounds, screenBounds, Anchor.TOP_LEFT, Anchor.TOP_LEFT, 0, 0);
 
-		this.progressBar.getTransform().scaleSet(1.8f, 1, 0.03f).updateMatrix();
+//		this.progressBar.getTransform().scaleSet(1.8f, 1, 0.5f).updateMatrix();
 		this.progressBar.setForegroundColor(GameEngineUtils.hsvToColorToVec4f((float) Math.sin(PGLogic.TOTAL_TIME()), 1, 1, 1));
 		this.progressBar.setValue((float) Math.sin(PGLogic.TOTAL_TIME()) / 2 + 0.5f).updateScaling();
+//		((Transform3DShear) this.progressBar.getTransform()).shearSet(GeoAxis.Z, GeoAxis.X, -0.8f).update();
 
 //		this.setPadding(((float) Math.sin(PGLogic.TOTAL_TIME()) / 2 + 0.5f) * 0.2f);
 		this.doLayout();

@@ -5,15 +5,12 @@ import java.awt.geom.AffineTransform;
 
 import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
-import org.joml.Quaternionf;
-import org.joml.Quaternionfc;
 import org.joml.Vector2f;
 import org.joml.Vector2fc;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
 import lu.kbra.plant_game.engine.entity.impl.Transform3DOwner;
-import lu.kbra.standalone.gameengine.GameEngine;
 import lu.kbra.standalone.gameengine.utils.geo.GeoPlane;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
@@ -23,19 +20,27 @@ public interface TransformedBoundsOwner extends BoundsOwner, Transform3DOwner {
 		final Shape bounds = this.getBounds();
 
 		final Transform3D transform = this.getTransform();
-//		final Vector3fc pos3 = transform == null ? GameEngine.ZERO : transform.getTranslation();
-		final Vector3fc scale = transform == null ? GameEngine.IDENTITY_VECTOR3F : transform.getScale();
-		final Quaternionfc rotation = transform == null ? GameEngine.IDENTITY_QUATERNIONF : transform.getRotation();
+		if (transform == null) {
+			return bounds;
+		}
+		final Matrix4f worldMatrix = transform.getMatrix();
 
-//		final Vector2fc pos = GeoPlane.XZ.projectToPlane(pos3);
+		final Vector3fc pos3 = transform.getTranslation();
+		final Vector2fc pos = GeoPlane.XZ.projectToPlane(pos3);
 
-		final float angleY = rotation.getEulerAnglesXYZ(new Vector3f()).y;
+		// Build the 2D linear part by transforming the X and Z basis vectors
+		final Vector3f basisX = new Vector3f(1, 0, 0);
+		final Vector3f basisZ = new Vector3f(0, 0, 1);
+		worldMatrix.transformDirection(basisX);
+		worldMatrix.transformDirection(basisZ);
 
-		final AffineTransform affine = new AffineTransform();
-//		affine.translate(pos.x(), pos.y());
-		affine.rotate(-angleY);
-		affine.scale(scale.x(), scale.z());
+		// Map XZ components to 2D affine
+		final double m00 = basisX.x();
+		final double m01 = basisZ.x();
+		final double m10 = basisX.z();
+		final double m11 = basisZ.z();
 
+		final AffineTransform affine = new AffineTransform(m00, m10, m01, m11, 0, 0);
 		return affine.createTransformedShape(bounds);
 	}
 
@@ -43,19 +48,27 @@ public interface TransformedBoundsOwner extends BoundsOwner, Transform3DOwner {
 		final Shape bounds = this.getBounds();
 
 		final Transform3D transform = this.getTransform();
-		final Vector3fc pos3 = transform == null ? GameEngine.ZERO : transform.getTranslation();
-		final Vector3fc scale = transform == null ? GameEngine.IDENTITY_VECTOR3F : transform.getScale();
-		final Quaternionfc rotation = transform == null ? GameEngine.IDENTITY_QUATERNIONF : transform.getRotation();
+		if (transform == null) {
+			return bounds;
+		}
+		final Matrix4f worldMatrix = transform.getMatrix();
 
+		final Vector3fc pos3 = transform.getTranslation();
 		final Vector2fc pos = GeoPlane.XZ.projectToPlane(pos3);
 
-		final float angleY = rotation.getEulerAnglesXYZ(new Vector3f()).y;
+		// Build the 2D linear part by transforming the X and Z basis vectors
+		final Vector3f basisX = new Vector3f(1, 0, 0);
+		final Vector3f basisZ = new Vector3f(0, 0, 1);
+		worldMatrix.transformDirection(basisX);
+		worldMatrix.transformDirection(basisZ);
 
-		final AffineTransform affine = new AffineTransform();
-		affine.translate(pos.x(), pos.y());
-		affine.rotate(-angleY);
-		affine.scale(scale.x(), scale.z());
+		// Map XZ components to 2D affine
+		final double m00 = basisX.x();
+		final double m01 = basisZ.x();
+		final double m10 = basisX.z();
+		final double m11 = basisZ.z();
 
+		final AffineTransform affine = new AffineTransform(m00, m10, m01, m11, pos.x(), pos.y());
 		return affine.createTransformedShape(bounds);
 	}
 
@@ -65,21 +78,24 @@ public interface TransformedBoundsOwner extends BoundsOwner, Transform3DOwner {
 		final Transform3D transform = this.getTransform();
 		final Matrix4f worldMatrix = new Matrix4f(parentMatrix);
 		if (transform != null) {
-			worldMatrix.mul(transform.getMatrix());
+			worldMatrix.mulAffine(transform.getMatrix());
 		}
-		final Vector3f pos3 = worldMatrix.getTranslation(new Vector3f());
-		final Quaternionf rotation = worldMatrix.getNormalizedRotation(new Quaternionf());
-		final Vector3f scale = worldMatrix.getScale(new Vector3f());
 
+		final Vector3f pos3 = worldMatrix.getTranslation(new Vector3f());
 		final Vector2f pos = GeoPlane.XZ.projectToPlane(pos3);
 
-		final float angleY = rotation.getEulerAnglesXYZ(new Vector3f()).y;
+		final Vector3f basisX = new Vector3f(1, 0, 0);
+		final Vector3f basisZ = new Vector3f(0, 0, 1);
+		worldMatrix.transformDirection(basisX);
+		worldMatrix.transformDirection(basisZ);
 
-		final AffineTransform affine = new AffineTransform();
-		affine.translate(pos.x, pos.y);
-		affine.rotate(-angleY);
-		affine.scale(scale.x, scale.z);
+		// Map XZ components to 2D affine
+		final double m00 = basisX.x();
+		final double m01 = basisZ.x();
+		final double m10 = basisX.z();
+		final double m11 = basisZ.z();
 
+		final AffineTransform affine = new AffineTransform(m00, m10, m01, m11, pos.x, pos.y);
 		return affine.createTransformedShape(bounds);
 	}
 
