@@ -41,6 +41,7 @@ import lu.kbra.plant_game.engine.entity.go.impl.SwayInstanceEmitterComponent;
 import lu.kbra.plant_game.engine.entity.go.impl.SwayOwner;
 import lu.kbra.plant_game.engine.entity.impl.AnimatedMeshComponent;
 import lu.kbra.plant_game.engine.entity.impl.AnimatedTransformOwner;
+import lu.kbra.plant_game.engine.entity.impl.TransformOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.TransformedBoundsOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.TransparentEntity;
 import lu.kbra.plant_game.engine.mesh.AnimatedMesh;
@@ -108,6 +109,7 @@ import lu.kbra.standalone.gameengine.utils.gl.consts.TexelInternalFormat;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextureFilter;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextureType;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextureWrap;
+import lu.kbra.standalone.gameengine.utils.transform.Transform;
 
 public class DeferredCompositor implements Cleanupable {
 
@@ -677,7 +679,7 @@ public class DeferredCompositor implements Cleanupable {
 			final RenderShader gradientMeshShader,
 			final RenderShader swayMeshShader,
 			final RenderShader swayInstanceEmitterShader,
-			final Matrix4fc parentTransform) {
+			final Matrix4fc parentTransformMatrix) {
 
 		if (!entity.isActive()) {
 			return;
@@ -688,12 +690,20 @@ public class DeferredCompositor implements Cleanupable {
 			return;
 		}
 
-		final Matrix4fc localTransform = entity instanceof final GameObject go && go.hasTransform() ? go.getTransform().getMatrix()
-				: entity.hasComponentMatching(TransformComponent.class)
-						? entity.getComponentMatching(TransformComponent.class).getTransform().getMatrix()
-				: GameEngine.IDENTITY_MATRIX4F;
+		final Transform localTransform;
+		final Matrix4fc localTransformMatrix;
+		if (entity instanceof final TransformOwner to && to.hasTransform()) {
+			localTransform = to.getTransform();
+			localTransformMatrix = localTransform.getMatrix();
+		} else if (entity.hasComponentMatching(TransformComponent.class)) {
+			localTransform = entity.getComponentMatching(TransformComponent.class).getTransform();
+			localTransformMatrix = localTransform.getMatrix();
+		} else {
+			localTransform = null;
+			localTransformMatrix = GameEngine.IDENTITY_MATRIX4F;
+		}
 
-		final Matrix4f worldTransform = new Matrix4f(parentTransform).mul(localTransform);
+		final Matrix4f worldTransform = new Matrix4f(parentTransformMatrix).mulAffine(localTransformMatrix);
 
 		if (meshShader != null && entity.hasComponentMatching(MeshComponent.class)) {
 			for (final MeshComponent meshComponent : entity.getComponentsMatching(MeshComponent.class)) {
@@ -749,7 +759,7 @@ public class DeferredCompositor implements Cleanupable {
 		}
 
 		if (entity instanceof final TransformedBoundsOwner tbo) {
-			this.drawDebugBounds(tbo.getTransformedBounds(parentTransform));
+			this.drawDebugBounds(tbo.getTransformedBounds(parentTransformMatrix));
 		}
 
 		if (entity.hasComponentMatching(SubEntitiesComponent.class)) {

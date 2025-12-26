@@ -71,7 +71,7 @@ public class CursorUIObject extends TextureUIObject implements NeedsUpdate {
 			cursorPos.x = this.to.x + (float) Math.cos(angle) * radius;
 			cursorPos.z = this.to.y + (float) Math.sin(angle) * radius;
 
-			this.getTransform().rotationSet(0, (float) (-angle + Math.PI / 3), 0);
+			this.getTransform().rotationAdd(0, (float) (-angle + Math.PI / 3), 0);
 		} else {
 			final float speed = 4;
 			final float freq = 3;

@@ -24,14 +24,16 @@ import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.WorkerDispatcher;
 import lu.kbra.standalone.gameengine.objs.entity.ParentAware;
 import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
-import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
+import lu.kbra.standalone.gameengine.utils.geo.GeoAxis;
 
 public class OverlayUIScene extends UIScene implements LayoutParent, PaddingOwner {
 
 	protected float margin = 0.02f;
 
 	protected final LayoutOffsetUIObjectGroup statsGroup = new LayoutOffsetUIObjectGroup("stats", new FlowLayout(true, 0.08f));
-	protected OverlayIntegerStatLine waterGroup, moneyGroup, energyGroup;
+	protected OverlayIntegerStatLine waterGroup;
+	protected OverlayIntegerStatLine moneyGroup;
+	protected OverlayIntegerStatLine energyGroup;
 	protected ProgressBarUIObject progressBar;
 
 	protected Layout layout;
@@ -47,13 +49,13 @@ public class OverlayUIScene extends UIScene implements LayoutParent, PaddingOwne
 
 		this.statsGroup.addComponent(new AnchorComponent(Anchor.TOP_LEFT, Anchor.TOP_LEFT));
 
-		final float iconScale = 0.1f, textScale = iconScale * 2;
+		final float height = 0.2f;
 
 		this.waterGroup = new OverlayIntegerStatLine("water");
 		this.waterGroup
 				.init(workers,
 						renderDispatcher,
-						textScale,
+						height,
 						WaterIconUIObject.class,
 						IntegerTextUIObject.class,
 						SignedIntegerTextUIObject.class)
@@ -68,7 +70,7 @@ public class OverlayUIScene extends UIScene implements LayoutParent, PaddingOwne
 		this.moneyGroup
 				.init(workers,
 						renderDispatcher,
-						textScale,
+						height,
 						MoneyIconUIObject.class,
 						IntegerTextUIObject.class,
 						SignedIntegerTextUIObject.class)
@@ -83,7 +85,7 @@ public class OverlayUIScene extends UIScene implements LayoutParent, PaddingOwne
 		this.energyGroup
 				.init(workers,
 						renderDispatcher,
-						textScale,
+						height,
 						EnergyIconUIObject.class,
 						IntegerTextUIObject.class,
 						SignedIntegerTextUIObject.class)
@@ -94,7 +96,7 @@ public class OverlayUIScene extends UIScene implements LayoutParent, PaddingOwne
 				});
 		this.statsGroup.add(this.energyGroup);
 
-		this.progressBar = new ProgressBarUIObject("...", this, new Transform3D(), 0.02f, 0.5f);
+		this.progressBar = new ProgressBarUIObject("...", this, new Transform3DShear().shearSet(GeoAxis.Z, GeoAxis.X, -0.8f), 0.01f, 0.5f);
 		this.progressBar.init(workers, renderDispatcher, FlatQuadUIObject.class, FlatQuadUIObject.class);
 		this.progressBar.addComponent(new AnchorComponent(Anchor.TOP_CENTER, Anchor.TOP_CENTER));
 	}
@@ -111,8 +113,7 @@ public class OverlayUIScene extends UIScene implements LayoutParent, PaddingOwne
 //		final Rectangle2D bounds = this.statsGroup.getBounds().getBounds2D();
 //		this.statsGroup.getTransform().getTranslation().x = -(float) super.getBounds().getWidth() - (float) bounds.getMinX() + this.margin;
 //		this.statsGroup.getTransform().getTranslation().z = -1f + this.margin;
-		this.statsGroup.getTransform().scaleSet(0.35f);
-		this.statsGroup.getTransform().updateMatrix();
+		this.statsGroup.getTransform().scaleSet(0.35f).updateMatrix();
 //		}
 
 //		final Rectangle2D objBounds = this.statsGroup.getBounds().getBounds2D();
@@ -120,7 +121,7 @@ public class OverlayUIScene extends UIScene implements LayoutParent, PaddingOwne
 //		this.statsGroup.getTransform().scaleSet(0.35f);
 //		alignAnchors(this.statsGroup.getTransform(), objBounds, screenBounds, Anchor.TOP_LEFT, Anchor.TOP_LEFT, 0, 0);
 
-		this.progressBar.getTransform().scaleSet(2, 1, 0.1f).update();
+		this.progressBar.getTransform().scaleSet(1.8f, 1, 0.03f).updateMatrix();
 		this.progressBar.setForegroundColor(GameEngineUtils.hsvToColorToVec4f((float) Math.sin(PGLogic.TOTAL_TIME()), 1, 1, 1));
 		this.progressBar.setValue((float) Math.sin(PGLogic.TOTAL_TIME()) / 2 + 0.5f).updateScaling();
 
