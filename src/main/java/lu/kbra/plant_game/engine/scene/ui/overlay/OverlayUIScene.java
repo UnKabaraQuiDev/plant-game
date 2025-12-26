@@ -1,9 +1,10 @@
 package lu.kbra.plant_game.engine.scene.ui.overlay;
 
-import java.awt.geom.Rectangle2D;
+import java.util.stream.Collectors;
 
 import lu.kbra.plant_game.PGLogic;
 import lu.kbra.plant_game.engine.UpdateFrameState;
+import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.bar.ProgressBarUIObject;
 import lu.kbra.plant_game.engine.entity.ui.group.LayoutOffsetUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.prim.FlatQuadUIObject;
@@ -15,14 +16,17 @@ import lu.kbra.plant_game.engine.entity.ui.texture.WaterIconUIObject;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
 import lu.kbra.plant_game.engine.scene.ui.layout.FlowLayout;
+import lu.kbra.plant_game.engine.scene.ui.layout.Layout;
+import lu.kbra.plant_game.engine.scene.ui.layout.LayoutParent;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.WorkerDispatcher;
+import lu.kbra.standalone.gameengine.objs.entity.ParentAware;
 import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-public class OverlayUIScene extends UIScene {
+public class OverlayUIScene extends UIScene implements LayoutParent {
 
 	protected final float margin = 0.02f;
 
@@ -30,13 +34,18 @@ public class OverlayUIScene extends UIScene {
 	protected OverlayIntegerStatLine waterGroup, moneyGroup, energyGroup;
 	protected ProgressBarUIObject progressBar;
 
+	protected Layout layout;
+
 	public OverlayUIScene(final CacheManager parent) {
 		super("game-overlay", parent);
 	}
 
 	@Override
 	public void init(final Dispatcher workers, final Dispatcher renderDispatcher) {
+		this.setLayout(new AnchorLayout());
 		super.addEntity(this.statsGroup);
+
+		this.statsGroup.addComponent(new AnchorComponent(Anchor.TOP_LEFT, Anchor.TOP_LEFT));
 
 		final float iconScale = 0.1f, textScale = iconScale * 2;
 
@@ -93,13 +102,22 @@ public class OverlayUIScene extends UIScene {
 	public void input(final WindowInputHandler inputHandler, final float dTime, final UpdateFrameState frameState) {
 		super.input(inputHandler, dTime, frameState);
 
+		if (inputHandler.wasResized()) {
+			this.doLayout();
+		}
+
 //		if (inputHandler.wasResized()) {
-		final Rectangle2D bounds = this.statsGroup.getBounds().getBounds2D();
-		this.statsGroup.getTransform().getTranslation().x = -(float) super.getBounds().getWidth() - (float) bounds.getMinX() + this.margin;
-		this.statsGroup.getTransform().getTranslation().z = -1f + this.margin;
+//		final Rectangle2D bounds = this.statsGroup.getBounds().getBounds2D();
+//		this.statsGroup.getTransform().getTranslation().x = -(float) super.getBounds().getWidth() - (float) bounds.getMinX() + this.margin;
+//		this.statsGroup.getTransform().getTranslation().z = -1f + this.margin;
 		this.statsGroup.getTransform().scaleSet(0.35f);
 		this.statsGroup.getTransform().updateMatrix();
 //		}
+
+//		final Rectangle2D objBounds = this.statsGroup.getBounds().getBounds2D();
+//		final Rectangle2D.Float screenBounds = super.getBounds();
+//		this.statsGroup.getTransform().scaleSet(0.35f);
+//		alignAnchors(this.statsGroup.getTransform(), objBounds, screenBounds, Anchor.TOP_LEFT, Anchor.TOP_LEFT, 0, 0);
 
 		this.progressBar.getTransform().scaleSet(2, 1, 0.1f).update();
 		this.progressBar.setForegroundColor(GameEngineUtils.hsvToColorToVec4f((float) Math.sin(PGLogic.TOTAL_TIME()), 1, 1, 1));
@@ -114,6 +132,36 @@ public class OverlayUIScene extends UIScene {
 			final WorkerDispatcher workers,
 			final Dispatcher render) {
 		super.update(inputHandler, dTime, compositor, workers, render);
+	}
+
+	@Override
+	public void setLayout(final Layout layout) {
+		this.layout = layout;
+		if (layout instanceof final ParentAware pa) {
+			pa.setParent(this);
+		}
+	}
+
+	@Override
+	public Layout getLayout() {
+		return this.layout;
+	}
+
+	@Override
+	public void doLayout() {
+		if (this.layout == null) {
+			return;
+		}
+		synchronized (this.getEntitiesLock()) {
+			this.layout
+					.doLayout(this
+							.getEntities()
+							.values()
+							.stream()
+							.filter(UIObject.class::isInstance)
+							.map(UIObject.class::cast)
+							.collect(Collectors.toList()));
+		}
 	}
 
 }
