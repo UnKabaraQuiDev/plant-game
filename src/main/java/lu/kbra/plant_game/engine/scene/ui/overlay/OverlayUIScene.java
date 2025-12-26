@@ -26,9 +26,9 @@ import lu.kbra.standalone.gameengine.objs.entity.ParentAware;
 import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-public class OverlayUIScene extends UIScene implements LayoutParent {
+public class OverlayUIScene extends UIScene implements LayoutParent, PaddingOwner {
 
-	protected final float margin = 0.02f;
+	protected float margin = 0.02f;
 
 	protected final LayoutOffsetUIObjectGroup statsGroup = new LayoutOffsetUIObjectGroup("stats", new FlowLayout(true, 0.08f));
 	protected OverlayIntegerStatLine waterGroup, moneyGroup, energyGroup;
@@ -96,6 +96,7 @@ public class OverlayUIScene extends UIScene implements LayoutParent {
 
 		this.progressBar = new ProgressBarUIObject("...", this, new Transform3D(), 0.02f, 0.5f);
 		this.progressBar.init(workers, renderDispatcher, FlatQuadUIObject.class, FlatQuadUIObject.class);
+		this.progressBar.addComponent(new AnchorComponent(Anchor.TOP_CENTER, Anchor.TOP_CENTER));
 	}
 
 	@Override
@@ -122,6 +123,9 @@ public class OverlayUIScene extends UIScene implements LayoutParent {
 		this.progressBar.getTransform().scaleSet(2, 1, 0.1f).update();
 		this.progressBar.setForegroundColor(GameEngineUtils.hsvToColorToVec4f((float) Math.sin(PGLogic.TOTAL_TIME()), 1, 1, 1));
 		this.progressBar.setValue((float) Math.sin(PGLogic.TOTAL_TIME()) / 2 + 0.5f).updateScaling();
+
+//		this.setPadding(((float) Math.sin(PGLogic.TOTAL_TIME()) / 2 + 0.5f) * 0.2f);
+		this.doLayout();
 	}
 
 	@Override
@@ -149,10 +153,16 @@ public class OverlayUIScene extends UIScene implements LayoutParent {
 
 	@Override
 	public void doLayout() {
-		if (this.layout == null) {
-			return;
-		}
 		synchronized (this.getEntitiesLock()) {
+			this
+					.getEntities()
+					.values()
+					.stream()
+					.filter(e -> e instanceof final LayoutParent lp)
+					.forEach(e -> ((LayoutParent) e).doLayout());
+			if (this.layout == null) {
+				return;
+			}
 			this.layout
 					.doLayout(this
 							.getEntities()
@@ -162,6 +172,16 @@ public class OverlayUIScene extends UIScene implements LayoutParent {
 							.map(UIObject.class::cast)
 							.collect(Collectors.toList()));
 		}
+	}
+
+	@Override
+	public float getPadding() {
+		return this.margin;
+	}
+
+	@Override
+	public void setPadding(final float p) {
+		this.margin = p;
 	}
 
 }

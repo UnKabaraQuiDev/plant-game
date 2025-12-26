@@ -41,8 +41,6 @@ public class AnchorLayout implements Layout, BoundsOwnerParentAware {
 				continue;
 			}
 
-			System.err.println(obj + " " + objectAnchor + " " + targetAnchor);
-
 			float margin = 0;
 			// child has margin outwards
 			if (obj instanceof final MarginOwner mo) {
@@ -59,7 +57,7 @@ public class AnchorLayout implements Layout, BoundsOwnerParentAware {
 				margin = ac.getPadding();
 			}
 
-			final Rectangle2D bounds = obj.getBounds().getBounds2D();
+			final Rectangle2D bounds = obj.getLocalTransformedBounds().getBounds2D();
 			alignAnchors(obj.getTransform(), bounds, screenBounds, objectAnchor, targetAnchor, margin, margin);
 		}
 	}
@@ -116,11 +114,11 @@ public class AnchorLayout implements Layout, BoundsOwnerParentAware {
 		case CENTER_LEFT:
 		case TOP_LEFT:
 			// TODO: this isn't right, it should be #getMinX()
-			yield -(float) screenBounds.getWidth();
+			yield -(float) screenBounds.getWidth() + marginX;
 		case BOTTOM_RIGHT:
 		case CENTER_RIGHT:
 		case TOP_RIGHT:
-			yield (float) screenBounds.getWidth();
+			yield (float) screenBounds.getWidth() - marginX;
 		default:
 			throw new IllegalArgumentException(Objects.toString(screenAnchor));
 		};
@@ -129,7 +127,7 @@ public class AnchorLayout implements Layout, BoundsOwnerParentAware {
 		case BOTTOM_CENTER:
 		case BOTTOM_LEFT:
 		case BOTTOM_RIGHT:
-			yield (float) screenBounds.getMaxY();
+			yield (float) screenBounds.getMaxY() - marginZ;
 		case CENTER_CENTER:
 		case CENTER_LEFT:
 		case CENTER_RIGHT:
@@ -137,13 +135,13 @@ public class AnchorLayout implements Layout, BoundsOwnerParentAware {
 		case TOP_CENTER:
 		case TOP_LEFT:
 		case TOP_RIGHT:
-			yield (float) screenBounds.getMinY();
+			yield (float) screenBounds.getMinY() + marginZ;
 		default:
 			throw new IllegalArgumentException(Objects.toString(screenAnchor));
 		};
 
-		transform.getTranslation().x = screenAnchorX - objAnchorX + marginX;
-		transform.getTranslation().z = screenAnchorZ - objAnchorZ + marginZ;
+		transform.getTranslation().x = screenAnchorX - objAnchorX;
+		transform.getTranslation().z = screenAnchorZ - objAnchorZ;
 
 		transform.updateMatrix();
 	}
