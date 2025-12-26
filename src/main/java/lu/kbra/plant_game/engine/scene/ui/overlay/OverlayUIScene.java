@@ -9,12 +9,16 @@ import lu.kbra.plant_game.engine.entity.ui.bar.ProgressBarUIObject;
 import lu.kbra.plant_game.engine.entity.ui.group.LayoutOffsetUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.prim.FlatQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.IntegerTextUIObject;
+import lu.kbra.plant_game.engine.entity.ui.text.PercentageIntTextUIObject;
+import lu.kbra.plant_game.engine.entity.ui.text.PercentageSignedIntTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.SignedIntegerTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.texture.EnergyIconUIObject;
 import lu.kbra.plant_game.engine.entity.ui.texture.MoneyIconUIObject;
 import lu.kbra.plant_game.engine.entity.ui.texture.WaterIconUIObject;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
+import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
+import lu.kbra.plant_game.engine.scene.ui.layout.AnchorLayout;
 import lu.kbra.plant_game.engine.scene.ui.layout.FlowLayout;
 import lu.kbra.plant_game.engine.scene.ui.layout.Layout;
 import lu.kbra.plant_game.engine.scene.ui.layout.LayoutParent;
@@ -25,6 +29,7 @@ import lu.kbra.standalone.gameengine.impl.future.WorkerDispatcher;
 import lu.kbra.standalone.gameengine.objs.entity.ParentAware;
 import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
 import lu.kbra.standalone.gameengine.utils.geo.GeoAxis;
+import lu.kbra.standalone.gameengine.utils.transform.Transform3DShear;
 
 public class OverlayUIScene extends UIScene implements LayoutParent, PaddingOwner {
 
@@ -35,6 +40,7 @@ public class OverlayUIScene extends UIScene implements LayoutParent, PaddingOwne
 	protected OverlayIntegerStatLine moneyGroup;
 	protected OverlayIntegerStatLine energyGroup;
 	protected ProgressBarUIObject progressBar;
+	protected OverlayIntegerStatLine progressGroup;
 
 	protected Layout layout;
 
@@ -104,6 +110,16 @@ public class OverlayUIScene extends UIScene implements LayoutParent, PaddingOwne
 				0.5f);
 		this.progressBar.init(workers, renderDispatcher, FlatQuadUIObject.class, FlatQuadUIObject.class);
 		this.progressBar.addComponent(new AnchorComponent(Anchor.TOP_RIGHT, Anchor.TOP_RIGHT));
+
+		this.progressGroup = new OverlayIntegerStatLine("progress");
+		this.progressGroup
+				.init(workers, renderDispatcher, height, 4, 3, null, PercentageIntTextUIObject.class, PercentageSignedIntTextUIObject.class)
+				.then(obj -> {
+					obj.getValue().setValue(0).flushValue();
+					obj.getPopup().setValue(0).flushValue();
+					obj.getPopup().setPadding(false);
+				});
+		super.addEntity(this.progressGroup);
 	}
 
 	@Override
@@ -131,8 +147,12 @@ public class OverlayUIScene extends UIScene implements LayoutParent, PaddingOwne
 		this.progressBar.setValue((float) Math.sin(PGLogic.TOTAL_TIME()) / 2 + 0.5f).updateScaling();
 //		((Transform3DShear) this.progressBar.getTransform()).shearSet(GeoAxis.Z, GeoAxis.X, -0.8f).update();
 
+		if (Math.random() * 100 < 0.1) {
+			this.progressGroup.add(1).flushValue();
+		}
+
 //		this.setPadding(((float) Math.sin(PGLogic.TOTAL_TIME()) / 2 + 0.5f) * 0.2f);
-		this.doLayout();
+		// this.doLayout();
 	}
 
 	@Override

@@ -1,5 +1,7 @@
 package lu.kbra.plant_game.engine.scene.ui.overlay;
 
+import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
+
 public interface AnchorOwner {
 
 	Anchor getObjectAnchor();

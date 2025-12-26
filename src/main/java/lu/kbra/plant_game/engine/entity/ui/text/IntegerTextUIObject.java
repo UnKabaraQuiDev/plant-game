@@ -167,17 +167,16 @@ public class IntegerTextUIObject extends ProgrammaticTextUIObject {
 	}
 
 	public void updateTextContent() {
-		super.getTextEmitter()
-				.setText((this.forceSign && this.value >= 0 ? "+" : "")
-						+ (this.padding
-								? PCUtils
-										.leftPadString(Integer.toString(this.value),
-												this.paddingZero ? "0" : " ",
-												this.paddingLength + (this.forceSign ? -1 : 0))
-								: Integer.toString(this.value)));
+		super.getTextEmitter().setText(this.buildText());
 		if (this.colorMaterial != null) {
 			this.getTextEmitter().setForegroundColor(this.colorMaterial.getColor());
 		}
+	}
+
+	public String buildText() {
+		return (this.forceSign && this.value >= 0 ? "+" : "") + (this.padding ? PCUtils
+				.leftPadString(Integer.toString(this.value), this.paddingZero ? "0" : " ", this.paddingLength + (this.forceSign ? -1 : 0))
+				: Integer.toString(this.value));
 	}
 
 	public int getValue() {

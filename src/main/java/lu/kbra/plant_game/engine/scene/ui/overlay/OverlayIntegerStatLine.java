@@ -11,6 +11,7 @@ import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory.TextData;
 import lu.kbra.plant_game.engine.entity.ui.group.LayoutOffsetUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.group.UIObjectGroup;
+import lu.kbra.plant_game.engine.entity.ui.impl.NeedsUpdate;
 import lu.kbra.plant_game.engine.entity.ui.layout.SpacerUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.IntegerTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.SignedIntegerTextUIObject;
@@ -18,10 +19,15 @@ import lu.kbra.plant_game.engine.entity.ui.texture.TextureUIObject;
 import lu.kbra.plant_game.engine.scene.ui.layout.FlowLayout;
 import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
+import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
+import lu.kbra.standalone.gameengine.scene.Scene;
+import lu.kbra.standalone.gameengine.utils.consts.Direction;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextAlignment;
+import lu.kbra.standalone.gameengine.utils.interpolation.Interpolator;
+import lu.kbra.standalone.gameengine.utils.interpolation.Interpolators;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup implements LimitedObjectGroup<UIObject> {
+public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup implements LimitedObjectGroup<UIObject>, NeedsUpdate {
 
 	public static final float POPUP_TEXT_SCALE = 0.6f;
 	public static final int VALUE_LENGTH = 5, POPUP_LENGTH = 3;
@@ -31,6 +37,11 @@ public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup implements
 	protected TextureUIObject icon;
 	protected IntegerTextUIObject value;
 	protected SignedIntegerTextUIObject popup;
+	protected Direction popupSpawnDirection = Direction.EAST;
+	protected float popupSpawnDuration = 0.2f;
+	protected float popupStayDuration = 1 - 2 * this.popupSpawnDuration;
+	protected float progress = 100;
+	protected Interpolator popupSpawnInterpolator = Interpolators.CUBIC_IN;
 
 	protected Comparator<UIObject> comparator = (o1, o2) -> {
 		if (o1 == o2) {
@@ -71,21 +82,29 @@ public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup implements
 			final Dispatcher workers,
 			final Dispatcher render,
 			final float height,
+			final int valueLength,
+			final int popupLength,
 			final Class<T> iconClazz,
 			final Class<V> valueClazz,
 			final Class<P> popupClazz) {
-		final TextData td = new TextData(UIObjectFactory.DEFAULT_CHAR_SIZE, TextAlignment.LEFT, VALUE_LENGTH);
+
+		final TextData td = new TextData(UIObjectFactory.DEFAULT_CHAR_SIZE, TextAlignment.LEFT, valueLength);
 
 		final float iconHeightRatio = height / (float) TextureUIObject.SQUARE_1_UNIT.getBounds2D().getHeight();
 		final float textHeightRatio = height / td.getCharSize().y;
 
-		final FutureTriggerLatch<OverlayIntegerStatLine> latch = new FutureTriggerLatch<OverlayIntegerStatLine>(3, this);
+		final FutureTriggerLatch<OverlayIntegerStatLine> latch = new FutureTriggerLatch<OverlayIntegerStatLine>(
+				iconClazz == null ? 2 : 3,
+				this);
 
-		UIObjectFactory.create(iconClazz, new Transform3D().scaleMul(iconHeightRatio)).then(workers, (Consumer<T>) obj -> {
-			this.icon = obj;
-			this.add(obj);
-			latch.countDown();
-		}).push();
+		if (iconClazz != null) {
+			UIObjectFactory.create(iconClazz, new Transform3D().scaleMul(iconHeightRatio)).then(workers, (Consumer<T>) obj -> {
+				this.icon = obj;
+				this.add(obj);
+				latch.countDown();
+			}).push();
+		}
+
 		UIObjectFactory
 				.create(valueClazz,
 						td,
@@ -94,7 +113,7 @@ public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup implements
 						false, // force sign
 						true, // padding
 						false, // padding zero
-						VALUE_LENGTH,
+						valueLength,
 						DEFAULT_TEXT_COLOR,
 						new Transform3D().scaleMul(textHeightRatio))
 				.then(workers, (Consumer<V>) obj -> {
@@ -104,7 +123,7 @@ public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup implements
 				})
 				.push();
 
-		td.setBufferSize(POPUP_LENGTH + 1);
+		td.setBufferSize(popupLength + 1);
 
 		UIObjectFactory
 				.create(popupClazz,
@@ -124,6 +143,16 @@ public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup implements
 		return latch;
 	}
 
+	public <T extends TextureUIObject, V extends IntegerTextUIObject, P extends SignedIntegerTextUIObject> FutureTriggerLatch<OverlayIntegerStatLine> init(
+			final Dispatcher workers,
+			final Dispatcher render,
+			final float height,
+			final Class<T> iconClazz,
+			final Class<V> valueClazz,
+			final Class<P> popupClazz) {
+		return this.init(workers, render, height, VALUE_LENGTH, POPUP_LENGTH, iconClazz, valueClazz, popupClazz);
+	}
+
 	@Override
 	public void doSort() {
 		this.getSubEntitiesComponent().sort(this.comparator);
@@ -133,12 +162,82 @@ public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup implements
 		return this.icon;
 	}
 
+	public boolean hasIcon() {
+		return this.icon != null;
+	}
+
 	public IntegerTextUIObject getValue() {
 		return this.value;
 	}
 
 	public SignedIntegerTextUIObject getPopup() {
 		return this.popup;
+	}
+
+	public OverlayIntegerStatLine add(final int value) {
+		if (this.getPopup() == null) {
+			return this;
+		}
+		this.getPopup().setValue(this.getPopup().getValue() + value);
+		return this;
+	}
+
+	public OverlayIntegerStatLine flushValue() {
+		if (this.getPopup() == null || this.getValue() == null) {
+			return this;
+		}
+		this.getValue().setValue(this.getValue().getValue() + this.getPopup().getValue()).flushValue();
+		this.getPopup().flushValue();
+		this.getPopup().setValue(0);
+		this.progress = this.progress > this.popupStayDuration + this.popupSpawnDuration ? 0 : this.popupSpawnDuration; // start animation
+		return this;
+	}
+
+	@Override
+	public void update(final float dTime, final Scene scene) {
+		final SignedIntegerTextUIObject popup = this.getPopup();
+		if (popup == null) {
+			return;
+		}
+
+		if (!popup.getTextEmitter().getText().contains("%")) {
+			return;
+		}
+
+//		final float dst = 0.25f;
+//		final Transform3D transform = popup.getTransform();
+		if (this.progress < this.popupSpawnDuration) {
+			final float interpol = this.popupSpawnInterpolator.evaluate(this.progress / this.popupSpawnDuration);
+			final TextEmitter text = popup.getTextEmitter();
+
+//			transform.getTranslation().z = interpol * dst;
+			text.setOpacity(interpol);
+//			transform.updateMatrix();
+
+			this.progress += dTime;
+
+			if (this.progress >= this.popupSpawnDuration) {
+				text.setOpacity(1);
+			}
+		} else if (this.progress >= this.popupSpawnDuration && this.progress < this.popupSpawnDuration + this.popupStayDuration) {
+			this.progress += dTime;
+		} else if (this.progress >= this.popupSpawnDuration + this.popupStayDuration
+				&& this.progress < 2 * this.popupSpawnDuration + this.popupStayDuration) {
+			final float interpol = this.popupSpawnInterpolator
+					.evaluate((this.progress - (this.popupSpawnDuration + this.popupStayDuration)) / this.popupSpawnDuration);
+			final TextEmitter text = popup.getTextEmitter();
+
+//			transform.getTranslation().z = -interpol * dst;
+			text.setOpacity(1f - interpol);
+//			transform.updateMatrix();
+			this.progress += dTime;
+
+			if (this.progress >= 2 * this.popupSpawnDuration + this.popupStayDuration) {
+				text.setOpacity(0);
+			}
+		} else if (this.progress >= 2 * this.popupSpawnDuration + this.popupStayDuration) {
+			// do nothing
+		}
 	}
 
 	@Override

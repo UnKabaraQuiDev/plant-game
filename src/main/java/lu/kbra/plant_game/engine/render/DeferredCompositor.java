@@ -939,20 +939,22 @@ public class DeferredCompositor implements Cleanupable {
 
 		shader
 				.setUniform(TextDirectShader.FG_COLOR,
-						obj.getForegroundColor() != null ? obj.getForegroundColor() : TextEmitter.DEFAULT_FG_COLOR);
+						(obj.getForegroundColor() != null ? obj.getForegroundColor() : TextEmitter.DEFAULT_FG_COLOR)
+								.mul(1, 1, 1, obj.getOpacity(), new Vector4f()));
 		shader
 				.setUniform(TextDirectShader.BG_COLOR,
-						obj.getBackgroundColor() != null ? obj.getBackgroundColor() : TextEmitter.DEFAULT_BG_COLOR);
+						(obj.getBackgroundColor() != null ? obj.getBackgroundColor() : TextEmitter.DEFAULT_BG_COLOR)
+								.mul(1, 1, 1, obj.getOpacity(), new Vector4f()));
 		shader.setUniform(TextDirectShader.TRANSPARENT, transparent);
 		shader.setUniformUnsigned(TextDirectShader.TEXT_LENGTH, obj.getCharCount());
 
 		GL_W.glDisable(GL_W.GL_CULL_FACE);
 		if (transparent) {
 			GL_W.glEnable(GL_W.GL_BLEND);
+			GL_W.glBlendFunc(GL_W.GL_SRC_ALPHA, GL_W.GL_ONE_MINUS_SRC_ALPHA);
 		} else {
 			GL_W.glDisable(GL_W.GL_BLEND);
 		}
-		GL_W.glBlendFunc(GL_W.GL_SRC_ALPHA, GL_W.GL_ONE_MINUS_SRC_ALPHA);
 
 		GL_W
 				.glDrawElementsInstanced(shader.getBeginMode().getGlId(),

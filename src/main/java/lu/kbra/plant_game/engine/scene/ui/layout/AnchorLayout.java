@@ -1,4 +1,4 @@
-package lu.kbra.plant_game.engine.scene.ui.overlay;
+package lu.kbra.plant_game.engine.scene.ui.layout;
 
 import java.awt.geom.Rectangle2D;
 import java.util.List;
@@ -7,7 +7,12 @@ import java.util.Objects;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwnerParentAware;
-import lu.kbra.plant_game.engine.scene.ui.layout.Layout;
+import lu.kbra.plant_game.engine.scene.ui.overlay.AnchorComponent;
+import lu.kbra.plant_game.engine.scene.ui.overlay.AnchorOwner;
+import lu.kbra.plant_game.engine.scene.ui.overlay.MarginComponent;
+import lu.kbra.plant_game.engine.scene.ui.overlay.MarginOwner;
+import lu.kbra.plant_game.engine.scene.ui.overlay.PaddingComponent;
+import lu.kbra.plant_game.engine.scene.ui.overlay.PaddingOwner;
 import lu.kbra.standalone.gameengine.objs.entity.Entity;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 

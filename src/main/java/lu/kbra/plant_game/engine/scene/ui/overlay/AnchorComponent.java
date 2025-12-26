@@ -1,5 +1,6 @@
 package lu.kbra.plant_game.engine.scene.ui.overlay;
 
+import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
 import lu.kbra.standalone.gameengine.objs.entity.Component;
 
 public class AnchorComponent extends Component implements AnchorOwner {

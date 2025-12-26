@@ -1,4 +1,4 @@
-package lu.kbra.plant_game.engine.scene.ui.overlay;
+package lu.kbra.plant_game.engine.scene.ui.layout;
 
 public enum Anchor {
 
