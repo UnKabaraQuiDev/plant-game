@@ -8,8 +8,10 @@ import lu.kbra.plant_game.engine.entity.go.AnimatedGameObject;
 import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
 import lu.kbra.plant_game.engine.entity.go.impl.WaterContainer;
 import lu.kbra.plant_game.engine.mesh.AnimatedMesh;
+import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.standalone.gameengine.geom.Mesh;
+import lu.kbra.standalone.gameengine.utils.consts.Direction;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 @DataPath("classpath:/models/water_wheel.json")
@@ -54,13 +56,32 @@ public class WaterWheelObject extends AnimatedGameObject implements PlaceableObj
 	}
 
 	@Override
+	public boolean isPlaceable(final WorldLevelScene scene, final Vector2i tile, final Direction rotation) {
+//		if (!PlaceableObject.super.isPlaceable(scene, tile, rotation)) {
+//			return false;
+//		}
+
+		final float waterLevel = scene.getWaterLevel().getTransform().getTranslation().y();
+		boolean ok = true;
+		final Vector2i pos = scene.getTerrain().getCellPosition(this.getTransform().getTranslation());
+		for (int x = -1; x <= +1; x++) {
+			final float height = scene.getTerrain().getMesh().getCellHeight(this.getRotated(new Vector2i(x, 1)).add(pos));
+			System.err.println(x + ") " + height + " " + waterLevel);
+
+			ok &= height < waterLevel;
+		}
+
+		return ok;
+	}
+
+	@Override
 	public Vector2i getFootprint() {
-		return new Vector2i(3, 3);
+		return new Vector2i(4, 2);
 	}
 
 	@Override
 	public Vector2i getOriginOffset() {
-		return new Vector2i(1, 1);
+		return new Vector2i(1, 0);
 	}
 
 	@Override

@@ -15,21 +15,21 @@ public class SolarPanelObject extends GameObject implements PlaceableObject, Ene
 
 	protected long waterLevel;
 
-	public SolarPanelObject(String str, Mesh mesh, Transform3D transform, Vector3i objectId) {
+	public SolarPanelObject(final String str, final Mesh mesh, final Transform3D transform, final Vector3i objectId) {
 		super(str, mesh, transform, objectId);
 	}
 
-	public SolarPanelObject(String str, Mesh mesh, Transform3D transform) {
+	public SolarPanelObject(final String str, final Mesh mesh, final Transform3D transform) {
 		super(str, mesh, transform);
 	}
 
-	public SolarPanelObject(String str, Mesh mesh) {
+	public SolarPanelObject(final String str, final Mesh mesh) {
 		super(str, mesh);
 	}
 
 	@Override
 	public Vector2i getFootprint() {
-		return new Vector2i(2, 2);
+		return new Vector2i(1, 1);
 	}
 
 	@Override
@@ -48,12 +48,12 @@ public class SolarPanelObject extends GameObject implements PlaceableObject, Ene
 	}
 
 	@Override
-	public void removePower(long power) {
+	public void removePower(final long power) {
 
 	}
 
 	@Override
-	public void addPower(long power) {
+	public void addPower(final long power) {
 
 	}
 

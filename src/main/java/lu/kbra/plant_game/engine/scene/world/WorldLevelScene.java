@@ -377,6 +377,8 @@ public class WorldLevelScene extends Scene3D {
 				.push();
 	}
 
+	private Vector2i pos;
+
 	public void input(final WindowInputHandler inputHandler, final float dTime, final UpdateFrameState frameState) {
 		this.posAdd.zero();
 		this.rotation = 0;
@@ -413,7 +415,17 @@ public class WorldLevelScene extends Scene3D {
 			this.fovDiff = (float) (inputHandler.getMouseScroll().y * 0.05f);
 
 			if (inputHandler.isMouseButtonPressedOnce(StandardKeyOption.PLACE)) {
-				this.movingObject = !this.movingObject;
+				if (this.attachedObject != null) {
+					if (!this.isPlaceable(this.attachedObject, this.pos, this.targetRotation)) {
+						// TODO: play error sound or smth
+//						PGLogic.INSTANCE.getCompositor().addOutline(this.attachedObject, new Vector4f(1f, 0.2f, 0.2f, 1));
+					} else {
+						this.movingObject = false;
+//						PGLogic.INSTANCE.getCompositor().addOutline(this.attachedObject, new Vector4f(0.2f, 0.8f, 0.2f, 1));
+					}
+				} else {
+					this.movingObject = true;
+				}
 			}
 		}
 	}
@@ -435,12 +447,6 @@ public class WorldLevelScene extends Scene3D {
 								compositor.getObjectId().z(),
 								compositor.getObjectId().w());
 
-						super.getEntities()
-								.values()
-								.parallelStream()
-								.filter(e -> e instanceof GameObject && e instanceof PlaceableObject
-										&& ((GameObject) e).getObjectIdLocation() == AttributeLocation.ENTITY);
-
 						this.attachedObject = (PlaceableObject) super.getEntities()
 								.values()
 								.parallelStream()
@@ -456,27 +462,34 @@ public class WorldLevelScene extends Scene3D {
 							this.moveObjectTaskState = null;
 							this.movingObject = false;
 						} else {
-							compositor.addOutline(this.attachedObject, new Vector4f(1, 0, 1, 1));
+							compositor.addOutline(this.attachedObject, new Vector4f(0.2f, 0.8f, 0.2f, 1));
 						}
 					}).push();
 				} else {
 					final Vector2f mousePos = inputHandler.getMousePosition();
 					this.moveObjectTaskState = new TaskFuture<Void, Void>(renderDispatcher, () -> {
-						final Vector2i pos = this
+						this.pos = this
 								.getTerrain()
 								.pickTerrainCell(super.getCamera(),
 										mousePos,
 										compositor.getWindow().getWidth(),
 										compositor.getWindow().getHeight());
-						if (pos != null) {
+						if (this.pos != null) {
 							this.terrain
 									.getTerrainHighlightObject()
 									.getTransform()
-									.translationSet(this.getTerrain().getCellPosition(pos))
+									.translationSet(this.getTerrain().getCellPosition(this.pos))
 									.translationSub(this.getTerrain().getTransform().getTranslation())
 									.updateMatrix();
-							this.attachedObject.placeDown(this.getTerrain(), pos, this.targetRotation);
+							this.attachedObject.placeDown(this.getTerrain(), this.pos, this.targetRotation);
 							this.targetRotation = Direction.DEFAULT();
+							if (this.isPlaceable(this.attachedObject, this.pos, this.targetRotation)) {
+								compositor.addOutline(this.attachedObject, new Vector4f(0.2f, 0.8f, 0.2f, 1));
+							} else {
+								compositor.addOutline(this.attachedObject, new Vector4f(1f, 0.2f, 0.2f, 1));
+							}
+						} else {
+							compositor.addOutline(this.attachedObject, new Vector4f(1f, 0.2f, 0.2f, 1));
 						}
 					}).push();
 				}
@@ -505,6 +518,22 @@ public class WorldLevelScene extends Scene3D {
 		camera.getPosition().fma(dTime * 10, this.posAdd);
 		camera.getRotation().rotateY((float) Math.toRadians(this.rotation * 50 * dTime));
 		camera.updateMatrix();
+	}
+
+	private boolean isPlaceable(final PlaceableObject targetObject, final Vector2i targetPos, final Direction targetRotation) {
+		if (!targetObject.isPlaceable(this, targetPos, targetRotation)) {
+			return false;
+		}
+
+		return !this.getEntities().values().stream().map(GameObject.class::cast).anyMatch(c -> {
+			if (!c.hasTransform() || !(c instanceof final PlaceableObject po) || c == targetObject) {
+				return false;
+			}
+
+			final Vector2i thisPos = this.getTerrain().getCellPosition(po.getTransform().getTranslation());
+
+			return po.intersects(thisPos, targetPos, targetObject);
+		});
 	}
 
 	public GameObject getWaterLevel() {

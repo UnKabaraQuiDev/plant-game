@@ -105,6 +105,14 @@ public class TerrainObject extends GameObject {
 				.mul(this.getMesh().getCellSize());
 	}
 
+	public Vector2i getCellPosition(final Vector3f pos) {
+		final Vector3f scaledPos = pos
+				.sub(0.5f, 0, 0.5f, new Vector3f())
+				.sub(this.getTransform().getTranslation())
+				.div(this.getMesh().getCellSize());
+		return new Vector2i((int) scaledPos.x, (int) scaledPos.z);
+	}
+
 	@Override
 	public TerrainMesh getMesh() {
 		return (TerrainMesh) super.getMesh();
