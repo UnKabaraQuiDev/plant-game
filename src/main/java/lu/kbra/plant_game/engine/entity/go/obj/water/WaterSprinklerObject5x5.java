@@ -1,7 +1,6 @@
 package lu.kbra.plant_game.engine.entity.go.obj.water;
 
 import org.joml.Matrix4f;
-import org.joml.Vector2i;
 import org.joml.Vector3i;
 
 import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
@@ -48,16 +47,6 @@ public class WaterSprinklerObject5x5 extends PlaceableAnimatedGameObject impleme
 				.getMatrix()
 				.mul(this.animatedTransform.identity().rotateY((float) Math.toRadians(t * 12)), this.animatedTransform);
 		return this.animatedTransform;
-	}
-
-	@Override
-	public Vector2i getFootprint() {
-		return new Vector2i(1, 1);
-	}
-
-	@Override
-	public Vector2i getOriginOffset() {
-		return new Vector2i(0, 0);
 	}
 
 }

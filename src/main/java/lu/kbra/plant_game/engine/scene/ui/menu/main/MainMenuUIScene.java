@@ -32,7 +32,7 @@ import lu.kbra.plant_game.engine.entity.ui.group.LayoutScrollDrivenUIObjectGroup
 import lu.kbra.plant_game.engine.entity.ui.group.OffsetUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.group.ScrollContainerUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.group.ScrollDrivenUIObjectGroup;
-import lu.kbra.plant_game.engine.entity.ui.impl.AbsoluteTransformOwner;
+import lu.kbra.plant_game.engine.entity.ui.impl.AbsoluteTransform3DOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.Scale2dDir;
 import lu.kbra.plant_game.engine.entity.ui.mesh.line.TimelineMesh;
 import lu.kbra.plant_game.engine.entity.ui.prim.MeshUIObject;
@@ -419,10 +419,10 @@ public class MainMenuUIScene extends UIScene {
 		if (this.cursor != null && this.currentGroup == MAIN && this.mainButtonsMenuGroup.size() > 1) {
 			this.cursor.setActive(true);
 
-			final float z1 = ((AbsoluteTransformOwner) this.mainButtonsMenuGroup.get(0))
+			final float z1 = ((AbsoluteTransform3DOwner) this.mainButtonsMenuGroup.get(0))
 					.getAbsoluteTransform()
 					.getTranslation(new Vector3f()).z;
-			final float z2 = ((AbsoluteTransformOwner) this.mainButtonsMenuGroup.get(1))
+			final float z2 = ((AbsoluteTransform3DOwner) this.mainButtonsMenuGroup.get(1))
 					.getAbsoluteTransform()
 					.getTranslation(new Vector3f()).z;
 

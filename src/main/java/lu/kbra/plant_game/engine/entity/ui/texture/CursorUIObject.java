@@ -6,7 +6,7 @@ import org.joml.Vector3f;
 
 import lu.kbra.plant_game.PGLogic;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
-import lu.kbra.plant_game.engine.entity.ui.impl.AbsoluteTransformOwner;
+import lu.kbra.plant_game.engine.entity.ui.impl.AbsoluteTransform3DOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsUpdate;
 import lu.kbra.plant_game.engine.mesh.TexturedQuadMesh;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
@@ -39,7 +39,7 @@ public class CursorUIObject extends TextureUIObject implements NeedsUpdate {
 
 		final float cursorWidth = (float) (this.getBounds().getWidth() * this.getTransform().getScale().x);
 
-		final Matrix4f c = uiObject instanceof AbsoluteTransformOwner ? ((AbsoluteTransformOwner) uiObject).getAbsoluteTransform()
+		final Matrix4f c = uiObject instanceof AbsoluteTransform3DOwner ? ((AbsoluteTransform3DOwner) uiObject).getAbsoluteTransform()
 				: uiObject.getTransform().getMatrix();
 		final Vector3f pos = c.getTranslation(new Vector3f());
 		final float scaleX = new Vector3f(c.m00(), c.m01(), c.m02()).length();

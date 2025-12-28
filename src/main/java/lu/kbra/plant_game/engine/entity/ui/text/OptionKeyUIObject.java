@@ -4,7 +4,7 @@ import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
 
 import lu.kbra.plant_game.PGLogic;
-import lu.kbra.plant_game.engine.entity.ui.impl.AbsoluteTransformOwner;
+import lu.kbra.plant_game.engine.entity.ui.impl.AbsoluteTransform3DOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.Focusable;
 import lu.kbra.plant_game.engine.entity.ui.impl.IndexOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsClick;
@@ -23,7 +23,7 @@ import lu.kbra.standalone.gameengine.utils.transform.Transform3DPivot;
 
 @DataPath("")
 public class OptionKeyUIObject extends ProgrammaticGrowOnHoverTextUIObject
-		implements NeedsClick, Focusable, NeedsInput, IndexOwner, AbsoluteTransformOwner {
+		implements NeedsClick, Focusable, NeedsInput, IndexOwner, AbsoluteTransform3DOwner {
 
 	public static enum State {
 		IDLE, WAITING_RELEASE, WAITING_INPUT;

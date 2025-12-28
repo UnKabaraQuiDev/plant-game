@@ -10,7 +10,7 @@ import lu.pcy113.pclib.PCUtils;
 import lu.pcy113.pclib.concurrency.ListTriggerLatch;
 import lu.pcy113.pclib.impl.ThrowingFunction;
 
-import lu.kbra.plant_game.engine.entity.go.obj.water.NeedsPostConstruct;
+import lu.kbra.plant_game.engine.entity.go.impl.NeedsPostConstruct;
 import lu.kbra.plant_game.engine.entity.ui.AnimatedUIObject;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.gradient.GradientQuadUIObject;

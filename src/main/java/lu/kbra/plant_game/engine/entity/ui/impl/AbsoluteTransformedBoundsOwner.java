@@ -4,7 +4,7 @@ import java.awt.Shape;
 
 import lu.kbra.standalone.gameengine.objs.entity.ParentAware;
 
-public interface AbsoluteTransformedBoundsOwner extends TransformedBoundsOwner, ParentAware, AbsoluteTransformOwner {
+public interface AbsoluteTransformedBoundsOwner extends TransformedBoundsOwner, ParentAware, AbsoluteTransform3DOwner {
 
 	default Shape getTransformedWorld() {
 		return this.getTransformedBounds(this.getAbsoluteTransform());

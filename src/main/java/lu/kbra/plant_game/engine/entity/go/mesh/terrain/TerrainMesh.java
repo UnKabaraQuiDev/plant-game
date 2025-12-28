@@ -1,6 +1,6 @@
 package lu.kbra.plant_game.engine.entity.go.mesh.terrain;
 
-import org.joml.Vector2i;
+import org.joml.Vector2ic;
 
 import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.standalone.gameengine.cache.attrib.AttribArray;
@@ -46,12 +46,16 @@ public class TerrainMesh extends LoadedMesh {
 		return Integer.MIN_VALUE;
 	}
 
-	public int getCellHeight(final Vector2i rotated) {
-		return this.getCellHeight(rotated.x, rotated.y);
+	public int getCellHeight(final Vector2ic tile) {
+		return this.getCellHeight(tile.x(), tile.y());
 	}
 
 	public boolean isInBounds(final int x, final int z) {
 		return x >= 0 && x < this.width && z >= 0 && z < this.length;
+	}
+
+	public boolean isInBounds(final Vector2ic tile) {
+		return this.isInBounds(tile.x(), tile.y());
 	}
 
 	public Integer[][] getCellHeights() {
@@ -72,6 +76,10 @@ public class TerrainMesh extends LoadedMesh {
 
 	public ColorMaterial getCellMaterial(final int x, final int z) {
 		return this.materialType[x][z];
+	}
+
+	public ColorMaterial getCellMaterial(final Vector2ic v) {
+		return this.getCellMaterial(v.x(), v.y());
 	}
 
 	public ColorMaterial[][] getMaterialTypes() {

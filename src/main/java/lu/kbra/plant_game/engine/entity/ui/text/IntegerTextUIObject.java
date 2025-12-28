@@ -3,7 +3,7 @@ package lu.kbra.plant_game.engine.entity.ui.text;
 import lu.pcy113.pclib.PCUtils;
 
 import lu.kbra.plant_game.PGLogic;
-import lu.kbra.plant_game.engine.entity.go.obj.water.NeedsPostConstruct;
+import lu.kbra.plant_game.engine.entity.go.impl.NeedsPostConstruct;
 import lu.kbra.plant_game.engine.util.annotation.BufferSize;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.plant_game.generated.ColorMaterial;

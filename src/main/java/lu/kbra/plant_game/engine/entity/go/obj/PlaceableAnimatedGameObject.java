@@ -1,23 +1,23 @@
 package lu.kbra.plant_game.engine.entity.go.obj;
 
-import org.joml.Vector2i;
-import org.joml.Vector3f;
 import org.joml.Vector3i;
 
 import lu.kbra.plant_game.engine.entity.go.AnimatedGameObject;
+import lu.kbra.plant_game.engine.entity.go.impl.Footprint;
+import lu.kbra.plant_game.engine.entity.go.impl.NeedsPostConstruct;
 import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
-import lu.kbra.plant_game.engine.entity.go.obj.water.NeedsPostConstruct;
 import lu.kbra.plant_game.engine.mesh.AnimatedMesh;
-import lu.kbra.standalone.gameengine.geom.BoundingBox;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.utils.consts.Direction;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-public abstract class PlaceableAnimatedGameObject extends AnimatedGameObject implements PlaceableObject, NeedsPostConstruct {
+public abstract class PlaceableAnimatedGameObject extends AnimatedGameObject
+		implements PlaceableObject, NeedsPostConstruct, StaticMeshFootprintOwner, AnimatedMeshFootprintOwner {
 
 	protected Direction rotation = Direction.DEFAULT();
-	protected Vector2i originOffset;
-	protected Vector2i footprint;
+	protected Footprint staticMeshFootprint;
+	protected Footprint animatedMeshFootprint;
+	protected Footprint footprint;
 
 	public PlaceableAnimatedGameObject(
 			final String str,
@@ -46,73 +46,38 @@ public abstract class PlaceableAnimatedGameObject extends AnimatedGameObject imp
 		super(str, mesh, animatedMesh);
 	}
 
-	protected boolean isInclusiveMesh() {
-		return false;
+	protected FootprintComputeMethod getStaticMeshFootprintComputeMethod() {
+		return FootprintComputeMethod.CLOSEST;
+	}
+
+	protected FootprintComputeMethod getAnimatedMeshFootprintComputeMethod() {
+		return FootprintComputeMethod.CLOSEST;
 	}
 
 	@Override
 	public void init() {
-		final boolean inclusive = this.isInclusiveMesh();
-		this.originOffset = this.computeMeshOffset(inclusive);
-		this.footprint = this.computeMeshFootprint(inclusive);
-
-		System.err.println(this.getClass().getSimpleName() + ": " + this.getOriginOffset() + " " + this.getFootprint());
-	}
-
-	protected Vector2i computeMeshFootprint(final boolean inclusive) {
-		final Mesh mesh = this.getMesh();
-		final AnimatedMesh animatedMesh = this.getAnimatedMesh();
-		final BoundingBox bb = BoundingBox.union(mesh.getBoundingBox(), animatedMesh.getBoundingBox());
-
-		final int minX;
-		final int minZ;
-		final int maxX;
-		final int maxZ;
-		final Vector3f min = bb.getMin();
-		final Vector3f max = bb.getMax();
-		if (inclusive) {
-			minX = (int) Math.copySign(Math.ceil(Math.abs(min.x())), min.x());
-			minZ = (int) Math.copySign(Math.ceil(Math.abs(min.z())), min.z());
-
-			maxX = (int) Math.copySign(Math.ceil(Math.abs(max.x())), max.x());
-			maxZ = (int) Math.copySign(Math.ceil(Math.abs(max.z())), max.z());
-		} else {
-			minX = (int) min.x();
-			minZ = (int) min.z();
-
-			maxX = (int) max.x();
-			maxZ = (int) max.z();
-		}
-
-		return new Vector2i(maxX - minX, maxZ - minZ);
-	}
-
-	protected Vector2i computeMeshOffset(final boolean inclusive) {
-		final Mesh mesh = this.getMesh();
-		final AnimatedMesh animatedMesh = this.getAnimatedMesh();
-		final BoundingBox bb = BoundingBox.union(mesh.getBoundingBox(), animatedMesh.getBoundingBox());
-
-		final int minX;
-		final int minZ;
-		final Vector3f min = bb.getMin();
-		if (inclusive) {
-			minX = (int) Math.copySign(Math.ceil(Math.abs(min.x())), min.x());
-			minZ = (int) Math.copySign(Math.ceil(Math.abs(min.z())), min.z());
-		} else {
-			minX = (int) min.x();
-			minZ = (int) min.z();
-		}
-
-		return new Vector2i(-minX, -minZ);
+		this.staticMeshFootprint = StaticMeshFootprintOwner
+				.computeMeshFootprint(this.getStaticMeshFootprintComputeMethod(), this.getMesh());
+		this.animatedMeshFootprint = StaticMeshFootprintOwner
+				.computeMeshFootprint(this.getAnimatedMeshFootprintComputeMethod(), this.getAnimatedMesh());
+		this.footprint = Footprint.union(this.getStaticMeshFootprint(), this.getAnimatedMeshFootprint());
+		System.err
+				.println(this.getClass().getSimpleName() + " : " + this.getStaticMeshFootprintComputeMethod() + " = "
+						+ this.getMesh().getBoundingBox() + " = " + this.staticMeshFootprint);
 	}
 
 	@Override
-	public Vector2i getOriginOffset() {
-		return this.originOffset;
+	public Footprint getStaticMeshFootprint() {
+		return this.staticMeshFootprint;
 	}
 
 	@Override
-	public Vector2i getFootprint() {
+	public Footprint getAnimatedMeshFootprint() {
+		return this.animatedMeshFootprint;
+	}
+
+	@Override
+	public Footprint getFootprint() {
 		return this.footprint;
 	}
 

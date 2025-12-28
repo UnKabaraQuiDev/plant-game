@@ -1,6 +1,5 @@
 package lu.kbra.plant_game.engine.entity.go.obj.energy;
 
-import org.joml.Vector2i;
 import org.joml.Vector3i;
 
 import lu.kbra.plant_game.engine.entity.go.impl.EnergyContainer;
@@ -25,16 +24,6 @@ public class SolarPanelObject extends PlaceableGameObject implements PlaceableOb
 
 	public SolarPanelObject(final String str, final Mesh mesh) {
 		super(str, mesh);
-	}
-
-	@Override
-	public Vector2i getFootprint() {
-		return new Vector2i(1, 1);
-	}
-
-	@Override
-	public Vector2i getOriginOffset() {
-		return new Vector2i(0, 0);
 	}
 
 	@Override
