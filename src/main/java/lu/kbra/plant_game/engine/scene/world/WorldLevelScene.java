@@ -62,6 +62,7 @@ import lu.kbra.standalone.gameengine.cache.attrib.UIntAttribArray;
 import lu.kbra.standalone.gameengine.cache.attrib.Vec3fAttribArray;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.geom.QuadLoadedMesh;
+import lu.kbra.standalone.gameengine.geom.QuadMesh;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
 import lu.kbra.standalone.gameengine.objs.entity.Entity;
@@ -90,7 +91,7 @@ public class WorldLevelScene extends Scene3D {
 
 	private boolean movingObject = false;
 	private PlaceableObject attachedObject = null;
-	private Direction targetRotation = Direction.DEFAULT();
+	private Direction targetRotation = Direction.NONE;
 	private TaskFuture<?, Void>.TaskState<Void> moveObjectTaskState;
 
 	public WorldLevelScene(final String name, final CacheManager parent) {
@@ -162,20 +163,20 @@ public class WorldLevelScene extends Scene3D {
 						final Vector3f[] pos = new Vector3f[48];
 						int index = 0;
 						final TerrainMesh terrainMesh = this.getTerrain().getMesh();
-						for (int x = 0, y = 2; x < 12; x += terrainMesh.getCellSize()) {
+						for (int x = 0, y = 2; x < 12; x += 1) {
 							final float h0 = terrainMesh.getCellHeight(x, y) + 0.5f;
 							final float h1 = terrainMesh.getCellHeight(x + 1, y) + 0.5f;
 
 							pos[index + 0] = new Vector3f(x, h0, y + 0.5f);
-							pos[index + 1] = new Vector3f(x + terrainMesh.getCellSize(), h0, y + 0.5f);
+							pos[index + 1] = new Vector3f(x + 1, h0, y + 0.5f);
 							index += 2;
 
 							if (h0 != h1) {
 								final float low = Math.min(h0, h1);
 								final float high = Math.max(h0, h1);
 
-								pos[index + 0] = new Vector3f(x + terrainMesh.getCellSize(), low, y + 0.5f);
-								pos[index + 1] = new Vector3f(x + terrainMesh.getCellSize(), high, y + 0.5f);
+								pos[index + 0] = new Vector3f(x + 1, low, y + 0.5f);
+								pos[index + 1] = new Vector3f(x + 1, high, y + 0.5f);
 								index += 2;
 							}
 						}
@@ -202,17 +203,17 @@ public class WorldLevelScene extends Scene3D {
 								.addEntity(
 										new GameObject("test", mesh, new Transform3D(), new Vector3i(), ColorMaterial.LIGHT_BLUE.getId()));
 
-						for (int x = terrainMesh.getWidth(), y = 12; x > 0; x -= terrainMesh.getCellSize()) {
+						for (int x = terrainMesh.getWidth(), y = 12; x > 0; x -= 1) {
 							final float h0 = terrainMesh.getCellHeight(x, y) + 0.5f;
 							final float h1 = terrainMesh.getCellHeight(x + 1, y) + 0.5f;
 
-							mesh.addPoint(new Vector3f(x + terrainMesh.getCellSize(), h0, y + 0.5f));
+							mesh.addPoint(new Vector3f(x + 1, h0, y + 0.5f));
 
 							if (h0 != h1) {
 								final float low = Math.min(h0, h1);
 								final float high = Math.max(h0, h1);
 
-								mesh.addPoint(new Vector3f(x + terrainMesh.getCellSize(), high, y + 0.5f));
+								mesh.addPoint(new Vector3f(x + 1, high, y + 0.5f));
 							}
 						}
 
@@ -221,7 +222,7 @@ public class WorldLevelScene extends Scene3D {
 
 					new TaskFuture<>(renderDispatcher, () -> {
 						GlobalLogger.info("Generating water mesh...");
-						final Pair<Mesh, Long> meshTime = PCUtils
+						final Pair<QuadMesh, Long> meshTime = PCUtils
 								.nanoTime(() -> new QuadLoadedMesh(
 										"water",
 										null,
@@ -231,11 +232,11 @@ public class WorldLevelScene extends Scene3D {
 						return meshTime.getKey();
 					})
 							.then(workers,
-									(ThrowingConsumer<Mesh, Throwable>) mesh -> this
+									(ThrowingConsumer<QuadMesh, Throwable>) mesh -> this
 											.setWaterLevel(new GameObject(
 													"water",
 													mesh,
-													new Transform3D(new Vector3f(0, 0.9f, 0)),
+													new Transform3D(new Vector3f(mesh.getSize().x() / 2, 0.9f, mesh.getSize().y() / 2)),
 													new Vector3i(2, 0, 0),
 													ColorMaterial.BLUE.getId())))
 							.push();
@@ -463,6 +464,7 @@ public class WorldLevelScene extends Scene3D {
 							this.movingObject = false;
 						} else {
 							compositor.addOutline(this.attachedObject, new Vector4f(0.2f, 0.8f, 0.2f, 1));
+							this.targetRotation = this.attachedObject.getRotation();
 						}
 					}).push();
 				} else {
@@ -482,7 +484,6 @@ public class WorldLevelScene extends Scene3D {
 									.translationSub(this.getTerrain().getTransform().getTranslation())
 									.updateMatrix();
 							this.attachedObject.placeDown(this.getTerrain(), this.pos, this.targetRotation);
-							this.targetRotation = Direction.DEFAULT();
 							if (this.isPlaceable(this.attachedObject, this.pos, this.targetRotation)) {
 								compositor.addOutline(this.attachedObject, new Vector4f(0.2f, 0.8f, 0.2f, 1));
 							} else {
@@ -542,7 +543,8 @@ public class WorldLevelScene extends Scene3D {
 
 	public <T extends GameObject> T setWaterLevel(final T waterLevel) {
 		this.waterLevel = waterLevel;
-		return super.addEntity(waterLevel);
+		this.getTerrain().getSubEntitiesComponent().addEntity(waterLevel);
+		return waterLevel;
 	}
 
 	public TerrainObject getTerrain() {
@@ -588,6 +590,11 @@ public class WorldLevelScene extends Scene3D {
 
 	public void setWindDirection(final Vector2f windDirection) {
 		this.windDirection = windDirection;
+	}
+
+	public float getWaterHeight() {
+		return (this.getWaterLevel().getTransform().getTranslation().y() + this.getTerrain().getTransform().getTranslation().y())
+				/ this.getTerrain().getTransform().getScale().y();
 	}
 
 }

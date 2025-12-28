@@ -4,9 +4,8 @@ import org.joml.Matrix4f;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
 
-import lu.kbra.plant_game.engine.entity.go.AnimatedGameObject;
-import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
 import lu.kbra.plant_game.engine.entity.go.impl.WaterContainer;
+import lu.kbra.plant_game.engine.entity.go.obj.PlaceableAnimatedGameObject;
 import lu.kbra.plant_game.engine.mesh.AnimatedMesh;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
@@ -15,7 +14,7 @@ import lu.kbra.standalone.gameengine.utils.consts.Direction;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 @DataPath("classpath:/models/water_wheel.json")
-public class WaterWheelObject extends AnimatedGameObject implements PlaceableObject, WaterContainer {
+public class WaterWheelObject extends PlaceableAnimatedGameObject implements WaterContainer {
 
 	protected long waterLevel;
 
@@ -47,6 +46,11 @@ public class WaterWheelObject extends AnimatedGameObject implements PlaceableObj
 	}
 
 	@Override
+	protected boolean isInclusiveMesh() {
+		return true;
+	}
+
+	@Override
 	public Matrix4f computeAnimatedTransform(final float t) {
 		this
 				.getTransform()
@@ -61,27 +65,19 @@ public class WaterWheelObject extends AnimatedGameObject implements PlaceableObj
 //			return false;
 //		}
 
-		final float waterLevel = scene.getWaterLevel().getTransform().getTranslation().y();
+		final float waterLevel = scene.getWaterHeight();
 		boolean ok = true;
 		final Vector2i pos = scene.getTerrain().getCellPosition(this.getTransform().getTranslation());
 		for (int x = -1; x <= +1; x++) {
 			final float height = scene.getTerrain().getMesh().getCellHeight(this.getRotated(new Vector2i(x, 1)).add(pos));
-			System.err.println(x + ") " + height + " " + waterLevel);
+			System.err
+					.println(x + ") " + height + " " + waterLevel + " | " + new Vector2i(x, 0) + " = "
+							+ this.getRotated(new Vector2i(x, 0)));
 
 			ok &= height < waterLevel;
 		}
 
 		return ok;
-	}
-
-	@Override
-	public Vector2i getFootprint() {
-		return new Vector2i(4, 2);
-	}
-
-	@Override
-	public Vector2i getOriginOffset() {
-		return new Vector2i(1, 0);
 	}
 
 	@Override

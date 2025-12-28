@@ -3,15 +3,15 @@ package lu.kbra.plant_game.engine.entity.go.obj.water;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
 
-import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
 import lu.kbra.plant_game.engine.entity.go.impl.WaterContainer;
+import lu.kbra.plant_game.engine.entity.go.obj.PlaceableGameObject;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 @DataPath("classpath:/models/water_tower.json")
-public class WaterTowerObject extends GameObject implements PlaceableObject, WaterContainer {
+public class WaterTowerObject extends PlaceableGameObject implements PlaceableObject, WaterContainer {
 
 	protected long waterLevel;
 

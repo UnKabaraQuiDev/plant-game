@@ -10,6 +10,7 @@ import lu.pcy113.pclib.PCUtils;
 import lu.pcy113.pclib.concurrency.ListTriggerLatch;
 import lu.pcy113.pclib.impl.ThrowingFunction;
 
+import lu.kbra.plant_game.engine.entity.go.obj.water.NeedsPostConstruct;
 import lu.kbra.plant_game.engine.entity.ui.AnimatedUIObject;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.gradient.GradientQuadUIObject;
@@ -154,6 +155,9 @@ public class UIObjectFactory {
 																	meshes.staticMesh(),
 																	meshes.animatedMesh() },
 															args));
+							if (instance instanceof final NeedsPostConstruct npc) {
+								npc.init();
+							}
 							return instance;
 						});
 			}
@@ -165,6 +169,9 @@ public class UIObjectFactory {
 										PCUtils
 												.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), mesh },
 														args));
+						if (instance instanceof final NeedsPostConstruct npc) {
+							npc.init();
+						}
 						return instance;
 					});
 
@@ -197,6 +204,9 @@ public class UIObjectFactory {
 						.getFuture(this.cache, uName, key, td, this.loader, this.render)
 						.then(this.loader, (ThrowingFunction<TextEmitter, T, Throwable>) te -> {
 							final T instance = UIObjectRegistry.create(clazz, PCUtils.combineArrays(new Object[] { uName, te }, nargs));
+							if (instance instanceof final NeedsPostConstruct npc) {
+								npc.init();
+							}
 							return instance;
 						})
 						.then(this.render, (Function<T, T>) t -> {
@@ -211,6 +221,9 @@ public class UIObjectFactory {
 						final T instance = UIObjectRegistry
 								.create(clazz,
 										PCUtils.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), te }, nargs));
+						if (instance instanceof final NeedsPostConstruct npc) {
+							npc.init();
+						}
 						return instance;
 					});
 
@@ -227,6 +240,9 @@ public class UIObjectFactory {
 										PCUtils
 												.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), mesh },
 														args));
+						if (instance instanceof final NeedsPostConstruct npc) {
+							npc.init();
+						}
 						return instance;
 					});
 
@@ -236,6 +252,9 @@ public class UIObjectFactory {
 			return new TaskFuture<>(this.loader, () -> {
 				final T instance = UIObjectRegistry
 						.create(clazz, PCUtils.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime() }, args));
+				if (instance instanceof final NeedsPostConstruct npc) {
+					npc.init();
+				}
 				return instance;
 			});
 
@@ -254,6 +273,9 @@ public class UIObjectFactory {
 										PCUtils
 												.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), mesh },
 														args));
+						if (instance instanceof final NeedsPostConstruct npc) {
+							npc.init();
+						}
 						return instance;
 					});
 
@@ -268,6 +290,9 @@ public class UIObjectFactory {
 										PCUtils
 												.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), mesh },
 														args));
+						if (instance instanceof final NeedsPostConstruct npc) {
+							npc.init();
+						}
 						return instance;
 					});
 

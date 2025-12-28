@@ -14,6 +14,7 @@ import lu.kbra.plant_game.engine.entity.go.impl.InstanceGameObject;
 import lu.kbra.plant_game.engine.entity.go.impl.InstanceSwayGameObject;
 import lu.kbra.plant_game.engine.entity.go.impl.SwayGameObject;
 import lu.kbra.plant_game.engine.entity.go.impl.SwayInstanceEmitter;
+import lu.kbra.plant_game.engine.entity.go.obj.water.NeedsPostConstruct;
 import lu.kbra.plant_game.engine.locale.NoMeshObject;
 import lu.kbra.plant_game.engine.mesh.AnimatedMesh;
 import lu.kbra.plant_game.engine.mesh.loader.AnimatedMeshLoader;
@@ -122,6 +123,9 @@ public class GameObjectFactory {
 														meshes.staticMesh(),
 														meshes.animatedMesh() },
 												args));
+						if (instance instanceof final NeedsPostConstruct npc) {
+							npc.init();
+						}
 						return instance;
 					});
 		}
@@ -135,6 +139,9 @@ public class GameObjectFactory {
 										PCUtils
 												.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), mesh },
 														args));
+						if (instance instanceof final NeedsPostConstruct npc) {
+							npc.init();
+						}
 						return instance;
 					});
 
@@ -169,6 +176,9 @@ public class GameObjectFactory {
 						final T instance = GameObjectRegistry
 								.create(clazz,
 										PCUtils.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), ie }, nargs));
+						if (instance instanceof final NeedsPostConstruct npc) {
+							npc.init();
+						}
 						return instance;
 					});
 
@@ -203,6 +213,9 @@ public class GameObjectFactory {
 						final T instance = GameObjectRegistry
 								.create(clazz,
 										PCUtils.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), ie }, nargs));
+						if (instance instanceof final NeedsPostConstruct npc) {
+							npc.init();
+						}
 						return instance;
 					});
 
@@ -212,6 +225,9 @@ public class GameObjectFactory {
 			return new TaskFuture<>(this.loader, () -> {
 				final T instance = GameObjectRegistry
 						.create(clazz, PCUtils.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime() }, args));
+				if (instance instanceof final NeedsPostConstruct npc) {
+					npc.init();
+				}
 				return instance;
 			});
 
@@ -222,6 +238,9 @@ public class GameObjectFactory {
 					final T instance = GameObjectRegistry
 							.create(clazz,
 									PCUtils.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), mesh }, args));
+					if (instance instanceof final NeedsPostConstruct npc) {
+						npc.init();
+					}
 					return instance;
 				});
 	}

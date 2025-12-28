@@ -2,7 +2,6 @@ package lu.kbra.plant_game.engine.entity.go.impl;
 
 import org.joml.Vector2f;
 import org.joml.Vector2i;
-import org.joml.Vector3f;
 
 import lu.kbra.plant_game.engine.entity.go.mesh.terrain.TerrainMesh;
 import lu.kbra.plant_game.engine.entity.go.obj.terrain.TerrainObject;
@@ -18,6 +17,10 @@ public interface PlaceableObject extends Transform3DOwner, UniqueID, SceneEntity
 	Vector2i getFootprint();
 
 	Vector2i getOriginOffset();
+
+	Direction getRotation();
+
+	void setRotation(Direction dir);
 
 	default boolean isPlaceable(final WorldLevelScene scene, final Vector2i tile, final Direction rotation) {
 		final TerrainMesh mesh = scene.getTerrain().getMesh();
@@ -56,57 +59,38 @@ public interface PlaceableObject extends Transform3DOwner, UniqueID, SceneEntity
 	default void placeDown(final TerrainObject terrain, final Vector2i tile, final Direction rotation) {
 		final Transform3D transform = this.getTransform();
 
-		rotation.rotate(transform.getRotation());
+		rotation.rotation(transform.getRotation());
 		transform.translationSet(terrain.getCellPosition(tile));
-
 		transform.updateMatrix();
+
+		this.setRotation(rotation);
 	}
 
-	default void getRotated(final Vector2i footprint, final Vector2i origin) {
-		final int rot = Math
-				.floorMod(Math.round(this.getTransform().getRotation().getEulerAnglesXYZ(new Vector3f()).y / (float) (Math.PI / 2)), 4);
-
-		rotateFootprint(this.getFootprint(), this.getOriginOffset(), rot, footprint, origin);
+	default void getRotated(final Vector2i footprint) {
+		rotateFootprint(this.getFootprint(), this.getOriginOffset(), this.getRotation(), footprint);
 	}
 
-	default int getRotationStep() {
-		final float y = this.getTransform().getRotation().getEulerAnglesXYZ(new Vector3f()).y;
-		return Math.floorMod(Math.round(y / (float) (Math.PI / 2)), 4);
-	}
-
-	default Direction getRotationDirection() {
-		return Direction.getByIndex((this.getRotationStep() - 0) % 4);
-	}
-
-	default Vector2i getRotated(final Vector2i in) {
-		final Vector2i origin = this.getOriginOffset();
-		final Direction dir = this.getRotationDirection();
-
-		final int x = in.x - origin.x;
-		final int y = in.y - origin.y;
+	default Vector2i getRotated(final Vector2i v) {
+		final Direction dir = this.getRotation();
 
 		return switch (dir) {
-		case NORTH -> new Vector2i(x + origin.x, y + origin.y);
-		case EAST -> new Vector2i(-y + origin.x, x + origin.y);
-		case SOUTH -> new Vector2i(-x + origin.x, -y + origin.y);
-		case WEST -> new Vector2i(y + origin.x, -x + origin.y);
-		case NONE -> new Vector2i(in);
+		case SOUTH -> new Vector2i(v);
+		case EAST -> new Vector2i(-v.y, v.x);
+		case NORTH -> new Vector2i(-v.x, -v.y);
+		case WEST -> new Vector2i(v.y, -v.x);
+		default -> new Vector2i(0, 0);
 		};
 	}
 
-	default Vector2f getRotated(final Vector2f in) {
-		final Vector2f origin = new Vector2f(this.getOriginOffset().x, this.getOriginOffset().y);
-		final Direction dir = this.getRotationDirection();
-
-		final float x = in.x - origin.x;
-		final float y = in.y - origin.y;
+	default Vector2f getRotated(final Vector2f v) {
+		final Direction dir = this.getRotation();
 
 		return switch (dir) {
-		case NORTH -> new Vector2f(x + origin.x, y + origin.y);
-		case EAST -> new Vector2f(-y + origin.x, x + origin.y);
-		case SOUTH -> new Vector2f(-x + origin.x, -y + origin.y);
-		case WEST -> new Vector2f(y + origin.x, -x + origin.y);
-		case NONE -> new Vector2f(in);
+		case SOUTH -> new Vector2f(v);
+		case EAST -> new Vector2f(-v.y, v.x);
+		case NORTH -> new Vector2f(-v.x, -v.y);
+		case WEST -> new Vector2f(v.y, -v.x);
+		default -> new Vector2f(0, 0);
 		};
 	}
 
@@ -151,33 +135,30 @@ public interface PlaceableObject extends Transform3DOwner, UniqueID, SceneEntity
 		return aStartX <= bEndX && aEndX >= bStartX && aStartY <= bEndY && aEndY >= bStartY;
 	}
 
-	static void rotateFootprint(
-			final Vector2i footprint,
-			final Vector2i offset,
-			final int rot,
-			final Vector2i outFootprint,
-			final Vector2i outOffset) {
+	static void rotateFootprint(final Vector2i footprint, final Vector2i offset, final Direction rot, final Vector2i outFootprint) {
 		final int w = footprint.x;
 		final int h = footprint.y;
 		final int ox = offset.x;
 		final int oy = offset.y;
 
 		switch (rot) {
-		case 0 -> {
+		case SOUTH -> {
 			outFootprint.set(w, h);
-			outOffset.set(ox, oy);
 		}
-		case 1 -> { // 90°
+		case WEST -> { // 90°
 			outFootprint.set(h, w);
-			outOffset.set(oy, w - 1 - ox);
 		}
-		case 2 -> { // 180°
+		case NORTH -> { // 180°
 			outFootprint.set(w, h);
-			outOffset.set(w - 1 - ox, h - 1 - oy);
 		}
-		case 3 -> { // 270°
+		case EAST -> { // 270°
 			outFootprint.set(h, w);
-			outOffset.set(h - 1 - oy, ox);
+		}
+		case NONE -> {
+			outFootprint.set(footprint);
+		}
+		default -> {
+			throw new IllegalArgumentException("Null rotation");
 		}
 		}
 	}

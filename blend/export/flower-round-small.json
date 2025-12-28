@@ -1,0 +1,16 @@
+{
+    "collection_name": "flower-round-small",
+    "animated": false,
+    "meshes": {
+        "static": {
+            "file": "models/flower-round-small_static.obj",
+            "offset_from_origin": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "texture_material": false,
+            "texture_path": null
+        }
+    }
+}

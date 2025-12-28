@@ -3,6 +3,7 @@ package lu.kbra.plant_game.engine.entity.ui.text;
 import lu.pcy113.pclib.PCUtils;
 
 import lu.kbra.plant_game.PGLogic;
+import lu.kbra.plant_game.engine.entity.go.obj.water.NeedsPostConstruct;
 import lu.kbra.plant_game.engine.util.annotation.BufferSize;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.plant_game.generated.ColorMaterial;
@@ -11,7 +12,7 @@ import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 @DataPath("localization:string-placeholder")
 @BufferSize(10)
-public class IntegerTextUIObject extends ProgrammaticTextUIObject {
+public class IntegerTextUIObject extends ProgrammaticTextUIObject implements NeedsPostConstruct {
 
 	protected final String key;
 	protected int value;
@@ -24,20 +25,17 @@ public class IntegerTextUIObject extends ProgrammaticTextUIObject {
 	public IntegerTextUIObject(final String str, final TextEmitter text, final String key) {
 		super(str, text, key);
 		this.key = key;
-		this.updateTextContent();
 	}
 
 	public IntegerTextUIObject(final String str, final TextEmitter text, final String key, final Transform3D transform) {
 		super(str, text, key, transform);
 		this.key = key;
-		this.updateTextContent();
 	}
 
 	public IntegerTextUIObject(final String str, final TextEmitter text, final String key, final ColorMaterial mat) {
 		super(str, text, key);
 		this.key = key;
 		this.colorMaterial = mat;
-		this.updateTextContent();
 	}
 
 	public IntegerTextUIObject(
@@ -49,21 +47,18 @@ public class IntegerTextUIObject extends ProgrammaticTextUIObject {
 		super(str, text, key, transform);
 		this.key = key;
 		this.colorMaterial = mat;
-		this.updateTextContent();
 	}
 
 	public IntegerTextUIObject(final String str, final TextEmitter text, final String key, final int value) {
 		super(str, text, key);
 		this.key = key;
 		this.value = value;
-		this.updateTextContent();
 	}
 
 	public IntegerTextUIObject(final String str, final TextEmitter text, final String key, final int value, final Transform3D transform) {
 		super(str, text, key, transform);
 		this.key = key;
 		this.value = value;
-		this.updateTextContent();
 	}
 
 	public IntegerTextUIObject(final String str, final TextEmitter text, final String key, final int value, final boolean forceSign) {
@@ -71,7 +66,6 @@ public class IntegerTextUIObject extends ProgrammaticTextUIObject {
 		this.key = key;
 		this.value = value;
 		this.forceSign = forceSign;
-		this.updateTextContent();
 	}
 
 	public IntegerTextUIObject(
@@ -85,7 +79,6 @@ public class IntegerTextUIObject extends ProgrammaticTextUIObject {
 		this.key = key;
 		this.value = value;
 		this.forceSign = forceSign;
-		this.updateTextContent();
 	}
 
 	public IntegerTextUIObject(
@@ -102,7 +95,6 @@ public class IntegerTextUIObject extends ProgrammaticTextUIObject {
 		this.forceSign = forceSign;
 		this.padding = padding;
 		this.paddingLength = padLength;
-		this.updateTextContent();
 	}
 
 	public IntegerTextUIObject(
@@ -120,7 +112,6 @@ public class IntegerTextUIObject extends ProgrammaticTextUIObject {
 		this.forceSign = forceSign;
 		this.padding = padding;
 		this.paddingLength = padLength;
-		this.updateTextContent();
 	}
 
 	public IntegerTextUIObject(
@@ -141,7 +132,6 @@ public class IntegerTextUIObject extends ProgrammaticTextUIObject {
 		this.paddingZero = paddingZero;
 		this.paddingLength = padLength;
 		this.colorMaterial = mat;
-		this.updateTextContent();
 	}
 
 	public IntegerTextUIObject(
@@ -163,6 +153,10 @@ public class IntegerTextUIObject extends ProgrammaticTextUIObject {
 		this.paddingZero = paddingZero;
 		this.paddingLength = padLength;
 		this.colorMaterial = mat;
+	}
+
+	@Override
+	public void init() {
 		this.updateTextContent();
 	}
 

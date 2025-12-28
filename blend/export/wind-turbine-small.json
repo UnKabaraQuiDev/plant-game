@@ -1,0 +1,26 @@
+{
+    "collection_name": "wind-turbine-small",
+    "animated": true,
+    "meshes": {
+        "static": {
+            "file": "models/wind-turbine-small_static.obj",
+            "offset_from_origin": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "texture_material": false,
+            "texture_path": null
+        },
+        "animated": {
+            "file": "models/wind-turbine-small_animated.obj",
+            "offset_from_origin": [
+                0.0,
+                0.0,
+                1.7670577764511108
+            ],
+            "texture_material": false,
+            "texture_path": null
+        }
+    }
+}

@@ -4,15 +4,15 @@ import org.joml.Matrix4f;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
 
-import lu.kbra.plant_game.engine.entity.go.AnimatedGameObject;
 import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
+import lu.kbra.plant_game.engine.entity.go.obj.PlaceableAnimatedGameObject;
 import lu.kbra.plant_game.engine.mesh.AnimatedMesh;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 @DataPath("classpath:/models/water-sprinkler-5x5.json")
-public class WaterSprinklerObject5x5 extends AnimatedGameObject implements PlaceableObject {
+public class WaterSprinklerObject5x5 extends PlaceableAnimatedGameObject implements PlaceableObject {
 
 	public WaterSprinklerObject5x5(
 			final String str,
