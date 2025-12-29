@@ -5,6 +5,7 @@ import org.joml.Vector2i;
 import org.joml.Vector3i;
 
 import lu.kbra.plant_game.engine.entity.go.impl.WaterContainer;
+import lu.kbra.plant_game.engine.entity.go.obj.FootprintComputeMethod;
 import lu.kbra.plant_game.engine.entity.go.obj.PlaceableAnimatedGameObject;
 import lu.kbra.plant_game.engine.mesh.AnimatedMesh;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
@@ -13,7 +14,7 @@ import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.utils.consts.Direction;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-@DataPath("classpath:/models/water_wheel.json")
+@DataPath("classpath:/models/water-wheel-small.json")
 public class WaterWheelObject extends PlaceableAnimatedGameObject implements WaterContainer {
 
 	protected long waterLevel;
@@ -46,6 +47,11 @@ public class WaterWheelObject extends PlaceableAnimatedGameObject implements Wat
 	}
 
 	@Override
+	protected FootprintComputeMethod getStaticMeshFootprintComputeMethod() {
+		return FootprintComputeMethod.MINIMAL;
+	}
+
+	@Override
 	public Matrix4f computeAnimatedTransform(final float t) {
 		this
 				.getTransform()
@@ -57,6 +63,7 @@ public class WaterWheelObject extends PlaceableAnimatedGameObject implements Wat
 	@Override
 	public boolean isPlaceable(final WorldLevelScene scene, final Vector2i tile, final Direction rotation) {
 		final float waterLevel = scene.getWaterHeight();
+
 		return super.getAnimatedMeshFootprint()
 				.allCellsMatch(tile, rotation, v -> (scene.getTerrain().getMesh().getCellHeight(v) < waterLevel))
 				&& super.getStaticMeshFootprint()
