@@ -5,7 +5,6 @@ import org.joml.Vector2i;
 import org.joml.Vector3i;
 
 import lu.kbra.plant_game.engine.entity.go.impl.WaterContainer;
-import lu.kbra.plant_game.engine.entity.go.obj.FootprintComputeMethod;
 import lu.kbra.plant_game.engine.entity.go.obj.PlaceableAnimatedGameObject;
 import lu.kbra.plant_game.engine.mesh.AnimatedMesh;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
@@ -56,40 +55,12 @@ public class WaterWheelObject extends PlaceableAnimatedGameObject implements Wat
 	}
 
 	@Override
-	protected FootprintComputeMethod getStaticMeshFootprintComputeMethod() {
-		return FootprintComputeMethod.CLOSEST;
-	}
-
-	@Override
-	protected FootprintComputeMethod getAnimatedMeshFootprintComputeMethod() {
-		return FootprintComputeMethod.MINIMAL;
-	}
-
-	@Override
 	public boolean isPlaceable(final WorldLevelScene scene, final Vector2i tile, final Direction rotation) {
-//		if (!PlaceableObject.super.isPlaceable(scene, tile, rotation)) {
-//			return false;
-//		}
-
-		System.err.println("static: " + this.getStaticMeshFootprint());
-		System.err.println("animated: " + this.getAnimatedMeshFootprint());
-		System.err.println("footprint: " + this.getStaticMeshFootprint());
-
 		final float waterLevel = scene.getWaterHeight();
-		boolean ok = true;
-		ok = super.getAnimatedMeshFootprint().allCellsMatch(tile, rotation, v -> {
-			System.err.println(tile + "] " + v + " " + scene.getTerrain().getMesh().getCellHeight(v));
-			return scene.getTerrain().getMesh().getCellHeight(v) < waterLevel;
-		});
-//		for (int x = -1; x <= +1; x++) {
-//			final float height = scene.getTerrain().getMesh().getCellHeight(this.getRotated(new Vector2i(x, 0)).add(pos));
-//
-//			System.err.println(new Vector2i(x, 1) + " = " + this.getRotated(new Vector2i(x, 1)));
-//
-//			ok &= height < waterLevel;
-//		}
-
-		return ok;
+		return super.getAnimatedMeshFootprint()
+				.allCellsMatch(tile, rotation, v -> (scene.getTerrain().getMesh().getCellHeight(v) < waterLevel))
+				&& super.getStaticMeshFootprint()
+						.allCellsMatch(tile, rotation, v -> (scene.getTerrain().getMesh().getCellHeight(v) == (int) Math.ceil(waterLevel)));
 	}
 
 	@Override

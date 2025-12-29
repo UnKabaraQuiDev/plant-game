@@ -18,6 +18,7 @@ import java.util.logging.Level;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
 import org.joml.Vector2f;
+import org.joml.Vector2fc;
 import org.joml.Vector2i;
 import org.joml.Vector2ic;
 import org.joml.Vector3f;
@@ -38,7 +39,6 @@ import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.entity.go.impl.Footprint;
 import lu.kbra.plant_game.engine.entity.go.impl.FootprintOwner;
 import lu.kbra.plant_game.engine.entity.go.impl.MaterialOwner;
-import lu.kbra.plant_game.engine.entity.go.impl.NeedsPostConstruct;
 import lu.kbra.plant_game.engine.entity.go.impl.ObjectIdOwner;
 import lu.kbra.plant_game.engine.entity.go.impl.SwayInstanceEmitter;
 import lu.kbra.plant_game.engine.entity.go.impl.SwayInstanceEmitterComponent;
@@ -356,14 +356,6 @@ public class DeferredCompositor implements Cleanupable {
 
 		this.blitToScreen(cache, this.outputResolution, needRegen);
 
-//		if (DEBUG_FOOTPRINTS) {
-//			synchronized (worldScene.getEntitiesLock()) {
-//				for (final Entity e : worldScene) {
-//					this.drawDebugWorldScene(GameEngine.IDENTITY_MATRIX4F, e);
-//				}
-//			}
-//		}
-
 		if (uiScene != null) {
 			this.renderUi(cache, uiScene, this.outputResolution, needRegen);
 		}
@@ -376,40 +368,6 @@ public class DeferredCompositor implements Cleanupable {
 			this.objectId.zero();
 		}
 	}
-
-//	private void drawDebugWorldScene(final Matrix4fc parentTransform, final Entity entity) {
-//		if (entity instanceof final Transform3DOwner to) {
-//			if (entity instanceof final NeedsPostConstruct npc) {
-//				npc.init();
-//			}
-//			if (entity instanceof final StaticMeshFootprintOwner smfo) {
-//				this.drawDebugFootprint(parentTransform, to.getTransform(), smfo.getStaticMeshFootprint(), DEBUG_STATIC_FOOTPRINTS_COLOR);
-//			}
-//			if (entity instanceof final AnimatedMeshFootprintOwner amfo) {
-//				this
-//						.drawDebugFootprint(parentTransform,
-//								to.getTransform(),
-//								amfo.getAnimatedMeshFootprint(),
-//								DEBUG_ANIMATED_FOOTPRINTS_COLOR);
-//			}
-//			if (entity instanceof final FootprintOwner fo) {
-//				this.drawDebugFootprint(parentTransform, to.getTransform(), fo.getFootprint(), DEBUG_FOOTPRINTS_COLOR);
-//			}
-//		}
-//
-//		if (entity.hasComponentMatching(SubEntitiesComponent.class)) {
-//			final SubEntitiesComponent<? extends Entity> subEntities = entity.getComponentMatching(SubEntitiesComponent.class);
-//			final Matrix4fc thisTransform = entity.hasComponentMatching(Transform3DComponent.class)
-//					? new Matrix4f(parentTransform).mul(entity.getComponentMatching(Transform3DComponent.class).getTransform().getMatrix())
-//					: parentTransform;
-//
-//			synchronized (subEntities.getEntitiesLock()) {
-//				for (final Entity e : subEntities.getEntities()) {
-//					this.drawDebugWorldScene(thisTransform, e);
-//				}
-//			}
-//		}
-//	}
 
 	protected void renderUi(final CacheManager cache, final UIScene uiScene, final Vector2i outputResolution, final boolean needRegen) {
 		GL_W.glBindFramebuffer(GL_W.GL_FRAMEBUFFER, 0);
@@ -847,20 +805,20 @@ public class DeferredCompositor implements Cleanupable {
 			this.drawDebugBounds(tbo.getTransformedBounds(parentTransformMatrix));
 		}
 
-		if (entity instanceof final NeedsPostConstruct npc) {
-			npc.init();
-		}
+//		if (entity instanceof final NeedsPostConstruct npc) {
+//			npc.init();
+//		}
 		if (entity instanceof final StaticMeshFootprintOwner smfo) {
 			this.drawDebugFootprint(parentTransformMatrix, localTransformMatrix, smfo.getStaticMeshFootprint(), ColorMaterial.PINK);
-			System.err.println("static: " + entity.getClass().getSimpleName() + " : " + smfo.getStaticMeshFootprint());
+//			System.err.println("static: " + entity.getClass().getSimpleName() + " : " + smfo.getStaticMeshFootprint());
 		}
 		if (entity instanceof final AnimatedMeshFootprintOwner amfo) {
 			this.drawDebugFootprint(parentTransformMatrix, localTransformMatrix, amfo.getAnimatedMeshFootprint(), ColorMaterial.RED);
-			System.err.println("anim  : " + entity.getClass().getSimpleName() + " : " + amfo.getAnimatedMeshFootprint());
+//			System.err.println("anim  : " + entity.getClass().getSimpleName() + " : " + amfo.getAnimatedMeshFootprint());
 		}
 		if (entity instanceof final FootprintOwner fo) {
 			this.drawDebugFootprint(parentTransformMatrix, localTransformMatrix, fo.getFootprint(), ColorMaterial.YELLOW);
-			System.err.println("all   : " + entity.getClass().getSimpleName() + " : " + fo.getFootprint());
+//			System.err.println("all   : " + entity.getClass().getSimpleName() + " : " + fo.getFootprint());
 		}
 
 		if (entity.hasComponentMatching(SubEntitiesComponent.class)) {
@@ -892,17 +850,16 @@ public class DeferredCompositor implements Cleanupable {
 			QUAD.bind();
 			this.transferShader.bind();
 
-			final Vector2ic origin = footprint.getOrigin();
+			final Vector2ic min = footprint.getMin();
+			final Vector2ic max = footprint.getMax();
+			final Vector2fc center = footprint.getCenter();
 			final Vector2ic size = footprint.getSize();
 
 			final Matrix4f localOffset = new Matrix4f()
-					.scale(size.x(), 1, size.y())
-					.translate(-size.x() / 2 + origin.x(), 0, size.y() / 2 + origin.y())
-//					.scale(size.x() / 2, 1, size.y() / 2)
-					.translate(0, (float) color.getId() / ColorMaterial.values().length, 0);
-//					.scale(size.x() / 2, 1f, size.y() / 2);
+					.translate(center.x() - 0.5f, (float) color.ordinal() / ColorMaterial.values().length, center.y() - 0.5f)
+					.scale(size.x(), 1f, size.y());
 
-			final Matrix4f mat = new Matrix4f(parentTransform).mul(new Matrix4f(localTransform).mul(localOffset));
+			final Matrix4f mat = new Matrix4f(parentTransform).mul(new Matrix4f(localTransform)).mul(localOffset);
 
 			this.transferShader.setUniform(RenderShader.TRANSFORMATION_MATRIX, mat);
 //			this.transferShader.setUniform(LineDirectShader.TINT, color);
