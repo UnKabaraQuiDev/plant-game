@@ -8,8 +8,8 @@ import org.joml.Vector2f;
 import lu.pcy113.pclib.impl.ThrowingFunction;
 import lu.pcy113.pclib.impl.ThrowingSupplier;
 
+import lu.kbra.plant_game.engine.data.locale.LocalizationService;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory.TextData;
-import lu.kbra.plant_game.engine.locale.LocalizationService;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.SkipThen;

@@ -81,106 +81,32 @@ public class UIObjectRegistry {
 	static {
 		UI_OBJECT_CONSTRUCTORS = new HashMap<>();
 
-		/*                 SpacerUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listSpacerUIObject = new ArrayList<>();
-		listSpacerUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class, Vector2f.class}, (Object[] arr) -> (UIObject) new SpacerUIObject((String) arr[0], (Mesh) arr[1], (Vector2f) arr[2])));
-		listSpacerUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class, Transform3D.class, Vector2f.class}, (Object[] arr) -> (UIObject) new SpacerUIObject((String) arr[0], (Mesh) arr[1], (Transform3D) arr[2], (Vector2f) arr[3])));
-		UI_OBJECT_CONSTRUCTORS.put(SpacerUIObject.class, listSpacerUIObject);
+		/*                 OverlayIntegerStatLine                 */
+		final List<InternalConstructorFunction<UIObject>> listOverlayIntegerStatLine = new ArrayList<>();
+		listOverlayIntegerStatLine.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObject[].class}, (Object[] arr) -> (UIObject) new OverlayIntegerStatLine((String) arr[0], (UIObject[]) arr[1])));
+		listOverlayIntegerStatLine.add(new InternalConstructorFunction<>(new Class[] {String.class, Transform3D.class, UIObject[].class}, (Object[] arr) -> (UIObject) new OverlayIntegerStatLine((String) arr[0], (Transform3D) arr[1], (UIObject[]) arr[2])));
+		listOverlayIntegerStatLine.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObjectGroup.class, UIObject[].class}, (Object[] arr) -> (UIObject) new OverlayIntegerStatLine((String) arr[0], (UIObjectGroup) arr[1], (UIObject[]) arr[2])));
+		UI_OBJECT_CONSTRUCTORS.put(OverlayIntegerStatLine.class, listOverlayIntegerStatLine);
 
-		/*                 ProgressBarUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listProgressBarUIObject = new ArrayList<>();
-		listProgressBarUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObject[].class}, (Object[] arr) -> (UIObject) new ProgressBarUIObject((String) arr[0], (UIObject[]) arr[1])));
-		listProgressBarUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObjectGroup.class, UIObject[].class}, (Object[] arr) -> (UIObject) new ProgressBarUIObject((String) arr[0], (UIObjectGroup) arr[1], (UIObject[]) arr[2])));
-		listProgressBarUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, UIScene.class, UIObject[].class}, (Object[] arr) -> (UIObject) new ProgressBarUIObject((String) arr[0], (UIScene) arr[1], (UIObject[]) arr[2])));
-		listProgressBarUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Transform3D.class, UIObject[].class}, (Object[] arr) -> (UIObject) new ProgressBarUIObject((String) arr[0], (Transform3D) arr[1], (UIObject[]) arr[2])));
-		listProgressBarUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObjectGroup.class, Transform3D.class, UIObject[].class}, (Object[] arr) -> (UIObject) new ProgressBarUIObject((String) arr[0], (UIObjectGroup) arr[1], (Transform3D) arr[2], (UIObject[]) arr[3])));
-		listProgressBarUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, UIScene.class, Transform3D.class, UIObject[].class}, (Object[] arr) -> (UIObject) new ProgressBarUIObject((String) arr[0], (UIScene) arr[1], (Transform3D) arr[2], (UIObject[]) arr[3])));
-		listProgressBarUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, UIScene.class, Transform3D.class, float.class, float.class}, (Object[] arr) -> (UIObject) new ProgressBarUIObject((String) arr[0], (UIScene) arr[1], (Transform3D) arr[2], (float) arr[3], (float) arr[4])));
-		UI_OBJECT_CONSTRUCTORS.put(ProgressBarUIObject.class, listProgressBarUIObject);
+		/*                 LevelButtonUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listLevelButtonUIObject = new ArrayList<>();
+		listLevelButtonUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class, String.class}, (Object[] arr) -> (UIObject) new LevelButtonUIObject((String) arr[0], (TexturedQuadMesh) arr[1], (String) arr[2])));
+		listLevelButtonUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class, String.class, LevelState.class}, (Object[] arr) -> (UIObject) new LevelButtonUIObject((String) arr[0], (TexturedQuadMesh) arr[1], (String) arr[2], (LevelState) arr[3])));
+		listLevelButtonUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class, Transform3D.class, String.class}, (Object[] arr) -> (UIObject) new LevelButtonUIObject((String) arr[0], (TexturedQuadMesh) arr[1], (Transform3D) arr[2], (String) arr[3])));
+		listLevelButtonUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class, Transform3D.class, String.class, LevelState.class}, (Object[] arr) -> (UIObject) new LevelButtonUIObject((String) arr[0], (TexturedQuadMesh) arr[1], (Transform3D) arr[2], (String) arr[3], (LevelState) arr[4])));
+		UI_OBJECT_CONSTRUCTORS.put(LevelButtonUIObject.class, listLevelButtonUIObject);
 
-		/*                 DelegatingTextUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listDelegatingTextUIObject = new ArrayList<>();
-		listDelegatingTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, TriConsumer.class, TriConsumer.class}, (Object[] arr) -> (UIObject) new DelegatingTextUIObject((String) arr[0], (TextEmitter) arr[1], (TriConsumer) arr[2], (TriConsumer) arr[3])));
-		listDelegatingTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, Transform3D.class, TriConsumer.class, TriConsumer.class}, (Object[] arr) -> (UIObject) new DelegatingTextUIObject((String) arr[0], (TextEmitter) arr[1], (Transform3D) arr[2], (TriConsumer) arr[3], (TriConsumer) arr[4])));
-		UI_OBJECT_CONSTRUCTORS.put(DelegatingTextUIObject.class, listDelegatingTextUIObject);
+		/*                 QuadUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listQuadUIObject = new ArrayList<>();
+		listQuadUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, QuadMesh.class}, (Object[] arr) -> (UIObject) new QuadUIObject((String) arr[0], (QuadMesh) arr[1])));
+		listQuadUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, QuadMesh.class, Transform3D.class}, (Object[] arr) -> (UIObject) new QuadUIObject((String) arr[0], (QuadMesh) arr[1], (Transform3D) arr[2])));
+		UI_OBJECT_CONSTRUCTORS.put(QuadUIObject.class, listQuadUIObject);
 
-		/*                 PercentageIntTextUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listPercentageIntTextUIObject = new ArrayList<>();
-		listPercentageIntTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class}, (Object[] arr) -> (UIObject) new PercentageIntTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2])));
-		listPercentageIntTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, int.class}, (Object[] arr) -> (UIObject) new PercentageIntTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (int) arr[3])));
-		listPercentageIntTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, Transform3D.class}, (Object[] arr) -> (UIObject) new PercentageIntTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (Transform3D) arr[3])));
-		listPercentageIntTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, ColorMaterial.class}, (Object[] arr) -> (UIObject) new PercentageIntTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (ColorMaterial) arr[3])));
-		listPercentageIntTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, int.class, boolean.class}, (Object[] arr) -> (UIObject) new PercentageIntTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (int) arr[3], (boolean) arr[4])));
-		listPercentageIntTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, int.class, Transform3D.class}, (Object[] arr) -> (UIObject) new PercentageIntTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (int) arr[3], (Transform3D) arr[4])));
-		listPercentageIntTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, ColorMaterial.class, Transform3D.class}, (Object[] arr) -> (UIObject) new PercentageIntTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (ColorMaterial) arr[3], (Transform3D) arr[4])));
-		listPercentageIntTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, int.class, boolean.class, Transform3D.class}, (Object[] arr) -> (UIObject) new PercentageIntTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (int) arr[3], (boolean) arr[4], (Transform3D) arr[5])));
-		listPercentageIntTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, int.class, boolean.class, boolean.class, int.class}, (Object[] arr) -> (UIObject) new PercentageIntTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (int) arr[3], (boolean) arr[4], (boolean) arr[5], (int) arr[6])));
-		listPercentageIntTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, int.class, boolean.class, boolean.class, int.class, Transform3D.class}, (Object[] arr) -> (UIObject) new PercentageIntTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (int) arr[3], (boolean) arr[4], (boolean) arr[5], (int) arr[6], (Transform3D) arr[7])));
-		listPercentageIntTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, int.class, boolean.class, boolean.class, boolean.class, int.class, ColorMaterial.class}, (Object[] arr) -> (UIObject) new PercentageIntTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (int) arr[3], (boolean) arr[4], (boolean) arr[5], (boolean) arr[6], (int) arr[7], (ColorMaterial) arr[8])));
-		listPercentageIntTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, int.class, boolean.class, boolean.class, boolean.class, int.class, ColorMaterial.class, Transform3D.class}, (Object[] arr) -> (UIObject) new PercentageIntTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (int) arr[3], (boolean) arr[4], (boolean) arr[5], (boolean) arr[6], (int) arr[7], (ColorMaterial) arr[8], (Transform3D) arr[9])));
-		UI_OBJECT_CONSTRUCTORS.put(PercentageIntTextUIObject.class, listPercentageIntTextUIObject);
-
-		/*                 SliderUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listSliderUIObject = new ArrayList<>();
-		listSliderUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, float.class, float.class, float.class, int.class}, (Object[] arr) -> (UIObject) new SliderUIObject((String) arr[0], (TextEmitter) arr[1], (float) arr[2], (float) arr[3], (float) arr[4], (int) arr[5])));
-		listSliderUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, Transform3D.class, float.class, float.class, float.class, int.class}, (Object[] arr) -> (UIObject) new SliderUIObject((String) arr[0], (TextEmitter) arr[1], (Transform3D) arr[2], (float) arr[3], (float) arr[4], (float) arr[5], (int) arr[6])));
-		UI_OBJECT_CONSTRUCTORS.put(SliderUIObject.class, listSliderUIObject);
-
-		/*                 WaterIconUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listWaterIconUIObject = new ArrayList<>();
-		listWaterIconUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new WaterIconUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
-		listWaterIconUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class, Transform3D.class}, (Object[] arr) -> (UIObject) new WaterIconUIObject((String) arr[0], (TexturedQuadMesh) arr[1], (Transform3D) arr[2])));
-		UI_OBJECT_CONSTRUCTORS.put(WaterIconUIObject.class, listWaterIconUIObject);
-
-		/*                 OffsetUIObjectGroup                 */
-		final List<InternalConstructorFunction<UIObject>> listOffsetUIObjectGroup = new ArrayList<>();
-		listOffsetUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObject[].class}, (Object[] arr) -> (UIObject) new OffsetUIObjectGroup((String) arr[0], (UIObject[]) arr[1])));
-		listOffsetUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Transform3D.class, UIObject[].class}, (Object[] arr) -> (UIObject) new OffsetUIObjectGroup((String) arr[0], (Transform3D) arr[1], (UIObject[]) arr[2])));
-		listOffsetUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObjectGroup.class, UIObject[].class}, (Object[] arr) -> (UIObject) new OffsetUIObjectGroup((String) arr[0], (UIObjectGroup) arr[1], (UIObject[]) arr[2])));
-		listOffsetUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, UIScene.class, UIObject[].class}, (Object[] arr) -> (UIObject) new OffsetUIObjectGroup((String) arr[0], (UIScene) arr[1], (UIObject[]) arr[2])));
-		listOffsetUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, UIScene.class, Transform3D.class, UIObject[].class}, (Object[] arr) -> (UIObject) new OffsetUIObjectGroup((String) arr[0], (UIScene) arr[1], (Transform3D) arr[2], (UIObject[]) arr[3])));
-		listOffsetUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObjectGroup.class, Transform3D.class, UIObject[].class}, (Object[] arr) -> (UIObject) new OffsetUIObjectGroup((String) arr[0], (UIObjectGroup) arr[1], (Transform3D) arr[2], (UIObject[]) arr[3])));
-		UI_OBJECT_CONSTRUCTORS.put(OffsetUIObjectGroup.class, listOffsetUIObjectGroup);
-
-		/*                 OptionsButtonUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listOptionsButtonUIObject = new ArrayList<>();
-		listOptionsButtonUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class}, (Object[] arr) -> (UIObject) new OptionsButtonUIObject((String) arr[0], (TextEmitter) arr[1])));
-		listOptionsButtonUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, Transform3D.class}, (Object[] arr) -> (UIObject) new OptionsButtonUIObject((String) arr[0], (TextEmitter) arr[1], (Transform3D) arr[2])));
-		UI_OBJECT_CONSTRUCTORS.put(OptionsButtonUIObject.class, listOptionsButtonUIObject);
-
-		/*                 TextureUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listTextureUIObject = new ArrayList<>();
-		listTextureUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new TextureUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
-		listTextureUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class, Transform3D.class}, (Object[] arr) -> (UIObject) new TextureUIObject((String) arr[0], (TexturedQuadMesh) arr[1], (Transform3D) arr[2])));
-		UI_OBJECT_CONSTRUCTORS.put(TextureUIObject.class, listTextureUIObject);
-
-		/*                 OptionKeyUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listOptionKeyUIObject = new ArrayList<>();
-		listOptionKeyUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, Scale2dDir.class}, (Object[] arr) -> (UIObject) new OptionKeyUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (Scale2dDir) arr[3])));
-		listOptionKeyUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, Scale2dDir.class, Transform3D.class}, (Object[] arr) -> (UIObject) new OptionKeyUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (Scale2dDir) arr[3], (Transform3D) arr[4])));
-		UI_OBJECT_CONSTRUCTORS.put(OptionKeyUIObject.class, listOptionKeyUIObject);
-
-		/*                 QuitButtonUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listQuitButtonUIObject = new ArrayList<>();
-		listQuitButtonUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class}, (Object[] arr) -> (UIObject) new QuitButtonUIObject((String) arr[0], (TextEmitter) arr[1])));
-		listQuitButtonUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, Transform3D.class}, (Object[] arr) -> (UIObject) new QuitButtonUIObject((String) arr[0], (TextEmitter) arr[1], (Transform3D) arr[2])));
-		UI_OBJECT_CONSTRUCTORS.put(QuitButtonUIObject.class, listQuitButtonUIObject);
-
-		/*                 VolumeSliderUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listVolumeSliderUIObject = new ArrayList<>();
-		listVolumeSliderUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class}, (Object[] arr) -> (UIObject) new VolumeSliderUIObject((String) arr[0], (TextEmitter) arr[1])));
-		listVolumeSliderUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, Transform3D.class}, (Object[] arr) -> (UIObject) new VolumeSliderUIObject((String) arr[0], (TextEmitter) arr[1], (Transform3D) arr[2])));
-		listVolumeSliderUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, float.class, float.class, float.class, int.class}, (Object[] arr) -> (UIObject) new VolumeSliderUIObject((String) arr[0], (TextEmitter) arr[1], (float) arr[2], (float) arr[3], (float) arr[4], (int) arr[5])));
-		listVolumeSliderUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, Transform3D.class, float.class, float.class, float.class, int.class}, (Object[] arr) -> (UIObject) new VolumeSliderUIObject((String) arr[0], (TextEmitter) arr[1], (Transform3D) arr[2], (float) arr[3], (float) arr[4], (float) arr[5], (int) arr[6])));
-		UI_OBJECT_CONSTRUCTORS.put(VolumeSliderUIObject.class, listVolumeSliderUIObject);
-
-		/*                 ScrollBarUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listScrollBarUIObject = new ArrayList<>();
-		listScrollBarUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class, Transform3D.class, Vector4f.class, Direction.class, Vector2f.class, Vector2f.class}, (Object[] arr) -> (UIObject) new ScrollBarUIObject((String) arr[0], (TexturedQuadMesh) arr[1], (Transform3D) arr[2], (Vector4f) arr[3], (Direction) arr[4], (Vector2f) arr[5], (Vector2f) arr[6])));
-		listScrollBarUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class, Transform3D.class, ColorMaterial.class, Direction.class, Vector2f.class, Vector2f.class}, (Object[] arr) -> (UIObject) new ScrollBarUIObject((String) arr[0], (TexturedQuadMesh) arr[1], (Transform3D) arr[2], (ColorMaterial) arr[3], (Direction) arr[4], (Vector2f) arr[5], (Vector2f) arr[6])));
-		listScrollBarUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class, Transform3D.class, ColorMaterial.class, Direction.class, Vector2f.class, Vector2f.class, float.class}, (Object[] arr) -> (UIObject) new ScrollBarUIObject((String) arr[0], (TexturedQuadMesh) arr[1], (Transform3D) arr[2], (ColorMaterial) arr[3], (Direction) arr[4], (Vector2f) arr[5], (Vector2f) arr[6], (float) arr[7])));
-		listScrollBarUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class, Transform3D.class, Vector4f.class, Direction.class, Vector2f.class, Vector2f.class, float.class}, (Object[] arr) -> (UIObject) new ScrollBarUIObject((String) arr[0], (TexturedQuadMesh) arr[1], (Transform3D) arr[2], (Vector4f) arr[3], (Direction) arr[4], (Vector2f) arr[5], (Vector2f) arr[6], (float) arr[7])));
-		UI_OBJECT_CONSTRUCTORS.put(ScrollBarUIObject.class, listScrollBarUIObject);
+		/*                 StarIconUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listStarIconUIObject = new ArrayList<>();
+		listStarIconUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new StarIconUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
+		listStarIconUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class, Transform3D.class}, (Object[] arr) -> (UIObject) new StarIconUIObject((String) arr[0], (TexturedQuadMesh) arr[1], (Transform3D) arr[2])));
+		UI_OBJECT_CONSTRUCTORS.put(StarIconUIObject.class, listStarIconUIObject);
 
 		/*                 LayoutOffsetUIObjectGroup                 */
 		final List<InternalConstructorFunction<UIObject>> listLayoutOffsetUIObjectGroup = new ArrayList<>();
@@ -189,108 +115,17 @@ public class UIObjectRegistry {
 		listLayoutOffsetUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Layout.class, Transform3D.class, UIObject[].class}, (Object[] arr) -> (UIObject) new LayoutOffsetUIObjectGroup((String) arr[0], (Layout) arr[1], (Transform3D) arr[2], (UIObject[]) arr[3])));
 		UI_OBJECT_CONSTRUCTORS.put(LayoutOffsetUIObjectGroup.class, listLayoutOffsetUIObjectGroup);
 
-		/*                 OverlayIntegerStatLine                 */
-		final List<InternalConstructorFunction<UIObject>> listOverlayIntegerStatLine = new ArrayList<>();
-		listOverlayIntegerStatLine.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObject[].class}, (Object[] arr) -> (UIObject) new OverlayIntegerStatLine((String) arr[0], (UIObject[]) arr[1])));
-		listOverlayIntegerStatLine.add(new InternalConstructorFunction<>(new Class[] {String.class, Transform3D.class, UIObject[].class}, (Object[] arr) -> (UIObject) new OverlayIntegerStatLine((String) arr[0], (Transform3D) arr[1], (UIObject[]) arr[2])));
-		listOverlayIntegerStatLine.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObjectGroup.class, UIObject[].class}, (Object[] arr) -> (UIObject) new OverlayIntegerStatLine((String) arr[0], (UIObjectGroup) arr[1], (UIObject[]) arr[2])));
-		UI_OBJECT_CONSTRUCTORS.put(OverlayIntegerStatLine.class, listOverlayIntegerStatLine);
+		/*                 ProgrammaticTextUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listProgrammaticTextUIObject = new ArrayList<>();
+		listProgrammaticTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class}, (Object[] arr) -> (UIObject) new ProgrammaticTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2])));
+		listProgrammaticTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, Transform3D.class}, (Object[] arr) -> (UIObject) new ProgrammaticTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (Transform3D) arr[3])));
+		UI_OBJECT_CONSTRUCTORS.put(ProgrammaticTextUIObject.class, listProgrammaticTextUIObject);
 
-		/*                 SignedIntegerTextUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listSignedIntegerTextUIObject = new ArrayList<>();
-		listSignedIntegerTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, ColorMaterial.class, ColorMaterial.class, ColorMaterial.class}, (Object[] arr) -> (UIObject) new SignedIntegerTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (ColorMaterial) arr[3], (ColorMaterial) arr[4], (ColorMaterial) arr[5])));
-		listSignedIntegerTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, ColorMaterial.class, ColorMaterial.class, ColorMaterial.class, Transform3D.class}, (Object[] arr) -> (UIObject) new SignedIntegerTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (ColorMaterial) arr[3], (ColorMaterial) arr[4], (ColorMaterial) arr[5], (Transform3D) arr[6])));
-		UI_OBJECT_CONSTRUCTORS.put(SignedIntegerTextUIObject.class, listSignedIntegerTextUIObject);
-
-		/*                 EnergyIconUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listEnergyIconUIObject = new ArrayList<>();
-		listEnergyIconUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new EnergyIconUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
-		listEnergyIconUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class, Transform3D.class}, (Object[] arr) -> (UIObject) new EnergyIconUIObject((String) arr[0], (TexturedQuadMesh) arr[1], (Transform3D) arr[2])));
-		UI_OBJECT_CONSTRUCTORS.put(EnergyIconUIObject.class, listEnergyIconUIObject);
-
-		/*                 ProgrammaticGrowOnHoverTextUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listProgrammaticGrowOnHoverTextUIObject = new ArrayList<>();
-		listProgrammaticGrowOnHoverTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, Scale2dDir.class}, (Object[] arr) -> (UIObject) new ProgrammaticGrowOnHoverTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (Scale2dDir) arr[3])));
-		listProgrammaticGrowOnHoverTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, Scale2dDir.class, Transform3D.class}, (Object[] arr) -> (UIObject) new ProgrammaticGrowOnHoverTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (Scale2dDir) arr[3], (Transform3D) arr[4])));
-		UI_OBJECT_CONSTRUCTORS.put(ProgrammaticGrowOnHoverTextUIObject.class, listProgrammaticGrowOnHoverTextUIObject);
-
-		/*                 BackButtonUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listBackButtonUIObject = new ArrayList<>();
-		listBackButtonUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class}, (Object[] arr) -> (UIObject) new BackButtonUIObject((String) arr[0], (TextEmitter) arr[1])));
-		listBackButtonUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, Transform3D.class}, (Object[] arr) -> (UIObject) new BackButtonUIObject((String) arr[0], (TextEmitter) arr[1], (Transform3D) arr[2])));
-		UI_OBJECT_CONSTRUCTORS.put(BackButtonUIObject.class, listBackButtonUIObject);
-
-		/*                 ScrollContainerUIObjectGroup                 */
-		final List<InternalConstructorFunction<UIObject>> listScrollContainerUIObjectGroup = new ArrayList<>();
-		listScrollContainerUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Direction.class, float.class, UIObject[].class}, (Object[] arr) -> (UIObject) new ScrollContainerUIObjectGroup((String) arr[0], (Direction) arr[1], (float) arr[2], (UIObject[]) arr[3])));
-		listScrollContainerUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Direction.class, float.class, Layout.class, UIObject[].class}, (Object[] arr) -> (UIObject) new ScrollContainerUIObjectGroup((String) arr[0], (Direction) arr[1], (float) arr[2], (Layout) arr[3], (UIObject[]) arr[4])));
-		listScrollContainerUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Transform3D.class, Direction.class, float.class, UIObject[].class}, (Object[] arr) -> (UIObject) new ScrollContainerUIObjectGroup((String) arr[0], (Transform3D) arr[1], (Direction) arr[2], (float) arr[3], (UIObject[]) arr[4])));
-		listScrollContainerUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Vector3fc.class, Direction.class, float.class, UIObject[].class}, (Object[] arr) -> (UIObject) new ScrollContainerUIObjectGroup((String) arr[0], (Vector3fc) arr[1], (Direction) arr[2], (float) arr[3], (UIObject[]) arr[4])));
-		listScrollContainerUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObjectGroup.class, Direction.class, float.class, UIObject[].class}, (Object[] arr) -> (UIObject) new ScrollContainerUIObjectGroup((String) arr[0], (UIObjectGroup) arr[1], (Direction) arr[2], (float) arr[3], (UIObject[]) arr[4])));
-		listScrollContainerUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Transform3D.class, Direction.class, float.class, Layout.class, UIObject[].class}, (Object[] arr) -> (UIObject) new ScrollContainerUIObjectGroup((String) arr[0], (Transform3D) arr[1], (Direction) arr[2], (float) arr[3], (Layout) arr[4], (UIObject[]) arr[5])));
-		listScrollContainerUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Vector3fc.class, Direction.class, float.class, Layout.class, UIObject[].class}, (Object[] arr) -> (UIObject) new ScrollContainerUIObjectGroup((String) arr[0], (Vector3fc) arr[1], (Direction) arr[2], (float) arr[3], (Layout) arr[4], (UIObject[]) arr[5])));
-		listScrollContainerUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObjectGroup.class, Direction.class, float.class, Layout.class, UIObject[].class}, (Object[] arr) -> (UIObject) new ScrollContainerUIObjectGroup((String) arr[0], (UIObjectGroup) arr[1], (Direction) arr[2], (float) arr[3], (Layout) arr[4], (UIObject[]) arr[5])));
-		UI_OBJECT_CONSTRUCTORS.put(ScrollContainerUIObjectGroup.class, listScrollContainerUIObjectGroup);
-
-		/*                 StarIconUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listStarIconUIObject = new ArrayList<>();
-		listStarIconUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new StarIconUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
-		listStarIconUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class, Transform3D.class}, (Object[] arr) -> (UIObject) new StarIconUIObject((String) arr[0], (TexturedQuadMesh) arr[1], (Transform3D) arr[2])));
-		UI_OBJECT_CONSTRUCTORS.put(StarIconUIObject.class, listStarIconUIObject);
-
-		/*                 MeshUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listMeshUIObject = new ArrayList<>();
-		listMeshUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class}, (Object[] arr) -> (UIObject) new MeshUIObject((String) arr[0], (Mesh) arr[1])));
-		listMeshUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class, Transform3D.class}, (Object[] arr) -> (UIObject) new MeshUIObject((String) arr[0], (Mesh) arr[1], (Transform3D) arr[2])));
-		UI_OBJECT_CONSTRUCTORS.put(MeshUIObject.class, listMeshUIObject);
-
-		/*                 TextFieldUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listTextFieldUIObject = new ArrayList<>();
-		listTextFieldUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class}, (Object[] arr) -> (UIObject) new TextFieldUIObject((String) arr[0], (TextEmitter) arr[1])));
-		listTextFieldUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, Transform3D.class}, (Object[] arr) -> (UIObject) new TextFieldUIObject((String) arr[0], (TextEmitter) arr[1], (Transform3D) arr[2])));
-		UI_OBJECT_CONSTRUCTORS.put(TextFieldUIObject.class, listTextFieldUIObject);
-
-		/*                 GrowOnHoverTextUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listGrowOnHoverTextUIObject = new ArrayList<>();
-		listGrowOnHoverTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, Scale2dDir.class}, (Object[] arr) -> (UIObject) new GrowOnHoverTextUIObject((String) arr[0], (TextEmitter) arr[1], (Scale2dDir) arr[2])));
-		listGrowOnHoverTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, Scale2dDir.class, Transform3D.class}, (Object[] arr) -> (UIObject) new GrowOnHoverTextUIObject((String) arr[0], (TextEmitter) arr[1], (Scale2dDir) arr[2], (Transform3D) arr[3])));
-		UI_OBJECT_CONSTRUCTORS.put(GrowOnHoverTextUIObject.class, listGrowOnHoverTextUIObject);
-
-		/*                 TextBoxUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listTextBoxUIObject = new ArrayList<>();
-		listTextBoxUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class}, (Object[] arr) -> (UIObject) new TextBoxUIObject((String) arr[0], (TextEmitter) arr[1])));
-		listTextBoxUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, Transform3D.class}, (Object[] arr) -> (UIObject) new TextBoxUIObject((String) arr[0], (TextEmitter) arr[1], (Transform3D) arr[2])));
-		UI_OBJECT_CONSTRUCTORS.put(TextBoxUIObject.class, listTextBoxUIObject);
-
-		/*                 UIObjectGroup                 */
-		final List<InternalConstructorFunction<UIObject>> listUIObjectGroup = new ArrayList<>();
-		listUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObject[].class}, (Object[] arr) -> (UIObject) new UIObjectGroup((String) arr[0], (UIObject[]) arr[1])));
-		listUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, UIScene.class, UIObject[].class}, (Object[] arr) -> (UIObject) new UIObjectGroup((String) arr[0], (UIScene) arr[1], (UIObject[]) arr[2])));
-		listUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, List.class, Component[].class}, (Object[] arr) -> (UIObject) new UIObjectGroup((String) arr[0], (List) arr[1], (Component[]) arr[2])));
-		listUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObjectGroup.class, UIObject[].class}, (Object[] arr) -> (UIObject) new UIObjectGroup((String) arr[0], (UIObjectGroup) arr[1], (UIObject[]) arr[2])));
-		UI_OBJECT_CONSTRUCTORS.put(UIObjectGroup.class, listUIObjectGroup);
-
-		/*                 IntegerTextUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listIntegerTextUIObject = new ArrayList<>();
-		listIntegerTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class}, (Object[] arr) -> (UIObject) new IntegerTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2])));
-		listIntegerTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, Transform3D.class}, (Object[] arr) -> (UIObject) new IntegerTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (Transform3D) arr[3])));
-		listIntegerTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, ColorMaterial.class}, (Object[] arr) -> (UIObject) new IntegerTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (ColorMaterial) arr[3])));
-		listIntegerTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, int.class}, (Object[] arr) -> (UIObject) new IntegerTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (int) arr[3])));
-		listIntegerTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, int.class, boolean.class}, (Object[] arr) -> (UIObject) new IntegerTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (int) arr[3], (boolean) arr[4])));
-		listIntegerTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, int.class, Transform3D.class}, (Object[] arr) -> (UIObject) new IntegerTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (int) arr[3], (Transform3D) arr[4])));
-		listIntegerTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, ColorMaterial.class, Transform3D.class}, (Object[] arr) -> (UIObject) new IntegerTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (ColorMaterial) arr[3], (Transform3D) arr[4])));
-		listIntegerTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, int.class, boolean.class, Transform3D.class}, (Object[] arr) -> (UIObject) new IntegerTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (int) arr[3], (boolean) arr[4], (Transform3D) arr[5])));
-		listIntegerTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, int.class, boolean.class, boolean.class, int.class}, (Object[] arr) -> (UIObject) new IntegerTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (int) arr[3], (boolean) arr[4], (boolean) arr[5], (int) arr[6])));
-		listIntegerTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, int.class, boolean.class, boolean.class, int.class, Transform3D.class}, (Object[] arr) -> (UIObject) new IntegerTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (int) arr[3], (boolean) arr[4], (boolean) arr[5], (int) arr[6], (Transform3D) arr[7])));
-		listIntegerTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, int.class, boolean.class, boolean.class, boolean.class, int.class, ColorMaterial.class}, (Object[] arr) -> (UIObject) new IntegerTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (int) arr[3], (boolean) arr[4], (boolean) arr[5], (boolean) arr[6], (int) arr[7], (ColorMaterial) arr[8])));
-		listIntegerTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, int.class, boolean.class, boolean.class, boolean.class, int.class, ColorMaterial.class, Transform3D.class}, (Object[] arr) -> (UIObject) new IntegerTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (int) arr[3], (boolean) arr[4], (boolean) arr[5], (boolean) arr[6], (int) arr[7], (ColorMaterial) arr[8], (Transform3D) arr[9])));
-		UI_OBJECT_CONSTRUCTORS.put(IntegerTextUIObject.class, listIntegerTextUIObject);
-
-		/*                 LargeLogoUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listLargeLogoUIObject = new ArrayList<>();
-		listLargeLogoUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new LargeLogoUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
-		listLargeLogoUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class, Transform3D.class}, (Object[] arr) -> (UIObject) new LargeLogoUIObject((String) arr[0], (TexturedQuadMesh) arr[1], (Transform3D) arr[2])));
-		UI_OBJECT_CONSTRUCTORS.put(LargeLogoUIObject.class, listLargeLogoUIObject);
+		/*                 LeafIconUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listLeafIconUIObject = new ArrayList<>();
+		listLeafIconUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new LeafIconUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
+		listLeafIconUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class, Transform3D.class}, (Object[] arr) -> (UIObject) new LeafIconUIObject((String) arr[0], (TexturedQuadMesh) arr[1], (Transform3D) arr[2])));
+		UI_OBJECT_CONSTRUCTORS.put(LeafIconUIObject.class, listLeafIconUIObject);
 
 		/*                 GradientQuadUIObject                 */
 		final List<InternalConstructorFunction<UIObject>> listGradientQuadUIObject = new ArrayList<>();
@@ -310,6 +145,241 @@ public class UIObjectRegistry {
 		listGradientQuadUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, GradientQuadMesh.class, Transform3D.class, GradientDirection.class, Vector2f.class, Vector4f.class, Vector4f.class, Vector4f.class}, (Object[] arr) -> (UIObject) new GradientQuadUIObject((String) arr[0], (GradientQuadMesh) arr[1], (Transform3D) arr[2], (GradientDirection) arr[3], (Vector2f) arr[4], (Vector4f) arr[5], (Vector4f) arr[6], (Vector4f) arr[7])));
 		UI_OBJECT_CONSTRUCTORS.put(GradientQuadUIObject.class, listGradientQuadUIObject);
 
+		/*                 TextureUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listTextureUIObject = new ArrayList<>();
+		listTextureUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new TextureUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
+		listTextureUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class, Transform3D.class}, (Object[] arr) -> (UIObject) new TextureUIObject((String) arr[0], (TexturedQuadMesh) arr[1], (Transform3D) arr[2])));
+		UI_OBJECT_CONSTRUCTORS.put(TextureUIObject.class, listTextureUIObject);
+
+		/*                 DelegatingTextUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listDelegatingTextUIObject = new ArrayList<>();
+		listDelegatingTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, TriConsumer.class, TriConsumer.class}, (Object[] arr) -> (UIObject) new DelegatingTextUIObject((String) arr[0], (TextEmitter) arr[1], (TriConsumer) arr[2], (TriConsumer) arr[3])));
+		listDelegatingTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, Transform3D.class, TriConsumer.class, TriConsumer.class}, (Object[] arr) -> (UIObject) new DelegatingTextUIObject((String) arr[0], (TextEmitter) arr[1], (Transform3D) arr[2], (TriConsumer) arr[3], (TriConsumer) arr[4])));
+		UI_OBJECT_CONSTRUCTORS.put(DelegatingTextUIObject.class, listDelegatingTextUIObject);
+
+		/*                 MeshUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listMeshUIObject = new ArrayList<>();
+		listMeshUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class}, (Object[] arr) -> (UIObject) new MeshUIObject((String) arr[0], (Mesh) arr[1])));
+		listMeshUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class, Transform3D.class}, (Object[] arr) -> (UIObject) new MeshUIObject((String) arr[0], (Mesh) arr[1], (Transform3D) arr[2])));
+		UI_OBJECT_CONSTRUCTORS.put(MeshUIObject.class, listMeshUIObject);
+
+		/*                 VolumeSliderUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listVolumeSliderUIObject = new ArrayList<>();
+		listVolumeSliderUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class}, (Object[] arr) -> (UIObject) new VolumeSliderUIObject((String) arr[0], (TextEmitter) arr[1])));
+		listVolumeSliderUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, Transform3D.class}, (Object[] arr) -> (UIObject) new VolumeSliderUIObject((String) arr[0], (TextEmitter) arr[1], (Transform3D) arr[2])));
+		listVolumeSliderUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, float.class, float.class, float.class, int.class}, (Object[] arr) -> (UIObject) new VolumeSliderUIObject((String) arr[0], (TextEmitter) arr[1], (float) arr[2], (float) arr[3], (float) arr[4], (int) arr[5])));
+		listVolumeSliderUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, Transform3D.class, float.class, float.class, float.class, int.class}, (Object[] arr) -> (UIObject) new VolumeSliderUIObject((String) arr[0], (TextEmitter) arr[1], (Transform3D) arr[2], (float) arr[3], (float) arr[4], (float) arr[5], (int) arr[6])));
+		UI_OBJECT_CONSTRUCTORS.put(VolumeSliderUIObject.class, listVolumeSliderUIObject);
+
+		/*                 SignedIntegerTextUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listSignedIntegerTextUIObject = new ArrayList<>();
+		listSignedIntegerTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, ColorMaterial.class, ColorMaterial.class, ColorMaterial.class}, (Object[] arr) -> (UIObject) new SignedIntegerTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (ColorMaterial) arr[3], (ColorMaterial) arr[4], (ColorMaterial) arr[5])));
+		listSignedIntegerTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, ColorMaterial.class, ColorMaterial.class, ColorMaterial.class, Transform3D.class}, (Object[] arr) -> (UIObject) new SignedIntegerTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (ColorMaterial) arr[3], (ColorMaterial) arr[4], (ColorMaterial) arr[5], (Transform3D) arr[6])));
+		UI_OBJECT_CONSTRUCTORS.put(SignedIntegerTextUIObject.class, listSignedIntegerTextUIObject);
+
+		/*                 VolumeTextUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listVolumeTextUIObject = new ArrayList<>();
+		listVolumeTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class}, (Object[] arr) -> (UIObject) new VolumeTextUIObject((String) arr[0], (TextEmitter) arr[1])));
+		listVolumeTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, Transform3D.class}, (Object[] arr) -> (UIObject) new VolumeTextUIObject((String) arr[0], (TextEmitter) arr[1], (Transform3D) arr[2])));
+		UI_OBJECT_CONSTRUCTORS.put(VolumeTextUIObject.class, listVolumeTextUIObject);
+
+		/*                 PercentageIntTextUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listPercentageIntTextUIObject = new ArrayList<>();
+		listPercentageIntTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class}, (Object[] arr) -> (UIObject) new PercentageIntTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2])));
+		listPercentageIntTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, int.class}, (Object[] arr) -> (UIObject) new PercentageIntTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (int) arr[3])));
+		listPercentageIntTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, Transform3D.class}, (Object[] arr) -> (UIObject) new PercentageIntTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (Transform3D) arr[3])));
+		listPercentageIntTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, ColorMaterial.class}, (Object[] arr) -> (UIObject) new PercentageIntTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (ColorMaterial) arr[3])));
+		listPercentageIntTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, int.class, boolean.class}, (Object[] arr) -> (UIObject) new PercentageIntTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (int) arr[3], (boolean) arr[4])));
+		listPercentageIntTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, int.class, Transform3D.class}, (Object[] arr) -> (UIObject) new PercentageIntTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (int) arr[3], (Transform3D) arr[4])));
+		listPercentageIntTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, ColorMaterial.class, Transform3D.class}, (Object[] arr) -> (UIObject) new PercentageIntTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (ColorMaterial) arr[3], (Transform3D) arr[4])));
+		listPercentageIntTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, int.class, boolean.class, Transform3D.class}, (Object[] arr) -> (UIObject) new PercentageIntTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (int) arr[3], (boolean) arr[4], (Transform3D) arr[5])));
+		listPercentageIntTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, int.class, boolean.class, boolean.class, int.class}, (Object[] arr) -> (UIObject) new PercentageIntTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (int) arr[3], (boolean) arr[4], (boolean) arr[5], (int) arr[6])));
+		listPercentageIntTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, int.class, boolean.class, boolean.class, int.class, Transform3D.class}, (Object[] arr) -> (UIObject) new PercentageIntTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (int) arr[3], (boolean) arr[4], (boolean) arr[5], (int) arr[6], (Transform3D) arr[7])));
+		listPercentageIntTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, int.class, boolean.class, boolean.class, boolean.class, int.class, ColorMaterial.class}, (Object[] arr) -> (UIObject) new PercentageIntTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (int) arr[3], (boolean) arr[4], (boolean) arr[5], (boolean) arr[6], (int) arr[7], (ColorMaterial) arr[8])));
+		listPercentageIntTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, int.class, boolean.class, boolean.class, boolean.class, int.class, ColorMaterial.class, Transform3D.class}, (Object[] arr) -> (UIObject) new PercentageIntTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (int) arr[3], (boolean) arr[4], (boolean) arr[5], (boolean) arr[6], (int) arr[7], (ColorMaterial) arr[8], (Transform3D) arr[9])));
+		UI_OBJECT_CONSTRUCTORS.put(PercentageIntTextUIObject.class, listPercentageIntTextUIObject);
+
+		/*                 ProgressBarUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listProgressBarUIObject = new ArrayList<>();
+		listProgressBarUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObject[].class}, (Object[] arr) -> (UIObject) new ProgressBarUIObject((String) arr[0], (UIObject[]) arr[1])));
+		listProgressBarUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObjectGroup.class, UIObject[].class}, (Object[] arr) -> (UIObject) new ProgressBarUIObject((String) arr[0], (UIObjectGroup) arr[1], (UIObject[]) arr[2])));
+		listProgressBarUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, UIScene.class, UIObject[].class}, (Object[] arr) -> (UIObject) new ProgressBarUIObject((String) arr[0], (UIScene) arr[1], (UIObject[]) arr[2])));
+		listProgressBarUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Transform3D.class, UIObject[].class}, (Object[] arr) -> (UIObject) new ProgressBarUIObject((String) arr[0], (Transform3D) arr[1], (UIObject[]) arr[2])));
+		listProgressBarUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObjectGroup.class, Transform3D.class, UIObject[].class}, (Object[] arr) -> (UIObject) new ProgressBarUIObject((String) arr[0], (UIObjectGroup) arr[1], (Transform3D) arr[2], (UIObject[]) arr[3])));
+		listProgressBarUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, UIScene.class, Transform3D.class, UIObject[].class}, (Object[] arr) -> (UIObject) new ProgressBarUIObject((String) arr[0], (UIScene) arr[1], (Transform3D) arr[2], (UIObject[]) arr[3])));
+		listProgressBarUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, UIScene.class, Transform3D.class, float.class, float.class}, (Object[] arr) -> (UIObject) new ProgressBarUIObject((String) arr[0], (UIScene) arr[1], (Transform3D) arr[2], (float) arr[3], (float) arr[4])));
+		UI_OBJECT_CONSTRUCTORS.put(ProgressBarUIObject.class, listProgressBarUIObject);
+
+		/*                 TextFieldUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listTextFieldUIObject = new ArrayList<>();
+		listTextFieldUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class}, (Object[] arr) -> (UIObject) new TextFieldUIObject((String) arr[0], (TextEmitter) arr[1])));
+		listTextFieldUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, Transform3D.class}, (Object[] arr) -> (UIObject) new TextFieldUIObject((String) arr[0], (TextEmitter) arr[1], (Transform3D) arr[2])));
+		UI_OBJECT_CONSTRUCTORS.put(TextFieldUIObject.class, listTextFieldUIObject);
+
+		/*                 OffsetUIObjectGroup                 */
+		final List<InternalConstructorFunction<UIObject>> listOffsetUIObjectGroup = new ArrayList<>();
+		listOffsetUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObject[].class}, (Object[] arr) -> (UIObject) new OffsetUIObjectGroup((String) arr[0], (UIObject[]) arr[1])));
+		listOffsetUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Transform3D.class, UIObject[].class}, (Object[] arr) -> (UIObject) new OffsetUIObjectGroup((String) arr[0], (Transform3D) arr[1], (UIObject[]) arr[2])));
+		listOffsetUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObjectGroup.class, UIObject[].class}, (Object[] arr) -> (UIObject) new OffsetUIObjectGroup((String) arr[0], (UIObjectGroup) arr[1], (UIObject[]) arr[2])));
+		listOffsetUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, UIScene.class, UIObject[].class}, (Object[] arr) -> (UIObject) new OffsetUIObjectGroup((String) arr[0], (UIScene) arr[1], (UIObject[]) arr[2])));
+		listOffsetUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, UIScene.class, Transform3D.class, UIObject[].class}, (Object[] arr) -> (UIObject) new OffsetUIObjectGroup((String) arr[0], (UIScene) arr[1], (Transform3D) arr[2], (UIObject[]) arr[3])));
+		listOffsetUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObjectGroup.class, Transform3D.class, UIObject[].class}, (Object[] arr) -> (UIObject) new OffsetUIObjectGroup((String) arr[0], (UIObjectGroup) arr[1], (Transform3D) arr[2], (UIObject[]) arr[3])));
+		UI_OBJECT_CONSTRUCTORS.put(OffsetUIObjectGroup.class, listOffsetUIObjectGroup);
+
+		/*                 ProgrammaticGrowOnHoverTextUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listProgrammaticGrowOnHoverTextUIObject = new ArrayList<>();
+		listProgrammaticGrowOnHoverTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, Scale2dDir.class}, (Object[] arr) -> (UIObject) new ProgrammaticGrowOnHoverTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (Scale2dDir) arr[3])));
+		listProgrammaticGrowOnHoverTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, Scale2dDir.class, Transform3D.class}, (Object[] arr) -> (UIObject) new ProgrammaticGrowOnHoverTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (Scale2dDir) arr[3], (Transform3D) arr[4])));
+		UI_OBJECT_CONSTRUCTORS.put(ProgrammaticGrowOnHoverTextUIObject.class, listProgrammaticGrowOnHoverTextUIObject);
+
+		/*                 ScrollBarUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listScrollBarUIObject = new ArrayList<>();
+		listScrollBarUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class, Transform3D.class, Vector4f.class, Direction.class, Vector2f.class, Vector2f.class}, (Object[] arr) -> (UIObject) new ScrollBarUIObject((String) arr[0], (TexturedQuadMesh) arr[1], (Transform3D) arr[2], (Vector4f) arr[3], (Direction) arr[4], (Vector2f) arr[5], (Vector2f) arr[6])));
+		listScrollBarUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class, Transform3D.class, ColorMaterial.class, Direction.class, Vector2f.class, Vector2f.class}, (Object[] arr) -> (UIObject) new ScrollBarUIObject((String) arr[0], (TexturedQuadMesh) arr[1], (Transform3D) arr[2], (ColorMaterial) arr[3], (Direction) arr[4], (Vector2f) arr[5], (Vector2f) arr[6])));
+		listScrollBarUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class, Transform3D.class, ColorMaterial.class, Direction.class, Vector2f.class, Vector2f.class, float.class}, (Object[] arr) -> (UIObject) new ScrollBarUIObject((String) arr[0], (TexturedQuadMesh) arr[1], (Transform3D) arr[2], (ColorMaterial) arr[3], (Direction) arr[4], (Vector2f) arr[5], (Vector2f) arr[6], (float) arr[7])));
+		listScrollBarUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class, Transform3D.class, Vector4f.class, Direction.class, Vector2f.class, Vector2f.class, float.class}, (Object[] arr) -> (UIObject) new ScrollBarUIObject((String) arr[0], (TexturedQuadMesh) arr[1], (Transform3D) arr[2], (Vector4f) arr[3], (Direction) arr[4], (Vector2f) arr[5], (Vector2f) arr[6], (float) arr[7])));
+		UI_OBJECT_CONSTRUCTORS.put(ScrollBarUIObject.class, listScrollBarUIObject);
+
+		/*                 OptionsButtonUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listOptionsButtonUIObject = new ArrayList<>();
+		listOptionsButtonUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class}, (Object[] arr) -> (UIObject) new OptionsButtonUIObject((String) arr[0], (TextEmitter) arr[1])));
+		listOptionsButtonUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, Transform3D.class}, (Object[] arr) -> (UIObject) new OptionsButtonUIObject((String) arr[0], (TextEmitter) arr[1], (Transform3D) arr[2])));
+		UI_OBJECT_CONSTRUCTORS.put(OptionsButtonUIObject.class, listOptionsButtonUIObject);
+
+		/*                 EnergyIconUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listEnergyIconUIObject = new ArrayList<>();
+		listEnergyIconUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new EnergyIconUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
+		listEnergyIconUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class, Transform3D.class}, (Object[] arr) -> (UIObject) new EnergyIconUIObject((String) arr[0], (TexturedQuadMesh) arr[1], (Transform3D) arr[2])));
+		UI_OBJECT_CONSTRUCTORS.put(EnergyIconUIObject.class, listEnergyIconUIObject);
+
+		/*                 MoneyIconUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listMoneyIconUIObject = new ArrayList<>();
+		listMoneyIconUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new MoneyIconUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
+		listMoneyIconUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class, Transform3D.class}, (Object[] arr) -> (UIObject) new MoneyIconUIObject((String) arr[0], (TexturedQuadMesh) arr[1], (Transform3D) arr[2])));
+		UI_OBJECT_CONSTRUCTORS.put(MoneyIconUIObject.class, listMoneyIconUIObject);
+
+		/*                 LayoutScrollDrivenUIObjectGroup                 */
+		final List<InternalConstructorFunction<UIObject>> listLayoutScrollDrivenUIObjectGroup = new ArrayList<>();
+		listLayoutScrollDrivenUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Supplier.class, Direction.class, float.class, Layout.class, UIObject[].class}, (Object[] arr) -> (UIObject) new LayoutScrollDrivenUIObjectGroup((String) arr[0], (Supplier) arr[1], (Direction) arr[2], (float) arr[3], (Layout) arr[4], (UIObject[]) arr[5])));
+		listLayoutScrollDrivenUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObjectGroup.class, Supplier.class, Direction.class, float.class, Layout.class, UIObject[].class}, (Object[] arr) -> (UIObject) new LayoutScrollDrivenUIObjectGroup((String) arr[0], (UIObjectGroup) arr[1], (Supplier) arr[2], (Direction) arr[3], (float) arr[4], (Layout) arr[5], (UIObject[]) arr[6])));
+		listLayoutScrollDrivenUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Transform3D.class, Supplier.class, Direction.class, float.class, Layout.class, UIObject[].class}, (Object[] arr) -> (UIObject) new LayoutScrollDrivenUIObjectGroup((String) arr[0], (Transform3D) arr[1], (Supplier) arr[2], (Direction) arr[3], (float) arr[4], (Layout) arr[5], (UIObject[]) arr[6])));
+		UI_OBJECT_CONSTRUCTORS.put(LayoutScrollDrivenUIObjectGroup.class, listLayoutScrollDrivenUIObjectGroup);
+
+		/*                 BackButtonUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listBackButtonUIObject = new ArrayList<>();
+		listBackButtonUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class}, (Object[] arr) -> (UIObject) new BackButtonUIObject((String) arr[0], (TextEmitter) arr[1])));
+		listBackButtonUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, Transform3D.class}, (Object[] arr) -> (UIObject) new BackButtonUIObject((String) arr[0], (TextEmitter) arr[1], (Transform3D) arr[2])));
+		UI_OBJECT_CONSTRUCTORS.put(BackButtonUIObject.class, listBackButtonUIObject);
+
+		/*                 PercentageSignedIntTextUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listPercentageSignedIntTextUIObject = new ArrayList<>();
+		listPercentageSignedIntTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, ColorMaterial.class, ColorMaterial.class, ColorMaterial.class}, (Object[] arr) -> (UIObject) new PercentageSignedIntTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (ColorMaterial) arr[3], (ColorMaterial) arr[4], (ColorMaterial) arr[5])));
+		listPercentageSignedIntTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, ColorMaterial.class, ColorMaterial.class, ColorMaterial.class, Transform3D.class}, (Object[] arr) -> (UIObject) new PercentageSignedIntTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (ColorMaterial) arr[3], (ColorMaterial) arr[4], (ColorMaterial) arr[5], (Transform3D) arr[6])));
+		UI_OBJECT_CONSTRUCTORS.put(PercentageSignedIntTextUIObject.class, listPercentageSignedIntTextUIObject);
+
+		/*                 TextUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listTextUIObject = new ArrayList<>();
+		listTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class}, (Object[] arr) -> (UIObject) new TextUIObject((String) arr[0], (TextEmitter) arr[1])));
+		listTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, Transform3D.class}, (Object[] arr) -> (UIObject) new TextUIObject((String) arr[0], (TextEmitter) arr[1], (Transform3D) arr[2])));
+		UI_OBJECT_CONSTRUCTORS.put(TextUIObject.class, listTextUIObject);
+
+		/*                 ScrollContainerUIObjectGroup                 */
+		final List<InternalConstructorFunction<UIObject>> listScrollContainerUIObjectGroup = new ArrayList<>();
+		listScrollContainerUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Direction.class, float.class, UIObject[].class}, (Object[] arr) -> (UIObject) new ScrollContainerUIObjectGroup((String) arr[0], (Direction) arr[1], (float) arr[2], (UIObject[]) arr[3])));
+		listScrollContainerUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Direction.class, float.class, Layout.class, UIObject[].class}, (Object[] arr) -> (UIObject) new ScrollContainerUIObjectGroup((String) arr[0], (Direction) arr[1], (float) arr[2], (Layout) arr[3], (UIObject[]) arr[4])));
+		listScrollContainerUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Transform3D.class, Direction.class, float.class, UIObject[].class}, (Object[] arr) -> (UIObject) new ScrollContainerUIObjectGroup((String) arr[0], (Transform3D) arr[1], (Direction) arr[2], (float) arr[3], (UIObject[]) arr[4])));
+		listScrollContainerUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Vector3fc.class, Direction.class, float.class, UIObject[].class}, (Object[] arr) -> (UIObject) new ScrollContainerUIObjectGroup((String) arr[0], (Vector3fc) arr[1], (Direction) arr[2], (float) arr[3], (UIObject[]) arr[4])));
+		listScrollContainerUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObjectGroup.class, Direction.class, float.class, UIObject[].class}, (Object[] arr) -> (UIObject) new ScrollContainerUIObjectGroup((String) arr[0], (UIObjectGroup) arr[1], (Direction) arr[2], (float) arr[3], (UIObject[]) arr[4])));
+		listScrollContainerUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Transform3D.class, Direction.class, float.class, Layout.class, UIObject[].class}, (Object[] arr) -> (UIObject) new ScrollContainerUIObjectGroup((String) arr[0], (Transform3D) arr[1], (Direction) arr[2], (float) arr[3], (Layout) arr[4], (UIObject[]) arr[5])));
+		listScrollContainerUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Vector3fc.class, Direction.class, float.class, Layout.class, UIObject[].class}, (Object[] arr) -> (UIObject) new ScrollContainerUIObjectGroup((String) arr[0], (Vector3fc) arr[1], (Direction) arr[2], (float) arr[3], (Layout) arr[4], (UIObject[]) arr[5])));
+		listScrollContainerUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObjectGroup.class, Direction.class, float.class, Layout.class, UIObject[].class}, (Object[] arr) -> (UIObject) new ScrollContainerUIObjectGroup((String) arr[0], (UIObjectGroup) arr[1], (Direction) arr[2], (float) arr[3], (Layout) arr[4], (UIObject[]) arr[5])));
+		UI_OBJECT_CONSTRUCTORS.put(ScrollContainerUIObjectGroup.class, listScrollContainerUIObjectGroup);
+
+		/*                 UIObjectGroup                 */
+		final List<InternalConstructorFunction<UIObject>> listUIObjectGroup = new ArrayList<>();
+		listUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObject[].class}, (Object[] arr) -> (UIObject) new UIObjectGroup((String) arr[0], (UIObject[]) arr[1])));
+		listUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, UIScene.class, UIObject[].class}, (Object[] arr) -> (UIObject) new UIObjectGroup((String) arr[0], (UIScene) arr[1], (UIObject[]) arr[2])));
+		listUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, List.class, Component[].class}, (Object[] arr) -> (UIObject) new UIObjectGroup((String) arr[0], (List) arr[1], (Component[]) arr[2])));
+		listUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObjectGroup.class, UIObject[].class}, (Object[] arr) -> (UIObject) new UIObjectGroup((String) arr[0], (UIObjectGroup) arr[1], (UIObject[]) arr[2])));
+		UI_OBJECT_CONSTRUCTORS.put(UIObjectGroup.class, listUIObjectGroup);
+
+		/*                 SliderUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listSliderUIObject = new ArrayList<>();
+		listSliderUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, float.class, float.class, float.class, int.class}, (Object[] arr) -> (UIObject) new SliderUIObject((String) arr[0], (TextEmitter) arr[1], (float) arr[2], (float) arr[3], (float) arr[4], (int) arr[5])));
+		listSliderUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, Transform3D.class, float.class, float.class, float.class, int.class}, (Object[] arr) -> (UIObject) new SliderUIObject((String) arr[0], (TextEmitter) arr[1], (Transform3D) arr[2], (float) arr[3], (float) arr[4], (float) arr[5], (int) arr[6])));
+		UI_OBJECT_CONSTRUCTORS.put(SliderUIObject.class, listSliderUIObject);
+
+		/*                 QuitButtonUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listQuitButtonUIObject = new ArrayList<>();
+		listQuitButtonUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class}, (Object[] arr) -> (UIObject) new QuitButtonUIObject((String) arr[0], (TextEmitter) arr[1])));
+		listQuitButtonUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, Transform3D.class}, (Object[] arr) -> (UIObject) new QuitButtonUIObject((String) arr[0], (TextEmitter) arr[1], (Transform3D) arr[2])));
+		UI_OBJECT_CONSTRUCTORS.put(QuitButtonUIObject.class, listQuitButtonUIObject);
+
+		/*                 ScrollDrivenUIObjectGroup                 */
+		final List<InternalConstructorFunction<UIObject>> listScrollDrivenUIObjectGroup = new ArrayList<>();
+		listScrollDrivenUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Supplier.class, Direction.class, float.class, UIObject[].class}, (Object[] arr) -> (UIObject) new ScrollDrivenUIObjectGroup((String) arr[0], (Supplier) arr[1], (Direction) arr[2], (float) arr[3], (UIObject[]) arr[4])));
+		listScrollDrivenUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObjectGroup.class, Supplier.class, Direction.class, float.class, UIObject[].class}, (Object[] arr) -> (UIObject) new ScrollDrivenUIObjectGroup((String) arr[0], (UIObjectGroup) arr[1], (Supplier) arr[2], (Direction) arr[3], (float) arr[4], (UIObject[]) arr[5])));
+		listScrollDrivenUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Transform3D.class, Supplier.class, Direction.class, float.class, UIObject[].class}, (Object[] arr) -> (UIObject) new ScrollDrivenUIObjectGroup((String) arr[0], (Transform3D) arr[1], (Supplier) arr[2], (Direction) arr[3], (float) arr[4], (UIObject[]) arr[5])));
+		UI_OBJECT_CONSTRUCTORS.put(ScrollDrivenUIObjectGroup.class, listScrollDrivenUIObjectGroup);
+
+		/*                 TextBoxUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listTextBoxUIObject = new ArrayList<>();
+		listTextBoxUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class}, (Object[] arr) -> (UIObject) new TextBoxUIObject((String) arr[0], (TextEmitter) arr[1])));
+		listTextBoxUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, Transform3D.class}, (Object[] arr) -> (UIObject) new TextBoxUIObject((String) arr[0], (TextEmitter) arr[1], (Transform3D) arr[2])));
+		UI_OBJECT_CONSTRUCTORS.put(TextBoxUIObject.class, listTextBoxUIObject);
+
+		/*                 LargeLogoUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listLargeLogoUIObject = new ArrayList<>();
+		listLargeLogoUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new LargeLogoUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
+		listLargeLogoUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class, Transform3D.class}, (Object[] arr) -> (UIObject) new LargeLogoUIObject((String) arr[0], (TexturedQuadMesh) arr[1], (Transform3D) arr[2])));
+		UI_OBJECT_CONSTRUCTORS.put(LargeLogoUIObject.class, listLargeLogoUIObject);
+
+		/*                 IntegerTextUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listIntegerTextUIObject = new ArrayList<>();
+		listIntegerTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class}, (Object[] arr) -> (UIObject) new IntegerTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2])));
+		listIntegerTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, Transform3D.class}, (Object[] arr) -> (UIObject) new IntegerTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (Transform3D) arr[3])));
+		listIntegerTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, ColorMaterial.class}, (Object[] arr) -> (UIObject) new IntegerTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (ColorMaterial) arr[3])));
+		listIntegerTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, int.class}, (Object[] arr) -> (UIObject) new IntegerTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (int) arr[3])));
+		listIntegerTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, int.class, boolean.class}, (Object[] arr) -> (UIObject) new IntegerTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (int) arr[3], (boolean) arr[4])));
+		listIntegerTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, int.class, Transform3D.class}, (Object[] arr) -> (UIObject) new IntegerTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (int) arr[3], (Transform3D) arr[4])));
+		listIntegerTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, ColorMaterial.class, Transform3D.class}, (Object[] arr) -> (UIObject) new IntegerTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (ColorMaterial) arr[3], (Transform3D) arr[4])));
+		listIntegerTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, int.class, boolean.class, Transform3D.class}, (Object[] arr) -> (UIObject) new IntegerTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (int) arr[3], (boolean) arr[4], (Transform3D) arr[5])));
+		listIntegerTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, int.class, boolean.class, boolean.class, int.class}, (Object[] arr) -> (UIObject) new IntegerTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (int) arr[3], (boolean) arr[4], (boolean) arr[5], (int) arr[6])));
+		listIntegerTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, int.class, boolean.class, boolean.class, int.class, Transform3D.class}, (Object[] arr) -> (UIObject) new IntegerTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (int) arr[3], (boolean) arr[4], (boolean) arr[5], (int) arr[6], (Transform3D) arr[7])));
+		listIntegerTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, int.class, boolean.class, boolean.class, boolean.class, int.class, ColorMaterial.class}, (Object[] arr) -> (UIObject) new IntegerTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (int) arr[3], (boolean) arr[4], (boolean) arr[5], (boolean) arr[6], (int) arr[7], (ColorMaterial) arr[8])));
+		listIntegerTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, int.class, boolean.class, boolean.class, boolean.class, int.class, ColorMaterial.class, Transform3D.class}, (Object[] arr) -> (UIObject) new IntegerTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (int) arr[3], (boolean) arr[4], (boolean) arr[5], (boolean) arr[6], (int) arr[7], (ColorMaterial) arr[8], (Transform3D) arr[9])));
+		UI_OBJECT_CONSTRUCTORS.put(IntegerTextUIObject.class, listIntegerTextUIObject);
+
+		/*                 PlayButtonUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listPlayButtonUIObject = new ArrayList<>();
+		listPlayButtonUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class}, (Object[] arr) -> (UIObject) new PlayButtonUIObject((String) arr[0], (TextEmitter) arr[1])));
+		listPlayButtonUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, Transform3D.class}, (Object[] arr) -> (UIObject) new PlayButtonUIObject((String) arr[0], (TextEmitter) arr[1], (Transform3D) arr[2])));
+		UI_OBJECT_CONSTRUCTORS.put(PlayButtonUIObject.class, listPlayButtonUIObject);
+
+		/*                 GrowOnHoverTextUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listGrowOnHoverTextUIObject = new ArrayList<>();
+		listGrowOnHoverTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, Scale2dDir.class}, (Object[] arr) -> (UIObject) new GrowOnHoverTextUIObject((String) arr[0], (TextEmitter) arr[1], (Scale2dDir) arr[2])));
+		listGrowOnHoverTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, Scale2dDir.class, Transform3D.class}, (Object[] arr) -> (UIObject) new GrowOnHoverTextUIObject((String) arr[0], (TextEmitter) arr[1], (Scale2dDir) arr[2], (Transform3D) arr[3])));
+		UI_OBJECT_CONSTRUCTORS.put(GrowOnHoverTextUIObject.class, listGrowOnHoverTextUIObject);
+
+		/*                 OptionKeyUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listOptionKeyUIObject = new ArrayList<>();
+		listOptionKeyUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, Scale2dDir.class}, (Object[] arr) -> (UIObject) new OptionKeyUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (Scale2dDir) arr[3])));
+		listOptionKeyUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, Scale2dDir.class, Transform3D.class}, (Object[] arr) -> (UIObject) new OptionKeyUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (Scale2dDir) arr[3], (Transform3D) arr[4])));
+		UI_OBJECT_CONSTRUCTORS.put(OptionKeyUIObject.class, listOptionKeyUIObject);
+
+		/*                 SpacerUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listSpacerUIObject = new ArrayList<>();
+		listSpacerUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class, Vector2f.class}, (Object[] arr) -> (UIObject) new SpacerUIObject((String) arr[0], (Mesh) arr[1], (Vector2f) arr[2])));
+		listSpacerUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class, Transform3D.class, Vector2f.class}, (Object[] arr) -> (UIObject) new SpacerUIObject((String) arr[0], (Mesh) arr[1], (Transform3D) arr[2], (Vector2f) arr[3])));
+		UI_OBJECT_CONSTRUCTORS.put(SpacerUIObject.class, listSpacerUIObject);
+
+		/*                 CursorUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listCursorUIObject = new ArrayList<>();
+		listCursorUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new CursorUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
+		listCursorUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class, Transform3D.class}, (Object[] arr) -> (UIObject) new CursorUIObject((String) arr[0], (TexturedQuadMesh) arr[1], (Transform3D) arr[2])));
+		UI_OBJECT_CONSTRUCTORS.put(CursorUIObject.class, listCursorUIObject);
+
 		/*                 FlatQuadUIObject                 */
 		final List<InternalConstructorFunction<UIObject>> listFlatQuadUIObject = new ArrayList<>();
 		listFlatQuadUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new FlatQuadUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
@@ -320,81 +390,11 @@ public class UIObjectRegistry {
 		listFlatQuadUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class, Transform3D.class, Vector4f.class}, (Object[] arr) -> (UIObject) new FlatQuadUIObject((String) arr[0], (TexturedQuadMesh) arr[1], (Transform3D) arr[2], (Vector4f) arr[3])));
 		UI_OBJECT_CONSTRUCTORS.put(FlatQuadUIObject.class, listFlatQuadUIObject);
 
-		/*                 PlayButtonUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listPlayButtonUIObject = new ArrayList<>();
-		listPlayButtonUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class}, (Object[] arr) -> (UIObject) new PlayButtonUIObject((String) arr[0], (TextEmitter) arr[1])));
-		listPlayButtonUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, Transform3D.class}, (Object[] arr) -> (UIObject) new PlayButtonUIObject((String) arr[0], (TextEmitter) arr[1], (Transform3D) arr[2])));
-		UI_OBJECT_CONSTRUCTORS.put(PlayButtonUIObject.class, listPlayButtonUIObject);
-
-		/*                 TextUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listTextUIObject = new ArrayList<>();
-		listTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class}, (Object[] arr) -> (UIObject) new TextUIObject((String) arr[0], (TextEmitter) arr[1])));
-		listTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, Transform3D.class}, (Object[] arr) -> (UIObject) new TextUIObject((String) arr[0], (TextEmitter) arr[1], (Transform3D) arr[2])));
-		UI_OBJECT_CONSTRUCTORS.put(TextUIObject.class, listTextUIObject);
-
-		/*                 LeafIconUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listLeafIconUIObject = new ArrayList<>();
-		listLeafIconUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new LeafIconUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
-		listLeafIconUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class, Transform3D.class}, (Object[] arr) -> (UIObject) new LeafIconUIObject((String) arr[0], (TexturedQuadMesh) arr[1], (Transform3D) arr[2])));
-		UI_OBJECT_CONSTRUCTORS.put(LeafIconUIObject.class, listLeafIconUIObject);
-
-		/*                 CursorUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listCursorUIObject = new ArrayList<>();
-		listCursorUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new CursorUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
-		listCursorUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class, Transform3D.class}, (Object[] arr) -> (UIObject) new CursorUIObject((String) arr[0], (TexturedQuadMesh) arr[1], (Transform3D) arr[2])));
-		UI_OBJECT_CONSTRUCTORS.put(CursorUIObject.class, listCursorUIObject);
-
-		/*                 ScrollDrivenUIObjectGroup                 */
-		final List<InternalConstructorFunction<UIObject>> listScrollDrivenUIObjectGroup = new ArrayList<>();
-		listScrollDrivenUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Supplier.class, Direction.class, float.class, UIObject[].class}, (Object[] arr) -> (UIObject) new ScrollDrivenUIObjectGroup((String) arr[0], (Supplier) arr[1], (Direction) arr[2], (float) arr[3], (UIObject[]) arr[4])));
-		listScrollDrivenUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObjectGroup.class, Supplier.class, Direction.class, float.class, UIObject[].class}, (Object[] arr) -> (UIObject) new ScrollDrivenUIObjectGroup((String) arr[0], (UIObjectGroup) arr[1], (Supplier) arr[2], (Direction) arr[3], (float) arr[4], (UIObject[]) arr[5])));
-		listScrollDrivenUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Transform3D.class, Supplier.class, Direction.class, float.class, UIObject[].class}, (Object[] arr) -> (UIObject) new ScrollDrivenUIObjectGroup((String) arr[0], (Transform3D) arr[1], (Supplier) arr[2], (Direction) arr[3], (float) arr[4], (UIObject[]) arr[5])));
-		UI_OBJECT_CONSTRUCTORS.put(ScrollDrivenUIObjectGroup.class, listScrollDrivenUIObjectGroup);
-
-		/*                 LevelButtonUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listLevelButtonUIObject = new ArrayList<>();
-		listLevelButtonUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class, String.class}, (Object[] arr) -> (UIObject) new LevelButtonUIObject((String) arr[0], (TexturedQuadMesh) arr[1], (String) arr[2])));
-		listLevelButtonUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class, String.class, LevelState.class}, (Object[] arr) -> (UIObject) new LevelButtonUIObject((String) arr[0], (TexturedQuadMesh) arr[1], (String) arr[2], (LevelState) arr[3])));
-		listLevelButtonUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class, Transform3D.class, String.class}, (Object[] arr) -> (UIObject) new LevelButtonUIObject((String) arr[0], (TexturedQuadMesh) arr[1], (Transform3D) arr[2], (String) arr[3])));
-		listLevelButtonUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class, Transform3D.class, String.class, LevelState.class}, (Object[] arr) -> (UIObject) new LevelButtonUIObject((String) arr[0], (TexturedQuadMesh) arr[1], (Transform3D) arr[2], (String) arr[3], (LevelState) arr[4])));
-		UI_OBJECT_CONSTRUCTORS.put(LevelButtonUIObject.class, listLevelButtonUIObject);
-
-		/*                 MoneyIconUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listMoneyIconUIObject = new ArrayList<>();
-		listMoneyIconUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new MoneyIconUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
-		listMoneyIconUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class, Transform3D.class}, (Object[] arr) -> (UIObject) new MoneyIconUIObject((String) arr[0], (TexturedQuadMesh) arr[1], (Transform3D) arr[2])));
-		UI_OBJECT_CONSTRUCTORS.put(MoneyIconUIObject.class, listMoneyIconUIObject);
-
-		/*                 QuadUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listQuadUIObject = new ArrayList<>();
-		listQuadUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, QuadMesh.class}, (Object[] arr) -> (UIObject) new QuadUIObject((String) arr[0], (QuadMesh) arr[1])));
-		listQuadUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, QuadMesh.class, Transform3D.class}, (Object[] arr) -> (UIObject) new QuadUIObject((String) arr[0], (QuadMesh) arr[1], (Transform3D) arr[2])));
-		UI_OBJECT_CONSTRUCTORS.put(QuadUIObject.class, listQuadUIObject);
-
-		/*                 VolumeTextUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listVolumeTextUIObject = new ArrayList<>();
-		listVolumeTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class}, (Object[] arr) -> (UIObject) new VolumeTextUIObject((String) arr[0], (TextEmitter) arr[1])));
-		listVolumeTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, Transform3D.class}, (Object[] arr) -> (UIObject) new VolumeTextUIObject((String) arr[0], (TextEmitter) arr[1], (Transform3D) arr[2])));
-		UI_OBJECT_CONSTRUCTORS.put(VolumeTextUIObject.class, listVolumeTextUIObject);
-
-		/*                 LayoutScrollDrivenUIObjectGroup                 */
-		final List<InternalConstructorFunction<UIObject>> listLayoutScrollDrivenUIObjectGroup = new ArrayList<>();
-		listLayoutScrollDrivenUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Supplier.class, Direction.class, float.class, Layout.class, UIObject[].class}, (Object[] arr) -> (UIObject) new LayoutScrollDrivenUIObjectGroup((String) arr[0], (Supplier) arr[1], (Direction) arr[2], (float) arr[3], (Layout) arr[4], (UIObject[]) arr[5])));
-		listLayoutScrollDrivenUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObjectGroup.class, Supplier.class, Direction.class, float.class, Layout.class, UIObject[].class}, (Object[] arr) -> (UIObject) new LayoutScrollDrivenUIObjectGroup((String) arr[0], (UIObjectGroup) arr[1], (Supplier) arr[2], (Direction) arr[3], (float) arr[4], (Layout) arr[5], (UIObject[]) arr[6])));
-		listLayoutScrollDrivenUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Transform3D.class, Supplier.class, Direction.class, float.class, Layout.class, UIObject[].class}, (Object[] arr) -> (UIObject) new LayoutScrollDrivenUIObjectGroup((String) arr[0], (Transform3D) arr[1], (Supplier) arr[2], (Direction) arr[3], (float) arr[4], (Layout) arr[5], (UIObject[]) arr[6])));
-		UI_OBJECT_CONSTRUCTORS.put(LayoutScrollDrivenUIObjectGroup.class, listLayoutScrollDrivenUIObjectGroup);
-
-		/*                 PercentageSignedIntTextUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listPercentageSignedIntTextUIObject = new ArrayList<>();
-		listPercentageSignedIntTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, ColorMaterial.class, ColorMaterial.class, ColorMaterial.class}, (Object[] arr) -> (UIObject) new PercentageSignedIntTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (ColorMaterial) arr[3], (ColorMaterial) arr[4], (ColorMaterial) arr[5])));
-		listPercentageSignedIntTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, ColorMaterial.class, ColorMaterial.class, ColorMaterial.class, Transform3D.class}, (Object[] arr) -> (UIObject) new PercentageSignedIntTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (ColorMaterial) arr[3], (ColorMaterial) arr[4], (ColorMaterial) arr[5], (Transform3D) arr[6])));
-		UI_OBJECT_CONSTRUCTORS.put(PercentageSignedIntTextUIObject.class, listPercentageSignedIntTextUIObject);
-
-		/*                 ProgrammaticTextUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listProgrammaticTextUIObject = new ArrayList<>();
-		listProgrammaticTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class}, (Object[] arr) -> (UIObject) new ProgrammaticTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2])));
-		listProgrammaticTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class, String.class, Transform3D.class}, (Object[] arr) -> (UIObject) new ProgrammaticTextUIObject((String) arr[0], (TextEmitter) arr[1], (String) arr[2], (Transform3D) arr[3])));
-		UI_OBJECT_CONSTRUCTORS.put(ProgrammaticTextUIObject.class, listProgrammaticTextUIObject);
+		/*                 WaterIconUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listWaterIconUIObject = new ArrayList<>();
+		listWaterIconUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new WaterIconUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
+		listWaterIconUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class, Transform3D.class}, (Object[] arr) -> (UIObject) new WaterIconUIObject((String) arr[0], (TexturedQuadMesh) arr[1], (Transform3D) arr[2])));
+		UI_OBJECT_CONSTRUCTORS.put(WaterIconUIObject.class, listWaterIconUIObject);
 
 	}
 

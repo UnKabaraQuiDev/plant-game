@@ -7,7 +7,7 @@ import lu.kbra.plant_game.engine.render.SwayMesh;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-@DataPath("classpath:/models/flower_round_small.json")
+@DataPath("classpath:/models/flower-round-small.json")
 public class SmallRoundFlowerObject extends SwayGameObject {
 
 	public SmallRoundFlowerObject(final String str, final SwayMesh swayMesh, final Transform3D transform) {

@@ -7,7 +7,7 @@ import lu.kbra.plant_game.engine.entity.go.impl.SwayInstanceEmitter;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-@DataPath("classpath:/models/flower_round_large.json")
+@DataPath("classpath:/models/flower-round-large.json")
 public class InstanceLargeRoundFlowerObject extends InstanceSwayGameObject {
 
 	public InstanceLargeRoundFlowerObject(

@@ -13,6 +13,10 @@ public class ImageWorldGenerator extends WorldGenerator {
 	private BufferedImage image;
 	private final float scale;
 
+	public ImageWorldGenerator(final String location, final int height) {
+		this(location, (float) height / 255);
+	}
+
 	public ImageWorldGenerator(final String location, final float scale) {
 		this.scale = scale;
 

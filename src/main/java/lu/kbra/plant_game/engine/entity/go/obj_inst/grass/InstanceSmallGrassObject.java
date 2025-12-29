@@ -7,7 +7,7 @@ import lu.kbra.plant_game.engine.entity.go.impl.SwayInstanceEmitter;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-@DataPath("classpath:/models/grass_small.json")
+@DataPath("classpath:/models/grass-small.json")
 public class InstanceSmallGrassObject extends InstanceSwayGameObject {
 
 	public InstanceSmallGrassObject(

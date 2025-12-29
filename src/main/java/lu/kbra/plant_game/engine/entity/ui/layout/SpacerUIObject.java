@@ -6,8 +6,8 @@ import javax.swing.GroupLayout.Alignment;
 
 import org.joml.Vector2f;
 
+import lu.kbra.plant_game.engine.entity.impl.NoMeshObject;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
-import lu.kbra.plant_game.engine.locale.NoMeshObject;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;

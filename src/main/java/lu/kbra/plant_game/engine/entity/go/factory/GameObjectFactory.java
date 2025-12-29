@@ -15,7 +15,7 @@ import lu.kbra.plant_game.engine.entity.go.impl.InstanceSwayGameObject;
 import lu.kbra.plant_game.engine.entity.go.impl.NeedsPostConstruct;
 import lu.kbra.plant_game.engine.entity.go.impl.SwayGameObject;
 import lu.kbra.plant_game.engine.entity.go.impl.SwayInstanceEmitter;
-import lu.kbra.plant_game.engine.locale.NoMeshObject;
+import lu.kbra.plant_game.engine.entity.impl.NoMeshObject;
 import lu.kbra.plant_game.engine.mesh.AnimatedMesh;
 import lu.kbra.plant_game.engine.mesh.loader.AnimatedMeshLoader;
 import lu.kbra.plant_game.engine.mesh.loader.AnimatedMeshLoader.AnimatedMeshes;

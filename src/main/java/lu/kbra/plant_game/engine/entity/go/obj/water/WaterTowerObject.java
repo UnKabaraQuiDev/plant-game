@@ -10,7 +10,7 @@ import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-@DataPath("classpath:/models/water_tower.json")
+@DataPath("classpath:/models/water-tower-medium.json")
 public class WaterTowerObject extends PlaceableGameObject implements PlaceableObject, WaterContainer {
 
 	protected long waterLevel;

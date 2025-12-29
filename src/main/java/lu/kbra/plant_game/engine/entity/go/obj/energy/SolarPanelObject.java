@@ -9,7 +9,7 @@ import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-@DataPath("classpath:/models/solar_panel.json")
+@DataPath("classpath:/models/solar-panel-medium.json")
 public class SolarPanelObject extends PlaceableGameObject implements PlaceableObject, EnergyContainer {
 
 	protected long waterLevel;

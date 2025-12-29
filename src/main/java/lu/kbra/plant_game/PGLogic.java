@@ -5,10 +5,14 @@ import java.util.Locale;
 
 import org.lwjgl.glfw.GLFW;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import lu.kbra.plant_game.engine.UpdateFrameState;
+import lu.kbra.plant_game.engine.data.json.OrgJOMLModule;
+import lu.kbra.plant_game.engine.data.json.OrgJSONModule;
+import lu.kbra.plant_game.engine.data.locale.LocalizationService;
 import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
-import lu.kbra.plant_game.engine.locale.LocalizationService;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
 import lu.kbra.plant_game.engine.scene.ui.menu.main.MainMenuUIScene;
@@ -22,6 +26,13 @@ import lu.kbra.standalone.gameengine.utils.gl.consts.Consts;
 public class PGLogic extends GameLogic {
 
 	public static PGLogic INSTANCE;
+	public static ObjectMapper OBJECT_MAPPER;
+
+	static {
+		OBJECT_MAPPER = new ObjectMapper();
+		OBJECT_MAPPER.registerModule(new OrgJSONModule());
+		OBJECT_MAPPER.registerModule(new OrgJOMLModule());
+	}
 
 	public final WorkerDispatcher WORKERS = new WorkerDispatcher("WORKERS", 8);
 

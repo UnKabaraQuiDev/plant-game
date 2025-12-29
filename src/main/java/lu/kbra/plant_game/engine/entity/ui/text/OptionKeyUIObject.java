@@ -4,13 +4,13 @@ import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
 
 import lu.kbra.plant_game.PGLogic;
+import lu.kbra.plant_game.engine.data.locale.LocalizationService;
 import lu.kbra.plant_game.engine.entity.ui.impl.AbsoluteTransform3DOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.Focusable;
 import lu.kbra.plant_game.engine.entity.ui.impl.IndexOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsClick;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsInput;
 import lu.kbra.plant_game.engine.entity.ui.impl.Scale2dDir;
-import lu.kbra.plant_game.engine.locale.LocalizationService;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.plant_game.engine.window.input.KeyOption;
 import lu.kbra.plant_game.engine.window.input.MappingInputHandler;

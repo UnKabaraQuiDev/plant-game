@@ -7,7 +7,7 @@ import lu.kbra.plant_game.engine.render.SwayMesh;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-@DataPath("classpath:/models/grass_medium.json")
+@DataPath("classpath:/models/grass-medium.json")
 public class MediumGrassObject extends SwayGameObject {
 
 	public MediumGrassObject(final String str, final SwayMesh swayMesh, final Transform3D transform) {

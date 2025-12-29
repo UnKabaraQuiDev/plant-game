@@ -7,7 +7,7 @@ import lu.kbra.plant_game.engine.render.SwayMesh;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-@DataPath("classpath:/models/champi_small.json")
+@DataPath("classpath:/models/champi-small.json")
 public class SmallChampiFlowerObject extends SwayGameObject {
 
 	public SmallChampiFlowerObject(final String str, final SwayMesh swayMesh, final Transform3D transform) {

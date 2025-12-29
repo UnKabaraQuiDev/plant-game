@@ -1,4 +1,4 @@
-package lu.kbra.plant_game.engine.locale;
+package lu.kbra.plant_game.engine.data.locale;
 
 import java.io.IOException;
 import java.io.InputStream;

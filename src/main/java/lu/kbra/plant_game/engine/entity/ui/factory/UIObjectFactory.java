@@ -11,6 +11,7 @@ import lu.pcy113.pclib.concurrency.ListTriggerLatch;
 import lu.pcy113.pclib.impl.ThrowingFunction;
 
 import lu.kbra.plant_game.engine.entity.go.impl.NeedsPostConstruct;
+import lu.kbra.plant_game.engine.entity.impl.NoMeshObject;
 import lu.kbra.plant_game.engine.entity.ui.AnimatedUIObject;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.gradient.GradientQuadUIObject;
@@ -20,7 +21,6 @@ import lu.kbra.plant_game.engine.entity.ui.prim.FlatQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.ProgrammaticTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.TextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.texture.TextureUIObject;
-import lu.kbra.plant_game.engine.locale.NoMeshObject;
 import lu.kbra.plant_game.engine.mesh.TexturedMesh;
 import lu.kbra.plant_game.engine.mesh.TexturedQuadMesh;
 import lu.kbra.plant_game.engine.mesh.loader.AnimatedMeshLoader;
