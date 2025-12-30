@@ -1,6 +1,6 @@
 #version 430
 
-layout(local_size_x = 16, local_size_y = 16) in;
+layout(local_size_x = %LOCAL_SIZE_X%, local_size_y = %LOCAL_SIZE_Y%) in;
 
 layout(location = 0) uniform sampler2D uPosTex;
 layout(location = 1) uniform sampler2D uNormalTex;
@@ -11,8 +11,8 @@ layout(location = 4) uniform sampler2D uDepthTex;
 layout(rgba8, binding = 0) uniform image2D uOutputTex;
 
 uniform int currentTargetCount;
-uniform uvec3[{MAX_COUNT}] targetIds;
-uniform vec4[{MAX_COUNT}] targetColors;
+uniform uvec3[%MAX_COUNT%] targetIds;
+uniform vec4[%MAX_COUNT%] targetColors;
 
 uniform ivec2 inputSize;
 uniform ivec2 outputSize;

@@ -1,10 +1,8 @@
 #version 430
 
-#define NUM_COLOR %NUM_COLOR%
+vec4 colors[] = %COLORS%;
 
-vec4 colors[NUM_COLOR] = %COLORS%;
-
-layout(local_size_x = 16, local_size_y = 16) in;
+layout(local_size_x = %LOCAL_SIZE_X%, local_size_y = %LOCAL_SIZE_Y%) in;
 
 layout(location = 0) uniform sampler2D uPosTex;
 layout(location = 1) uniform sampler2D uNormalTex;
@@ -23,8 +21,9 @@ uniform float ambientLight;
 
 void main() {
     ivec2 outPixel = ivec2(gl_GlobalInvocationID.xy);
-    if (outPixel.x >= outputSize.x || outPixel.y >= outputSize.y)
+    if (outPixel.x >= outputSize.x || outPixel.y >= outputSize.y) {
         return;
+    }
 
     vec2 screenUv = (vec2(outPixel) + 0.5) / vec2(outputSize);
     ivec2 screenCoord = ivec2(screenUv * vec2(inputSize));
@@ -37,7 +36,7 @@ void main() {
 
 	vec3 color = vec3(0);
 	
-	if(ids.r > 0 && ids.r <= NUM_COLOR) {
+	if(ids.r > 0 && ids.r <= %NUM_COLORS%) {
 		color = colors[ids.r - 1].rgb;
 	} else {
 		return;

@@ -27,13 +27,14 @@ import lu.kbra.plant_game.engine.entity.go.obj.water.WaterSprinklerObject5x5;
 import lu.kbra.plant_game.engine.entity.go.obj.water.WaterSprinklerObject7x7;
 import lu.kbra.plant_game.engine.entity.go.obj.water.WaterTowerObject;
 import lu.kbra.plant_game.engine.entity.go.obj.water.WaterWheelObject;
-import lu.kbra.plant_game.engine.entity.go.obj_inst.ParticleGameObject;
 import lu.kbra.plant_game.engine.entity.go.obj_inst.champi.InstanceLargeChampiFlowerObject;
 import lu.kbra.plant_game.engine.entity.go.obj_inst.champi.InstanceMediumChampiFlowerObject;
 import lu.kbra.plant_game.engine.entity.go.obj_inst.champi.InstanceSmallChampiFlowerObject;
 import lu.kbra.plant_game.engine.entity.go.obj_inst.grass.InstanceLargeGrassObject;
 import lu.kbra.plant_game.engine.entity.go.obj_inst.grass.InstanceMediumGrassObject;
 import lu.kbra.plant_game.engine.entity.go.obj_inst.grass.InstanceSmallGrassObject;
+import lu.kbra.plant_game.engine.entity.go.obj_inst.particles.GravityParticleGameObject;
+import lu.kbra.plant_game.engine.entity.go.obj_inst.particles.ParticleGameObject;
 import lu.kbra.plant_game.engine.entity.go.obj_inst.round.InstanceLargeRoundFlowerObject;
 import lu.kbra.plant_game.engine.entity.go.obj_inst.round.InstanceMediumRoundFlowerObject;
 import lu.kbra.plant_game.engine.entity.go.obj_inst.round.InstanceSmallRoundFlowerObject;
@@ -45,6 +46,7 @@ import lu.kbra.plant_game.engine.util.exceptions.GameObjectNotFound;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.geom.instance.InstanceEmitter;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
+import org.joml.Vector3f;
 import org.joml.Vector3i;
 import org.joml.Vector3ic;
 
@@ -307,6 +309,16 @@ public class GameObjectRegistry {
 		listInstanceMediumChampiFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class, Transform3D.class, Vector3i.class, float.class, float.class, float.class}, (Object[] arr) -> (GameObject) new InstanceMediumChampiFlowerObject((String) arr[0], (SwayInstanceEmitter) arr[1], (Transform3D) arr[2], (Vector3i) arr[3], (float) arr[4], (float) arr[5], (float) arr[6])));
 		listInstanceMediumChampiFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayInstanceEmitter.class, Transform3D.class, Vector3i.class, short.class, float.class, float.class, float.class}, (Object[] arr) -> (GameObject) new InstanceMediumChampiFlowerObject((String) arr[0], (SwayInstanceEmitter) arr[1], (Transform3D) arr[2], (Vector3i) arr[3], (short) arr[4], (float) arr[5], (float) arr[6], (float) arr[7])));
 		GAME_OBJECT_CONSTRUCTORS.put(InstanceMediumChampiFlowerObject.class, listInstanceMediumChampiFlowerObject);
+
+		/*                 GravityParticleGameObject                 */
+		final List<InternalConstructorFunction<GameObject>> listGravityParticleGameObject = new ArrayList<>();
+		listGravityParticleGameObject.add(new InternalConstructorFunction<>(new Class[] {String.class, InstanceEmitter.class, Vector3f.class}, (Object[] arr) -> (GameObject) new GravityParticleGameObject((String) arr[0], (InstanceEmitter) arr[1], (Vector3f) arr[2])));
+		listGravityParticleGameObject.add(new InternalConstructorFunction<>(new Class[] {String.class, InstanceEmitter.class, Transform3D.class, Vector3f.class}, (Object[] arr) -> (GameObject) new GravityParticleGameObject((String) arr[0], (InstanceEmitter) arr[1], (Transform3D) arr[2], (Vector3f) arr[3])));
+		listGravityParticleGameObject.add(new InternalConstructorFunction<>(new Class[] {String.class, InstanceEmitter.class, short.class, Vector3f.class}, (Object[] arr) -> (GameObject) new GravityParticleGameObject((String) arr[0], (InstanceEmitter) arr[1], (short) arr[2], (Vector3f) arr[3])));
+		listGravityParticleGameObject.add(new InternalConstructorFunction<>(new Class[] {String.class, InstanceEmitter.class, Transform3D.class, short.class, Vector3f.class}, (Object[] arr) -> (GameObject) new GravityParticleGameObject((String) arr[0], (InstanceEmitter) arr[1], (Transform3D) arr[2], (short) arr[3], (Vector3f) arr[4])));
+		listGravityParticleGameObject.add(new InternalConstructorFunction<>(new Class[] {String.class, InstanceEmitter.class, Transform3D.class, Vector3ic.class, Vector3f.class}, (Object[] arr) -> (GameObject) new GravityParticleGameObject((String) arr[0], (InstanceEmitter) arr[1], (Transform3D) arr[2], (Vector3ic) arr[3], (Vector3f) arr[4])));
+		listGravityParticleGameObject.add(new InternalConstructorFunction<>(new Class[] {String.class, InstanceEmitter.class, Transform3D.class, Vector3ic.class, short.class, Vector3f.class}, (Object[] arr) -> (GameObject) new GravityParticleGameObject((String) arr[0], (InstanceEmitter) arr[1], (Transform3D) arr[2], (Vector3ic) arr[3], (short) arr[4], (Vector3f) arr[5])));
+		GAME_OBJECT_CONSTRUCTORS.put(GravityParticleGameObject.class, listGravityParticleGameObject);
 
 	}
 

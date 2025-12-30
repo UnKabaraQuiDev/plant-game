@@ -64,4 +64,12 @@ public class InstanceGameObject extends GameObject {
 		return this.instanceEmitterComponent == null ? null : this.instanceEmitterComponent.getInstanceEmitter();
 	}
 
+	@Override
+	public String toString() {
+		return "InstanceGameObject [materialId=" + this.materialId + ", entityMaterialId=" + this.entityMaterialId + ", objectId="
+				+ this.objectId + ", objectIdLocation=" + this.objectIdLocation + ", active=" + this.active + ", name=" + this.name
+				+ ", components=" + this.components.size() + ", getInstanceEmitter()=" + this.getInstanceEmitter() + ", getTransform()="
+				+ this.getTransform() + "]";
+	}
+
 }

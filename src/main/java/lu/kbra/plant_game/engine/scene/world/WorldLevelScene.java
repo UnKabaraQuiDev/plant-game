@@ -55,6 +55,7 @@ import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.scene.world.data.LevelData;
 import lu.kbra.plant_game.engine.scene.world.generator.ImageWorldGenerator;
 import lu.kbra.plant_game.engine.scene.world.generator.WorldGenerator;
+import lu.kbra.plant_game.engine.scene.world.particles.ParticleManager;
 import lu.kbra.plant_game.engine.window.input.StandardKeyOption;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.plant_game.generated.ColorMaterial;
@@ -93,6 +94,8 @@ public class WorldLevelScene extends Scene3D {
 	private float rotation = 0;
 	private float fovDiff = 0;
 
+	private final ParticleManager particleManager;
+
 	private boolean movingObject = false;
 	private PlaceableObject attachedObject = null;
 	private Direction targetRotation = Direction.NONE;
@@ -101,6 +104,8 @@ public class WorldLevelScene extends Scene3D {
 	public WorldLevelScene(final String name, final CacheManager parent) {
 		super(name);
 		this.worldCache = new CacheManager(name, parent);
+
+		this.particleManager = new ParticleManager(parent, this);
 
 		this.getCamera().setPosition(new Vector3f(-20, 25, 20).mul(1.5f));
 		this.getCamera().lookAt(this.getCamera().getPosition(), new Vector3f(0, 0, 0)).updateMatrix();
@@ -522,6 +527,10 @@ public class WorldLevelScene extends Scene3D {
 		});
 	}
 
+	public void render(final float dTime) {
+		this.particleManager.render(dTime);
+	}
+
 	public GameObject getWaterLevel() {
 		return this.waterLevel;
 	}
@@ -580,6 +589,10 @@ public class WorldLevelScene extends Scene3D {
 	public float getWaterHeight() {
 		return (this.getWaterLevel().getTransform().getTranslation().y() + this.getTerrain().getTransform().getTranslation().y())
 				/ this.getTerrain().getTransform().getScale().y();
+	}
+
+	public ParticleManager getParticleManager() {
+		return this.particleManager;
 	}
 
 }

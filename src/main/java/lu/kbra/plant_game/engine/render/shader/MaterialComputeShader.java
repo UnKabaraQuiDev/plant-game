@@ -1,8 +1,9 @@
 package lu.kbra.plant_game.engine.render.shader;
 
-import java.util.HashMap;
 import java.util.Map;
 
+import org.joml.Vector3i;
+import org.joml.Vector3ic;
 import org.joml.Vector4fc;
 
 import lu.kbra.plant_game.generated.ColorMaterial;
@@ -12,23 +13,28 @@ import lu.kbra.standalone.gameengine.graph.shader.part.ComputeShaderPart;
 
 public class MaterialComputeShader extends ComputeShader {
 
+	public static final Vector3ic LOCAL_SIZE = new Vector3i(16, 16, 1);
+
+	public static final String NUM_COLORS = "%NUM_COLORS%";
+	public static final String COLORS = "%COLORS%";
+
 	public static final String LIGHT_DIR = "lightDir";
 	public static final String LIGHT_COLOR = "lightColor";
 	public static final String AMBIENT_LIGHT = "ambientLight";
 
 	public MaterialComputeShader() {
-		super((ComputeShaderPart) AbstractShaderPart.load("classpath:/shaders/material.comp", getBuildingDeps()));
+		super((ComputeShaderPart) AbstractShaderPart.load("classpath:/shaders/material.comp", getBuildingDeps()), LOCAL_SIZE);
 	}
 
-	private static Map<String, Object> getBuildingDeps() {
-		final Map<String, Object> objs = new HashMap<>();
-		objs.put("%NUM_COLOR%", Integer.toString(ColorMaterial.values().length));
-		objs.put("%COLORS%", generateGlslArray(ColorMaterial.values()));
+	protected static Map<String, Object> getBuildingDeps() {
+		final Map<String, Object> objs = getBaseBuildingDeps(LOCAL_SIZE);
+		objs.put(NUM_COLORS, Integer.toString(ColorMaterial.values().length));
+		objs.put(COLORS, generateGlslArray(ColorMaterial.values()));
 		return objs;
 	}
 
 	public MaterialComputeShader(final ComputeShaderPart part) {
-		super(part);
+		super(part, LOCAL_SIZE);
 	}
 
 	@Override

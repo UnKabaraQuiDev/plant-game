@@ -22,6 +22,7 @@ import org.joml.Vector2fc;
 import org.joml.Vector2i;
 import org.joml.Vector2ic;
 import org.joml.Vector3f;
+import org.joml.Vector3i;
 import org.joml.Vector3ic;
 import org.joml.Vector4f;
 import org.joml.Vector4fc;
@@ -499,11 +500,10 @@ public class DeferredCompositor implements Cleanupable {
 
 		GL_W.glViewport(0, 0, resolution.x, resolution.y);
 
-		final int groupsX = (resolution.x + 15) / 16;
-		final int groupsY = (resolution.y + 15) / 16;
+		Vector3ic groups = this.materialComputeShader.getGlobalGroup(new Vector3i(resolution.x, resolution.y, 1));
 
-		assert groupsX != 0;
-		assert groupsY != 0;
+		assert groups.x() != 0;
+		assert groups.y() != 0;
 
 		// regular materials
 
@@ -511,11 +511,16 @@ public class DeferredCompositor implements Cleanupable {
 
 		this.setupMaterialInputs(this.materialComputeShader, worldScene, resolution, needRegen);
 
-		GL_W.glDispatchCompute(groupsX, groupsY, 1);
+		GL_W.glDispatchCompute(groups.x(), groups.y(), 1);
 
 		GL_W.glMemoryBarrier(GL_W.GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
 		// txt materials
+
+		groups = this.textureMaterialComputeShader.getGlobalGroup(new Vector3i(resolution.x, resolution.y, 1));
+
+		assert groups.x() != 0;
+		assert groups.y() != 0;
 
 		this.textureMaterialComputeShader.bind();
 
@@ -529,7 +534,7 @@ public class DeferredCompositor implements Cleanupable {
 		synchronized (worldScene.getEntitiesLock()) {
 
 			for (final Entity entity : worldScene.getEntities().values()) {
-				this.renderTexture(alreadyRendered, txt0UniformLoc, currentMaterialIdLoc, groupsX, groupsY, entity);
+				this.renderTexture(alreadyRendered, txt0UniformLoc, currentMaterialIdLoc, groups.x(), groups.y(), entity);
 			}
 
 		}

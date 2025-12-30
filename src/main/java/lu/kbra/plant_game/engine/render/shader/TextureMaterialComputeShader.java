@@ -16,8 +16,8 @@ public class TextureMaterialComputeShader extends MaterialComputeShader {
 	public void createUniforms() {
 		super.createUniforms();
 
-		createUniform(TXT0);
-		createUniform(CURRENT_MATERIAL_ID);
+		this.createUniform(TXT0);
+		this.createUniform(CURRENT_MATERIAL_ID);
 	}
 
 }

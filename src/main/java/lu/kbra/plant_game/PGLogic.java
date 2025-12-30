@@ -2,7 +2,9 @@ package lu.kbra.plant_game;
 
 import java.io.File;
 import java.util.Locale;
+import java.util.function.Consumer;
 
+import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,7 +14,8 @@ import lu.kbra.plant_game.engine.data.json.OrgJOMLModule;
 import lu.kbra.plant_game.engine.data.json.OrgJSONModule;
 import lu.kbra.plant_game.engine.data.locale.LocalizationService;
 import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory;
-import lu.kbra.plant_game.engine.entity.go.obj_inst.ParticleGameObject;
+import lu.kbra.plant_game.engine.entity.go.obj_inst.particles.GravityParticleGameObject;
+import lu.kbra.plant_game.engine.entity.go.obj_inst.particles.ParticleGameObject;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
@@ -20,9 +23,11 @@ import lu.kbra.plant_game.engine.scene.ui.menu.main.MainMenuUIScene;
 import lu.kbra.plant_game.engine.scene.ui.overlay.OverlayUIScene;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.plant_game.engine.window.input.MappingInputHandler;
+import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.standalone.gameengine.impl.GameLogic;
 import lu.kbra.standalone.gameengine.impl.future.WorkerDispatcher;
 import lu.kbra.standalone.gameengine.utils.gl.consts.Consts;
+import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 public class PGLogic extends GameLogic {
 
@@ -97,6 +102,21 @@ public class PGLogic extends GameLogic {
 //				.then(this.WORKERS, (Function<ParticleGameObject, ParticleGameObject>) obj -> this.parts = obj)
 //				.then(this.WORKERS, (Consumer<ParticleGameObject>) System.out::println)
 //				.push();
+
+		ParticleGameObject
+				.createGravity(this.WORKERS,
+						this.worldScene,
+						20,
+						ColorMaterial.RED,
+						new Vector3f(0, -1, 0),
+						new Transform3D(new Vector3f(0, 10, 0)),
+						i -> new Vector3f((float) i / (20 * 0.2f), 0, 0),
+						null,
+						null,
+						0.2f)
+				.then(this.WORKERS,
+						(Consumer<GravityParticleGameObject>) parts -> this.worldScene.getParticleManager().getActiveObjects().add(parts))
+				.push();
 	}
 
 	private final UpdateFrameState frameState = new UpdateFrameState();
@@ -132,14 +152,7 @@ public class PGLogic extends GameLogic {
 		this.worldScene.getCamera().getProjection().update(this.window.getWidth(), this.window.getHeight());
 		// uiScene.getCamera().getProjection().update(window.getWidth(), window.getHeight());
 
-//		if (this.parts != null) {
-//			this.parts.getInstanceEmitter().update(i -> {
-//				((Transform3D) i.getTransform())
-//						.translationSetY((float) Math.sin(TOTAL_TIME() + ((Transform3D) i.getTransform()).getTranslation().x()))
-//						.updateMatrix();
-//				i.getBuffers()[2] = (byte) ColorMaterial.byId((byte) i.getBuffers()[2]).next().getId();
-//			});
-//		}
+		this.worldScene.render(dTime);
 
 		this.compositor.render(this.engine, this.worldScene, this.uiScene);
 	}
