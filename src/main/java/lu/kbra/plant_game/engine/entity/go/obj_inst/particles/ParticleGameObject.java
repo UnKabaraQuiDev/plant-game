@@ -1,20 +1,18 @@
 package lu.kbra.plant_game.engine.entity.go.obj_inst.particles;
 
+import java.util.Arrays;
 import java.util.function.Function;
 
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.joml.Vector3ic;
 
-import lu.pcy113.pclib.pointer.prim.IntPointer;
-
-import lu.kbra.plant_game.PGLogic;
 import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory;
 import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory.InstanceData;
 import lu.kbra.plant_game.engine.entity.go.impl.InstanceGameObject;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.plant_game.generated.ColorMaterial;
-import lu.kbra.standalone.gameengine.cache.attrib.Vec3fAttribArray;
+import lu.kbra.standalone.gameengine.cache.attrib.Vec3fPaddedAttribArray;
 import lu.kbra.standalone.gameengine.geom.instance.InstanceEmitter;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
@@ -57,25 +55,21 @@ public class ParticleGameObject extends InstanceGameObject {
 			final Scene3D scene,
 			final int count,
 			final ColorMaterial color,
-			final Vector3f gravity,
 			final Transform3D transform,
-			final Function<Integer, Vector3f> position,
+			final boolean hasMinY,
+			final float minY,
+			final float density,
 			final Function<Integer, Vector3f> velocity,
 			final Function<Integer, Vector3f> acceleration,
-			final float scale) {
+			final Function<Integer, Vector3f> position,
+			final Function<Integer, Quaternionf> rotation,
+			final Function<Integer, Float> scale) {
 
-		final Vector3f[] posArr = new Vector3f[count];
 		final Vector3f[] accArr = new Vector3f[count];
 		final Vector3f[] velArr = new Vector3f[count];
 
-		final IntPointer velGlId = new IntPointer();
-		final IntPointer accGlId = new IntPointer();
-
 		return new TaskFuture<Void, Object>(workers, (Runnable) () -> {
 			for (int i = 0; i < count; i++) {
-				if (position != null) {
-					posArr[i] = position.apply(i);
-				}
 				if (velocity != null) {
 					velArr[i] = velocity.apply(i);
 				}
@@ -83,44 +77,31 @@ public class ParticleGameObject extends InstanceGameObject {
 					accArr[i] = acceleration.apply(i);
 				}
 			}
-		}).then(PGLogic.INSTANCE.RENDER_DISPATCHER, (Runnable) () -> {
-			Vec3fAttribArray data = new Vec3fAttribArray("velocity",
-					GravityParticleGameObject.VELOCITY_BUFFER_INDEX,
-					new Vector3f[count],
-					BufferType.ARRAY,
-					true,
-					0);
-			data.bind();
-			data.init();
-			data.unbind();
-			velGlId.set(data.getGlId());
-
-			data = new Vec3fAttribArray("acceleration",
-					GravityParticleGameObject.ACCELERATION_BUFFER_INDEX,
-					new Vector3f[count],
-					BufferType.ARRAY,
-					true,
-					0);
-			data.bind();
-			data.init();
-			data.unbind();
-			accGlId.set(data.getGlId());
-		})
-				.then(GameObjectFactory.create(GravityParticleGameObject.class,
-						scene,
-						new InstanceData(
-								i -> new Transform3D(posArr[i] == null ? new Vector3f() : posArr[i],
-										new Quaternionf(),
-										new Vector3f(scale)),
-								count),
-						transform,
-						color.getId(),
-						gravity))
-				.then(workers, (Function<GravityParticleGameObject, GravityParticleGameObject>) v -> {
-					v.setVelocityGlId(velGlId.get());
-					v.setAccelerationGlId(velGlId.get());
-					return v;
-				});
+		}).then(GameObjectFactory.create(GravityParticleGameObject.class,
+				scene,
+				new InstanceData(i -> new Transform3D(position.apply(i), rotation.apply(i), new Vector3f(scale.apply(i))),
+						count,
+						Arrays.asList(
+								() -> new Vec3fPaddedAttribArray("velocity",
+										GravityParticleGameObject.VELOCITY_BUFFER_INDEX,
+										velArr,
+										BufferType.ARRAY,
+										true,
+										1,
+										4),
+								() -> new Vec3fPaddedAttribArray("acceleration",
+										GravityParticleGameObject.ACCELERATION_BUFFER_INDEX,
+										accArr,
+										BufferType.ARRAY,
+										true,
+										1,
+										4))),
+				transform,
+				color.getId(),
+				true,
+				hasMinY,
+				minY,
+				density));
 	}
 
 }

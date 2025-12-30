@@ -16,6 +16,11 @@ public class GravityParticleComputeShader extends ComputeShader {
 	public static final String RESET_ACCELERATION = "resetAcceleration";
 	public static final String COUNT = "count";
 	public static final String D_TIME = "dTime";
+	public static final String ENFORCE_MIN_Y = "enforceMinY";
+	public static final String MIN_Y = "minY";
+	public static final String REBOUND_COEFFICIENT = "reboundCoefficient";
+	public static final String FRICTION_COEFFICIENT = "frictionCoefficient";
+	public static final String DENSITY = "density";
 
 	public GravityParticleComputeShader() {
 		super((ComputeShaderPart) AbstractShaderPart.load("classpath:/shaders/gravity_particle.comp", getBaseBuildingDeps(LOCAL_SIZE)),
@@ -31,6 +36,11 @@ public class GravityParticleComputeShader extends ComputeShader {
 		this.createUniform(RESET_ACCELERATION);
 		this.createUniform(COUNT);
 		this.createUniform(D_TIME);
+		this.createUniform(ENFORCE_MIN_Y);
+		this.createUniform(MIN_Y);
+		this.createUniform(REBOUND_COEFFICIENT);
+		this.createUniform(FRICTION_COEFFICIENT);
+		this.createUniform(DENSITY);
 	}
 
 }

@@ -3,6 +3,8 @@ package lu.kbra.plant_game.engine.scene.world.particles;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.joml.Vector3f;
+import org.joml.Vector3fc;
 import org.joml.Vector3i;
 import org.joml.Vector3ic;
 
@@ -25,6 +27,7 @@ public class ParticleManager {
 	protected int maxActiveParticleEmitters = 32;
 
 	protected Scene3D scene;
+	protected Vector3fc gravity = new Vector3f(0, -9.81f, 0);
 
 	protected final Object objectLocks = new Object();
 	protected Set<GravityParticleGameObject> activeObjects = new HashSet<>();
@@ -42,27 +45,33 @@ public class ParticleManager {
 		this.computeShader.bind();
 
 		this.computeShader.setUniform(GravityParticleComputeShader.D_TIME, dTime);
+		this.computeShader.setUniform(GravityParticleComputeShader.REBOUND_COEFFICIENT, 0.5f);
+		this.computeShader.setUniform(GravityParticleComputeShader.FRICTION_COEFFICIENT, 0.85f);
+		this.computeShader.setUniform(GravityParticleComputeShader.RESET_ACCELERATION, true);
+		this.computeShader.setUniform(GravityParticleComputeShader.ACCELERATION, this.gravity);
 
 		for (final GravityParticleGameObject object : this.activeObjects) {
 
 			final InstanceEmitter emitter = object.getInstanceEmitter();
 			final Mesh mesh = emitter.getParticleMesh();
 			final int count = emitter.getParticleCount();
+			final float minY = object.getMinY();
 
 			final Vector3ic groups = this.computeShader.getGlobalGroup(new Vector3i(count, 0, 0));
-
-			System.err.println(count + " " + groups.x());
-
 			assert groups.x() != 0;
 
 			this.computeShader.setUniformUnsigned(GravityParticleComputeShader.COUNT, count);
-			this.computeShader.setUniform(GravityParticleComputeShader.ACCELERATION, object.getAcceleration());
-			this.computeShader.setUniform(GravityParticleComputeShader.APPLY_ACCELERATION, object.isApplyAcceleration());
-			this.computeShader.setUniform(GravityParticleComputeShader.RESET_ACCELERATION, object.isResetAcceleration());
+			this.computeShader.setUniform(GravityParticleComputeShader.APPLY_ACCELERATION, object.isApplyGravity());
+			this.computeShader.setUniform(GravityParticleComputeShader.ENFORCE_MIN_Y, object.isEnforceMinY());
+			this.computeShader.setUniform(GravityParticleComputeShader.MIN_Y, object.getMinY());
+			this.computeShader.setUniform(GravityParticleComputeShader.DENSITY, object.getDensity());
 
-			GL_W.glBindBufferBase(BufferType.SHADER_STORAGE.getGlId(), 0, object.getVelocityGlId());
-			// mesh.getVbo().get(GravityParticleGameObject.ACCELERATION_BUFFER_INDEX)
-			GL_W.glBindBufferBase(BufferType.SHADER_STORAGE.getGlId(), 1, object.getAccelerationGlId());
+			GL_W.glBindBufferBase(BufferType.SHADER_STORAGE.getGlId(),
+					0,
+					mesh.getVbo().get(GravityParticleGameObject.ACCELERATION_BUFFER_INDEX));
+			GL_W.glBindBufferBase(BufferType.SHADER_STORAGE.getGlId(),
+					1,
+					mesh.getVbo().get(GravityParticleGameObject.VELOCITY_BUFFER_INDEX));
 			GL_W.glBindBufferBase(BufferType.SHADER_STORAGE.getGlId(), 2, emitter.getParticleTransforms().getGlId());
 
 			GL_W.glDispatchCompute(groups.x(), 1, 1);

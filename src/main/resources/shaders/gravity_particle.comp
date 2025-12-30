@@ -17,8 +17,15 @@ uniform uint count;
 uniform float dTime;
 uniform bool applyAcceleration;
 uniform bool resetAcceleration;
+uniform bool enforceMinY;
+uniform float minY;
+uniform float reboundCoefficient;
+uniform float frictionCoefficient;
+uniform float density;
 
 layout(local_size_x = %LOCAL_SIZE_X%) in;
+
+vec3 getScale(mat4 m);
 
 void main() {
     uint i = gl_GlobalInvocationID.x;
@@ -28,14 +35,36 @@ void main() {
     }
 
 	if (applyAcceleration) {
-	    acc[i].xyz += acceleration * dTime;
+		vec3 scale = getScale(model[i]);
+		float volume = scale.x * scale.y * scale.z;
+	
+	    acc[i].xyz += acceleration * volume * density;
 	}
 	
    	vel[i].xyz += acc[i].xyz * dTime;
    	
     model[i][3].xyz += vel[i].xyz * dTime; 
+    
+    if (enforceMinY && model[i][3].y <= minY) {
+    	model[i][3].y = minY;
+    	vel[i].y *= -reboundCoefficient;
+    	vel[i].xz *= frictionCoefficient;
+    
+    	/*if (vel[i].y <= 1e-6) {
+    		// stop sliding
+    		vel[i].xyz = vec3(0);
+    	}*/
+    }
 
 	if (resetAcceleration) {
 	    acc[i].xyz = vec3(0.0);
 	}
 }
+
+vec3 getScale(mat4 m) {
+    float sx = length(m[0].xyz);
+    float sy = length(m[1].xyz);
+    float sz = length(m[2].xyz);
+    return vec3(sx, sy, sz);
+}
+

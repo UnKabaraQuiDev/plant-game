@@ -46,7 +46,6 @@ import lu.kbra.plant_game.engine.util.exceptions.GameObjectNotFound;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.geom.instance.InstanceEmitter;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
-import org.joml.Vector3f;
 import org.joml.Vector3i;
 import org.joml.Vector3ic;
 
@@ -312,12 +311,7 @@ public class GameObjectRegistry {
 
 		/*                 GravityParticleGameObject                 */
 		final List<InternalConstructorFunction<GameObject>> listGravityParticleGameObject = new ArrayList<>();
-		listGravityParticleGameObject.add(new InternalConstructorFunction<>(new Class[] {String.class, InstanceEmitter.class, Vector3f.class}, (Object[] arr) -> (GameObject) new GravityParticleGameObject((String) arr[0], (InstanceEmitter) arr[1], (Vector3f) arr[2])));
-		listGravityParticleGameObject.add(new InternalConstructorFunction<>(new Class[] {String.class, InstanceEmitter.class, Transform3D.class, Vector3f.class}, (Object[] arr) -> (GameObject) new GravityParticleGameObject((String) arr[0], (InstanceEmitter) arr[1], (Transform3D) arr[2], (Vector3f) arr[3])));
-		listGravityParticleGameObject.add(new InternalConstructorFunction<>(new Class[] {String.class, InstanceEmitter.class, short.class, Vector3f.class}, (Object[] arr) -> (GameObject) new GravityParticleGameObject((String) arr[0], (InstanceEmitter) arr[1], (short) arr[2], (Vector3f) arr[3])));
-		listGravityParticleGameObject.add(new InternalConstructorFunction<>(new Class[] {String.class, InstanceEmitter.class, Transform3D.class, short.class, Vector3f.class}, (Object[] arr) -> (GameObject) new GravityParticleGameObject((String) arr[0], (InstanceEmitter) arr[1], (Transform3D) arr[2], (short) arr[3], (Vector3f) arr[4])));
-		listGravityParticleGameObject.add(new InternalConstructorFunction<>(new Class[] {String.class, InstanceEmitter.class, Transform3D.class, Vector3ic.class, Vector3f.class}, (Object[] arr) -> (GameObject) new GravityParticleGameObject((String) arr[0], (InstanceEmitter) arr[1], (Transform3D) arr[2], (Vector3ic) arr[3], (Vector3f) arr[4])));
-		listGravityParticleGameObject.add(new InternalConstructorFunction<>(new Class[] {String.class, InstanceEmitter.class, Transform3D.class, Vector3ic.class, short.class, Vector3f.class}, (Object[] arr) -> (GameObject) new GravityParticleGameObject((String) arr[0], (InstanceEmitter) arr[1], (Transform3D) arr[2], (Vector3ic) arr[3], (short) arr[4], (Vector3f) arr[5])));
+		listGravityParticleGameObject.add(new InternalConstructorFunction<>(new Class[] {String.class, InstanceEmitter.class, Transform3D.class, short.class, boolean.class, boolean.class, float.class, float.class}, (Object[] arr) -> (GameObject) new GravityParticleGameObject((String) arr[0], (InstanceEmitter) arr[1], (Transform3D) arr[2], (short) arr[3], (boolean) arr[4], (boolean) arr[5], (float) arr[6], (float) arr[7])));
 		GAME_OBJECT_CONSTRUCTORS.put(GravityParticleGameObject.class, listGravityParticleGameObject);
 
 	}

@@ -151,8 +151,7 @@ public class WorldLevelScene extends Scene3D {
 								ColorMaterial.CYAN.getId()));
 //						terrainEntity.getTerrainHighlightObject().setActive(false);
 						terrainEntity.getTransform()
-								.getTranslation()
-								.set(-meshes.getFirst().getWidth() / 2, 0, -meshes.getFirst().getLength() / 2);
+								.translationSet(-meshes.getFirst().getWidth() / 2, 0, -meshes.getFirst().getLength() / 2);
 						terrainEntity.getTransform().updateMatrix();
 //						terrainEntity.setActive(false);
 						this.setTerrain(terrainEntity);
@@ -212,7 +211,7 @@ public class WorldLevelScene extends Scene3D {
 							}
 						}
 
-						System.err.println("created pipe");
+//						System.err.println("created pipe");
 					}); // .push();
 
 					new TaskFuture<>(renderDispatcher, (Supplier<QuadMesh>) () -> {
