@@ -1,6 +1,9 @@
 // @formatter:off
 package lu.kbra.plant_game.generated;
 
+import java.lang.Integer;
+import java.util.HashMap;
+import java.util.Map;
 import org.joml.Vector4f;
 import org.joml.Vector4fc;
 
@@ -85,6 +88,14 @@ public enum ColorMaterial {
 
 	DARK_ORANGE(0.69803923f, 0.54901963f, 0.0f, 1f);
 
+	private static final Map<Integer, ColorMaterial> COLORS_BY_ID = new HashMap<>();
+
+	static {
+		for (ColorMaterial cm : ColorMaterial.values()) {
+			COLORS_BY_ID.put((int) cm.getId(), cm);
+		}
+	}
+
 	private final float r;
 
 	private final float g;
@@ -101,6 +112,20 @@ public enum ColorMaterial {
 		this.b = b;
 		this.a = a;
 		this.color = new Vector4f(r, g, b, a);
+	}
+
+	public static ColorMaterial byId(int id) {
+		return COLORS_BY_ID.get(id);
+	}
+
+	public ColorMaterial next() {
+		int nextId = getId() % ColorMaterial.values().length + 1;
+		return byId(nextId);
+	}
+
+	public ColorMaterial previous() {
+		int prevId = (getId() - 2 + ColorMaterial.values().length) % ColorMaterial.values().length + 1;
+		return byId(prevId);
 	}
 
 	public static ColorMaterial valueOf(float r, float g, float b, float a) {

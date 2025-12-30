@@ -1,8 +1,12 @@
 package lu.kbra.plant_game;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Locale;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
+import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,7 +15,10 @@ import lu.kbra.plant_game.engine.UpdateFrameState;
 import lu.kbra.plant_game.engine.data.json.OrgJOMLModule;
 import lu.kbra.plant_game.engine.data.json.OrgJSONModule;
 import lu.kbra.plant_game.engine.data.locale.LocalizationService;
+import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory;
+import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory.InstanceData;
+import lu.kbra.plant_game.engine.entity.go.obj_inst.ParticleGameObject;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
@@ -19,9 +26,14 @@ import lu.kbra.plant_game.engine.scene.ui.menu.main.MainMenuUIScene;
 import lu.kbra.plant_game.engine.scene.ui.overlay.OverlayUIScene;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.plant_game.engine.window.input.MappingInputHandler;
+import lu.kbra.plant_game.generated.ColorMaterial;
+import lu.kbra.standalone.gameengine.cache.attrib.UByteAttribArray;
+import lu.kbra.standalone.gameengine.cache.attrib.Vec3fAttribArray;
 import lu.kbra.standalone.gameengine.impl.GameLogic;
 import lu.kbra.standalone.gameengine.impl.future.WorkerDispatcher;
+import lu.kbra.standalone.gameengine.utils.gl.consts.BufferType;
 import lu.kbra.standalone.gameengine.utils.gl.consts.Consts;
+import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 public class PGLogic extends GameLogic {
 
@@ -47,6 +59,8 @@ public class PGLogic extends GameLogic {
 	public PGLogic() {
 		INSTANCE = this;
 	}
+
+	private ParticleGameObject parts;
 
 	@Override
 	public void init() throws Exception {
@@ -74,6 +88,26 @@ public class PGLogic extends GameLogic {
 
 		// this.uiScene = null;
 		this.uiScene = this.overlayUIScene;
+
+		final byte[] colors = new byte[20];
+		for (int i = 0; i < colors.length; i++) {
+			colors[i] = (byte) ColorMaterial.byId(i % ColorMaterial.values().length + 1).getId();
+		}
+		GameObjectFactory
+				.create(ParticleGameObject.class,
+						this.worldScene,
+						new InstanceData(i -> new Transform3D(new Vector3f(i, 0, 0)).scaleMul(0.25f).update(), 20, Arrays
+								.asList(() -> new Vec3fAttribArray("velocity", ParticleGameObject.VELOCITY_BUFFER_INDEX, 1,
+										new Vector3f[20], BufferType.ARRAY, false),
+										() -> new Vec3fAttribArray("acceleration", ParticleGameObject.ACCELERATION_BUFFER_INDEX, 1,
+												new Vector3f[20], BufferType.ARRAY, false),
+										() -> new UByteAttribArray("color", GameObject.MESH_ATTRIB_MATERIAL_ID_ID, 1, colors, false, 1))),
+						new Transform3D(new Vector3f(0, 10, 0))/*
+																 * , ColorMaterial.PINK.getId()
+																 */)
+				.then(this.WORKERS, (Function<ParticleGameObject, ParticleGameObject>) obj -> this.parts = obj)
+				.then(this.WORKERS, (Consumer<ParticleGameObject>) System.out::println)
+				.push();
 	}
 
 	private final UpdateFrameState frameState = new UpdateFrameState();
@@ -108,6 +142,15 @@ public class PGLogic extends GameLogic {
 	public void render(final float dTime) {
 		this.worldScene.getCamera().getProjection().update(this.window.getWidth(), this.window.getHeight());
 		// uiScene.getCamera().getProjection().update(window.getWidth(), window.getHeight());
+
+		if (this.parts != null) {
+			this.parts.getInstanceEmitter().update(i -> {
+				((Transform3D) i.getTransform())
+						.translationSetY((float) Math.sin(TOTAL_TIME() + ((Transform3D) i.getTransform()).getTranslation().x()))
+						.updateMatrix();
+				i.getBuffers()[2] = (byte) ColorMaterial.byId((byte) i.getBuffers()[2]).next().getId();
+			});
+		}
 
 		this.compositor.render(this.engine, this.worldScene, this.uiScene);
 	}

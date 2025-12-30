@@ -14,10 +14,15 @@ import org.joml.Vector4fc;
 import org.junit.Test;
 
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+
+import lu.kbra.plant_game.generated.ColorMaterial;
 
 public class ColorMaterialGenMain extends GenMainConsts {
 
@@ -71,6 +76,55 @@ public class ColorMaterialGenMain extends GenMainConsts {
 
 	private TypeSpec buildColorEnum(final String name, final Map<String, Color> colors) {
 		final TypeSpec.Builder builder = TypeSpec.enumBuilder(name).addModifiers(Modifier.PUBLIC);
+
+		final FieldSpec colorsById = FieldSpec
+				.builder(
+						ParameterizedTypeName
+								.get(ClassName.get(Map.class), ClassName.get(Integer.class), ClassName.get(ColorMaterial.class)),
+						"COLORS_BY_ID",
+						Modifier.PRIVATE,
+						Modifier.STATIC,
+						Modifier.FINAL)
+				.initializer("new $T<>()", HashMap.class)
+				.build();
+		builder.addField(colorsById);
+
+		final CodeBlock staticBlock = CodeBlock
+				.builder()
+				.beginControlFlow("for ($T cm : $T.values())", ColorMaterial.class, ColorMaterial.class)
+				.addStatement("COLORS_BY_ID.put((int) cm.getId(), cm)")
+				.endControlFlow()
+				.build();
+		builder.addStaticBlock(staticBlock);
+
+		final MethodSpec byId = MethodSpec
+				.methodBuilder("byId")
+				.addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+				.returns(ColorMaterial.class)
+				.addParameter(int.class, "id")
+				.addStatement("return COLORS_BY_ID.get(id)")
+				.build();
+		builder.addMethod(byId);
+
+		final MethodSpec next = MethodSpec
+				.methodBuilder("next")
+				.addModifiers(Modifier.PUBLIC)
+				.returns(ColorMaterial.class)
+				.addStatement("int nextId = getId() % $T.values().length + 1", ColorMaterial.class)
+				.addStatement("return byId(nextId)")
+				.build();
+		builder.addMethod(next);
+
+		final MethodSpec previous = MethodSpec
+				.methodBuilder("previous")
+				.addModifiers(Modifier.PUBLIC)
+				.returns(ColorMaterial.class)
+				.addStatement("int prevId = (getId() - 2 + $T.values().length) % $T.values().length + 1",
+						ColorMaterial.class,
+						ColorMaterial.class)
+				.addStatement("return byId(prevId)")
+				.build();
+		builder.addMethod(previous);
 
 		// store the RGBA as fields
 		builder.addField(float.class, "r", Modifier.PRIVATE, Modifier.FINAL);

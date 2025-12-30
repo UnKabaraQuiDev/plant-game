@@ -2,8 +2,10 @@ package lu.kbra.plant_game.engine.entity.go.factory;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import lu.pcy113.pclib.PCUtils;
 import lu.pcy113.pclib.impl.ThrowingFunction;
@@ -25,6 +27,7 @@ import lu.kbra.plant_game.engine.util.annotation.BufferSize;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.plant_game.generated.GameObjectRegistry;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
+import lu.kbra.standalone.gameengine.cache.attrib.AttribArray;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.geom.instance.InstanceEmitter;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
@@ -41,6 +44,7 @@ public class GameObjectFactory {
 		protected Function<Integer, Transform> transforms;
 		protected int bufferSize;
 		protected String name;
+		protected List<Supplier<AttribArray>> attribs;
 
 		public InstanceData(final Function<Integer, Transform> transforms, final int bufferSize) {
 			this.transforms = transforms;
@@ -51,6 +55,21 @@ public class GameObjectFactory {
 			this.transforms = transforms;
 			this.bufferSize = bufferSize;
 			this.name = name;
+		}
+
+		public InstanceData(final Function<Integer, Transform> transforms, final int bufferSize, final String name,
+				final List<Supplier<AttribArray>> attribs) {
+			this.transforms = transforms;
+			this.bufferSize = bufferSize;
+			this.name = name;
+			this.attribs = attribs;
+		}
+
+		public InstanceData(final Function<Integer, Transform> transforms, final int bufferSize,
+				final List<Supplier<AttribArray>> attribs) {
+			this.transforms = transforms;
+			this.bufferSize = bufferSize;
+			this.attribs = attribs;
 		}
 
 		public Function<Integer, Transform> getTransforms() {
@@ -77,10 +96,18 @@ public class GameObjectFactory {
 			this.name = name;
 		}
 
+		public void setAttribs(final List<Supplier<AttribArray>> attribs) {
+			this.attribs = attribs;
+		}
+
+		public List<Supplier<AttribArray>> getAttribs() {
+			return this.attribs;
+		}
+
 	}
 
 	public static final int DEFAULT_BUFFER_SIZE = 12;
-	public static final InstanceData DEFAULT_INSTANCE_DATA = new InstanceData(i -> new Transform3D(), DEFAULT_BUFFER_SIZE, null);
+	public static final InstanceData DEFAULT_INSTANCE_DATA = new InstanceData(i -> new Transform3D(), DEFAULT_BUFFER_SIZE);
 
 	public static GameObjectFactory INSTANCE;
 

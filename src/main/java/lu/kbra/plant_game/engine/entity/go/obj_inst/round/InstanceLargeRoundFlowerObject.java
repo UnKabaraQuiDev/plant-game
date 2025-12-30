@@ -17,12 +17,10 @@ public class InstanceLargeRoundFlowerObject extends InstanceSwayGameObject {
 			final float speedRatio,
 			final float scaleRatio) {
 		super(str, instanceEmitter, deformRatio, speedRatio, scaleRatio);
-		// TODO Auto-generated constructor stub
 	}
 
 	public InstanceLargeRoundFlowerObject(final String str, final SwayInstanceEmitter instanceEmitter, final short materialId) {
 		super(str, instanceEmitter, materialId);
-		// TODO Auto-generated constructor stub
 	}
 
 	public InstanceLargeRoundFlowerObject(
@@ -31,7 +29,6 @@ public class InstanceLargeRoundFlowerObject extends InstanceSwayGameObject {
 			final Transform3D transform,
 			final short materialId) {
 		super(str, instanceEmitter, transform, materialId);
-		// TODO Auto-generated constructor stub
 	}
 
 	public InstanceLargeRoundFlowerObject(
@@ -43,7 +40,6 @@ public class InstanceLargeRoundFlowerObject extends InstanceSwayGameObject {
 			final float speedRatio,
 			final float scaleRatio) {
 		super(str, instanceEmitter, transform, objectId, deformRatio, speedRatio, scaleRatio);
-		// TODO Auto-generated constructor stub
 	}
 
 	public InstanceLargeRoundFlowerObject(
@@ -56,17 +52,14 @@ public class InstanceLargeRoundFlowerObject extends InstanceSwayGameObject {
 			final float speedRatio,
 			final float scaleRatio) {
 		super(str, instanceEmitter, transform, objectId, materialId, deformRatio, speedRatio, scaleRatio);
-		// TODO Auto-generated constructor stub
 	}
 
 	public InstanceLargeRoundFlowerObject(final String str, final SwayInstanceEmitter instanceEmitter, final Transform3D transform) {
 		super(str, instanceEmitter, transform);
-		// TODO Auto-generated constructor stub
 	}
 
 	public InstanceLargeRoundFlowerObject(final String str, final SwayInstanceEmitter instanceEmitter) {
 		super(str, instanceEmitter);
-		// TODO Auto-generated constructor stub
 	}
 
 }

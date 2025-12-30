@@ -11,22 +11,23 @@ public class InstanceGameObject extends GameObject {
 
 	protected InstanceEmitterComponent instanceEmitterComponent;
 
-	public InstanceGameObject(
-			final String str,
-			final InstanceEmitter instanceEmitter,
-			final Transform3D transform,
-			final Vector3ic objectId,
-			final short materialId) {
+	public InstanceGameObject(final String str, final InstanceEmitter instanceEmitter, final Transform3D transform,
+			final Vector3ic objectId, final short materialId) {
 		super(str, null, transform, objectId, materialId);
 		if (instanceEmitter != null) {
 			super.addComponent(this.instanceEmitterComponent = new InstanceEmitterComponent(instanceEmitter));
 		}
 	}
 
-	public InstanceGameObject(
-			final String str,
-			final InstanceEmitter instanceEmitter,
-			final Transform3D transform,
+	public InstanceGameObject(final String str, final InstanceEmitter instanceEmitter, final Transform3D transform,
+			final short materialId) {
+		super(str, null, transform, getRandomObjectId(), materialId);
+		if (instanceEmitter != null) {
+			super.addComponent(this.instanceEmitterComponent = new InstanceEmitterComponent(instanceEmitter));
+		}
+	}
+
+	public InstanceGameObject(final String str, final InstanceEmitter instanceEmitter, final Transform3D transform,
 			final Vector3ic objectId) {
 		super(str, null, transform, objectId, (short) -1);
 		if (instanceEmitter != null) {

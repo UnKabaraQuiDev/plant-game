@@ -27,6 +27,7 @@ import lu.kbra.plant_game.engine.entity.go.obj.water.WaterSprinklerObject5x5;
 import lu.kbra.plant_game.engine.entity.go.obj.water.WaterSprinklerObject7x7;
 import lu.kbra.plant_game.engine.entity.go.obj.water.WaterTowerObject;
 import lu.kbra.plant_game.engine.entity.go.obj.water.WaterWheelObject;
+import lu.kbra.plant_game.engine.entity.go.obj_inst.ParticleGameObject;
 import lu.kbra.plant_game.engine.entity.go.obj_inst.champi.InstanceLargeChampiFlowerObject;
 import lu.kbra.plant_game.engine.entity.go.obj_inst.champi.InstanceMediumChampiFlowerObject;
 import lu.kbra.plant_game.engine.entity.go.obj_inst.champi.InstanceSmallChampiFlowerObject;
@@ -42,8 +43,10 @@ import lu.kbra.plant_game.engine.util.InternalConstructorFunction;
 import lu.kbra.plant_game.engine.util.exceptions.GameObjectConstructorNotFound;
 import lu.kbra.plant_game.engine.util.exceptions.GameObjectNotFound;
 import lu.kbra.standalone.gameengine.geom.Mesh;
+import lu.kbra.standalone.gameengine.geom.instance.InstanceEmitter;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 import org.joml.Vector3i;
+import org.joml.Vector3ic;
 
 public class GameObjectRegistry {
 	private static final Map<Class<? extends GameObject>, List<InternalConstructorFunction<GameObject>>> GAME_OBJECT_CONSTRUCTORS;
@@ -64,6 +67,16 @@ public class GameObjectRegistry {
 		listSolarPanelObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class, Transform3D.class}, (Object[] arr) -> (GameObject) new SolarPanelObject((String) arr[0], (Mesh) arr[1], (Transform3D) arr[2])));
 		listSolarPanelObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class, Transform3D.class, Vector3i.class}, (Object[] arr) -> (GameObject) new SolarPanelObject((String) arr[0], (Mesh) arr[1], (Transform3D) arr[2], (Vector3i) arr[3])));
 		GAME_OBJECT_CONSTRUCTORS.put(SolarPanelObject.class, listSolarPanelObject);
+
+		/*                 ParticleGameObject                 */
+		final List<InternalConstructorFunction<GameObject>> listParticleGameObject = new ArrayList<>();
+		listParticleGameObject.add(new InternalConstructorFunction<>(new Class[] {String.class, InstanceEmitter.class}, (Object[] arr) -> (GameObject) new ParticleGameObject((String) arr[0], (InstanceEmitter) arr[1])));
+		listParticleGameObject.add(new InternalConstructorFunction<>(new Class[] {String.class, InstanceEmitter.class, Transform3D.class}, (Object[] arr) -> (GameObject) new ParticleGameObject((String) arr[0], (InstanceEmitter) arr[1], (Transform3D) arr[2])));
+		listParticleGameObject.add(new InternalConstructorFunction<>(new Class[] {String.class, InstanceEmitter.class, short.class}, (Object[] arr) -> (GameObject) new ParticleGameObject((String) arr[0], (InstanceEmitter) arr[1], (short) arr[2])));
+		listParticleGameObject.add(new InternalConstructorFunction<>(new Class[] {String.class, InstanceEmitter.class, Transform3D.class, short.class}, (Object[] arr) -> (GameObject) new ParticleGameObject((String) arr[0], (InstanceEmitter) arr[1], (Transform3D) arr[2], (short) arr[3])));
+		listParticleGameObject.add(new InternalConstructorFunction<>(new Class[] {String.class, InstanceEmitter.class, Transform3D.class, Vector3ic.class}, (Object[] arr) -> (GameObject) new ParticleGameObject((String) arr[0], (InstanceEmitter) arr[1], (Transform3D) arr[2], (Vector3ic) arr[3])));
+		listParticleGameObject.add(new InternalConstructorFunction<>(new Class[] {String.class, InstanceEmitter.class, Transform3D.class, Vector3ic.class, short.class}, (Object[] arr) -> (GameObject) new ParticleGameObject((String) arr[0], (InstanceEmitter) arr[1], (Transform3D) arr[2], (Vector3ic) arr[3], (short) arr[4])));
+		GAME_OBJECT_CONSTRUCTORS.put(ParticleGameObject.class, listParticleGameObject);
 
 		/*                 SmallGrassObject                 */
 		final List<InternalConstructorFunction<GameObject>> listSmallGrassObject = new ArrayList<>();
