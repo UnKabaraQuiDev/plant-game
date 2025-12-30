@@ -28,7 +28,7 @@ import lu.kbra.plant_game.engine.util.annotation.BufferSize;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.plant_game.generated.GameObjectRegistry;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
-import lu.kbra.standalone.gameengine.cache.attrib.AttribArray;
+import lu.kbra.standalone.gameengine.cache.attrib.impl.AttribArray;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.geom.instance.InstanceEmitter;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;

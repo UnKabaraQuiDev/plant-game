@@ -17,7 +17,7 @@ import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory.InstanceDat
 import lu.kbra.plant_game.engine.mesh.loader.StaticMeshLoader;
 import lu.kbra.plant_game.engine.mesh.loader.StaticMeshLoader.GenericMeshData;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
-import lu.kbra.standalone.gameengine.cache.attrib.AttribArray;
+import lu.kbra.standalone.gameengine.cache.attrib.impl.AttribArray;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.geom.instance.InstanceEmitter;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
@@ -72,10 +72,9 @@ public class StaticInstanceLoader {
 			}
 		}
 
-		return tf
-				.then(render,
-						(ThrowingFunction<Mesh, InstanceEmitter, Throwable>) (
-								final Mesh mesh) -> createInstance(cache, name, mesh, bufferSize, transforms, attribs));
+		return tf.then(render,
+				(ThrowingFunction<Mesh, InstanceEmitter, Throwable>) (
+						final Mesh mesh) -> createInstance(cache, name, mesh, bufferSize, transforms, attribs));
 	}
 
 	static InstanceEmitter createInstance(
@@ -85,8 +84,10 @@ public class StaticInstanceLoader {
 			final int bufferSize,
 			final Function<Integer, Transform> transform,
 			final List<AttribArray> attribs) {
-		final InstanceEmitter te = new InstanceEmitter(name, mesh,
-				PCUtils.clamp(MIN_INSTANCE_BUFFER_LENGTH, MAX_INSTANCE_BUFFER_LENGTH, bufferSize), transform,
+		final InstanceEmitter te = new InstanceEmitter(name,
+				mesh,
+				PCUtils.clamp(MIN_INSTANCE_BUFFER_LENGTH, MAX_INSTANCE_BUFFER_LENGTH, bufferSize),
+				transform,
 				attribs.toArray(AttribArray[]::new));
 		cache.addInstanceEmitter(te);
 		releaseLock(name);

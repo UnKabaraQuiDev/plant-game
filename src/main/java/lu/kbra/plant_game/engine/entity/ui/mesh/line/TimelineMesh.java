@@ -10,9 +10,9 @@ import lu.kbra.plant_game.engine.entity.go.mesh.path.LineLoadedMesh;
 import lu.kbra.plant_game.engine.mesh.TexturedMesh;
 import lu.kbra.plant_game.engine.mesh.TintOwner;
 import lu.kbra.plant_game.generated.ColorMaterial;
-import lu.kbra.standalone.gameengine.cache.attrib.AttribArray;
 import lu.kbra.standalone.gameengine.cache.attrib.UIntAttribArray;
 import lu.kbra.standalone.gameengine.cache.attrib.Vec3fAttribArray;
+import lu.kbra.standalone.gameengine.cache.attrib.impl.AttribArray;
 import lu.kbra.standalone.gameengine.graph.texture.SingleTexture;
 
 public class TimelineMesh extends LineLoadedMesh implements TexturedMesh, TintOwner {

@@ -3,9 +3,9 @@ package lu.kbra.plant_game.engine.entity.go.mesh.terrain;
 import org.joml.Vector2ic;
 
 import lu.kbra.plant_game.generated.ColorMaterial;
-import lu.kbra.standalone.gameengine.cache.attrib.AttribArray;
 import lu.kbra.standalone.gameengine.cache.attrib.UIntAttribArray;
 import lu.kbra.standalone.gameengine.cache.attrib.Vec3fAttribArray;
+import lu.kbra.standalone.gameengine.cache.attrib.impl.AttribArray;
 import lu.kbra.standalone.gameengine.geom.LoadedMesh;
 
 public class TerrainMesh extends LoadedMesh {

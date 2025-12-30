@@ -94,17 +94,24 @@ public class MainMenuUIScene extends UIScene {
 	protected OffsetUIObjectGroup mainMenuGroup = new OffsetUIObjectGroup("main", new Transform3D(new Vector3f(this.restPositions[MAIN])));
 
 	protected LayoutOffsetUIObjectGroup mainLeftMenuGroup = new LayoutOffsetUIObjectGroup("main.left",
-			new MarginFlowLayout(true, 0.02f, 0.3f, 0, 0.5f, 0.5f, MarginFlowLayout.LEFT), this.mainMenuGroup);
-	protected LayoutOffsetUIObjectGroup mainButtonsMenuGroup = new LayoutOffsetUIObjectGroup("main.buttons", new FlowLayout(true, 0.02f),
+			new MarginFlowLayout(true, 0.02f, 0.3f, 0, 0.5f, 0.5f, MarginFlowLayout.LEFT),
+			this.mainMenuGroup);
+	protected LayoutOffsetUIObjectGroup mainButtonsMenuGroup = new LayoutOffsetUIObjectGroup("main.buttons",
+			new FlowLayout(true, 0.02f),
 			this.mainLeftMenuGroup);
 
-	protected ScrollContainerUIObjectGroup optionsMenuGroup = new ScrollContainerUIObjectGroup("options", this.restPositions[OPTIONS],
-			Direction.SOUTH, 0.05f, new FlowLayout(true, 0.0f));
+	protected ScrollContainerUIObjectGroup optionsMenuGroup = new ScrollContainerUIObjectGroup("options",
+			this.restPositions[OPTIONS],
+			Direction.SOUTH,
+			0.05f,
+			new FlowLayout(true, 0.0f));
 	protected LayoutScrollDrivenUIObjectGroup optionsEntriesMenuGroup = (LayoutScrollDrivenUIObjectGroup) this.optionsMenuGroup
 			.getScrollContent();
 
-	protected ScrollContainerUIObjectGroup playMenuGroup = new ScrollContainerUIObjectGroup("play", this.restPositions[PLAY],
-			Direction.EAST, 0.00f);
+	protected ScrollContainerUIObjectGroup playMenuGroup = new ScrollContainerUIObjectGroup("play",
+			this.restPositions[PLAY],
+			Direction.EAST,
+			0.00f);
 	protected ScrollDrivenUIObjectGroup playContentMenuGroup = this.playMenuGroup.getScrollContent();
 
 	protected OffsetUIObjectGroup[] groups = new OffsetUIObjectGroup[] {
@@ -181,10 +188,11 @@ public class MainMenuUIScene extends UIScene {
 				final Vector3f[] pos = pair.getKey();
 				final int[] indices = pair.getValue();
 
-				final TimelineMesh mesh = new TimelineMesh("timeline@" + System.identityHashCode(this), 13,
+				final TimelineMesh mesh = new TimelineMesh("timeline@" + System.identityHashCode(this),
+						13,
 						(SingleTexture) this.uiCache.getTexture(StaticFlatMeshLoader.TEXTURE_NAME),
-						new Vec3fAttribArray(Mesh.ATTRIB_VERTICES_NAME, Mesh.ATTRIB_VERTICES_ID, 1, pos),
-						new UIntAttribArray(Mesh.ATTRIB_INDICES_NAME, Mesh.ATTRIB_INDICES_ID, 1, indices, BufferType.ELEMENT_ARRAY));
+						new Vec3fAttribArray(Mesh.ATTRIB_VERTICES_NAME, Mesh.ATTRIB_VERTICES_ID, pos),
+						new UIntAttribArray(Mesh.ATTRIB_INDICES_NAME, Mesh.ATTRIB_INDICES_ID, indices, BufferType.ELEMENT_ARRAY));
 				mesh.setLineWidth(100);
 				mesh.setEffectiveLength(list.size() * 2 - 2);
 				this.uiCache.addMesh(mesh);
@@ -194,8 +202,7 @@ public class MainMenuUIScene extends UIScene {
 			}).then(workers, (Consumer<TimelineMesh>) (final TimelineMesh mesh) -> {
 				this.playContentMenuGroup.add(new MeshUIObject("meshName", mesh, new Transform3D(new Vector3f(0, -0.1f, 0))));
 				this.playContentMenuGroup.recomputeBounds();
-				this.playContentMenuGroup
-						.getTransform()
+				this.playContentMenuGroup.getTransform()
 						.getTranslation().z = (float) -this.playContentMenuGroup.getBounds().getBounds2D().getCenterY();
 				this.playContentMenuGroup.getTransform().updateMatrix();
 			}).push();
@@ -203,12 +210,12 @@ public class MainMenuUIScene extends UIScene {
 
 		final float startPosX = -1;
 		for (int i = 0; i < count; i++) {
-			UIObjectFactory
-					.create(LevelButtonUIObject.class,
-							btns,
-							new Transform3D(new Vector3f(startPosX + 0.6f * i, 0, (0.6f * i) % (2 - 0.5f) - 1),
-									new Quaternionf().rotateY((float) Math.random()), new Vector3f(0.5f)),
-							"lvl" + i)
+			UIObjectFactory.create(LevelButtonUIObject.class,
+					btns,
+					new Transform3D(new Vector3f(startPosX + 0.6f * i, 0, (0.6f * i) % (2 - 0.5f) - 1),
+							new Quaternionf().rotateY((float) Math.random()),
+							new Vector3f(0.5f)),
+					"lvl" + i)
 //					.then(workers, (Function<LevelButtonUIObject, LevelButtonUIObject>) b -> {
 //						b.setActive(false);
 //						return b;
@@ -247,8 +254,10 @@ public class MainMenuUIScene extends UIScene {
 		uiSmallLeftTextData.setName(null);
 
 		/* volume */
-		final ListTriggerLatch<UIObject> optionsVolumeGroupLatch = new TextSliderListTriggerLatch<>(workers, optionsVolumeGroup,
-				VolumeTextUIObject.class, VolumeSliderUIObject.class);
+		final ListTriggerLatch<UIObject> optionsVolumeGroupLatch = new TextSliderListTriggerLatch<>(workers,
+				optionsVolumeGroup,
+				VolumeTextUIObject.class,
+				VolumeSliderUIObject.class);
 
 		uiSmallLeftTextData.setTextAlignment(TextAlignment.TEXT_LEFT);
 		UIObjectFactory.create(VolumeTextUIObject.class, optionsVolumeGroupLatch, uiSmallLeftTextData, new Transform3DPivot()).push();
@@ -298,13 +307,11 @@ public class MainMenuUIScene extends UIScene {
 
 		/** options */
 
-		UIObjectFactory
-				.create(GradientQuadUIObject.class,
-						this.optionsMenuGroup,
-						new Transform3D(new Vector3f(0, GRADIENT_DEPTH, 0), new Quaternionf().rotateY((float) Math.PI),
-								new Vector3f(2.5f, 1, 2)),
-						GradientDirection.UV_X,
-						GameEngineUtils.hexToColorToVec4f("317dac8c"))
+		UIObjectFactory.create(GradientQuadUIObject.class,
+				this.optionsMenuGroup,
+				new Transform3D(new Vector3f(0, GRADIENT_DEPTH, 0), new Quaternionf().rotateY((float) Math.PI), new Vector3f(2.5f, 1, 2)),
+				GradientDirection.UV_X,
+				GameEngineUtils.hexToColorToVec4f("317dac8c"))
 				.then(workers, (Consumer<GradientQuadUIObject>) (final GradientQuadUIObject t) -> {
 					this.blueGradient = t;
 				})
@@ -324,15 +331,13 @@ public class MainMenuUIScene extends UIScene {
 	private void updateKeys() {
 		final MappingInputHandler inputHandler = PGLogic.INSTANCE.getInputHandler();
 
-		this.optionsEntriesMenuGroup
-				.getSubEntities()
+		this.optionsEntriesMenuGroup.getSubEntities()
 				.parallelStream()
 				.filter(OptionKeyUIObject.class::isInstance)
 				.map(e -> (OptionKeyUIObject) e)
 				.forEach(e -> e.setKeyValue(inputHandler.getInputName(e.getKeyOption().getPhysicalKey())));
 
-		final OptionKeyUIObject example = this.optionsEntriesMenuGroup
-				.getSubEntities()
+		final OptionKeyUIObject example = this.optionsEntriesMenuGroup.getSubEntities()
 				.parallelStream()
 				.filter(OptionKeyUIObject.class::isInstance)
 				.map(e -> (OptionKeyUIObject) e)
@@ -340,17 +345,15 @@ public class MainMenuUIScene extends UIScene {
 				.orElseThrow(IllegalStateException::new);
 
 		PGLogic.INSTANCE.RENDER_DISPATCHER.post(() -> {
-			this.optionsEntriesMenuGroup
-					.getSubEntities()
+			this.optionsEntriesMenuGroup.getSubEntities()
 					.stream()
 					.filter(ProgrammaticTextUIObject.class::isInstance)
 					.map(e -> (ProgrammaticTextUIObject) e)
 					.forEach(e -> e.getTextEmitter().updateText());
 		});
 
-		((FlowLayout) this.optionsEntriesMenuGroup.getLayout())
-				.setGap((float) (example.getBounds().getBounds2D().getHeight()
-						* (example.getTargetScale(true).z() - example.getTargetScale(false).z())));
+		((FlowLayout) this.optionsEntriesMenuGroup.getLayout()).setGap((float) (example.getBounds().getBounds2D().getHeight()
+				* (example.getTargetScale(true).z() - example.getTargetScale(false).z())));
 
 		this.optionsEntriesMenuGroup.doLayout();
 
@@ -371,8 +374,7 @@ public class MainMenuUIScene extends UIScene {
 		frameState.uiSceneCaughtMouseInput = true;
 
 		if (this.cursor != null) {
-			final Optional<UIObject> focusCandidate = this.hovering
-					.stream()
+			final Optional<UIObject> focusCandidate = this.hovering.stream()
 					.filter(c -> c instanceof TextUIObject && !(c instanceof TextFieldUIObject))
 					.findFirst();
 			if (this.cursor.isCirclingMouse() && focusCandidate.isEmpty()) {
@@ -398,11 +400,9 @@ public class MainMenuUIScene extends UIScene {
 		if (this.cursor != null && this.currentGroup == MAIN && this.mainButtonsMenuGroup.size() > 1) {
 			this.cursor.setActive(true);
 
-			final float z1 = ((AbsoluteTransform3DOwner) this.mainButtonsMenuGroup.get(0))
-					.getAbsoluteTransform()
+			final float z1 = ((AbsoluteTransform3DOwner) this.mainButtonsMenuGroup.get(0)).getAbsoluteTransform()
 					.getTranslation(new Vector3f()).z;
-			final float z2 = ((AbsoluteTransform3DOwner) this.mainButtonsMenuGroup.get(1))
-					.getAbsoluteTransform()
+			final float z2 = ((AbsoluteTransform3DOwner) this.mainButtonsMenuGroup.get(1)).getAbsoluteTransform()
 					.getTranslation(new Vector3f()).z;
 
 			this.cursor.setSnapPhase(Math.max(z1, z2));

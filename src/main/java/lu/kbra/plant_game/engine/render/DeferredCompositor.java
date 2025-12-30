@@ -174,12 +174,12 @@ public class DeferredCompositor implements Cleanupable {
 	public static final boolean GL_FORCE_SYNC_COMPUTE_SHADERS = Boolean.getBoolean(GL_FORCE_SYNC_COMPUTE_SHADERS_PROPERTY);
 
 	private static Mesh SCREEN = new LoadedMesh(PASS_SCREEN, null,
-			new Vec3fAttribArray("pos", 0, 1,
+			new Vec3fAttribArray("pos", 0,
 					new Vector3f[] { new Vector3f(-1, 1, 0), new Vector3f(1, 1, 0), new Vector3f(1, -1, 0), new Vector3f(-1, -1, 0) }),
-			new UIntAttribArray("ind", -1, 1, new int[] { 0, 1, 2, 0, 2, 3 }, BufferType.ELEMENT_ARRAY), new Vec2fAttribArray("uv", 1, 1,
+			new UIntAttribArray("ind", -1, new int[] { 0, 1, 2, 0, 2, 3 }, BufferType.ELEMENT_ARRAY), new Vec2fAttribArray("uv", 1,
 					new Vector2f[] { new Vector2f(0, 1), new Vector2f(1, 1), new Vector2f(1, 0), new Vector2f(0, 0) }));
 	private static QuadMesh QUAD = new QuadLoadedMesh(PASS_BOUNDS, null, new Vector2f(1),
-			new UByteAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_NAME, GameObject.MESH_ATTRIB_MATERIAL_ID_ID, 1, new byte[4]));
+			new UByteAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_NAME, GameObject.MESH_ATTRIB_MATERIAL_ID_ID, new byte[4]));
 
 	protected Thread ownerThread;
 	protected Window window;

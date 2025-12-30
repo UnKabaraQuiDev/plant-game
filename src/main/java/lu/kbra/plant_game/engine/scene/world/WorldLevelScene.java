@@ -126,42 +126,38 @@ public class WorldLevelScene extends Scene3D {
 			final long time = PCUtils.nanoTime(() -> worldGenerator.compute());
 			GlobalLogger.info("World generated in " + (time / 1e6) + " ms");
 			return worldGenerator;
-		})
-				.then(renderDispatcher,
-						(ThrowingFunction<WorldGenerator, Triplet<TerrainMesh, TerrainEdgeMesh, Mesh>, Throwable>) worldGenerator -> {
-							GlobalLogger.info("Generating mesh...");
-							final Pair<TerrainMesh, Long> mesh = PCUtils.nanoTime(() -> worldGenerator.generateMesh(this.getCache()));
-							GlobalLogger.info("Mesh generated in " + (mesh.getValue() / 1e6) + " ms");
-							GlobalLogger.info("Generating edge mesh...");
-							final Pair<TerrainEdgeMesh, Long> edgeMesh = PCUtils
-									.nanoTime(() -> worldGenerator.generateEdgeMesh(this.getCache()));
-							GlobalLogger.info("Mesh generated in " + (mesh.getValue() / 1e6) + " ms");
-							GlobalLogger.info("Generating highlight mesh...");
-							final Pair<Mesh, Long> highlightMesh = PCUtils
-									.nanoTime(() -> worldGenerator.generateHighlightMesh(this.getCache()));
-							GlobalLogger.info("Mesh highlight in " + (mesh.getValue() / 1e6) + " ms");
-							return Triplets.readOnly(mesh.getKey(), edgeMesh.getKey(), highlightMesh.getKey());
-						},
-						0)
-				.then(workers, (Consumer<Triplet<TerrainMesh, TerrainEdgeMesh, Mesh>>) meshes -> {
+		}).then(renderDispatcher,
+				(ThrowingFunction<WorldGenerator, Triplet<TerrainMesh, TerrainEdgeMesh, Mesh>, Throwable>) worldGenerator -> {
+					GlobalLogger.info("Generating mesh...");
+					final Pair<TerrainMesh, Long> mesh = PCUtils.nanoTime(() -> worldGenerator.generateMesh(this.getCache()));
+					GlobalLogger.info("Mesh generated in " + (mesh.getValue() / 1e6) + " ms");
+					GlobalLogger.info("Generating edge mesh...");
+					final Pair<TerrainEdgeMesh, Long> edgeMesh = PCUtils.nanoTime(() -> worldGenerator.generateEdgeMesh(this.getCache()));
+					GlobalLogger.info("Mesh generated in " + (mesh.getValue() / 1e6) + " ms");
+					GlobalLogger.info("Generating highlight mesh...");
+					final Pair<Mesh, Long> highlightMesh = PCUtils.nanoTime(() -> worldGenerator.generateHighlightMesh(this.getCache()));
+					GlobalLogger.info("Mesh highlight in " + (mesh.getValue() / 1e6) + " ms");
+					return Triplets.readOnly(mesh.getKey(), edgeMesh.getKey(), highlightMesh.getKey());
+				},
+				0).then(workers, (Consumer<Triplet<TerrainMesh, TerrainEdgeMesh, Mesh>>) meshes -> {
 					GlobalLogger.info("Creating entity...");
 					final long time = PCUtils.nanoTime((Runnable) () -> {
 						final TerrainObject terrainEntity = new TerrainObject("terrain", meshes.getFirst());
 						terrainEntity.setTerrainEdgeEntity(new TerrainEdgeObject("terrain-edges", meshes.getSecond(), new Transform3D()));
-						terrainEntity
-								.setTerrainHighlightEntity(new TerrainHighlightObject("terrain-highlight", meshes.getThird(),
-										new Transform3D(new Vector3f(0, 10, 0)), GameEngine.IDENTITY_VECTOR3I, ColorMaterial.CYAN.getId()));
+						terrainEntity.setTerrainHighlightEntity(new TerrainHighlightObject("terrain-highlight",
+								meshes.getThird(),
+								new Transform3D(new Vector3f(0, 10, 0)),
+								GameEngine.IDENTITY_VECTOR3I,
+								ColorMaterial.CYAN.getId()));
 						terrainEntity.getTerrainHighlightObject().setActive(false);
-						terrainEntity
-								.getTransform()
+						terrainEntity.getTransform()
 								.getTranslation()
 								.set(-meshes.getFirst().getWidth() / 2, 0, -meshes.getFirst().getLength() / 2);
 						terrainEntity.getTransform().updateMatrix();
 						this.setTerrain(terrainEntity);
 					});
 					GlobalLogger.info("Entity created in " + (time / 1e6) + " ms");
-				})
-				.then(workers, (Runnable) () -> {
+				}).then(workers, (Runnable) () -> {
 					terrainLatch.countDown();
 
 					new TaskFuture<>(renderDispatcher, (Runnable) () -> {
@@ -191,13 +187,13 @@ public class WorldLevelScene extends Scene3D {
 							indices[i * 2 + 1] = i + 1;
 						}
 
-						final PipeMesh mesh = new PipeMesh("pipe-" + "@" + System.identityHashCode(this), 12,
-								new Vec3fAttribArray(Mesh.ATTRIB_VERTICES_NAME, Mesh.ATTRIB_VERTICES_ID, 1, pos), new UIntAttribArray(
-										Mesh.ATTRIB_INDICES_NAME, Mesh.ATTRIB_INDICES_ID, 1, indices, BufferType.ELEMENT_ARRAY));
+						final PipeMesh mesh = new PipeMesh("pipe-" + "@" + System.identityHashCode(this),
+								12,
+								new Vec3fAttribArray(Mesh.ATTRIB_VERTICES_NAME, Mesh.ATTRIB_VERTICES_ID, pos),
+								new UIntAttribArray(Mesh.ATTRIB_INDICES_NAME, Mesh.ATTRIB_INDICES_ID, indices, BufferType.ELEMENT_ARRAY));
 						mesh.setEffectiveLength(index);
 						this.worldCache.addMesh(mesh);
-						this.terrain
-								.getSubEntitiesComponent()
+						this.terrain.getSubEntitiesComponent()
 								.addEntity(
 										new GameObject("test", mesh, new Transform3D(), new Vector3i(), ColorMaterial.LIGHT_BLUE.getId()));
 
@@ -220,22 +216,21 @@ public class WorldLevelScene extends Scene3D {
 
 					new TaskFuture<>(renderDispatcher, (Supplier<QuadMesh>) () -> {
 						GlobalLogger.info("Generating water mesh...");
-						final Pair<QuadMesh, Long> meshTime = PCUtils
-								.nanoTime(() -> new QuadLoadedMesh("water", null,
-										new Vector2f(this.getTerrain().getMesh().getWidth(), this.getTerrain().getMesh().getLength())));
+						final Pair<QuadMesh, Long> meshTime = PCUtils.nanoTime(() -> new QuadLoadedMesh("water",
+								null,
+								new Vector2f(this.getTerrain().getMesh().getWidth(), this.getTerrain().getMesh().getLength())));
 						this.getCache().addMesh(meshTime.getKey());
 						GlobalLogger.info("Water mesh generated in " + (meshTime.getValue() / 1e6) + " ms");
 						return meshTime.getKey();
-					})
-							.then(workers,
-									(ThrowingConsumer<QuadMesh, Throwable>) mesh -> this
-											.setWaterLevel(new GameObject("water", mesh,
-													new Transform3D(new Vector3f(mesh.getSize().x() / 2, 0.9f, mesh.getSize().y() / 2)),
-													new Vector3i(2, 0, 0), ColorMaterial.BLUE.getId())))
+					}).then(workers,
+							(ThrowingConsumer<QuadMesh, Throwable>) mesh -> this.setWaterLevel(new GameObject("water",
+									mesh,
+									new Transform3D(new Vector3f(mesh.getSize().x() / 2, 0.9f, mesh.getSize().y() / 2)),
+									new Vector3i(2, 0, 0),
+									ColorMaterial.BLUE.getId())))
 							.push();
 
-					GameObjectFactory
-							.create(WaterTowerObject.class, this, new Transform3D())
+					GameObjectFactory.create(WaterTowerObject.class, this, new Transform3D())
 							.then(workers, (ThrowingConsumer<WaterTowerObject, Throwable>) obj -> {
 								final Vector2i pos = new Vector2i(0, 0);
 								while (!obj.isPlaceable(this, pos, Direction.NONE)) {
@@ -252,50 +247,43 @@ public class WorldLevelScene extends Scene3D {
 							})
 							.push();
 
-					GameObjectFactory
-							.create(WaterTowerObject.class, this, new Transform3D())
+					GameObjectFactory.create(WaterTowerObject.class, this, new Transform3D())
 							.then(workers, (ThrowingConsumer<WaterTowerObject, Throwable>) obj -> {
 								obj.placeDown(this.getTerrain(), new Vector2i(11, 15), Direction.NONE);
 							})
 							.push();
 
-					GameObjectFactory
-							.create(SolarPanelObject.class, this, new Transform3D())
+					GameObjectFactory.create(SolarPanelObject.class, this, new Transform3D())
 							.then(workers,
 									(ThrowingConsumer<SolarPanelObject, Throwable>) obj -> obj
 											.placeDown(this.getTerrain(), new Vector2i(15, 5), Direction.NONE))
 							.push();
 
-					GameObjectFactory
-							.create(WaterWheelObject.class, this, new Transform3D())
+					GameObjectFactory.create(WaterWheelObject.class, this, new Transform3D())
 							.then(workers,
 									(ThrowingConsumer<WaterWheelObject, Throwable>) obj -> obj
 											.placeDown(this.getTerrain(), new Vector2i(11, 7), Direction.WEST))
 							.push();
 
-					GameObjectFactory
-							.create(WaterWheelObject.class, this, new Transform3D())
+					GameObjectFactory.create(WaterWheelObject.class, this, new Transform3D())
 							.then(workers,
 									(ThrowingConsumer<WaterWheelObject, Throwable>) obj -> obj
 											.placeDown(this.getTerrain(), new Vector2i(13, 8), Direction.WEST))
 							.push();
 
-					GameObjectFactory
-							.create(WaterSprinklerObject3x3.class, this, new Transform3D())
+					GameObjectFactory.create(WaterSprinklerObject3x3.class, this, new Transform3D())
 							.then(workers,
 									(ThrowingConsumer<WaterSprinklerObject3x3, Throwable>) obj -> obj
 											.placeDown(this.getTerrain(), new Vector2i(15, 8), Direction.WEST))
 							.push();
 
-					GameObjectFactory
-							.create(WaterSprinklerObject5x5.class, this, new Transform3D())
+					GameObjectFactory.create(WaterSprinklerObject5x5.class, this, new Transform3D())
 							.then(workers,
 									(ThrowingConsumer<WaterSprinklerObject5x5, Throwable>) obj -> obj
 											.placeDown(this.getTerrain(), new Vector2i(16, 8), Direction.WEST))
 							.push();
 
-					GameObjectFactory
-							.create(WaterSprinklerObject7x7.class, this, new Transform3D())
+					GameObjectFactory.create(WaterSprinklerObject7x7.class, this, new Transform3D())
 							.then(workers,
 									(ThrowingConsumer<WaterSprinklerObject7x7, Throwable>) obj -> obj
 											.placeDown(this.getTerrain(), new Vector2i(17, 8), Direction.WEST))
@@ -353,8 +341,7 @@ public class WorldLevelScene extends Scene3D {
 					this.instance(InstanceMediumRoundFlowerObject.class, mediumPositions1, ColorMaterial.WHITE);
 					this.instance(InstanceLargeRoundFlowerObject.class, largePositions1, ColorMaterial.LIGHT_PINK);
 
-				})
-				.push();
+				}).push();
 	}
 
 	private <T extends GameObject> TaskFuture<?, T>.TaskState<T> instance(
@@ -435,11 +422,11 @@ public class WorldLevelScene extends Scene3D {
 					this.moveObjectTaskState = new TaskFuture<Void, Void>(workers, (Runnable) () -> {
 						compositor.pollObjectId(true);
 
-						final Vector3ic ids = new Vector3i(compositor.getObjectId().y(), compositor.getObjectId().z(),
+						final Vector3ic ids = new Vector3i(compositor.getObjectId().y(),
+								compositor.getObjectId().z(),
 								compositor.getObjectId().w());
 
-						this.attachedObject = (PlaceableObject) super.getEntities()
-								.values()
+						this.attachedObject = (PlaceableObject) super.getEntities().values()
 								.parallelStream()
 								.filter(e -> e instanceof GameObject && e instanceof PlaceableObject
 										&& ((GameObject) e).getObjectIdLocation() == AttributeLocation.ENTITY)
@@ -460,15 +447,13 @@ public class WorldLevelScene extends Scene3D {
 				} else {
 					final Vector2f mousePos = inputHandler.getMousePosition();
 					this.moveObjectTaskState = new TaskFuture<Void, Void>(renderDispatcher, (Runnable) () -> {
-						this.pos = this
-								.getTerrain()
+						this.pos = this.getTerrain()
 								.pickTerrainCell(super.getCamera(),
 										mousePos,
 										compositor.getWindow().getWidth(),
 										compositor.getWindow().getHeight());
 						if (this.pos != null) {
-							this.terrain
-									.getTerrainHighlightObject()
+							this.terrain.getTerrainHighlightObject()
 									.getTransform()
 									.translationSet(this.getTerrain().getCellPosition(this.pos))
 									.translationSub(this.getTerrain().getTransform().getTranslation())

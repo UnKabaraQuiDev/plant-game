@@ -77,19 +77,18 @@ public class WorldGenerator {
 	}
 
 	public TerrainMesh generateMesh(final CacheManager cache) {
-		final TerrainMesh mesh = new TerrainMesh(
-				"terrain-" + this.width + "x" + this.length + "@" + System.identityHashCode(this),
+		final TerrainMesh mesh = new TerrainMesh("terrain-" + this.width + "x" + this.length + "@" + System.identityHashCode(this),
 				this.meshId,
 				this.width,
 				this.length,
 				this.maxHeight,
 				this.noiseCompute,
 				this.materialType,
-				new Vec3fAttribArray(Mesh.ATTRIB_VERTICES_NAME, Mesh.ATTRIB_VERTICES_ID, 1, this.verts),
-				new UIntAttribArray(Mesh.ATTRIB_INDICES_NAME, Mesh.ATTRIB_INDICES_ID, 1, this.indices, BufferType.ELEMENT_ARRAY),
-				new Vec3fAttribArray(Mesh.ATTRIB_NORMALS_NAME, Mesh.ATTRIB_NORMALS_ID, 1, this.normals),
-				new UByteAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_NAME, GameObject.MESH_ATTRIB_MATERIAL_ID_ID, 1, this.materialIds),
-				new Vec3iAttribArray(GameObject.MESH_ATTRIB_OBJECT_ID_NAME, GameObject.MESH_ATTRIB_OBJECT_ID_ID, 1, this.objectIds));
+				new Vec3fAttribArray(Mesh.ATTRIB_VERTICES_NAME, Mesh.ATTRIB_VERTICES_ID, this.verts),
+				new UIntAttribArray(Mesh.ATTRIB_INDICES_NAME, Mesh.ATTRIB_INDICES_ID, this.indices, BufferType.ELEMENT_ARRAY),
+				new Vec3fAttribArray(Mesh.ATTRIB_NORMALS_NAME, Mesh.ATTRIB_NORMALS_ID, this.normals),
+				new UByteAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_NAME, GameObject.MESH_ATTRIB_MATERIAL_ID_ID, this.materialIds),
+				new Vec3iAttribArray(GameObject.MESH_ATTRIB_OBJECT_ID_NAME, GameObject.MESH_ATTRIB_OBJECT_ID_ID, this.objectIds));
 		cache.addMesh(mesh);
 		return mesh;
 	}
@@ -131,15 +130,10 @@ public class WorldGenerator {
 			this.edgeIndices[i] = inds.get(i);
 		}
 
-		return new TerrainEdgeMesh(
-				"terrain_edges-" + this.width + "x" + this.length + "@" + System.identityHashCode(this),
-				new Vec3fAttribArray(Mesh.ATTRIB_VERTICES_NAME, Mesh.ATTRIB_VERTICES_ID, 1, this.edgeVertices),
-				new UIntAttribArray(Mesh.ATTRIB_INDICES_NAME, Mesh.ATTRIB_INDICES_ID, 1, this.edgeIndices, BufferType.ELEMENT_ARRAY),
-				new UByteAttribArray(
-						GameObject.MESH_ATTRIB_MATERIAL_ID_NAME,
-						GameObject.MESH_ATTRIB_MATERIAL_ID_ID,
-						1,
-						this.edgeMaterialIds));
+		return new TerrainEdgeMesh("terrain_edges-" + this.width + "x" + this.length + "@" + System.identityHashCode(this),
+				new Vec3fAttribArray(Mesh.ATTRIB_VERTICES_NAME, Mesh.ATTRIB_VERTICES_ID, this.edgeVertices),
+				new UIntAttribArray(Mesh.ATTRIB_INDICES_NAME, Mesh.ATTRIB_INDICES_ID, this.edgeIndices, BufferType.ELEMENT_ARRAY),
+				new UByteAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_NAME, GameObject.MESH_ATTRIB_MATERIAL_ID_ID, this.edgeMaterialIds));
 	}
 
 	public Mesh generateHighlightMesh(final CacheManager cache) {
@@ -163,12 +157,11 @@ public class WorldGenerator {
 
 		final int[] edgeIndices = { 0, 1, 2, 3, 4, 5, 6, 7 };
 
-		return new LineLoadedMesh(
-				"terrain_highlight-3x3@" + System.identityHashCode(this),
+		return new LineLoadedMesh("terrain_highlight-3x3@" + System.identityHashCode(this),
 				null,
 				1f,
-				new Vec3fAttribArray(Mesh.ATTRIB_VERTICES_NAME, Mesh.ATTRIB_VERTICES_ID, 1, edgeVertices),
-				new UIntAttribArray(Mesh.ATTRIB_INDICES_NAME, Mesh.ATTRIB_INDICES_ID, 1, edgeIndices, BufferType.ELEMENT_ARRAY));
+				new Vec3fAttribArray(Mesh.ATTRIB_VERTICES_NAME, Mesh.ATTRIB_VERTICES_ID, edgeVertices),
+				new UIntAttribArray(Mesh.ATTRIB_INDICES_NAME, Mesh.ATTRIB_INDICES_ID, edgeIndices, BufferType.ELEMENT_ARRAY));
 	}
 
 	protected void generateFaces() {
@@ -179,8 +172,7 @@ public class WorldGenerator {
 			for (int z = 0; z < this.length; z++) {
 				final int cellHeight = this.getCellHeight(x, z);
 
-				final SquareFace face = new SquareFace(
-						new Vector2i(x, z),
+				final SquareFace face = new SquareFace(new Vector2i(x, z),
 						new Vector3f(x, cellHeight, z),
 						new Vector3f(x + 1, cellHeight, z + 1),
 						GameEngine.Y_POS,
@@ -194,52 +186,44 @@ public class WorldGenerator {
 				final int cellHeightXPos = this.getCellHeight(x + 1, z);
 				if (cellHeight > cellHeightXPos) {
 					for (int y = cellHeightXPos; y < cellHeight; y++) {
-						this.faces
-								.add(new SquareFace(
-										null,
-										new Vector3f(x + 1, y, z),
-										new Vector3f(x + 1, y + 1, z + 1),
-										GameEngine.X_POS,
-										ColorMaterial.BROWN));
+						this.faces.add(new SquareFace(null,
+								new Vector3f(x + 1, y, z),
+								new Vector3f(x + 1, y + 1, z + 1),
+								GameEngine.X_POS,
+								ColorMaterial.BROWN));
 					}
 				}
 
 				final int cellHeightZPos = this.getCellHeight(x, z + 1);
 				if (cellHeight > cellHeightZPos) {
 					for (int y = cellHeightZPos; y < cellHeight; y++) {
-						this.faces
-								.add(new SquareFace(
-										null,
-										new Vector3f(x, y, z + 1),
-										new Vector3f(x + 1, y + 1, z + 1),
-										GameEngine.Z_POS,
-										ColorMaterial.BROWN));
+						this.faces.add(new SquareFace(null,
+								new Vector3f(x, y, z + 1),
+								new Vector3f(x + 1, y + 1, z + 1),
+								GameEngine.Z_POS,
+								ColorMaterial.BROWN));
 					}
 				}
 
 				final int cellHeightXNeg = this.getCellHeight(x - 1, z);
 				if (cellHeight > cellHeightXNeg) {
 					for (int y = cellHeightXNeg; y < cellHeight; y++) {
-						this.faces
-								.add(new SquareFace(
-										null,
-										new Vector3f(x, y, z),
-										new Vector3f(x, y + 1, z + 1),
-										GameEngine.X_NEG,
-										ColorMaterial.BROWN));
+						this.faces.add(new SquareFace(null,
+								new Vector3f(x, y, z),
+								new Vector3f(x, y + 1, z + 1),
+								GameEngine.X_NEG,
+								ColorMaterial.BROWN));
 					}
 				}
 
 				final int cellHeightZNeg = this.getCellHeight(x, z - 1);
 				if (cellHeight > cellHeightZNeg) {
 					for (int y = cellHeightZNeg; y < cellHeight; y++) {
-						this.faces
-								.add(new SquareFace(
-										null,
-										new Vector3f(x, y, z),
-										new Vector3f(x + 1, y + 1, z),
-										GameEngine.Z_NEG,
-										ColorMaterial.BROWN));
+						this.faces.add(new SquareFace(null,
+								new Vector3f(x, y, z),
+								new Vector3f(x + 1, y + 1, z),
+								GameEngine.Z_NEG,
+								ColorMaterial.BROWN));
 					}
 				}
 			}
@@ -289,11 +273,10 @@ public class WorldGenerator {
 			Arrays.fill(this.normals, faceCount * 4, faceCount * 4 + 4, face.normal);
 			Arrays.fill(this.materialIds, faceCount * 4, faceCount * 4 + 4, (byte) face.material().getId());
 			if (face.cellPosition != null) {
-				Arrays
-						.fill(this.objectIds,
-								faceCount * 4,
-								faceCount * 4 + 4,
-								new Vector3i(this.meshId, face.cellPosition.x(), face.cellPosition.y()));
+				Arrays.fill(this.objectIds,
+						faceCount * 4,
+						faceCount * 4 + 4,
+						new Vector3i(this.meshId, face.cellPosition.x(), face.cellPosition.y()));
 			} else {
 				Arrays.fill(this.objectIds, faceCount * 4, faceCount * 4 + 4, new Vector3i(this.meshId, 0, 0));
 			}

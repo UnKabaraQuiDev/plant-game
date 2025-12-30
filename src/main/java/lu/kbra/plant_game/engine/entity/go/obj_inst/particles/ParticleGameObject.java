@@ -84,28 +84,38 @@ public class ParticleGameObject extends InstanceGameObject {
 				}
 			}
 		}).then(PGLogic.INSTANCE.RENDER_DISPATCHER, (Runnable) () -> {
-			Vec3fAttribArray data = new Vec3fAttribArray("velocity", GravityParticleGameObject.VELOCITY_BUFFER_INDEX, 1,
-					new Vector3f[count], BufferType.ARRAY, true, 0);
+			Vec3fAttribArray data = new Vec3fAttribArray("velocity",
+					GravityParticleGameObject.VELOCITY_BUFFER_INDEX,
+					new Vector3f[count],
+					BufferType.ARRAY,
+					true,
+					0);
 			data.bind();
 			data.init();
 			data.unbind();
 			velGlId.set(data.getGlId());
 
-			data = new Vec3fAttribArray("acceleration", GravityParticleGameObject.ACCELERATION_BUFFER_INDEX, 1, new Vector3f[count],
-					BufferType.ARRAY, true, 0);
+			data = new Vec3fAttribArray("acceleration",
+					GravityParticleGameObject.ACCELERATION_BUFFER_INDEX,
+					new Vector3f[count],
+					BufferType.ARRAY,
+					true,
+					0);
 			data.bind();
 			data.init();
 			data.unbind();
 			accGlId.set(data.getGlId());
 		})
-				.then(GameObjectFactory
-						.create(GravityParticleGameObject.class,
-								scene,
-								new InstanceData(i -> new Transform3D(posArr[i] == null ? new Vector3f() : posArr[i], new Quaternionf(),
-										new Vector3f(scale)), count),
-								transform,
-								color.getId(),
-								gravity))
+				.then(GameObjectFactory.create(GravityParticleGameObject.class,
+						scene,
+						new InstanceData(
+								i -> new Transform3D(posArr[i] == null ? new Vector3f() : posArr[i],
+										new Quaternionf(),
+										new Vector3f(scale)),
+								count),
+						transform,
+						color.getId(),
+						gravity))
 				.then(workers, (Function<GravityParticleGameObject, GravityParticleGameObject>) v -> {
 					v.setVelocityGlId(velGlId.get());
 					v.setAccelerationGlId(velGlId.get());

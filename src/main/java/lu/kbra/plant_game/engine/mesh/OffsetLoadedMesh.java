@@ -4,9 +4,9 @@ import java.util.Arrays;
 
 import org.joml.Vector3f;
 
-import lu.kbra.standalone.gameengine.cache.attrib.AttribArray;
 import lu.kbra.standalone.gameengine.cache.attrib.UIntAttribArray;
 import lu.kbra.standalone.gameengine.cache.attrib.Vec3fAttribArray;
+import lu.kbra.standalone.gameengine.cache.attrib.impl.AttribArray;
 import lu.kbra.standalone.gameengine.geom.LoadedMesh;
 import lu.kbra.standalone.gameengine.graph.material.Material;
 

@@ -7,9 +7,9 @@ import org.joml.Vector4fc;
 
 import lu.kbra.plant_game.engine.render.GradientDirection;
 import lu.kbra.plant_game.engine.render.GradientMesh;
-import lu.kbra.standalone.gameengine.cache.attrib.AttribArray;
 import lu.kbra.standalone.gameengine.cache.attrib.UIntAttribArray;
 import lu.kbra.standalone.gameengine.cache.attrib.Vec3fAttribArray;
+import lu.kbra.standalone.gameengine.cache.attrib.impl.AttribArray;
 import lu.kbra.standalone.gameengine.geom.LoadedMesh;
 import lu.kbra.standalone.gameengine.graph.material.Material;
 import lu.kbra.standalone.gameengine.utils.GameEngineUtils;

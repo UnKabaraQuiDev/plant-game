@@ -1,6 +1,6 @@
 import java.util.Map;
 
-import lu.kbra.standalone.gameengine.cache.attrib.AttribArray;
+import lu.kbra.standalone.gameengine.cache.attrib.impl.AttribArray;
 import lu.kbra.standalone.gameengine.geom.BoundingBox;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.graph.material.Material;

@@ -2,7 +2,7 @@ import java.util.Map;
 
 import lu.kbra.plant_game.engine.mesh.AnimatedMesh;
 import lu.kbra.plant_game.engine.mesh.loader.AnimatedMeshLoader.AnimationData;
-import lu.kbra.standalone.gameengine.cache.attrib.AttribArray;
+import lu.kbra.standalone.gameengine.cache.attrib.impl.AttribArray;
 import lu.kbra.standalone.gameengine.geom.BoundingBox;
 import lu.kbra.standalone.gameengine.graph.material.Material;
 

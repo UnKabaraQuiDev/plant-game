@@ -3,7 +3,7 @@ package lu.kbra.plant_game.engine.entity.go.impl;
 import java.util.function.Function;
 
 import lu.kbra.plant_game.engine.render.SwayMesh;
-import lu.kbra.standalone.gameengine.cache.attrib.AttribArray;
+import lu.kbra.standalone.gameengine.cache.attrib.impl.AttribArray;
 import lu.kbra.standalone.gameengine.geom.instance.InstanceEmitter;
 import lu.kbra.standalone.gameengine.utils.transform.Transform;
 
