@@ -5,7 +5,7 @@ layout (location = 0) in vec3 i_pos;
 layout (location = 1) in vec3 i_norm;
 layout (location = 2) in vec2 i_uv;
 layout (location = 3) in mat4 i_transform;
-layout (location = 7) in uint i_char;
+layout (location = 10) in uint i_char;
 
 flat out struct per_instance {
 	int index;

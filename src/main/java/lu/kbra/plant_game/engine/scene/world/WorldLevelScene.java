@@ -149,11 +149,12 @@ public class WorldLevelScene extends Scene3D {
 								new Transform3D(new Vector3f(0, 10, 0)),
 								GameEngine.IDENTITY_VECTOR3I,
 								ColorMaterial.CYAN.getId()));
-						terrainEntity.getTerrainHighlightObject().setActive(false);
+//						terrainEntity.getTerrainHighlightObject().setActive(false);
 						terrainEntity.getTransform()
 								.getTranslation()
 								.set(-meshes.getFirst().getWidth() / 2, 0, -meshes.getFirst().getLength() / 2);
 						terrainEntity.getTransform().updateMatrix();
+//						terrainEntity.setActive(false);
 						this.setTerrain(terrainEntity);
 					});
 					GlobalLogger.info("Entity created in " + (time / 1e6) + " ms");
@@ -344,11 +345,8 @@ public class WorldLevelScene extends Scene3D {
 				}).push();
 	}
 
-	private <T extends GameObject> TaskFuture<?, T>.TaskState<T> instance(
-			final Class<T> class1,
-			final List<Vector3f> pos,
-			final ColorMaterial mt) {
-		return GameObjectFactory
+	private <T extends GameObject> void instance(final Class<T> class1, final List<Vector3f> pos, final ColorMaterial mt) {
+		GameObjectFactory
 				.create(class1,
 						this.getTerrain().getSubEntitiesComponent(),
 						new InstanceData(i -> new Transform3D(pos.get(i), new Quaternionf().rotateY((float) (Math.random() * 2 * Math.PI))),

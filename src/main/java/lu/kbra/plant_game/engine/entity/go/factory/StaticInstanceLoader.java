@@ -63,7 +63,7 @@ public class StaticInstanceLoader {
 
 		final List<AttribArray> attribs = new ArrayList<>();
 
-		if (id.getAttribs() != null) {
+		if (id.getAttribs() != null && !id.getAttribs().isEmpty()) {
 			for (final Supplier<AttribArray> aa : id.getAttribs()) {
 				tf = tf.then(render, (ThrowingFunction<Mesh, Mesh, Throwable>) mesh -> {
 					attribs.add(aa.get());

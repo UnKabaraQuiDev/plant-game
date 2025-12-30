@@ -8,7 +8,7 @@ layout(location = 4) in uvec3 in_ObjectId;
 // instances
 layout(location = 5) in mat4 in_InstanceMatrix;
 // text related
-layout(location = 9) in uint in_CharIndex;
+layout(location = 10) in uint in_CharIndex;
 
 uniform mat4 transformationMatrix;
 uniform mat4 viewMatrix;
