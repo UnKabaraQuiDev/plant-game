@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.joml.Quaternionf;
 import org.joml.Vector2f;
@@ -92,29 +93,18 @@ public class MainMenuUIScene extends UIScene {
 
 	protected OffsetUIObjectGroup mainMenuGroup = new OffsetUIObjectGroup("main", new Transform3D(new Vector3f(this.restPositions[MAIN])));
 
-	protected LayoutOffsetUIObjectGroup mainLeftMenuGroup = new LayoutOffsetUIObjectGroup(
-			"main.left",
-			new MarginFlowLayout(true, 0.02f, 0.3f, 0, 0.5f, 0.5f, MarginFlowLayout.LEFT),
-			this.mainMenuGroup);
-	protected LayoutOffsetUIObjectGroup mainButtonsMenuGroup = new LayoutOffsetUIObjectGroup(
-			"main.buttons",
-			new FlowLayout(true, 0.02f),
+	protected LayoutOffsetUIObjectGroup mainLeftMenuGroup = new LayoutOffsetUIObjectGroup("main.left",
+			new MarginFlowLayout(true, 0.02f, 0.3f, 0, 0.5f, 0.5f, MarginFlowLayout.LEFT), this.mainMenuGroup);
+	protected LayoutOffsetUIObjectGroup mainButtonsMenuGroup = new LayoutOffsetUIObjectGroup("main.buttons", new FlowLayout(true, 0.02f),
 			this.mainLeftMenuGroup);
 
-	protected ScrollContainerUIObjectGroup optionsMenuGroup = new ScrollContainerUIObjectGroup(
-			"options",
-			this.restPositions[OPTIONS],
-			Direction.SOUTH,
-			0.05f,
-			new FlowLayout(true, 0.0f));
+	protected ScrollContainerUIObjectGroup optionsMenuGroup = new ScrollContainerUIObjectGroup("options", this.restPositions[OPTIONS],
+			Direction.SOUTH, 0.05f, new FlowLayout(true, 0.0f));
 	protected LayoutScrollDrivenUIObjectGroup optionsEntriesMenuGroup = (LayoutScrollDrivenUIObjectGroup) this.optionsMenuGroup
 			.getScrollContent();
 
-	protected ScrollContainerUIObjectGroup playMenuGroup = new ScrollContainerUIObjectGroup(
-			"play",
-			this.restPositions[PLAY],
-			Direction.EAST,
-			0.00f);
+	protected ScrollContainerUIObjectGroup playMenuGroup = new ScrollContainerUIObjectGroup("play", this.restPositions[PLAY],
+			Direction.EAST, 0.00f);
 	protected ScrollDrivenUIObjectGroup playContentMenuGroup = this.playMenuGroup.getScrollContent();
 
 	protected OffsetUIObjectGroup[] groups = new OffsetUIObjectGroup[] {
@@ -174,7 +164,7 @@ public class MainMenuUIScene extends UIScene {
 			Collections.sort(list);
 			this.playContentMenuGroup.addAll(list);
 
-			new TaskFuture<>(workers, () -> {
+			new TaskFuture<>(workers, (Supplier<ReadOnlyPair<Vector3f[], int[]>>) () -> {
 				final Vector3f[] pos = new Vector3f[12];
 				for (int i = 0; i < list.size(); i++) {
 //					final Rectangle2D bounds = list.get(i).getTransformedBounds().getBounds2D();
@@ -191,9 +181,7 @@ public class MainMenuUIScene extends UIScene {
 				final Vector3f[] pos = pair.getKey();
 				final int[] indices = pair.getValue();
 
-				final TimelineMesh mesh = new TimelineMesh(
-						"timeline@" + System.identityHashCode(this),
-						13,
+				final TimelineMesh mesh = new TimelineMesh("timeline@" + System.identityHashCode(this), 13,
 						(SingleTexture) this.uiCache.getTexture(StaticFlatMeshLoader.TEXTURE_NAME),
 						new Vec3fAttribArray(Mesh.ATTRIB_VERTICES_NAME, Mesh.ATTRIB_VERTICES_ID, 1, pos),
 						new UIntAttribArray(Mesh.ATTRIB_INDICES_NAME, Mesh.ATTRIB_INDICES_ID, 1, indices, BufferType.ELEMENT_ARRAY));
@@ -218,10 +206,8 @@ public class MainMenuUIScene extends UIScene {
 			UIObjectFactory
 					.create(LevelButtonUIObject.class,
 							btns,
-							new Transform3D(
-									new Vector3f(startPosX + 0.6f * i, 0, (0.6f * i) % (2 - 0.5f) - 1),
-									new Quaternionf().rotateY((float) Math.random()),
-									new Vector3f(0.5f)),
+							new Transform3D(new Vector3f(startPosX + 0.6f * i, 0, (0.6f * i) % (2 - 0.5f) - 1),
+									new Quaternionf().rotateY((float) Math.random()), new Vector3f(0.5f)),
 							"lvl" + i)
 //					.then(workers, (Function<LevelButtonUIObject, LevelButtonUIObject>) b -> {
 //						b.setActive(false);
@@ -234,15 +220,13 @@ public class MainMenuUIScene extends UIScene {
 	private void buildOptionsMenu(final Dispatcher workers, final Dispatcher renderDispatcher) {
 		final TextData uiSmallLeftTextData = new TextData(new Vector2f(0.1f), TextAlignment.TEXT_CENTER, -1);
 
-		final LayoutOffsetUIObjectGroup optionsVolumeGroup = new LayoutOffsetUIObjectGroup(
-				"options.volume",
+		final LayoutOffsetUIObjectGroup optionsVolumeGroup = new LayoutOffsetUIObjectGroup("options.volume",
 				new EdgeStickLayout(true, 0, uiSmallLeftTextData.getCharSize().x() * OPTIONS_COLUMN_COUNT));
 
 		this.optionsEntriesMenuGroup.add(optionsVolumeGroup);
 		this.optionsEntriesMenuGroup.add(UIObjectFactory.createVerticalSpacer(2 * uiSmallLeftTextData.getCharSize().y()));
 
-		final ListTriggerLatch<OptionKeyUIObject> optionKeyGroupLatch = new ListTriggerLatch<>(
-				StandardKeyOption.values().length,
+		final ListTriggerLatch<OptionKeyUIObject> optionKeyGroupLatch = new ListTriggerLatch<>(StandardKeyOption.values().length,
 				l -> workers.post(() -> {
 					l.forEach(this.optionsEntriesMenuGroup::add);
 					this.updateKeys();
@@ -263,11 +247,8 @@ public class MainMenuUIScene extends UIScene {
 		uiSmallLeftTextData.setName(null);
 
 		/* volume */
-		final ListTriggerLatch<UIObject> optionsVolumeGroupLatch = new TextSliderListTriggerLatch<>(
-				workers,
-				optionsVolumeGroup,
-				VolumeTextUIObject.class,
-				VolumeSliderUIObject.class);
+		final ListTriggerLatch<UIObject> optionsVolumeGroupLatch = new TextSliderListTriggerLatch<>(workers, optionsVolumeGroup,
+				VolumeTextUIObject.class, VolumeSliderUIObject.class);
 
 		uiSmallLeftTextData.setTextAlignment(TextAlignment.TEXT_LEFT);
 		UIObjectFactory.create(VolumeTextUIObject.class, optionsVolumeGroupLatch, uiSmallLeftTextData, new Transform3DPivot()).push();
@@ -320,9 +301,7 @@ public class MainMenuUIScene extends UIScene {
 		UIObjectFactory
 				.create(GradientQuadUIObject.class,
 						this.optionsMenuGroup,
-						new Transform3D(
-								new Vector3f(0, GRADIENT_DEPTH, 0),
-								new Quaternionf().rotateY((float) Math.PI),
+						new Transform3D(new Vector3f(0, GRADIENT_DEPTH, 0), new Quaternionf().rotateY((float) Math.PI),
 								new Vector3f(2.5f, 1, 2)),
 						GradientDirection.UV_X,
 						GameEngineUtils.hexToColorToVec4f("317dac8c"))

@@ -9,6 +9,7 @@ import java.util.function.Supplier;
 
 import lu.pcy113.pclib.PCUtils;
 import lu.pcy113.pclib.impl.ThrowingFunction;
+import lu.pcy113.pclib.impl.ThrowingSupplier;
 
 import lu.kbra.plant_game.engine.entity.go.AnimatedGameObject;
 import lu.kbra.plant_game.engine.entity.go.GameObject;
@@ -249,7 +250,7 @@ public class GameObjectFactory {
 		}
 		if (NoMeshObject.class.isAssignableFrom(clazz)) {
 
-			return new TaskFuture<>(this.loader, () -> {
+			return new TaskFuture<>(this.loader, (ThrowingSupplier<T, Throwable>) () -> {
 				final T instance = GameObjectRegistry
 						.create(clazz, PCUtils.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime() }, args));
 				if (instance instanceof final NeedsPostConstruct npc) {
