@@ -1,21 +1,25 @@
 package lu.kbra.plant_game.engine.render;
 
-import lu.kbra.standalone.gameengine.objs.entity.Component;
+import lu.kbra.standalone.gameengine.geom.Mesh;
+import lu.kbra.standalone.gameengine.objs.entity.components.MeshComponent;
 
-public class GradientMeshComponent extends Component {
-
-	protected GradientMesh gradientMesh;
+public class GradientMeshComponent extends MeshComponent {
 
 	public GradientMeshComponent(final GradientMesh gradientMesh) {
-		this.gradientMesh = gradientMesh;
+		super(gradientMesh);
 	}
 
 	public GradientMesh getGradientMesh() {
-		return this.gradientMesh;
+		return (GradientMesh) super.mesh;
 	}
 
 	public void setGradientMesh(final GradientMesh gradientMesh) {
-		this.gradientMesh = gradientMesh;
+		super.mesh = gradientMesh;
+	}
+
+	@Override
+	public void setMesh(final Mesh mesh) {
+		this.setGradientMesh((GradientMesh) mesh);
 	}
 
 }

@@ -76,7 +76,7 @@ public class PGLogic extends GameLogic {
 		this.worldScene.init(this.WORKERS, this.RENDER_DISPATCHER);
 
 		this.uiScene = null;
-//		this.uiScene = this.overlayUIScene;
+		this.uiScene = this.overlayUIScene;
 
 //		final byte[] colors = new byte[20];
 //		for (int i = 0; i < colors.length; i++) {

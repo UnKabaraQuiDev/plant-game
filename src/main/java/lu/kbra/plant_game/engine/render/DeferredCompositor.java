@@ -42,7 +42,6 @@ import lu.kbra.plant_game.engine.entity.go.impl.FootprintOwner;
 import lu.kbra.plant_game.engine.entity.go.impl.MaterialIdOwner;
 import lu.kbra.plant_game.engine.entity.go.impl.ObjectIdOwner;
 import lu.kbra.plant_game.engine.entity.go.impl.SwayInstanceEmitter;
-import lu.kbra.plant_game.engine.entity.go.impl.SwayInstanceEmitterComponent;
 import lu.kbra.plant_game.engine.entity.go.impl.SwayOwner;
 import lu.kbra.plant_game.engine.entity.go.obj.AnimatedMeshFootprintOwner;
 import lu.kbra.plant_game.engine.entity.go.obj.StaticMeshFootprintOwner;
@@ -749,31 +748,45 @@ public class DeferredCompositor implements Cleanupable {
 		final Matrix4f worldTransform = new Matrix4f(parentTransformMatrix).mulAffine(localTransformMatrix);
 
 		if (meshShader != null && entity.hasComponentMatching(MeshComponent.class)) {
-			for (final MeshComponent meshComponent : entity.getComponentsMatching(MeshComponent.class)) {
-				this.renderMesh(meshComponent.getMesh(), meshComponent, entity, worldTransform, meshShader);
-			}
+			entity.getComponentsMatching(MeshComponent.class).forEach((final MeshComponent meshComponent) -> {
+				final Mesh mesh = meshComponent.getMesh();
+
+				if (entity instanceof final AnimatedTransformOwner ago && meshComponent instanceof AnimatedMeshComponent) {
+					final Matrix4f animatedTransform = ago.getAnimatedTransform();
+					this.renderMesh(mesh, meshComponent, entity, animatedTransform, animatedMeshShader);
+				} else if (mesh instanceof final AnimatedTransformOwner ago && meshComponent instanceof AnimatedMeshComponent) {
+					final Matrix4f animatedTransform = ago.getAnimatedTransform();
+					this.renderMesh(mesh, meshComponent, entity, animatedTransform, animatedMeshShader);
+				} else if (mesh instanceof GradientOwner || entity instanceof GradientOwner) {
+					this.renderMesh(mesh, meshComponent, entity, worldTransform, gradientMeshShader);
+				} else if (mesh instanceof SwayOwner || entity instanceof SwayOwner) {
+					this.renderMesh(mesh, meshComponent, entity, worldTransform, swayMeshShader);
+				} else {
+					this.renderMesh(mesh, meshComponent, entity, worldTransform, meshShader);
+				}
+			});
 		}
 
-		if (gradientMeshShader != null && entity.hasComponentMatching(GradientMeshComponent.class)) {
-			for (final GradientMeshComponent gradientMeshComponent : entity.getComponentsMatching(GradientMeshComponent.class)) {
-				this.renderMesh(gradientMeshComponent.getGradientMesh(), gradientMeshComponent, entity, worldTransform, gradientMeshShader);
-			}
-		}
+//		if (gradientMeshShader != null && entity.hasComponentMatching(GradientMeshComponent.class)) {
+//			for (final GradientMeshComponent gradientMeshComponent : entity.getComponentsMatching(GradientMeshComponent.class)) {
+//				this.renderMesh(gradientMeshComponent.getGradientMesh(), gradientMeshComponent, entity, worldTransform, gradientMeshShader);
+//			}
+//		}
 
-		if (swayMeshShader != null && entity.hasComponentMatching(SwayMeshComponent.class)) {
-			for (final SwayMeshComponent swayMeshComponent : entity.getComponentsMatching(SwayMeshComponent.class)) {
-				this.renderMesh(swayMeshComponent.getSwayMesh(), swayMeshComponent, entity, worldTransform, swayMeshShader);
-			}
-		}
+//		if (swayMeshShader != null && entity.hasComponentMatching(SwayMeshComponent.class)) {
+//			for (final SwayMeshComponent swayMeshComponent : entity.getComponentsMatching(SwayMeshComponent.class)) {
+//				this.renderMesh(swayMeshComponent.getSwayMesh(), swayMeshComponent, entity, worldTransform, swayMeshShader);
+//			}
+//		}
 
-		if (animatedMeshShader != null && entity.hasComponentMatching(AnimatedMeshComponent.class)) {
-			final Matrix4f animatedTransform = entity instanceof final AnimatedTransformOwner ago ? ago.getAnimatedTransform()
-					: worldTransform;
-			for (final AnimatedMeshComponent animatedMeshComponent : entity.getComponentsMatching(AnimatedMeshComponent.class)) {
-				this.renderMesh(animatedMeshComponent
-						.getAnimatedMesh(), animatedMeshComponent, entity, animatedTransform, animatedMeshShader);
-			}
-		}
+//		if (animatedMeshShader != null && entity.hasComponentMatching(AnimatedMeshComponent.class)) {
+//			final Matrix4f animatedTransform = entity instanceof final AnimatedTransformOwner ago ? ago.getAnimatedTransform()
+//					: worldTransform;
+//			for (final AnimatedMeshComponent animatedMeshComponent : entity.getComponentsMatching(AnimatedMeshComponent.class)) {
+//				this.renderMesh(animatedMeshComponent
+//						.getAnimatedMesh(), animatedMeshComponent, entity, animatedTransform, animatedMeshShader);
+//			}
+//		}
 
 		if (textEmitterShader != null && entity.hasComponentMatching(TextEmitterComponent.class)) {
 			for (final TextEmitterComponent textEmitterComponent : entity.getComponentsMatching(TextEmitterComponent.class)) {
@@ -783,19 +796,30 @@ public class DeferredCompositor implements Cleanupable {
 		}
 
 		if (instanceEmitterShader != null && entity.hasComponentMatching(InstanceEmitterComponent.class)) {
-			for (final InstanceEmitterComponent instanceEmitterComponent : entity.getComponentsMatching(InstanceEmitterComponent.class)) {
-				this.renderInstanceEmitter(instanceEmitterComponent
-						.getInstanceEmitter(), instanceEmitterComponent, entity, worldTransform, instanceEmitterShader);
-			}
+			entity.getComponentsMatching(InstanceEmitterComponent.class)
+					.forEach((final InstanceEmitterComponent instanceEmitterComponent) -> {
+						final InstanceEmitter instanceEmitter = instanceEmitterComponent.getInstanceEmitter();
+
+						if (instanceEmitter instanceof SwayOwner || entity instanceof SwayOwner) {
+							this.renderInstanceEmitter(instanceEmitter,
+									instanceEmitterComponent,
+									entity,
+									worldTransform,
+									swayInstanceEmitterShader);
+						} else {
+							this.renderInstanceEmitter(instanceEmitterComponent
+									.getInstanceEmitter(), instanceEmitterComponent, entity, worldTransform, instanceEmitterShader);
+						}
+					});
 		}
 
-		if (swayInstanceEmitterShader != null && entity.hasComponentMatching(SwayInstanceEmitterComponent.class)) {
-			for (final SwayInstanceEmitterComponent swayInstanceEmitterComponent : entity
-					.getComponentsMatching(SwayInstanceEmitterComponent.class)) {
-				this.renderInstanceEmitter(swayInstanceEmitterComponent
-						.getSwayInstanceEmitter(), swayInstanceEmitterComponent, entity, worldTransform, swayInstanceEmitterShader);
-			}
-		}
+//		if (swayInstanceEmitterShader != null && entity.hasComponentMatching(SwayInstanceEmitterComponent.class)) {
+//			for (final SwayInstanceEmitterComponent swayInstanceEmitterComponent : entity
+//					.getComponentsMatching(SwayInstanceEmitterComponent.class)) {
+//				this.renderInstanceEmitter(swayInstanceEmitterComponent
+//						.getSwayInstanceEmitter(), swayInstanceEmitterComponent, entity, worldTransform, swayInstanceEmitterShader);
+//			}
+//		}
 
 		if (entity instanceof final TransformedBoundsOwner tbo) {
 			this.drawDebugBounds(tbo.getTransformedBounds(parentTransformMatrix));

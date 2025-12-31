@@ -1,22 +1,26 @@
 package lu.kbra.plant_game.engine.entity.impl;
 
 import lu.kbra.plant_game.engine.mesh.AnimatedMesh;
-import lu.kbra.standalone.gameengine.objs.entity.Component;
+import lu.kbra.standalone.gameengine.geom.Mesh;
+import lu.kbra.standalone.gameengine.objs.entity.components.MeshComponent;
 
-public class AnimatedMeshComponent extends Component {
+public class AnimatedMeshComponent extends MeshComponent {
 
-	protected AnimatedMesh AnimatedMesh;
-
-	public AnimatedMeshComponent(AnimatedMesh AnimatedMesh) {
-		this.AnimatedMesh = AnimatedMesh;
+	public AnimatedMeshComponent(final AnimatedMesh animatedMesh) {
+		super(animatedMesh);
 	}
 
 	public AnimatedMesh getAnimatedMesh() {
-		return AnimatedMesh;
+		return (AnimatedMesh) super.mesh;
 	}
 
-	public void setAnimatedMesh(AnimatedMesh AnimatedMesh) {
-		this.AnimatedMesh = AnimatedMesh;
+	public void setAnimatedMesh(final AnimatedMesh animatedMesh) {
+		super.mesh = animatedMesh;
+	}
+
+	@Override
+	public void setMesh(final Mesh mesh) {
+		this.setAnimatedMesh((AnimatedMesh) mesh);
 	}
 
 }
