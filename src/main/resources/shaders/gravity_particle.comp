@@ -17,10 +17,12 @@ uniform uint count;
 uniform float dTime;
 uniform bool applyAcceleration;
 uniform bool resetAcceleration;
+uniform bool applyDrag;
 uniform bool enforceMinY;
 uniform float minY;
 uniform float reboundCoefficient;
 uniform float frictionCoefficient;
+uniform float dragCoefficient;
 uniform float density;
 
 layout(local_size_x = %LOCAL_SIZE_X%) in;
@@ -43,18 +45,20 @@ void main() {
 	
    	vel[i].xyz += acc[i].xyz * dTime;
    	
+   	if (applyDrag) {
+   		vel[i].xyz *= max(0.0, 1.0 - dragCoefficient * dTime);
+   	}
+   	
     model[i][3].xyz += vel[i].xyz * dTime; 
     
     if (enforceMinY && model[i][3].y <= minY) {
     	model[i][3].y = minY;
     	vel[i].y *= -reboundCoefficient;
     	vel[i].xz *= frictionCoefficient;
-    
-    	/*if (vel[i].y <= 1e-6) {
-    		// stop sliding
-    		vel[i].xyz = vec3(0);
-    	}*/
     }
+    if (applyDrag && length(vel[i].xyz) < 1e-3) {
+	    vel[i].xyz = vec3(0.0);
+	}
 
 	if (resetAcceleration) {
 	    acc[i].xyz = vec3(0.0);

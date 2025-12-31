@@ -11,6 +11,7 @@ public class GravityParticleGameObject extends ParticleGameObject {
 
 	protected boolean applyAcceleration = true;
 	protected boolean enforceMinY = false;
+	protected boolean applyDrag = false;
 	protected float minY = 0;
 	protected float density = 1;
 
@@ -26,11 +27,11 @@ public class GravityParticleGameObject extends ParticleGameObject {
 		this.minY = minY;
 	}
 
-	public boolean isApplyGravity() {
+	public boolean isApplyAcceleration() {
 		return this.applyAcceleration;
 	}
 
-	public void isApplyGravity(final boolean applyAcceleration) {
+	public void isApplyAcceleration(final boolean applyAcceleration) {
 		this.applyAcceleration = applyAcceleration;
 	}
 
@@ -48,6 +49,14 @@ public class GravityParticleGameObject extends ParticleGameObject {
 
 	public void setDensity(final float density) {
 		this.density = density;
+	}
+
+	public boolean isApplyDrag() {
+		return this.applyDrag;
+	}
+
+	public void setApplyDrag(final boolean applyDrag) {
+		this.applyDrag = applyDrag;
 	}
 
 }

@@ -29,6 +29,10 @@ public class ParticleManager {
 
 	protected EntityContainer<SceneEntity> scene;
 	protected Vector3fc gravity = new Vector3f(0, -9.81f, 0);
+	protected float reboundCoefficient = 0.5f;
+	protected float frictionCoefficient = 0.85f;
+	protected float dragCoefficient = 0.75f;
+	protected boolean resetAcceleration = true;
 
 	protected final Object objectLocks = new Object();
 	protected Set<GravityParticleGameObject> activeObjects = new HashSet<>();
@@ -46,39 +50,42 @@ public class ParticleManager {
 		this.computeShader.bind();
 
 		this.computeShader.setUniform(GravityParticleComputeShader.D_TIME, dTime);
-		this.computeShader.setUniform(GravityParticleComputeShader.REBOUND_COEFFICIENT, 0.5f);
-		this.computeShader.setUniform(GravityParticleComputeShader.FRICTION_COEFFICIENT, 0.85f);
-		this.computeShader.setUniform(GravityParticleComputeShader.RESET_ACCELERATION, true);
+		this.computeShader.setUniform(GravityParticleComputeShader.REBOUND_COEFFICIENT, this.reboundCoefficient);
+		this.computeShader.setUniform(GravityParticleComputeShader.FRICTION_COEFFICIENT, this.frictionCoefficient);
+		this.computeShader.setUniform(GravityParticleComputeShader.DRAG_COEFFICIENT, this.dragCoefficient);
+		this.computeShader.setUniform(GravityParticleComputeShader.RESET_ACCELERATION, this.resetAcceleration);
 		this.computeShader.setUniform(GravityParticleComputeShader.ACCELERATION, this.gravity);
 
-		for (final GravityParticleGameObject object : this.activeObjects) {
+		synchronized (this.activeObjects) {
+			for (final GravityParticleGameObject object : this.activeObjects) {
 
-			final InstanceEmitter emitter = object.getInstanceEmitter();
-			final Mesh mesh = emitter.getParticleMesh();
-			final int count = emitter.getParticleCount();
-			final float minY = object.getMinY();
+				final InstanceEmitter emitter = object.getInstanceEmitter();
+				final Mesh mesh = emitter.getParticleMesh();
+				final int count = emitter.getParticleCount();
 
-			final Vector3ic groups = this.computeShader.getGlobalGroup(new Vector3i(count, 0, 0));
-			assert groups.x() != 0;
+				final Vector3ic groups = this.computeShader.getGlobalGroup(new Vector3i(count, 0, 0));
+				assert groups.x() != 0;
 
-			this.computeShader.setUniformUnsigned(GravityParticleComputeShader.COUNT, count);
-			this.computeShader.setUniform(GravityParticleComputeShader.APPLY_ACCELERATION, object.isApplyGravity());
-			this.computeShader.setUniform(GravityParticleComputeShader.ENFORCE_MIN_Y, object.isEnforceMinY());
-			this.computeShader.setUniform(GravityParticleComputeShader.MIN_Y, object.getMinY());
-			this.computeShader.setUniform(GravityParticleComputeShader.DENSITY, object.getDensity());
+				this.computeShader.setUniformUnsigned(GravityParticleComputeShader.COUNT, count);
+				this.computeShader.setUniform(GravityParticleComputeShader.APPLY_ACCELERATION, object.isApplyAcceleration());
+				this.computeShader.setUniform(GravityParticleComputeShader.APPLY_DRAG, object.isApplyDrag());
+				this.computeShader.setUniform(GravityParticleComputeShader.ENFORCE_MIN_Y, object.isEnforceMinY());
+				this.computeShader.setUniform(GravityParticleComputeShader.MIN_Y, object.getMinY());
+				this.computeShader.setUniform(GravityParticleComputeShader.DENSITY, object.getDensity());
 
-			GL_W.glBindBufferBase(BufferType.SHADER_STORAGE.getGlId(),
-					0,
-					mesh.getVbo().get(GravityParticleGameObject.ACCELERATION_BUFFER_INDEX));
-			GL_W.glBindBufferBase(BufferType.SHADER_STORAGE.getGlId(),
-					1,
-					mesh.getVbo().get(GravityParticleGameObject.VELOCITY_BUFFER_INDEX));
-			GL_W.glBindBufferBase(BufferType.SHADER_STORAGE.getGlId(), 2, emitter.getParticleTransforms().getGlId());
+				GL_W.glBindBufferBase(BufferType.SHADER_STORAGE.getGlId(),
+						0,
+						mesh.getVbo().get(GravityParticleGameObject.ACCELERATION_BUFFER_INDEX));
+				GL_W.glBindBufferBase(BufferType.SHADER_STORAGE.getGlId(),
+						1,
+						mesh.getVbo().get(GravityParticleGameObject.VELOCITY_BUFFER_INDEX));
+				GL_W.glBindBufferBase(BufferType.SHADER_STORAGE.getGlId(), 2, emitter.getParticleTransforms().getGlId());
 
-			GL_W.glDispatchCompute(groups.x(), 1, 1);
+				GL_W.glDispatchCompute(groups.x(), 1, 1);
 
-			if (GL_FORCE_SYNC_COMPUTE_SHADERS) {
-				GL_W.glMemoryBarrier(GL_W.GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | GL_W.GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT);
+				if (GL_FORCE_SYNC_COMPUTE_SHADERS) {
+					GL_W.glMemoryBarrier(GL_W.GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | GL_W.GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT);
+				}
 			}
 		}
 

@@ -30,6 +30,7 @@ import lu.kbra.plant_game.engine.window.input.MappingInputHandler;
 import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.standalone.gameengine.impl.GameLogic;
 import lu.kbra.standalone.gameengine.impl.future.WorkerDispatcher;
+import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
 import lu.kbra.standalone.gameengine.utils.gl.consts.Consts;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
@@ -125,6 +126,21 @@ public class PGLogic extends GameLogic {
 								(float) Math.random() * 2 - 1,
 								(float) Math.random() * 2 - 1,
 								(float) Math.random() * 2 - 1)),
+						i -> PCUtils.randomFloatRange(0.08f, 0.1f))
+				.then(this.WORKERS,
+						(Consumer<GravityParticleGameObject>) parts -> this.worldScene.getParticleManager().getActiveObjects().add(parts))
+				.push();
+
+		ParticleGameObject
+				.createFloating(this.WORKERS,
+						this.worldScene,
+						100,
+						ColorMaterial.DARK_BROWN,
+						new Transform3D(new Vector3f(0, 3, 0)),
+						GravityParticleGameObject.IRON_DENSITY,
+						i -> PCUtils.randomFloatRange(0.8f, 1.5f),
+						null,
+						i -> GameEngineUtils.randomQuaterionf(),
 						i -> PCUtils.randomFloatRange(0.08f, 0.1f))
 				.then(this.WORKERS,
 						(Consumer<GravityParticleGameObject>) parts -> this.worldScene.getParticleManager().getActiveObjects().add(parts))

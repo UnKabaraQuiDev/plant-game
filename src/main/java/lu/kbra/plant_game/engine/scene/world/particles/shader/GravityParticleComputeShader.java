@@ -14,12 +14,14 @@ public class GravityParticleComputeShader extends ComputeShader {
 	public static final String ACCELERATION = "acceleration";
 	public static final String APPLY_ACCELERATION = "applyAcceleration";
 	public static final String RESET_ACCELERATION = "resetAcceleration";
+	public static final String APPLY_DRAG = "applyDrag";
 	public static final String COUNT = "count";
 	public static final String D_TIME = "dTime";
 	public static final String ENFORCE_MIN_Y = "enforceMinY";
 	public static final String MIN_Y = "minY";
 	public static final String REBOUND_COEFFICIENT = "reboundCoefficient";
 	public static final String FRICTION_COEFFICIENT = "frictionCoefficient";
+	public static final String DRAG_COEFFICIENT = "dragCoefficient";
 	public static final String DENSITY = "density";
 
 	public GravityParticleComputeShader() {
@@ -40,6 +42,7 @@ public class GravityParticleComputeShader extends ComputeShader {
 		this.createUniform(MIN_Y);
 		this.createUniform(REBOUND_COEFFICIENT);
 		this.createUniform(FRICTION_COEFFICIENT);
+		this.createUniform(DRAG_COEFFICIENT);
 		this.createUniform(DENSITY);
 	}
 
