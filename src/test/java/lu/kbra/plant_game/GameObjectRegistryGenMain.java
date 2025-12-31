@@ -111,6 +111,7 @@ public class GameObjectRegistryGenMain extends GenMainConsts {
 
 		final Reflections reflections = new Reflections(MAIN_PACKAGE);
 		final Set<Class<? extends GameObject>> classes = reflections.getSubTypesOf(GameObject.class);
+		classes.add(GameObject.class);
 
 		final CodeBlock.Builder staticCodeBlock = CodeBlock.builder();
 
@@ -126,10 +127,14 @@ public class GameObjectRegistryGenMain extends GenMainConsts {
 		for (final Class<? extends GameObject> c : classes) {
 			if (!c.isAnnotationPresent(DataPath.class)) {
 				System.err.println("Missing @DataPath on: " + c.getName());
+//				continue;
+			}
+			if (java.lang.reflect.Modifier.isAbstract(c.getModifiers())) {
 				continue;
 			}
 
-			final String dataPath = c.getAnnotation(DataPath.class).value();
+			final Optional<String> dataPath = c.isAnnotationPresent(DataPath.class) ? Optional.of(c.getAnnotation(DataPath.class).value())
+					: Optional.empty();
 			final OptionalInt bufferSize = c.isAnnotationPresent(BufferSize.class)
 					? OptionalInt.of(c.getAnnotation(BufferSize.class).value())
 					: OptionalInt.empty();
@@ -162,7 +167,7 @@ public class GameObjectRegistryGenMain extends GenMainConsts {
 
 			staticCodeBlock.addStatement("$N.put($T.class, $L)", constructorHashMap, c, listName);
 			bufferSize.ifPresent(i -> staticCodeBlock.addStatement("$N.put($T.class, $L)", bufferSizeHashMap, c, i));
-			staticCodeBlock.addStatement("$N.put($T.class, $S)", dataPathHashMap, c, dataPath);
+			dataPath.ifPresent(t -> staticCodeBlock.addStatement("$N.put($T.class, $S)", dataPathHashMap, c, t));
 			textureOption.ifPresent(t -> {
 				staticCodeBlock.addStatement("$N.put($T.class, $L)", textureFilterHashMap, c, t.textureFilter());
 				staticCodeBlock.addStatement("$N.put($T.class, $L)", textureWrapHashMap, c, t.textureWrap());

@@ -10,6 +10,7 @@ import lu.kbra.plant_game.engine.entity.impl.Transform3DOwner;
 import lu.kbra.plant_game.engine.mesh.MaterialMesh;
 import lu.kbra.plant_game.engine.mesh.TexturedMesh;
 import lu.kbra.plant_game.engine.mesh.data.AttributeLocation;
+import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.objs.entity.Entity;
 import lu.kbra.standalone.gameengine.objs.entity.components.MeshComponent;
@@ -25,7 +26,7 @@ public class GameObject extends Entity implements Transform3DOwner, MeshOwner, M
 
 	protected short materialId = -1;
 	protected boolean isEntityMaterialId = false;
-	protected Vector3ic objectId;
+	protected Vector3ic objectId = getRandomObjectId();
 	protected AttributeLocation objectIdLocation = AttributeLocation.ENTITY;
 
 	protected MeshComponent meshComponent;
@@ -51,6 +52,17 @@ public class GameObject extends Entity implements Transform3DOwner, MeshOwner, M
 	@Override
 	public void setMaterialId(final short materialId) {
 		this.materialId = materialId;
+
+		final Mesh mesh = this.getMesh();
+		if (this.materialId > 0) {
+			this.isEntityMaterialId = true;
+		} else if (mesh != null && (mesh instanceof TexturedMesh || mesh instanceof MaterialMesh)) {
+			this.isEntityMaterialId = false;
+		}
+	}
+
+	public void setMaterial(final ColorMaterial colorMaterial) {
+		this.setMaterialId(colorMaterial.getId());
 	}
 
 	@Override

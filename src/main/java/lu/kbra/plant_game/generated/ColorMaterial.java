@@ -1,9 +1,9 @@
 // @formatter:off
 package lu.kbra.plant_game.generated;
 
-import java.lang.Integer;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.joml.Vector4f;
 import org.joml.Vector4fc;
 

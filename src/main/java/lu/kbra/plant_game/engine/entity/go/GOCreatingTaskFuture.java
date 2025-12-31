@@ -10,7 +10,6 @@ import lu.kbra.plant_game.engine.entity.go.impl.NeedsPostConstruct;
 import lu.kbra.plant_game.generated.GameObjectRegistry;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
-import lu.kbra.standalone.gameengine.objs.entity.SceneEntity;
 import lu.kbra.standalone.gameengine.scene.EntityContainer;
 
 public class GOCreatingTaskFuture<T extends GameObject> extends TaskFuture<List<Object>, T> {
@@ -18,7 +17,7 @@ public class GOCreatingTaskFuture<T extends GameObject> extends TaskFuture<List<
 	protected Class<T> clazz;
 
 	protected List<Consumer<T>> postCreateHooks = new ArrayList<>();
-	protected EntityContainer<SceneEntity> parent;
+	protected EntityContainer parent;
 
 	public GOCreatingTaskFuture(final Dispatcher dispatcher, final Class<T> clazz) {
 		super(dispatcher);
@@ -43,7 +42,7 @@ public class GOCreatingTaskFuture<T extends GameObject> extends TaskFuture<List<
 		return this;
 	}
 
-	public GOCreatingTaskFuture<T> add(final EntityContainer<SceneEntity> parent) {
+	public GOCreatingTaskFuture<T> add(final EntityContainer parent) {
 		this.parent = parent;
 		return this;
 	}

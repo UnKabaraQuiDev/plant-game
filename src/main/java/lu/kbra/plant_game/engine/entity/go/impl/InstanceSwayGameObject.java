@@ -4,7 +4,9 @@ import static lu.kbra.plant_game.engine.entity.go.impl.SwayGameObject.DEFAULT_DE
 import static lu.kbra.plant_game.engine.entity.go.impl.SwayGameObject.DEFAULT_SCALE_RATIO;
 import static lu.kbra.plant_game.engine.entity.go.impl.SwayGameObject.DEFAULT_SPEED_RATIO;
 
-public class InstanceSwayGameObject extends InstanceGameObject implements SwayOwner, SwayInstanceEmitterOwner {
+import lu.kbra.standalone.gameengine.geom.instance.InstanceEmitter;
+
+public class InstanceSwayGameObject extends InstanceGameObject implements SwayOwner {
 
 	protected SwayInstanceEmitterComponent swayInstanceEmitterComponent;
 
@@ -12,9 +14,8 @@ public class InstanceSwayGameObject extends InstanceGameObject implements SwayOw
 	protected float speedRatio = DEFAULT_SPEED_RATIO;
 	protected float scaleRatio = DEFAULT_SCALE_RATIO;
 
-	public InstanceSwayGameObject(final String str, final SwayInstanceEmitter ie) {
-		super(str, null);
-		this.setSwayInstanceEmitter(ie);
+	public InstanceSwayGameObject(final String str, final InstanceEmitter ie) {
+		super(str, ie);
 	}
 
 	@Override
@@ -51,23 +52,23 @@ public class InstanceSwayGameObject extends InstanceGameObject implements SwayOw
 		return this.swayInstanceEmitterComponent;
 	}
 
-	@Override
-	public SwayInstanceEmitter getSwayInstanceEmitter() {
-		return this.swayInstanceEmitterComponent == null ? null : this.swayInstanceEmitterComponent.getSwayInstanceEmitter();
-	}
-
-	@Override
-	public void setSwayInstanceEmitter(final SwayInstanceEmitter ie) {
-		if (this.swayInstanceEmitterComponent != null) {
-			if (ie == null) {
-				super.removeComponent(SwayInstanceEmitterComponent.class);
-			} else {
-				this.swayInstanceEmitterComponent.setSwayInstanceEmitter(ie);
-			}
-		} else if (ie != null) {
-			super.addComponent(this.swayInstanceEmitterComponent = new SwayInstanceEmitterComponent(ie));
-		}
-	}
+//	@Override
+//	public SwayInstanceEmitter getSwayInstanceEmitter() {
+//		return this.swayInstanceEmitterComponent == null ? null : this.swayInstanceEmitterComponent.getSwayInstanceEmitter();
+//	}
+//
+//	@Override
+//	public void setSwayInstanceEmitter(final SwayInstanceEmitter ie) {
+//		if (this.swayInstanceEmitterComponent != null) {
+//			if (ie == null) {
+//				super.removeComponent(SwayInstanceEmitterComponent.class);
+//			} else {
+//				this.swayInstanceEmitterComponent.setSwayInstanceEmitter(ie);
+//			}
+//		} else if (ie != null) {
+//			super.addComponent(this.swayInstanceEmitterComponent = new SwayInstanceEmitterComponent(ie));
+//		}
+//	}
 
 	@Override
 	public String toString() {

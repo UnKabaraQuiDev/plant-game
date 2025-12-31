@@ -15,7 +15,7 @@ public class AnimatedGameObject extends GameObject implements AnimatedTransformO
 
 	public AnimatedGameObject(final String str, final Mesh mesh, final AnimatedMesh animatedMesh) {
 		super(str, mesh);
-
+		this.setAnimatedMesh(animatedMesh);
 	}
 
 	@Override

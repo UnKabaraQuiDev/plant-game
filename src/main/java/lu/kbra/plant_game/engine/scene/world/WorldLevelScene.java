@@ -1,7 +1,14 @@
 package lu.kbra.plant_game.engine.scene.world;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.concurrent.CountDownLatch;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
+import org.joml.Quaternionf;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
@@ -9,24 +16,65 @@ import org.joml.Vector3i;
 import org.joml.Vector3ic;
 import org.joml.Vector4f;
 
+import lu.pcy113.pclib.PCUtils;
+import lu.pcy113.pclib.datastructure.pair.Pair;
+import lu.pcy113.pclib.datastructure.triplet.Triplet;
+import lu.pcy113.pclib.datastructure.triplet.Triplets;
+import lu.pcy113.pclib.impl.ThrowingConsumer;
+import lu.pcy113.pclib.impl.ThrowingFunction;
+import lu.pcy113.pclib.impl.ThrowingRunnable;
+import lu.pcy113.pclib.logger.GlobalLogger;
+
 import lu.kbra.plant_game.engine.UpdateFrameState;
 import lu.kbra.plant_game.engine.entity.go.AnimatedGameObject;
 import lu.kbra.plant_game.engine.entity.go.GameObject;
+import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory;
+import lu.kbra.plant_game.engine.entity.go.impl.InstanceEmitterOwner;
 import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
+import lu.kbra.plant_game.engine.entity.go.mesh.pipe.PipeMesh;
+import lu.kbra.plant_game.engine.entity.go.mesh.terrain.TerrainEdgeMesh;
+import lu.kbra.plant_game.engine.entity.go.mesh.terrain.TerrainMesh;
+import lu.kbra.plant_game.engine.entity.go.obj.energy.SolarPanelObject;
+import lu.kbra.plant_game.engine.entity.go.obj.terrain.TerrainEdgeObject;
+import lu.kbra.plant_game.engine.entity.go.obj.terrain.TerrainHighlightObject;
 import lu.kbra.plant_game.engine.entity.go.obj.terrain.TerrainObject;
+import lu.kbra.plant_game.engine.entity.go.obj.water.WaterSprinklerObject3x3;
+import lu.kbra.plant_game.engine.entity.go.obj.water.WaterSprinklerObject5x5;
+import lu.kbra.plant_game.engine.entity.go.obj.water.WaterSprinklerObject7x7;
+import lu.kbra.plant_game.engine.entity.go.obj.water.WaterTowerObject;
+import lu.kbra.plant_game.engine.entity.go.obj.water.WaterWheelObject;
+import lu.kbra.plant_game.engine.entity.go.obj_inst.champi.InstanceLargeChampiFlowerObject;
+import lu.kbra.plant_game.engine.entity.go.obj_inst.champi.InstanceMediumChampiFlowerObject;
+import lu.kbra.plant_game.engine.entity.go.obj_inst.champi.InstanceSmallChampiFlowerObject;
+import lu.kbra.plant_game.engine.entity.go.obj_inst.grass.InstanceLargeGrassObject;
+import lu.kbra.plant_game.engine.entity.go.obj_inst.grass.InstanceMediumGrassObject;
+import lu.kbra.plant_game.engine.entity.go.obj_inst.grass.InstanceSmallGrassObject;
+import lu.kbra.plant_game.engine.entity.go.obj_inst.round.InstanceLargeRoundFlowerObject;
+import lu.kbra.plant_game.engine.entity.go.obj_inst.round.InstanceMediumRoundFlowerObject;
+import lu.kbra.plant_game.engine.entity.go.obj_inst.round.InstanceSmallRoundFlowerObject;
 import lu.kbra.plant_game.engine.mesh.data.AttributeLocation;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.scene.world.data.LevelData;
+import lu.kbra.plant_game.engine.scene.world.generator.ImageWorldGenerator;
+import lu.kbra.plant_game.engine.scene.world.generator.WorldGenerator;
 import lu.kbra.plant_game.engine.scene.world.particles.ParticleManager;
 import lu.kbra.plant_game.engine.window.input.StandardKeyOption;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
+import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
+import lu.kbra.standalone.gameengine.cache.attrib.UIntAttribArray;
+import lu.kbra.standalone.gameengine.cache.attrib.Vec3fAttribArray;
+import lu.kbra.standalone.gameengine.geom.Mesh;
+import lu.kbra.standalone.gameengine.geom.QuadLoadedMesh;
+import lu.kbra.standalone.gameengine.geom.QuadMesh;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
 import lu.kbra.standalone.gameengine.objs.entity.SceneEntity;
 import lu.kbra.standalone.gameengine.scene.Scene3D;
 import lu.kbra.standalone.gameengine.scene.camera.Camera3D;
 import lu.kbra.standalone.gameengine.utils.consts.Direction;
+import lu.kbra.standalone.gameengine.utils.gl.consts.BufferType;
+import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 public class WorldLevelScene extends Scene3D {
 
@@ -69,242 +117,285 @@ public class WorldLevelScene extends Scene3D {
 	public void init(final Dispatcher workers, final Dispatcher renderDispatcher) {
 		final CountDownLatch terrainLatch = new CountDownLatch(1);
 
-//		this.moveObjectTaskState = new TaskFuture<Void, Void>(workers, (ThrowingRunnable<Throwable>) () -> {
-//			terrainLatch.await();
-//		}).push();
-//
-//		new TaskFuture<>(workers, (Supplier<WorldGenerator>) () -> {
-//			final WorldGenerator worldGenerator = new ImageWorldGenerator("classpath:/maps/world_map.png", 4 / 255f);
-//			GlobalLogger.info("Generating world...");
-//			final long time = PCUtils.nanoTime(() -> worldGenerator.compute());
-//			GlobalLogger.info("World generated in " + (time / 1e6) + " ms");
-//			return worldGenerator;
-//		}).then(renderDispatcher,
-//				(ThrowingFunction<WorldGenerator, Triplet<TerrainMesh, TerrainEdgeMesh, Mesh>, Throwable>) worldGenerator -> {
-//					GlobalLogger.info("Generating mesh...");
-//					final Pair<TerrainMesh, Long> mesh = PCUtils.nanoTime(() -> worldGenerator.generateMesh(this.getCache()));
-//					GlobalLogger.info("Mesh generated in " + (mesh.getValue() / 1e6) + " ms");
-//					GlobalLogger.info("Generating edge mesh...");
-//					final Pair<TerrainEdgeMesh, Long> edgeMesh = PCUtils.nanoTime(() -> worldGenerator.generateEdgeMesh(this.getCache()));
-//					GlobalLogger.info("Mesh generated in " + (mesh.getValue() / 1e6) + " ms");
-//					GlobalLogger.info("Generating highlight mesh...");
-//					final Pair<Mesh, Long> highlightMesh = PCUtils.nanoTime(() -> worldGenerator.generateHighlightMesh(this.getCache()));
-//					GlobalLogger.info("Mesh highlight in " + (mesh.getValue() / 1e6) + " ms");
-//					return Triplets.readOnly(mesh.getKey(), edgeMesh.getKey(), highlightMesh.getKey());
-//				},
-//				0).then(workers, (Consumer<Triplet<TerrainMesh, TerrainEdgeMesh, Mesh>>) meshes -> {
-//					GlobalLogger.info("Creating entity...");
-//					final long time = PCUtils.nanoTime((Runnable) () -> {
-//						final TerrainObject terrainEntity = new TerrainObject("terrain", meshes.getFirst());
-//						terrainEntity.setTerrainEdgeEntity(new TerrainEdgeObject("terrain-edges", meshes.getSecond(), new Transform3D()));
-//						terrainEntity.setTerrainHighlightEntity(new TerrainHighlightObject("terrain-highlight",
-//								meshes.getThird(),
-//								new Transform3D(new Vector3f(0, 10, 0)),
-//								GameEngine.IDENTITY_VECTOR3I,
-//								ColorMaterial.CYAN.getId()));
-////						terrainEntity.getTerrainHighlightObject().setActive(false);
-//						terrainEntity.getTransform()
-//								.translationSet(-meshes.getFirst().getWidth() / 2, 0, -meshes.getFirst().getLength() / 2);
-//						terrainEntity.getTransform().updateMatrix();
-////						terrainEntity.setActive(false);
-//						this.setTerrain(terrainEntity);
-//					});
-//					GlobalLogger.info("Entity created in " + (time / 1e6) + " ms");
-//				}).then(workers, (Runnable) () -> {
-//					terrainLatch.countDown();
-//
-//					new TaskFuture<>(renderDispatcher, (Runnable) () -> {
-//						final Vector3f[] pos = new Vector3f[48];
-//						int index = 0;
-//						final TerrainMesh terrainMesh = this.getTerrain().getMesh();
-//						for (int x = 0, y = 2; x < 12; x += 1) {
-//							final float h0 = terrainMesh.getCellHeight(x, y) + 0.5f;
-//							final float h1 = terrainMesh.getCellHeight(x + 1, y) + 0.5f;
-//
-//							pos[index + 0] = new Vector3f(x, h0, y + 0.5f);
-//							pos[index + 1] = new Vector3f(x + 1, h0, y + 0.5f);
-//							index += 2;
-//
-//							if (h0 != h1) {
-//								final float low = Math.min(h0, h1);
-//								final float high = Math.max(h0, h1);
-//
-//								pos[index + 0] = new Vector3f(x + 1, low, y + 0.5f);
-//								pos[index + 1] = new Vector3f(x + 1, high, y + 0.5f);
-//								index += 2;
-//							}
-//						}
-//						final int[] indices = new int[pos.length * 2 + 2];
-//						for (int i = 0; i < pos.length - 1; i++) {
-//							indices[i * 2 + 0] = i;
-//							indices[i * 2 + 1] = i + 1;
-//						}
-//
-//						final PipeMesh mesh = new PipeMesh("pipe-" + "@" + System.identityHashCode(this),
-//								12,
-//								new Vec3fAttribArray(Mesh.ATTRIB_VERTICES_NAME, Mesh.ATTRIB_VERTICES_ID, pos),
-//								new UIntAttribArray(Mesh.ATTRIB_INDICES_NAME, Mesh.ATTRIB_INDICES_ID, indices, BufferType.ELEMENT_ARRAY));
-//						mesh.setEffectiveLength(index);
-//						this.worldCache.addMesh(mesh);
-//						this.terrain.getSubEntitiesComponent()
-//								.add(new GameObject("test", mesh, new Transform3D(), new Vector3i(), ColorMaterial.LIGHT_BLUE.getId()));
-//
-//						for (int x = terrainMesh.getWidth(), y = 12; x > 0; x -= 1) {
-//							final float h0 = terrainMesh.getCellHeight(x, y) + 0.5f;
-//							final float h1 = terrainMesh.getCellHeight(x + 1, y) + 0.5f;
-//
-//							mesh.addPoint(new Vector3f(x + 1, h0, y + 0.5f));
-//
-//							if (h0 != h1) {
-//								final float low = Math.min(h0, h1);
-//								final float high = Math.max(h0, h1);
-//
-//								mesh.addPoint(new Vector3f(x + 1, high, y + 0.5f));
-//							}
-//						}
-//
-////						System.err.println("created pipe");
-//					}); // .push();
-//
-//					new TaskFuture<>(renderDispatcher, (Supplier<QuadMesh>) () -> {
-//						GlobalLogger.info("Generating water mesh...");
-//						final Pair<QuadMesh, Long> meshTime = PCUtils.nanoTime(() -> new QuadLoadedMesh("water",
-//								null,
-//								new Vector2f(this.getTerrain().getMesh().getWidth(), this.getTerrain().getMesh().getLength())));
-//						this.getCache().addMesh(meshTime.getKey());
-//						GlobalLogger.info("Water mesh generated in " + (meshTime.getValue() / 1e6) + " ms");
-//						return meshTime.getKey();
-//					}).then(workers,
-//							(ThrowingConsumer<QuadMesh, Throwable>) mesh -> this.setWaterLevel(new GameObject("water",
+		this.moveObjectTaskState = new TaskFuture<Void, Void>(workers, (ThrowingRunnable<Throwable>) () -> {
+			terrainLatch.await();
+		}).push();
+
+		new TaskFuture<>(workers, (Supplier<WorldGenerator>) () -> {
+			final WorldGenerator worldGenerator = new ImageWorldGenerator("classpath:/maps/world_map.png", 4 / 255f);
+			GlobalLogger.info("Generating world...");
+			final long time = PCUtils.nanoTime(() -> worldGenerator.compute());
+			GlobalLogger.info("World generated in " + (time / 1e6) + " ms");
+			return worldGenerator;
+		}).then(renderDispatcher,
+				(ThrowingFunction<WorldGenerator, Triplet<TerrainMesh, TerrainEdgeMesh, Mesh>, Throwable>) worldGenerator -> {
+					GlobalLogger.info("Generating mesh...");
+					final Pair<TerrainMesh, Long> mesh = PCUtils.nanoTime(() -> worldGenerator.generateMesh(this.getCache()));
+					GlobalLogger.info("Mesh generated in " + (mesh.getValue() / 1e6) + " ms");
+					GlobalLogger.info("Generating edge mesh...");
+					final Pair<TerrainEdgeMesh, Long> edgeMesh = PCUtils.nanoTime(() -> worldGenerator.generateEdgeMesh(this.getCache()));
+					GlobalLogger.info("Mesh generated in " + (mesh.getValue() / 1e6) + " ms");
+					GlobalLogger.info("Generating highlight mesh...");
+					final Pair<Mesh, Long> highlightMesh = PCUtils.nanoTime(() -> worldGenerator.generateHighlightMesh(this.getCache()));
+					GlobalLogger.info("Mesh highlight in " + (mesh.getValue() / 1e6) + " ms");
+					return Triplets.readOnly(mesh.getKey(), edgeMesh.getKey(), highlightMesh.getKey());
+				},
+				0).then(workers, (Consumer<Triplet<TerrainMesh, TerrainEdgeMesh, Mesh>>) meshes -> {
+					GlobalLogger.info("Creating entity...");
+					final long time = PCUtils.nanoTime((Runnable) () -> {
+						final TerrainObject terrainEntity = new TerrainObject("terrain", meshes.getFirst());
+
+						terrainEntity.setTerrainEdgeEntity(GameObjectFactory.createManual(TerrainEdgeObject.class, meshes.getSecond())
+								.set(i -> i.setTransform(new Transform3D(new Vector3f(0, 0, 0))))
+								.set(i -> i.setMaterial(ColorMaterial.BLACK))
+								.exec());
+
+						terrainEntity
+								.setTerrainHighlightEntity(GameObjectFactory.createManual(TerrainHighlightObject.class, meshes.getThird())
+										.set(i -> i.setTransform(new Transform3D(new Vector3f(0, 10, 0))))
+										.set(i -> i.setMaterial(ColorMaterial.CYAN))
+										.exec());
+
+						terrainEntity.getTransform()
+								.translationSet(-meshes.getFirst().getWidth() / 2, 0, -meshes.getFirst().getLength() / 2);
+						terrainEntity.getTransform().updateMatrix();
+
+						this.setTerrain(terrainEntity);
+					});
+					GlobalLogger.info("Entity created in " + (time / 1e6) + " ms");
+				}).then(workers, (Runnable) () -> {
+					terrainLatch.countDown();
+
+					new TaskFuture<>(renderDispatcher, (Runnable) () -> {
+						final Vector3f[] pos = new Vector3f[48];
+						int index = 0;
+						final TerrainMesh terrainMesh = this.getTerrain().getMesh();
+						for (int x = 0, y = 2; x < 12; x += 1) {
+							final float h0 = terrainMesh.getCellHeight(x, y) + 0.5f;
+							final float h1 = terrainMesh.getCellHeight(x + 1, y) + 0.5f;
+
+							pos[index + 0] = new Vector3f(x, h0, y + 0.5f);
+							pos[index + 1] = new Vector3f(x + 1, h0, y + 0.5f);
+							index += 2;
+
+							if (h0 != h1) {
+								final float low = Math.min(h0, h1);
+								final float high = Math.max(h0, h1);
+
+								pos[index + 0] = new Vector3f(x + 1, low, y + 0.5f);
+								pos[index + 1] = new Vector3f(x + 1, high, y + 0.5f);
+								index += 2;
+							}
+						}
+						final int[] indices = new int[pos.length * 2 + 2];
+						for (int i = 0; i < pos.length - 1; i++) {
+							indices[i * 2 + 0] = i;
+							indices[i * 2 + 1] = i + 1;
+						}
+
+						final PipeMesh mesh = new PipeMesh("pipe-" + "@" + System.identityHashCode(this),
+								12,
+								new Vec3fAttribArray(Mesh.ATTRIB_VERTICES_NAME, Mesh.ATTRIB_VERTICES_ID, pos),
+								new UIntAttribArray(Mesh.ATTRIB_INDICES_NAME, Mesh.ATTRIB_INDICES_ID, indices, BufferType.ELEMENT_ARRAY));
+						mesh.setEffectiveLength(index);
+						this.worldCache.addMesh(mesh);
+						this.terrain.getSubEntitiesComponent().add(null);
+						GameObjectFactory.createManual(GameObject.class, mesh)
+								.set(i -> i.setTransform(new Transform3D()))
+								.set(i -> i.setObjectId(GameObject.getRandomObjectId()))
+								.set(i -> i.setMaterialId(ColorMaterial.LIGHT_BLUE.getId()))
+								.exec();
+//						new GameObject("test", mesh, new Transform3D(), new Vector3i(), ColorMaterial.LIGHT_BLUE.getId());
+
+						for (int x = terrainMesh.getWidth(), y = 12; x > 0; x -= 1) {
+							final float h0 = terrainMesh.getCellHeight(x, y) + 0.5f;
+							final float h1 = terrainMesh.getCellHeight(x + 1, y) + 0.5f;
+
+							mesh.addPoint(new Vector3f(x + 1, h0, y + 0.5f));
+
+							if (h0 != h1) {
+								final float low = Math.min(h0, h1);
+								final float high = Math.max(h0, h1);
+
+								mesh.addPoint(new Vector3f(x + 1, high, y + 0.5f));
+							}
+						}
+
+//						System.err.println("created pipe");
+					}); // .push();
+
+					final float width = this.getTerrain().getMesh().getWidth();
+					final float length = this.getTerrain().getMesh().getLength();
+
+					new TaskFuture<>(renderDispatcher, (Supplier<QuadMesh>) () -> {
+						GlobalLogger.info("Generating water mesh...");
+						final Pair<QuadMesh, Long> meshTime = PCUtils
+								.nanoTime(() -> new QuadLoadedMesh("water", null, new Vector2f(width, length)));
+						this.getCache().addMesh(meshTime.getKey());
+						GlobalLogger.info("Water mesh generated in " + (meshTime.getValue() / 1e6) + " ms");
+						return meshTime.getKey();
+					}).then(workers,
+							(Consumer<QuadMesh>) mesh -> this.setWaterLevel(GameObjectFactory.createManual(GameObject.class, mesh)
+									.set(i -> i.setTransform(new Transform3D(new Vector3f(width / 2, 0.9f, length / 2))))
+									.set(i -> i.setObjectId(new Vector3i(2, 0, 0)))
+									.set(i -> i.setMaterial(ColorMaterial.BLUE))
+									.exec()))
+							.push();
+
+//					.then(GameObjectFactory.taskManual(GameObject.class)
+//							.set(i -> i.setTransform(new Transform3D(new Vector3f(width / 2, 0.9f, length / 2))))
+//							.set(i -> i.setObjectId(new Vector3i(2, 0, 0)))
+//							.set(i -> i.setMaterialId(ColorMaterial.BLUE.getId()))).push();
+
+//							new GameObject("water",
 //									mesh,
 //									new Transform3D(new Vector3f(mesh.getSize().x() / 2, 0.9f, mesh.getSize().y() / 2)),
 //									new Vector3i(2, 0, 0),
-//									ColorMaterial.BLUE.getId())))
-//							.push();
-//
-//					GameObjectFactory.create(WaterTowerObject.class, this, new Transform3D())
-//							.then(workers, (ThrowingConsumer<WaterTowerObject, Throwable>) obj -> {
-//								final Vector2i pos = new Vector2i(0, 0);
-//								while (!obj.isPlaceable(this, pos, Direction.NONE)) {
-//									pos.x++;
-//									if (pos.x >= this.getTerrain().getMesh().getWidth()) {
-//										pos.x = 0;
-//										pos.y++;
-//									}
-//									if (pos.y >= this.getTerrain().getMesh().getLength()) {
-//										break;
-//									}
-//								}
-//								obj.placeDown(this.getTerrain(), pos, Direction.NONE);
-//							})
-//							.push();
-//
-//					GameObjectFactory.create(WaterTowerObject.class, this, new Transform3D())
-//							.then(workers, (ThrowingConsumer<WaterTowerObject, Throwable>) obj -> {
-//								obj.placeDown(this.getTerrain(), new Vector2i(11, 15), Direction.NONE);
-//							})
-//							.push();
-//
-//					GameObjectFactory.create(SolarPanelObject.class, this, new Transform3D())
-//							.then(workers,
-//									(ThrowingConsumer<SolarPanelObject, Throwable>) obj -> obj
-//											.placeDown(this.getTerrain(), new Vector2i(15, 5), Direction.NONE))
-//							.push();
-//
-//					GameObjectFactory.create(WaterWheelObject.class, this, new Transform3D())
-//							.then(workers,
-//									(ThrowingConsumer<WaterWheelObject, Throwable>) obj -> obj
-//											.placeDown(this.getTerrain(), new Vector2i(11, 7), Direction.WEST))
-//							.push();
-//
-//					GameObjectFactory.create(WaterWheelObject.class, this, new Transform3D())
-//							.then(workers,
-//									(ThrowingConsumer<WaterWheelObject, Throwable>) obj -> obj
-//											.placeDown(this.getTerrain(), new Vector2i(13, 8), Direction.WEST))
-//							.push();
-//
-//					GameObjectFactory.create(WaterSprinklerObject3x3.class, this, new Transform3D())
-//							.then(workers,
-//									(ThrowingConsumer<WaterSprinklerObject3x3, Throwable>) obj -> obj
-//											.placeDown(this.getTerrain(), new Vector2i(15, 8), Direction.WEST))
-//							.push();
-//
-//					GameObjectFactory.create(WaterSprinklerObject5x5.class, this, new Transform3D())
-//							.then(workers,
-//									(ThrowingConsumer<WaterSprinklerObject5x5, Throwable>) obj -> obj
-//											.placeDown(this.getTerrain(), new Vector2i(16, 8), Direction.WEST))
-//							.push();
-//
-//					GameObjectFactory.create(WaterSprinklerObject7x7.class, this, new Transform3D())
-//							.then(workers,
-//									(ThrowingConsumer<WaterSprinklerObject7x7, Throwable>) obj -> obj
-//											.placeDown(this.getTerrain(), new Vector2i(17, 8), Direction.WEST))
-//							.push();
-//
-//					final List<Vector3f> positions = new ArrayList<>();
-//					for (int x = 0; x < this.getTerrain().getMesh().getWidth(); x++) {
-//						for (int z = 0; z < this.getTerrain().getMesh().getLength(); z++) {
-//							final float y = this.getTerrain().getMesh().getCellHeight(x, z);
-//							if (Math.random() < 0.5f) {
-//								positions.add(new Vector3f(x + 0.5f, y, z + 0.5f));
-//							}
-//						}
-//					}
-//
-//					List<Vector3f> smallPositions = new ArrayList<>();
-//					List<Vector3f> mediumPositions = new ArrayList<>();
-//					List<Vector3f> largePositions = new ArrayList<>();
-//					for (final Vector3f pos : positions) {
-//						(switch (PCUtils.randomIntRange(0, 3)) {
-//						case 0 -> smallPositions;
-//						case 1 -> mediumPositions;
-//						case 2 -> largePositions;
-//						default -> null;
-//						}).add(pos);
-//					}
-//
-//					this.instance(InstanceSmallGrassObject.class, smallPositions, ColorMaterial.GREEN);
-//					this.instance(InstanceMediumGrassObject.class, mediumPositions, ColorMaterial.GREEN);
-//					this.instance(InstanceLargeGrassObject.class, largePositions, ColorMaterial.GREEN);
-//
-//					smallPositions = new ArrayList<>();
-//					mediumPositions = new ArrayList<>();
-//					largePositions = new ArrayList<>();
-//					final List<Vector3f> smallPositions1 = new ArrayList<>();
-//					final List<Vector3f> mediumPositions1 = new ArrayList<>();
-//					final List<Vector3f> largePositions1 = new ArrayList<>();
-//
-//					for (final Vector3f pos : positions) {
-//						(switch (PCUtils.randomIntRange(0, 6)) {
-//						case 0 -> smallPositions;
-//						case 1 -> mediumPositions;
-//						case 2 -> largePositions;
-//						case 3 -> smallPositions1;
-//						case 4 -> mediumPositions1;
-//						case 5 -> largePositions1;
-//						default -> null;
-//						}).add(pos);
-//					}
-//
-//					this.instance(InstanceSmallChampiFlowerObject.class, smallPositions, ColorMaterial.LIGHT_CYAN);
-//					this.instance(InstanceMediumChampiFlowerObject.class, mediumPositions, ColorMaterial.LIGHT_MAGENTA);
-//					this.instance(InstanceLargeChampiFlowerObject.class, largePositions, ColorMaterial.LIGHT_ORANGE);
-//					this.instance(InstanceSmallRoundFlowerObject.class, smallPositions1, ColorMaterial.LIGHT_YELLOW);
-//					this.instance(InstanceMediumRoundFlowerObject.class, mediumPositions1, ColorMaterial.WHITE);
-//					this.instance(InstanceLargeRoundFlowerObject.class, largePositions1, ColorMaterial.LIGHT_PINK);
-//
-//				}).push();
+//									ColorMaterial.BLUE.getId()))
+
+					GameObjectFactory.create(WaterTowerObject.class)
+							.set(i -> i.setTransform(new Transform3D()))
+							.add(this)
+							.then(workers, (ThrowingConsumer<WaterTowerObject, Throwable>) obj -> {
+								final Vector2i pos = new Vector2i(0, 0);
+								while (!obj.isPlaceable(this, pos, Direction.NONE)) {
+									pos.x++;
+									if (pos.x >= this.getTerrain().getMesh().getWidth()) {
+										pos.x = 0;
+										pos.y++;
+									}
+									if (pos.y >= this.getTerrain().getMesh().getLength()) {
+										break;
+									}
+								}
+								obj.placeDown(this.getTerrain(), pos, Direction.NONE);
+							})
+							.push();
+
+					GameObjectFactory.create(WaterTowerObject.class)
+							.set(i -> i.setTransform(new Transform3D()))
+							.add(this)
+							.then(workers,
+									(ThrowingConsumer<WaterTowerObject, Throwable>) obj -> obj
+											.placeDown(this.getTerrain(), new Vector2i(11, 15), Direction.NONE))
+							.push();
+
+					GameObjectFactory.create(SolarPanelObject.class)
+							.set(i -> i.setTransform(new Transform3D()))
+							.add(this)
+							.then(workers,
+									(ThrowingConsumer<SolarPanelObject, Throwable>) obj -> obj
+											.placeDown(this.getTerrain(), new Vector2i(15, 5), Direction.NONE))
+							.push();
+
+					GameObjectFactory.create(WaterWheelObject.class)
+							.set(i -> i.setTransform(new Transform3D()))
+							.add(this)
+							.then(workers,
+									(ThrowingConsumer<WaterWheelObject, Throwable>) obj -> obj
+											.placeDown(this.getTerrain(), new Vector2i(11, 7), Direction.WEST))
+							.push();
+
+					GameObjectFactory.create(WaterWheelObject.class)
+							.set(i -> i.setTransform(new Transform3D()))
+							.add(this)
+							.then(workers,
+									(ThrowingConsumer<WaterWheelObject, Throwable>) obj -> obj
+											.placeDown(this.getTerrain(), new Vector2i(13, 8), Direction.WEST))
+							.push();
+
+					GameObjectFactory.create(WaterSprinklerObject3x3.class)
+							.set(i -> i.setTransform(new Transform3D()))
+							.add(this)
+							.then(workers,
+									(ThrowingConsumer<WaterSprinklerObject3x3, Throwable>) obj -> obj
+											.placeDown(this.getTerrain(), new Vector2i(15, 8), Direction.WEST))
+							.push();
+
+					GameObjectFactory.create(WaterSprinklerObject5x5.class)
+							.set(i -> i.setTransform(new Transform3D()))
+							.add(this)
+							.then(workers,
+									(ThrowingConsumer<WaterSprinklerObject5x5, Throwable>) obj -> obj
+											.placeDown(this.getTerrain(), new Vector2i(16, 8), Direction.WEST))
+							.push();
+
+					GameObjectFactory.create(WaterSprinklerObject7x7.class)
+							.set(i -> i.setTransform(new Transform3D()))
+							.add(this)
+							.then(workers,
+									(ThrowingConsumer<WaterSprinklerObject7x7, Throwable>) obj -> obj
+											.placeDown(this.getTerrain(), new Vector2i(17, 8), Direction.WEST))
+							.push();
+
+					final List<Vector3f> positions = new ArrayList<>();
+					for (int x = 0; x < this.getTerrain().getMesh().getWidth(); x++) {
+						for (int z = 0; z < this.getTerrain().getMesh().getLength(); z++) {
+							final float y = this.getTerrain().getMesh().getCellHeight(x, z);
+							if (Math.random() < 0.5f) {
+								positions.add(new Vector3f(x + 0.5f, y, z + 0.5f));
+							}
+						}
+					}
+
+					List<Vector3f> smallPositions = new ArrayList<>();
+					List<Vector3f> mediumPositions = new ArrayList<>();
+					List<Vector3f> largePositions = new ArrayList<>();
+					for (final Vector3f pos : positions) {
+						(switch (PCUtils.randomIntRange(0, 3)) {
+						case 0 -> smallPositions;
+						case 1 -> mediumPositions;
+						case 2 -> largePositions;
+						default -> null;
+						}).add(pos);
+					}
+
+					this.instance(InstanceSmallGrassObject.class, smallPositions, ColorMaterial.GREEN);
+					this.instance(InstanceMediumGrassObject.class, mediumPositions, ColorMaterial.GREEN);
+					this.instance(InstanceLargeGrassObject.class, largePositions, ColorMaterial.GREEN);
+
+					smallPositions = new ArrayList<>();
+					mediumPositions = new ArrayList<>();
+					largePositions = new ArrayList<>();
+					final List<Vector3f> smallPositions1 = new ArrayList<>();
+					final List<Vector3f> mediumPositions1 = new ArrayList<>();
+					final List<Vector3f> largePositions1 = new ArrayList<>();
+
+					for (final Vector3f pos : positions) {
+						(switch (PCUtils.randomIntRange(0, 6)) {
+						case 0 -> smallPositions;
+						case 1 -> mediumPositions;
+						case 2 -> largePositions;
+						case 3 -> smallPositions1;
+						case 4 -> mediumPositions1;
+						case 5 -> largePositions1;
+						default -> null;
+						}).add(pos);
+					}
+
+					this.instance(InstanceSmallChampiFlowerObject.class, smallPositions, ColorMaterial.LIGHT_CYAN);
+					this.instance(InstanceMediumChampiFlowerObject.class, mediumPositions, ColorMaterial.LIGHT_MAGENTA);
+					this.instance(InstanceLargeChampiFlowerObject.class, largePositions, ColorMaterial.LIGHT_ORANGE);
+					this.instance(InstanceSmallRoundFlowerObject.class, smallPositions1, ColorMaterial.LIGHT_YELLOW);
+					this.instance(InstanceMediumRoundFlowerObject.class, mediumPositions1, ColorMaterial.WHITE);
+					this.instance(InstanceLargeRoundFlowerObject.class, largePositions1, ColorMaterial.LIGHT_PINK);
+
+				}).push();
 	}
 
-//	private <T extends GameObject> void instance(final Class<T> class1, final List<Vector3f> pos, final ColorMaterial mt) {
-//		GameObjectFactory
-//				.create(class1,
-//						this.getTerrain().getSubEntitiesComponent(),
-//						new InstanceData(i -> new Transform3D(pos.get(i), new Quaternionf().rotateY((float) (Math.random() * 2 * Math.PI))),
-//								pos.size()),
-//						mt.getId())
-//				.push();
-//	}
+	private <T extends GameObject & InstanceEmitterOwner> void instance(
+			final Class<T> clazz,
+			final List<Vector3f> pos,
+			final ColorMaterial mt) {
+		GameObjectFactory
+				.createInstances(clazz,
+						i -> new Transform3D(pos.get(i), new Quaternionf().rotateY((float) (Math.random() * 2 * Math.PI))),
+						OptionalInt.of(pos.size()),
+						Optional.empty())
+				.set(i -> i.setMaterialId(mt.getId()))
+				.add(this.getTerrain())
+				.push();
+	}
 
 	private Vector2i pos;
 
