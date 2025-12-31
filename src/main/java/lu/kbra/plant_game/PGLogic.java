@@ -2,23 +2,16 @@ package lu.kbra.plant_game;
 
 import java.io.File;
 import java.util.Locale;
-import java.util.function.Consumer;
 
-import org.joml.AxisAngle4d;
-import org.joml.Quaternionf;
-import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import lu.pcy113.pclib.PCUtils;
 
 import lu.kbra.plant_game.engine.UpdateFrameState;
 import lu.kbra.plant_game.engine.data.json.OrgJOMLModule;
 import lu.kbra.plant_game.engine.data.json.OrgJSONModule;
 import lu.kbra.plant_game.engine.data.locale.LocalizationService;
 import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory;
-import lu.kbra.plant_game.engine.entity.go.obj_inst.particles.GravityParticleGameObject;
 import lu.kbra.plant_game.engine.entity.go.obj_inst.particles.ParticleGameObject;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
@@ -27,11 +20,9 @@ import lu.kbra.plant_game.engine.scene.ui.menu.main.MainMenuUIScene;
 import lu.kbra.plant_game.engine.scene.ui.overlay.OverlayUIScene;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.plant_game.engine.window.input.MappingInputHandler;
-import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.standalone.gameengine.impl.GameLogic;
 import lu.kbra.standalone.gameengine.impl.future.WorkerDispatcher;
 import lu.kbra.standalone.gameengine.utils.gl.consts.Consts;
-import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 public class PGLogic extends GameLogic {
 
@@ -107,28 +98,28 @@ public class PGLogic extends GameLogic {
 //				.then(this.WORKERS, (Consumer<ParticleGameObject>) System.out::println)
 //				.push();
 
-		ParticleGameObject
-				.createGravity(this.WORKERS,
-						this.worldScene,
-						100,
-						ColorMaterial.RED,
-						new Transform3D(new Vector3f(0, 3, 0)),
-						true,
-						0,
-						GravityParticleGameObject.IRON_DENSITY,
-						i -> new Vector3f(1, 0, 0).rotateY((float) (Math.random() * Math.PI * 2))
-								.normalize()
-								.mul(PCUtils.randomFloatRange(0.8f, 1.5f)),
-						null,
-						i -> new Vector3f(0, 2, 0),
-						i -> new Quaternionf(new AxisAngle4d((float) Math.random() * 2 - 1,
-								(float) Math.random() * 2 - 1,
-								(float) Math.random() * 2 - 1,
-								(float) Math.random() * 2 - 1)),
-						i -> PCUtils.randomFloatRange(0.08f, 0.1f))
-				.then(this.WORKERS,
-						(Consumer<GravityParticleGameObject>) parts -> this.worldScene.getParticleManager().getActiveObjects().add(parts))
-				.push();
+//		ParticleGameObject
+//				.createGravity(this.WORKERS,
+//						this.worldScene,
+//						100,
+//						ColorMaterial.RED,
+//						new Transform3D(new Vector3f(0, 3, 0)),
+//						true,
+//						0,
+//						GravityParticleGameObject.IRON_DENSITY,
+//						i -> new Vector3f(1, 0, 0).rotateY((float) (Math.random() * Math.PI * 2))
+//								.normalize()
+//								.mul(PCUtils.randomFloatRange(0.8f, 1.5f)),
+//						null,
+//						i -> new Vector3f(0, 2, 0),
+//						i -> new Quaternionf(new AxisAngle4d((float) Math.random() * 2 - 1,
+//								(float) Math.random() * 2 - 1,
+//								(float) Math.random() * 2 - 1,
+//								(float) Math.random() * 2 - 1)),
+//						i -> PCUtils.randomFloatRange(0.08f, 0.1f))
+//				.then(this.WORKERS,
+//						(Consumer<GravityParticleGameObject>) parts -> this.worldScene.getParticleManager().getActiveObjects().add(parts))
+//				.push();
 	}
 
 	private final UpdateFrameState frameState = new UpdateFrameState();

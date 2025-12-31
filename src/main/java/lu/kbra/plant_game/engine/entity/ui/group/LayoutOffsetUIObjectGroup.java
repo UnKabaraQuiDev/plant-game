@@ -36,7 +36,7 @@ public class LayoutOffsetUIObjectGroup extends OffsetUIObjectGroup implements La
 	}
 
 	@Override
-	public boolean addAll(final Collection<? extends UIObject> c) {
+	public <V extends UIObject> boolean addAll(final Collection<? extends V> c) {
 		final boolean v = super.addAll(c);
 		this.doLayout();
 		return v;
@@ -50,7 +50,7 @@ public class LayoutOffsetUIObjectGroup extends OffsetUIObjectGroup implements La
 	}
 
 	@Override
-	public boolean addChildren(final ObjectGroup<? extends UIObject> c) {
+	public <V extends UIObject> boolean addChildren(final ObjectGroup<? extends V> c) {
 		final boolean v = super.addChildren(c);
 		this.doLayout();
 		return v;

@@ -29,9 +29,9 @@ public abstract class UIObject extends Entity
 	}
 
 	public UIObject(final String str, final Mesh mesh, final Transform3D transform) {
-		super(str, mesh != null ? new MeshComponent(mesh) : null, transform != null ? new Transform3DComponent(transform) : null);
-		this.meshComponent = super.getComponent(MeshComponent.class);
-		this.transformComponent = super.getComponent(Transform3DComponent.class);
+		super(str);
+		this.setMesh(mesh);
+		this.setTransform(transform);
 	}
 
 	public MeshComponent getMeshComponent() {
@@ -50,6 +50,32 @@ public abstract class UIObject extends Entity
 	@Override
 	public Transform3D getTransform() {
 		return this.transformComponent == null ? null : this.transformComponent.getTransform();
+	}
+
+	@Override
+	public void setTransform(final Transform3D ie) {
+		if (this.transformComponent != null) {
+			if (ie == null) {
+				super.removeComponent(Transform3DComponent.class);
+			} else {
+				this.transformComponent.setTransform(ie);
+			}
+		} else if (ie != null) {
+			super.addComponent(this.transformComponent = new Transform3DComponent(ie));
+		}
+	}
+
+	@Override
+	public void setMesh(final Mesh ie) {
+		if (this.meshComponent != null) {
+			if (ie == null) {
+				super.removeComponent(MeshComponent.class);
+			} else {
+				this.meshComponent.setMesh(ie);
+			}
+		} else if (ie != null) {
+			super.addComponent(this.meshComponent = new MeshComponent(ie));
+		}
 	}
 
 	@Override

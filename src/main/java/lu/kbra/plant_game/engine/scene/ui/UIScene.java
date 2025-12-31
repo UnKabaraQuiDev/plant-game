@@ -4,7 +4,6 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -35,6 +34,7 @@ import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.WorkerDispatcher;
 import lu.kbra.standalone.gameengine.objs.entity.Entity;
+import lu.kbra.standalone.gameengine.objs.entity.SceneEntity;
 import lu.kbra.standalone.gameengine.objs.entity.components.SubEntitiesComponent;
 import lu.kbra.standalone.gameengine.objs.entity.components.TransformComponent;
 import lu.kbra.standalone.gameengine.scene.Scene3D;
@@ -86,15 +86,14 @@ public class UIScene extends Scene3D implements BoundsOwner {
 		}
 
 		synchronized (super.getEntitiesLock()) {
-			for (final Entity e : this) {
-				this
-						.checkInput(e,
-								inputHandler,
-								dTime,
-								frameState,
-								new Point2D.Float(mouseWorld2D.x, mouseWorld2D.y),
-								newHovered,
-								GameEngine.IDENTITY_MATRIX4F);
+			for (final SceneEntity e : this) {
+				this.checkInput(e,
+						inputHandler,
+						dTime,
+						frameState,
+						new Point2D.Float(mouseWorld2D.x, mouseWorld2D.y),
+						newHovered,
+						GameEngine.IDENTITY_MATRIX4F);
 
 				if (resized && e instanceof final LayoutParent lp) {
 					lp.doLayout();
@@ -123,7 +122,7 @@ public class UIScene extends Scene3D implements BoundsOwner {
 	}
 
 	private void checkInput(
-			final Entity e,
+			final SceneEntity e,
 			final WindowInputHandler inputHandler,
 			final float dTime,
 			final UpdateFrameState frameState,
@@ -139,7 +138,7 @@ public class UIScene extends Scene3D implements BoundsOwner {
 
 			e.getComponentsMatching(SubEntitiesComponent.class).forEach(se -> {
 				synchronized (se.getEntitiesLock()) {
-					for (final Entity e2 : (List<Entity>) se.getEntities()) {
+					for (final SceneEntity e2 : (List<SceneEntity>) se.getEntities()) {
 						this.checkInput(e2, inputHandler, dTime, frameState, mousePos, newHovered, newMatrix);
 					}
 				}
@@ -187,17 +186,17 @@ public class UIScene extends Scene3D implements BoundsOwner {
 			final WorkerDispatcher workers,
 			final Dispatcher render) {
 		synchronized (super.getEntitiesLock()) {
-			for (final Entity e : this) {
+			for (final SceneEntity e : this) {
 				this.updateEntity(inputHandler, dTime, e);
 			}
 		}
 	}
 
-	private void updateEntity(final WindowInputHandler inputHandler, final float dTime, final Entity e) {
+	private void updateEntity(final WindowInputHandler inputHandler, final float dTime, final SceneEntity e) {
 		if (e.hasComponentMatching(SubEntitiesComponent.class)) {
 			e.getComponentsMatching(SubEntitiesComponent.class).forEach(se -> {
 				synchronized (se.getEntitiesLock()) {
-					for (final Entity e2 : (List<Entity>) se.getEntities()) {
+					for (final SceneEntity e2 : (List<SceneEntity>) se.getEntities()) {
 						this.updateEntity(inputHandler, dTime, e2);
 					}
 				}
@@ -211,11 +210,6 @@ public class UIScene extends Scene3D implements BoundsOwner {
 
 	public CacheManager getCache() {
 		return this.uiCache;
-	}
-
-	@Override
-	public Iterator<Entity> iterator() {
-		return this.entities.values().stream().sorted(DEPTH_COMPARATOR).iterator();
 	}
 
 	@Override

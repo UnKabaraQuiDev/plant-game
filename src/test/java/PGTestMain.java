@@ -8,16 +8,14 @@ import java.util.Properties;
 import lu.pcy113.pclib.PCUtils;
 import lu.pcy113.pclib.logger.GlobalLogger;
 
-import lu.kbra.plant_game.GameObjectRegistryGenMain;
 import lu.kbra.plant_game.PGLogic;
-import lu.kbra.plant_game.UIObjectRegistryGenMain;
 import lu.kbra.standalone.gameengine.GameEngine;
 import lu.kbra.standalone.gameengine.graph.window.WindowOptions;
 import lu.kbra.standalone.gameengine.impl.GameLogic;
 
 public class PGTestMain {
 
-	public static void main(String[] args) throws FileNotFoundException, IOException {
+	public static void main(final String[] args) throws FileNotFoundException, IOException {
 		final Properties props = new Properties();
 		props.load(new StringReader(PCUtils.readStringSource("classpath:/config/main.properties")));
 
@@ -25,8 +23,8 @@ public class PGTestMain {
 		GlobalLogger.init(PCUtils.readStringSource(props.getProperty("logs.config.file")));
 		GlobalLogger.info("Removed " + PCUtils.deleteOldFiles(new File("./logs/"), 20) + " entries from the logs directory.");
 
-		new UIObjectRegistryGenMain().genRegistry();
-		new GameObjectRegistryGenMain().genRegistry();
+//		new UIObjectRegistryGenMain().genRegistry();
+//		new GameObjectRegistryGenMain().genRegistry();
 
 		final GameLogic gameLogic = new PGLogic();
 

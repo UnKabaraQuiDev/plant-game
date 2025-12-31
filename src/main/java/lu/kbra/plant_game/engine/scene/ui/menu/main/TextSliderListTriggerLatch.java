@@ -49,10 +49,10 @@ public class TextSliderListTriggerLatch<A extends TextUIObject, B extends UIObje
 					: null;
 
 			if (objA != null) {
-				parent.addEntity(objA);
+				parent.add(objA);
 			}
 			if (objB != null) {
-				parent.addEntity(objB);
+				parent.add(objB);
 			}
 
 			if (parent instanceof final LayoutParent lp) {

@@ -51,7 +51,7 @@ public class OverlayUIScene extends UIScene implements LayoutParent, PaddingOwne
 	@Override
 	public void init(final Dispatcher workers, final Dispatcher renderDispatcher) {
 		this.setLayout(new AnchorLayout());
-		super.addEntity(this.statsGroup);
+		super.add(this.statsGroup);
 
 		this.statsGroup.addComponent(new AnchorComponent(Anchor.TOP_LEFT, Anchor.TOP_LEFT));
 
@@ -119,7 +119,7 @@ public class OverlayUIScene extends UIScene implements LayoutParent, PaddingOwne
 					obj.getPopup().setValue(0).flushValue();
 					obj.getPopup().setPadding(false);
 				});
-		super.addEntity(this.progressGroup);
+		super.add(this.progressGroup);
 	}
 
 	@Override

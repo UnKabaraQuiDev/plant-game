@@ -1,13 +1,10 @@
 package lu.kbra.plant_game.engine.entity.go.impl;
 
-import org.joml.Vector3i;
-
 import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.render.SwayMesh;
 import lu.kbra.plant_game.engine.render.SwayMeshComponent;
-import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-public class SwayGameObject extends GameObject implements SwayOwner {
+public class SwayGameObject extends GameObject implements SwayOwner, SwayMeshOwner {
 
 	public static final float DEFAULT_DEFORM_RATIO = 0.1f;
 	public static final float DEFAULT_SPEED_RATIO = 0.1f;
@@ -15,82 +12,13 @@ public class SwayGameObject extends GameObject implements SwayOwner {
 
 	protected SwayMeshComponent swayMeshComponent;
 
-	protected float deformRatio;
-	protected float speedRatio;
-	protected float scaleRatio;
+	protected float deformRatio = DEFAULT_DEFORM_RATIO;
+	protected float speedRatio = DEFAULT_SPEED_RATIO;
+	protected float scaleRatio = DEFAULT_SCALE_RATIO;
 
-	public SwayGameObject(
-			final String str,
-			final SwayMesh swayMesh,
-			final float deformRatio,
-			final float speedRatio,
-			final float scaleRatio) {
+	public SwayGameObject(final String str, final SwayMesh mesh) {
 		super(str, null);
-		super.addComponent(this.swayMeshComponent = new SwayMeshComponent(swayMesh));
-		this.deformRatio = deformRatio;
-		this.speedRatio = speedRatio;
-		this.scaleRatio = scaleRatio;
-	}
-
-	public SwayGameObject(final String str, final SwayMesh swayMesh, final Transform3D transform) {
-		super(str, null, transform);
-		super.addComponent(this.swayMeshComponent = new SwayMeshComponent(swayMesh));
-		this.deformRatio = DEFAULT_DEFORM_RATIO;
-		this.speedRatio = DEFAULT_SPEED_RATIO;
-		this.scaleRatio = DEFAULT_SCALE_RATIO;
-	}
-
-	public SwayGameObject(final String str, final SwayMesh swayMesh, final Transform3D transform, final short materialId) {
-		super(str, null, transform, getRandomObjectId(), materialId);
-		super.addComponent(this.swayMeshComponent = new SwayMeshComponent(swayMesh));
-		this.deformRatio = DEFAULT_DEFORM_RATIO;
-		this.speedRatio = DEFAULT_SPEED_RATIO;
-		this.scaleRatio = DEFAULT_SCALE_RATIO;
-	}
-
-	public SwayGameObject(
-			final String str,
-			final SwayMesh swayMesh,
-			final Transform3D transform,
-			final float deformRatio,
-			final float speedRatio,
-			final float scaleRatio) {
-		super(str, null, transform);
-		super.addComponent(this.swayMeshComponent = new SwayMeshComponent(swayMesh));
-		this.deformRatio = deformRatio;
-		this.speedRatio = speedRatio;
-		this.scaleRatio = scaleRatio;
-	}
-
-	public SwayGameObject(
-			final String str,
-			final SwayMesh swayMesh,
-			final Transform3D transform,
-			final Vector3i objectId,
-			final float deformRatio,
-			final float speedRatio,
-			final float scaleRatio) {
-		super(str, null, transform, objectId);
-		super.addComponent(this.swayMeshComponent = new SwayMeshComponent(swayMesh));
-		this.deformRatio = deformRatio;
-		this.speedRatio = speedRatio;
-		this.scaleRatio = scaleRatio;
-	}
-
-	public SwayGameObject(
-			final String str,
-			final SwayMesh swayMesh,
-			final Transform3D transform,
-			final Vector3i objectId,
-			final short materialId,
-			final float deformRatio,
-			final float speedRatio,
-			final float scaleRatio) {
-		super(str, null, transform, objectId, materialId);
-		super.addComponent(this.swayMeshComponent = new SwayMeshComponent(swayMesh));
-		this.deformRatio = deformRatio;
-		this.speedRatio = speedRatio;
-		this.scaleRatio = scaleRatio;
+		this.setSwayMesh(mesh);
 	}
 
 	@Override
@@ -127,14 +55,28 @@ public class SwayGameObject extends GameObject implements SwayOwner {
 		return this.swayMeshComponent;
 	}
 
+	@Override
 	public SwayMesh getSwayMesh() {
 		return this.swayMeshComponent == null ? null : this.swayMeshComponent.getSwayMesh();
 	}
 
 	@Override
+	public void setSwayMesh(final SwayMesh ie) {
+		if (this.swayMeshComponent != null) {
+			if (ie == null) {
+				super.removeComponent(SwayMeshComponent.class);
+			} else {
+				this.swayMeshComponent.setSwayMesh(ie);
+			}
+		} else if (ie != null) {
+			super.addComponent(this.swayMeshComponent = new SwayMeshComponent(ie));
+		}
+	}
+
+	@Override
 	public String toString() {
 		return "SwayGameObject [deformRatio=" + this.deformRatio + ", speedRatio=" + this.speedRatio + ", scaleRatio=" + this.scaleRatio
-				+ ", materialId=" + this.materialId + ", entityMaterialId=" + this.entityMaterialId + ", objectId=" + this.objectId
+				+ ", materialId=" + this.materialId + ", entityMaterialId=" + this.isEntityMaterialId + ", objectId=" + this.objectId
 				+ ", objectIdLocation=" + this.objectIdLocation + ", active=" + this.active + ", name=" + this.name + ", getSwayMesh()="
 				+ this.getSwayMesh() + ", getMesh()=" + this.getMesh() + ", getTransform()=" + this.getTransform() + "]";
 	}

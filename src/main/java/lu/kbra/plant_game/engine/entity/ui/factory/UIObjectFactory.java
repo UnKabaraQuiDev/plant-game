@@ -122,6 +122,15 @@ public class UIObjectFactory {
 		this.render = render;
 	}
 
+//	public <T extends GameObject & MeshOwner> GOCreatingTaskFuture<T> createMesh_(final Class<T> clazz) {
+//		return StaticMeshLoader.getStaticFuture(this.cache, clazz.getName(), DATA_PATH.get(clazz), this.loader, this.render)
+//				.then(new GOCreatingTaskFuture(this.loader, clazz));
+//	}
+//
+//	public <T extends GameObject & NoMeshObject> GOCreatingTaskFuture<T> createNoMesh_(final Class<T> clazz) {
+//		return new GOCreatingTaskFuture(this.loader, clazz);
+//	}
+
 	public <T extends UIObject> TaskFuture<?, T> create_(final Class<T> clazz, final Object... args) {
 		this.animatedMesh.computeIfAbsent(clazz, k -> AnimatedUIObject.class.isAssignableFrom(k));
 		this.dataPath.computeIfAbsent(clazz, k -> {
@@ -144,32 +153,25 @@ public class UIObjectFactory {
 
 			if (this.animatedMesh.get(clazz)) {
 
-				return AnimatedMeshLoader
-						.getAnimatedFuture(this.cache, clazz.getName(), cDataPath, this.loader, this.render)
+				return AnimatedMeshLoader.getAnimatedFuture(this.cache, clazz.getName(), cDataPath, this.loader, this.render)
 						.then(this.loader, (ThrowingFunction<AnimatedMeshes, T, Throwable>) meshes -> {
-							final T instance = UIObjectRegistry
-									.create(clazz,
-											PCUtils
-													.combineArrays(
-															new Object[] {
-																	clazz.getSimpleName() + "#" + System.nanoTime(),
-																	meshes.staticMesh(),
-																	meshes.animatedMesh() },
-															args));
+							final T instance = UIObjectRegistry.create(clazz,
+									PCUtils.combineArrays(
+											new Object[] {
+													clazz.getSimpleName() + "#" + System.nanoTime(),
+													meshes.staticMesh(),
+													meshes.animatedMesh() },
+											args));
 							if (instance instanceof final NeedsPostConstruct npc) {
 								npc.init();
 							}
 							return instance;
 						});
 			}
-			return StaticMeshLoader
-					.getStaticFuture(this.cache, clazz.getName(), cDataPath, this.loader, this.render)
+			return StaticMeshLoader.getStaticFuture(this.cache, clazz.getName(), cDataPath, this.loader, this.render)
 					.then(this.loader, (ThrowingFunction<Mesh, T, Throwable>) mesh -> {
-						final T instance = UIObjectRegistry
-								.create(clazz,
-										PCUtils
-												.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), mesh },
-														args));
+						final T instance = UIObjectRegistry.create(clazz,
+								PCUtils.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), mesh }, args));
 						if (instance instanceof final NeedsPostConstruct npc) {
 							npc.init();
 						}
@@ -190,10 +192,8 @@ public class UIObjectFactory {
 				td = DEFAULT_TEXT_DATA;
 				nargs = args;
 
-				if (this.bufferSize
-						.computeIfAbsent(clazz,
-								c -> clazz.isAnnotationPresent(BufferSize.class) ? clazz.getAnnotation(BufferSize.class).value()
-										: -1) != -1) {
+				if (this.bufferSize.computeIfAbsent(clazz,
+						c -> clazz.isAnnotationPresent(BufferSize.class) ? clazz.getAnnotation(BufferSize.class).value() : -1) != -1) {
 					td = new TextData(td.charSize, td.textAlignment, this.bufferSize.get(clazz));
 				}
 			}
@@ -201,8 +201,7 @@ public class UIObjectFactory {
 			final String uName = td.name == null ? clazz.getSimpleName() + "#" + System.nanoTime() : td.name;
 
 			if (ProgrammaticTextUIObject.class.isAssignableFrom(clazz)) {
-				return StaticTextLoader
-						.getFuture(this.cache, uName, key, td, this.loader, this.render)
+				return StaticTextLoader.getFuture(this.cache, uName, key, td, this.loader, this.render)
 						.then(this.loader, (ThrowingFunction<TextEmitter, T, Throwable>) te -> {
 							final T instance = UIObjectRegistry.create(clazz, PCUtils.combineArrays(new Object[] { uName, te }, nargs));
 							if (instance instanceof final NeedsPostConstruct npc) {
@@ -216,12 +215,10 @@ public class UIObjectFactory {
 						});
 			}
 
-			return StaticTextLoader
-					.getFuture(this.cache, uName, key, td, this.loader, this.render)
+			return StaticTextLoader.getFuture(this.cache, uName, key, td, this.loader, this.render)
 					.then(this.loader, (ThrowingFunction<TextEmitter, T, Throwable>) te -> {
-						final T instance = UIObjectRegistry
-								.create(clazz,
-										PCUtils.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), te }, nargs));
+						final T instance = UIObjectRegistry.create(clazz,
+								PCUtils.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), te }, nargs));
 						if (instance instanceof final NeedsPostConstruct npc) {
 							npc.init();
 						}
@@ -233,14 +230,10 @@ public class UIObjectFactory {
 
 			final String txtPath = cDataPath.substring(cDataPath.indexOf(":") + 1);
 
-			return StaticTexturedMeshLoader
-					.getStaticFuture(this.cache, txtPath, txtPath, this.loader, this.render)
+			return StaticTexturedMeshLoader.getStaticFuture(this.cache, txtPath, txtPath, this.loader, this.render)
 					.then(this.loader, (ThrowingFunction<TexturedMesh, T, Throwable>) mesh -> {
-						final T instance = UIObjectRegistry
-								.create(clazz,
-										PCUtils
-												.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), mesh },
-														args));
+						final T instance = UIObjectRegistry.create(clazz,
+								PCUtils.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), mesh }, args));
 						if (instance instanceof final NeedsPostConstruct npc) {
 							npc.init();
 						}
@@ -251,8 +244,8 @@ public class UIObjectFactory {
 		if (NoMeshObject.class.isAssignableFrom(clazz)) {
 
 			return new TaskFuture<>(this.loader, (ThrowingSupplier<T, Throwable>) () -> {
-				final T instance = UIObjectRegistry
-						.create(clazz, PCUtils.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime() }, args));
+				final T instance = UIObjectRegistry.create(clazz,
+						PCUtils.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime() }, args));
 				if (instance instanceof final NeedsPostConstruct npc) {
 					npc.init();
 				}
@@ -269,11 +262,8 @@ public class UIObjectFactory {
 							this.loader,
 							this.render)
 					.then(this.loader, (ThrowingFunction<GradientMesh, T, Throwable>) mesh -> {
-						final T instance = UIObjectRegistry
-								.create(clazz,
-										PCUtils
-												.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), mesh },
-														args));
+						final T instance = UIObjectRegistry.create(clazz,
+								PCUtils.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), mesh }, args));
 						if (instance instanceof final NeedsPostConstruct npc) {
 							npc.init();
 						}
@@ -283,14 +273,10 @@ public class UIObjectFactory {
 		}
 		if (FlatQuadUIObject.class.isAssignableFrom(clazz)) {
 
-			return StaticFlatMeshLoader
-					.getStaticFuture(this.cache, this.loader, this.render)
+			return StaticFlatMeshLoader.getStaticFuture(this.cache, this.loader, this.render)
 					.then(this.loader, (ThrowingFunction<TexturedQuadMesh, T, Throwable>) mesh -> {
-						final T instance = UIObjectRegistry
-								.create(clazz,
-										PCUtils
-												.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), mesh },
-														args));
+						final T instance = UIObjectRegistry.create(clazz,
+								PCUtils.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), mesh }, args));
 						if (instance instanceof final NeedsPostConstruct npc) {
 							npc.init();
 						}
@@ -303,7 +289,7 @@ public class UIObjectFactory {
 	}
 
 	public <T extends UIObject> TaskFuture<?, T> create_(final Class<T> clazz, final UIScene scene, final Object... args) {
-		return this.create_(clazz, args).then(this.loader, (ThrowingFunction<T, T, Throwable>) scene::addEntity);
+		return this.create_(clazz, args).then(this.loader, (ThrowingFunction<T, T, Throwable>) scene::add);
 	}
 
 	@SuppressWarnings("unchecked")

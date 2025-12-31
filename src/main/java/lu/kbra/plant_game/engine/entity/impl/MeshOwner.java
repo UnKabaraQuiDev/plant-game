@@ -6,4 +6,6 @@ public interface MeshOwner {
 
 	Mesh getMesh();
 
+	void setMesh(Mesh m);
+
 }

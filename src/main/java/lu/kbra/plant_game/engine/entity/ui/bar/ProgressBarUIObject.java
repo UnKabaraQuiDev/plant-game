@@ -126,18 +126,15 @@ public class ProgressBarUIObject extends OffsetUIObjectGroup implements LimitedO
 		final float marginZ = this.margin / scale.z;
 		final Rectangle2D bgBounds = this.background.getLocalTransformedBounds().getBounds2D();
 		if (marginZ >= bgBounds.getHeight()) {
-			GlobalLogger
-					.severe("Margin (" + this.margin + ") on Z (" + marginZ + ") too big for scale (" + scale.z + ") and height ("
-							+ bgBounds.getHeight() + ")");
+			GlobalLogger.severe("Margin (" + this.margin + ") on Z (" + marginZ + ") too big for scale (" + scale.z + ") and height ("
+					+ bgBounds.getHeight() + ")");
 		}
 		if (marginX >= bgBounds.getWidth()) {
-			GlobalLogger
-					.severe("Margin (" + this.margin + ") on X (" + marginX + ") too big for scale (" + scale.x + ") and width ("
-							+ bgBounds.getWidth() + ")");
+			GlobalLogger.severe("Margin (" + this.margin + ") on X (" + marginX + ") too big for scale (" + scale.x + ") and width ("
+					+ bgBounds.getWidth() + ")");
 		}
 
-		this.foreground
-				.getTransform()
+		this.foreground.getTransform()
 				.scaleSet(org.joml.Math.lerp(0, 1 - 2 * marginX, this.value), 1, 1 - 2 * marginZ)
 				.translationSet(marginX, Y_OFFSET, 0)
 				.updateMatrix();
@@ -179,5 +176,10 @@ public class ProgressBarUIObject extends OffsetUIObjectGroup implements LimitedO
 	public int getMaxItems() {
 		return 2;
 	}
+
+//	@Override
+//	public <V extends UIObject> boolean addChildren(final ObjectGroup<? extends V> c) {
+//		return LimitedObjectGroup.super.addChildren(c);
+//	}
 
 }

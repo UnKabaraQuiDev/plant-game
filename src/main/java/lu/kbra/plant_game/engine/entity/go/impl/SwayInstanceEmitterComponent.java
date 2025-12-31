@@ -10,11 +10,11 @@ public class SwayInstanceEmitterComponent extends Component {
 		this.instanceEmitter = instanceEmitter;
 	}
 
-	public SwayInstanceEmitter getInstanceEmitter() {
+	public SwayInstanceEmitter getSwayInstanceEmitter() {
 		return this.instanceEmitter;
 	}
 
-	public void setInstanceEmitter(final SwayInstanceEmitter instanceEmitter) {
+	public void setSwayInstanceEmitter(final SwayInstanceEmitter instanceEmitter) {
 		this.instanceEmitter = instanceEmitter;
 	}
 

@@ -6,14 +6,13 @@ import static lu.kbra.plant_game.engine.mesh.loader.StaticMeshLoader.getStaticMe
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
+import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
 import lu.pcy113.pclib.PCUtils;
 import lu.pcy113.pclib.impl.ThrowingFunction;
 import lu.pcy113.pclib.impl.ThrowingSupplier;
 
-import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory.InstanceData;
 import lu.kbra.plant_game.engine.mesh.loader.StaticMeshLoader;
 import lu.kbra.plant_game.engine.mesh.loader.StaticMeshLoader.GenericMeshData;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
@@ -35,12 +34,12 @@ public class StaticInstanceLoader {
 			final CacheManager cache,
 			final String name,
 			final String path,
-			final InstanceData id,
+			final int bufferSize,
+			final IntFunction<Transform> transforms,
+			final Supplier<AttribArray>[] attribs,
 			final Dispatcher loader,
 			final Dispatcher render) {
 
-		final int bufferSize = id.getBufferSize();
-		final Function<Integer, Transform> transforms = id.getTransforms();
 		final String meshName = name + "-mesh";
 
 		TaskFuture tf = new TaskFuture<>(loader, (ThrowingSupplier<GenericMeshData, Throwable>) () -> {
@@ -61,12 +60,12 @@ public class StaticInstanceLoader {
 			return getStaticMeshData(path);
 		}).then(render, (ThrowingFunction<GenericMeshData, Mesh, Throwable>) obj -> StaticMeshLoader.createStatic(cache, meshName, obj));
 
-		final List<AttribArray> attribs = new ArrayList<>();
+		final List<AttribArray> createdAttribs = new ArrayList<>();
 
-		if (id.getAttribs() != null && !id.getAttribs().isEmpty()) {
-			for (final Supplier<AttribArray> aa : id.getAttribs()) {
+		if (attribs != null && attribs.length != 0) {
+			for (final Supplier<AttribArray> aa : attribs) {
 				tf = tf.then(render, (ThrowingFunction<Mesh, Mesh, Throwable>) mesh -> {
-					attribs.add(aa.get());
+					createdAttribs.add(aa.get());
 					return mesh;
 				});
 			}
@@ -74,7 +73,7 @@ public class StaticInstanceLoader {
 
 		return tf.then(render,
 				(ThrowingFunction<Mesh, InstanceEmitter, Throwable>) (
-						final Mesh mesh) -> createInstance(cache, name, mesh, bufferSize, transforms, attribs));
+						final Mesh mesh) -> createInstance(cache, name, mesh, bufferSize, transforms, createdAttribs));
 	}
 
 	static InstanceEmitter createInstance(
@@ -82,7 +81,7 @@ public class StaticInstanceLoader {
 			final String name,
 			final Mesh mesh,
 			final int bufferSize,
-			final Function<Integer, Transform> transform,
+			final IntFunction<Transform> transform,
 			final List<AttribArray> attribs) {
 		final InstanceEmitter te = new InstanceEmitter(name,
 				mesh,

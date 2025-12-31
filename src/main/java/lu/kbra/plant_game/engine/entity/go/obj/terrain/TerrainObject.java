@@ -14,7 +14,6 @@ import lu.kbra.plant_game.engine.entity.go.mesh.terrain.TerrainMesh;
 import lu.kbra.plant_game.engine.mesh.data.AttributeLocation;
 import lu.kbra.standalone.gameengine.objs.entity.components.SubEntitiesComponent;
 import lu.kbra.standalone.gameengine.scene.camera.Camera3D;
-import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 public class TerrainObject extends GameObject {
 
@@ -22,10 +21,11 @@ public class TerrainObject extends GameObject {
 
 	protected TerrainEdgeObject terrainEdgeObject;
 	protected TerrainHighlightObject terrainHighlightObject;
+	protected GameObject terrainWaterObject;
 
 	public TerrainObject(final String str, final TerrainMesh mesh) {
-		super(str, mesh, new Transform3D());
-		this.setEntityMaterialId(false);
+		super(str, mesh);
+		this.setIsEntityMaterialId(false);
 		this.setObjectIdLocation(AttributeLocation.MESH);
 		super.addComponent(this.subEntitiesComponent = new SubEntitiesComponent<>(new ArrayList<>()));
 	}
@@ -142,6 +142,11 @@ public class TerrainObject extends GameObject {
 
 	public TerrainHighlightObject getTerrainHighlightObject() {
 		return this.terrainHighlightObject;
+	}
+
+	public <T extends GameObject> void setWaterLevel(final T terrainWaterObject) {
+		this.getSubEntitiesComponent().replace(this.terrainWaterObject, terrainWaterObject);
+		this.terrainWaterObject = terrainWaterObject;
 	}
 
 }

@@ -1,6 +1,6 @@
 package lu.kbra.plant_game.engine.entity.go.impl;
 
-import java.util.function.Function;
+import java.util.function.IntFunction;
 
 import lu.kbra.plant_game.engine.render.SwayMesh;
 import lu.kbra.standalone.gameengine.cache.attrib.impl.AttribArray;
@@ -9,24 +9,14 @@ import lu.kbra.standalone.gameengine.utils.transform.Transform;
 
 public class SwayInstanceEmitter extends InstanceEmitter {
 
-	public SwayInstanceEmitter(
-			final String name,
-			final SwayMesh mesh,
-			final int count,
-			final Function<Integer, Transform> baseTransform,
+	public SwayInstanceEmitter(final String name, final SwayMesh mesh, final int count, final IntFunction<Transform> baseTransform,
 			final AttribArray... attribs) {
 		super(name, mesh, count, baseTransform, attribs);
-		// TODO Auto-generated constructor stub
 	}
 
-	public SwayInstanceEmitter(
-			final String name,
-			final SwayMesh mesh,
-			final int count,
-			final Transform baseTransform,
+	public SwayInstanceEmitter(final String name, final SwayMesh mesh, final int count, final Transform baseTransform,
 			final AttribArray... attribs) {
 		super(name, mesh, count, baseTransform, attribs);
-		// TODO Auto-generated constructor stub
 	}
 
 }

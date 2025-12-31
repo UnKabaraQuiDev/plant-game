@@ -59,7 +59,7 @@ public class DeferredIconRenderer extends DeferredCompositor {
 			fakeWorld.getCamera().getProjection().setSize(0.3f);
 		}
 
-		fakeWorld.addEntity(obj);
+		fakeWorld.add(obj);
 
 		// super.render(engine, fakeWorld, null);
 

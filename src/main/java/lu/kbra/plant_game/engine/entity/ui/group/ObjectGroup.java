@@ -1,27 +1,18 @@
 package lu.kbra.plant_game.engine.entity.ui.group;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
-import lu.kbra.plant_game.engine.entity.ui.UIObject;
-import lu.kbra.standalone.gameengine.objs.entity.Entity;
 import lu.kbra.standalone.gameengine.objs.entity.ParentAware;
+import lu.kbra.standalone.gameengine.objs.entity.SceneEntity;
 import lu.kbra.standalone.gameengine.objs.entity.components.SubEntitiesComponent;
+import lu.kbra.standalone.gameengine.scene.EntityContainer;
 
-public interface ObjectGroup<T extends Entity> extends Iterable<T>, ParentAware {
+public interface ObjectGroup<T extends SceneEntity> extends Iterable<T>, ParentAware, EntityContainer<T> {
 
 	T get(int index);
 
-	boolean addChildren(ObjectGroup<? extends T> c);
-
-	boolean addAll(Collection<? extends T> c);
-
-	<V extends T> V add(V e);
-
-	<V extends T> V[] addAll(V... e);
-
-	boolean contains(UIObject o);
+	<V extends T> boolean addChildren(ObjectGroup<? extends V> c);
 
 	Object getSubEntitiesLock();
 
@@ -34,7 +25,5 @@ public interface ObjectGroup<T extends Entity> extends Iterable<T>, ParentAware 
 	Stream<T> stream();
 
 	void doSort();
-
-	int size();
 
 }

@@ -6,4 +6,6 @@ public interface AnimatedMeshOwner {
 
 	AnimatedMesh getAnimatedMesh();
 
+	void setAnimatedMesh(AnimatedMesh m);
+
 }

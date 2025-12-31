@@ -3,9 +3,9 @@ package lu.kbra.plant_game.engine.entity.ui.bar;
 import java.util.Collection;
 
 import lu.kbra.plant_game.engine.entity.ui.group.ObjectGroup;
-import lu.kbra.standalone.gameengine.objs.entity.Entity;
+import lu.kbra.standalone.gameengine.objs.entity.SceneEntity;
 
-public interface LimitedObjectGroup<T extends Entity> extends ObjectGroup<T> {
+public interface LimitedObjectGroup<T extends SceneEntity> extends ObjectGroup<T> {
 
 	int getMaxItems();
 
@@ -19,7 +19,7 @@ public interface LimitedObjectGroup<T extends Entity> extends ObjectGroup<T> {
 	}
 
 	@Override
-	default boolean addAll(final Collection<? extends T> c) {
+	default <V extends T> boolean addAll(final Collection<? extends V> c) {
 		final int MAX_ITEMS = this.getMaxItems();
 		if (this.size() >= MAX_ITEMS || this.size() + c.size() > MAX_ITEMS) {
 			throw new UnsupportedOperationException("Max. " + MAX_ITEMS + " columns: " + this.getSubEntities());
@@ -37,7 +37,7 @@ public interface LimitedObjectGroup<T extends Entity> extends ObjectGroup<T> {
 	}
 
 	@Override
-	default boolean addChildren(final ObjectGroup<? extends T> c) {
+	default <V extends T> boolean addChildren(final ObjectGroup<? extends V> c) {
 		final int MAX_ITEMS = this.getMaxItems();
 		if (this.size() >= MAX_ITEMS || this.size() + c.size() > MAX_ITEMS) {
 			throw new UnsupportedOperationException("Max. " + MAX_ITEMS + " columns: " + this.getSubEntities());

@@ -10,4 +10,6 @@ public interface TransformOwner {
 
 	Transform getTransform();
 
+	void setTransform(Transform t);
+
 }

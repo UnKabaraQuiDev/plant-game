@@ -132,7 +132,7 @@ public class MainMenuUIScene extends UIScene {
 
 	@Override
 	public void init(final Dispatcher workers, final Dispatcher renderDispatcher) {
-		super.addEntities(this.mainMenuGroup, this.optionsMenuGroup, this.playMenuGroup);
+		super.addAll(this.mainMenuGroup, this.optionsMenuGroup, this.playMenuGroup);
 
 		/* main menu */
 		this.buildMainMenu(workers, renderDispatcher);

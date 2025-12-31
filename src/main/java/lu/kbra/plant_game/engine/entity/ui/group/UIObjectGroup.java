@@ -9,17 +9,23 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import lu.kbra.plant_game.engine.entity.impl.NoMeshObject;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.IndexOwner;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
+import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.objs.entity.Component;
 import lu.kbra.standalone.gameengine.objs.entity.ParentAware;
+import lu.kbra.standalone.gameengine.objs.entity.SceneEntity;
 import lu.kbra.standalone.gameengine.objs.entity.components.SubEntitiesComponent;
+import lu.kbra.standalone.gameengine.objs.entity.components.Transform3DComponent;
+import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-public class UIObjectGroup extends UIObject implements ObjectGroup<UIObject> {
+public class UIObjectGroup extends UIObject implements ObjectGroup<UIObject>, NoMeshObject {
 
 	public static final Comparator<UIObject> INDEX_COMPARATOR = Comparator.comparingInt(b -> {
 		if (b instanceof final IndexOwner ime) {
@@ -53,7 +59,7 @@ public class UIObjectGroup extends UIObject implements ObjectGroup<UIObject> {
 
 	public UIObjectGroup(final String str, final UIScene parent, final UIObject... values) {
 		this(str, values);
-		parent.addEntity(this);
+		parent.add(this);
 	}
 
 	@Override
@@ -110,7 +116,7 @@ public class UIObjectGroup extends UIObject implements ObjectGroup<UIObject> {
 	}
 
 	@Override
-	public boolean addAll(final Collection<? extends UIObject> c) {
+	public <T extends UIObject> boolean addAll(final Collection<? extends T> c) {
 		final boolean result;
 		synchronized (this.getSubEntitiesLock()) {
 			result = this.getSubEntitiesComponent().getEntities().addAll(c);
@@ -123,7 +129,7 @@ public class UIObjectGroup extends UIObject implements ObjectGroup<UIObject> {
 	}
 
 	@Override
-	public boolean addChildren(final ObjectGroup<? extends UIObject> c) {
+	public <V extends UIObject> boolean addChildren(final ObjectGroup<? extends V> c) {
 		final boolean result;
 		synchronized (this.getSubEntitiesLock()) {
 			final List<UIObject> list = this.getSubEntitiesComponent().getEntities();
@@ -208,9 +214,55 @@ public class UIObjectGroup extends UIObject implements ObjectGroup<UIObject> {
 	}
 
 	@Override
+	public void setTransform(final Transform3D ie) {
+		if (this.transformComponent != null) {
+			if (ie == null) {
+				super.removeComponent(Transform3DComponent.class);
+				this.transformComponent = null;
+			} else {
+				this.transformComponent.setTransform(ie);
+			}
+		} else if (ie != null) {
+			super.addComponent(this.transformComponent = new Transform3DComponent(ie));
+		}
+	}
+
+	@Override
+	public void setMesh(final Mesh m) {
+	}
+
+	@Override
 	public String toString() {
 		return "UIObjectGroup [subEntitiesComponent=" + this.subEntitiesComponent + ", bounds=" + this.bounds + ", active=" + this.active
 				+ ", name=" + this.name + "]";
+	}
+
+	@Override
+	public <T extends UIObject, O extends UIObject> Optional<O> replace(final O old, final T new_) {
+		synchronized (this.getSubEntitiesLock()) {
+			return this.subEntitiesComponent.replace(old, new_);
+		}
+	}
+
+	@Override
+	public <T extends UIObject> Optional<T> remove(final T e) {
+		synchronized (this.getSubEntitiesLock()) {
+			return this.subEntitiesComponent.remove(e);
+		}
+	}
+
+	@Override
+	public <T extends UIObject> boolean contains(final String e) {
+		synchronized (this.getSubEntitiesLock()) {
+			return this.subEntitiesComponent.contains(e);
+		}
+	}
+
+	@Override
+	public <T extends SceneEntity> T getEntity(final String str) {
+		synchronized (this.getSubEntitiesLock()) {
+			return this.subEntitiesComponent.getEntity(str);
+		}
 	}
 
 }

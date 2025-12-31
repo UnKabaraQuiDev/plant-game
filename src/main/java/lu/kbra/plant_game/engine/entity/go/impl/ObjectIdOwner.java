@@ -10,4 +10,8 @@ public interface ObjectIdOwner {
 
 	Vector3ic getObjectId();
 
+	void setObjectIdLocation(AttributeLocation loc);
+
+	void setObjectId(Vector3ic v);
+
 }

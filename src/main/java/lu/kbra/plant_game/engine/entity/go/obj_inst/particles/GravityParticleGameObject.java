@@ -1,7 +1,6 @@
 package lu.kbra.plant_game.engine.entity.go.obj_inst.particles;
 
 import lu.kbra.standalone.gameengine.geom.instance.InstanceEmitter;
-import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 public class GravityParticleGameObject extends ParticleGameObject {
 
@@ -15,13 +14,8 @@ public class GravityParticleGameObject extends ParticleGameObject {
 	protected float minY = 0;
 	protected float density = 1;
 
-	public GravityParticleGameObject(final String str, final InstanceEmitter instanceEmitter, final Transform3D transform,
-			final short materialId, final boolean applyAcceleration, final boolean enforceMinY, final float minY, final float density) {
-		super(str, instanceEmitter, transform, materialId);
-		this.applyAcceleration = applyAcceleration;
-		this.enforceMinY = enforceMinY;
-		this.minY = minY;
-		this.density = density;
+	public GravityParticleGameObject(final String str, final InstanceEmitter instanceEmitter) {
+		super(str, instanceEmitter);
 	}
 
 	public float getMinY() {

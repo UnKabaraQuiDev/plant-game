@@ -1,120 +1,32 @@
 package lu.kbra.plant_game.engine.entity.go.factory;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
+import static lu.kbra.plant_game.generated.GameObjectRegistry.BUFFER_SIZE;
+import static lu.kbra.plant_game.generated.GameObjectRegistry.DATA_PATH;
+
+import java.util.Optional;
+import java.util.OptionalInt;
+import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
-import lu.pcy113.pclib.PCUtils;
-import lu.pcy113.pclib.impl.ThrowingFunction;
-import lu.pcy113.pclib.impl.ThrowingSupplier;
-
-import lu.kbra.plant_game.engine.entity.go.AnimatedGameObject;
+import lu.kbra.plant_game.engine.entity.go.GOCreatingTaskFuture;
 import lu.kbra.plant_game.engine.entity.go.GameObject;
-import lu.kbra.plant_game.engine.entity.go.impl.InstanceGameObject;
-import lu.kbra.plant_game.engine.entity.go.impl.InstanceSwayGameObject;
-import lu.kbra.plant_game.engine.entity.go.impl.NeedsPostConstruct;
-import lu.kbra.plant_game.engine.entity.go.impl.SwayGameObject;
-import lu.kbra.plant_game.engine.entity.go.impl.SwayInstanceEmitter;
+import lu.kbra.plant_game.engine.entity.go.impl.InstanceEmitterOwner;
+import lu.kbra.plant_game.engine.entity.impl.AnimatedMeshOwner;
+import lu.kbra.plant_game.engine.entity.impl.MeshOwner;
 import lu.kbra.plant_game.engine.entity.impl.NoMeshObject;
-import lu.kbra.plant_game.engine.mesh.AnimatedMesh;
 import lu.kbra.plant_game.engine.mesh.loader.AnimatedMeshLoader;
-import lu.kbra.plant_game.engine.mesh.loader.AnimatedMeshLoader.AnimatedMeshes;
 import lu.kbra.plant_game.engine.mesh.loader.StaticMeshLoader;
-import lu.kbra.plant_game.engine.render.SwayMesh;
 import lu.kbra.plant_game.engine.util.annotation.BufferSize;
-import lu.kbra.plant_game.engine.util.annotation.DataPath;
-import lu.kbra.plant_game.generated.GameObjectRegistry;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.cache.attrib.impl.AttribArray;
-import lu.kbra.standalone.gameengine.geom.Mesh;
-import lu.kbra.standalone.gameengine.geom.instance.InstanceEmitter;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
-import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
-import lu.kbra.standalone.gameengine.objs.entity.components.SubEntitiesComponent;
-import lu.kbra.standalone.gameengine.scene.Scene3D;
 import lu.kbra.standalone.gameengine.utils.transform.Transform;
-import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 public class GameObjectFactory {
 
-	public static class InstanceData {
-
-		protected Function<Integer, Transform> transforms;
-		protected int bufferSize;
-		protected String name;
-		protected List<Supplier<AttribArray>> attribs;
-
-		public InstanceData(final Function<Integer, Transform> transforms, final int bufferSize) {
-			this.transforms = transforms;
-			this.bufferSize = bufferSize;
-		}
-
-		public InstanceData(final Function<Integer, Transform> transforms, final int bufferSize, final String name) {
-			this.transforms = transforms;
-			this.bufferSize = bufferSize;
-			this.name = name;
-		}
-
-		public InstanceData(final Function<Integer, Transform> transforms, final int bufferSize, final String name,
-				final List<Supplier<AttribArray>> attribs) {
-			this.transforms = transforms;
-			this.bufferSize = bufferSize;
-			this.name = name;
-			this.attribs = attribs;
-		}
-
-		public InstanceData(final Function<Integer, Transform> transforms, final int bufferSize,
-				final List<Supplier<AttribArray>> attribs) {
-			this.transforms = transforms;
-			this.bufferSize = bufferSize;
-			this.attribs = attribs;
-		}
-
-		public Function<Integer, Transform> getTransforms() {
-			return this.transforms;
-		}
-
-		public void setTransforms(final Function<Integer, Transform> transforms) {
-			this.transforms = transforms;
-		}
-
-		public int getBufferSize() {
-			return this.bufferSize;
-		}
-
-		public void setBufferSize(final int bufferSize) {
-			this.bufferSize = bufferSize;
-		}
-
-		public String getName() {
-			return this.name;
-		}
-
-		public void setName(final String name) {
-			this.name = name;
-		}
-
-		public void setAttribs(final List<Supplier<AttribArray>> attribs) {
-			this.attribs = attribs;
-		}
-
-		public List<Supplier<AttribArray>> getAttribs() {
-			return this.attribs;
-		}
-
-	}
-
 	public static final int DEFAULT_BUFFER_SIZE = 12;
-	public static final InstanceData DEFAULT_INSTANCE_DATA = new InstanceData(i -> new Transform3D(), DEFAULT_BUFFER_SIZE);
 
 	public static GameObjectFactory INSTANCE;
-
-	private final Map<Class<? extends GameObject>, Boolean> animatedMesh = new HashMap<>();
-	private final Map<Class<? extends GameObject>, String> dataPath = new HashMap<>();
-	private final Map<Class<? extends GameObject>, Integer> bufferSize = new HashMap<>();
 
 	private final CacheManager cache;
 	private final Dispatcher loader, render;
@@ -125,178 +37,61 @@ public class GameObjectFactory {
 		this.render = render;
 	}
 
-	public <T extends GameObject> TaskFuture<?, T> create_(final Class<T> clazz, final Object... args) {
-		this.animatedMesh.computeIfAbsent(clazz, k -> AnimatedGameObject.class.isAssignableFrom(k));
-		this.dataPath.computeIfAbsent(clazz, k -> {
-			if (!k.isAnnotationPresent(DataPath.class)) {
-				throw new IllegalArgumentException(clazz.getName() + " doesn't have @DataPath.");
-			}
-			return k.getAnnotation(DataPath.class).value();
-		});
-
-		if (this.animatedMesh.get(clazz)) {
-
-			return AnimatedMeshLoader
-					.getAnimatedFuture(this.cache, clazz.getName(), this.dataPath.get(clazz), this.loader, this.render)
-					.then(this.loader, (ThrowingFunction<AnimatedMeshes, T, Throwable>) meshes -> {
-						final T instance = PCUtils
-								.findCompatibleConstructor(clazz,
-										PCUtils
-												.combineArrays(new Class[] { String.class, Mesh.class, AnimatedMesh.class },
-														Arrays.stream(args).map(Object::getClass).toArray(Class[]::new)))
-								.newInstance(PCUtils
-										.combineArrays(
-												new Object[] {
-														clazz.getSimpleName() + "#" + System.nanoTime(),
-														meshes.staticMesh(),
-														meshes.animatedMesh() },
-												args));
-						if (instance instanceof final NeedsPostConstruct npc) {
-							npc.init();
-						}
-						return instance;
-					});
-		}
-		if (SwayGameObject.class.isAssignableFrom(clazz)) {
-
-			return StaticSwayMeshLoader
-					.getStaticFuture(this.cache, clazz.getName(), this.dataPath.get(clazz), this.loader, this.render)
-					.then(this.loader, (ThrowingFunction<SwayMesh, T, Throwable>) mesh -> {
-						final T instance = GameObjectRegistry
-								.create(clazz,
-										PCUtils
-												.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), mesh },
-														args));
-						if (instance instanceof final NeedsPostConstruct npc) {
-							npc.init();
-						}
-						return instance;
-					});
-
-		}
-		if (InstanceSwayGameObject.class.isAssignableFrom(clazz)) {
-
-			InstanceData td;
-			final Object[] nargs;
-			if (args.length > 0 && args[0] instanceof final InstanceData vvec) {
-				td = vvec;
-				nargs = PCUtils.removeArray(args, 0);
-			} else {
-				td = DEFAULT_INSTANCE_DATA;
-				nargs = args;
-
-				if (this.bufferSize
-						.computeIfAbsent(clazz,
-								c -> clazz.isAnnotationPresent(BufferSize.class) ? clazz.getAnnotation(BufferSize.class).value()
-										: -1) != -1) {
-					td = new InstanceData(td.transforms, this.bufferSize.get(clazz), td.name);
-				}
-			}
-
-			return StaticSwayInstanceLoader
-					.getFuture(this.cache,
-							td.name == null ? clazz.getName() : td.name,
-							this.dataPath.get(clazz),
-							td,
-							this.loader,
-							this.render)
-					.then(this.loader, (ThrowingFunction<SwayInstanceEmitter, T, Throwable>) ie -> {
-						final T instance = GameObjectRegistry
-								.create(clazz,
-										PCUtils.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), ie }, nargs));
-						if (instance instanceof final NeedsPostConstruct npc) {
-							npc.init();
-						}
-						return instance;
-					});
-
-		}
-		if (InstanceGameObject.class.isAssignableFrom(clazz)) {
-
-			InstanceData td;
-			final Object[] nargs;
-			if (args.length > 0 && args[0] instanceof final InstanceData vvec) {
-				td = vvec;
-				nargs = PCUtils.removeArray(args, 0);
-			} else {
-				td = DEFAULT_INSTANCE_DATA;
-				nargs = args;
-
-				if (this.bufferSize
-						.computeIfAbsent(clazz,
-								c -> clazz.isAnnotationPresent(BufferSize.class) ? clazz.getAnnotation(BufferSize.class).value()
-										: -1) != -1) {
-					td = new InstanceData(td.transforms, this.bufferSize.get(clazz), td.name);
-				}
-			}
-
-			return StaticInstanceLoader
-					.getFuture(this.cache,
-							td.name == null ? clazz.getName() : td.name,
-							this.dataPath.get(clazz),
-							td,
-							this.loader,
-							this.render)
-					.then(this.loader, (ThrowingFunction<InstanceEmitter, T, Throwable>) ie -> {
-						final T instance = GameObjectRegistry
-								.create(clazz,
-										PCUtils.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), ie }, nargs));
-						if (instance instanceof final NeedsPostConstruct npc) {
-							npc.init();
-						}
-						return instance;
-					});
-
-		}
-		if (NoMeshObject.class.isAssignableFrom(clazz)) {
-
-			return new TaskFuture<>(this.loader, (ThrowingSupplier<T, Throwable>) () -> {
-				final T instance = GameObjectRegistry
-						.create(clazz, PCUtils.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime() }, args));
-				if (instance instanceof final NeedsPostConstruct npc) {
-					npc.init();
-				}
-				return instance;
-			});
-
-		}
-		return StaticMeshLoader
-				.getStaticFuture(this.cache, clazz.getName(), this.dataPath.get(clazz), this.loader, this.render)
-				.then(this.loader, (ThrowingFunction<Mesh, T, Throwable>) mesh -> {
-					final T instance = GameObjectRegistry
-							.create(clazz,
-									PCUtils.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), mesh }, args));
-					if (instance instanceof final NeedsPostConstruct npc) {
-						npc.init();
-					}
-					return instance;
-				});
-	}
-
-	public <T extends GameObject> TaskFuture<?, T> create_(final Class<T> clazz, final Scene3D scene, final Object... args) {
-		return this.create_(clazz, args).then(this.loader, (ThrowingFunction<T, T, Throwable>) scene::addEntity);
-	}
-
-	public <T extends GameObject> TaskFuture<?, T> create_(final Class<T> clazz, final SubEntitiesComponent parent, final Object... args) {
-		return this.create_(clazz, args).then(this.loader, (ThrowingFunction<T, T, Throwable>) e -> {
-			parent.addEntity(e);
-			return e;
-		});
-	}
-
-	public static <T extends GameObject> TaskFuture<?, T> create(final Class<T> clazz, final Object... args) {
-		return INSTANCE.create_(clazz, args);
-	}
-
-	public static <T extends GameObject> TaskFuture<?, T> create(
+	public <T extends GameObject & InstanceEmitterOwner> GOCreatingTaskFuture<T> createInstances_(
 			final Class<T> clazz,
-			final SubEntitiesComponent parent,
-			final Object... args) {
-		return INSTANCE.create_(clazz, parent, args);
+			final IntFunction<Transform> transforms,
+			final OptionalInt bufferSize,
+			final Optional<String> name,
+			final Supplier<AttribArray>... attribs) {
+
+		return StaticInstanceLoader
+				.getFuture(this.cache,
+						name.orElse(clazz.getSimpleName()),
+						DATA_PATH.get(clazz),
+						bufferSize.orElse(BUFFER_SIZE.computeIfAbsent(clazz,
+								c -> c.isAnnotationPresent(BufferSize.class) ? c.getAnnotation(BufferSize.class).value()
+										: DEFAULT_BUFFER_SIZE)),
+						transforms,
+						attribs,
+						this.loader,
+						this.render)
+				.then(new GOCreatingTaskFuture(this.loader, clazz));
 	}
 
-	public static <T extends GameObject> TaskFuture<?, T> create(final Class<T> clazz, final Scene3D scene, final Object... args) {
-		return INSTANCE.create_(clazz, scene, args);
+	public <T extends GameObject & MeshOwner> GOCreatingTaskFuture<T> createMesh_(final Class<T> clazz) {
+		return StaticMeshLoader.getStaticFuture(this.cache, clazz.getName(), DATA_PATH.get(clazz), this.loader, this.render)
+				.then(new GOCreatingTaskFuture(this.loader, clazz));
+	}
+
+	public <T extends GameObject & NoMeshObject> GOCreatingTaskFuture<T> createNoMesh_(final Class<T> clazz) {
+		return new GOCreatingTaskFuture(this.loader, clazz);
+	}
+
+	public <T extends GameObject & AnimatedMeshOwner & MeshOwner> GOCreatingTaskFuture<T> createAnimatedMesh_(final Class<T> clazz) {
+		return AnimatedMeshLoader.getAnimatedFuture(this.cache, clazz.getName(), DATA_PATH.get(clazz), this.loader, this.render)
+				.then(new GOCreatingTaskFuture(this.loader, clazz));
+	}
+
+	public static <T extends GameObject> GOCreatingTaskFuture<T> create(final Class<T> clazz) {
+		if (NoMeshObject.class.isAssignableFrom(clazz)) {
+			return INSTANCE.createNoMesh_((Class) clazz);
+		}
+		if (MeshOwner.class.isAssignableFrom(clazz)) {
+			return INSTANCE.createMesh_(clazz);
+		}
+		if (AnimatedMeshOwner.class.isAssignableFrom(clazz)) {
+			return INSTANCE.createAnimatedMesh_((Class) clazz);
+		}
+		throw new UnsupportedOperationException(clazz.getName());
+	}
+
+	public static <T extends GameObject & InstanceEmitterOwner> GOCreatingTaskFuture<T> createInstances(
+			final Class<T> clazz,
+			final IntFunction<Transform> transforms,
+			final OptionalInt bufferSize,
+			final Optional<String> name,
+			final Supplier<AttribArray>... attribs) {
+		return INSTANCE.createInstances_(clazz, transforms, bufferSize, name, attribs);
 	}
 
 }

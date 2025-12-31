@@ -15,7 +15,8 @@ import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.generated.gl_wrapper.GL_W;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.geom.instance.InstanceEmitter;
-import lu.kbra.standalone.gameengine.scene.Scene3D;
+import lu.kbra.standalone.gameengine.objs.entity.SceneEntity;
+import lu.kbra.standalone.gameengine.scene.EntityContainer;
 import lu.kbra.standalone.gameengine.utils.gl.consts.BufferType;
 
 public class ParticleManager {
@@ -26,7 +27,7 @@ public class ParticleManager {
 
 	protected int maxActiveParticleEmitters = 32;
 
-	protected Scene3D scene;
+	protected EntityContainer<SceneEntity> scene;
 	protected Vector3fc gravity = new Vector3f(0, -9.81f, 0);
 
 	protected final Object objectLocks = new Object();
@@ -35,7 +36,7 @@ public class ParticleManager {
 
 	protected GravityParticleComputeShader computeShader;
 
-	public ParticleManager(final CacheManager cache, final Scene3D scene) {
+	public ParticleManager(final CacheManager cache, final EntityContainer<SceneEntity> scene) {
 		this.scene = scene;
 
 		cache.addAbstractShader(this.computeShader = new GravityParticleComputeShader());
@@ -86,11 +87,11 @@ public class ParticleManager {
 		}
 	}
 
-	public Scene3D getScene() {
+	public EntityContainer<SceneEntity> getScene() {
 		return this.scene;
 	}
 
-	public void setScene(final Scene3D scene) {
+	public void setScene(final EntityContainer<SceneEntity> scene) {
 		this.scene = scene;
 	}
 
