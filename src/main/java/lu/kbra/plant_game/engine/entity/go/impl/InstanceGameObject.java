@@ -1,46 +1,55 @@
 package lu.kbra.plant_game.engine.entity.go.impl;
 
 import lu.kbra.plant_game.engine.entity.go.GameObject;
+import lu.kbra.plant_game.engine.entity.impl.InstanceEmitterOwner;
+import lu.kbra.plant_game.engine.entity.impl.MaterialIdOwner;
 import lu.kbra.standalone.gameengine.geom.instance.InstanceEmitter;
-import lu.kbra.standalone.gameengine.objs.entity.components.InstanceEmitterComponent;
 
-public class InstanceGameObject extends GameObject implements InstanceEmitterOwner {
+public class InstanceGameObject extends GameObject implements InstanceEmitterOwner, MaterialIdOwner {
 
-	protected InstanceEmitterComponent instanceEmitterComponent;
+	protected short materialId;
+	protected boolean isEntityMaterialId = true;
+	protected InstanceEmitter instanceEmitter;
 
 	public InstanceGameObject(final String str, final InstanceEmitter ie) {
-		super(str, null);
+		super(str);
 		this.setInstanceEmitter(ie);
 	}
 
-	public InstanceEmitterComponent getInstanceEmitterComponent() {
-		return this.instanceEmitterComponent;
+	@Override
+	public void setIsEntityMaterialId(final boolean ie) {
+		this.isEntityMaterialId = ie;
+	}
+
+	@Override
+	public short getMaterialId() {
+		return this.materialId;
+	}
+
+	@Override
+	public void setMaterialId(final short materialId) {
+		this.materialId = materialId;
+	}
+
+	@Override
+	public boolean isEntityMaterialId() {
+		return this.isEntityMaterialId;
 	}
 
 	@Override
 	public InstanceEmitter getInstanceEmitter() {
-		return this.instanceEmitterComponent == null ? null : this.instanceEmitterComponent.getInstanceEmitter();
+		return this.instanceEmitter;
 	}
 
 	@Override
 	public void setInstanceEmitter(final InstanceEmitter ie) {
-		if (this.instanceEmitterComponent != null) {
-			if (ie == null) {
-				super.removeComponent(InstanceEmitterComponent.class);
-			} else {
-				this.instanceEmitterComponent.setInstanceEmitter(ie);
-			}
-		} else if (ie != null) {
-			super.addComponent(this.instanceEmitterComponent = new InstanceEmitterComponent(ie));
-		}
+		this.instanceEmitter = ie;
 	}
 
 	@Override
 	public String toString() {
-		return "InstanceGameObject [materialId=" + this.materialId + ", entityMaterialId=" + this.isEntityMaterialId + ", objectId="
-				+ this.objectId + ", objectIdLocation=" + this.objectIdLocation + ", active=" + this.active + ", name=" + this.name
-				+ ", components=" + this.components.size() + ", getInstanceEmitter()=" + this.getInstanceEmitter() + ", getTransform()="
-				+ this.getTransform() + "]";
+		return "InstanceGameObject [instanceEmitter=" + this.instanceEmitter + ", objectId=" + this.objectId + ", objectIdLocation="
+				+ this.objectIdLocation + ", transform=" + this.transform + ", active=" + this.active + ", name=" + this.name + "]";
 	}
 
 }

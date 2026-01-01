@@ -1,5 +1,7 @@
 package lu.kbra.plant_game.engine.window.input;
 
+import java.util.Arrays;
+
 import org.joml.Vector2d;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
@@ -43,6 +45,8 @@ public class DefaultInputHandler implements WindowInputHandler {
 
 	private Character pressedChar;
 
+	private float dTime;
+
 	public DefaultInputHandler(final GameEngine engine) {
 		this.engine = engine;
 		this.window = engine.getWindow();
@@ -55,8 +59,9 @@ public class DefaultInputHandler implements WindowInputHandler {
 	}
 
 	@Override
-	public void onFrameBegin() {
+	public void onFrameBegin(final float dTime) {
 		this.checkOwnerThread();
+		this.dTime = dTime;
 
 		System.arraycopy(this.currKeys, 0, this.prevKeys, 0, this.currKeys.length);
 		System.arraycopy(this.currMouse, 0, this.prevMouse, 0, this.currMouse.length);
@@ -88,6 +93,11 @@ public class DefaultInputHandler implements WindowInputHandler {
 
 		this.pressedChar = this.window.getCharacter();
 		this.window.clearCharacter();
+	}
+
+	@Override
+	public float dTime() {
+		return this.dTime;
 	}
 
 	@Override
@@ -265,4 +275,14 @@ public class DefaultInputHandler implements WindowInputHandler {
 		}
 		return false;
 	}
+
+	@Override
+	public String toString() {
+		return "DefaultInputHandler [engine=" + this.engine + ", window=" + this.window + ", prevKeys=" + Arrays.toString(this.prevKeys)
+				+ ", currKeys=" + Arrays.toString(this.currKeys) + ", prevMouse=" + Arrays.toString(this.prevMouse) + ", currMouse="
+				+ Arrays.toString(this.currMouse) + ", owner=" + this.owner + ", mousePosition=" + this.mousePosition
+				+ ", normalizedMousePosition=" + this.normalizedMousePosition + ", mouseScroll=" + this.mouseScroll + ", oldSize="
+				+ this.oldSize + ", resized=" + this.resized + ", pressedChar=" + this.pressedChar + ", dTime=" + this.dTime + "]";
+	}
+
 }

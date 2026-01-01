@@ -11,7 +11,6 @@ import lu.kbra.plant_game.engine.entity.ui.impl.NeedsUpdate;
 import lu.kbra.plant_game.engine.mesh.TexturedQuadMesh;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.standalone.gameengine.scene.Scene;
-import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 @DataPath("image:classpath:/icons/cursor-128.png")
 public class CursorUIObject extends TextureUIObject implements NeedsUpdate {
@@ -26,10 +25,6 @@ public class CursorUIObject extends TextureUIObject implements NeedsUpdate {
 		super(str, mesh);
 	}
 
-	public CursorUIObject(final String str, final TexturedQuadMesh mesh, final Transform3D transform) {
-		super(str, mesh, transform);
-	}
-
 	public void setTargetedObject(final UIObject uiObject) {
 		if (uiObject == null || uiObject == this || !uiObject.hasTransform()) {
 			return;
@@ -39,7 +34,7 @@ public class CursorUIObject extends TextureUIObject implements NeedsUpdate {
 
 		final float cursorWidth = (float) (this.getBounds().getWidth() * this.getTransform().getScale().x);
 
-		final Matrix4f c = uiObject instanceof AbsoluteTransform3DOwner ? ((AbsoluteTransform3DOwner) uiObject).getAbsoluteTransform()
+		final Matrix4f c = uiObject instanceof final AbsoluteTransform3DOwner a ? a.getAbsoluteTransform()
 				: uiObject.getTransform().getMatrix();
 		final Vector3f pos = c.getTranslation(new Vector3f());
 		final float scaleX = new Vector3f(c.m00(), c.m01(), c.m02()).length();
@@ -79,8 +74,7 @@ public class CursorUIObject extends TextureUIObject implements NeedsUpdate {
 			cursorPos.x += Math.cos(PGLogic.TOTAL_TIME() * freq) * freq * (cursorWidth / 2) * dTime;
 			cursorPos.z += (this.to.y - cursorPos.z) * dTime * speed;
 
-			this
-					.getTransform()
+			this.getTransform()
 					.getRotation()
 					.rotationY((float) ((cursorPos.z / this.snapAngle + this.snapPhase % this.snapAngle) * (2.0 * Math.PI / 3.0)));
 

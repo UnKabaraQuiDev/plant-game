@@ -3,43 +3,17 @@ package lu.kbra.plant_game.engine.entity.ui.prim;
 import org.joml.Vector4f;
 import org.joml.Vector4fc;
 
+import lu.kbra.plant_game.engine.entity.ui.text.ProgrammaticUIObject;
 import lu.kbra.plant_game.engine.mesh.TexturedQuadMesh;
 import lu.kbra.plant_game.engine.mesh.TintOwner;
-import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.plant_game.generated.ColorMaterial;
-import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-@DataPath("")
-public class FlatQuadUIObject extends QuadUIObject implements TintOwner {
+public class FlatQuadUIObject extends TexturedQuadMeshUIObject implements TintOwner, ProgrammaticUIObject {
 
 	protected Vector4f color;
 
 	public FlatQuadUIObject(final String str, final TexturedQuadMesh mesh) {
 		super(str, mesh);
-	}
-
-	public FlatQuadUIObject(final String str, final TexturedQuadMesh mesh, final Transform3D transform) {
-		super(str, mesh, transform);
-	}
-
-	public FlatQuadUIObject(final String str, final TexturedQuadMesh mesh, final Vector4f color) {
-		super(str, mesh);
-		this.color = color;
-	}
-
-	public FlatQuadUIObject(final String str, final TexturedQuadMesh mesh, final ColorMaterial color) {
-		super(str, mesh);
-		this.color = new Vector4f(color.getColor());
-	}
-
-	public FlatQuadUIObject(final String str, final TexturedQuadMesh mesh, final Transform3D transform, final Vector4f color) {
-		super(str, mesh, transform);
-		this.color = color;
-	}
-
-	public FlatQuadUIObject(final String str, final TexturedQuadMesh mesh, final Transform3D transform, final ColorMaterial color) {
-		super(str, mesh, transform);
-		this.color = new Vector4f(color.getColor());
 	}
 
 	public Vector4f getColor() {
@@ -69,17 +43,10 @@ public class FlatQuadUIObject extends QuadUIObject implements TintOwner {
 		}
 	}
 
-	public void setTint(final ColorMaterial tint) {
-		if (tint == null) {
-			this.setTint(ColorMaterial.BLACK.getColor());
-			return;
-		}
-
-		if (this.color == null) {
-			this.color = new Vector4f(tint.getColor());
-		} else {
-			this.color.set(tint.getColor());
-		}
+	@Override
+	public String toString() {
+		return "FlatQuadUIObject [color=" + this.color + ", bounds=" + this.bounds + ", mesh=" + this.mesh + ", transform=" + this.transform
+				+ ", parent=" + this.parent + ", active=" + this.active + ", name=" + this.name + "]";
 	}
 
 }

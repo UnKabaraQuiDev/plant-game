@@ -8,26 +8,18 @@ import lu.kbra.plant_game.engine.entity.ui.impl.Scale2dDir;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.GameEngine;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
-import lu.kbra.standalone.gameengine.scene.Scene;
-import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 public class GrowOnHoverTextUIObject extends TextUIObject implements GrowOnHover {
 
 	private boolean hovered;
-	private final Scale2dDir dir;
+	private Scale2dDir dir;
 
-	public GrowOnHoverTextUIObject(final String str, final TextEmitter text, final Scale2dDir dir) {
+	public GrowOnHoverTextUIObject(final String str, final TextEmitter text) {
 		super(str, text);
-		this.dir = dir;
-	}
-
-	public GrowOnHoverTextUIObject(final String str, final TextEmitter text, final Scale2dDir dir, final Transform3D transform) {
-		super(str, text, transform);
-		this.dir = dir;
 	}
 
 	@Override
-	public void hover(final WindowInputHandler input, final float dTime, final HoverState hoverState, final Scene scene) {
+	public void hover(final WindowInputHandler input, final HoverState hoverState) {
 		this.hovered = (hoverState == HoverState.ENTER || hoverState == HoverState.STAY);
 	}
 
@@ -48,6 +40,14 @@ public class GrowOnHoverTextUIObject extends TextUIObject implements GrowOnHover
 	@Override
 	public float getGrowthRate(final boolean grow) {
 		return grow ? 1.5f : 3f;
+	}
+
+	public Scale2dDir getDir() {
+		return this.dir;
+	}
+
+	public void setDir(final Scale2dDir dir) {
+		this.dir = dir;
 	}
 
 }

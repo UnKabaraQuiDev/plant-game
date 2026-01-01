@@ -6,7 +6,6 @@ import lu.pcy113.pclib.PCUtils;
 
 import lu.kbra.plant_game.PGLogic;
 import lu.kbra.plant_game.engine.entity.ui.impl.Focusable;
-import lu.kbra.plant_game.engine.entity.ui.impl.NeedsClick;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsInput;
 import lu.kbra.plant_game.engine.entity.ui.text.TextUIObject;
 import lu.kbra.plant_game.engine.util.annotation.BufferSize;
@@ -14,12 +13,10 @@ import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.impl.future.ScheduledTask;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
-import lu.kbra.standalone.gameengine.scene.Scene;
-import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 @DataPath("localization:string-placeholder")
 @BufferSize(25)
-public class TextFieldUIObject extends TextUIObject implements NeedsInput, NeedsClick, Focusable {
+public class TextFieldUIObject extends TextUIObject implements NeedsInput, Focusable/* , NeedsPostConstruct */ {
 
 	private static final char CURSOR_CHAR = '_';
 
@@ -28,51 +25,50 @@ public class TextFieldUIObject extends TextUIObject implements NeedsInput, Needs
 	protected int cursorPosition = -1;
 	protected ScheduledTask updateTask;
 
-	public TextFieldUIObject(String str, TextEmitter textEmitter) {
+	public TextFieldUIObject(final String str, final TextEmitter textEmitter) {
 		super(str, textEmitter);
 		this.input = textEmitter.getText();
 	}
 
-	public TextFieldUIObject(String str, TextEmitter textEmitter, Transform3D transform) {
-		super(str, textEmitter, transform);
-		this.input = textEmitter.getText();
-	}
-
 	@Override
-	public void input(WindowInputHandler inputHandler, float dTime, Scene scene) {
-		if (updateTask != null && updateTask.wasRan()) {
-			updateTask = null;
+	public void input(final WindowInputHandler inputHandler) {
+		if (this.updateTask != null && this.updateTask.wasRan()) {
+			this.updateTask = null;
 		}
 
-		if (!focused) {
+		if (!this.focused) {
 			return;
 		}
 
-		final boolean dirty = handleInput(inputHandler);
+		final boolean dirty = this.handleInput(inputHandler);
 
-		if (dirty && (updateTask == null || updateTask.wasRan())) {
-			super.getTextEmitter().setText(cursorPosition == -1 ? input : PCUtils.insertChar(input, cursorPosition, CURSOR_CHAR));
-			updateTask = PGLogic.INSTANCE.RENDER_DISPATCHER.post(() -> super.getTextEmitter().updateText());
+		if (dirty && (this.updateTask == null || this.updateTask.wasRan())) {
+			super.getTextEmitter()
+					.setText(this.cursorPosition == -1 ? this.input : PCUtils.insertChar(this.input, this.cursorPosition, CURSOR_CHAR));
+			this.updateTask = PGLogic.INSTANCE.RENDER_DISPATCHER.post(() -> super.getTextEmitter().updateText());
 		}
 	}
 
-	protected boolean handleInput(WindowInputHandler inputHandler) {
+	protected boolean handleInput(final WindowInputHandler inputHandler) {
 		if (inputHandler.hasPressedKeyChar()) {
-			input = PCUtils.insertChar(input, cursorPosition, inputHandler.getPressedKeyChar());
-			cursorPosition++;
+			this.input = PCUtils.insertChar(this.input, this.cursorPosition, inputHandler.getPressedKeyChar());
+			this.cursorPosition++;
 
 			return true;
-		} else if (inputHandler.isKeyPressedOrRepeat(GLFW.GLFW_KEY_BACKSPACE) && super.getTextEmitter().getText().length() > 0) {
-			input = PCUtils.backspace(input, cursorPosition);
-			cursorPosition = Math.max(0, cursorPosition - 1);
+		}
+		if (inputHandler.isKeyPressedOrRepeat(GLFW.GLFW_KEY_BACKSPACE) && super.getTextEmitter().getText().length() > 0) {
+			this.input = PCUtils.backspace(this.input, this.cursorPosition);
+			this.cursorPosition = Math.max(0, this.cursorPosition - 1);
 
 			return true;
-		} else if (inputHandler.isKeyPressedOrRepeat(GLFW.GLFW_KEY_LEFT)) {
-			moveCursorLeft();
+		}
+		if (inputHandler.isKeyPressedOrRepeat(GLFW.GLFW_KEY_LEFT)) {
+			this.moveCursorLeft();
 
 			return true;
-		} else if (inputHandler.isKeyPressedOrRepeat(GLFW.GLFW_KEY_RIGHT)) {
-			moveCursorRight();
+		}
+		if (inputHandler.isKeyPressedOrRepeat(GLFW.GLFW_KEY_RIGHT)) {
+			this.moveCursorRight();
 
 			return true;
 		}
@@ -81,39 +77,52 @@ public class TextFieldUIObject extends TextUIObject implements NeedsInput, Needs
 	}
 
 	protected void moveCursorLeft() {
-		cursorPosition = Math.max(0, cursorPosition - 1);
+		this.cursorPosition = Math.max(0, this.cursorPosition - 1);
 	}
 
 	protected void moveCursorRight() {
-		cursorPosition = Math.min(getTextEmitter().getText().length(), cursorPosition + 1);
-	}
-
-	@Override
-	public void click(WindowInputHandler input, float dTime, Scene scene) {
-
+		this.cursorPosition = Math.min(this.getTextEmitter().getText().length(), this.cursorPosition + 1);
 	}
 
 	@Override
 	public boolean hasFocus() {
-		return focused;
+		return this.focused;
 	}
 
 	@Override
-	public void setFocused(boolean focused) {
+	public void setFocused(final boolean focused) {
 		this.focused = focused;
 		if (focused) {
-			cursorPosition = super.getTextEmitter().getText().length();
+			this.cursorPosition = super.getTextEmitter().getText().length();
 		} else {
-			cursorPosition = -1;
+			this.cursorPosition = -1;
 		}
 	}
 
-	public String getText() {
-		return getTextEmitter() != null ? super.getTextEmitter().getText() : null;
+	public int getCursorPosition() {
+		return this.cursorPosition;
+	}
+
+	public void setCursorPosition(final int cursorPosition) {
+		this.cursorPosition = cursorPosition;
+	}
+
+	public boolean isFocused() {
+		return this.focused;
+	}
+
+	public void setInput(final String input) {
+		this.input = input;
 	}
 
 	public String getInput() {
-		return input;
+		return this.input;
+	}
+
+	@Override
+	public String toString() {
+		return "TextFieldUIObject [input=" + this.input + ", focused=" + this.focused + ", cursorPosition=" + this.cursorPosition
+				+ ", updateTask=" + this.updateTask + "]";
 	}
 
 }

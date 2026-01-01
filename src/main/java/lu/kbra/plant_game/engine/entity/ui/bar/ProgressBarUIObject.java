@@ -1,7 +1,6 @@
 package lu.kbra.plant_game.engine.entity.ui.bar;
 
 import java.awt.geom.Rectangle2D;
-import java.util.function.Consumer;
 
 import org.joml.Vector3f;
 import org.joml.Vector4fc;
@@ -14,7 +13,7 @@ import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
 import lu.kbra.plant_game.engine.entity.ui.group.OffsetUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.group.UIObjectGroup;
-import lu.kbra.plant_game.engine.entity.ui.prim.QuadUIObject;
+import lu.kbra.plant_game.engine.mesh.ColorMaterialOwner;
 import lu.kbra.plant_game.engine.mesh.TintOwner;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
 import lu.kbra.plant_game.generated.ColorMaterial;
@@ -30,8 +29,8 @@ public class ProgressBarUIObject extends OffsetUIObjectGroup implements LimitedO
 
 	protected float margin = 0.1f;
 	protected float value = 0.5f;
-	protected QuadUIObject background;
-	protected QuadUIObject foreground;
+	protected UIObject background;
+	protected UIObject foreground;
 
 	public ProgressBarUIObject(final String str, final Transform3D transform, final UIObject... values) {
 		super(str, transform, values);
@@ -63,7 +62,7 @@ public class ProgressBarUIObject extends OffsetUIObjectGroup implements LimitedO
 		this.value = value;
 	}
 
-	public <T extends QuadUIObject, V extends QuadUIObject> FutureTriggerLatch<ProgressBarUIObject> init(
+	public <T extends UIObject & ColorMaterialOwner, V extends UIObject & ColorMaterialOwner> FutureTriggerLatch<ProgressBarUIObject> init(
 			final Dispatcher workers,
 			final Dispatcher render,
 			final Class<T> bgClazz,
@@ -71,27 +70,38 @@ public class ProgressBarUIObject extends OffsetUIObjectGroup implements LimitedO
 			final ColorMaterial bg,
 			final ColorMaterial fg) {
 
-		final FutureTriggerLatch<ProgressBarUIObject> latch = new FutureTriggerLatch<ProgressBarUIObject>(2, this);
+		final FutureTriggerLatch<ProgressBarUIObject> latch = new FutureTriggerLatch<>(2, this);
 
-		UIObjectFactory.create(bgClazz, this, new Transform3D(), bg).then(workers, (Consumer<T>) obj -> {
-			this.background = obj;
-			if (this.foreground != null) {
-				this.updateScaling();
-			}
-			latch.countDown();
-		}).push();
-		UIObjectFactory.create(fgClazz, this, new Transform3DPivot().scalePivotSet(-0.5f, 0, 0), fg).then(workers, (Consumer<V>) obj -> {
-			this.foreground = obj;
-			if (this.background != null) {
-				this.updateScaling();
-			}
-			latch.countDown();
-		}).push();
+		UIObjectFactory.create(bgClazz)
+				.set(i -> i.setTransform(new Transform3D()))
+				.set(i -> i.setColorMaterial(bg))
+				.set(i -> this.background = i)
+				.set(i -> System.err.println("x: " + i))
+				.add(this)
+				.latch(latch)
+				.set(i -> {
+					if (this.foreground != null) {
+						this.updateScaling();
+					}
+				})
+				.push();
+		UIObjectFactory.create(fgClazz)
+				.set(i -> i.setTransform(new Transform3DPivot().scalePivotSet(-0.5f, 0, 0)))
+				.set(i -> i.setColorMaterial(fg))
+				.set(i -> this.foreground = i)
+				.add(this)
+				.latch(latch)
+				.set(i -> {
+					if (this.background != null) {
+						this.updateScaling();
+					}
+				})
+				.push();
 
 		return latch;
 	}
 
-	public <T extends QuadUIObject, V extends QuadUIObject> FutureTriggerLatch<ProgressBarUIObject> init(
+	public <T extends UIObject & ColorMaterialOwner, V extends UIObject & ColorMaterialOwner> FutureTriggerLatch<ProgressBarUIObject> init(
 			final Dispatcher workers,
 			final Dispatcher render,
 			final Class<T> bgClazz,

@@ -4,152 +4,146 @@ import org.lwjgl.glfw.GLFW;
 
 import lu.pcy113.pclib.PCUtils;
 
-import lu.kbra.plant_game.engine.entity.ui.impl.Focusable;
-import lu.kbra.plant_game.engine.entity.ui.impl.NeedsClick;
-import lu.kbra.plant_game.engine.entity.ui.impl.NeedsInput;
 import lu.kbra.plant_game.engine.util.annotation.BufferSize;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
-import lu.kbra.standalone.gameengine.scene.Scene;
-import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 @DataPath("localization:string-placeholder")
 @BufferSize(25)
-public class TextBoxUIObject extends TextFieldUIObject implements NeedsInput, NeedsClick, Focusable {
+public class TextBoxUIObject extends TextFieldUIObject {
 
-	public TextBoxUIObject(String str, TextEmitter textEmitter) {
+	public TextBoxUIObject(final String str, final TextEmitter textEmitter) {
 		super(str, textEmitter);
 	}
 
-	public TextBoxUIObject(String str, TextEmitter textEmitter, Transform3D transform) {
-		super(str, textEmitter, transform);
-	}
-
 	@Override
-	protected boolean handleInput(WindowInputHandler inputHandler) {
+	protected boolean handleInput(final WindowInputHandler inputHandler) {
 		if ((inputHandler.isKeyPressedOrRepeat(GLFW.GLFW_KEY_ENTER) || inputHandler.isKeyPressedOrRepeat(GLFW.GLFW_KEY_KP_ENTER))
 				&& super.getTextEmitter().getText().length() > 0) {
-			input = PCUtils.insertChar(input, cursorPosition, '\n');
-			cursorPosition++;
+			this.input = PCUtils.insertChar(this.input, this.cursorPosition, '\n');
+			this.cursorPosition++;
 
 			return true;
-		} else if (inputHandler.isKeyPressedOrRepeat(GLFW.GLFW_KEY_TAB) && super.getTextEmitter().getText().length() > 0) {
-			input = PCUtils.insertChar(input, cursorPosition, '\t');
-			cursorPosition++;
+		}
+		if (inputHandler.isKeyPressedOrRepeat(GLFW.GLFW_KEY_TAB) && super.getTextEmitter().getText().length() > 0) {
+			this.input = PCUtils.insertChar(this.input, this.cursorPosition, '\t');
+			this.cursorPosition++;
 
 			return true;
-		} else if (inputHandler.isKeyPressedOrRepeat(GLFW.GLFW_KEY_UP)) {
-			moveCursorUp();
+		}
+		if (inputHandler.isKeyPressedOrRepeat(GLFW.GLFW_KEY_UP)) {
+			this.moveCursorUp();
 			return true;
 
-		} else if (inputHandler.isKeyPressedOrRepeat(GLFW.GLFW_KEY_DOWN)) {
-			moveCursorDown();
+		}
+		if (inputHandler.isKeyPressedOrRepeat(GLFW.GLFW_KEY_DOWN)) {
+			this.moveCursorDown();
 			return true;
 		}
 
 		return super.handleInput(inputHandler);
 	}
 
-	protected int getColumn(String text, int pos) {
+	protected int getColumn(final String text, final int pos) {
 		int lineStart = text.lastIndexOf('\n', pos - 1);
-		if (lineStart == -1)
+		if (lineStart == -1) {
 			lineStart = 0;
-		else
+		} else {
 			lineStart += 1;
+		}
 
 		return pos - lineStart;
 	}
 
-	protected int getLineStart(String text, int pos) {
-		int idx = text.lastIndexOf('\n', pos - 1);
-		if (idx == -1)
+	protected int getLineStart(final String text, final int pos) {
+		final int idx = text.lastIndexOf('\n', pos - 1);
+		if (idx == -1) {
 			return 0;
+		}
 		return idx + 1;
 	}
 
-	protected int getPrevLineStart(String text, int lineStart) {
-		if (lineStart == 0)
+	protected int getPrevLineStart(final String text, final int lineStart) {
+		if (lineStart == 0) {
 			return -1;
+		}
 
-		int endPrev = text.lastIndexOf('\n', lineStart - 2);
-		if (endPrev == -1)
+		final int endPrev = text.lastIndexOf('\n', lineStart - 2);
+		if (endPrev == -1) {
 			return 0;
+		}
 		return endPrev + 1;
 	}
 
-	protected int getNextLineStart(String text, int pos) {
-		int next = text.indexOf('\n', pos);
-		if (next == -1)
+	protected int getNextLineStart(final String text, final int pos) {
+		final int next = text.indexOf('\n', pos);
+		if (next == -1) {
 			return -1;
+		}
 		return next + 1;
 	}
 
 	protected boolean moveCursorUp() {
-		String text = getTextEmitter().getText();
-		int pos = cursorPosition;
+		final String text = this.getTextEmitter().getText();
+		final int pos = this.cursorPosition;
 
-		int col = getColumn(text, pos);
-		int lineStart = getLineStart(text, pos);
-		int prevLineStart = getPrevLineStart(text, lineStart);
+		final int col = this.getColumn(text, pos);
+		final int lineStart = this.getLineStart(text, pos);
+		final int prevLineStart = this.getPrevLineStart(text, lineStart);
 
-		if (prevLineStart == -1)
+		if (prevLineStart == -1) {
 			return true; // no line above
+		}
 
 		int prevLineEnd = text.indexOf('\n', prevLineStart);
-		if (prevLineEnd == -1)
+		if (prevLineEnd == -1) {
 			prevLineEnd = text.length();
+		}
 
 		int target = prevLineStart + col;
 		target = Math.min(target, prevLineEnd);
-		cursorPosition = target;
+		this.cursorPosition = target;
 
 		return false;
 	}
 
 	protected boolean moveCursorDown() {
-		String text = getTextEmitter().getText();
-		int pos = cursorPosition;
+		final String text = this.getTextEmitter().getText();
+		final int pos = this.cursorPosition;
 
-		int col = getColumn(text, pos);
-		int nextLineStart = getNextLineStart(text, pos);
+		final int col = this.getColumn(text, pos);
+		final int nextLineStart = this.getNextLineStart(text, pos);
 
-		if (nextLineStart == -1)
+		if (nextLineStart == -1) {
 			return false; // no line below
+		}
 
 		int nextLineEnd = text.indexOf('\n', nextLineStart);
-		if (nextLineEnd == -1)
+		if (nextLineEnd == -1) {
 			nextLineEnd = text.length();
+		}
 
 		int target = nextLineStart + col;
 		target = Math.min(target, nextLineEnd);
-		cursorPosition = target;
+		this.cursorPosition = target;
 
 		return true;
 	}
 
 	@Override
-	public void click(WindowInputHandler input, float dTime, Scene scene) {
-
-	}
-
-	@Override
 	public boolean hasFocus() {
-		return focused;
+		return this.focused;
 	}
 
 	@Override
-	public void setFocused(boolean focused) {
+	public void setFocused(final boolean focused) {
 		this.focused = focused;
 		if (focused) {
-			cursorPosition = super.getTextEmitter().getText().length();
+			this.cursorPosition = super.getTextEmitter().getText().length();
 		} else {
-			cursorPosition = -1;
+			this.cursorPosition = -1;
 		}
-	}
-
-	public String getText() {
-		return getTextEmitter() != null ? super.getTextEmitter().getText() : null;
 	}
 
 }

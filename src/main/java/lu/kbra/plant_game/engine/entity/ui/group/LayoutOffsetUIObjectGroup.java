@@ -71,15 +71,15 @@ public class LayoutOffsetUIObjectGroup extends OffsetUIObjectGroup implements La
 
 	@Override
 	public void doLayout() {
-		synchronized (this.getSubEntitiesLock()) {
-			this.getSubEntities().stream().forEach(e -> {
+		synchronized (this.getEntitiesLock()) {
+			this.getWEntities().stream().forEach(e -> {
 				if (e instanceof final LayoutParent lp) {
 					lp.doLayout();
 				}
 			});
-		}
-		if (this.layout != null) {
-			this.layout.doLayout(this.getSubEntities());
+			if (this.layout != null) {
+				this.layout.doLayout(this.getWEntities());
+			}
 		}
 		this.recomputeBounds();
 	}

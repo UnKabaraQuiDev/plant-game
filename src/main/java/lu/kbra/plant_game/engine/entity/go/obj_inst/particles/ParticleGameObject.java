@@ -70,7 +70,7 @@ public class ParticleGameObject extends InstanceGameObject {
 						true,
 						1,
 						4)))
-				.set(i -> i.setMaterial(color))
+				.set(i -> i.setColorMaterial(color))
 				.set(i -> i.setTransform(transform))
 				.set(i -> i.setEnforceMinY(false))
 				.set(i -> i.setApplyDrag(true))
@@ -127,12 +127,18 @@ public class ParticleGameObject extends InstanceGameObject {
 						true,
 						1,
 						4)))
-				.set(i -> i.setMaterial(color))
+				.set(i -> i.setColorMaterial(color))
 				.set(i -> i.setTransform(transform))
 				.set(i -> i.setEnforceMinY(hasMinY))
 				.set(i -> i.setMinY(minY))
 				.set(i -> i.setDensity(density))
 				.add(scene);
+	}
+
+	@Override
+	public String toString() {
+		return "ParticleGameObject [instanceEmitter=" + this.instanceEmitter + ", objectId=" + this.objectId + ", objectIdLocation="
+				+ this.objectIdLocation + ", transform=" + this.transform + ", active=" + this.active + ", name=" + this.name + "]";
 	}
 
 }

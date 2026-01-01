@@ -1,14 +1,14 @@
 package lu.kbra.plant_game.engine.entity.go.obj;
 
-import lu.kbra.plant_game.engine.entity.go.AnimatedGameObject;
+import lu.kbra.plant_game.engine.entity.go.AnimatedMeshGameObject;
 import lu.kbra.plant_game.engine.entity.go.impl.Footprint;
-import lu.kbra.plant_game.engine.entity.go.impl.NeedsPostConstruct;
 import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
+import lu.kbra.plant_game.engine.entity.impl.NeedsPostConstruct;
 import lu.kbra.plant_game.engine.mesh.AnimatedMesh;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.utils.consts.Direction;
 
-public abstract class PlaceableAnimatedGameObject extends AnimatedGameObject
+public abstract class PlaceableAnimatedGameObject extends AnimatedMeshGameObject
 		implements PlaceableObject, NeedsPostConstruct, StaticMeshFootprintOwner, AnimatedMeshFootprintOwner {
 
 	protected Direction rotation = Direction.DEFAULT();

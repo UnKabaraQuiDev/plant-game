@@ -4,7 +4,6 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.joml.Matrix4f;
@@ -17,6 +16,7 @@ import org.lwjgl.glfw.GLFW;
 
 import lu.kbra.plant_game.engine.UpdateFrameState;
 import lu.kbra.plant_game.engine.entity.impl.Transform3DOwner;
+import lu.kbra.plant_game.engine.entity.impl.TransformOwner;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.Focusable;
@@ -35,8 +35,7 @@ import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.WorkerDispatcher;
 import lu.kbra.standalone.gameengine.objs.entity.Entity;
 import lu.kbra.standalone.gameengine.objs.entity.SceneEntity;
-import lu.kbra.standalone.gameengine.objs.entity.components.SubEntitiesComponent;
-import lu.kbra.standalone.gameengine.objs.entity.components.TransformComponent;
+import lu.kbra.standalone.gameengine.scene.EntityContainer;
 import lu.kbra.standalone.gameengine.scene.Scene3D;
 import lu.kbra.standalone.gameengine.scene.camera.Camera;
 
@@ -71,7 +70,7 @@ public class UIScene extends Scene3D implements BoundsOwner {
 	protected Set<UIObject> hovering = new HashSet<>();
 	protected Focusable focused;
 
-	public void input(final WindowInputHandler inputHandler, final float dTime, final UpdateFrameState frameState) {
+	public void input(final WindowInputHandler inputHandler, final UpdateFrameState frameState) {
 		final Vector2f mouseWorld2D = this.getMouseCoords(inputHandler);
 
 		final Set<UIObject> newHovered = new HashSet<>();
@@ -89,7 +88,6 @@ public class UIScene extends Scene3D implements BoundsOwner {
 			for (final SceneEntity e : this) {
 				this.checkInput(e,
 						inputHandler,
-						dTime,
 						frameState,
 						new Point2D.Float(mouseWorld2D.x, mouseWorld2D.y),
 						newHovered,
@@ -103,7 +101,7 @@ public class UIScene extends Scene3D implements BoundsOwner {
 
 		this.hovering.removeAll(newHovered);
 		for (final UIObject uiObj : this.hovering) {
-			((NeedsHover) uiObj).hover(inputHandler, dTime, HoverState.LEAVE, this);
+			((NeedsHover) uiObj).hover(inputHandler, HoverState.LEAVE);
 		}
 
 		this.hovering = newHovered;
@@ -124,30 +122,23 @@ public class UIScene extends Scene3D implements BoundsOwner {
 	private void checkInput(
 			final SceneEntity e,
 			final WindowInputHandler inputHandler,
-			final float dTime,
 			final UpdateFrameState frameState,
 			final Point2D.Float mousePos,
 			final Set<UIObject> newHovered,
 			final Matrix4fc parentTransform) {
 
 		// treat children first so they are earlier in the hovered stack
-		if (e.hasComponentMatching(SubEntitiesComponent.class)) {
-			final Matrix4fc newMatrix = e.hasComponentMatching(TransformComponent.class)
-					? parentTransform.mul(e.getComponentMatching(TransformComponent.class).getTransform().getMatrix(), new Matrix4f())
+		if (e instanceof final EntityContainer<?> ec) {
+			final Matrix4fc newMatrix = e instanceof final TransformOwner to && to.hasTransform()
+					? parentTransform.mul(to.getTransform().getMatrix(), new Matrix4f())
 					: parentTransform;
 
-			e.getComponentsMatching(SubEntitiesComponent.class).forEach(se -> {
-				synchronized (se.getEntitiesLock()) {
-					for (final SceneEntity e2 : (List<SceneEntity>) se.getEntities()) {
-						this.checkInput(e2, inputHandler, dTime, frameState, mousePos, newHovered, newMatrix);
-					}
-				}
-			});
+			ec.forEach(e2 -> this.checkInput(e2, inputHandler, frameState, mousePos, newHovered, newMatrix));
 		}
 
 		if (e instanceof final UIObject uiObj) {
 			if (uiObj instanceof final NeedsInput uiObjectInput) {
-				uiObjectInput.input(inputHandler, dTime, this);
+				uiObjectInput.input(inputHandler);
 			}
 
 			if ((e instanceof NeedsHover || e instanceof NeedsClick || e instanceof NeedsBoundsInput)
@@ -155,17 +146,17 @@ public class UIScene extends Scene3D implements BoundsOwner {
 				frameState.uiSceneCaughtMouseInput = true;
 
 				if (uiObj instanceof final NeedsHover uiObjectHover) {
-					uiObjectHover.hover(inputHandler, dTime, this.hovering.contains(uiObj) ? HoverState.STAY : HoverState.ENTER, this);
+					uiObjectHover.hover(inputHandler, this.hovering.contains(uiObj) ? HoverState.STAY : HoverState.ENTER);
 					newHovered.add(uiObj);
 				}
 
 				if (uiObj instanceof final NeedsBoundsInput uiObjectInput) {
-					uiObjectInput.input(inputHandler, dTime, this);
+					uiObjectInput.input(inputHandler);
 					newHovered.add(uiObj);
 				}
 
 				if (uiObj instanceof final NeedsClick uiObjectClick && inputHandler.isMouseButtonPressedOnce(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
-					uiObjectClick.click(inputHandler, dTime, this);
+					uiObjectClick.click(inputHandler);
 				}
 
 				if (uiObj instanceof Focusable && inputHandler.isMouseButtonPressedOnce(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
@@ -181,27 +172,22 @@ public class UIScene extends Scene3D implements BoundsOwner {
 
 	public void update(
 			final WindowInputHandler inputHandler,
-			final float dTime,
 			final DeferredCompositor compositor,
 			final WorkerDispatcher workers,
 			final Dispatcher render) {
 		synchronized (super.getEntitiesLock()) {
 			for (final SceneEntity e : this) {
-				this.updateEntity(inputHandler, dTime, e);
+				this.updateEntity(inputHandler, e);
 			}
 		}
 	}
 
-	private void updateEntity(final WindowInputHandler inputHandler, final float dTime, final SceneEntity e) {
-		if (e.hasComponentMatching(SubEntitiesComponent.class)) {
-			e.getComponentsMatching(SubEntitiesComponent.class).forEach(se -> {
-				synchronized (se.getEntitiesLock()) {
-					for (final SceneEntity e2 : (List<SceneEntity>) se.getEntities()) {
-						this.updateEntity(inputHandler, dTime, e2);
-					}
-				}
-			});
+	private void updateEntity(final WindowInputHandler inputHandler, final SceneEntity e) {
+		if (e instanceof final EntityContainer<?> ec) {
+			ec.forEach(e2 -> this.updateEntity(inputHandler, e2));
 		}
+
+		final float dTime = inputHandler.dTime();
 
 		if (e instanceof final NeedsUpdate needsUpdate) {
 			needsUpdate.update(dTime, this);

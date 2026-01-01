@@ -3,79 +3,32 @@ package lu.kbra.plant_game.engine.entity.ui;
 import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
 
-import lu.kbra.plant_game.engine.entity.impl.MeshOwner;
 import lu.kbra.plant_game.engine.entity.impl.Transform3DOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.TransformedBoundsOwner;
-import lu.kbra.plant_game.engine.entity.ui.impl.TransparentEntity;
-import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.objs.entity.Entity;
 import lu.kbra.standalone.gameengine.objs.entity.ParentAware;
-import lu.kbra.standalone.gameengine.objs.entity.components.MeshComponent;
-import lu.kbra.standalone.gameengine.objs.entity.components.Transform3DComponent;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-public abstract class UIObject extends Entity
-		implements Transform3DOwner, MeshOwner, TransparentEntity, TransformedBoundsOwner, ParentAware {
+public abstract class UIObject extends Entity implements Transform3DOwner, TransformedBoundsOwner, ParentAware {
 
 	public static final Shape SQUARE_1_UNIT = new Rectangle2D.Float(-0.5f, -0.5f, 1f, 1f);
 
-	protected MeshComponent meshComponent;
-	protected Transform3DComponent transformComponent;
+	protected Transform3D transform;
 
 	protected Object parent;
 
-	public UIObject(final String str, final Mesh mesh) {
-		this(str, mesh, null);
-	}
-
-	public UIObject(final String str, final Mesh mesh, final Transform3D transform) {
+	public UIObject(final String str) {
 		super(str);
-		this.setMesh(mesh);
-		this.setTransform(transform);
-	}
-
-	public MeshComponent getMeshComponent() {
-		return this.meshComponent;
-	}
-
-	public Transform3DComponent getTransformComponent() {
-		return this.transformComponent;
-	}
-
-	@Override
-	public Mesh getMesh() {
-		return this.meshComponent == null ? null : this.meshComponent.getMesh();
 	}
 
 	@Override
 	public Transform3D getTransform() {
-		return this.transformComponent == null ? null : this.transformComponent.getTransform();
+		return this.transform;
 	}
 
 	@Override
 	public void setTransform(final Transform3D ie) {
-		if (this.transformComponent != null) {
-			if (ie == null) {
-				super.removeComponent(Transform3DComponent.class);
-			} else {
-				this.transformComponent.setTransform(ie);
-			}
-		} else if (ie != null) {
-			super.addComponent(this.transformComponent = new Transform3DComponent(ie));
-		}
-	}
-
-	@Override
-	public void setMesh(final Mesh ie) {
-		if (this.meshComponent != null) {
-			if (ie == null) {
-				super.removeComponent(MeshComponent.class);
-			} else {
-				this.meshComponent.setMesh(ie);
-			}
-		} else if (ie != null) {
-			super.addComponent(this.meshComponent = new MeshComponent(ie));
-		}
+		this.transform = ie;
 	}
 
 	@Override
@@ -86,6 +39,12 @@ public abstract class UIObject extends Entity
 	@Override
 	public void setParent(final Object e) {
 		this.parent = e;
+	}
+
+	@Override
+	public String toString() {
+		return "UIObject [transform=" + this.transform + ", parent=" + this.parent + ", active=" + this.active + ", name=" + this.name
+				+ "]";
 	}
 
 }

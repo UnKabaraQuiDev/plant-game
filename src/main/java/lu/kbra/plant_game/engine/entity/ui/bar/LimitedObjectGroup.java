@@ -13,7 +13,7 @@ public interface LimitedObjectGroup<T extends SceneEntity> extends ObjectGroup<T
 	default <V extends T> V add(final V e) {
 		final int MAX_ITEMS = this.getMaxItems();
 		if (this.size() >= MAX_ITEMS) {
-			throw new UnsupportedOperationException("Max. " + MAX_ITEMS + " columns: " + this.getSubEntities());
+			throw new UnsupportedOperationException("Max. " + MAX_ITEMS + " columns: " + this.getROEntities());
 		}
 		return this.add(e);
 	}
@@ -22,7 +22,7 @@ public interface LimitedObjectGroup<T extends SceneEntity> extends ObjectGroup<T
 	default <V extends T> boolean addAll(final Collection<? extends V> c) {
 		final int MAX_ITEMS = this.getMaxItems();
 		if (this.size() >= MAX_ITEMS || this.size() + c.size() > MAX_ITEMS) {
-			throw new UnsupportedOperationException("Max. " + MAX_ITEMS + " columns: " + this.getSubEntities());
+			throw new UnsupportedOperationException("Max. " + MAX_ITEMS + " columns: " + this.getROEntities());
 		}
 		return this.addAll(c);
 	}
@@ -31,7 +31,7 @@ public interface LimitedObjectGroup<T extends SceneEntity> extends ObjectGroup<T
 	default <V extends T> V[] addAll(final V... e) {
 		final int MAX_ITEMS = this.getMaxItems();
 		if (this.size() >= MAX_ITEMS || this.size() + e.length > MAX_ITEMS) {
-			throw new UnsupportedOperationException("Max. " + MAX_ITEMS + " columns: " + this.getSubEntities());
+			throw new UnsupportedOperationException("Max. " + MAX_ITEMS + " columns: " + this.getROEntities());
 		}
 		return this.addAll(e);
 	}
@@ -40,7 +40,7 @@ public interface LimitedObjectGroup<T extends SceneEntity> extends ObjectGroup<T
 	default <V extends T> boolean addChildren(final ObjectGroup<? extends V> c) {
 		final int MAX_ITEMS = this.getMaxItems();
 		if (this.size() >= MAX_ITEMS || this.size() + c.size() > MAX_ITEMS) {
-			throw new UnsupportedOperationException("Max. " + MAX_ITEMS + " columns: " + this.getSubEntities());
+			throw new UnsupportedOperationException("Max. " + MAX_ITEMS + " columns: " + this.getROEntities());
 		}
 		return this.addChildren(c);
 	}

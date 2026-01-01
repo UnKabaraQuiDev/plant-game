@@ -13,37 +13,20 @@ public class LayoutScrollDrivenUIObjectGroup extends ScrollDrivenUIObjectGroup i
 
 	protected Layout layout;
 
-	public LayoutScrollDrivenUIObjectGroup(
-			final String str,
-			final Transform3D transform,
-			final Supplier<Float> scrollRatio,
-			final Direction dir,
-			final float margin,
-			final Layout layout,
-			final UIObject... values) {
+	public LayoutScrollDrivenUIObjectGroup(final String str, final Transform3D transform, final Supplier<Float> scrollRatio,
+			final Direction dir, final float margin, final Layout layout, final UIObject... values) {
 		super(str, transform, scrollRatio, dir, margin, values);
 		this.setLayout(layout);
 	}
 
-	public LayoutScrollDrivenUIObjectGroup(
-			final String str,
-			final UIObjectGroup parent,
-			final Supplier<Float> scrollRatio,
-			final Direction dir,
-			final float margin,
-			final Layout layout,
-			final UIObject... values) {
+	public LayoutScrollDrivenUIObjectGroup(final String str, final UIObjectGroup parent, final Supplier<Float> scrollRatio,
+			final Direction dir, final float margin, final Layout layout, final UIObject... values) {
 		super(str, parent, scrollRatio, dir, margin, values);
 		this.setLayout(layout);
 	}
 
-	public LayoutScrollDrivenUIObjectGroup(
-			final String str,
-			final Supplier<Float> scrollRatio,
-			final Direction dir,
-			final float margin,
-			final Layout layout,
-			final UIObject... values) {
+	public LayoutScrollDrivenUIObjectGroup(final String str, final Supplier<Float> scrollRatio, final Direction dir, final float margin,
+			final Layout layout, final UIObject... values) {
 		super(str, scrollRatio, dir, margin, values);
 		this.setLayout(layout);
 	}
@@ -63,16 +46,17 @@ public class LayoutScrollDrivenUIObjectGroup extends ScrollDrivenUIObjectGroup i
 
 	@Override
 	public void doLayout() {
-		synchronized (this.getSubEntitiesLock()) {
-			this.getSubEntities().stream().forEach(e -> {
+		synchronized (this.getEntitiesLock()) {
+			this.getWEntities().stream().forEach(e -> {
 				if (e instanceof final LayoutParent lp) {
 					lp.doLayout();
 				}
 			});
+			if (this.layout != null) {
+				this.layout.doLayout(this.getWEntities());
+			}
 		}
-		if (this.layout != null) {
-			this.layout.doLayout(this.getSubEntities());
-		}
+
 		this.recomputeBounds();
 	}
 

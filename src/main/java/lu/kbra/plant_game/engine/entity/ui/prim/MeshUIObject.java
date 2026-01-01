@@ -2,24 +2,35 @@ package lu.kbra.plant_game.engine.entity.ui.prim;
 
 import java.awt.geom.Rectangle2D;
 
+import lu.kbra.plant_game.engine.entity.impl.MeshOwner;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.utils.geo.GeoPlane;
-import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-public class MeshUIObject extends UIObject {
+public class MeshUIObject extends UIObject implements MeshOwner {
 
 	protected Rectangle2D.Float bounds;
 
+	protected Mesh mesh;
+
 	public MeshUIObject(final String str, final Mesh mesh) {
-		this(str, mesh, null);
+		super(str);
+		this.setMesh(mesh);
 	}
 
-	public MeshUIObject(final String str, final Mesh mesh, final Transform3D transform) {
-		super(str, mesh, transform);
-		if (mesh != null) {
-			this.bounds = mesh.getBoundingBox().project(GeoPlane.XZ);
-		}
+	protected void recomputeBounds() {
+		this.bounds = this.mesh.getBoundingBox().project(GeoPlane.XZ);
+	}
+
+	@Override
+	public Mesh getMesh() {
+		return this.mesh;
+	}
+
+	@Override
+	public void setMesh(final Mesh m) {
+		this.mesh = m;
+		this.recomputeBounds();
 	}
 
 	@Override

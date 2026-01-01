@@ -5,38 +5,46 @@ import java.awt.Shape;
 import javax.swing.GroupLayout.Alignment;
 
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
-import lu.kbra.standalone.gameengine.objs.entity.components.TextEmitterComponent;
+import lu.kbra.plant_game.engine.entity.ui.impl.TransparentEntity;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
 import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
-import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-public class TextUIObject extends UIObject {
+public class TextUIObject extends UIObject implements TextEmitterOwner, TransparentEntity {
 
-	private TextEmitterComponent textEmitterComponent;
+	private TextEmitter textEmitter;
 
 	public TextUIObject(final String str, final TextEmitter text) {
-		super(str, null);
-		super.addComponent(this.textEmitterComponent = new TextEmitterComponent(text));
-	}
-
-	public TextUIObject(final String str, final TextEmitter text, final Transform3D transform) {
-		super(str, null, transform);
-		super.addComponent(this.textEmitterComponent = new TextEmitterComponent(text));
+		super(str);
+		this.setTextEmitter(text);
 	}
 
 	@Override
 	public Shape getBounds() {
-		assert this.textEmitterComponent.getTextEmitter().getLineCount() == 1;
-		return GameEngineUtils
-				.toRectangleBounds(this.textEmitterComponent.getTextEmitter().getTextBounds(), Alignment.LEADING, Alignment.CENTER);
+		assert this.textEmitter.getLineCount() == 1;
+		return GameEngineUtils.toRectangleBounds(this.textEmitter.getTextBounds(), Alignment.LEADING, Alignment.CENTER);
 	}
 
-	public TextEmitterComponent getTextEmitterComponent() {
-		return this.textEmitterComponent;
+	public String getText() {
+		return this.getTextEmitter() != null ? this.getTextEmitter().getText() : null;
 	}
 
+	public TextEmitter setText(final String txt) {
+		return this.getTextEmitter() != null ? this.getTextEmitter().setText(txt) : null;
+	}
+
+	/** in gl thread only */
+	public void updateText() {
+		this.getTextEmitter().updateText();
+	}
+
+	@Override
 	public TextEmitter getTextEmitter() {
-		return this.textEmitterComponent == null ? null : this.textEmitterComponent.getTextEmitter();
+		return this.textEmitter;
+	}
+
+	@Override
+	public void setTextEmitter(final TextEmitter te) {
+		this.textEmitter = te;
 	}
 
 }

@@ -7,7 +7,6 @@ import java.nio.IntBuffer;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -38,19 +37,20 @@ import lu.pcy113.pclib.pointer.prim.BooleanPointer;
 import lu.kbra.plant_game.PGLogic;
 import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.entity.go.impl.Footprint;
-import lu.kbra.plant_game.engine.entity.go.impl.FootprintOwner;
-import lu.kbra.plant_game.engine.entity.go.impl.MaterialIdOwner;
-import lu.kbra.plant_game.engine.entity.go.impl.ObjectIdOwner;
-import lu.kbra.plant_game.engine.entity.go.impl.SwayInstanceEmitter;
-import lu.kbra.plant_game.engine.entity.go.impl.SwayOwner;
 import lu.kbra.plant_game.engine.entity.go.obj.AnimatedMeshFootprintOwner;
 import lu.kbra.plant_game.engine.entity.go.obj.StaticMeshFootprintOwner;
-import lu.kbra.plant_game.engine.entity.impl.AnimatedMeshComponent;
+import lu.kbra.plant_game.engine.entity.impl.AnimatedMeshOwner;
 import lu.kbra.plant_game.engine.entity.impl.AnimatedTransformOwner;
+import lu.kbra.plant_game.engine.entity.impl.FootprintOwner;
+import lu.kbra.plant_game.engine.entity.impl.InstanceEmitterOwner;
+import lu.kbra.plant_game.engine.entity.impl.MaterialIdOwner;
+import lu.kbra.plant_game.engine.entity.impl.MeshOwner;
+import lu.kbra.plant_game.engine.entity.impl.ObjectIdOwner;
+import lu.kbra.plant_game.engine.entity.impl.SwayOwner;
 import lu.kbra.plant_game.engine.entity.impl.TransformOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.TransformedBoundsOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.TransparentEntity;
-import lu.kbra.plant_game.engine.mesh.AnimatedMesh;
+import lu.kbra.plant_game.engine.entity.ui.text.TextEmitterOwner;
 import lu.kbra.plant_game.engine.mesh.MaterialMesh;
 import lu.kbra.plant_game.engine.mesh.TexturedMesh;
 import lu.kbra.plant_game.engine.mesh.TintOwner;
@@ -93,17 +93,9 @@ import lu.kbra.standalone.gameengine.graph.texture.Texture;
 import lu.kbra.standalone.gameengine.graph.window.Window;
 import lu.kbra.standalone.gameengine.impl.Cleanupable;
 import lu.kbra.standalone.gameengine.impl.GLObject;
-import lu.kbra.standalone.gameengine.impl.Renderable;
-import lu.kbra.standalone.gameengine.objs.entity.Component;
-import lu.kbra.standalone.gameengine.objs.entity.Entity;
 import lu.kbra.standalone.gameengine.objs.entity.SceneEntity;
-import lu.kbra.standalone.gameengine.objs.entity.components.InstanceEmitterComponent;
-import lu.kbra.standalone.gameengine.objs.entity.components.MeshComponent;
-import lu.kbra.standalone.gameengine.objs.entity.components.RenderConditionComponent;
-import lu.kbra.standalone.gameengine.objs.entity.components.SubEntitiesComponent;
-import lu.kbra.standalone.gameengine.objs.entity.components.TextEmitterComponent;
-import lu.kbra.standalone.gameengine.objs.entity.components.TransformComponent;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
+import lu.kbra.standalone.gameengine.scene.EntityContainer;
 import lu.kbra.standalone.gameengine.scene.Scene;
 import lu.kbra.standalone.gameengine.scene.camera.Camera;
 import lu.kbra.standalone.gameengine.utils.MathUtils;
@@ -117,9 +109,12 @@ import lu.kbra.standalone.gameengine.utils.gl.consts.TexelInternalFormat;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextureFilter;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextureType;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextureWrap;
-import lu.kbra.standalone.gameengine.utils.transform.Transform;
 
 public class DeferredCompositor implements Cleanupable {
+
+	public enum Method {
+		DIRECT, DEFERRED;
+	}
 
 	private static final String SWAY_NOISE_PATH = System.getProperty(DeferredCompositor.class.getSimpleName() + ".path.sway_noise",
 			"classpath:/bakes/noise/sway/512.png");
@@ -192,20 +187,18 @@ public class DeferredCompositor implements Cleanupable {
 	// world rendering
 	protected SingleTexture depthTexture, posTexture, normalTexture, uvTexture, idsTexture;
 	protected Framebuffer worldFramebuffer;
-	protected TransferShader transferShader;
-	protected InstanceTransferShader instanceTransferShader;
-	protected SwayTransferShader swayTransferShader;
-	protected SwayInstanceTransferShader swayInstanceTransferShader;
+	protected TransferShader deferredTransferShader;
+	protected InstanceTransferShader deferredInstanceTransferShader;
+	protected SwayTransferShader deferredSwayTransferShader;
+	protected SwayInstanceTransferShader deferredSwayInstanceTransferShader;
 	protected Texture swayMap;
-	protected Map<Class<? extends Renderable>, RenderShader> worldSceneShaders;
 
 	// ui rendering
 	protected SingleTexture fontTexture;
 	protected DirectShader directShader;
-	protected GradientShader gradientShader;
-	protected InstanceDirectShader instanceDirectShader;
-	protected TextDirectShader textDirectShader;
-	protected Map<Class<? extends Renderable>, RenderShader> uiSceneShaders;
+	protected GradientShader directGradientShader;
+	protected InstanceDirectShader directInstanceShader;
+	protected TextDirectShader directTextShader;
 	protected SingleTexture whiteTexture;
 
 	// material passes
@@ -238,10 +231,10 @@ public class DeferredCompositor implements Cleanupable {
 		this.ownerThread = ownerThread;
 		this.window = engine.getWindow();
 
-		cache.addAbstractShader(this.transferShader = new TransferShader());
-		cache.addAbstractShader(this.instanceTransferShader = new InstanceTransferShader());
-		cache.addAbstractShader(this.swayTransferShader = new SwayTransferShader());
-		cache.addAbstractShader(this.swayInstanceTransferShader = new SwayInstanceTransferShader());
+		cache.addAbstractShader(this.deferredTransferShader = new TransferShader());
+		cache.addAbstractShader(this.deferredInstanceTransferShader = new InstanceTransferShader());
+		cache.addAbstractShader(this.deferredSwayTransferShader = new SwayTransferShader());
+		cache.addAbstractShader(this.deferredSwayInstanceTransferShader = new SwayInstanceTransferShader());
 
 		cache.addAbstractShader(this.materialComputeShader = new MaterialComputeShader());
 		cache.addAbstractShader(this.textureMaterialComputeShader = new TextureMaterialComputeShader());
@@ -251,9 +244,9 @@ public class DeferredCompositor implements Cleanupable {
 		cache.addAbstractShader(this.blitShader = new BlitShader());
 
 		cache.addAbstractShader(this.directShader = new DirectShader());
-		cache.addAbstractShader(this.gradientShader = new GradientShader());
-		cache.addAbstractShader(this.textDirectShader = new TextDirectShader());
-		cache.addAbstractShader(this.instanceDirectShader = new InstanceDirectShader());
+		cache.addAbstractShader(this.directGradientShader = new GradientShader());
+		cache.addAbstractShader(this.directTextShader = new TextDirectShader());
+		cache.addAbstractShader(this.directInstanceShader = new InstanceDirectShader());
 
 		cache.addAbstractShader(this.lineDirectShader = new LineDirectShader());
 		cache.addAbstractShader(this.lineInstanceDirectShader = new LineInstanceDirectShader());
@@ -283,36 +276,6 @@ public class DeferredCompositor implements Cleanupable {
 		cache.addTexture(this.outputTxt);
 
 		cache.addFramebuffer(this.worldFramebuffer = this.genFramebuffer(cache, engine.getWindow().getSize()));
-
-		this.worldSceneShaders = PCUtils.hashMap(Mesh.class,
-				this.transferShader,
-				AnimatedMesh.class,
-				this.transferShader,
-				GradientMesh.class,
-				null,
-				TextEmitter.class,
-				null,
-				InstanceEmitter.class,
-				this.instanceTransferShader,
-				SwayMesh.class,
-				this.swayTransferShader,
-				SwayInstanceEmitter.class,
-				this.swayInstanceTransferShader);
-
-		this.uiSceneShaders = PCUtils.hashMap(Mesh.class,
-				this.directShader,
-				AnimatedMesh.class,
-				this.directShader,
-				GradientMesh.class,
-				this.gradientShader,
-				TextEmitter.class,
-				this.textDirectShader,
-				InstanceEmitter.class,
-				this.instanceDirectShader,
-				SwayMesh.class,
-				null,
-				SwayInstanceEmitter.class,
-				null);
 	}
 
 	public void render(final GameEngine engine, final WorldLevelScene worldScene, final UIScene uiScene) {
@@ -372,13 +335,13 @@ public class DeferredCompositor implements Cleanupable {
 		GL_W.glDisable(GL_W.GL_CULL_FACE);
 
 		synchronized (uiScene.getEntitiesLock()) {
-			this.renderScene(uiScene, this.uiSceneShaders);
+			this.renderScene(uiScene, Method.DIRECT);
 		}
 	}
 
-	private void checkComponent(final GLObject mesh, final Component source, final SceneEntity entity) {
+	private void checkComponent(final GLObject mesh, final SceneEntity entity) {
 		if (mesh == null) {
-			throw new NullPointerException("Mesh is null on: " + source.getClass().getSimpleName() + " in " + entity.getId());
+			throw new NullPointerException("Mesh is null in " + entity.getId());
 		}
 		synchronized (mesh) {
 			final String txtMesh = Objects.toString(mesh);
@@ -557,20 +520,15 @@ public class DeferredCompositor implements Cleanupable {
 //		SCREEN.bind();
 //		this.textureMaterialComputeShader.bind();
 
-		if (entity.hasComponentMatching(MeshComponent.class)) {
-			final List<MeshComponent> meshComponents = entity.getComponentsMatching(MeshComponent.class);
+		if (entity instanceof final MeshOwner mo) {
+			final Mesh mesh = mo.getMesh();
+			this.checkComponent(mesh, entity);
 
-			for (final MeshComponent meshComponent : meshComponents) {
-				final Mesh mesh = meshComponent.getMesh();
-				this.checkComponent(mesh, meshComponent, entity);
+			if (mesh instanceof final TexturedMesh txtMesh) {
+				final SingleTexture txt = txtMesh.getTexture();
+				final int tid = txt.getGlId();
 
-				if (mesh instanceof final TexturedMesh txtMesh) {
-					final SingleTexture txt = txtMesh.getTexture();
-					final int tid = txt.getGlId();
-					if (alreadyRendered.contains(tid)) {
-						continue;
-					}
-
+				if (!alreadyRendered.contains(tid)) {
 					txt.bindUniform(txt0UniformLoc, 0);
 
 					this.textureMaterialComputeShader.storeUniformUnsigned(currentMaterialIdLoc, tid);
@@ -586,29 +544,20 @@ public class DeferredCompositor implements Cleanupable {
 			}
 		}
 
-		if (entity.hasComponentMatching(SubEntitiesComponent.class)) {
-			final SubEntitiesComponent<? extends Entity> subEntities = entity.getComponent(SubEntitiesComponent.class);
-			synchronized (subEntities.getEntitiesLock()) {
-				for (final Entity e : subEntities.getEntities()) {
-					this.renderTexture(alreadyRendered, txt0UniformLoc, currentMaterialIdLoc, groupsX, groupsY, e);
-				}
-			}
+		if (entity instanceof final EntityContainer<?> ec) {
+			ec.forEach(e -> this.renderTexture(alreadyRendered, txt0UniformLoc, currentMaterialIdLoc, groupsX, groupsY, e));
 		}
 
-		if (entity.hasComponentMatching(InstanceEmitterComponent.class)) {
-			final List<InstanceEmitterComponent> instanceEmitterComponents = entity.getComponentsMatching(InstanceEmitterComponent.class);
+		if (entity instanceof final InstanceEmitterOwner ieo) {
+			final InstanceEmitter instances = ieo.getInstanceEmitter();
+			this.checkComponent(instances, entity);
+			final Mesh mesh = instances.getParticleMesh();
 
-			for (final InstanceEmitterComponent instanceEmitterComponent : instanceEmitterComponents) {
-				final InstanceEmitter instances = instanceEmitterComponent.getInstanceEmitter();
-				this.checkComponent(instances, instanceEmitterComponent, entity);
-				final Mesh mesh = instances.getParticleMesh();
+			if (mesh instanceof final TexturedMesh txtMesh) {
+				final SingleTexture txt = txtMesh.getTexture();
+				final int tid = txt.getGlId();
 
-				if (mesh instanceof final TexturedMesh txtMesh) {
-					final SingleTexture txt = txtMesh.getTexture();
-					final int tid = txt.getGlId();
-					if (alreadyRendered.contains(tid)) {
-						continue;
-					}
+				if (!alreadyRendered.contains(tid)) {
 
 					txt.bindUniform(txt0UniformLoc, 0);
 
@@ -675,45 +624,72 @@ public class DeferredCompositor implements Cleanupable {
 		GL_W.glClearColor(0, 0, 0, 1);
 		GL_W.glClear(GL_W.GL_COLOR_BUFFER_BIT | GL_W.GL_DEPTH_BUFFER_BIT);
 
-		this.transferShader.bind();
+		this.deferredTransferShader.bind();
 
 		synchronized (worldScene.getEntitiesLock()) {
-			this.renderScene(worldScene, this.worldSceneShaders);
+			this.renderScene(worldScene, Method.DEFERRED);
 		}
 
-		this.transferShader.unbind();
+		this.deferredTransferShader.unbind();
 		this.worldFramebuffer.unbind();
 	}
 
-	protected void renderScene(final Scene scene, final Map<Class<? extends Renderable>, RenderShader> shaders) {
-		final RenderShader meshShader = shaders.get(Mesh.class);
-		final RenderShader animatedMeshShader = shaders.get(AnimatedMesh.class);
-		final RenderShader textEmitterShader = shaders.get(TextEmitter.class);
-		final RenderShader instanceEmitterShader = shaders.get(InstanceEmitter.class);
-		final RenderShader gradientMeshShader = shaders.get(GradientMesh.class);
-		final RenderShader swayMeshShader = shaders.get(SwayMesh.class);
-		final RenderShader swayInstanceEmitterShader = shaders.get(SwayInstanceEmitter.class);
-
-		this.setupSceneUniforms(shaders.values(), scene);
-		this.setupSceneUniforms(Arrays.asList(this.lineDirectShader, this.lineInstanceDirectShader), scene);
-
-		for (final SceneEntity entity : scene) {
-			this.renderEntityRecursive(entity,
-					shaders,
-					meshShader,
-					animatedMeshShader,
-					textEmitterShader,
-					instanceEmitterShader,
-					gradientMeshShader,
-					swayMeshShader,
-					swayInstanceEmitterShader,
-					GameEngine.IDENTITY_MATRIX4F);
+	protected void renderScene(final Scene scene, final Method method) {
+		final RenderShader meshShader;
+		final RenderShader animatedMeshShader;
+		final RenderShader textEmitterShader;
+		final RenderShader instanceEmitterShader;
+		final RenderShader gradientMeshShader;
+		final RenderShader swayMeshShader;
+		final RenderShader swayInstanceEmitterShader;
+		switch (method) {
+		case DEFERRED -> {
+			meshShader = this.deferredTransferShader;
+			animatedMeshShader = this.deferredTransferShader;
+			textEmitterShader = null;
+			instanceEmitterShader = this.deferredInstanceTransferShader;
+			gradientMeshShader = null;
+			swayMeshShader = this.deferredSwayTransferShader;
+			swayInstanceEmitterShader = this.deferredSwayInstanceTransferShader;
 		}
+		case DIRECT -> {
+			meshShader = this.directShader;
+			animatedMeshShader = this.directShader;
+			textEmitterShader = this.directTextShader;
+			instanceEmitterShader = this.directInstanceShader;
+			gradientMeshShader = this.directGradientShader;
+			swayMeshShader = null;
+			swayInstanceEmitterShader = null;
+		}
+		default -> {
+			throw new IllegalArgumentException(Objects.toString(method));
+		}
+		}
+
+		this.setupSceneUniforms(Arrays.asList(meshShader,
+				animatedMeshShader,
+				textEmitterShader,
+				instanceEmitterShader,
+				gradientMeshShader,
+				swayMeshShader,
+				swayInstanceEmitterShader,
+				this.lineDirectShader,
+				this.lineInstanceDirectShader), scene);
+
+		scene.forEach(entity -> this.renderEntityRecursive(entity,
+				meshShader,
+				animatedMeshShader,
+				textEmitterShader,
+				instanceEmitterShader,
+				gradientMeshShader,
+				swayMeshShader,
+				swayInstanceEmitterShader,
+				GameEngine.IDENTITY_MATRIX4F));
+
 	}
 
 	private void renderEntityRecursive(
 			final SceneEntity entity,
-			final Map<Class<? extends Renderable>, RenderShader> shaders,
 			final RenderShader meshShader,
 			final RenderShader animatedMeshShader,
 			final RenderShader textEmitterShader,
@@ -727,99 +703,98 @@ public class DeferredCompositor implements Cleanupable {
 			return;
 		}
 
-		if (entity.hasComponentMatching(RenderConditionComponent.class)
-				&& entity.getComponentsMatching(RenderConditionComponent.class).parallelStream().allMatch(RenderConditionComponent::get)) {
+		if (entity instanceof final RenderConditionOwner rco && !rco.fullFillsRenderConditions()) {
 			return;
 		}
 
-		final Transform localTransform;
 		final Matrix4fc localTransformMatrix;
 		if (entity instanceof final TransformOwner to && to.hasTransform()) {
-			localTransform = to.getTransform();
-			localTransformMatrix = localTransform.getMatrix();
-		} else if (entity.hasComponentMatching(TransformComponent.class)) {
-			localTransform = entity.getComponentMatching(TransformComponent.class).getTransform();
-			localTransformMatrix = localTransform.getMatrix();
+			localTransformMatrix = to.getTransform().getMatrix();
 		} else {
-			localTransform = null;
 			localTransformMatrix = GameEngine.IDENTITY_MATRIX4F;
 		}
 
 		final Matrix4f worldTransform = new Matrix4f(parentTransformMatrix).mulAffine(localTransformMatrix);
 
-		if (meshShader != null && entity.hasComponentMatching(MeshComponent.class)) {
-			entity.getComponentsMatching(MeshComponent.class).forEach((final MeshComponent meshComponent) -> {
-				final Mesh mesh = meshComponent.getMesh();
-
-				if (entity instanceof final AnimatedTransformOwner ago && meshComponent instanceof AnimatedMeshComponent) {
-					final Matrix4f animatedTransform = ago.getAnimatedTransform();
-					this.renderMesh(mesh, meshComponent, entity, animatedTransform, animatedMeshShader);
-				} else if (mesh instanceof final AnimatedTransformOwner ago && meshComponent instanceof AnimatedMeshComponent) {
-					final Matrix4f animatedTransform = ago.getAnimatedTransform();
-					this.renderMesh(mesh, meshComponent, entity, animatedTransform, animatedMeshShader);
-				} else if (mesh instanceof GradientOwner || entity instanceof GradientOwner) {
-					this.renderMesh(mesh, meshComponent, entity, worldTransform, gradientMeshShader);
-				} else if (mesh instanceof SwayOwner || entity instanceof SwayOwner) {
-					this.renderMesh(mesh, meshComponent, entity, worldTransform, swayMeshShader);
+		if (entity instanceof final SwayOwner so) {
+			if (entity instanceof final MeshOwner mo) {
+				if (swayMeshShader != null) {
+					this.renderMesh(mo.getMesh(), entity, worldTransform, swayMeshShader);
 				} else {
-					this.renderMesh(mesh, meshComponent, entity, worldTransform, meshShader);
+					GlobalLogger.warning("Sway Mesh rendering not supported !");
 				}
-			});
-		}
+			}
 
-//		if (gradientMeshShader != null && entity.hasComponentMatching(GradientMeshComponent.class)) {
-//			for (final GradientMeshComponent gradientMeshComponent : entity.getComponentsMatching(GradientMeshComponent.class)) {
-//				this.renderMesh(gradientMeshComponent.getGradientMesh(), gradientMeshComponent, entity, worldTransform, gradientMeshShader);
-//			}
-//		}
+			if (entity instanceof final AnimatedMeshOwner amo) {
+				GlobalLogger.warning("Sway AnimatedMesh rendering not supported !");
+			}
 
-//		if (swayMeshShader != null && entity.hasComponentMatching(SwayMeshComponent.class)) {
-//			for (final SwayMeshComponent swayMeshComponent : entity.getComponentsMatching(SwayMeshComponent.class)) {
-//				this.renderMesh(swayMeshComponent.getSwayMesh(), swayMeshComponent, entity, worldTransform, swayMeshShader);
-//			}
-//		}
+			if (entity instanceof final InstanceEmitterOwner ieo) {
+				if (swayMeshShader != null) {
+					this.renderInstanceEmitter(ieo.getInstanceEmitter(), entity, worldTransform, swayInstanceEmitterShader);
+				} else {
+					GlobalLogger.warning("Sway InstanceEmitter rendering not supported !");
+				}
+			}
 
-//		if (animatedMeshShader != null && entity.hasComponentMatching(AnimatedMeshComponent.class)) {
-//			final Matrix4f animatedTransform = entity instanceof final AnimatedTransformOwner ago ? ago.getAnimatedTransform()
-//					: worldTransform;
-//			for (final AnimatedMeshComponent animatedMeshComponent : entity.getComponentsMatching(AnimatedMeshComponent.class)) {
-//				this.renderMesh(animatedMeshComponent
-//						.getAnimatedMesh(), animatedMeshComponent, entity, animatedTransform, animatedMeshShader);
-//			}
-//		}
+			if (entity instanceof final TextEmitterOwner amo) {
+				GlobalLogger.warning("Sway TextEmitter rendering not supported !");
+			}
+		} else if (entity instanceof final GradientOwner go) {
+			if (entity instanceof final MeshOwner mo) {
+				if (gradientMeshShader != null) {
+					this.renderMesh(mo.getMesh(), entity, worldTransform, gradientMeshShader);
+				} else {
+					GlobalLogger.warning("Gradient Mesh rendering not supported !");
+				}
+			}
 
-		if (textEmitterShader != null && entity.hasComponentMatching(TextEmitterComponent.class)) {
-			for (final TextEmitterComponent textEmitterComponent : entity.getComponentsMatching(TextEmitterComponent.class)) {
-				this.renderTextEmitter(textEmitterComponent
-						.getTextEmitter(), textEmitterComponent, entity, worldTransform, textEmitterShader);
+			if (entity instanceof final AnimatedMeshOwner amo) {
+				GlobalLogger.warning("Gradient AnimatedMesh rendering not supported !");
+			}
+
+			if (entity instanceof final InstanceEmitterOwner ieo) {
+				GlobalLogger.warning("Gradient InstanceEmitter rendering not supported !");
+			}
+
+			if (entity instanceof final TextEmitterOwner amo) {
+				GlobalLogger.warning("Gradient TextEmitter rendering not supported !");
+			}
+		} else {
+			if (entity instanceof final MeshOwner mo) {
+				if (swayMeshShader != null) {
+					this.renderMesh(mo.getMesh(), entity, worldTransform, meshShader);
+				} else {
+					GlobalLogger.warning("Mesh rendering not supported !");
+				}
+			}
+
+			if (entity instanceof final AnimatedMeshOwner amo) {
+				if (animatedMeshShader != null) {
+					final Matrix4f animatedTransform = entity instanceof final AnimatedTransformOwner ago ? ago.getAnimatedTransform()
+							: worldTransform;
+					this.renderMesh(amo.getAnimatedMesh(), entity, animatedTransform, animatedMeshShader);
+				} else {
+					GlobalLogger.warning("AnimatedMesh rendering not supported !");
+				}
+			}
+
+			if (entity instanceof final InstanceEmitterOwner teo) {
+				if (instanceEmitterShader != null) {
+					this.renderInstanceEmitter(teo.getInstanceEmitter(), entity, worldTransform, instanceEmitterShader);
+				} else {
+					GlobalLogger.warning("InstanceEmitter rendering not supported !");
+				}
+			}
+
+			if (entity instanceof final TextEmitterOwner teo) {
+				if (textEmitterShader != null) {
+					this.renderTextEmitter(teo.getTextEmitter(), entity, worldTransform, textEmitterShader);
+				} else {
+					GlobalLogger.warning("TextEmitter rendering not supported !");
+				}
 			}
 		}
-
-		if (instanceEmitterShader != null && entity.hasComponentMatching(InstanceEmitterComponent.class)) {
-			entity.getComponentsMatching(InstanceEmitterComponent.class)
-					.forEach((final InstanceEmitterComponent instanceEmitterComponent) -> {
-						final InstanceEmitter instanceEmitter = instanceEmitterComponent.getInstanceEmitter();
-
-						if (instanceEmitter instanceof SwayOwner || entity instanceof SwayOwner) {
-							this.renderInstanceEmitter(instanceEmitter,
-									instanceEmitterComponent,
-									entity,
-									worldTransform,
-									swayInstanceEmitterShader);
-						} else {
-							this.renderInstanceEmitter(instanceEmitterComponent
-									.getInstanceEmitter(), instanceEmitterComponent, entity, worldTransform, instanceEmitterShader);
-						}
-					});
-		}
-
-//		if (swayInstanceEmitterShader != null && entity.hasComponentMatching(SwayInstanceEmitterComponent.class)) {
-//			for (final SwayInstanceEmitterComponent swayInstanceEmitterComponent : entity
-//					.getComponentsMatching(SwayInstanceEmitterComponent.class)) {
-//				this.renderInstanceEmitter(swayInstanceEmitterComponent
-//						.getSwayInstanceEmitter(), swayInstanceEmitterComponent, entity, worldTransform, swayInstanceEmitterShader);
-//			}
-//		}
 
 		if (entity instanceof final TransformedBoundsOwner tbo) {
 			this.drawDebugBounds(tbo.getTransformedBounds(parentTransformMatrix));
@@ -838,22 +813,16 @@ public class DeferredCompositor implements Cleanupable {
 			this.drawDebugFootprint(parentTransformMatrix, localTransformMatrix, fo.getFootprint(), ColorMaterial.YELLOW);
 		}
 
-		if (entity.hasComponentMatching(SubEntitiesComponent.class)) {
-			final SubEntitiesComponent<?> subEntitiesComponent = entity.getComponentMatching(SubEntitiesComponent.class);
-			synchronized (subEntitiesComponent.getEntitiesLock()) {
-				for (final Entity child : (List<Entity>) subEntitiesComponent.getEntities()) {
-					this.renderEntityRecursive(child,
-							shaders,
-							meshShader,
-							animatedMeshShader,
-							textEmitterShader,
-							instanceEmitterShader,
-							gradientMeshShader,
-							swayMeshShader,
-							swayInstanceEmitterShader,
-							worldTransform);
-				}
-			}
+		if (entity instanceof final EntityContainer<?> ec) {
+			ec.forEach(child -> this.renderEntityRecursive(child,
+					meshShader,
+					animatedMeshShader,
+					textEmitterShader,
+					instanceEmitterShader,
+					gradientMeshShader,
+					swayMeshShader,
+					swayInstanceEmitterShader,
+					worldTransform));
 		}
 	}
 
@@ -862,9 +831,9 @@ public class DeferredCompositor implements Cleanupable {
 			final Matrix4fc localTransform,
 			final Footprint footprint,
 			final ColorMaterial color) {
-		if (this.deferredPass && DEBUG_FOOTPRINTS && this.transferShader != null) {
+		if (this.deferredPass && DEBUG_FOOTPRINTS && this.deferredTransferShader != null) {
 			QUAD.bind();
-			this.transferShader.bind();
+			this.deferredTransferShader.bind();
 
 			final Vector2ic min = footprint.getMin();
 			final Vector2ic max = footprint.getMax();
@@ -877,7 +846,7 @@ public class DeferredCompositor implements Cleanupable {
 
 			final Matrix4f mat = new Matrix4f(parentTransform).mul(new Matrix4f(localTransform)).mul(localOffset);
 
-			this.transferShader.setUniform(RenderShader.TRANSFORMATION_MATRIX, mat);
+			this.deferredTransferShader.setUniform(RenderShader.TRANSFORMATION_MATRIX, mat);
 //			this.transferShader.setUniform(LineDirectShader.TINT, color);
 			GL_W.glDisableVertexAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_ID);
 			GL_W.glVertexAttribI1ui(GameObject.MESH_ATTRIB_MATERIAL_ID_ID, color.getId());
@@ -891,7 +860,7 @@ public class DeferredCompositor implements Cleanupable {
 			GL_W.glPolygonMode(PolygonMode.FRONT_AND_BACK.getGlId(), PolygonDrawMode.LINE.getGlId());
 
 //			GL_W.glDrawElements(mesh.getBeginMode().getGlId(), mesh.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
-			GL_W.glDrawElements(this.transferShader.getBeginMode().getGlId(), QUAD.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
+			GL_W.glDrawElements(this.deferredTransferShader.getBeginMode().getGlId(), QUAD.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
 
 //			GL_W.glEnable(GL_W.GL_DEPTH_TEST);
 			GL_W.glPolygonMode(GL_W.GL_FRONT_AND_BACK, GL_W.GL_FILL);
@@ -923,11 +892,10 @@ public class DeferredCompositor implements Cleanupable {
 
 	private void renderInstanceEmitter(
 			final InstanceEmitter obj,
-			final Component component,
 			final SceneEntity entity,
 			final Matrix4f transformationMatrix,
 			final RenderShader shader) {
-		this.checkComponent(obj, component, entity);
+		this.checkComponent(obj, entity);
 		final Mesh mesh = obj.getParticleMesh();
 		obj.bind();
 		shader.bind();
@@ -980,7 +948,7 @@ public class DeferredCompositor implements Cleanupable {
 			this.swayMap.bindUniform(shader.getUniformLocation(SwayTransferShader.SWAY_MAP), 1);
 		}
 
-		if (entity instanceof final GameObject go && go.isEntityMaterialId()) {
+		if (entity instanceof final MaterialIdOwner go && go.isEntityMaterialId()) {
 			// id is in the entity
 			final int matId = go.getMaterialId();
 
@@ -1034,11 +1002,10 @@ public class DeferredCompositor implements Cleanupable {
 
 	private void renderTextEmitter(
 			final TextEmitter obj,
-			final Component component,
 			final SceneEntity entity,
 			final Matrix4f transformationMatrix,
 			final RenderShader shader) {
-		this.checkComponent(obj, component, entity);
+		this.checkComponent(obj, entity);
 		final InstanceEmitter instances = obj.getInstances();
 		final Mesh mesh = instances.getParticleMesh();
 		shader.bind();
@@ -1081,13 +1048,8 @@ public class DeferredCompositor implements Cleanupable {
 		instances.unbind();
 	}
 
-	private void renderMesh(
-			final Mesh mesh,
-			final Component component,
-			final SceneEntity entity,
-			final Matrix4f transformationMatrix,
-			final RenderShader shader) {
-		this.checkComponent(mesh, component, entity);
+	private void renderMesh(final Mesh mesh, final SceneEntity entity, final Matrix4f transformationMatrix, final RenderShader shader) {
+		this.checkComponent(mesh, entity);
 		mesh.bind();
 		shader.bind();
 
@@ -1245,14 +1207,14 @@ public class DeferredCompositor implements Cleanupable {
 
 //			GL_W.glEnable(GL_W.GL_DEPTH_TEST);
 			GL_W.glPolygonMode(GL_W.GL_FRONT_AND_BACK, GL_W.GL_FILL);
-		} else if (this.deferredPass && DEBUG_TRIANGLES && this.transferShader != null) {
-			this.transferShader.bind();
+		} else if (this.deferredPass && DEBUG_TRIANGLES && this.deferredTransferShader != null) {
+			this.deferredTransferShader.bind();
 
 			if (mesh.getVbo().containsKey(GameObject.MESH_ATTRIB_MATERIAL_ID_ID)) {
 				GL_W.glDisableVertexAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_ID);
 			}
 			GL_W.glVertexAttribI1ui(GameObject.MESH_ATTRIB_MATERIAL_ID_ID, ColorMaterial.LIGHT_GREEN.getId());
-			this.transferShader.setUniform(RenderShader.TRANSFORMATION_MATRIX, transformationMatrix);
+			this.deferredTransferShader.setUniform(RenderShader.TRANSFORMATION_MATRIX, transformationMatrix);
 
 			if (GL_LINE_SMOOTHING) {
 				GL_W.glEnable(GL_W.GL_LINE_SMOOTH);

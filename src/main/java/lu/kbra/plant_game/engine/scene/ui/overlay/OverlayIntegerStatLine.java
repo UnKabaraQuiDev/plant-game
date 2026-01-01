@@ -1,14 +1,14 @@
 package lu.kbra.plant_game.engine.scene.ui.overlay;
 
 import java.util.Comparator;
-import java.util.function.Consumer;
+import java.util.Optional;
+import java.util.OptionalInt;
 
 import lu.pcy113.pclib.concurrency.FutureTriggerLatch;
 
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.bar.LimitedObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
-import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory.TextData;
 import lu.kbra.plant_game.engine.entity.ui.group.LayoutOffsetUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.group.UIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsUpdate;
@@ -22,7 +22,6 @@ import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
 import lu.kbra.standalone.gameengine.scene.Scene;
 import lu.kbra.standalone.gameengine.utils.consts.Direction;
-import lu.kbra.standalone.gameengine.utils.gl.consts.TextAlignment;
 import lu.kbra.standalone.gameengine.utils.interpolation.Interpolator;
 import lu.kbra.standalone.gameengine.utils.interpolation.Interpolators;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
@@ -88,56 +87,52 @@ public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup implements
 			final Class<V> valueClazz,
 			final Class<P> popupClazz) {
 
-		final TextData td = new TextData(UIObjectFactory.DEFAULT_CHAR_SIZE, TextAlignment.LEFT, valueLength);
-
 		final float iconHeightRatio = height / (float) TextureUIObject.SQUARE_1_UNIT.getBounds2D().getHeight();
-		final float textHeightRatio = height / td.getCharSize().y;
+		final float textHeightRatio = height / UIObjectFactory.DEFAULT_CHAR_SIZE.y();
 
-		final FutureTriggerLatch<OverlayIntegerStatLine> latch = new FutureTriggerLatch<OverlayIntegerStatLine>(
-				iconClazz == null ? 2 : 3,
-				this);
+		final FutureTriggerLatch<OverlayIntegerStatLine> latch = new FutureTriggerLatch<>(iconClazz == null ? 2 : 3, this);
 
 		if (iconClazz != null) {
-			UIObjectFactory.create(iconClazz, new Transform3D().scaleMul(iconHeightRatio)).then(workers, (Consumer<T>) obj -> {
-				this.icon = obj;
-				this.add(obj);
-				latch.countDown();
-			}).push();
+			UIObjectFactory.create(iconClazz)
+					.set(i -> i.setTransform(new Transform3D().scaleMul(iconHeightRatio)))
+					.add(this)
+					.postInit(i -> this.icon = i)
+					.latch(latch)
+					.push();
 		}
 
 		UIObjectFactory
-				.create(valueClazz,
-						td,
-						this.getId() + "-value",
-						0,
-						false, // force sign
-						true, // padding
-						false, // padding zero
-						valueLength,
-						DEFAULT_TEXT_COLOR,
-						new Transform3D().scaleMul(textHeightRatio))
-				.then(workers, (Consumer<V>) obj -> {
-					this.value = obj;
-					this.add(obj);
-					latch.countDown();
-				})
+				.createText(valueClazz,
+						OptionalInt.of(valueLength),
+						Optional.empty(),
+						Optional.empty(),
+						Optional.of(this.getId() + "-value"),
+						Optional.empty())
+				.set(i -> i.setForceSign(false))
+				.set(i -> i.setPadding(true))
+				.set(i -> i.setPaddingZero(false))
+				.set(i -> i.setValue(0))
+				.set(i -> i.setColorMaterial(DEFAULT_TEXT_COLOR))
+				.set(i -> i.setTransform(new Transform3D().scaleMul(textHeightRatio)))
+				.add(this)
+				.postInit(i -> this.value = i)
+				.latch(latch)
 				.push();
 
-		td.setBufferSize(popupLength + 1);
-
 		UIObjectFactory
-				.create(popupClazz,
-						td,
-						this.getId() + "-popup",
-						ColorMaterial.GRAY,
-						ColorMaterial.RED,
-						ColorMaterial.LIGHT_GREEN,
-						new Transform3D().scaleMul(textHeightRatio * POPUP_TEXT_SCALE))
-				.then(workers, (Consumer<P>) obj -> {
-					this.popup = obj;
-					this.add(obj);
-					latch.countDown();
-				})
+				.createText(popupClazz,
+						OptionalInt.of(valueLength + 1),
+						Optional.empty(),
+						Optional.empty(),
+						Optional.of(this.getId() + "-popup"),
+						Optional.empty())
+				.set(i -> i.setNeutralColor(ColorMaterial.GRAY))
+				.set(i -> i.setPositiveColor(ColorMaterial.LIGHT_GREEN))
+				.set(i -> i.setNegativeColor(ColorMaterial.RED))
+				.set(i -> i.setTransform(new Transform3D().scaleMul(textHeightRatio * POPUP_TEXT_SCALE)))
+				.add(this)
+				.postInit(i -> this.popup = i)
+				.latch(latch)
 				.push();
 
 		return latch;
@@ -151,11 +146,6 @@ public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup implements
 			final Class<V> valueClazz,
 			final Class<P> popupClazz) {
 		return this.init(workers, render, height, VALUE_LENGTH, POPUP_LENGTH, iconClazz, valueClazz, popupClazz);
-	}
-
-	@Override
-	public void doSort() {
-		this.getSubEntitiesComponent().sort(this.comparator);
 	}
 
 	public TextureUIObject getIcon() {
@@ -241,7 +231,23 @@ public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup implements
 	}
 
 	@Override
+	public void doSort() {
+		super.sort(this.comparator);
+	}
+
+	@Override
 	public int getMaxItems() {
 		return 3;
 	}
+
+	@Override
+	public String toString() {
+		return "OverlayIntegerStatLine [icon=" + this.icon + ", value=" + this.value + ", popup=" + this.popup + ", popupSpawnDirection="
+				+ this.popupSpawnDirection + ", popupSpawnDuration=" + this.popupSpawnDuration + ", popupStayDuration="
+				+ this.popupStayDuration + ", progress=" + this.progress + ", popupSpawnInterpolator=" + this.popupSpawnInterpolator
+				+ ", comparator=" + this.comparator + ", layout=" + this.layout + ", transform=" + this.transform + ", subEntitiesLock="
+				+ this.subEntitiesLock + ", subEntities=" + this.subEntities + ", bounds=" + this.bounds + ", active=" + this.active
+				+ ", name=" + this.name + "]";
+	}
+
 }

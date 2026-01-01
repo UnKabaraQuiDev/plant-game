@@ -1,26 +1,19 @@
 package lu.kbra.plant_game.engine.entity.ui.gradient;
 
-import javax.swing.GroupLayout.Alignment;
-
 import org.joml.Vector2f;
 import org.joml.Vector2fc;
 import org.joml.Vector4f;
 import org.joml.Vector4fc;
 
 import lu.kbra.plant_game.engine.entity.ui.impl.TransparentEntity;
-import lu.kbra.plant_game.engine.entity.ui.prim.QuadUIObject;
+import lu.kbra.plant_game.engine.entity.ui.prim.QuadMeshUIObject;
 import lu.kbra.plant_game.engine.mesh.TintOwner;
 import lu.kbra.plant_game.engine.render.GradientDirection;
-import lu.kbra.plant_game.engine.render.GradientMesh;
-import lu.kbra.plant_game.engine.render.GradientMeshComponent;
 import lu.kbra.plant_game.engine.render.GradientOwner;
-import lu.kbra.plant_game.engine.render.GradientQuadMesh;
-import lu.kbra.plant_game.engine.util.annotation.DataPath;
+import lu.kbra.standalone.gameengine.geom.QuadMesh;
 import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
-import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-@DataPath("")
-public class GradientQuadUIObject extends QuadUIObject implements TintOwner, GradientOwner, TransparentEntity {
+public class GradientQuadUIObject extends QuadMeshUIObject implements TintOwner, GradientOwner, TransparentEntity {
 
 	protected Vector4f tint;
 	protected Vector4f startColor;
@@ -28,128 +21,8 @@ public class GradientQuadUIObject extends QuadUIObject implements TintOwner, Gra
 	protected GradientDirection gradientDirection;
 	protected Vector2f gradientRange;
 
-	protected GradientMeshComponent gradientMeshComponent;
-
-	public GradientQuadUIObject(final String str, final GradientQuadMesh gradientMesh) {
-		this(str, gradientMesh, null, null, null, null, null, null);
-	}
-
-	public GradientQuadUIObject(final String str, final GradientQuadMesh gradientMesh, final GradientDirection dir) {
-		this(str, gradientMesh, null, dir, null, null, null, null);
-	}
-
-	public GradientQuadUIObject(final String str, final GradientQuadMesh gradientMesh, final GradientDirection dir, final Vector4f tint) {
-		this(str, gradientMesh, null, dir, null, tint, null, null);
-	}
-
-	public GradientQuadUIObject(
-			final String str,
-			final GradientQuadMesh gradientMesh,
-			final GradientDirection dir,
-			final Vector2f gradientRange,
-			final Vector4f tint) {
-		this(str, gradientMesh, null, dir, null, tint, null, null);
-	}
-
-	public GradientQuadUIObject(
-			final String str,
-			final GradientQuadMesh gradientMesh,
-			final GradientDirection dir,
-			final Vector4f start,
-			final Vector4f end) {
-		this(str, gradientMesh, null, dir, null, start, end);
-	}
-
-	public GradientQuadUIObject(
-			final String str,
-			final GradientQuadMesh gradientMesh,
-			final GradientDirection dir,
-			final Vector2f gradientRange,
-			final Vector4f start,
-			final Vector4f end) {
-		this(str, gradientMesh, null, dir, gradientRange, null, start, end);
-	}
-
-	public GradientQuadUIObject(
-			final String str,
-			final GradientQuadMesh gradientMesh,
-			final GradientDirection dir,
-			final Vector2f gradientRange,
-			final Vector4f tint,
-			final Vector4f start,
-			final Vector4f end) {
-		this(str, gradientMesh, null, dir, gradientRange, tint, start, end);
-	}
-
-	public GradientQuadUIObject(final String str, final GradientQuadMesh gradientMesh, final Transform3D transform) {
-		this(str, gradientMesh, transform, null, null, null, null, null);
-	}
-
-	public GradientQuadUIObject(
-			final String str,
-			final GradientQuadMesh gradientMesh,
-			final Transform3D transform,
-			final GradientDirection dir) {
-		this(str, gradientMesh, transform, dir, null, null, null, null);
-	}
-
-	public GradientQuadUIObject(
-			final String str,
-			final GradientQuadMesh gradientMesh,
-			final Transform3D transform,
-			final GradientDirection dir,
-			final Vector4f tint) {
-		this(str, gradientMesh, transform, dir, null, tint, null, null);
-	}
-
-	public GradientQuadUIObject(
-			final String str,
-			final GradientQuadMesh gradientMesh,
-			final Transform3D transform,
-			final GradientDirection dir,
-			final Vector2f gradientRange,
-			final Vector4f tint) {
-		this(str, gradientMesh, transform, dir, gradientRange, tint, null, null);
-	}
-
-	public GradientQuadUIObject(
-			final String str,
-			final GradientQuadMesh gradientMesh,
-			final Transform3D transform,
-			final GradientDirection dir,
-			final Vector4f start,
-			final Vector4f end) {
-		this(str, gradientMesh, transform, dir, null, null, start, end);
-	}
-
-	public GradientQuadUIObject(
-			final String str,
-			final GradientQuadMesh gradientMesh,
-			final Transform3D transform,
-			final GradientDirection dir,
-			final Vector2f gradientRange,
-			final Vector4f start,
-			final Vector4f end) {
-		this(str, gradientMesh, transform, dir, gradientRange, null, start, end);
-	}
-
-	public GradientQuadUIObject(
-			final String str,
-			final GradientQuadMesh gradientMesh,
-			final Transform3D transform,
-			final GradientDirection dir,
-			final Vector2f gradientRange,
-			final Vector4f tint,
-			final Vector4f start,
-			final Vector4f end) {
-		super(str, null, transform);
-		super.addComponent(this.gradientMeshComponent = new GradientMeshComponent(gradientMesh));
-		this.bounds = GameEngineUtils.toRectangleBounds(gradientMesh.getSize(), Alignment.CENTER, Alignment.CENTER);
-		this.gradientDirection = dir;
-		this.gradientRange = gradientRange;
-		this.tint = tint;
-		this.startColor = start;
-		this.endColor = end;
+	public GradientQuadUIObject(final String str, final QuadMesh mesh) {
+		super(str, mesh);
 	}
 
 	@Override
@@ -159,15 +32,11 @@ public class GradientQuadUIObject extends QuadUIObject implements TintOwner, Gra
 
 	@Override
 	public void setTint(final Vector4fc tint) {
-		this.tint.set(tint);
-	}
-
-	public GradientMeshComponent getGradientMeshComponent() {
-		return this.gradientMeshComponent;
-	}
-
-	public GradientMesh getGradientMesh() {
-		return this.gradientMeshComponent == null ? null : this.gradientMeshComponent.getGradientMesh();
+		if (this.tint == null) {
+			this.tint = new Vector4f(tint);
+		} else {
+			this.tint.set(tint);
+		}
 	}
 
 	@Override
@@ -197,7 +66,7 @@ public class GradientQuadUIObject extends QuadUIObject implements TintOwner, Gra
 
 	@Override
 	public void setStartColor(final Vector4fc color) {
-		this.startColor = GameEngineUtils.clone(color);
+		this.startColor = new Vector4f(color);
 	}
 
 	@Override
@@ -207,7 +76,15 @@ public class GradientQuadUIObject extends QuadUIObject implements TintOwner, Gra
 
 	@Override
 	public void setEndColor(final Vector4fc color) {
-		this.endColor = GameEngineUtils.clone(color);
+		this.endColor = new Vector4f(color);
+	}
+
+	@Override
+	public String toString() {
+		return "GradientQuadUIObject [tint=" + this.tint + ", startColor=" + this.startColor + ", endColor=" + this.endColor
+				+ ", gradientDirection=" + this.gradientDirection + ", gradientRange=" + this.gradientRange + ", bounds=" + this.bounds
+				+ ", mesh=" + this.mesh + ", transform=" + this.transform + ", parent=" + this.parent + ", active=" + this.active
+				+ ", name=" + this.name + "]";
 	}
 
 }

@@ -2,12 +2,15 @@ package lu.kbra.plant_game.engine.scene.ui.menu.main;
 
 import java.util.Collections;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.IntStream;
 
 import org.joml.Quaternionf;
 import org.joml.Vector2f;
+import org.joml.Vector2fc;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
@@ -26,7 +29,6 @@ import lu.kbra.plant_game.engine.entity.ui.btn.PlayButtonUIObject;
 import lu.kbra.plant_game.engine.entity.ui.btn.QuitButtonUIObject;
 import lu.kbra.plant_game.engine.entity.ui.factory.StaticFlatMeshLoader;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
-import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory.TextData;
 import lu.kbra.plant_game.engine.entity.ui.gradient.GradientQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.group.LayoutOffsetUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.group.LayoutScrollDrivenUIObjectGroup;
@@ -35,6 +37,7 @@ import lu.kbra.plant_game.engine.entity.ui.group.ScrollContainerUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.group.ScrollDrivenUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.impl.AbsoluteTransform3DOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.Scale2dDir;
+import lu.kbra.plant_game.engine.entity.ui.layout.SpacerUIObject;
 import lu.kbra.plant_game.engine.entity.ui.mesh.line.TimelineMesh;
 import lu.kbra.plant_game.engine.entity.ui.prim.MeshUIObject;
 import lu.kbra.plant_game.engine.entity.ui.scroller.ScrollBarUIObject;
@@ -144,8 +147,9 @@ public class MainMenuUIScene extends UIScene {
 		this.buildPlayMenu(workers, renderDispatcher);
 
 		/* common */
-		UIObjectFactory
-				.create(CursorUIObject.class, this, new Transform3D(new Vector3f(0, 0.01f, 0.25f), new Quaternionf(), new Vector3f(0.15f)))
+		UIObjectFactory.create(CursorUIObject.class)
+				.set(i -> i.setTransform(new Transform3D(new Vector3f(0, 0.01f, 0.25f), new Quaternionf(), new Vector3f(0.15f))))
+				.add(this)
 				.then(workers, (Consumer<CursorUIObject>) btn -> {
 					btn.forceCirclingMouse();
 					this.cursor = btn;
@@ -154,16 +158,15 @@ public class MainMenuUIScene extends UIScene {
 	}
 
 	private void buildPlayMenu(final Dispatcher workers, final Dispatcher renderDispatcher) {
-		UIObjectFactory
-				.create(ScrollBarUIObject.class,
-						this.playMenuGroup,
-						new Transform3D(),
-						ColorMaterial.GRAY,
-						Direction.EAST,
-						new Vector2f(-1, 1),
-						new Vector2f(0.05f, 0.2f),
-						PLAY_SCROLL_SPEED)
-				.then(workers, (Consumer<ScrollBarUIObject>) this.playMenuGroup::setScrollBar)
+		UIObjectFactory.create(ScrollBarUIObject.class)
+				.set(i -> i.setTransform(new Transform3D()))
+				.set(i -> i.setColorMaterial(ColorMaterial.GRAY))
+				.set(i -> i.setDir(Direction.EAST))
+				.set(i -> i.setRange(new Vector2f(-1, 1)))
+				.set(i -> i.setSize(new Vector2f(0.05f, 0.2f)))
+				.set(i -> i.setSpeed(PLAY_SCROLL_SPEED))
+//				.add(this.playMenuGroup)
+				.postInit(this.playMenuGroup::setScrollBar)
 				.push();
 
 		final int count = 5;
@@ -200,8 +203,9 @@ public class MainMenuUIScene extends UIScene {
 
 				return mesh;
 			}).then(workers, (Consumer<TimelineMesh>) (final TimelineMesh mesh) -> {
-				this.playContentMenuGroup.add(new MeshUIObject("meshName", mesh, new Transform3D(new Vector3f(0, -0.1f, 0))));
-				this.playContentMenuGroup.recomputeBounds();
+				UIObjectFactory.createManual(MeshUIObject.class, mesh)
+						.set(i -> i.setTransform(new Transform3D(new Vector3f(0, -0.1f, 0))))
+						.add(this.playContentMenuGroup);
 				this.playContentMenuGroup.getTransform()
 						.getTranslation().z = (float) -this.playContentMenuGroup.getBounds().getBounds2D().getCenterY();
 				this.playContentMenuGroup.getTransform().updateMatrix();
@@ -209,49 +213,47 @@ public class MainMenuUIScene extends UIScene {
 		});
 
 		final float startPosX = -1;
-		for (int i = 0; i < count; i++) {
-			UIObjectFactory.create(LevelButtonUIObject.class,
-					btns,
-					new Transform3D(new Vector3f(startPosX + 0.6f * i, 0, (0.6f * i) % (2 - 0.5f) - 1),
-							new Quaternionf().rotateY((float) Math.random()),
-							new Vector3f(0.5f)),
-					"lvl" + i)
-//					.then(workers, (Function<LevelButtonUIObject, LevelButtonUIObject>) b -> {
-//						b.setActive(false);
-//						return b;
-//					})
-					.push();
-		}
+		IntStream.range(0, count)
+				.forEach(j -> UIObjectFactory.create(LevelButtonUIObject.class)
+						.set(i -> i.setTransform(new Transform3D(new Vector3f(startPosX + 0.6f * j, 0, (0.6f * j) % (2 - 0.5f) - 1),
+								new Quaternionf().rotateY((float) Math.random()),
+								new Vector3f(0.5f))))
+						.set(i -> i.setLevelId("lvl" + j))
+						.latch(btns)
+						.push());
 	}
 
 	private void buildOptionsMenu(final Dispatcher workers, final Dispatcher renderDispatcher) {
-		final TextData uiSmallLeftTextData = new TextData(new Vector2f(0.1f), TextAlignment.TEXT_CENTER, -1);
+		final Optional<Vector2fc> SMALL_TEXT_CHAR_SIZE = Optional.of(new Vector2f(0.1f));
+		Optional<TextAlignment> SMALL_TEXT_TEXT_ALIGNMENT = Optional.of(TextAlignment.TEXT_CENTER);
 
 		final LayoutOffsetUIObjectGroup optionsVolumeGroup = new LayoutOffsetUIObjectGroup("options.volume",
-				new EdgeStickLayout(true, 0, uiSmallLeftTextData.getCharSize().x() * OPTIONS_COLUMN_COUNT));
+				new EdgeStickLayout(true, 0, SMALL_TEXT_CHAR_SIZE.get().x() * OPTIONS_COLUMN_COUNT));
 
 		this.optionsEntriesMenuGroup.add(optionsVolumeGroup);
-		this.optionsEntriesMenuGroup.add(UIObjectFactory.createVerticalSpacer(2 * uiSmallLeftTextData.getCharSize().y()));
+		this.optionsEntriesMenuGroup.add(SpacerUIObject.getVerticalSpacer(2 * SMALL_TEXT_CHAR_SIZE.get().y()));
 
 		final ListTriggerLatch<OptionKeyUIObject> optionKeyGroupLatch = new ListTriggerLatch<>(StandardKeyOption.values().length,
 				l -> workers.post(() -> {
 					l.forEach(this.optionsEntriesMenuGroup::add);
 					this.updateKeys();
 				}));
+
+		final OptionalInt SMALL_TEXT_BUFFER_SIZE = OptionalInt.of(OPTIONS_COLUMN_COUNT);
 		for (final StandardKeyOption key : StandardKeyOption.values()) {
-			uiSmallLeftTextData.setBufferSize(OPTIONS_COLUMN_COUNT);
-			uiSmallLeftTextData.setName("options.keys" + key);
 			UIObjectFactory
-					.create(OptionKeyUIObject.class,
-							optionKeyGroupLatch,
-							uiSmallLeftTextData,
-							key.name().toLowerCase(),
-							Scale2dDir.BOTH,
-							new Transform3D())
+					.createText(OptionKeyUIObject.class,
+							SMALL_TEXT_BUFFER_SIZE,
+							SMALL_TEXT_CHAR_SIZE,
+							SMALL_TEXT_TEXT_ALIGNMENT,
+							Optional.of("options.keys" + key),
+							Optional.of(key.name().toLowerCase()))
+					.set(i -> i.setTransform(new Transform3D()))
+					.set(i -> i.setDir(Scale2dDir.BOTH))
+					.set(i -> i.setKey(key.name().toLowerCase()))
+					.latch(optionKeyGroupLatch)
 					.push();
 		}
-		uiSmallLeftTextData.setBufferSize(-1);
-		uiSmallLeftTextData.setName(null);
 
 		/* volume */
 		final ListTriggerLatch<UIObject> optionsVolumeGroupLatch = new TextSliderListTriggerLatch<>(workers,
@@ -259,98 +261,135 @@ public class MainMenuUIScene extends UIScene {
 				VolumeTextUIObject.class,
 				VolumeSliderUIObject.class);
 
-		uiSmallLeftTextData.setTextAlignment(TextAlignment.TEXT_LEFT);
-		UIObjectFactory.create(VolumeTextUIObject.class, optionsVolumeGroupLatch, uiSmallLeftTextData, new Transform3DPivot()).push();
-		UIObjectFactory.create(VolumeSliderUIObject.class, optionsVolumeGroupLatch, uiSmallLeftTextData, new Transform3DPivot()).push();
-
+		SMALL_TEXT_TEXT_ALIGNMENT = Optional.of(TextAlignment.TEXT_LEFT);
 		UIObjectFactory
-				.create(ScrollBarUIObject.class,
-						this.optionsMenuGroup,
-						new Transform3D(),
-						ColorMaterial.GRAY,
-						Direction.NORTH,
-						new Vector2f(0.8f, -0.8f),
-						new Vector2f(0.05f, 0.2f),
-						OPTIONS_SCROLL_SPEED)
-				.then(workers, (Consumer<ScrollBarUIObject>) this.optionsMenuGroup::setScrollBar)
+				.createText(VolumeTextUIObject.class,
+						SMALL_TEXT_BUFFER_SIZE,
+						SMALL_TEXT_CHAR_SIZE,
+						SMALL_TEXT_TEXT_ALIGNMENT,
+						Optional.empty(),
+						Optional.empty())
+				.set(i -> i.setTransform(new Transform3DPivot()))
+				.latch(optionsVolumeGroupLatch)
+				.push();
+		UIObjectFactory
+				.createText(VolumeSliderUIObject.class,
+						SMALL_TEXT_BUFFER_SIZE,
+						SMALL_TEXT_CHAR_SIZE,
+						SMALL_TEXT_TEXT_ALIGNMENT,
+						Optional.empty(),
+						Optional.empty())
+				.set(i -> i.setTransform(new Transform3DPivot()))
+				.latch(optionsVolumeGroupLatch)
+				.push();
+
+		UIObjectFactory.create(ScrollBarUIObject.class)
+				.set(i -> i.setTransform(new Transform3D()))
+				.set(i -> i.setColorMaterial(ColorMaterial.GRAY))
+				.set(i -> i.setDir(Direction.NORTH))
+				.set(i -> i.setRange(new Vector2f(0.8f, -0.8f)))
+				.set(i -> i.setSize(new Vector2f(0.05f, 0.2f)))
+				.set(i -> i.setSpeed(OPTIONS_SCROLL_SPEED))
+				.set(this.optionsMenuGroup::setScrollBar)
 				.push();
 	}
 
 	private void buildMainMenu(final Dispatcher workers, final Dispatcher renderDispatcher) {
-		final TextData uiTextData = new TextData(new Vector2f(0.2f), TextAlignment.TEXT_CENTER, -1);
+		final Optional<Vector2fc> SMALL_TEXT_CHAR_SIZE = Optional.of(new Vector2f(0.2f));
+		final Optional<TextAlignment> SMALL_TEXT_TEXT_ALIGNMENT = Optional.of(TextAlignment.TEXT_CENTER);
 
 		final ListTriggerLatch<UIObject> mainButtonsLatch = new ListTriggerLatch<>(3, l -> workers.post(() -> {
 			l.forEach(this.mainButtonsMenuGroup::add);
 			this.mainLeftMenuGroup.doLayout();
 		}));
 
-		UIObjectFactory.create(PlayButtonUIObject.class, mainButtonsLatch, uiTextData, new Transform3D()).push();
-		UIObjectFactory.create(OptionsButtonUIObject.class, mainButtonsLatch, uiTextData, new Transform3D()).push();
-		UIObjectFactory.create(QuitButtonUIObject.class, mainButtonsLatch, uiTextData, new Transform3D()).push();
-
 		UIObjectFactory
-				.create(LargeLogoUIObject.class,
-						this.mainMenuGroup,
-						new Transform3D(new Vector3f(0, 0, -0.75f), new Quaternionf(), new Vector3f(2)))
+				.createText(PlayButtonUIObject.class,
+						OptionalInt.empty(),
+						SMALL_TEXT_CHAR_SIZE,
+						SMALL_TEXT_TEXT_ALIGNMENT,
+						Optional.empty(),
+						Optional.empty())
+				.set(i -> i.setTransform(new Transform3D()))
+				.latch(mainButtonsLatch)
+				.push();
+		UIObjectFactory
+				.createText(OptionsButtonUIObject.class,
+						OptionalInt.empty(),
+						SMALL_TEXT_CHAR_SIZE,
+						SMALL_TEXT_TEXT_ALIGNMENT,
+						Optional.empty(),
+						Optional.empty())
+				.set(i -> i.setTransform(new Transform3D()))
+				.latch(mainButtonsLatch)
+				.push();
+		UIObjectFactory
+				.createText(QuitButtonUIObject.class,
+						OptionalInt.empty(),
+						SMALL_TEXT_CHAR_SIZE,
+						SMALL_TEXT_TEXT_ALIGNMENT,
+						Optional.empty(),
+						Optional.empty())
+				.set(i -> i.setTransform(new Transform3D()))
+				.latch(mainButtonsLatch)
 				.push();
 
-		UIObjectFactory
-				.create(GradientQuadUIObject.class,
-						this.mainMenuGroup,
-						new Transform3D(new Vector3f(0, GRADIENT_DEPTH, 0), new Quaternionf(), new Vector3f(2.5f, 1, 2)),
-						GradientDirection.UV_X,
-						GameEngineUtils.hexToColorToVec4f("3b784a"))
-				.then(workers, (Consumer<GradientQuadUIObject>) (final GradientQuadUIObject t) -> {
-					this.greenGradient = t;
-				})
+		UIObjectFactory.create(LargeLogoUIObject.class)
+				.set(i -> i.setTransform(new Transform3D(new Vector3f(0, 0, -0.75f), new Quaternionf(), new Vector3f(2))))
+				.add(this.mainMenuGroup)
+				.push();
+
+		UIObjectFactory.create(GradientQuadUIObject.class)
+				.set(i -> i.setTransform(new Transform3D(new Vector3f(0, GRADIENT_DEPTH, 0), new Quaternionf(), new Vector3f(2.5f, 1, 2))))
+				.set(i -> i.setDirection(GradientDirection.UV_X))
+				.set(i -> i.setTint(GameEngineUtils.hexToColorToVec4f("3b784a")))
+				.add(this.mainMenuGroup)
+				.postInit(i -> this.greenGradient = i)
 				.push();
 
 		/** options */
 
-		UIObjectFactory.create(GradientQuadUIObject.class,
-				this.optionsMenuGroup,
-				new Transform3D(new Vector3f(0, GRADIENT_DEPTH, 0), new Quaternionf().rotateY((float) Math.PI), new Vector3f(2.5f, 1, 2)),
-				GradientDirection.UV_X,
-				GameEngineUtils.hexToColorToVec4f("317dac8c"))
-				.then(workers, (Consumer<GradientQuadUIObject>) (final GradientQuadUIObject t) -> {
-					this.blueGradient = t;
-				})
+		UIObjectFactory.create(GradientQuadUIObject.class)
+				.set(i -> i.setTransform(new Transform3D(new Vector3f(0, GRADIENT_DEPTH, 0),
+						new Quaternionf().rotateY((float) Math.PI),
+						new Vector3f(2.5f, 1, 2))))
+				.set(i -> i.setDirection(GradientDirection.UV_X))
+				.set(i -> i.setTint(GameEngineUtils.hexToColorToVec4f("317dac8c")))
+				.add(this.mainMenuGroup)
+				.postInit(i -> this.blueGradient = i)
 				.push();
 
 		UIObjectFactory
-				.create(BackButtonUIObject.class,
-						this.optionsMenuGroup,
-						uiTextData,
-						new Transform3D(new Vector3f(-0.5f, 0, -0.5f), new Quaternionf(), new Vector3f(0.5f)))
-				.then(workers, (Consumer<BackButtonUIObject>) t -> {
-					this.optionsBackBtn = t;
-				})
+				.createText(BackButtonUIObject.class,
+						OptionalInt.empty(),
+						SMALL_TEXT_CHAR_SIZE,
+						SMALL_TEXT_TEXT_ALIGNMENT,
+						Optional.empty(),
+						Optional.empty())
+				.set(i -> i.setTransform(new Transform3D(new Vector3f(-0.5f, 0, -0.5f), new Quaternionf(), new Vector3f(0.5f))))
+				.add(this.optionsMenuGroup)
+				.postInit(i -> this.optionsBackBtn = i)
 				.push();
 	}
 
 	private void updateKeys() {
 		final MappingInputHandler inputHandler = PGLogic.INSTANCE.getInputHandler();
 
-		this.optionsEntriesMenuGroup.getSubEntities()
-				.parallelStream()
+		this.optionsEntriesMenuGroup.parallelStream()
 				.filter(OptionKeyUIObject.class::isInstance)
 				.map(e -> (OptionKeyUIObject) e)
 				.forEach(e -> e.setKeyValue(inputHandler.getInputName(e.getKeyOption().getPhysicalKey())));
 
-		final OptionKeyUIObject example = this.optionsEntriesMenuGroup.getSubEntities()
-				.parallelStream()
+		final OptionKeyUIObject example = this.optionsEntriesMenuGroup.parallelStream()
 				.filter(OptionKeyUIObject.class::isInstance)
 				.map(e -> (OptionKeyUIObject) e)
 				.findFirst()
 				.orElseThrow(IllegalStateException::new);
 
-		PGLogic.INSTANCE.RENDER_DISPATCHER.post(() -> {
-			this.optionsEntriesMenuGroup.getSubEntities()
-					.stream()
-					.filter(ProgrammaticTextUIObject.class::isInstance)
-					.map(e -> (ProgrammaticTextUIObject) e)
-					.forEach(e -> e.getTextEmitter().updateText());
-		});
+		PGLogic.INSTANCE.RENDER_DISPATCHER.post(() -> this.optionsEntriesMenuGroup.stream()
+				.filter(ProgrammaticTextUIObject.class::isInstance)
+				.map(e -> (ProgrammaticTextUIObject) e)
+				.forEach(ProgrammaticTextUIObject::updateText));
 
 		((FlowLayout) this.optionsEntriesMenuGroup.getLayout()).setGap((float) (example.getBounds().getBounds2D().getHeight()
 				* (example.getTargetScale(true).z() - example.getTargetScale(false).z())));
@@ -361,8 +400,8 @@ public class MainMenuUIScene extends UIScene {
 	}
 
 	@Override
-	public void input(final WindowInputHandler inputHandler, final float dTime, final UpdateFrameState frameState) {
-		super.input(inputHandler, dTime, frameState);
+	public void input(final WindowInputHandler inputHandler, final UpdateFrameState frameState) {
+		super.input(inputHandler, frameState);
 
 		final OffsetUIObjectGroup current = this.groups[this.currentGroup];
 		if (current instanceof final ScrollContainerUIObjectGroup scrollContainer && scrollContainer.getScrollBar() != null) {
@@ -391,11 +430,10 @@ public class MainMenuUIScene extends UIScene {
 	@Override
 	public void update(
 			final WindowInputHandler inputHandler,
-			final float dTime,
 			final DeferredCompositor compositor,
 			final WorkerDispatcher workers,
 			final Dispatcher render) {
-		super.update(inputHandler, dTime, compositor, workers, render);
+		super.update(inputHandler, compositor, workers, render);
 
 		if (this.cursor != null && this.currentGroup == MAIN && this.mainButtonsMenuGroup.size() > 1) {
 			this.cursor.setActive(true);
@@ -438,6 +476,7 @@ public class MainMenuUIScene extends UIScene {
 			final OffsetUIObjectGroup current = this.groups[this.currentGroup];
 
 			final float duration = 0.8f;
+			final float dTime = inputHandler.dTime();
 			this.progress = org.joml.Math.clamp(0, 1, this.progress + dTime / duration);
 
 			final Vector3f targetPos = new Vector3f(0, 0, 0);

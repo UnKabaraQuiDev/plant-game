@@ -5,25 +5,20 @@ import org.lwjgl.glfw.GLFW;
 
 import lu.kbra.plant_game.PGLogic;
 import lu.kbra.plant_game.engine.data.locale.LocalizationService;
-import lu.kbra.plant_game.engine.entity.ui.impl.AbsoluteTransform3DOwner;
+import lu.kbra.plant_game.engine.entity.impl.NeedsPostConstruct;
 import lu.kbra.plant_game.engine.entity.ui.impl.Focusable;
 import lu.kbra.plant_game.engine.entity.ui.impl.IndexOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsClick;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsInput;
-import lu.kbra.plant_game.engine.entity.ui.impl.Scale2dDir;
-import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.plant_game.engine.window.input.KeyOption;
 import lu.kbra.plant_game.engine.window.input.MappingInputHandler;
 import lu.kbra.plant_game.engine.window.input.StandardKeyOption;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
-import lu.kbra.standalone.gameengine.scene.Scene;
-import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3DPivot;
 
-@DataPath("")
 public class OptionKeyUIObject extends ProgrammaticGrowOnHoverTextUIObject
-		implements NeedsClick, Focusable, NeedsInput, IndexOwner, AbsoluteTransform3DOwner {
+		implements NeedsClick, Focusable, NeedsInput, IndexOwner, NeedsPostConstruct {
 
 	public static enum State {
 		IDLE, WAITING_RELEASE, WAITING_INPUT;
@@ -32,28 +27,21 @@ public class OptionKeyUIObject extends ProgrammaticGrowOnHoverTextUIObject
 	private State awaitInput = State.IDLE;
 	private boolean focused = false;
 
-	public OptionKeyUIObject(
-			final String str,
-			final TextEmitter text,
-			final String key,
-			final Scale2dDir dir,
-			final Transform3D transform) {
-		super(str, text, key, dir, transform);
-
-		this.setKeyValue("x");
-
-		if (transform instanceof final Transform3DPivot t3dp) {
-			final Vector2f textBounds = this.getTextEmitter().getTextBounds();
-			t3dp.scalePivotSet(textBounds.x / 2, 0, textBounds.y / 2);
-		}
-	}
-
-	public OptionKeyUIObject(final String str, final TextEmitter text, final String key, final Scale2dDir dir) {
-		this(str, text, key, dir, null);
+	public OptionKeyUIObject(final String str, final TextEmitter text) {
+		super(str, text);
 	}
 
 	@Override
-	public void click(final WindowInputHandler input, final float dTime, final Scene scene) {
+	public void init() {
+		if (this.transform instanceof final Transform3DPivot t3dp) {
+			final Vector2f textBounds = this.getTextEmitter().getTextBounds();
+			t3dp.scalePivotSet(textBounds.x / 2, 0, textBounds.y / 2);
+		}
+		this.setKeyValue("x");
+	}
+
+	@Override
+	public void click(final WindowInputHandler input) {
 		if (this.awaitInput != State.IDLE) {
 			return;
 		}
@@ -66,7 +54,7 @@ public class OptionKeyUIObject extends ProgrammaticGrowOnHoverTextUIObject
 	}
 
 	@Override
-	public void input(final WindowInputHandler inputHandler, final float dTime, final Scene scene) {
+	public void input(final WindowInputHandler inputHandler) {
 		if (this.awaitInput == State.IDLE) {
 			return;
 		}
@@ -134,6 +122,12 @@ public class OptionKeyUIObject extends ProgrammaticGrowOnHoverTextUIObject
 	@Override
 	public int getIndex() {
 		return StandardKeyOption.valueOf(super.key.toUpperCase()).ordinal();
+	}
+
+	@Override
+	public String toString() {
+		return "OptionKeyUIObject [awaitInput=" + this.awaitInput + ", focused=" + this.focused + ", key=" + this.key + ", transform="
+				+ this.transform + ", parent=" + this.parent + ", active=" + this.active + ", name=" + this.name + "]";
 	}
 
 }

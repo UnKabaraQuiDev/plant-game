@@ -6,73 +6,46 @@ import org.joml.Vector2fc;
 import org.lwjgl.glfw.GLFW;
 
 import lu.kbra.plant_game.PGLogic;
+import lu.kbra.plant_game.engine.entity.impl.NeedsPostConstruct;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsInput;
 import lu.kbra.plant_game.engine.entity.ui.text.TextUIObject;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
-import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
+import lu.kbra.standalone.gameengine.objs.entity.SceneParentAware;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
-import lu.kbra.standalone.gameengine.scene.Scene;
 import lu.kbra.standalone.gameengine.utils.geo.GeoPlane;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextAlignment;
-import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-@DataPath("")
-public class SliderUIObject extends TextUIObject implements NeedsInput {
+public class SliderUIObject extends TextUIObject implements NeedsInput, NeedsPostConstruct, SceneParentAware {
 
 	protected float min;
 	protected float max;
 	protected float value;
 	protected int divisors;
 
-	public SliderUIObject(
-			final String str,
-			final TextEmitter text,
-			final Transform3D transform,
-			final float min,
-			final float max,
-			final float value,
-			final int divisors) {
-		super(str, text, transform);
-		this.min = min;
-		this.max = max;
-		this.value = value;
-		this.divisors = divisors;
-
-		this.updateText(true);
+	public SliderUIObject(final String str, final TextEmitter text) {
+		super(str, text);
 	}
 
-	public SliderUIObject(
-			final String str,
-			final TextEmitter text,
-			final float min,
-			final float max,
-			final float value,
-			final int divisors) {
-		super(str, text);
-		this.min = min;
-		this.max = max;
-		this.value = value;
-		this.divisors = divisors;
-
+	@Override
+	public void init() {
 		this.updateText(true);
 	}
 
 	@Override
-	public void input(final WindowInputHandler inputHandler, final float dTime, final Scene scene) {
+	public void input(final WindowInputHandler inputHandler) {
 		if (!inputHandler.isMouseButtonPressed(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
 			return;
 		}
 
-		final Vector2f coords = ((UIScene) scene).getMouseCoords(inputHandler);
+		final Vector2f coords = ((UIScene) this.getSceneParent()).getMouseCoords(inputHandler);
 		coords.sub(GeoPlane.XZ.projectToPlane(this.getTransform().getTranslation()));
 		coords.y += this.getTextEmitter().getCharSize().y() / 2;
 
 		assert this.getTextEmitter().getTextAlignment() == TextAlignment.TEXT_LEFT : this.getTextEmitter().getTextAlignment();
 		assert this.getTextEmitter().getLineCount() == 1;
 
-		final Vector2fc charSize = this
-				.getTextEmitter()
+		final Vector2fc charSize = this.getTextEmitter()
 				.getCharSize()
 				.mul(GeoPlane.XZ.projectToPlane(this.getTransform().getScale()), new Vector2f());
 
@@ -157,6 +130,12 @@ public class SliderUIObject extends TextUIObject implements NeedsInput {
 
 	public void setDivisors(final int divisors) {
 		this.divisors = divisors;
+	}
+
+	@Override
+	public String toString() {
+		return "SliderUIObject [min=" + this.min + ", max=" + this.max + ", value=" + this.value + ", divisors=" + this.divisors
+				+ ", transform=" + this.transform + ", parent=" + this.parent + ", active=" + this.active + ", name=" + this.name + "]";
 	}
 
 }

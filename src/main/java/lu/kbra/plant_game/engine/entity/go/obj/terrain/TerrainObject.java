@@ -1,10 +1,8 @@
 package lu.kbra.plant_game.engine.entity.go.obj.terrain;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
+import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
@@ -13,17 +11,19 @@ import org.joml.Vector3f;
 import org.joml.Vector4f;
 
 import lu.kbra.plant_game.engine.entity.go.GameObject;
+import lu.kbra.plant_game.engine.entity.go.MeshGameObject;
+import lu.kbra.plant_game.engine.entity.go.impl.SynchronizedEntityContainer;
 import lu.kbra.plant_game.engine.entity.go.mesh.terrain.TerrainMesh;
 import lu.kbra.plant_game.engine.mesh.data.AttributeLocation;
-import lu.kbra.standalone.gameengine.objs.entity.SceneEntity;
-import lu.kbra.standalone.gameengine.objs.entity.components.SubEntitiesComponent;
-import lu.kbra.standalone.gameengine.scene.EntityContainer;
 import lu.kbra.standalone.gameengine.scene.camera.Camera3D;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-public class TerrainObject extends GameObject implements EntityContainer<GameObject> {
+public class TerrainObject extends MeshGameObject implements SynchronizedEntityContainer<GameObject> {
 
-	protected SubEntitiesComponent<GameObject> subEntitiesComponent;
+	protected Object subEntitiesLock = new Object();
+	protected List<GameObject> subEntities = Collections.synchronizedList(new ArrayList<>());
+
+	protected Object parent;
 
 	protected TerrainEdgeObject terrainEdgeObject;
 	protected TerrainHighlightObject terrainHighlightObject;
@@ -34,7 +34,6 @@ public class TerrainObject extends GameObject implements EntityContainer<GameObj
 		this.setIsEntityMaterialId(false);
 		this.setObjectIdLocation(AttributeLocation.MESH);
 		this.setTransform(new Transform3D());
-		super.addComponent(this.subEntitiesComponent = new SubEntitiesComponent<>(new ArrayList<>()));
 	}
 
 	public Vector2i pickTerrainCell(final Camera3D cam, final Vector2f mousePos, final int windowWidth, final int windowHeight) {
@@ -121,25 +120,13 @@ public class TerrainObject extends GameObject implements EntityContainer<GameObj
 		return (TerrainMesh) super.getMesh();
 	}
 
-	public SubEntitiesComponent<GameObject> getSubEntitiesComponent() {
-		return this.subEntitiesComponent;
-	}
-
-	public List<GameObject> getSubEntities() {
-		return this.subEntitiesComponent == null ? null : this.subEntitiesComponent.getEntities();
-	}
-
-	public Object getSubEntitiesLock() {
-		return this.subEntitiesComponent == null ? null : this.subEntitiesComponent.getEntitiesLock();
-	}
-
 	public void setTerrainHighlightEntity(final TerrainHighlightObject terrainHighlightObject) {
-		this.getSubEntitiesComponent().replace(this.terrainHighlightObject, terrainHighlightObject);
+		this.replace(this.terrainHighlightObject, terrainHighlightObject);
 		this.terrainHighlightObject = terrainHighlightObject;
 	}
 
 	public void setTerrainEdgeEntity(final TerrainEdgeObject terrainEdgeObject) {
-		this.getSubEntitiesComponent().replace(this.terrainEdgeObject, terrainEdgeObject);
+		this.replace(this.terrainEdgeObject, terrainEdgeObject);
 		this.terrainEdgeObject = terrainEdgeObject;
 	}
 
@@ -152,58 +139,33 @@ public class TerrainObject extends GameObject implements EntityContainer<GameObj
 	}
 
 	public <T extends GameObject> void setWaterLevel(final T terrainWaterObject) {
-		this.getSubEntitiesComponent().replace(this.terrainWaterObject, terrainWaterObject);
+		this.replace(this.terrainWaterObject, terrainWaterObject);
 		this.terrainWaterObject = terrainWaterObject;
 	}
 
 	@Override
-	public <T extends GameObject> T add(final T entity) {
-		return this.subEntitiesComponent.add(entity);
+	public void setParent(final Object e) {
+		this.parent = e;
 	}
 
 	@Override
-	public <T extends GameObject> T[] addAll(final T... entity) {
-		return this.subEntitiesComponent.addAll(entity);
+	public Object getParent() {
+		return this.parent;
 	}
 
 	@Override
-	public <T extends GameObject> boolean contains(final T e) {
-		return this.subEntitiesComponent.contains(e);
+	public Object getEntitiesLock() {
+		return this.subEntitiesLock;
 	}
 
 	@Override
-	public int size() {
-		return this.subEntitiesComponent.size();
+	public List<GameObject> getWEntities() {
+		return this.subEntities;
 	}
 
 	@Override
-	public <T extends SceneEntity> T getEntity(final String str) {
-		return this.subEntitiesComponent.getEntity(str);
-	}
-
-	@Override
-	public Iterator<GameObject> iterator() {
-		return this.subEntitiesComponent.iterator();
-	}
-
-	@Override
-	public <T extends GameObject> boolean contains(final String e) {
-		return this.subEntitiesComponent.contains(e);
-	}
-
-	@Override
-	public <T extends GameObject> boolean addAll(final Collection<? extends T> entities) {
-		return this.subEntitiesComponent.addAll(entities);
-	}
-
-	@Override
-	public <T extends GameObject> Optional<T> remove(final T e) {
-		return this.subEntitiesComponent.remove(e);
-	}
-
-	@Override
-	public <T extends GameObject, O extends GameObject> Optional<O> replace(final O old, final T new_) {
-		return this.subEntitiesComponent.replace(old, new_);
+	public List<GameObject> getROEntities() {
+		return List.copyOf(this.subEntities);
 	}
 
 }

@@ -5,8 +5,7 @@ import java.util.stream.Collectors;
 import lu.kbra.plant_game.PGLogic;
 import lu.kbra.plant_game.engine.UpdateFrameState;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
-import lu.kbra.plant_game.engine.entity.ui.bar.ProgressBarUIObject;
-import lu.kbra.plant_game.engine.entity.ui.group.LayoutOffsetUIObjectGroup;
+import lu.kbra.plant_game.engine.entity.ui.bar.AnchoredProgressBarUIObject;
 import lu.kbra.plant_game.engine.entity.ui.prim.FlatQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.IntegerTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.PercentageIntTextUIObject;
@@ -35,11 +34,14 @@ public class OverlayUIScene extends UIScene implements LayoutParent, PaddingOwne
 
 	protected float margin = 0.02f;
 
-	protected final LayoutOffsetUIObjectGroup statsGroup = new LayoutOffsetUIObjectGroup("stats", new FlowLayout(true, 0.08f));
+	protected final AnchoredLayoutUIObjectGroup statsGroup = new AnchoredLayoutUIObjectGroup("stats",
+			new FlowLayout(true, 0.08f),
+			Anchor.TOP_LEFT,
+			Anchor.TOP_LEFT);
 	protected OverlayIntegerStatLine waterGroup;
 	protected OverlayIntegerStatLine moneyGroup;
 	protected OverlayIntegerStatLine energyGroup;
-	protected ProgressBarUIObject progressBar;
+	protected AnchoredProgressBarUIObject progressBar;
 	protected OverlayIntegerStatLine progressGroup;
 
 	protected Layout layout;
@@ -52,8 +54,6 @@ public class OverlayUIScene extends UIScene implements LayoutParent, PaddingOwne
 	public void init(final Dispatcher workers, final Dispatcher renderDispatcher) {
 		this.setLayout(new AnchorLayout());
 		super.add(this.statsGroup);
-
-		this.statsGroup.addComponent(new AnchorComponent(Anchor.TOP_LEFT, Anchor.TOP_LEFT));
 
 		final float height = 0.2f;
 
@@ -102,14 +102,14 @@ public class OverlayUIScene extends UIScene implements LayoutParent, PaddingOwne
 				});
 		this.statsGroup.add(this.energyGroup);
 
-		this.progressBar = new ProgressBarUIObject(
-				"...",
+		this.progressBar = new AnchoredProgressBarUIObject("...",
 				this,
 				new Transform3DShear().shearSet(GeoAxis.Z, GeoAxis.X, -0.8f).scaleSet(1.8f, 1, 0.05f),
+				Anchor.TOP_RIGHT,
+				Anchor.TOP_RIGHT,
 				0.01f,
 				0.5f);
 		this.progressBar.init(workers, renderDispatcher, FlatQuadUIObject.class, FlatQuadUIObject.class);
-		this.progressBar.addComponent(new AnchorComponent(Anchor.TOP_RIGHT, Anchor.TOP_RIGHT));
 
 		this.progressGroup = new OverlayIntegerStatLine("progress");
 		this.progressGroup
@@ -123,8 +123,8 @@ public class OverlayUIScene extends UIScene implements LayoutParent, PaddingOwne
 	}
 
 	@Override
-	public void input(final WindowInputHandler inputHandler, final float dTime, final UpdateFrameState frameState) {
-		super.input(inputHandler, dTime, frameState);
+	public void input(final WindowInputHandler inputHandler, final UpdateFrameState frameState) {
+		super.input(inputHandler, frameState);
 
 		if (inputHandler.wasResized()) {
 			this.doLayout();
@@ -158,11 +158,10 @@ public class OverlayUIScene extends UIScene implements LayoutParent, PaddingOwne
 	@Override
 	public void update(
 			final WindowInputHandler inputHandler,
-			final float dTime,
 			final DeferredCompositor compositor,
 			final WorkerDispatcher workers,
 			final Dispatcher render) {
-		super.update(inputHandler, dTime, compositor, workers, render);
+		super.update(inputHandler, compositor, workers, render);
 	}
 
 	@Override
@@ -181,8 +180,7 @@ public class OverlayUIScene extends UIScene implements LayoutParent, PaddingOwne
 	@Override
 	public void doLayout() {
 		synchronized (this.getEntitiesLock()) {
-			this
-					.getEntities()
+			this.getEntities()
 					.values()
 					.stream()
 					.filter(e -> e instanceof final LayoutParent lp)
@@ -190,14 +188,12 @@ public class OverlayUIScene extends UIScene implements LayoutParent, PaddingOwne
 			if (this.layout == null) {
 				return;
 			}
-			this.layout
-					.doLayout(this
-							.getEntities()
-							.values()
-							.stream()
-							.filter(UIObject.class::isInstance)
-							.map(UIObject.class::cast)
-							.collect(Collectors.toList()));
+			this.layout.doLayout(this.getEntities()
+					.values()
+					.stream()
+					.filter(UIObject.class::isInstance)
+					.map(UIObject.class::cast)
+					.collect(Collectors.toList()));
 		}
 	}
 
@@ -209,6 +205,15 @@ public class OverlayUIScene extends UIScene implements LayoutParent, PaddingOwne
 	@Override
 	public void setPadding(final float p) {
 		this.margin = p;
+	}
+
+	@Override
+	public String toString() {
+		return "OverlayUIScene [margin=" + this.margin + ", statsGroup=" + this.statsGroup + ", waterGroup=" + this.waterGroup
+				+ ", moneyGroup=" + this.moneyGroup + ", energyGroup=" + this.energyGroup + ", progressBar=" + this.progressBar
+				+ ", progressGroup=" + this.progressGroup + ", layout=" + this.layout + ", uiCache=" + this.uiCache + ", hovering="
+				+ this.hovering + ", focused=" + this.focused + ", entities=" + this.entities + ", name=" + this.name + ", camera="
+				+ this.camera + "]";
 	}
 
 }

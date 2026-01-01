@@ -11,8 +11,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import lu.kbra.plant_game.engine.entity.go.AnimatedGameObject;
+import lu.kbra.plant_game.engine.entity.go.AnimatedMeshGameObject;
 import lu.kbra.plant_game.engine.entity.go.GameObject;
+import lu.kbra.plant_game.engine.entity.go.MeshGameObject;
 import lu.kbra.plant_game.engine.entity.go.impl.InstanceGameObject;
 import lu.kbra.plant_game.engine.entity.go.impl.InstanceSwayGameObject;
 import lu.kbra.plant_game.engine.entity.go.impl.SwayGameObject;
@@ -47,7 +48,6 @@ import lu.kbra.plant_game.engine.entity.go.obj_inst.round.InstanceLargeRoundFlow
 import lu.kbra.plant_game.engine.entity.go.obj_inst.round.InstanceMediumRoundFlowerObject;
 import lu.kbra.plant_game.engine.entity.go.obj_inst.round.InstanceSmallRoundFlowerObject;
 import lu.kbra.plant_game.engine.mesh.AnimatedMesh;
-import lu.kbra.plant_game.engine.render.SwayMesh;
 import lu.kbra.plant_game.engine.util.InternalConstructorFunction;
 import lu.kbra.plant_game.engine.util.exceptions.GameObjectConstructorNotFound;
 import lu.kbra.plant_game.engine.util.exceptions.GameObjectNotFound;
@@ -74,10 +74,15 @@ public class GameObjectRegistry {
 		TEXTURE_FILTER = new HashMap<>();
 		TEXTURE_WRAP = new HashMap<>();
 
-		/*                 AnimatedGameObject                 */
-		final List<InternalConstructorFunction<GameObject>> listAnimatedGameObject = new ArrayList<>();
-		listAnimatedGameObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class, AnimatedMesh.class}, (Object[] arr) -> (GameObject) new AnimatedGameObject((String) arr[0], (Mesh) arr[1], (AnimatedMesh) arr[2])));
-		GAME_OBJECT_CONSTRUCTORS.put(AnimatedGameObject.class, listAnimatedGameObject);
+		/*                 MeshGameObject                 */
+		final List<InternalConstructorFunction<GameObject>> listMeshGameObject = new ArrayList<>();
+		listMeshGameObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class}, (Object[] arr) -> (GameObject) new MeshGameObject((String) arr[0], (Mesh) arr[1])));
+		GAME_OBJECT_CONSTRUCTORS.put(MeshGameObject.class, listMeshGameObject);
+
+		/*                 InstanceGameObject                 */
+		final List<InternalConstructorFunction<GameObject>> listInstanceGameObject = new ArrayList<>();
+		listInstanceGameObject.add(new InternalConstructorFunction<>(new Class[] {String.class, InstanceEmitter.class}, (Object[] arr) -> (GameObject) new InstanceGameObject((String) arr[0], (InstanceEmitter) arr[1])));
+		GAME_OBJECT_CONSTRUCTORS.put(InstanceGameObject.class, listInstanceGameObject);
 
 		/*                 TerrainObject                 */
 		final List<InternalConstructorFunction<GameObject>> listTerrainObject = new ArrayList<>();
@@ -89,20 +94,31 @@ public class GameObjectRegistry {
 		listTerrainEdgeObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class}, (Object[] arr) -> (GameObject) new TerrainEdgeObject((String) arr[0], (Mesh) arr[1])));
 		GAME_OBJECT_CONSTRUCTORS.put(TerrainEdgeObject.class, listTerrainEdgeObject);
 
-		/*                 InstanceGameObject                 */
-		final List<InternalConstructorFunction<GameObject>> listInstanceGameObject = new ArrayList<>();
-		listInstanceGameObject.add(new InternalConstructorFunction<>(new Class[] {String.class, InstanceEmitter.class}, (Object[] arr) -> (GameObject) new InstanceGameObject((String) arr[0], (InstanceEmitter) arr[1])));
-		GAME_OBJECT_CONSTRUCTORS.put(InstanceGameObject.class, listInstanceGameObject);
-
 		/*                 SwayGameObject                 */
 		final List<InternalConstructorFunction<GameObject>> listSwayGameObject = new ArrayList<>();
-		listSwayGameObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayMesh.class}, (Object[] arr) -> (GameObject) new SwayGameObject((String) arr[0], (SwayMesh) arr[1])));
+		listSwayGameObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class}, (Object[] arr) -> (GameObject) new SwayGameObject((String) arr[0], (Mesh) arr[1])));
 		GAME_OBJECT_CONSTRUCTORS.put(SwayGameObject.class, listSwayGameObject);
+
+		/*                 AnimatedMeshGameObject                 */
+		final List<InternalConstructorFunction<GameObject>> listAnimatedMeshGameObject = new ArrayList<>();
+		listAnimatedMeshGameObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class, AnimatedMesh.class}, (Object[] arr) -> (GameObject) new AnimatedMeshGameObject((String) arr[0], (Mesh) arr[1], (AnimatedMesh) arr[2])));
+		GAME_OBJECT_CONSTRUCTORS.put(AnimatedMeshGameObject.class, listAnimatedMeshGameObject);
 
 		/*                 TerrainHighlightObject                 */
 		final List<InternalConstructorFunction<GameObject>> listTerrainHighlightObject = new ArrayList<>();
 		listTerrainHighlightObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class}, (Object[] arr) -> (GameObject) new TerrainHighlightObject((String) arr[0], (Mesh) arr[1])));
 		GAME_OBJECT_CONSTRUCTORS.put(TerrainHighlightObject.class, listTerrainHighlightObject);
+
+		/*                 InstanceSwayGameObject                 */
+		final List<InternalConstructorFunction<GameObject>> listInstanceSwayGameObject = new ArrayList<>();
+		listInstanceSwayGameObject.add(new InternalConstructorFunction<>(new Class[] {String.class, InstanceEmitter.class}, (Object[] arr) -> (GameObject) new InstanceSwayGameObject((String) arr[0], (InstanceEmitter) arr[1])));
+		GAME_OBJECT_CONSTRUCTORS.put(InstanceSwayGameObject.class, listInstanceSwayGameObject);
+
+		/*                 ParticleGameObject                 */
+		final List<InternalConstructorFunction<GameObject>> listParticleGameObject = new ArrayList<>();
+		listParticleGameObject.add(new InternalConstructorFunction<>(new Class[] {String.class, InstanceEmitter.class}, (Object[] arr) -> (GameObject) new ParticleGameObject((String) arr[0], (InstanceEmitter) arr[1])));
+		GAME_OBJECT_CONSTRUCTORS.put(ParticleGameObject.class, listParticleGameObject);
+		DATA_PATH.put(ParticleGameObject.class, "classpath:/models/cube.json");
 
 		/*                 WaterTowerObject                 */
 		final List<InternalConstructorFunction<GameObject>> listWaterTowerObject = new ArrayList<>();
@@ -116,94 +132,59 @@ public class GameObjectRegistry {
 		GAME_OBJECT_CONSTRUCTORS.put(SolarPanelObject.class, listSolarPanelObject);
 		DATA_PATH.put(SolarPanelObject.class, "classpath:/models/solar-panel-medium.json");
 
-		/*                 InstanceSwayGameObject                 */
-		final List<InternalConstructorFunction<GameObject>> listInstanceSwayGameObject = new ArrayList<>();
-		listInstanceSwayGameObject.add(new InternalConstructorFunction<>(new Class[] {String.class, InstanceEmitter.class}, (Object[] arr) -> (GameObject) new InstanceSwayGameObject((String) arr[0], (InstanceEmitter) arr[1])));
-		GAME_OBJECT_CONSTRUCTORS.put(InstanceSwayGameObject.class, listInstanceSwayGameObject);
-
-		/*                 ParticleGameObject                 */
-		final List<InternalConstructorFunction<GameObject>> listParticleGameObject = new ArrayList<>();
-		listParticleGameObject.add(new InternalConstructorFunction<>(new Class[] {String.class, InstanceEmitter.class}, (Object[] arr) -> (GameObject) new ParticleGameObject((String) arr[0], (InstanceEmitter) arr[1])));
-		GAME_OBJECT_CONSTRUCTORS.put(ParticleGameObject.class, listParticleGameObject);
-		DATA_PATH.put(ParticleGameObject.class, "classpath:/models/cube.json");
-
 		/*                 SmallGrassObject                 */
 		final List<InternalConstructorFunction<GameObject>> listSmallGrassObject = new ArrayList<>();
-		listSmallGrassObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayMesh.class}, (Object[] arr) -> (GameObject) new SmallGrassObject((String) arr[0], (SwayMesh) arr[1])));
+		listSmallGrassObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class}, (Object[] arr) -> (GameObject) new SmallGrassObject((String) arr[0], (Mesh) arr[1])));
 		GAME_OBJECT_CONSTRUCTORS.put(SmallGrassObject.class, listSmallGrassObject);
 		DATA_PATH.put(SmallGrassObject.class, "classpath:/models/grass-small.json");
 
 		/*                 LargeRoundFlowerObject                 */
 		final List<InternalConstructorFunction<GameObject>> listLargeRoundFlowerObject = new ArrayList<>();
-		listLargeRoundFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayMesh.class}, (Object[] arr) -> (GameObject) new LargeRoundFlowerObject((String) arr[0], (SwayMesh) arr[1])));
+		listLargeRoundFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class}, (Object[] arr) -> (GameObject) new LargeRoundFlowerObject((String) arr[0], (Mesh) arr[1])));
 		GAME_OBJECT_CONSTRUCTORS.put(LargeRoundFlowerObject.class, listLargeRoundFlowerObject);
 		DATA_PATH.put(LargeRoundFlowerObject.class, "classpath:/models/flower-round-large.json");
 
 		/*                 LargeChampiFlowerObject                 */
 		final List<InternalConstructorFunction<GameObject>> listLargeChampiFlowerObject = new ArrayList<>();
-		listLargeChampiFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayMesh.class}, (Object[] arr) -> (GameObject) new LargeChampiFlowerObject((String) arr[0], (SwayMesh) arr[1])));
+		listLargeChampiFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class}, (Object[] arr) -> (GameObject) new LargeChampiFlowerObject((String) arr[0], (Mesh) arr[1])));
 		GAME_OBJECT_CONSTRUCTORS.put(LargeChampiFlowerObject.class, listLargeChampiFlowerObject);
 		DATA_PATH.put(LargeChampiFlowerObject.class, "classpath:/models/champi-large.json");
 
 		/*                 LargeGrassObject                 */
 		final List<InternalConstructorFunction<GameObject>> listLargeGrassObject = new ArrayList<>();
-		listLargeGrassObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayMesh.class}, (Object[] arr) -> (GameObject) new LargeGrassObject((String) arr[0], (SwayMesh) arr[1])));
+		listLargeGrassObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class}, (Object[] arr) -> (GameObject) new LargeGrassObject((String) arr[0], (Mesh) arr[1])));
 		GAME_OBJECT_CONSTRUCTORS.put(LargeGrassObject.class, listLargeGrassObject);
 		DATA_PATH.put(LargeGrassObject.class, "classpath:/models/grass-large.json");
 
 		/*                 SmallChampiFlowerObject                 */
 		final List<InternalConstructorFunction<GameObject>> listSmallChampiFlowerObject = new ArrayList<>();
-		listSmallChampiFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayMesh.class}, (Object[] arr) -> (GameObject) new SmallChampiFlowerObject((String) arr[0], (SwayMesh) arr[1])));
+		listSmallChampiFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class}, (Object[] arr) -> (GameObject) new SmallChampiFlowerObject((String) arr[0], (Mesh) arr[1])));
 		GAME_OBJECT_CONSTRUCTORS.put(SmallChampiFlowerObject.class, listSmallChampiFlowerObject);
 		DATA_PATH.put(SmallChampiFlowerObject.class, "classpath:/models/champi-small.json");
 
 		/*                 SmallRoundFlowerObject                 */
 		final List<InternalConstructorFunction<GameObject>> listSmallRoundFlowerObject = new ArrayList<>();
-		listSmallRoundFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayMesh.class}, (Object[] arr) -> (GameObject) new SmallRoundFlowerObject((String) arr[0], (SwayMesh) arr[1])));
+		listSmallRoundFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class}, (Object[] arr) -> (GameObject) new SmallRoundFlowerObject((String) arr[0], (Mesh) arr[1])));
 		GAME_OBJECT_CONSTRUCTORS.put(SmallRoundFlowerObject.class, listSmallRoundFlowerObject);
 		DATA_PATH.put(SmallRoundFlowerObject.class, "classpath:/models/flower-round-small.json");
 
 		/*                 MediumGrassObject                 */
 		final List<InternalConstructorFunction<GameObject>> listMediumGrassObject = new ArrayList<>();
-		listMediumGrassObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayMesh.class}, (Object[] arr) -> (GameObject) new MediumGrassObject((String) arr[0], (SwayMesh) arr[1])));
+		listMediumGrassObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class}, (Object[] arr) -> (GameObject) new MediumGrassObject((String) arr[0], (Mesh) arr[1])));
 		GAME_OBJECT_CONSTRUCTORS.put(MediumGrassObject.class, listMediumGrassObject);
 		DATA_PATH.put(MediumGrassObject.class, "classpath:/models/grass-medium.json");
 
 		/*                 MediumChampiFlowerObject                 */
 		final List<InternalConstructorFunction<GameObject>> listMediumChampiFlowerObject = new ArrayList<>();
-		listMediumChampiFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayMesh.class}, (Object[] arr) -> (GameObject) new MediumChampiFlowerObject((String) arr[0], (SwayMesh) arr[1])));
+		listMediumChampiFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class}, (Object[] arr) -> (GameObject) new MediumChampiFlowerObject((String) arr[0], (Mesh) arr[1])));
 		GAME_OBJECT_CONSTRUCTORS.put(MediumChampiFlowerObject.class, listMediumChampiFlowerObject);
 		DATA_PATH.put(MediumChampiFlowerObject.class, "classpath:/models/champi-medium.json");
 
 		/*                 MediumRoundFlowerObject                 */
 		final List<InternalConstructorFunction<GameObject>> listMediumRoundFlowerObject = new ArrayList<>();
-		listMediumRoundFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, SwayMesh.class}, (Object[] arr) -> (GameObject) new MediumRoundFlowerObject((String) arr[0], (SwayMesh) arr[1])));
+		listMediumRoundFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class}, (Object[] arr) -> (GameObject) new MediumRoundFlowerObject((String) arr[0], (Mesh) arr[1])));
 		GAME_OBJECT_CONSTRUCTORS.put(MediumRoundFlowerObject.class, listMediumRoundFlowerObject);
 		DATA_PATH.put(MediumRoundFlowerObject.class, "classpath:/models/flower-round-medium.json");
-
-		/*                 WaterSprinklerObject7x7                 */
-		final List<InternalConstructorFunction<GameObject>> listWaterSprinklerObject7x7 = new ArrayList<>();
-		listWaterSprinklerObject7x7.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class, AnimatedMesh.class}, (Object[] arr) -> (GameObject) new WaterSprinklerObject7x7((String) arr[0], (Mesh) arr[1], (AnimatedMesh) arr[2])));
-		GAME_OBJECT_CONSTRUCTORS.put(WaterSprinklerObject7x7.class, listWaterSprinklerObject7x7);
-		DATA_PATH.put(WaterSprinklerObject7x7.class, "classpath:/models/water-sprinkler-7x7.json");
-
-		/*                 WaterWheelObject                 */
-		final List<InternalConstructorFunction<GameObject>> listWaterWheelObject = new ArrayList<>();
-		listWaterWheelObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class, AnimatedMesh.class}, (Object[] arr) -> (GameObject) new WaterWheelObject((String) arr[0], (Mesh) arr[1], (AnimatedMesh) arr[2])));
-		GAME_OBJECT_CONSTRUCTORS.put(WaterWheelObject.class, listWaterWheelObject);
-		DATA_PATH.put(WaterWheelObject.class, "classpath:/models/water-wheel-small.json");
-
-		/*                 WaterSprinklerObject5x5                 */
-		final List<InternalConstructorFunction<GameObject>> listWaterSprinklerObject5x5 = new ArrayList<>();
-		listWaterSprinklerObject5x5.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class, AnimatedMesh.class}, (Object[] arr) -> (GameObject) new WaterSprinklerObject5x5((String) arr[0], (Mesh) arr[1], (AnimatedMesh) arr[2])));
-		GAME_OBJECT_CONSTRUCTORS.put(WaterSprinklerObject5x5.class, listWaterSprinklerObject5x5);
-		DATA_PATH.put(WaterSprinklerObject5x5.class, "classpath:/models/water-sprinkler-5x5.json");
-
-		/*                 WaterSprinklerObject3x3                 */
-		final List<InternalConstructorFunction<GameObject>> listWaterSprinklerObject3x3 = new ArrayList<>();
-		listWaterSprinklerObject3x3.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class, AnimatedMesh.class}, (Object[] arr) -> (GameObject) new WaterSprinklerObject3x3((String) arr[0], (Mesh) arr[1], (AnimatedMesh) arr[2])));
-		GAME_OBJECT_CONSTRUCTORS.put(WaterSprinklerObject3x3.class, listWaterSprinklerObject3x3);
-		DATA_PATH.put(WaterSprinklerObject3x3.class, "classpath:/models/water-sprinkler-3x3.json");
 
 		/*                 InstanceLargeRoundFlowerObject                 */
 		final List<InternalConstructorFunction<GameObject>> listInstanceLargeRoundFlowerObject = new ArrayList<>();
@@ -265,9 +246,33 @@ public class GameObjectRegistry {
 		GAME_OBJECT_CONSTRUCTORS.put(GravityParticleGameObject.class, listGravityParticleGameObject);
 		DATA_PATH.put(GravityParticleGameObject.class, "classpath:/models/cube.json");
 
+		/*                 WaterSprinklerObject7x7                 */
+		final List<InternalConstructorFunction<GameObject>> listWaterSprinklerObject7x7 = new ArrayList<>();
+		listWaterSprinklerObject7x7.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class, AnimatedMesh.class}, (Object[] arr) -> (GameObject) new WaterSprinklerObject7x7((String) arr[0], (Mesh) arr[1], (AnimatedMesh) arr[2])));
+		GAME_OBJECT_CONSTRUCTORS.put(WaterSprinklerObject7x7.class, listWaterSprinklerObject7x7);
+		DATA_PATH.put(WaterSprinklerObject7x7.class, "classpath:/models/water-sprinkler-7x7.json");
+
+		/*                 WaterWheelObject                 */
+		final List<InternalConstructorFunction<GameObject>> listWaterWheelObject = new ArrayList<>();
+		listWaterWheelObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class, AnimatedMesh.class}, (Object[] arr) -> (GameObject) new WaterWheelObject((String) arr[0], (Mesh) arr[1], (AnimatedMesh) arr[2])));
+		GAME_OBJECT_CONSTRUCTORS.put(WaterWheelObject.class, listWaterWheelObject);
+		DATA_PATH.put(WaterWheelObject.class, "classpath:/models/water-wheel-small.json");
+
+		/*                 WaterSprinklerObject5x5                 */
+		final List<InternalConstructorFunction<GameObject>> listWaterSprinklerObject5x5 = new ArrayList<>();
+		listWaterSprinklerObject5x5.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class, AnimatedMesh.class}, (Object[] arr) -> (GameObject) new WaterSprinklerObject5x5((String) arr[0], (Mesh) arr[1], (AnimatedMesh) arr[2])));
+		GAME_OBJECT_CONSTRUCTORS.put(WaterSprinklerObject5x5.class, listWaterSprinklerObject5x5);
+		DATA_PATH.put(WaterSprinklerObject5x5.class, "classpath:/models/water-sprinkler-5x5.json");
+
+		/*                 WaterSprinklerObject3x3                 */
+		final List<InternalConstructorFunction<GameObject>> listWaterSprinklerObject3x3 = new ArrayList<>();
+		listWaterSprinklerObject3x3.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class, AnimatedMesh.class}, (Object[] arr) -> (GameObject) new WaterSprinklerObject3x3((String) arr[0], (Mesh) arr[1], (AnimatedMesh) arr[2])));
+		GAME_OBJECT_CONSTRUCTORS.put(WaterSprinklerObject3x3.class, listWaterSprinklerObject3x3);
+		DATA_PATH.put(WaterSprinklerObject3x3.class, "classpath:/models/water-sprinkler-3x3.json");
+
 		/*                 GameObject                 */
 		final List<InternalConstructorFunction<GameObject>> listGameObject = new ArrayList<>();
-		listGameObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class}, (Object[] arr) -> (GameObject) new GameObject((String) arr[0], (Mesh) arr[1])));
+		listGameObject.add(new InternalConstructorFunction<>(new Class[] {String.class}, (Object[] arr) -> (GameObject) new GameObject((String) arr[0])));
 		GAME_OBJECT_CONSTRUCTORS.put(GameObject.class, listGameObject);
 
 	}

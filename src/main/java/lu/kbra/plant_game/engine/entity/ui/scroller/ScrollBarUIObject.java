@@ -2,82 +2,24 @@ package lu.kbra.plant_game.engine.entity.ui.scroller;
 
 import org.joml.Vector2f;
 import org.joml.Vector2fc;
-import org.joml.Vector4f;
 
 import lu.pcy113.pclib.PCUtils;
 
 import lu.kbra.plant_game.engine.entity.ui.prim.FlatQuadUIObject;
 import lu.kbra.plant_game.engine.mesh.TexturedQuadMesh;
-import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.standalone.gameengine.utils.consts.Direction;
-import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-@DataPath("")
 public class ScrollBarUIObject extends FlatQuadUIObject {
 
-	protected final Direction dir;
+	protected Direction dir;
 	protected Vector2f range;
-	protected final Vector2f size;
+	protected Vector2f size;
 	protected float speed = 1f;
 	protected float margin = 0.00f;
 
-	public ScrollBarUIObject(
-			final String str,
-			final TexturedQuadMesh mesh,
-			final Transform3D transform,
-			final Vector4f color,
-			final Direction dir,
-			final Vector2f bounds,
-			final Vector2f size,
-			final float speed) {
-		super(str, mesh, transform, color);
-		if (this.hasTransform()) {
-			if (dir.isVertical()) {
-				this.getTransform().scaleMul(size.x, 1, size.y);
-			} else if (dir.isHorizontal()) {
-				this.getTransform().scaleMul(size.y, 1, size.x);
-			}
-			this.getTransform().updateMatrix();
-		}
-		this.dir = dir;
-		this.range = bounds;
-		this.size = size;
-		this.speed = speed;
-	}
-
-	public ScrollBarUIObject(
-			final String str,
-			final TexturedQuadMesh mesh,
-			final Transform3D transform,
-			final ColorMaterial mt,
-			final Direction dir,
-			final Vector2f bounds,
-			final Vector2f size) {
-		this(str, mesh, transform, new Vector4f(mt.getColor()), dir, bounds, size, 1f);
-	}
-
-	public ScrollBarUIObject(
-			final String str,
-			final TexturedQuadMesh mesh,
-			final Transform3D transform,
-			final ColorMaterial mt,
-			final Direction dir,
-			final Vector2f bounds,
-			final Vector2f size,
-			final float speed) {
-		this(str, mesh, transform, new Vector4f(mt.getColor()), dir, bounds, size, speed);
-	}
-
-	public ScrollBarUIObject(
-			final String str,
-			final TexturedQuadMesh mesh,
-			final Transform3D transform,
-			final Vector4f color,
-			final Direction dir,
-			final Vector2f bounds,
-			final Vector2f size) {
-		this(str, mesh, transform, color, dir, bounds, size, 1f);
+	public ScrollBarUIObject(final String str, final TexturedQuadMesh mesh) {
+		super(str, mesh);
 	}
 
 	public void addScrollPosition(final float f) {
@@ -147,6 +89,7 @@ public class ScrollBarUIObject extends FlatQuadUIObject {
 		this.getTransform().updateMatrix();
 	}
 
+	@Override
 	public void setColorMaterial(final ColorMaterial mt) {
 		super.setTint(mt.getColor());
 	}
@@ -183,6 +126,30 @@ public class ScrollBarUIObject extends FlatQuadUIObject {
 
 	public void setMargin(final float margin) {
 		this.margin = margin;
+	}
+
+	public Direction getDir() {
+		return this.dir;
+	}
+
+	public void setDir(final Direction dir) {
+		this.dir = dir;
+	}
+
+	public Vector2fc getSize() {
+		return this.size;
+	}
+
+	public void setSize(final Vector2fc size) {
+		this.size = new Vector2f(size);
+		if (this.hasTransform()) {
+			if (this.dir.isVertical()) {
+				this.getTransform().scaleMul(size.x(), 1, size.y());
+			} else if (this.dir.isHorizontal()) {
+				this.getTransform().scaleMul(size.y(), 1, size.x());
+			}
+			this.getTransform().updateMatrix();
+		}
 	}
 
 	@Override

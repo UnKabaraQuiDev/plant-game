@@ -13,14 +13,13 @@ import java.util.function.Supplier;
 
 import lu.kbra.plant_game.engine.entity.go.GOCreatingTaskFuture;
 import lu.kbra.plant_game.engine.entity.go.GameObject;
-import lu.kbra.plant_game.engine.entity.go.impl.InstanceEmitterOwner;
 import lu.kbra.plant_game.engine.entity.impl.AnimatedMeshOwner;
+import lu.kbra.plant_game.engine.entity.impl.InstanceEmitterOwner;
 import lu.kbra.plant_game.engine.entity.impl.MeshOwner;
 import lu.kbra.plant_game.engine.entity.impl.NoMeshObject;
 import lu.kbra.plant_game.engine.mesh.loader.AnimatedMeshLoader;
 import lu.kbra.plant_game.engine.mesh.loader.AnimatedMeshLoader.AnimatedMeshes;
 import lu.kbra.plant_game.engine.mesh.loader.StaticMeshLoader;
-import lu.kbra.plant_game.engine.util.annotation.BufferSize;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.cache.attrib.impl.AttribArray;
 import lu.kbra.standalone.gameengine.geom.Mesh;
@@ -52,16 +51,12 @@ public class GameObjectFactory {
 			final Supplier<AttribArray>... attribs) {
 
 		return StaticInstanceLoader
-				.getFuture(this.cache,
-						name.orElse(clazz.getSimpleName()),
-						DATA_PATH.get(clazz),
-						bufferSize.orElse(BUFFER_SIZE.computeIfAbsent(clazz,
-								c -> c.isAnnotationPresent(BufferSize.class) ? c.getAnnotation(BufferSize.class).value()
-										: DEFAULT_BUFFER_SIZE)),
-						transforms,
-						attribs,
-						this.loader,
-						this.render)
+				.getFuture(this.cache, name.orElse(clazz.getSimpleName()), DATA_PATH.get(clazz), bufferSize.orElseGet(() -> {
+					if (!BUFFER_SIZE.containsKey(clazz)) {
+						throw new IllegalArgumentException("Class: " + clazz.getName() + " defines no default buffer size.");
+					}
+					return BUFFER_SIZE.get(clazz);
+				}), transforms, attribs, this.loader, this.render)
 				.then(this.loader, (Function<InstanceEmitter, List<Object>>) Arrays::asList)
 				.then(new GOCreatingTaskFuture(this.loader, clazz));
 	}
@@ -88,19 +83,20 @@ public class GameObjectFactory {
 				.then(new GOCreatingTaskFuture(this.loader, clazz));
 	}
 
-	public <T extends GameObject & MeshOwner> GOCreatingTaskFuture<T> taskManual_(final Class<T> clazz) {
-		return new TaskFuture<>(this.loader, (final Mesh m) -> Arrays.asList(m)).then(new GOCreatingTaskFuture(this.loader, clazz));
-	}
+//	public <T extends GameObject & MeshOwner> GOCreatingTaskFuture<T> taskManual_(final Class<T> clazz) {
+//		return new TaskFuture<>(this.loader, (final Mesh m) -> Arrays.asList(m)).then(new GOCreatingTaskFuture(this.loader, clazz));
+//	}
 
 	public static <T extends GameObject> GOCreatingTaskFuture<T> create(final Class<T> clazz) {
 		if (NoMeshObject.class.isAssignableFrom(clazz)) {
 			return INSTANCE.createNoMesh_((Class) clazz);
 		}
+		// split this for AnimatedMesh & Mesh and only AnimatedMesh
 		if (AnimatedMeshOwner.class.isAssignableFrom(clazz)) {
 			return INSTANCE.createAnimatedMesh_((Class) clazz);
 		}
 		if (MeshOwner.class.isAssignableFrom(clazz)) {
-			return INSTANCE.createMesh_(clazz);
+			return INSTANCE.createMesh_((Class) clazz);
 		}
 		throw new UnsupportedOperationException(clazz.getName());
 	}
@@ -119,8 +115,8 @@ public class GameObjectFactory {
 		return INSTANCE.createManual_(clazz, mesh);
 	}
 
-	public static <T extends GameObject & MeshOwner> GOCreatingTaskFuture<T> taskManual(final Class<T> clazz) {
-		return INSTANCE.taskManual_(clazz);
-	}
+//	public static <T extends GameObject & MeshOwner> GOCreatingTaskFuture<T> taskManual(final Class<T> clazz) {
+//		return INSTANCE.taskManual_(clazz);
+//	}
 
 }

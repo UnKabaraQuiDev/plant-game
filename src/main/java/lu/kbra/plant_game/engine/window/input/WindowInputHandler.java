@@ -20,7 +20,9 @@ public interface WindowInputHandler {
 
 	Vector2i getWindowSize();
 
-	void onFrameBegin();
+	void onFrameBegin(float dTime);
+
+	float dTime();
 
 	/**
 	 * @param GLFW code

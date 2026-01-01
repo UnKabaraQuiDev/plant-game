@@ -7,13 +7,9 @@ import java.util.Objects;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwnerParentAware;
-import lu.kbra.plant_game.engine.scene.ui.overlay.AnchorComponent;
 import lu.kbra.plant_game.engine.scene.ui.overlay.AnchorOwner;
-import lu.kbra.plant_game.engine.scene.ui.overlay.MarginComponent;
 import lu.kbra.plant_game.engine.scene.ui.overlay.MarginOwner;
-import lu.kbra.plant_game.engine.scene.ui.overlay.PaddingComponent;
 import lu.kbra.plant_game.engine.scene.ui.overlay.PaddingOwner;
-import lu.kbra.standalone.gameengine.objs.entity.Entity;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 public class AnchorLayout implements Layout, BoundsOwnerParentAware {
@@ -35,31 +31,20 @@ public class AnchorLayout implements Layout, BoundsOwnerParentAware {
 			}
 			final Anchor objectAnchor;
 			final Anchor targetAnchor;
-			if (obj instanceof final AnchorOwner ao) {
-				objectAnchor = ao.getObjectAnchor();
-				targetAnchor = ao.getTargetAnchor();
-			} else if (obj.hasComponentMatching(AnchorComponent.class)) {
-				final AnchorComponent ac = obj.getComponentMatching(AnchorComponent.class);
-				objectAnchor = ac.getObjectAnchor();
-				targetAnchor = ac.getTargetAnchor();
-			} else {
+			if (!(obj instanceof final AnchorOwner ao)) {
 				continue;
 			}
+			objectAnchor = ao.getObjectAnchor();
+			targetAnchor = ao.getTargetAnchor();
 
 			float margin = 0;
 			// child has margin outwards
 			if (obj instanceof final MarginOwner mo) {
 				margin += mo.getMargin();
-			} else if (obj.hasComponentMatching(MarginComponent.class)) {
-				final MarginComponent mc = obj.getComponentMatching(MarginComponent.class);
-				margin += mc.getMargin();
 			}
 			// parent has padding inwards
-			if (boundsParent instanceof final PaddingOwner ao) {
-				margin += ao.getPadding();
-			} else if (boundsParent instanceof final Entity e && e.hasComponentMatching(PaddingComponent.class)) {
-				final PaddingComponent ac = e.getComponentMatching(PaddingComponent.class);
-				margin = ac.getPadding();
+			if (boundsParent instanceof final PaddingOwner po) {
+				margin += po.getPadding();
 			}
 
 			final Rectangle2D bounds = obj.getLocalTransformedBounds().getBounds2D();

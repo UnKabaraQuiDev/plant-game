@@ -6,7 +6,7 @@ import java.util.function.Consumer;
 
 import lu.pcy113.pclib.PCUtils;
 
-import lu.kbra.plant_game.engine.entity.go.impl.NeedsPostConstruct;
+import lu.kbra.plant_game.engine.entity.impl.NeedsPostConstruct;
 import lu.kbra.plant_game.generated.GameObjectRegistry;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;

@@ -1,4 +1,4 @@
-package lu.kbra.plant_game.engine.entity.go.impl;
+package lu.kbra.plant_game.engine.entity.impl;
 
 import org.joml.Vector3ic;
 

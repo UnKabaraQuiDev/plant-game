@@ -26,10 +26,10 @@ import lu.pcy113.pclib.impl.ThrowingRunnable;
 import lu.pcy113.pclib.logger.GlobalLogger;
 
 import lu.kbra.plant_game.engine.UpdateFrameState;
-import lu.kbra.plant_game.engine.entity.go.AnimatedGameObject;
+import lu.kbra.plant_game.engine.entity.go.AnimatedMeshGameObject;
 import lu.kbra.plant_game.engine.entity.go.GameObject;
+import lu.kbra.plant_game.engine.entity.go.MeshGameObject;
 import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory;
-import lu.kbra.plant_game.engine.entity.go.impl.InstanceEmitterOwner;
 import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
 import lu.kbra.plant_game.engine.entity.go.mesh.pipe.PipeMesh;
 import lu.kbra.plant_game.engine.entity.go.mesh.terrain.TerrainEdgeMesh;
@@ -52,6 +52,8 @@ import lu.kbra.plant_game.engine.entity.go.obj_inst.grass.InstanceSmallGrassObje
 import lu.kbra.plant_game.engine.entity.go.obj_inst.round.InstanceLargeRoundFlowerObject;
 import lu.kbra.plant_game.engine.entity.go.obj_inst.round.InstanceMediumRoundFlowerObject;
 import lu.kbra.plant_game.engine.entity.go.obj_inst.round.InstanceSmallRoundFlowerObject;
+import lu.kbra.plant_game.engine.entity.impl.InstanceEmitterOwner;
+import lu.kbra.plant_game.engine.entity.impl.MaterialIdOwner;
 import lu.kbra.plant_game.engine.mesh.data.AttributeLocation;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.scene.world.data.LevelData;
@@ -147,13 +149,13 @@ public class WorldLevelScene extends Scene3D {
 
 						terrainEntity.setTerrainEdgeEntity(GameObjectFactory.createManual(TerrainEdgeObject.class, meshes.getSecond())
 								.set(i -> i.setTransform(new Transform3D(new Vector3f(0, 0, 0))))
-								.set(i -> i.setMaterial(ColorMaterial.BLACK))
+								.set(i -> i.setColorMaterial(ColorMaterial.BLACK))
 								.exec());
 
 						terrainEntity
 								.setTerrainHighlightEntity(GameObjectFactory.createManual(TerrainHighlightObject.class, meshes.getThird())
 										.set(i -> i.setTransform(new Transform3D(new Vector3f(0, 10, 0))))
-										.set(i -> i.setMaterial(ColorMaterial.CYAN))
+										.set(i -> i.setColorMaterial(ColorMaterial.CYAN))
 										.exec());
 
 						terrainEntity.getTransform()
@@ -199,13 +201,11 @@ public class WorldLevelScene extends Scene3D {
 								new UIntAttribArray(Mesh.ATTRIB_INDICES_NAME, Mesh.ATTRIB_INDICES_ID, indices, BufferType.ELEMENT_ARRAY));
 						mesh.setEffectiveLength(index);
 						this.worldCache.addMesh(mesh);
-						this.terrain.getSubEntitiesComponent().add(null);
-						GameObjectFactory.createManual(GameObject.class, mesh)
+						GameObjectFactory.createManual(MeshGameObject.class, mesh)
 								.set(i -> i.setTransform(new Transform3D()))
 								.set(i -> i.setObjectId(GameObject.getRandomObjectId()))
 								.set(i -> i.setMaterialId(ColorMaterial.LIGHT_BLUE.getId()))
 								.exec();
-//						new GameObject("test", mesh, new Transform3D(), new Vector3i(), ColorMaterial.LIGHT_BLUE.getId());
 
 						for (int x = terrainMesh.getWidth(), y = 12; x > 0; x -= 1) {
 							final float h0 = terrainMesh.getCellHeight(x, y) + 0.5f;
@@ -235,10 +235,10 @@ public class WorldLevelScene extends Scene3D {
 						GlobalLogger.info("Water mesh generated in " + (meshTime.getValue() / 1e6) + " ms");
 						return meshTime.getKey();
 					}).then(workers,
-							(Consumer<QuadMesh>) mesh -> this.setWaterLevel(GameObjectFactory.createManual(GameObject.class, mesh)
+							(Consumer<QuadMesh>) mesh -> this.setWaterLevel(GameObjectFactory.createManual(MeshGameObject.class, mesh)
 									.set(i -> i.setTransform(new Transform3D(new Vector3f(width / 2, 0.9f, length / 2))))
 									.set(i -> i.setObjectId(new Vector3i(2, 0, 0)))
-									.set(i -> i.setMaterial(ColorMaterial.BLUE))
+									.set(i -> i.setColorMaterial(ColorMaterial.BLUE))
 									.exec()))
 							.push();
 
@@ -383,7 +383,7 @@ public class WorldLevelScene extends Scene3D {
 				}).push();
 	}
 
-	private <T extends GameObject & InstanceEmitterOwner> void instance(
+	private <T extends GameObject & InstanceEmitterOwner & MaterialIdOwner> void instance(
 			final Class<T> clazz,
 			final List<Vector3f> pos,
 			final ColorMaterial mt) {
@@ -399,7 +399,7 @@ public class WorldLevelScene extends Scene3D {
 
 	private Vector2i pos;
 
-	public void input(final WindowInputHandler inputHandler, final float dTime, final UpdateFrameState frameState) {
+	public void input(final WindowInputHandler inputHandler, final UpdateFrameState frameState) {
 		this.posAdd.zero();
 		this.rotation = 0;
 
@@ -452,7 +452,6 @@ public class WorldLevelScene extends Scene3D {
 
 	public void update(
 			final WindowInputHandler inputHandler,
-			final float dTime,
 			final DeferredCompositor compositor,
 			final Dispatcher workers,
 			final Dispatcher renderDispatcher) {
@@ -518,11 +517,12 @@ public class WorldLevelScene extends Scene3D {
 		}
 
 		final float time = (float) inputHandler.getGameEngine().getTotalTime();
+		final float dTime = inputHandler.dTime();
 
 		synchronized (super.getEntitiesLock()) {
 
 			for (final SceneEntity e : this) {
-				if (e instanceof final AnimatedGameObject ago) {
+				if (e instanceof final AnimatedMeshGameObject ago) {
 					ago.computeAnimatedTransform(time);
 				}
 			}

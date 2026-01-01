@@ -6,7 +6,7 @@ import static lu.kbra.plant_game.engine.mesh.loader.MeshLoaderLocks.waitOrCreate
 import lu.pcy113.pclib.impl.ThrowingFunction;
 import lu.pcy113.pclib.impl.ThrowingSupplier;
 
-import lu.kbra.plant_game.engine.entity.ui.prim.QuadUIObject;
+import lu.kbra.plant_game.engine.entity.ui.prim.QuadMeshUIObject;
 import lu.kbra.plant_game.engine.mesh.LoadedTexturedQuadMesh;
 import lu.kbra.plant_game.engine.mesh.TexturedQuadMesh;
 import lu.kbra.standalone.gameengine.GameEngine;
@@ -21,7 +21,7 @@ import lu.kbra.standalone.gameengine.utils.mem.img.MemImage;
 
 public class StaticFlatMeshLoader {
 
-	public static final String MESH_NAME = QuadUIObject.class.getName();
+	public static final String MESH_NAME = QuadMeshUIObject.class.getName();
 	public static final String TEXTURE_NAME = "_WHITE_TXT";
 
 	public static TaskFuture<?, TexturedQuadMesh> getStaticFuture(

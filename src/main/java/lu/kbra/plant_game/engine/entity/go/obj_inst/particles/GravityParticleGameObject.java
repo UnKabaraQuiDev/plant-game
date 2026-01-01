@@ -59,4 +59,13 @@ public class GravityParticleGameObject extends ParticleGameObject {
 		this.applyDrag = applyDrag;
 	}
 
+	@Override
+	public String toString() {
+		return "GravityParticleGameObject [applyAcceleration=" + this.applyAcceleration + ", enforceMinY=" + this.enforceMinY
+				+ ", applyDrag=" + this.applyDrag + ", minY=" + this.minY + ", density=" + this.density + ", isEntityMaterialId="
+				+ this.isEntityMaterialId + ", materialId=" + this.materialId + ", instanceEmitter=" + this.instanceEmitter + ", objectId="
+				+ this.objectId + ", objectIdLocation=" + this.objectIdLocation + ", transform=" + this.transform + ", active="
+				+ this.active + ", name=" + this.name + "]";
+	}
+
 }

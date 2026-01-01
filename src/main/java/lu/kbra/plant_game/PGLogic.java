@@ -152,12 +152,12 @@ public class PGLogic extends GameLogic {
 	@Override
 	public void input(final float dTime) {
 		this.frameState.reset();
-		this.inputHandler.onFrameBegin();
+		this.inputHandler.onFrameBegin(dTime);
 
 		if (this.uiScene != null) {
-			this.uiScene.input(this.inputHandler, dTime, this.frameState);
+			this.uiScene.input(this.inputHandler, this.frameState);
 		}
-		this.worldScene.input(this.inputHandler, dTime, this.frameState);
+		this.worldScene.input(this.inputHandler, this.frameState);
 
 		if (this.inputHandler.isKeyPressedOnce(GLFW.GLFW_KEY_H)) {
 			this.uiScene.getCache().dump(System.out);
@@ -170,9 +170,9 @@ public class PGLogic extends GameLogic {
 	@Override
 	public void update(final float dTime) {
 		if (this.uiScene != null) {
-			this.uiScene.update(this.inputHandler, dTime, this.compositor, this.WORKERS, this.RENDER_DISPATCHER);
+			this.uiScene.update(this.inputHandler, this.compositor, this.WORKERS, this.RENDER_DISPATCHER);
 		}
-		this.worldScene.update(this.inputHandler, dTime, this.compositor, this.WORKERS, this.RENDER_DISPATCHER);
+		this.worldScene.update(this.inputHandler, this.compositor, this.WORKERS, this.RENDER_DISPATCHER);
 	}
 
 	@Override

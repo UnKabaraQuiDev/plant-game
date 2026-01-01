@@ -4,39 +4,22 @@ import lu.kbra.plant_game.engine.util.annotation.BufferSize;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
-import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 @DataPath("localization:string-placeholder")
 @BufferSize(10)
 public class SignedIntegerTextUIObject extends IntegerTextUIObject {
 
-	protected ColorMaterial neutralColor, negativeColor, positiveColor;
+	protected ColorMaterial neutralColor;
+	protected ColorMaterial negativeColor;
+	protected ColorMaterial positiveColor;
 
-	public SignedIntegerTextUIObject(
-			final String str,
-			final TextEmitter text,
-			final String key,
-			final ColorMaterial neutralColor,
-			final ColorMaterial negativeColor,
-			final ColorMaterial positiveColor) {
-		super(str, text, key, 0, true, true, false, 4, neutralColor);
-		this.neutralColor = neutralColor;
-		this.negativeColor = negativeColor;
-		this.positiveColor = positiveColor;
-	}
-
-	public SignedIntegerTextUIObject(
-			final String str,
-			final TextEmitter text,
-			final String key,
-			final ColorMaterial neutralColor,
-			final ColorMaterial negativeColor,
-			final ColorMaterial positiveColor,
-			final Transform3D transform) {
-		super(str, text, key, 0, true, true, false, 4, neutralColor, transform);
-		this.neutralColor = neutralColor;
-		this.negativeColor = negativeColor;
-		this.positiveColor = positiveColor;
+	public SignedIntegerTextUIObject(final String str, final TextEmitter text) {
+		super(str, text);
+		super.value = 0;
+		super.forceSign = true;
+		super.padding = true;
+		super.paddingZero = false;
+		super.paddingLength = 4;
 	}
 
 	@Override
@@ -77,11 +60,11 @@ public class SignedIntegerTextUIObject extends IntegerTextUIObject {
 
 	@Override
 	public String toString() {
-		return "SignedTextUIObject [neutralColor=" + this.neutralColor + ", negativeColor=" + this.negativeColor + ", positiveColor="
+		return "SignedIntegerTextUIObject [neutralColor=" + this.neutralColor + ", negativeColor=" + this.negativeColor + ", positiveColor="
 				+ this.positiveColor + ", key=" + this.key + ", value=" + this.value + ", forceSign=" + this.forceSign + ", padding="
-				+ this.padding + ", paddingLength=" + this.paddingLength + ", colorMaterial=" + this.colorMaterial + ", active="
-				+ this.active + ", name=" + this.name + ", getTextEmitter()=" + this.getTextEmitter() + ", getTransform()="
-				+ this.getTransform() + "]";
+				+ this.padding + ", paddingZero=" + this.paddingZero + ", paddingLength=" + this.paddingLength + ", colorMaterial="
+				+ this.colorMaterial + ", transform=" + this.transform + ", parent=" + this.parent + ", active=" + this.active + ", name="
+				+ this.name + "]";
 	}
 
 }

@@ -3,18 +3,15 @@ package lu.kbra.plant_game.engine.entity.ui.text;
 import lu.pcy113.pclib.PCUtils;
 
 import lu.kbra.plant_game.PGLogic;
-import lu.kbra.plant_game.engine.entity.go.impl.NeedsPostConstruct;
+import lu.kbra.plant_game.engine.entity.impl.NeedsPostConstruct;
 import lu.kbra.plant_game.engine.util.annotation.BufferSize;
-import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
-import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-@DataPath("localization:string-placeholder")
 @BufferSize(10)
 public class IntegerTextUIObject extends ProgrammaticTextUIObject implements NeedsPostConstruct {
 
-	protected final String key;
+	protected String key;
 	protected int value;
 	protected boolean forceSign = false;
 	protected boolean padding = false;
@@ -22,137 +19,8 @@ public class IntegerTextUIObject extends ProgrammaticTextUIObject implements Nee
 	protected int paddingLength = 4;
 	protected ColorMaterial colorMaterial = ColorMaterial.WHITE;
 
-	public IntegerTextUIObject(final String str, final TextEmitter text, final String key) {
-		super(str, text, key);
-		this.key = key;
-	}
-
-	public IntegerTextUIObject(final String str, final TextEmitter text, final String key, final Transform3D transform) {
-		super(str, text, key, transform);
-		this.key = key;
-	}
-
-	public IntegerTextUIObject(final String str, final TextEmitter text, final String key, final ColorMaterial mat) {
-		super(str, text, key);
-		this.key = key;
-		this.colorMaterial = mat;
-	}
-
-	public IntegerTextUIObject(
-			final String str,
-			final TextEmitter text,
-			final String key,
-			final ColorMaterial mat,
-			final Transform3D transform) {
-		super(str, text, key, transform);
-		this.key = key;
-		this.colorMaterial = mat;
-	}
-
-	public IntegerTextUIObject(final String str, final TextEmitter text, final String key, final int value) {
-		super(str, text, key);
-		this.key = key;
-		this.value = value;
-	}
-
-	public IntegerTextUIObject(final String str, final TextEmitter text, final String key, final int value, final Transform3D transform) {
-		super(str, text, key, transform);
-		this.key = key;
-		this.value = value;
-	}
-
-	public IntegerTextUIObject(final String str, final TextEmitter text, final String key, final int value, final boolean forceSign) {
-		super(str, text, key);
-		this.key = key;
-		this.value = value;
-		this.forceSign = forceSign;
-	}
-
-	public IntegerTextUIObject(
-			final String str,
-			final TextEmitter text,
-			final String key,
-			final int value,
-			final boolean forceSign,
-			final Transform3D transform) {
-		super(str, text, key, transform);
-		this.key = key;
-		this.value = value;
-		this.forceSign = forceSign;
-	}
-
-	public IntegerTextUIObject(
-			final String str,
-			final TextEmitter text,
-			final String key,
-			final int value,
-			final boolean forceSign,
-			final boolean padding,
-			final int padLength) {
-		super(str, text, key);
-		this.key = key;
-		this.value = value;
-		this.forceSign = forceSign;
-		this.padding = padding;
-		this.paddingLength = padLength;
-	}
-
-	public IntegerTextUIObject(
-			final String str,
-			final TextEmitter text,
-			final String key,
-			final int value,
-			final boolean forceSign,
-			final boolean padding,
-			final int padLength,
-			final Transform3D transform) {
-		super(str, text, key, transform);
-		this.key = key;
-		this.value = value;
-		this.forceSign = forceSign;
-		this.padding = padding;
-		this.paddingLength = padLength;
-	}
-
-	public IntegerTextUIObject(
-			final String str,
-			final TextEmitter text,
-			final String key,
-			final int value,
-			final boolean forceSign,
-			final boolean padding,
-			final boolean paddingZero,
-			final int padLength,
-			final ColorMaterial mat) {
-		super(str, text, key);
-		this.key = key;
-		this.value = value;
-		this.forceSign = forceSign;
-		this.padding = padding;
-		this.paddingZero = paddingZero;
-		this.paddingLength = padLength;
-		this.colorMaterial = mat;
-	}
-
-	public IntegerTextUIObject(
-			final String str,
-			final TextEmitter text,
-			final String key,
-			final int value,
-			final boolean forceSign,
-			final boolean padding,
-			final boolean paddingZero,
-			final int padLength,
-			final ColorMaterial mat,
-			final Transform3D transform) {
-		super(str, text, key, transform);
-		this.key = key;
-		this.value = value;
-		this.forceSign = forceSign;
-		this.padding = padding;
-		this.paddingZero = paddingZero;
-		this.paddingLength = padLength;
-		this.colorMaterial = mat;
+	public IntegerTextUIObject(final String str, final TextEmitter text) {
+		super(str, text);
 	}
 
 	@Override
@@ -219,6 +87,32 @@ public class IntegerTextUIObject extends ProgrammaticTextUIObject implements Nee
 
 	public void setColorMaterial(final ColorMaterial colorMaterial) {
 		this.colorMaterial = colorMaterial;
+	}
+
+	@Override
+	public String getKey() {
+		return this.key;
+	}
+
+	@Override
+	public void setKey(final String key) {
+		this.key = key;
+	}
+
+	public boolean isPaddingZero() {
+		return this.paddingZero;
+	}
+
+	public void setPaddingZero(final boolean paddingZero) {
+		this.paddingZero = paddingZero;
+	}
+
+	@Override
+	public String toString() {
+		return "IntegerTextUIObject [key=" + this.key + ", value=" + this.value + ", forceSign=" + this.forceSign + ", padding="
+				+ this.padding + ", paddingZero=" + this.paddingZero + ", paddingLength=" + this.paddingLength + ", colorMaterial="
+				+ this.colorMaterial + ", transform=" + this.transform + ", parent=" + this.parent + ", active=" + this.active + ", name="
+				+ this.name + "]";
 	}
 
 }

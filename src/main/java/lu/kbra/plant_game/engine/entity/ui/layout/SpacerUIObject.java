@@ -8,27 +8,72 @@ import org.joml.Vector2f;
 
 import lu.kbra.plant_game.engine.entity.impl.NoMeshObject;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
-import lu.kbra.standalone.gameengine.geom.Mesh;
+import lu.kbra.plant_game.engine.entity.ui.UOCreatingTaskFuture;
+import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
+import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
+@DataPath("")
 public class SpacerUIObject extends UIObject implements NoMeshObject {
 
-	private final Vector2f size;
+	private Vector2f size;
 
-	public SpacerUIObject(final String str, final Mesh mesh, final Vector2f size) {
-		super(str, mesh);
+	public SpacerUIObject(final String str) {
+		super(str);
+	}
+
+	public void setSize(final Vector2f size) {
 		this.size = size;
 	}
 
-	public SpacerUIObject(final String str, final Mesh mesh, final Transform3D transform, final Vector2f size) {
-		super(str, mesh, transform);
-		this.size = size;
+	public Vector2f getSize() {
+		return this.size;
 	}
 
 	@Override
 	public Shape getBounds() {
 		return GameEngineUtils.toRectangleBounds(this.size, Alignment.CENTER, Alignment.CENTER);
+	}
+
+	public static UOCreatingTaskFuture<SpacerUIObject> createVerticalSpacer(final float f) {
+		return UIObjectFactory.create(SpacerUIObject.class)
+				.set(i -> i.setTransform(new Transform3D()))
+				.set(i -> i.setSize(new Vector2f(1f, f)));
+	}
+
+	public static UOCreatingTaskFuture<SpacerUIObject> createHorizontalSpacer(final float f) {
+		return UIObjectFactory.create(SpacerUIObject.class)
+				.set(i -> i.setTransform(new Transform3D()))
+				.set(i -> i.setSize(new Vector2f(f, 1f)));
+	}
+
+	public static UOCreatingTaskFuture<SpacerUIObject> createSpacer(final float x, final float y) {
+		return UIObjectFactory.create(SpacerUIObject.class)
+				.set(i -> i.setTransform(new Transform3D()))
+				.set(i -> i.setSize(new Vector2f(x, y)));
+	}
+
+	public static UOCreatingTaskFuture<SpacerUIObject> createSpacer(final float s) {
+		return UIObjectFactory.create(SpacerUIObject.class)
+				.set(i -> i.setTransform(new Transform3D()))
+				.set(i -> i.setSize(new Vector2f(s)));
+	}
+
+	public static SpacerUIObject getVerticalSpacer(final float f) {
+		return createVerticalSpacer(f).exec();
+	}
+
+	public static SpacerUIObject getHorizontalSpacer(final float f) {
+		return createHorizontalSpacer(f).exec();
+	}
+
+	public static SpacerUIObject getSpacer(final float x, final float y) {
+		return createSpacer(x, y).exec();
+	}
+
+	public static SpacerUIObject getSpacer(final float s) {
+		return createSpacer(s).exec();
 	}
 
 }

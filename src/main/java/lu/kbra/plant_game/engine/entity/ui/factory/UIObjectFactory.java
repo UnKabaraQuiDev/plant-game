@@ -1,111 +1,45 @@
 package lu.kbra.plant_game.engine.entity.ui.factory;
 
+import static lu.kbra.plant_game.generated.UIObjectRegistry.BUFFER_SIZE;
+import static lu.kbra.plant_game.generated.UIObjectRegistry.DATA_PATH;
+
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.joml.Vector2f;
+import org.joml.Vector2fc;
 
-import lu.pcy113.pclib.PCUtils;
-import lu.pcy113.pclib.concurrency.ListTriggerLatch;
-import lu.pcy113.pclib.impl.ThrowingFunction;
-import lu.pcy113.pclib.impl.ThrowingSupplier;
-
-import lu.kbra.plant_game.engine.entity.go.impl.NeedsPostConstruct;
+import lu.kbra.plant_game.engine.entity.impl.MeshOwner;
 import lu.kbra.plant_game.engine.entity.impl.NoMeshObject;
-import lu.kbra.plant_game.engine.entity.ui.AnimatedUIObject;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
-import lu.kbra.plant_game.engine.entity.ui.gradient.GradientQuadUIObject;
-import lu.kbra.plant_game.engine.entity.ui.group.ObjectGroup;
-import lu.kbra.plant_game.engine.entity.ui.layout.SpacerUIObject;
-import lu.kbra.plant_game.engine.entity.ui.prim.FlatQuadUIObject;
-import lu.kbra.plant_game.engine.entity.ui.text.ProgrammaticTextUIObject;
-import lu.kbra.plant_game.engine.entity.ui.text.TextUIObject;
-import lu.kbra.plant_game.engine.entity.ui.texture.TextureUIObject;
-import lu.kbra.plant_game.engine.mesh.TexturedMesh;
+import lu.kbra.plant_game.engine.entity.ui.UOCreatingTaskFuture;
+import lu.kbra.plant_game.engine.entity.ui.prim.QuadMeshOwner;
+import lu.kbra.plant_game.engine.entity.ui.prim.TexturedQuadMeshOwner;
+import lu.kbra.plant_game.engine.entity.ui.text.ProgrammaticUIObject;
+import lu.kbra.plant_game.engine.entity.ui.text.TextEmitterOwner;
 import lu.kbra.plant_game.engine.mesh.TexturedQuadMesh;
-import lu.kbra.plant_game.engine.mesh.loader.AnimatedMeshLoader;
-import lu.kbra.plant_game.engine.mesh.loader.AnimatedMeshLoader.AnimatedMeshes;
 import lu.kbra.plant_game.engine.mesh.loader.StaticMeshLoader;
 import lu.kbra.plant_game.engine.mesh.loader.StaticTextLoader;
 import lu.kbra.plant_game.engine.mesh.loader.StaticTexturedMeshLoader;
-import lu.kbra.plant_game.engine.render.GradientMesh;
-import lu.kbra.plant_game.engine.scene.ui.UIScene;
-import lu.kbra.plant_game.engine.util.annotation.BufferSize;
-import lu.kbra.plant_game.engine.util.annotation.DataPath;
-import lu.kbra.plant_game.generated.UIObjectRegistry;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
+import lu.kbra.standalone.gameengine.cache.attrib.impl.AttribArray;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextAlignment;
-import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 public class UIObjectFactory {
 
-	public static class TextData {
-
-		protected Vector2f charSize;
-		protected TextAlignment textAlignment;
-		protected int bufferSize;
-		protected String name;
-
-		public TextData(final Vector2f charSize, final TextAlignment textAlignment, final int bufferSize, final String name) {
-			this.charSize = charSize;
-			this.textAlignment = textAlignment;
-			this.bufferSize = bufferSize;
-			this.name = name;
-		}
-
-		public TextData(final Vector2f charSize, final TextAlignment textAlignment, final int bufferSize) {
-			this.charSize = charSize;
-			this.textAlignment = textAlignment;
-			this.bufferSize = bufferSize;
-		}
-
-		public TextData(final Vector2f charSize, final TextAlignment textAlignment) {
-			this.charSize = charSize;
-			this.textAlignment = textAlignment;
-		}
-
-		public Vector2f getCharSize() {
-			return this.charSize;
-		}
-
-		public void setCharSize(final Vector2f charSize) {
-			this.charSize = charSize;
-		}
-
-		public TextAlignment getTextAlignment() {
-			return this.textAlignment;
-		}
-
-		public void setTextAlignment(final TextAlignment textAlignment) {
-			this.textAlignment = textAlignment;
-		}
-
-		public int getBufferSize() {
-			return this.bufferSize;
-		}
-
-		public void setBufferSize(final int bufferSize) {
-			this.bufferSize = bufferSize;
-		}
-
-		public String getName() {
-			return this.name;
-		}
-
-		public void setName(final String name) {
-			this.name = name;
-		}
-
-	}
-
 	public static final Vector2f DEFAULT_CHAR_SIZE = new Vector2f(0.5f);
 	public static final int DEFAULT_BUFFER_SIZE = 12;
-	public static final TextData DEFAULT_TEXT_DATA = new TextData(DEFAULT_CHAR_SIZE, TextAlignment.LEFT, DEFAULT_BUFFER_SIZE, null);
+	public static final TextAlignment DEFAULT_TEXT_ALIGNMENT = TextAlignment.LEFT;
 
 	public static UIObjectFactory INSTANCE;
 
@@ -114,7 +48,8 @@ public class UIObjectFactory {
 	private final Map<Class<? extends UIObject>, Integer> bufferSize = new HashMap<>();
 
 	private final CacheManager cache;
-	private final Dispatcher loader, render;
+	private final Dispatcher loader;
+	private final Dispatcher render;
 
 	public UIObjectFactory(final CacheManager cache, final Dispatcher loader, final Dispatcher render) {
 		this.cache = cache;
@@ -122,224 +57,91 @@ public class UIObjectFactory {
 		this.render = render;
 	}
 
-//	public <T extends GameObject & MeshOwner> GOCreatingTaskFuture<T> createMesh_(final Class<T> clazz) {
-//		return StaticMeshLoader.getStaticFuture(this.cache, clazz.getName(), DATA_PATH.get(clazz), this.loader, this.render)
-//				.then(new GOCreatingTaskFuture(this.loader, clazz));
-//	}
-//
-//	public <T extends GameObject & NoMeshObject> GOCreatingTaskFuture<T> createNoMesh_(final Class<T> clazz) {
-//		return new GOCreatingTaskFuture(this.loader, clazz);
-//	}
+	public <T extends UIObject & TextEmitterOwner> UOCreatingTaskFuture<T> createText_(
+			final Class<T> clazz,
+			final OptionalInt bufferSize,
+			final Optional<Vector2fc> charSize,
+			final Optional<TextAlignment> textAlignment,
+			final Optional<String> name,
+			final Optional<String> key,
+			final Supplier<AttribArray>... attribs) {
 
-	public <T extends UIObject> TaskFuture<?, T> create_(final Class<T> clazz, final Object... args) {
-		this.animatedMesh.computeIfAbsent(clazz, k -> AnimatedUIObject.class.isAssignableFrom(k));
-		this.dataPath.computeIfAbsent(clazz, k -> {
-			if (!k.isAnnotationPresent(DataPath.class)) {
-				throw new IllegalArgumentException(clazz.getName() + " doesn't have @DataPath.");
-			}
-			return k.getAnnotation(DataPath.class).value();
-		});
+		return StaticTextLoader
+				.getFuture(this.cache,
+						name.orElse(clazz.getSimpleName()),
+						key.orElse(DATA_PATH.get(clazz)),
+						charSize.orElse(DEFAULT_CHAR_SIZE),
+						textAlignment.orElse(DEFAULT_TEXT_ALIGNMENT),
+						bufferSize.isEmpty() ? BUFFER_SIZE.containsKey(clazz) ? OptionalInt.of(BUFFER_SIZE.get(clazz)) : OptionalInt.empty()
+								: OptionalInt.empty(),
+						attribs,
+						this.loader,
+						this.render)
+				.then(this.loader, (Function<TextEmitter, List<Object>>) Arrays::asList)
+				.then(new UOCreatingTaskFuture(this.loader, clazz));
+	}
 
-		final String cDataPath = this.dataPath.get(clazz);
+	public <T extends UIObject & MeshOwner> UOCreatingTaskFuture<T> createMesh_(final Class<T> clazz) {
+		return StaticMeshLoader.getStaticFuture(this.cache, clazz.getName(), DATA_PATH.get(clazz), this.loader, this.render)
+				.then(this.loader, (Function<Mesh, List<Object>>) Arrays::asList)
+				.then(new UOCreatingTaskFuture(this.loader, clazz));
+	}
 
-		if (this.animatedMesh.get(clazz)) {
-			PCUtils.throwUnsupported();
-			return null;
-		}
-
-		if (cDataPath.endsWith("json")) { // data file
-
-			PCUtils.throwUnsupported();
-
-			if (this.animatedMesh.get(clazz)) {
-
-				return AnimatedMeshLoader.getAnimatedFuture(this.cache, clazz.getName(), cDataPath, this.loader, this.render)
-						.then(this.loader, (ThrowingFunction<AnimatedMeshes, T, Throwable>) meshes -> {
-							final T instance = UIObjectRegistry.create(clazz,
-									PCUtils.combineArrays(
-											new Object[] {
-													clazz.getSimpleName() + "#" + System.nanoTime(),
-													meshes.staticMesh(),
-													meshes.animatedMesh() },
-											args));
-							if (instance instanceof final NeedsPostConstruct npc) {
-								npc.init();
-							}
-							return instance;
-						});
-			}
-			return StaticMeshLoader.getStaticFuture(this.cache, clazz.getName(), cDataPath, this.loader, this.render)
-					.then(this.loader, (ThrowingFunction<Mesh, T, Throwable>) mesh -> {
-						final T instance = UIObjectRegistry.create(clazz,
-								PCUtils.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), mesh }, args));
-						if (instance instanceof final NeedsPostConstruct npc) {
-							npc.init();
-						}
-						return instance;
-					});
-
-		}
-		if (TextUIObject.class.isAssignableFrom(clazz) && (cDataPath.startsWith("localization:") || cDataPath.isEmpty())) {
-
-			final String key = cDataPath.substring(cDataPath.indexOf(":") + 1);
-
-			TextData td;
-			final Object[] nargs;
-			if (args.length > 0 && args[0] instanceof final TextData vvec) {
-				td = vvec;
-				nargs = PCUtils.removeArray(args, 0);
-			} else {
-				td = DEFAULT_TEXT_DATA;
-				nargs = args;
-
-				if (this.bufferSize.computeIfAbsent(clazz,
-						c -> clazz.isAnnotationPresent(BufferSize.class) ? clazz.getAnnotation(BufferSize.class).value() : -1) != -1) {
-					td = new TextData(td.charSize, td.textAlignment, this.bufferSize.get(clazz));
-				}
-			}
-
-			final String uName = td.name == null ? clazz.getSimpleName() + "#" + System.nanoTime() : td.name;
-
-			if (ProgrammaticTextUIObject.class.isAssignableFrom(clazz)) {
-				return StaticTextLoader.getFuture(this.cache, uName, key, td, this.loader, this.render)
-						.then(this.loader, (ThrowingFunction<TextEmitter, T, Throwable>) te -> {
-							final T instance = UIObjectRegistry.create(clazz, PCUtils.combineArrays(new Object[] { uName, te }, nargs));
-							if (instance instanceof final NeedsPostConstruct npc) {
-								npc.init();
-							}
-							return instance;
-						})
-						.then(this.render, (Function<T, T>) t -> {
-							((ProgrammaticTextUIObject) t).updateText();
-							return t;
-						});
-			}
-
-			return StaticTextLoader.getFuture(this.cache, uName, key, td, this.loader, this.render)
-					.then(this.loader, (ThrowingFunction<TextEmitter, T, Throwable>) te -> {
-						final T instance = UIObjectRegistry.create(clazz,
-								PCUtils.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), te }, nargs));
-						if (instance instanceof final NeedsPostConstruct npc) {
-							npc.init();
-						}
-						return instance;
-					});
-
-		}
-		if (TextureUIObject.class.isAssignableFrom(clazz) && cDataPath.startsWith("image:")) {
-
-			final String txtPath = cDataPath.substring(cDataPath.indexOf(":") + 1);
-
-			return StaticTexturedMeshLoader.getStaticFuture(this.cache, txtPath, txtPath, this.loader, this.render)
-					.then(this.loader, (ThrowingFunction<TexturedMesh, T, Throwable>) mesh -> {
-						final T instance = UIObjectRegistry.create(clazz,
-								PCUtils.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), mesh }, args));
-						if (instance instanceof final NeedsPostConstruct npc) {
-							npc.init();
-						}
-						return instance;
-					});
-
-		}
-		if (NoMeshObject.class.isAssignableFrom(clazz)) {
-
-			return new TaskFuture<>(this.loader, (ThrowingSupplier<T, Throwable>) () -> {
-				final T instance = UIObjectRegistry.create(clazz,
-						PCUtils.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime() }, args));
-				if (instance instanceof final NeedsPostConstruct npc) {
-					npc.init();
-				}
-				return instance;
-			});
-
-		}
-		if (GradientQuadUIObject.class.isAssignableFrom(clazz)) {
-
-			return StaticGradientMeshLoader
-					.getStaticFuture(this.cache,
-							cDataPath.isBlank() ? GradientQuadUIObject.class.getName() : cDataPath,
-							cDataPath,
-							this.loader,
-							this.render)
-					.then(this.loader, (ThrowingFunction<GradientMesh, T, Throwable>) mesh -> {
-						final T instance = UIObjectRegistry.create(clazz,
-								PCUtils.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), mesh }, args));
-						if (instance instanceof final NeedsPostConstruct npc) {
-							npc.init();
-						}
-						return instance;
-					});
-
-		}
-		if (FlatQuadUIObject.class.isAssignableFrom(clazz)) {
-
+	public <T extends UIObject & MeshOwner> UOCreatingTaskFuture<T> createQuadMesh_(final Class<T> clazz) {
+		if (ProgrammaticUIObject.class.isAssignableFrom(clazz)) {
 			return StaticFlatMeshLoader.getStaticFuture(this.cache, this.loader, this.render)
-					.then(this.loader, (ThrowingFunction<TexturedQuadMesh, T, Throwable>) mesh -> {
-						final T instance = UIObjectRegistry.create(clazz,
-								PCUtils.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime(), mesh }, args));
-						if (instance instanceof final NeedsPostConstruct npc) {
-							npc.init();
-						}
-						return instance;
-					});
-
+					.then(this.loader, (Function<TexturedQuadMesh, List<Object>>) Arrays::asList)
+					.then(new UOCreatingTaskFuture(this.loader, clazz));
 		}
-		PCUtils.throwUnsupported();
-		return null;
+		return StaticTexturedMeshLoader.getStaticFuture(this.cache, clazz.getName(), DATA_PATH.get(clazz), this.loader, this.render)
+				.then(this.loader, (Function<TexturedQuadMesh, List<Object>>) Arrays::asList)
+				.then(new UOCreatingTaskFuture(this.loader, clazz));
 	}
 
-	public <T extends UIObject> TaskFuture<?, T> create_(final Class<T> clazz, final UIScene scene, final Object... args) {
-		return this.create_(clazz, args).then(this.loader, (ThrowingFunction<T, T, Throwable>) scene::add);
+	public <T extends UIObject & MeshOwner> UOCreatingTaskFuture<T> createManual_(final Class<T> clazz, final Mesh mesh) {
+		return new TaskFuture<>(this.loader, (Supplier<List<Object>>) () -> Arrays.asList(mesh))
+				.then(new UOCreatingTaskFuture(this.loader, clazz));
 	}
 
-	@SuppressWarnings("unchecked")
-	public <T extends UIObject, V extends T> TaskFuture<?, T> create_(
+	public <T extends UIObject & NoMeshObject> UOCreatingTaskFuture<T> createNoMesh_(final Class<T> clazz) {
+		return new UOCreatingTaskFuture(this.loader, clazz);
+	}
+
+	public static <T extends UIObject> UOCreatingTaskFuture<T> create(final Class<T> clazz) {
+		if (NoMeshObject.class.isAssignableFrom(clazz)) {
+			return INSTANCE.createNoMesh_((Class) clazz);
+		}
+		if (QuadMeshOwner.class.isAssignableFrom(clazz) || TexturedQuadMeshOwner.class.isAssignableFrom(clazz)) {
+			return INSTANCE.createQuadMesh_((Class) clazz);
+		}
+		if (MeshOwner.class.isAssignableFrom(clazz)) {
+			return INSTANCE.createMesh_((Class) clazz);
+		}
+		if (TextEmitterOwner.class.isAssignableFrom(clazz) && !(ProgrammaticUIObject.class.isAssignableFrom(clazz))) {
+			return INSTANCE.createText_((Class) clazz,
+					OptionalInt.empty(),
+					Optional.empty(),
+					Optional.empty(),
+					Optional.empty(),
+					Optional.empty());
+		}
+		throw new UnsupportedOperationException(clazz.getName());
+	}
+
+	@SafeVarargs
+	public static <T extends UIObject & TextEmitterOwner> UOCreatingTaskFuture<T> createText(
 			final Class<T> clazz,
-			final ObjectGroup<V> obj,
-			final Object... args) {
-		return this.create_(clazz, args).then(this.loader, (ThrowingFunction<T, T, Throwable>) (final T t) -> obj.add((V) t));
+			final OptionalInt bufferSize,
+			final Optional<Vector2fc> charSize,
+			final Optional<TextAlignment> textAlignment,
+			final Optional<String> name,
+			final Optional<String> key,
+			final Supplier<AttribArray>... attribs) {
+		return INSTANCE.createText_(clazz, bufferSize, charSize, textAlignment, name, key, attribs);
 	}
 
-	public <T extends UIObject, V extends T> TaskFuture<?, T> create_(
-			final Class<T> clazz,
-			final ListTriggerLatch<V> obj,
-			final Object... args) {
-		return this.create_(clazz, args).then(this.loader, (ThrowingFunction<T, T, Throwable>) (final T t) -> {
-			obj.add((V) t);
-			return t;
-		});
-	}
-
-	public static <T extends UIObject> TaskFuture<?, T> create(final Class<T> clazz, final Object... args) {
-		return INSTANCE.create_(clazz, args);
-	}
-
-	public static <T extends UIObject> TaskFuture<?, T> create(final Class<T> clazz, final UIScene scene, final Object... args) {
-		return INSTANCE.create_(clazz, scene, args);
-	}
-
-	public static <T extends UIObject> TaskFuture<?, T> create(final Class<T> clazz, final ListTriggerLatch latch, final Object... args) {
-		return INSTANCE.create_(clazz, latch, args);
-	}
-
-	public static <T extends UIObject> TaskFuture<?, T> create(final Class<T> clazz, final ObjectGroup obj, final Object... args) {
-		return INSTANCE.create_(clazz, obj, args);
-	}
-
-	public static UIObject createVerticalSpacer(final float f) {
-		return new SpacerUIObject("spacer-v-" + System.nanoTime() % 200_000, null, new Transform3D(), new Vector2f(1f, f));
-	}
-
-	public static UIObject createHorizontalSpacer(final float f) {
-		return new SpacerUIObject("spacer-h-" + System.nanoTime() % 200_000, null, new Transform3D(), new Vector2f(f, 1f));
-	}
-
-	public static UIObject createSpacer(final float x, final float y) {
-		return new SpacerUIObject("spacer-" + System.nanoTime() % 200_000, null, new Transform3D(), new Vector2f(x, y));
-	}
-
-	public static UIObject createSpacer(final float s) {
-		return new SpacerUIObject("spacer-" + System.nanoTime() % 200_000, null, new Transform3D(), new Vector2f(s));
+	public static <T extends UIObject & MeshOwner> UOCreatingTaskFuture<T> createManual(final Class<T> clazz, final Mesh mesh) {
+		return INSTANCE.createManual_(clazz, mesh);
 	}
 
 }

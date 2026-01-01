@@ -1,5 +1,6 @@
-package lu.kbra.plant_game.engine.entity.go.impl;
+package lu.kbra.plant_game.engine.entity.impl;
 
+import lu.kbra.plant_game.engine.entity.go.impl.Footprint;
 import lu.kbra.standalone.gameengine.utils.consts.Direction;
 
 public interface FootprintOwner {

@@ -3,14 +3,21 @@ package lu.kbra.plant_game.engine.mesh.loader;
 import static lu.kbra.plant_game.engine.mesh.loader.MeshLoaderLocks.releaseLock;
 import static lu.kbra.plant_game.engine.mesh.loader.MeshLoaderLocks.waitOrCreateLock;
 
-import org.joml.Vector2f;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.OptionalInt;
+import java.util.function.Supplier;
 
+import org.joml.Vector2fc;
+
+import lu.pcy113.pclib.PCUtils;
 import lu.pcy113.pclib.impl.ThrowingFunction;
 import lu.pcy113.pclib.impl.ThrowingSupplier;
 
 import lu.kbra.plant_game.engine.data.locale.LocalizationService;
-import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory.TextData;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
+import lu.kbra.standalone.gameengine.cache.attrib.impl.AttribArray;
+import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.SkipThen;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
@@ -26,15 +33,14 @@ public class StaticTextLoader {
 			final CacheManager cache,
 			final String meshName,
 			final String key,
-			final TextData td,
+			final Vector2fc charSize,
+			final TextAlignment textAlignment,
+			final OptionalInt bufferSize,
+			final Supplier<AttribArray>[] attribs,
 			final Dispatcher loader,
 			final Dispatcher render) {
 
-		final Vector2f charSize = td.getCharSize();
-		final TextAlignment textAlignment = td.getTextAlignment();
-		final int bufferSize = td.getBufferSize();
-
-		return new TaskFuture<>(loader, (ThrowingSupplier<String, Throwable>) () -> {
+		TaskFuture tf = new TaskFuture<>(loader, (ThrowingSupplier<String, Throwable>) () -> {
 			waitOrCreateLock(meshName);
 
 			if (cache.hasTextEmitter(meshName)) {
@@ -42,10 +48,22 @@ public class StaticTextLoader {
 			}
 
 			return LocalizationService.get(key);
-		})
-				.then(render,
-						(ThrowingFunction<String, TextEmitter, Throwable>) (
-								final String text) -> create(cache, meshName, text, charSize, textAlignment, bufferSize));
+		});
+
+		final List<AttribArray> createdAttribs = new ArrayList<>();
+
+		if (attribs != null && attribs.length != 0) {
+			for (final Supplier<AttribArray> aa : attribs) {
+				tf = tf.then(render, (ThrowingFunction<Mesh, Mesh, Throwable>) mesh -> {
+					createdAttribs.add(aa.get());
+					return mesh;
+				});
+			}
+		}
+
+		return tf.then(render,
+				(ThrowingFunction<String, TextEmitter, Throwable>) (
+						final String text) -> create(cache, meshName, text, charSize, textAlignment, bufferSize));
 
 	}
 
@@ -53,14 +71,13 @@ public class StaticTextLoader {
 			final CacheManager cache,
 			final String meshName,
 			final String text,
-			final Vector2f size,
+			final Vector2fc size,
 			final TextAlignment ta,
-			final int bufferSize) {
-		final TextEmitter te = new TextEmitter(
-				meshName,
+			final OptionalInt bufferSize) {
+		final TextEmitter te = new TextEmitter(meshName,
 				null,
-				bufferSize == -1 ? Math.min(Math.max((int) (text.length() * 1.25), MIN_CHAR_BUFFER_LENGTH), MAX_CHAR_BUFFER_LENGTH)
-						: bufferSize,
+				bufferSize.isEmpty() ? PCUtils.clamp(MIN_CHAR_BUFFER_LENGTH, MAX_CHAR_BUFFER_LENGTH, (int) (text.length() * 1.25))
+						: bufferSize.getAsInt(),
 				text,
 				size);
 		te.setTextAlignment(ta);
