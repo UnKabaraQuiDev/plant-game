@@ -11,7 +11,7 @@ import org.junit.Test;
 import lu.pcy113.pclib.PCUtils;
 import lu.pcy113.pclib.logger.GlobalLogger;
 
-import lu.kbra.plant_game.engine.entity.go.GameObject;
+import lu.kbra.plant_game.engine.entity.go.MeshGameObject;
 import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory;
 import lu.kbra.plant_game.engine.entity.go.obj.water.WaterTowerObject;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
@@ -39,42 +39,42 @@ public class IconRendererTestLogic extends GameLogic {
 
 	private WorldLevelScene world;
 
-	private TaskFuture<?, ? extends GameObject>.TaskState<? extends GameObject> state;
+	private TaskFuture<?, ? extends MeshGameObject>.TaskState<? extends MeshGameObject> state;
 
 	@Override
 	public void init() throws Exception {
-		deferredCompositor = new DeferredCompositor(engine, engine.getRenderThread());
-		iconRenderer = new DeferredIconRenderer(engine, engine.getRenderThread());
+		this.deferredCompositor = new DeferredCompositor(this.engine, this.engine.getRenderThread());
+		this.iconRenderer = new DeferredIconRenderer(this.engine, this.engine.getRenderThread());
 
-		GameObjectFactory.INSTANCE = new GameObjectFactory(cache, WORKERS, RENDER_DISPATCHER);
-		UIObjectFactory.INSTANCE = new UIObjectFactory(cache, WORKERS, RENDER_DISPATCHER);
+		GameObjectFactory.INSTANCE = new GameObjectFactory(this.cache, this.WORKERS, this.RENDER_DISPATCHER);
+		UIObjectFactory.INSTANCE = new UIObjectFactory(this.cache, this.WORKERS, this.RENDER_DISPATCHER);
 
-		state = GameObjectFactory.create(WaterTowerObject.class, new Transform3D()).push();
-		world = new WorldLevelScene("world", cache);
+		this.state = GameObjectFactory.create(WaterTowerObject.class).set(i -> i.setTransform(new Transform3D())).push();
+		this.world = new WorldLevelScene("world", this.cache);
 	}
 
 	@Override
-	public void input(float dTime) {
+	public void input(final float dTime) {
 	}
 
 	@Override
-	public void update(float dTime) {
+	public void update(final float dTime) {
 	}
 
 	@Override
-	public void render(float dTime) {
-		if (!state.isDone()) {
+	public void render(final float dTime) {
+		if (!this.state.isDone()) {
 			return;
 		}
 
 		GlobalLogger.info("Starting rendering.");
-		final SingleTexture txt = iconRenderer
-				.renderIcon(engine, state.getResult(), 128, new Vector3f(1), new Vector3f(1, 1, 1).normalize(), 0.1f);
+		final SingleTexture txt = this.iconRenderer
+				.renderIcon(this.engine, this.state.getResult(), 128, new Vector3f(1), new Vector3f(1, 1, 1).normalize(), 0.1f);
 		GlobalLogger.info("Rendering done.");
 		GlobalLogger.info("Fetching image.");
 		final MemImage img = txt.getStoredImage();
 		GlobalLogger.info("Saving image.");
-		final File outFile = new File(Consts.ICONS_BAKES_RES_DIR, state.getResult().getClass().getSimpleName() + ".png");
+		final File outFile = new File(Consts.ICONS_BAKES_RES_DIR, this.state.getResult().getClass().getSimpleName() + ".png");
 		FileUtils.STBISave(outFile, img);
 		GlobalLogger.info("Saved to: " + outFile.getAbsolutePath());
 
@@ -83,8 +83,8 @@ public class IconRendererTestLogic extends GameLogic {
 
 	@Override
 	public void cleanup() {
-		deferredCompositor.cleanup();
-		iconRenderer.cleanup();
+		this.deferredCompositor.cleanup();
+		this.iconRenderer.cleanup();
 	}
 
 	@Test
@@ -98,7 +98,7 @@ public class IconRendererTestLogic extends GameLogic {
 		engine.start();
 	}
 
-	public static void main(String[] args) throws FileNotFoundException, IOException {
+	public static void main(final String[] args) throws FileNotFoundException, IOException {
 		new IconRendererTestLogic().main();
 	}
 

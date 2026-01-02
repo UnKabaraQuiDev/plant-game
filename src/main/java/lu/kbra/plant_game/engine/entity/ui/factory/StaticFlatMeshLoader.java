@@ -15,6 +15,7 @@ import lu.kbra.standalone.gameengine.graph.texture.SingleTexture;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.SkipThen;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
+import lu.kbra.standalone.gameengine.impl.future.YieldExecutionThrowable;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextureFilter;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextureWrap;
 import lu.kbra.standalone.gameengine.utils.mem.img.MemImage;
@@ -30,20 +31,23 @@ public class StaticFlatMeshLoader {
 			final Dispatcher render) {
 
 		return new TaskFuture<>(loader, (ThrowingSupplier<SingleTexture, Throwable>) () -> {
-			waitOrCreateLock(MESH_NAME);
-
-			if (cache.hasTexture(TEXTURE_NAME)) {
-				throw new SkipThen(1, cache.getTexture(TEXTURE_NAME));
+			System.err.println(Thread.currentThread().getName() + " has mesh: " + cache.hasMesh(MESH_NAME));
+			if (!cache.hasMesh(MESH_NAME) && !waitOrCreateLock(MESH_NAME)) {
+				System.err.println(Thread.currentThread().getName() + " yielding");
+				throw new YieldExecutionThrowable(() -> cache.hasMesh(MESH_NAME));
 			}
 
 			if (cache.hasMesh(MESH_NAME)) {
+				releaseLock(MESH_NAME);
 				throw new SkipThen(2, cache.getMesh(MESH_NAME));
 			}
 
-			final SingleTexture whiteTexture = new SingleTexture(TEXTURE_NAME, MemImage.fromDirect(1, 1, 3, buffer -> {
-				buffer.put((byte) 255).put((byte) 255).put((byte) 255);
-				buffer.flip();
-			}));
+			if (cache.hasTexture(MESH_NAME)) {
+				throw new SkipThen(cache.getTexture(MESH_NAME));
+			}
+
+			final SingleTexture whiteTexture = new SingleTexture(TEXTURE_NAME,
+					MemImage.fromDirect(1, 1, 3, buffer -> buffer.put((byte) 255).put((byte) 255).put((byte) 255).flip()));
 			whiteTexture.setFilters(TextureFilter.NEAREST);
 			whiteTexture.setWraps(TextureWrap.CLAMP_TO_EDGE);
 
@@ -51,14 +55,9 @@ public class StaticFlatMeshLoader {
 		}).then(render, (ThrowingFunction<SingleTexture, SingleTexture, Throwable>) whiteTexture -> {
 			whiteTexture.setup();
 			cache.addTexture(whiteTexture);
+//			releaseLock(TEXTURE_NAME);
 			return whiteTexture;
-		}).then(render, (ThrowingFunction<SingleTexture, TexturedQuadMesh, Throwable>) txt -> {
-			if (cache.hasMesh(MESH_NAME)) {
-				return (TexturedQuadMesh) cache.getMesh(MESH_NAME);
-			}
-
-			return createStaticQuad(cache, txt);
-		});
+		}).then(render, (ThrowingFunction<SingleTexture, TexturedQuadMesh, Throwable>) txt -> createStaticQuad(cache, txt));
 
 	}
 

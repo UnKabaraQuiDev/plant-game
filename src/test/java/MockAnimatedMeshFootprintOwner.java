@@ -1,3 +1,5 @@
+import org.joml.Matrix4f;
+
 import lu.kbra.plant_game.engine.entity.go.impl.Footprint;
 import lu.kbra.plant_game.engine.entity.go.obj.AnimatedMeshFootprintOwner;
 import lu.kbra.plant_game.engine.mesh.AnimatedMesh;
@@ -34,6 +36,26 @@ public class MockAnimatedMeshFootprintOwner implements AnimatedMeshFootprintOwne
 
 	@Override
 	public Footprint getAnimatedMeshFootprint() {
+		return null;
+	}
+
+	@Override
+	public void setAnimatedMesh(final AnimatedMesh m) {
+		this.animatedMesh = m;
+	}
+
+	@Override
+	public Matrix4f computeAnimatedTransform(final float t) {
+		return null;
+	}
+
+	@Override
+	public void setAnimatedTransform(final Matrix4f animatedTransform) {
+
+	}
+
+	@Override
+	public Matrix4f getAnimatedTransform() {
 		return null;
 	}
 

@@ -19,6 +19,7 @@ import lu.kbra.standalone.gameengine.graph.texture.SingleTexture;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.SkipThen;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
+import lu.kbra.standalone.gameengine.impl.future.YieldExecutionThrowable;
 import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
 
 public class StaticMeshLoader {
@@ -66,7 +67,9 @@ public class StaticMeshLoader {
 			final Dispatcher render) {
 
 		return new TaskFuture<>(loader, (ThrowingSupplier<GenericMeshData, Throwable>) () -> {
-			waitOrCreateLock(meshName);
+			if (!cache.hasMesh(meshName) && !waitOrCreateLock(meshName)) {
+				throw new YieldExecutionThrowable(() -> cache.hasMesh(meshName));
+			}
 
 			if (cache.hasMesh(meshName)) {
 				releaseLock(meshName);
@@ -89,7 +92,7 @@ public class StaticMeshLoader {
 		}
 
 		if (cache.hasMesh(meshName)) {
-			throw new IllegalStateException("Mesh already exists.");
+			throw new IllegalStateException("Mesh: " + meshName + " already exists.");
 		}
 		cache.addMesh(staticMesh);
 		releaseLock(meshName);

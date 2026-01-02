@@ -16,6 +16,7 @@ import lu.kbra.standalone.gameengine.graph.texture.SingleTexture;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.SkipThen;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
+import lu.kbra.standalone.gameengine.impl.future.YieldExecutionThrowable;
 import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
 import lu.kbra.standalone.gameengine.utils.file.FileUtils;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextureFilter;
@@ -38,9 +39,12 @@ public class StaticTexturedMeshLoader {
 		}
 
 		return new TaskFuture<>(loader, (ThrowingSupplier<Pair<MemImage, SingleTexture>, Throwable>) () -> {
-			waitOrCreateLock(meshName);
+			if (!waitOrCreateLock(meshName)) {
+				throw new YieldExecutionThrowable(() -> cache.hasMesh(meshName));
+			}
 
 			if (cache.hasMesh(meshName)) {
+				releaseLock(meshName);
 				throw new SkipThen(3, cache.getMesh(meshName));
 			}
 

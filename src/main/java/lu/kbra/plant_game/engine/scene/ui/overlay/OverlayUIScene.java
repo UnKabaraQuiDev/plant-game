@@ -2,10 +2,14 @@ package lu.kbra.plant_game.engine.scene.ui.overlay;
 
 import java.util.stream.Collectors;
 
+import lu.pcy113.pclib.concurrency.ListTriggerLatch;
+import lu.pcy113.pclib.pointer.ObjectPointer;
+
 import lu.kbra.plant_game.PGLogic;
 import lu.kbra.plant_game.engine.UpdateFrameState;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.bar.AnchoredProgressBarUIObject;
+import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
 import lu.kbra.plant_game.engine.entity.ui.prim.FlatQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.IntegerTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.PercentageIntTextUIObject;
@@ -19,9 +23,11 @@ import lu.kbra.plant_game.engine.scene.ui.UIScene;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
 import lu.kbra.plant_game.engine.scene.ui.layout.AnchorLayout;
 import lu.kbra.plant_game.engine.scene.ui.layout.FlowLayout;
+import lu.kbra.plant_game.engine.scene.ui.layout.GridFlowLayout;
 import lu.kbra.plant_game.engine.scene.ui.layout.Layout;
 import lu.kbra.plant_game.engine.scene.ui.layout.LayoutParent;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
+import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.WorkerDispatcher;
@@ -29,6 +35,7 @@ import lu.kbra.standalone.gameengine.objs.entity.ParentAwareComponent;
 import lu.kbra.standalone.gameengine.objs.entity.ParentAwareNode;
 import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
 import lu.kbra.standalone.gameengine.utils.geo.GeoAxis;
+import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3DShear;
 
 public class OverlayUIScene extends UIScene implements LayoutParent, PaddingOwner {
@@ -47,18 +54,39 @@ public class OverlayUIScene extends UIScene implements LayoutParent, PaddingOwne
 	protected AnchoredProgressBarUIObject progressBar;
 	protected ExtAnchoredOverlayIntegerStatLine progressGroup;
 
+	protected AnchoredLayoutUIObjectGroup buildingTab = new AnchoredBoundedUIObjectGroup("buildings",
+			new GridFlowLayout(0.08f * STATS_GROUP_SCALE),
+			Anchor.BOTTOM_CENTER,
+			Anchor.BOTTOM_CENTER);
+
 	protected Layout layout;
 
 	public OverlayUIScene(final CacheManager parent) {
 		super("game-overlay", parent);
+		this.setLayout(new AnchorLayout());
 	}
 
 	@Override
 	public void init(final Dispatcher workers, final Dispatcher renderDispatcher) {
-		this.setLayout(new AnchorLayout());
-		super.add(this.statsGroup);
+		super.addAll(this.statsGroup, this.buildingTab);
 
 		final float height = 0.2f * STATS_GROUP_SCALE;
+
+		final ObjectPointer<ColorMaterial> col = new ObjectPointer<>(ColorMaterial.BLUE);
+		final ListTriggerLatch<UIObject> latch = new ListTriggerLatch<>(10, list -> {
+			System.err.println(list);
+			System.err.println(this.buildingTab.size());
+			System.err.println(list.size());
+//			this.buildingTab.doLayout();
+		});
+		for (int i = 0; i < 10; i++) {
+			UIObjectFactory.create(FlatQuadUIObject.class)
+					.set(j -> j.setTransform(new Transform3D(0.1f)))
+					.set(j -> j.setColorMaterial(col.set(ColorMaterial::next).get()))
+					.add(this.buildingTab)
+					.latch(latch)
+					.push();
+		}
 
 		this.waterGroup = new OverlayIntegerStatLine("water-counter");
 		this.waterGroup
@@ -158,7 +186,7 @@ public class OverlayUIScene extends UIScene implements LayoutParent, PaddingOwne
 		this.progressBar.setValue((float) Math.sin(PGLogic.TOTAL_TIME()) / 2 + 0.5f).updateScaling();
 //		((Transform3DShear) this.progressBar.getTransform()).shearSet(GeoAxis.Z, GeoAxis.X, -0.8f).update();
 
-		if (Math.random() * 100 < 0.1) {
+		if (Math.random() * 100 < 0.1 && this.progressGroup != null) {
 			this.progressGroup.add(1).flushValue();
 		}
 

@@ -43,16 +43,20 @@ public class StaticInstanceLoader {
 		final String meshName = name + "-mesh";
 
 		TaskFuture tf = new TaskFuture<>(loader, (ThrowingSupplier<GenericMeshData, Throwable>) () -> {
+			System.err.println("Creating: " + name);
 			waitOrCreateLock(name);
+			System.err.println("Creating: " + meshName);
 			waitOrCreateLock(meshName);
 
 			if (cache.hasInstanceEmitter(name)) {
+				System.err.println("Got: " + name + " + " + meshName);
 				releaseLock(meshName);
 				releaseLock(name);
 				throw new SkipThen(2, cache.getInstanceEmitter(name));
 			}
 
 			if (cache.hasMesh(meshName)) {
+				System.err.println("Got: " + meshName);
 				releaseLock(meshName);
 				throw new SkipThen(cache.getMesh(meshName));
 			}

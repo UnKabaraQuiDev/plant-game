@@ -24,6 +24,7 @@ import lu.kbra.standalone.gameengine.graph.texture.SingleTexture;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.SkipThen;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
+import lu.kbra.standalone.gameengine.impl.future.YieldExecutionThrowable;
 import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
 
 public class AnimatedMeshLoader {
@@ -96,42 +97,49 @@ public class AnimatedMeshLoader {
 			final String path,
 			final Dispatcher loader,
 			final Dispatcher render) {
+
+		final String animatedMeshName = meshName + "-animated";
+
 		// if the mesh is available at create time: return it
-		if (cache.hasMesh(meshName + "-animated") && cache.hasMesh(meshName)) {
-			return new TaskFuture<>(loader, (ThrowingSupplier<AnimatedMeshes, Throwable>) () -> new AnimatedMeshes(cache.getMesh(meshName),
-					(AnimatedMesh) cache.getMesh(meshName + "-animated")));
+		if (cache.hasMesh(animatedMeshName) && cache.hasMesh(meshName)) {
+			return new TaskFuture<>(loader,
+					(ThrowingSupplier<AnimatedMeshes, Throwable>) () -> new AnimatedMeshes(cache.getMesh(meshName),
+							(AnimatedMesh) cache.getMesh(animatedMeshName)));
 		}
 
 		// load both
 		return new TaskFuture<>(loader, (ThrowingSupplier<AnimatedMeshesData, Throwable>) () -> {
-			waitOrCreateLock(meshName);
-			waitOrCreateLock(meshName + "-animated");
+			if (!cache.hasMesh(meshName) && !waitOrCreateLock(meshName)) {
+				throw new YieldExecutionThrowable(() -> cache.hasMesh(meshName));
+			}
+			if (!cache.hasMesh(animatedMeshName) && !waitOrCreateLock(animatedMeshName)) {
+				throw new YieldExecutionThrowable(() -> cache.hasMesh(animatedMeshName));
+			}
 
-			if (cache.hasMesh(meshName + "-animated") && cache.hasMesh(meshName)) {
+			if (cache.hasMesh(animatedMeshName) && cache.hasMesh(meshName)) {
 				releaseLock(meshName);
-				releaseLock(meshName + "-animated");
-				throw new SkipThen(2, new AnimatedMeshes(cache.getMesh(meshName), (AnimatedMesh) cache.getMesh(meshName + "-animated")));
+				releaseLock(animatedMeshName);
+				throw new SkipThen(2, new AnimatedMeshes(cache.getMesh(meshName), (AnimatedMesh) cache.getMesh(animatedMeshName)));
 			}
 
 			// need to create animated mesh
 			if (cache.hasMesh(meshName)) {
 				releaseLock(meshName);
 				throw new SkipThen(2, new TaskFuture<>(loader, (ThrowingSupplier<AnimatedMeshData, Throwable>) () -> {
-					// waitOrCreateLock(meshName + "-animated");
+					// waitOrCreateLock(animatedMeshName);
 
 					final URI baseURI = URI.create(path);
 					final JSONObject obj = new JSONObject(PCUtils.readStringSource(path));
 
 					return readAnimatedMeshData(obj, baseURI);
-				})
-						.then(render,
-								(ThrowingFunction<AnimatedMeshData, AnimatedMeshes, Throwable>) obj -> new AnimatedMeshes(
-										cache.getMesh(meshName), createAnimated(cache, meshName + "-animated", obj))));
+				}).then(render,
+						(ThrowingFunction<AnimatedMeshData, AnimatedMeshes, Throwable>) obj -> new AnimatedMeshes(cache.getMesh(meshName),
+								createAnimated(cache, animatedMeshName, obj))));
 			}
 
 			// need to create static mesh
-			if (cache.hasMesh(meshName + "-animated")) {
-				releaseLock(meshName + "-animated");
+			if (cache.hasMesh(animatedMeshName)) {
+				releaseLock(animatedMeshName);
 				throw new SkipThen(2, new TaskFuture<>(loader, (ThrowingSupplier<GenericMeshData, Throwable>) () -> {
 					// waitOrCreateLock(meshName);
 
@@ -139,11 +147,10 @@ public class AnimatedMeshLoader {
 					final JSONObject obj = new JSONObject(PCUtils.readStringSource(path));
 
 					return StaticMeshLoader.readStaticMeshData(obj, baseURI);
-				})
-						.then(render,
-								(ThrowingFunction<GenericMeshData, AnimatedMeshes, Throwable>) obj -> new AnimatedMeshes(
-										StaticMeshLoader.createStatic(cache, meshName, obj),
-										(AnimatedMesh) cache.getMesh(meshName + "-animated"))));
+				}).then(render,
+						(ThrowingFunction<GenericMeshData, AnimatedMeshes, Throwable>) obj -> new AnimatedMeshes(
+								StaticMeshLoader.createStatic(cache, meshName, obj),
+								(AnimatedMesh) cache.getMesh(animatedMeshName))));
 			}
 
 			final URI baseURI = URI.create(path);
@@ -153,13 +160,13 @@ public class AnimatedMeshLoader {
 			final GenericMeshData staticMeshData = StaticMeshLoader.readStaticMeshData(obj, baseURI);
 
 			return new AnimatedMeshesData(staticMeshData, animatedMeshData);
-		})
-				.then(render,
-						(ThrowingFunction<AnimatedMeshesData, Pair<AnimatedMeshesData, Mesh>, Throwable>) obj -> Pairs
-								.readOnly(obj, StaticMeshLoader.createStatic(cache, meshName, obj.staticMeshData)))
+		}).then(render,
+				(ThrowingFunction<AnimatedMeshesData, Pair<AnimatedMeshesData, Mesh>, Throwable>) obj -> Pairs.readOnly(obj,
+						StaticMeshLoader.createStatic(cache, meshName, obj.staticMeshData)))
 				.then(render,
 						(ThrowingFunction<Pair<AnimatedMeshesData, Mesh>, AnimatedMeshes, Throwable>) pair -> new AnimatedMeshes(
-								pair.getValue(), createAnimated(cache, meshName + "-animated", pair.getKey().animatedMeshData())));
+								pair.getValue(),
+								createAnimated(cache, animatedMeshName, pair.getKey().animatedMeshData())));
 	}
 
 	public static AnimatedMesh createAnimated(final CacheManager cache, final String meshName, final AnimatedMeshData animatedMeshData) {

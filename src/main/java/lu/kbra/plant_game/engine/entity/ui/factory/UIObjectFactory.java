@@ -22,7 +22,6 @@ import lu.kbra.plant_game.engine.entity.impl.NoMeshObject;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.UOCreatingTaskFuture;
 import lu.kbra.plant_game.engine.entity.ui.prim.QuadMeshOwner;
-import lu.kbra.plant_game.engine.entity.ui.prim.TexturedQuadMeshOwner;
 import lu.kbra.plant_game.engine.entity.ui.text.ProgrammaticUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.TextEmitterOwner;
 import lu.kbra.plant_game.engine.mesh.TexturedQuadMesh;
@@ -125,7 +124,7 @@ public class UIObjectFactory {
 		if (NoMeshObject.class.isAssignableFrom(clazz)) {
 			return INSTANCE.createNoMesh_((Class) clazz);
 		}
-		if (QuadMeshOwner.class.isAssignableFrom(clazz) || TexturedQuadMeshOwner.class.isAssignableFrom(clazz)) {
+		if (QuadMeshOwner.class.isAssignableFrom(clazz)/* || TexturedQuadMeshOwner.class.isAssignableFrom(clazz) */) {
 			return INSTANCE.createQuadMesh_((Class) clazz);
 		}
 		if (MeshOwner.class.isAssignableFrom(clazz)) {

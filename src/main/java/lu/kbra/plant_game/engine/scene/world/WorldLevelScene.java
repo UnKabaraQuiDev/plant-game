@@ -612,8 +612,9 @@ public class WorldLevelScene extends Scene3D {
 	}
 
 	public float getWaterHeight() {
-		return (this.getWaterLevel().getTransform().getTranslation().y() + this.getTerrain().getTransform().getTranslation().y())
-				/ this.getTerrain().getTransform().getScale().y();
+		return this.getWaterLevel() == null ? 0
+				: (this.getWaterLevel().getTransform().getTranslation().y() + this.getTerrain().getTransform().getTranslation().y())
+						/ this.getTerrain().getTransform().getScale().y();
 	}
 
 	public ParticleManager getParticleManager() {
