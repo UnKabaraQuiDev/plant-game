@@ -9,11 +9,8 @@ import lu.pcy113.pclib.datastructure.pair.Pair;
 import lu.pcy113.pclib.datastructure.pair.Pairs;
 import lu.pcy113.pclib.impl.ThrowingSupplier;
 
-import lu.kbra.plant_game.engine.mesh.TexturedMesh;
 import lu.kbra.plant_game.engine.mesh.TexturedQuadLoadedMesh;
 import lu.kbra.plant_game.engine.mesh.TexturedQuadMesh;
-import lu.kbra.plant_game.engine.mesh.loader.StaticMeshLoader.GenericMeshData;
-import lu.kbra.plant_game.engine.util.DelegatingObjLoader;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.graph.texture.SingleTexture;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
@@ -22,6 +19,7 @@ import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
 import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
 import lu.kbra.standalone.gameengine.utils.file.FileUtils;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextureFilter;
+import lu.kbra.standalone.gameengine.utils.gl.consts.TextureWrap;
 import lu.kbra.standalone.gameengine.utils.mem.img.MemImage;
 
 public class StaticTexturedMeshLoader {
@@ -30,6 +28,8 @@ public class StaticTexturedMeshLoader {
 			final CacheManager cache,
 			final String meshName,
 			final String path,
+			final TextureFilter textureFilter,
+			final TextureWrap textureWrap,
 			final Dispatcher loader,
 			final Dispatcher render) {
 
@@ -50,8 +50,9 @@ public class StaticTexturedMeshLoader {
 
 			final String imgPath = path.replaceFirst("image:", "");
 			final MemImage image = FileUtils.STBILoad(imgPath);
-			final SingleTexture txt = new SingleTexture(imgPath, image);
-			txt.setFilters(TextureFilter.NEAREST);
+			final SingleTexture txt = new SingleTexture(meshName, image);
+			txt.setFilters(textureFilter);
+			txt.setWraps(textureWrap);
 
 			return Pairs.readOnly(image, txt);
 		}).then(render, (Function<Pair<MemImage, SingleTexture>, Pair<MemImage, SingleTexture>>) pair -> {
@@ -73,16 +74,16 @@ public class StaticTexturedMeshLoader {
 		return staticMesh;
 	}
 
-	static TexturedMesh createStatic(final CacheManager cache, final String meshName, final GenericMeshData meshData) {
-		final SingleTexture txt0 = cache.hasTexture(meshData.texturePath()) ? (SingleTexture) cache.getTexture(meshData.texturePath())
-				: SingleTexture.loadSingleTexture(cache, meshData.texturePath(), meshData.texturePath());
-
-		final TexturedMesh texturedMesh = DelegatingObjLoader
-				.loadTexturedMesh(meshName, null, meshData.filePath(), meshData.origin(), txt0);
-
-		cache.addMesh(texturedMesh);
-		releaseLock(meshName);
-		return texturedMesh;
-	}
+//	static TexturedMesh createStatic(final CacheManager cache, final String meshName, final GenericMeshData meshData) {
+//		final SingleTexture txt0 = cache.hasTexture(meshData.texturePath()) ? (SingleTexture) cache.getTexture(meshData.texturePath())
+//				: SingleTexture.loadSingleTexture(cache, meshData.texturePath(), meshData.texturePath());
+//
+//		final TexturedMesh texturedMesh = DelegatingObjLoader
+//				.loadTexturedMesh(meshName, null, meshData.filePath(), meshData.origin(), txt0);
+//
+//		cache.addMesh(texturedMesh);
+//		releaseLock(meshName);
+//		return texturedMesh;
+//	}
 
 }

@@ -33,10 +33,12 @@ import lu.kbra.standalone.gameengine.utils.transform.Transform3DShear;
 
 public class OverlayUIScene extends UIScene implements LayoutParent, PaddingOwner {
 
+	private static final float STATS_GROUP_SCALE = 0.35f;
+
 	protected float margin = 0.02f;
 
 	protected final AnchoredLayoutUIObjectGroup statsGroup = new AnchoredLayoutUIObjectGroup("stats",
-			new FlowLayout(true, 0.08f),
+			new FlowLayout(true, 0.08f * STATS_GROUP_SCALE),
 			Anchor.TOP_LEFT,
 			Anchor.TOP_LEFT);
 	protected OverlayIntegerStatLine waterGroup;
@@ -56,9 +58,9 @@ public class OverlayUIScene extends UIScene implements LayoutParent, PaddingOwne
 		this.setLayout(new AnchorLayout());
 		super.add(this.statsGroup);
 
-		final float height = 0.2f;
+		final float height = 0.2f * STATS_GROUP_SCALE;
 
-		this.waterGroup = new OverlayIntegerStatLine("water");
+		this.waterGroup = new OverlayIntegerStatLine("water-counter");
 		this.waterGroup
 				.init(workers,
 						renderDispatcher,
@@ -73,7 +75,7 @@ public class OverlayUIScene extends UIScene implements LayoutParent, PaddingOwne
 				});
 		this.statsGroup.add(this.waterGroup);
 
-		this.moneyGroup = new OverlayIntegerStatLine("money");
+		this.moneyGroup = new OverlayIntegerStatLine("money-counter");
 		this.moneyGroup
 				.init(workers,
 						renderDispatcher,
@@ -88,7 +90,7 @@ public class OverlayUIScene extends UIScene implements LayoutParent, PaddingOwne
 				});
 		this.statsGroup.add(this.moneyGroup);
 
-		this.energyGroup = new OverlayIntegerStatLine("energy");
+		this.energyGroup = new OverlayIntegerStatLine("energy-counter");
 		this.energyGroup
 				.init(workers,
 						renderDispatcher,
@@ -103,7 +105,7 @@ public class OverlayUIScene extends UIScene implements LayoutParent, PaddingOwne
 				});
 		this.statsGroup.add(this.energyGroup);
 
-		this.progressBar = new AnchoredProgressBarUIObject("...",
+		this.progressBar = new AnchoredProgressBarUIObject("level-progress-bar",
 				this,
 				new Transform3DShear().shearSet(GeoAxis.Z, GeoAxis.X, -0.8f).scaleSet(1.8f, 1, 0.05f),
 				Anchor.TOP_RIGHT,
@@ -111,7 +113,7 @@ public class OverlayUIScene extends UIScene implements LayoutParent, PaddingOwne
 				0.01f,
 				0.5f);
 		this.progressBar.init(workers, renderDispatcher, FlatQuadUIObject.class, FlatQuadUIObject.class).then(pb -> {
-			this.progressGroup = new ExtAnchoredOverlayIntegerStatLine("progress");
+			this.progressGroup = new ExtAnchoredOverlayIntegerStatLine("level-progress-counter");
 			this.progressGroup
 					.init(workers,
 							renderDispatcher,
@@ -143,7 +145,7 @@ public class OverlayUIScene extends UIScene implements LayoutParent, PaddingOwne
 //		final Rectangle2D bounds = this.statsGroup.getBounds().getBounds2D();
 //		this.statsGroup.getTransform().getTranslation().x = -(float) super.getBounds().getWidth() - (float) bounds.getMinX() + this.margin;
 //		this.statsGroup.getTransform().getTranslation().z = -1f + this.margin;
-		this.statsGroup.getTransform().scaleSet(0.35f).updateMatrix();
+//		this.statsGroup.getTransform().scaleSet(0.35f).updateMatrix();
 //		}
 
 //		final Rectangle2D objBounds = this.statsGroup.getBounds().getBounds2D();

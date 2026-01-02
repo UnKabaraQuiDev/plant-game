@@ -762,7 +762,7 @@ public class DeferredCompositor implements Cleanupable {
 			}
 		} else {
 			if (entity instanceof final MeshOwner mo) {
-				if (swayMeshShader != null) {
+				if (meshShader != null) {
 					this.renderMesh(mo.getMesh(), entity, worldTransform, meshShader);
 				} else {
 					GlobalLogger.warning("Mesh rendering not supported !");

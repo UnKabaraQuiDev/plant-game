@@ -112,6 +112,7 @@ public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup
 				.set(i -> i.setForceSign(false))
 				.set(i -> i.setPadding(true))
 				.set(i -> i.setPaddingZero(false))
+				.set(i -> i.setPaddingLength(valueLength))
 				.set(i -> i.setValue(0))
 				.set(i -> i.setColorMaterial(DEFAULT_TEXT_COLOR))
 				.set(i -> i.setTransform(new Transform3D().scaleMul(textHeightRatio)))

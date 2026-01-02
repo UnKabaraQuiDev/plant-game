@@ -2,6 +2,8 @@ package lu.kbra.plant_game.engine.entity.ui.factory;
 
 import static lu.kbra.plant_game.generated.UIObjectRegistry.BUFFER_SIZE;
 import static lu.kbra.plant_game.generated.UIObjectRegistry.DATA_PATH;
+import static lu.kbra.plant_game.generated.UIObjectRegistry.TEXTURE_FILTER;
+import static lu.kbra.plant_game.generated.UIObjectRegistry.TEXTURE_WRAP;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -34,12 +36,17 @@ import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextAlignment;
+import lu.kbra.standalone.gameengine.utils.gl.consts.TextureFilter;
+import lu.kbra.standalone.gameengine.utils.gl.consts.TextureWrap;
 
 public class UIObjectFactory {
 
 	public static final Vector2f DEFAULT_CHAR_SIZE = new Vector2f(0.5f);
 	public static final int DEFAULT_BUFFER_SIZE = 12;
 	public static final TextAlignment DEFAULT_TEXT_ALIGNMENT = TextAlignment.LEFT;
+
+	public static final TextureFilter DEFAULT_TEXTURE_FILTER = TextureFilter.NEAREST;
+	public static final TextureWrap DEFAULT_TEXTURE_WRAP = TextureWrap.REPEAT;
 
 	public static UIObjectFactory INSTANCE;
 
@@ -93,7 +100,14 @@ public class UIObjectFactory {
 					.then(this.loader, (Function<TexturedQuadMesh, List<Object>>) Arrays::asList)
 					.then(new UOCreatingTaskFuture(this.loader, clazz));
 		}
-		return StaticTexturedMeshLoader.getStaticFuture(this.cache, clazz.getName(), DATA_PATH.get(clazz), this.loader, this.render)
+		return StaticTexturedMeshLoader
+				.getStaticFuture(this.cache,
+						clazz.getName(),
+						DATA_PATH.get(clazz),
+						TEXTURE_FILTER.getOrDefault(clazz, DEFAULT_TEXTURE_FILTER),
+						TEXTURE_WRAP.getOrDefault(clazz, DEFAULT_TEXTURE_WRAP),
+						this.loader,
+						this.render)
 				.then(this.loader, (Function<TexturedQuadMesh, List<Object>>) Arrays::asList)
 				.then(new UOCreatingTaskFuture(this.loader, clazz));
 	}
