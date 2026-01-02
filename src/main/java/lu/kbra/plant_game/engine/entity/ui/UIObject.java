@@ -6,16 +6,17 @@ import java.awt.geom.Rectangle2D;
 import lu.kbra.plant_game.engine.entity.impl.Transform3DOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.TransformedBoundsOwner;
 import lu.kbra.standalone.gameengine.objs.entity.Entity;
-import lu.kbra.standalone.gameengine.objs.entity.ParentAware;
+import lu.kbra.standalone.gameengine.objs.entity.ParentAwareComponent;
+import lu.kbra.standalone.gameengine.objs.entity.ParentAwareNode;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-public abstract class UIObject extends Entity implements Transform3DOwner, TransformedBoundsOwner, ParentAware {
+public abstract class UIObject extends Entity implements Transform3DOwner, TransformedBoundsOwner, ParentAwareNode {
 
 	public static final Shape SQUARE_1_UNIT = new Rectangle2D.Float(-0.5f, -0.5f, 1f, 1f);
 
 	protected Transform3D transform;
 
-	protected Object parent;
+	protected ParentAwareComponent parent;
 
 	public UIObject(final String str) {
 		super(str);
@@ -32,12 +33,12 @@ public abstract class UIObject extends Entity implements Transform3DOwner, Trans
 	}
 
 	@Override
-	public Object getParent() {
+	public ParentAwareComponent getParent() {
 		return this.parent;
 	}
 
 	@Override
-	public void setParent(final Object e) {
+	public <T extends ParentAwareComponent> void setParent(final T e) {
 		this.parent = e;
 	}
 

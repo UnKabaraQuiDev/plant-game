@@ -25,7 +25,8 @@ import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.WorkerDispatcher;
-import lu.kbra.standalone.gameengine.objs.entity.ParentAware;
+import lu.kbra.standalone.gameengine.objs.entity.ParentAwareComponent;
+import lu.kbra.standalone.gameengine.objs.entity.ParentAwareNode;
 import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
 import lu.kbra.standalone.gameengine.utils.geo.GeoAxis;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3DShear;
@@ -42,7 +43,7 @@ public class OverlayUIScene extends UIScene implements LayoutParent, PaddingOwne
 	protected OverlayIntegerStatLine moneyGroup;
 	protected OverlayIntegerStatLine energyGroup;
 	protected AnchoredProgressBarUIObject progressBar;
-	protected OverlayIntegerStatLine progressGroup;
+	protected ExtAnchoredOverlayIntegerStatLine progressGroup;
 
 	protected Layout layout;
 
@@ -109,17 +110,25 @@ public class OverlayUIScene extends UIScene implements LayoutParent, PaddingOwne
 				Anchor.TOP_RIGHT,
 				0.01f,
 				0.5f);
-		this.progressBar.init(workers, renderDispatcher, FlatQuadUIObject.class, FlatQuadUIObject.class);
-
-		this.progressGroup = new OverlayIntegerStatLine("progress");
-		this.progressGroup
-				.init(workers, renderDispatcher, height, 4, 3, null, PercentageIntTextUIObject.class, PercentageSignedIntTextUIObject.class)
-				.then(obj -> {
-					obj.getValue().setValue(0).flushValue();
-					obj.getPopup().setValue(0).flushValue();
-					obj.getPopup().setPadding(false);
-				});
-		super.add(this.progressGroup);
+		this.progressBar.init(workers, renderDispatcher, FlatQuadUIObject.class, FlatQuadUIObject.class).then(pb -> {
+			this.progressGroup = new ExtAnchoredOverlayIntegerStatLine("progress");
+			this.progressGroup
+					.init(workers,
+							renderDispatcher,
+							height,
+							4,
+							3,
+							null,
+							PercentageIntTextUIObject.class,
+							PercentageSignedIntTextUIObject.class)
+					.then(obj -> {
+						obj.getValue().setValue(0).flushValue();
+						obj.getPopup().setValue(0).flushValue();
+						obj.getPopup().setPadding(false);
+						obj.setTarget(pb.getForeground(), Anchor.TOP_CENTER, Anchor.BOTTOM_RIGHT);
+					});
+			super.add(this.progressGroup);
+		});
 	}
 
 	@Override
@@ -167,7 +176,8 @@ public class OverlayUIScene extends UIScene implements LayoutParent, PaddingOwne
 	@Override
 	public void setLayout(final Layout layout) {
 		this.layout = layout;
-		if (layout instanceof final ParentAware pa) {
+		if (layout instanceof final ParentAwareNode pa) {
+			ParentAwareComponent.checkHierarchy(this, pa);
 			pa.setParent(this);
 		}
 	}

@@ -13,7 +13,6 @@ import lu.kbra.plant_game.engine.mesh.TintOwner;
 import lu.kbra.plant_game.engine.scene.world.LevelState;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
-import lu.kbra.standalone.gameengine.scene.Scene;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextureFilter;
 
 @DataPath("image:classpath:/icons/star-32.png")
@@ -34,11 +33,11 @@ public class LevelButtonUIObject extends TexturedQuadMeshUIObject
 	}
 
 	@Override
-	public void update(final float dTime, final Scene scene) {
+	public void update(final WindowInputHandler input) {
 		if (!this.hasTransform()) {
 			return;
 		}
-		this.getTransform().getRotation().rotateY(this.angularSpeed);
+		this.getTransform().getRotation().rotateY(this.angularSpeed * input.dTime());
 		this.getTransform().updateMatrix();
 	}
 

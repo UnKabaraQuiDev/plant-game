@@ -14,6 +14,7 @@ import lu.kbra.plant_game.engine.entity.impl.NoMeshObject;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.IndexOwner;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
+import lu.kbra.standalone.gameengine.objs.entity.ParentAwareComponent;
 
 public class UIObjectGroup extends UIObject implements ObjectGroup<UIObject>, NoMeshObject, SynchronizedEntityContainer<UIObject> {
 
@@ -29,7 +30,7 @@ public class UIObjectGroup extends UIObject implements ObjectGroup<UIObject>, No
 
 	protected Shape bounds;
 
-	protected Object parent;
+	protected ParentAwareComponent parent;
 
 	public UIObjectGroup(final String str, final List<UIObject> entities, final Component... cs) {
 		super(str);

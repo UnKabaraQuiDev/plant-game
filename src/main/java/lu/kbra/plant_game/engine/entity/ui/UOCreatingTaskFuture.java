@@ -52,6 +52,11 @@ public class UOCreatingTaskFuture<T extends UIObject> extends TaskFuture<List<Ob
 		return this;
 	}
 
+//	public UOCreatingTaskFuture<T> get(final Reference<T> ptr) {
+//		this.postInitHooks.add(v -> ptr.set(v));
+//		return this;
+//	}
+
 	public UOCreatingTaskFuture<T> postInit(final Consumer<T> postInit) {
 		this.postInitHooks.add(postInit);
 		return this;

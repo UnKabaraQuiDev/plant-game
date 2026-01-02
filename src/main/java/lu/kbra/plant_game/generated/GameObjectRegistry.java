@@ -1,16 +1,12 @@
 // @formatter:off
 package lu.kbra.plant_game.generated;
 
-import java.lang.Class;
-import java.lang.Integer;
-import java.lang.Object;
-import java.lang.String;
-import java.lang.SuppressWarnings;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
 import lu.kbra.plant_game.engine.entity.go.AnimatedMeshGameObject;
 import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.entity.go.MeshGameObject;

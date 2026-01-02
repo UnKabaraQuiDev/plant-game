@@ -11,7 +11,7 @@ import lu.kbra.plant_game.engine.entity.ui.impl.NeedsUpdate;
 import lu.kbra.plant_game.engine.entity.ui.prim.TexturedQuadMeshUIObject;
 import lu.kbra.plant_game.engine.mesh.TexturedQuadMesh;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
-import lu.kbra.standalone.gameengine.scene.Scene;
+import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 
 @DataPath("image:classpath:/icons/cursor-128.png")
 public class CursorUIObject extends TexturedQuadMeshUIObject implements NeedsUpdate {
@@ -45,7 +45,9 @@ public class CursorUIObject extends TexturedQuadMeshUIObject implements NeedsUpd
 	}
 
 	@Override
-	public void update(final float dTime, final Scene scene) {
+	public void update(final WindowInputHandler input) {
+		final float dTime = input.dTime();
+
 		final Vector3f cursorPos = this.getTransform().getTranslation();
 		final float cursorWidth = (float) (this.getBounds().getWidth() * this.getTransform().getScale().x);
 

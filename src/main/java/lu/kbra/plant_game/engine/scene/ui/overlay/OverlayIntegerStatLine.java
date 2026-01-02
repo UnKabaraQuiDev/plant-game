@@ -17,16 +17,17 @@ import lu.kbra.plant_game.engine.entity.ui.prim.TexturedQuadMeshUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.IntegerTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.SignedIntegerTextUIObject;
 import lu.kbra.plant_game.engine.scene.ui.layout.FlowLayout;
+import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
-import lu.kbra.standalone.gameengine.scene.Scene;
 import lu.kbra.standalone.gameengine.utils.consts.Direction;
 import lu.kbra.standalone.gameengine.utils.interpolation.Interpolator;
 import lu.kbra.standalone.gameengine.utils.interpolation.Interpolators;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup implements LimitedObjectGroup<UIObject>, NeedsUpdate {
+public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup
+		implements LimitedObjectGroup<UIObject>, NeedsUpdate, OverlayStatLine<OverlayIntegerStatLine> {
 
 	public static final float POPUP_TEXT_SCALE = 0.6f;
 	public static final int VALUE_LENGTH = 5, POPUP_LENGTH = 3;
@@ -77,7 +78,7 @@ public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup implements
 		super(str, new FlowLayout(false, gap), parent, values);
 	}
 
-	public <T extends TexturedQuadMeshUIObject, V extends IntegerTextUIObject, P extends SignedIntegerTextUIObject> FutureTriggerLatch<OverlayIntegerStatLine> init(
+	public <T extends TexturedQuadMeshUIObject, V extends IntegerTextUIObject, P extends SignedIntegerTextUIObject> FutureTriggerLatch<? extends OverlayIntegerStatLine> init(
 			final Dispatcher workers,
 			final Dispatcher render,
 			final float height,
@@ -90,7 +91,7 @@ public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup implements
 		final float iconHeightRatio = height / (float) TexturedQuadMeshUIObject.SQUARE_1_UNIT.getBounds2D().getHeight();
 		final float textHeightRatio = height / UIObjectFactory.DEFAULT_CHAR_SIZE.y();
 
-		final FutureTriggerLatch<OverlayIntegerStatLine> latch = new FutureTriggerLatch<>(iconClazz == null ? 2 : 3, this);
+		final FutureTriggerLatch<? extends OverlayIntegerStatLine> latch = new FutureTriggerLatch<>(iconClazz == null ? 2 : 3, this);
 
 		if (iconClazz != null) {
 			UIObjectFactory.create(iconClazz)
@@ -138,7 +139,7 @@ public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup implements
 		return latch;
 	}
 
-	public <T extends TexturedQuadMeshUIObject, V extends IntegerTextUIObject, P extends SignedIntegerTextUIObject> FutureTriggerLatch<OverlayIntegerStatLine> init(
+	public <T extends TexturedQuadMeshUIObject, V extends IntegerTextUIObject, P extends SignedIntegerTextUIObject> FutureTriggerLatch<? extends OverlayIntegerStatLine> init(
 			final Dispatcher workers,
 			final Dispatcher render,
 			final float height,
@@ -183,7 +184,7 @@ public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup implements
 	}
 
 	@Override
-	public void update(final float dTime, final Scene scene) {
+	public void update(final WindowInputHandler input) {
 		final SignedIntegerTextUIObject popup = this.getPopup();
 		if (popup == null) {
 			return;
@@ -192,6 +193,8 @@ public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup implements
 		if (!popup.getTextEmitter().getText().contains("%")) {
 			return;
 		}
+
+		final float dTime = input.dTime();
 
 //		final float dst = 0.25f;
 //		final Transform3D transform = popup.getTransform();

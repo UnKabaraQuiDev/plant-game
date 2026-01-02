@@ -187,10 +187,10 @@ public class UIScene extends Scene3D implements BoundsOwner {
 			ec.forEach(e2 -> this.updateEntity(inputHandler, e2));
 		}
 
-		final float dTime = inputHandler.dTime();
+//		final float dTime = inputHandler.dTime();
 
 		if (e instanceof final NeedsUpdate needsUpdate) {
-			needsUpdate.update(dTime, this);
+			needsUpdate.update(inputHandler);
 		}
 	}
 
@@ -200,8 +200,18 @@ public class UIScene extends Scene3D implements BoundsOwner {
 
 	@Override
 	public Rectangle2D.Float getBounds() {
-		final float width = this.getCamera().getProjection().getAspectRatio();
-		return new Rectangle2D.Float(-width / 2, -1, width, 2);
+		final float halfHeight = 1;
+		final float halfWidth = halfHeight * this.getCamera().getProjection().getAspectRatio();
+		final float size = this.getCamera().getProjection().getSize();
+
+//		return new Rectangle2D.Float(-halfWidth / 2, -1, halfWidth, 2);
+		final float minX = -halfWidth / size; // left
+		final float maxX = halfWidth / size; // right
+
+		final float minY = -halfHeight / size; // top
+		final float maxY = halfHeight / size; // bottom
+
+		return new Rectangle2D.Float(minX, minY, maxX - minX, maxY - minY);
 	}
 
 }

@@ -7,12 +7,13 @@ import lu.pcy113.pclib.PCUtils;
 
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwnerParentAware;
+import lu.kbra.standalone.gameengine.objs.entity.ParentAwareComponent;
 import lu.kbra.standalone.gameengine.objs.entity.SceneParentAware;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 public class EdgeStickLayout extends FlowLayout implements BoundsOwnerParentAware, SceneParentAware {
 
-	protected Object parent;
+	protected ParentAwareComponent parent;
 	protected float size;
 
 	public EdgeStickLayout(final boolean vertical, final float gap, final float size) {
@@ -69,12 +70,12 @@ public class EdgeStickLayout extends FlowLayout implements BoundsOwnerParentAwar
 	}
 
 	@Override
-	public void setParent(final Object e) {
+	public <T extends ParentAwareComponent> void setParent(final T e) {
 		this.parent = e;
 	}
 
 	@Override
-	public Object getParent() {
+	public ParentAwareComponent getParent() {
 		return this.parent;
 	}
 

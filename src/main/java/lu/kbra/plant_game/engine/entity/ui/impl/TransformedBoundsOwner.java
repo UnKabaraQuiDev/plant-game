@@ -12,14 +12,24 @@ import org.joml.Vector3fc;
 
 import lu.kbra.plant_game.engine.entity.impl.Transform3DOwner;
 import lu.kbra.standalone.gameengine.utils.geo.GeoPlane;
+import lu.kbra.standalone.gameengine.utils.transform.Transform;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 public interface TransformedBoundsOwner extends BoundsOwner, Transform3DOwner {
 
 	default Shape getLocalTransformedBounds() {
-		final Shape bounds = this.getBounds();
+		return getLocalTransformedBounds(this.getBounds(), this.getTransform());
+	}
 
-		final Transform3D transform = this.getTransform();
+	default Shape getTransformedBounds() {
+		return getTransformedBounds(this.getBounds(), this.getTransform());
+	}
+
+	default Shape getTransformedBounds(final Matrix4fc parentMatrix) {
+		return getTransformedBounds(this.getBounds(), this.getTransform(), parentMatrix);
+	}
+
+	static Shape getLocalTransformedBounds(final Shape bounds, final Transform3D transform) {
 		if (transform == null) {
 			return bounds;
 		}
@@ -44,10 +54,7 @@ public interface TransformedBoundsOwner extends BoundsOwner, Transform3DOwner {
 		return affine.createTransformedShape(bounds);
 	}
 
-	default Shape getTransformedBounds() {
-		final Shape bounds = this.getBounds();
-
-		final Transform3D transform = this.getTransform();
+	static Shape getTransformedBounds(final Shape bounds, final Transform3D transform) {
 		if (transform == null) {
 			return bounds;
 		}
@@ -72,10 +79,26 @@ public interface TransformedBoundsOwner extends BoundsOwner, Transform3DOwner {
 		return affine.createTransformedShape(bounds);
 	}
 
-	default Shape getTransformedBounds(final Matrix4fc parentMatrix) {
-		final Shape bounds = this.getBounds();
+	static Shape getTransformedBounds(final Shape bounds, final Matrix4fc worldMatrix) {
+		final Vector3f pos3 = worldMatrix.getTranslation(new Vector3f());
+		final Vector2f pos = GeoPlane.XZ.projectToPlane(pos3);
 
-		final Transform3D transform = this.getTransform();
+		final Vector3f basisX = new Vector3f(1, 0, 0);
+		final Vector3f basisZ = new Vector3f(0, 0, 1);
+		worldMatrix.transformDirection(basisX);
+		worldMatrix.transformDirection(basisZ);
+
+		// Map XZ components to 2D affine
+		final double m00 = basisX.x();
+		final double m01 = basisZ.x();
+		final double m10 = basisX.z();
+		final double m11 = basisZ.z();
+
+		final AffineTransform affine = new AffineTransform(m00, m10, m01, m11, pos.x, pos.y);
+		return affine.createTransformedShape(bounds);
+	}
+
+	static Shape getTransformedBounds(final Shape bounds, final Transform transform, final Matrix4fc parentMatrix) {
 		final Matrix4f worldMatrix = new Matrix4f(parentMatrix);
 		if (transform != null) {
 			worldMatrix.mulAffine(transform.getMatrix());

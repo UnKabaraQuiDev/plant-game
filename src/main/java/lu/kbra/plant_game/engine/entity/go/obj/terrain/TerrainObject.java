@@ -15,6 +15,7 @@ import lu.kbra.plant_game.engine.entity.go.MeshGameObject;
 import lu.kbra.plant_game.engine.entity.go.impl.SynchronizedEntityContainer;
 import lu.kbra.plant_game.engine.entity.go.mesh.terrain.TerrainMesh;
 import lu.kbra.plant_game.engine.mesh.data.AttributeLocation;
+import lu.kbra.standalone.gameengine.objs.entity.ParentAwareComponent;
 import lu.kbra.standalone.gameengine.scene.camera.Camera3D;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
@@ -23,7 +24,7 @@ public class TerrainObject extends MeshGameObject implements SynchronizedEntityC
 	protected Object subEntitiesLock = new Object();
 	protected List<GameObject> subEntities = Collections.synchronizedList(new ArrayList<>());
 
-	protected Object parent;
+	protected ParentAwareComponent parent;
 
 	protected TerrainEdgeObject terrainEdgeObject;
 	protected TerrainHighlightObject terrainHighlightObject;
@@ -144,12 +145,12 @@ public class TerrainObject extends MeshGameObject implements SynchronizedEntityC
 	}
 
 	@Override
-	public void setParent(final Object e) {
+	public <T extends ParentAwareComponent> void setParent(final T e) {
 		this.parent = e;
 	}
 
 	@Override
-	public Object getParent() {
+	public ParentAwareComponent getParent() {
 		return this.parent;
 	}
 

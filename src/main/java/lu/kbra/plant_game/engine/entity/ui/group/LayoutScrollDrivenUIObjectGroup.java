@@ -5,7 +5,8 @@ import java.util.function.Supplier;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.scene.ui.layout.Layout;
 import lu.kbra.plant_game.engine.scene.ui.layout.LayoutParent;
-import lu.kbra.standalone.gameengine.objs.entity.ParentAware;
+import lu.kbra.standalone.gameengine.objs.entity.ParentAwareComponent;
+import lu.kbra.standalone.gameengine.objs.entity.ParentAwareNode;
 import lu.kbra.standalone.gameengine.utils.consts.Direction;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
@@ -34,7 +35,8 @@ public class LayoutScrollDrivenUIObjectGroup extends ScrollDrivenUIObjectGroup i
 	@Override
 	public void setLayout(final Layout layout) {
 		this.layout = layout;
-		if (layout instanceof final ParentAware pa) {
+		if (layout instanceof final ParentAwareNode pa) {
+			ParentAwareComponent.checkHierarchy(this, pa);
 			pa.setParent(this);
 		}
 	}

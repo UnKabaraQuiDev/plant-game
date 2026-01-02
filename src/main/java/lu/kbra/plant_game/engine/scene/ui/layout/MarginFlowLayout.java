@@ -6,6 +6,7 @@ import java.util.List;
 
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwner;
+import lu.kbra.standalone.gameengine.objs.entity.ParentAwareComponent;
 import lu.kbra.standalone.gameengine.objs.entity.SceneParentAware;
 import lu.kbra.standalone.gameengine.scene.Scene;
 
@@ -17,7 +18,7 @@ public class MarginFlowLayout extends FlowLayout implements SceneParentAware {
 	protected float marginLeft, marginRight, marginTop, marginBottom;
 	protected final byte flags; // bitmask: L/T/V/R
 
-	protected Object parent;
+	protected ParentAwareComponent parent;
 
 	public MarginFlowLayout(
 			final boolean vertical,
@@ -120,12 +121,12 @@ public class MarginFlowLayout extends FlowLayout implements SceneParentAware {
 	}
 
 	@Override
-	public void setParent(final Object e) {
+	public <T extends ParentAwareComponent> void setParent(final T e) {
 		this.parent = e;
 	}
 
 	@Override
-	public Object getParent() {
+	public ParentAwareComponent getParent() {
 		return this.parent;
 	}
 

@@ -5,7 +5,7 @@ import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
 import lu.kbra.plant_game.engine.entity.impl.Transform3DOwner;
-import lu.kbra.standalone.gameengine.scene.Scene;
+import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.utils.interpolation.Interpolators;
 
 public interface GrowOnHover extends NeedsUpdate, Transform3DOwner, NeedsHover {
@@ -21,8 +21,8 @@ public interface GrowOnHover extends NeedsUpdate, Transform3DOwner, NeedsHover {
 	float getGrowthRate(boolean grow);
 
 	@Override
-	default void update(final float dTime, final Scene scene) {
-		this.grow(dTime, this.isHovered());
+	default void update(final WindowInputHandler input) {
+		this.grow(input.dTime(), this.isHovered());
 		this.getTransform().updateMatrix();
 	}
 

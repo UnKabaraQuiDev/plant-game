@@ -12,4 +12,8 @@ public interface AnchorOwner {
 
 	void setTargetAnchor(Anchor a);
 
+	default boolean isAnchored() {
+		return this.getTargetAnchor() != null && this.getObjectAnchor() != null;
+	}
+
 }

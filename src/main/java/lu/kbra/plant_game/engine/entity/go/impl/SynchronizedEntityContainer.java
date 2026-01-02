@@ -12,11 +12,12 @@ import java.util.stream.Stream;
 
 import lu.pcy113.pclib.PCUtils;
 
-import lu.kbra.standalone.gameengine.objs.entity.ParentAware;
+import lu.kbra.standalone.gameengine.objs.entity.ParentAwareComponent;
+import lu.kbra.standalone.gameengine.objs.entity.ParentAwareNode;
 import lu.kbra.standalone.gameengine.objs.entity.SceneEntity;
 import lu.kbra.standalone.gameengine.scene.EntityContainer;
 
-public interface SynchronizedEntityContainer<B extends SceneEntity> extends EntityContainer<B>, ParentAware {
+public interface SynchronizedEntityContainer<B extends SceneEntity> extends EntityContainer<B>, ParentAwareNode {
 
 //	protected Object getEntitiesLock() = new Object();
 //	protected List<B> getWEntities() = Collections.synchronizedList(new ArrayList<>());
@@ -50,14 +51,15 @@ public interface SynchronizedEntityContainer<B extends SceneEntity> extends Enti
 
 	@Override
 	default <T extends B> T add(final T entity) {
-		assert entity != this.getParent();
+		assert !this.getParents().contains(entity) : "Child cannot be parent.";
 		if (entity == null) {
 			return null;
 		}
 		synchronized (this.getEntitiesLock()) {
 			this.getWEntities().add(entity);
 		}
-		if (entity instanceof final ParentAware pa) {
+		if (entity instanceof final ParentAwareNode pa) {
+			ParentAwareComponent.checkHierarchy(this, pa);
 			pa.setParent(this);
 		}
 		return entity;
@@ -93,9 +95,7 @@ public interface SynchronizedEntityContainer<B extends SceneEntity> extends Enti
 		final HashSet<String> strs = entities.parallelStream().map(T::getId).collect(Collectors.toCollection(HashSet::new));
 		synchronized (this.getEntitiesLock()) {
 			final boolean addedAny = this.getWEntities().parallelStream().anyMatch(c -> strs.contains(c.getId()));
-			for (final T entity : entities) {
-				this.add(entity);
-			}
+			entities.forEach(this::add);
 			return addedAny;
 		}
 	}
@@ -118,7 +118,8 @@ public interface SynchronizedEntityContainer<B extends SceneEntity> extends Enti
 			}
 			final T old = (T) this.getWEntities().parallelStream().filter(c -> c.getId().equals(e.getId())).findFirst().orElse(null);
 			if (old != null) {
-				if (old instanceof final ParentAware pa) {
+				if (old instanceof final ParentAwareNode pa) {
+					ParentAwareComponent.checkHierarchy(this, pa);
 					pa.setParent(null);
 				}
 				return Optional.of(old);

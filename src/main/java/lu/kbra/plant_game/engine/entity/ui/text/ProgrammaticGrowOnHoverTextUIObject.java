@@ -9,7 +9,6 @@ import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.GameEngine;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
-import lu.kbra.standalone.gameengine.scene.Scene;
 
 @DataPath("localization:string-placeholder")
 public class ProgrammaticGrowOnHoverTextUIObject extends ProgrammaticTextUIObject implements GrowOnHover {
@@ -27,8 +26,8 @@ public class ProgrammaticGrowOnHoverTextUIObject extends ProgrammaticTextUIObjec
 	}
 
 	@Override
-	public void update(final float dTime, final Scene scene) {
-		GrowOnHover.super.update(dTime, scene);
+	public void update(final WindowInputHandler input) {
+		GrowOnHover.super.update(input);
 	}
 
 	@Override

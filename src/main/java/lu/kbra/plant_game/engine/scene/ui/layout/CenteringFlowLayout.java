@@ -5,11 +5,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
+import lu.kbra.standalone.gameengine.objs.entity.ParentAwareComponent;
 import lu.kbra.standalone.gameengine.objs.entity.SceneParentAware;
 
 public class CenteringFlowLayout extends FlowLayout implements SceneParentAware {
 
-	protected Object parent;
+	protected ParentAwareComponent parent;
 
 	public CenteringFlowLayout(final boolean vertical, final float gap) {
 		super(vertical, gap);
@@ -53,12 +54,12 @@ public class CenteringFlowLayout extends FlowLayout implements SceneParentAware 
 	}
 
 	@Override
-	public void setParent(final Object e) {
+	public <T extends ParentAwareComponent> void setParent(final T e) {
 		this.parent = e;
 	}
 
 	@Override
-	public Object getParent() {
+	public ParentAwareComponent getParent() {
 		return this.parent;
 	}
 

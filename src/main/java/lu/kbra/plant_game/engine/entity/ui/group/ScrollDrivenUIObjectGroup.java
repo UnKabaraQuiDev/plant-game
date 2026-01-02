@@ -9,8 +9,8 @@ import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsUpdate;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
+import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.objs.entity.SceneParentAware;
-import lu.kbra.standalone.gameengine.scene.Scene;
 import lu.kbra.standalone.gameengine.utils.consts.Direction;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
@@ -20,24 +20,15 @@ public class ScrollDrivenUIObjectGroup extends OffsetUIObjectGroup implements Ne
 	protected float margin;
 	protected Direction dir;
 
-	public ScrollDrivenUIObjectGroup(
-			final String str,
-			final Transform3D transform,
-			final Supplier<Float> scrollRatio,
-			final Direction dir,
-			final float margin,
-			final UIObject... values) {
+	public ScrollDrivenUIObjectGroup(final String str, final Transform3D transform, final Supplier<Float> scrollRatio, final Direction dir,
+			final float margin, final UIObject... values) {
 		super(str, transform, values);
 		this.scrollRatioSupplier = scrollRatio;
 		this.dir = dir;
 		this.margin = margin;
 	}
 
-	public ScrollDrivenUIObjectGroup(
-			final String str,
-			final Supplier<Float> scrollRatio,
-			final Direction dir,
-			final float margin,
+	public ScrollDrivenUIObjectGroup(final String str, final Supplier<Float> scrollRatio, final Direction dir, final float margin,
 			final UIObject... values) {
 		super(str, values);
 		this.scrollRatioSupplier = scrollRatio;
@@ -45,13 +36,8 @@ public class ScrollDrivenUIObjectGroup extends OffsetUIObjectGroup implements Ne
 		this.margin = margin;
 	}
 
-	public ScrollDrivenUIObjectGroup(
-			final String str,
-			final UIObjectGroup parent,
-			final Supplier<Float> scrollRatio,
-			final Direction dir,
-			final float margin,
-			final UIObject... values) {
+	public ScrollDrivenUIObjectGroup(final String str, final UIObjectGroup parent, final Supplier<Float> scrollRatio, final Direction dir,
+			final float margin, final UIObject... values) {
 		super(str, parent, values);
 		this.scrollRatioSupplier = scrollRatio;
 		this.dir = dir;
@@ -59,14 +45,14 @@ public class ScrollDrivenUIObjectGroup extends OffsetUIObjectGroup implements Ne
 	}
 
 	@Override
-	public void update(final float dTime, final Scene scene) {
+	public void update(final WindowInputHandler input) {
 		if (!this.isActive() || !this.hasTransform()) {
 			return;
 		}
 
 //		this.recomputeBounds();
 		final Rectangle2D bounds = this.getBounds().getBounds2D();
-		final Rectangle2D sceneBounds = ((BoundsOwner) scene).getBounds().getBounds2D();
+		final Rectangle2D sceneBounds = ((BoundsOwner) this.getSceneParent()).getBounds().getBounds2D();
 
 		if (this.dir.isHorizontal() && bounds.getWidth() < sceneBounds.getWidth()) {
 			this.getTransform().getTranslation().x = (float) (sceneBounds.getCenterX() - bounds.getCenterX());

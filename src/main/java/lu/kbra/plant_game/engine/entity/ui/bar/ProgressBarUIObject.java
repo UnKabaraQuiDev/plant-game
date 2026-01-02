@@ -181,6 +181,22 @@ public class ProgressBarUIObject extends OffsetUIObjectGroup implements LimitedO
 		return this.setBackgroundColor(color.getColor());
 	}
 
+	public float getMargin() {
+		return this.margin;
+	}
+
+	public void setMargin(final float margin) {
+		this.margin = margin;
+	}
+
+	public UIObject getBackground() {
+		return this.background;
+	}
+
+	public UIObject getForeground() {
+		return this.foreground;
+	}
+
 	@Override
 	public int getMaxItems() {
 		return 2;

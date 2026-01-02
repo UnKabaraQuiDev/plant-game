@@ -12,7 +12,6 @@ import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.objs.entity.SceneParentAware;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
-import lu.kbra.standalone.gameengine.scene.Scene;
 
 @DataPath("localization:btn.quit")
 public class QuitButtonUIObject extends GrowOnHoverTextUIObject implements NeedsClick, IndexOwner, SceneParentAware {
@@ -31,8 +30,8 @@ public class QuitButtonUIObject extends GrowOnHoverTextUIObject implements Needs
 	}
 
 	@Override
-	public void update(final float dTime, final Scene scene) {
-		final float factor = super.grow(dTime, this.isHovered());
+	public void update(final WindowInputHandler input) {
+		final float factor = super.grow(input.dTime(), this.isHovered());
 		this.getTransform().updateMatrix();
 
 		TextEmitter.DEFAULT_FG_COLOR.lerp(TARGET_RED, factor, this.getTextEmitter().getForegroundColor());
