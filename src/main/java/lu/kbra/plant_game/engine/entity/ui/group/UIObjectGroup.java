@@ -127,7 +127,7 @@ public class UIObjectGroup extends UIObject implements ObjectGroup<UIObject>, No
 	@Override
 	public String toString() {
 		return "UIObjectGroup [subEntitiesLock=" + this.subEntitiesLock + ", subEntities=" + this.subEntities + ", bounds=" + this.bounds
-				+ ", parent=" + this.parent + ", transform=" + this.transform + ", active=" + this.active + ", name=" + this.name + "]";
+				+ ", transform=" + this.transform + ", active=" + this.active + ", name=" + this.name + "]";
 	}
 
 }

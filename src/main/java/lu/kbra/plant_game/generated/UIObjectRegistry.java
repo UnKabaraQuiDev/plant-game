@@ -54,7 +54,6 @@ import lu.kbra.plant_game.engine.entity.ui.texture.LargeLogoUIObject;
 import lu.kbra.plant_game.engine.entity.ui.texture.LeafIconUIObject;
 import lu.kbra.plant_game.engine.entity.ui.texture.MoneyIconUIObject;
 import lu.kbra.plant_game.engine.entity.ui.texture.StarIconUIObject;
-import lu.kbra.plant_game.engine.entity.ui.texture.TextureUIObject;
 import lu.kbra.plant_game.engine.entity.ui.texture.WaterIconUIObject;
 import lu.kbra.plant_game.engine.mesh.TexturedQuadMesh;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
@@ -105,10 +104,15 @@ public class UIObjectRegistry {
 		listUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, UIScene.class, UIObject[].class}, (Object[] arr) -> (UIObject) new UIObjectGroup((String) arr[0], (UIScene) arr[1], (UIObject[]) arr[2])));
 		UI_OBJECT_CONSTRUCTORS.put(UIObjectGroup.class, listUIObjectGroup);
 
-		/*                 TexturedQuadUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listTexturedQuadUIObject = new ArrayList<>();
-		listTexturedQuadUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new TexturedQuadMeshUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
-		UI_OBJECT_CONSTRUCTORS.put(TexturedQuadMeshUIObject.class, listTexturedQuadUIObject);
+		/*                 QuadMeshUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listQuadMeshUIObject = new ArrayList<>();
+		listQuadMeshUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, QuadMesh.class}, (Object[] arr) -> (UIObject) new QuadMeshUIObject((String) arr[0], (QuadMesh) arr[1])));
+		UI_OBJECT_CONSTRUCTORS.put(QuadMeshUIObject.class, listQuadMeshUIObject);
+
+		/*                 TexturedQuadMeshUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listTexturedQuadMeshUIObject = new ArrayList<>();
+		listTexturedQuadMeshUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new TexturedQuadMeshUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
+		UI_OBJECT_CONSTRUCTORS.put(TexturedQuadMeshUIObject.class, listTexturedQuadMeshUIObject);
 
 		/*                 SpacerUIObject                 */
 		final List<InternalConstructorFunction<UIObject>> listSpacerUIObject = new ArrayList<>();
@@ -160,15 +164,67 @@ public class UIObjectRegistry {
 		listOffsetUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObjectGroup.class, Transform3D.class, UIObject[].class}, (Object[] arr) -> (UIObject) new OffsetUIObjectGroup((String) arr[0], (UIObjectGroup) arr[1], (Transform3D) arr[2], (UIObject[]) arr[3])));
 		UI_OBJECT_CONSTRUCTORS.put(OffsetUIObjectGroup.class, listOffsetUIObjectGroup);
 
+		/*                 GradientQuadUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listGradientQuadUIObject = new ArrayList<>();
+		listGradientQuadUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, QuadMesh.class}, (Object[] arr) -> (UIObject) new GradientQuadUIObject((String) arr[0], (QuadMesh) arr[1])));
+		UI_OBJECT_CONSTRUCTORS.put(GradientQuadUIObject.class, listGradientQuadUIObject);
+
+		/*                 LeafIconUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listLeafIconUIObject = new ArrayList<>();
+		listLeafIconUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new LeafIconUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
+		UI_OBJECT_CONSTRUCTORS.put(LeafIconUIObject.class, listLeafIconUIObject);
+		DATA_PATH.put(LeafIconUIObject.class, "image:classpath:/icons/star-128.png");
+
 		/*                 FlatQuadUIObject                 */
 		final List<InternalConstructorFunction<UIObject>> listFlatQuadUIObject = new ArrayList<>();
 		listFlatQuadUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new FlatQuadUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
 		UI_OBJECT_CONSTRUCTORS.put(FlatQuadUIObject.class, listFlatQuadUIObject);
 
-		/*                 QuadMeshUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listQuadMeshUIObject = new ArrayList<>();
-		listQuadMeshUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, QuadMesh.class}, (Object[] arr) -> (UIObject) new QuadMeshUIObject((String) arr[0], (QuadMesh) arr[1])));
-		UI_OBJECT_CONSTRUCTORS.put(QuadMeshUIObject.class, listQuadMeshUIObject);
+		/*                 StarIconUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listStarIconUIObject = new ArrayList<>();
+		listStarIconUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new StarIconUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
+		UI_OBJECT_CONSTRUCTORS.put(StarIconUIObject.class, listStarIconUIObject);
+		DATA_PATH.put(StarIconUIObject.class, "image:classpath:/icons/star-128.png");
+
+		/*                 EnergyIconUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listEnergyIconUIObject = new ArrayList<>();
+		listEnergyIconUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new EnergyIconUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
+		UI_OBJECT_CONSTRUCTORS.put(EnergyIconUIObject.class, listEnergyIconUIObject);
+		DATA_PATH.put(EnergyIconUIObject.class, "image:classpath:/icons/energy-128.png");
+
+		/*                 LargeLogoUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listLargeLogoUIObject = new ArrayList<>();
+		listLargeLogoUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new LargeLogoUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
+		UI_OBJECT_CONSTRUCTORS.put(LargeLogoUIObject.class, listLargeLogoUIObject);
+		DATA_PATH.put(LargeLogoUIObject.class, "image:classpath:/icons/large_logo-256.png");
+		TEXTURE_FILTER.put(LargeLogoUIObject.class, TextureFilter.LINEAR);
+		TEXTURE_WRAP.put(LargeLogoUIObject.class, TextureWrap.REPEAT);
+
+		/*                 LevelButtonUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listLevelButtonUIObject = new ArrayList<>();
+		listLevelButtonUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new LevelButtonUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
+		UI_OBJECT_CONSTRUCTORS.put(LevelButtonUIObject.class, listLevelButtonUIObject);
+		DATA_PATH.put(LevelButtonUIObject.class, "image:classpath:/icons/star-32.png");
+		TEXTURE_FILTER.put(LevelButtonUIObject.class, TextureFilter.NEAREST);
+		TEXTURE_WRAP.put(LevelButtonUIObject.class, TextureWrap.REPEAT);
+
+		/*                 WaterIconUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listWaterIconUIObject = new ArrayList<>();
+		listWaterIconUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new WaterIconUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
+		UI_OBJECT_CONSTRUCTORS.put(WaterIconUIObject.class, listWaterIconUIObject);
+		DATA_PATH.put(WaterIconUIObject.class, "image:classpath:/icons/water-128.png");
+
+		/*                 CursorUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listCursorUIObject = new ArrayList<>();
+		listCursorUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new CursorUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
+		UI_OBJECT_CONSTRUCTORS.put(CursorUIObject.class, listCursorUIObject);
+		DATA_PATH.put(CursorUIObject.class, "image:classpath:/icons/cursor-128.png");
+
+		/*                 MoneyIconUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listMoneyIconUIObject = new ArrayList<>();
+		listMoneyIconUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new MoneyIconUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
+		UI_OBJECT_CONSTRUCTORS.put(MoneyIconUIObject.class, listMoneyIconUIObject);
+		DATA_PATH.put(MoneyIconUIObject.class, "image:classpath:/icons/money-128.png");
 
 		/*                 BackButtonUIObject                 */
 		final List<InternalConstructorFunction<UIObject>> listBackButtonUIObject = new ArrayList<>();
@@ -262,16 +318,6 @@ public class UIObjectRegistry {
 		listScrollBarUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new ScrollBarUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
 		UI_OBJECT_CONSTRUCTORS.put(ScrollBarUIObject.class, listScrollBarUIObject);
 
-		/*                 TextureUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listTextureUIObject = new ArrayList<>();
-		listTextureUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new TextureUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
-		UI_OBJECT_CONSTRUCTORS.put(TextureUIObject.class, listTextureUIObject);
-
-		/*                 GradientQuadUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listGradientQuadUIObject = new ArrayList<>();
-		listGradientQuadUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, QuadMesh.class}, (Object[] arr) -> (UIObject) new GradientQuadUIObject((String) arr[0], (QuadMesh) arr[1])));
-		UI_OBJECT_CONSTRUCTORS.put(GradientQuadUIObject.class, listGradientQuadUIObject);
-
 		/*                 PercentageIntTextUIObject                 */
 		final List<InternalConstructorFunction<UIObject>> listPercentageIntTextUIObject = new ArrayList<>();
 		listPercentageIntTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class}, (Object[] arr) -> (UIObject) new PercentageIntTextUIObject((String) arr[0], (TextEmitter) arr[1])));
@@ -325,58 +371,6 @@ public class UIObjectRegistry {
 		listAnchoredProgressBarUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, UIScene.class, Transform3D.class, float.class, float.class}, (Object[] arr) -> (UIObject) new AnchoredProgressBarUIObject((String) arr[0], (UIScene) arr[1], (Transform3D) arr[2], (float) arr[3], (float) arr[4])));
 		listAnchoredProgressBarUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, UIScene.class, Transform3D.class, Anchor.class, Anchor.class, float.class, float.class}, (Object[] arr) -> (UIObject) new AnchoredProgressBarUIObject((String) arr[0], (UIScene) arr[1], (Transform3D) arr[2], (Anchor) arr[3], (Anchor) arr[4], (float) arr[5], (float) arr[6])));
 		UI_OBJECT_CONSTRUCTORS.put(AnchoredProgressBarUIObject.class, listAnchoredProgressBarUIObject);
-
-		/*                 LeafIconUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listLeafIconUIObject = new ArrayList<>();
-		listLeafIconUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new LeafIconUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
-		UI_OBJECT_CONSTRUCTORS.put(LeafIconUIObject.class, listLeafIconUIObject);
-		DATA_PATH.put(LeafIconUIObject.class, "image:classpath:/icons/star-128.png");
-
-		/*                 StarIconUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listStarIconUIObject = new ArrayList<>();
-		listStarIconUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new StarIconUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
-		UI_OBJECT_CONSTRUCTORS.put(StarIconUIObject.class, listStarIconUIObject);
-		DATA_PATH.put(StarIconUIObject.class, "image:classpath:/icons/star-128.png");
-
-		/*                 EnergyIconUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listEnergyIconUIObject = new ArrayList<>();
-		listEnergyIconUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new EnergyIconUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
-		UI_OBJECT_CONSTRUCTORS.put(EnergyIconUIObject.class, listEnergyIconUIObject);
-		DATA_PATH.put(EnergyIconUIObject.class, "image:classpath:/icons/energy-128.png");
-
-		/*                 LargeLogoUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listLargeLogoUIObject = new ArrayList<>();
-		listLargeLogoUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new LargeLogoUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
-		UI_OBJECT_CONSTRUCTORS.put(LargeLogoUIObject.class, listLargeLogoUIObject);
-		DATA_PATH.put(LargeLogoUIObject.class, "image:classpath:/icons/large_logo-256.png");
-		TEXTURE_FILTER.put(LargeLogoUIObject.class, TextureFilter.LINEAR);
-		TEXTURE_WRAP.put(LargeLogoUIObject.class, TextureWrap.REPEAT);
-
-		/*                 LevelButtonUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listLevelButtonUIObject = new ArrayList<>();
-		listLevelButtonUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new LevelButtonUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
-		UI_OBJECT_CONSTRUCTORS.put(LevelButtonUIObject.class, listLevelButtonUIObject);
-		DATA_PATH.put(LevelButtonUIObject.class, "image:classpath:/icons/star-32.png");
-		TEXTURE_FILTER.put(LevelButtonUIObject.class, TextureFilter.NEAREST);
-		TEXTURE_WRAP.put(LevelButtonUIObject.class, TextureWrap.REPEAT);
-
-		/*                 WaterIconUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listWaterIconUIObject = new ArrayList<>();
-		listWaterIconUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new WaterIconUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
-		UI_OBJECT_CONSTRUCTORS.put(WaterIconUIObject.class, listWaterIconUIObject);
-		DATA_PATH.put(WaterIconUIObject.class, "image:classpath:/icons/water-128.png");
-
-		/*                 CursorUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listCursorUIObject = new ArrayList<>();
-		listCursorUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new CursorUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
-		UI_OBJECT_CONSTRUCTORS.put(CursorUIObject.class, listCursorUIObject);
-		DATA_PATH.put(CursorUIObject.class, "image:classpath:/icons/cursor-128.png");
-
-		/*                 MoneyIconUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listMoneyIconUIObject = new ArrayList<>();
-		listMoneyIconUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new MoneyIconUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
-		UI_OBJECT_CONSTRUCTORS.put(MoneyIconUIObject.class, listMoneyIconUIObject);
-		DATA_PATH.put(MoneyIconUIObject.class, "image:classpath:/icons/money-128.png");
 
 		/*                 PercentageSignedIntTextUIObject                 */
 		final List<InternalConstructorFunction<UIObject>> listPercentageSignedIntTextUIObject = new ArrayList<>();

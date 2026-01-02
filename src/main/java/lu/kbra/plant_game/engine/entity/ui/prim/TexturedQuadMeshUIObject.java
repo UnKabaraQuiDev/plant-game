@@ -40,8 +40,8 @@ public class TexturedQuadMeshUIObject extends UIObject implements TexturedQuadMe
 
 	@Override
 	public String toString() {
-		return "QuadUIObject [bounds=" + this.bounds + ", mesh=" + this.mesh + ", transform=" + this.transform + ", parent=" + this.parent
-				+ ", active=" + this.active + ", name=" + this.name + "]";
+		return "QuadUIObject [bounds=" + this.bounds + ", mesh=" + this.mesh + ", transform=" + this.transform + ", active=" + this.active
+				+ ", name=" + this.name + "]";
 	}
 
 }

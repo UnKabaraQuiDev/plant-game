@@ -76,7 +76,6 @@ public class ProgressBarUIObject extends OffsetUIObjectGroup implements LimitedO
 				.set(i -> i.setTransform(new Transform3D()))
 				.set(i -> i.setColorMaterial(bg))
 				.set(i -> this.background = i)
-				.set(i -> System.err.println("x: " + i))
 				.add(this)
 				.latch(latch)
 				.set(i -> {

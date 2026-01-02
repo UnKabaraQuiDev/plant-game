@@ -45,8 +45,7 @@ public class QuitButtonUIObject extends GrowOnHoverTextUIObject implements Needs
 
 	@Override
 	public String toString() {
-		return "QuitButtonUIObject [transform=" + this.transform + ", parent=" + this.parent + ", active=" + this.active + ", name="
-				+ this.name + "]";
+		return "QuitButtonUIObject [transform=" + this.transform + ", active=" + this.active + ", name=" + this.name + "]";
 	}
 
 }

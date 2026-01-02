@@ -83,8 +83,7 @@ public class GradientQuadUIObject extends QuadMeshUIObject implements TintOwner,
 	public String toString() {
 		return "GradientQuadUIObject [tint=" + this.tint + ", startColor=" + this.startColor + ", endColor=" + this.endColor
 				+ ", gradientDirection=" + this.gradientDirection + ", gradientRange=" + this.gradientRange + ", bounds=" + this.bounds
-				+ ", mesh=" + this.mesh + ", transform=" + this.transform + ", parent=" + this.parent + ", active=" + this.active
-				+ ", name=" + this.name + "]";
+				+ ", mesh=" + this.mesh + ", transform=" + this.transform + ", active=" + this.active + ", name=" + this.name + "]";
 	}
 
 }

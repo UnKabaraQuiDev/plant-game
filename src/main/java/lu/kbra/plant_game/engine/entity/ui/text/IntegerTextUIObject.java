@@ -111,8 +111,7 @@ public class IntegerTextUIObject extends ProgrammaticTextUIObject implements Nee
 	public String toString() {
 		return "IntegerTextUIObject [key=" + this.key + ", value=" + this.value + ", forceSign=" + this.forceSign + ", padding="
 				+ this.padding + ", paddingZero=" + this.paddingZero + ", paddingLength=" + this.paddingLength + ", colorMaterial="
-				+ this.colorMaterial + ", transform=" + this.transform + ", parent=" + this.parent + ", active=" + this.active + ", name="
-				+ this.name + "]";
+				+ this.colorMaterial + ", transform=" + this.transform + ", active=" + this.active + ", name=" + this.name + "]";
 	}
 
 }

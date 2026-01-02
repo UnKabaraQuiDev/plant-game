@@ -13,9 +13,9 @@ import lu.kbra.plant_game.engine.entity.ui.group.LayoutOffsetUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.group.UIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsUpdate;
 import lu.kbra.plant_game.engine.entity.ui.layout.SpacerUIObject;
+import lu.kbra.plant_game.engine.entity.ui.prim.TexturedQuadMeshUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.IntegerTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.SignedIntegerTextUIObject;
-import lu.kbra.plant_game.engine.entity.ui.texture.TextureUIObject;
 import lu.kbra.plant_game.engine.scene.ui.layout.FlowLayout;
 import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
@@ -33,7 +33,7 @@ public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup implements
 	public static final ColorMaterial DEFAULT_TEXT_COLOR = ColorMaterial.WHITE;
 	public static final float gap = 0.08f;
 
-	protected TextureUIObject icon;
+	protected TexturedQuadMeshUIObject icon;
 	protected IntegerTextUIObject value;
 	protected SignedIntegerTextUIObject popup;
 	protected Direction popupSpawnDirection = Direction.EAST;
@@ -77,7 +77,7 @@ public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup implements
 		super(str, new FlowLayout(false, gap), parent, values);
 	}
 
-	public <T extends TextureUIObject, V extends IntegerTextUIObject, P extends SignedIntegerTextUIObject> FutureTriggerLatch<OverlayIntegerStatLine> init(
+	public <T extends TexturedQuadMeshUIObject, V extends IntegerTextUIObject, P extends SignedIntegerTextUIObject> FutureTriggerLatch<OverlayIntegerStatLine> init(
 			final Dispatcher workers,
 			final Dispatcher render,
 			final float height,
@@ -87,7 +87,7 @@ public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup implements
 			final Class<V> valueClazz,
 			final Class<P> popupClazz) {
 
-		final float iconHeightRatio = height / (float) TextureUIObject.SQUARE_1_UNIT.getBounds2D().getHeight();
+		final float iconHeightRatio = height / (float) TexturedQuadMeshUIObject.SQUARE_1_UNIT.getBounds2D().getHeight();
 		final float textHeightRatio = height / UIObjectFactory.DEFAULT_CHAR_SIZE.y();
 
 		final FutureTriggerLatch<OverlayIntegerStatLine> latch = new FutureTriggerLatch<>(iconClazz == null ? 2 : 3, this);
@@ -95,8 +95,8 @@ public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup implements
 		if (iconClazz != null) {
 			UIObjectFactory.create(iconClazz)
 					.set(i -> i.setTransform(new Transform3D().scaleMul(iconHeightRatio)))
-					.add(this)
 					.postInit(i -> this.icon = i)
+					.add(this)
 					.latch(latch)
 					.push();
 		}
@@ -114,8 +114,8 @@ public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup implements
 				.set(i -> i.setValue(0))
 				.set(i -> i.setColorMaterial(DEFAULT_TEXT_COLOR))
 				.set(i -> i.setTransform(new Transform3D().scaleMul(textHeightRatio)))
-				.add(this)
 				.postInit(i -> this.value = i)
+				.add(this)
 				.latch(latch)
 				.push();
 
@@ -130,15 +130,15 @@ public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup implements
 				.set(i -> i.setPositiveColor(ColorMaterial.LIGHT_GREEN))
 				.set(i -> i.setNegativeColor(ColorMaterial.RED))
 				.set(i -> i.setTransform(new Transform3D().scaleMul(textHeightRatio * POPUP_TEXT_SCALE)))
-				.add(this)
 				.postInit(i -> this.popup = i)
+				.add(this)
 				.latch(latch)
 				.push();
 
 		return latch;
 	}
 
-	public <T extends TextureUIObject, V extends IntegerTextUIObject, P extends SignedIntegerTextUIObject> FutureTriggerLatch<OverlayIntegerStatLine> init(
+	public <T extends TexturedQuadMeshUIObject, V extends IntegerTextUIObject, P extends SignedIntegerTextUIObject> FutureTriggerLatch<OverlayIntegerStatLine> init(
 			final Dispatcher workers,
 			final Dispatcher render,
 			final float height,
@@ -148,7 +148,7 @@ public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup implements
 		return this.init(workers, render, height, VALUE_LENGTH, POPUP_LENGTH, iconClazz, valueClazz, popupClazz);
 	}
 
-	public TextureUIObject getIcon() {
+	public TexturedQuadMeshUIObject getIcon() {
 		return this.icon;
 	}
 
@@ -165,10 +165,9 @@ public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup implements
 	}
 
 	public OverlayIntegerStatLine add(final int value) {
-		if (this.getPopup() == null) {
-			return this;
+		if (this.getPopup() != null) {
+			this.getPopup().setValue(this.getPopup().getValue() + value);
 		}
-		this.getPopup().setValue(this.getPopup().getValue() + value);
 		return this;
 	}
 

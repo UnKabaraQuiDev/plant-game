@@ -52,8 +52,7 @@ public class AnchoredLayoutUIObjectGroup extends LayoutOffsetUIObjectGroup imple
 	public String toString() {
 		return "AnchoredLayoutUIObjectGroup [objectAnchor=" + this.objectAnchor + ", targetAnchor=" + this.targetAnchor + ", layout="
 				+ this.layout + ", transform=" + this.transform + ", subEntitiesLock=" + this.subEntitiesLock + ", subEntities="
-				+ this.subEntities + ", bounds=" + this.bounds + ", parent=" + this.parent + ", active=" + this.active + ", name="
-				+ this.name + "]";
+				+ this.subEntities + ", bounds=" + this.bounds + ", active=" + this.active + ", name=" + this.name + "]";
 	}
 
 }

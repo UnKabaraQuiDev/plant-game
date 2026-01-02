@@ -30,8 +30,7 @@ public class OptionsButtonUIObject extends GrowOnHoverTextUIObject implements Ne
 
 	@Override
 	public String toString() {
-		return "OptionsButtonUIObject [transform=" + this.transform + ", parent=" + this.parent + ", active=" + this.active + ", name="
-				+ this.name + "]";
+		return "OptionsButtonUIObject [transform=" + this.transform + ", active=" + this.active + ", name=" + this.name + "]";
 	}
 
 }

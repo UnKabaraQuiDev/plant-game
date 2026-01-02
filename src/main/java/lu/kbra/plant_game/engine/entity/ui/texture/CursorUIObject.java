@@ -8,12 +8,13 @@ import lu.kbra.plant_game.PGLogic;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.AbsoluteTransform3DOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsUpdate;
+import lu.kbra.plant_game.engine.entity.ui.prim.TexturedQuadMeshUIObject;
 import lu.kbra.plant_game.engine.mesh.TexturedQuadMesh;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.standalone.gameengine.scene.Scene;
 
 @DataPath("image:classpath:/icons/cursor-128.png")
-public class CursorUIObject extends TextureUIObject implements NeedsUpdate {
+public class CursorUIObject extends TexturedQuadMeshUIObject implements NeedsUpdate {
 
 	protected final Vector2f to = new Vector2f();
 	protected boolean circlingMouse;

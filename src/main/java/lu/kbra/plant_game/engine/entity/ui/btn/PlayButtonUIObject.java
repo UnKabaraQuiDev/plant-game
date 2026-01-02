@@ -30,8 +30,7 @@ public class PlayButtonUIObject extends GrowOnHoverTextUIObject implements Needs
 
 	@Override
 	public String toString() {
-		return "PlayButtonUIObject [transform=" + this.transform + ", parent=" + this.parent + ", active=" + this.active + ", name="
-				+ this.name + "]";
+		return "PlayButtonUIObject [transform=" + this.transform + ", active=" + this.active + ", name=" + this.name + "]";
 	}
 
 }

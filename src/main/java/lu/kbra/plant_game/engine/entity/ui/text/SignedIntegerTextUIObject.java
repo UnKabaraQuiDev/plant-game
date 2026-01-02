@@ -63,8 +63,7 @@ public class SignedIntegerTextUIObject extends IntegerTextUIObject {
 		return "SignedIntegerTextUIObject [neutralColor=" + this.neutralColor + ", negativeColor=" + this.negativeColor + ", positiveColor="
 				+ this.positiveColor + ", key=" + this.key + ", value=" + this.value + ", forceSign=" + this.forceSign + ", padding="
 				+ this.padding + ", paddingZero=" + this.paddingZero + ", paddingLength=" + this.paddingLength + ", colorMaterial="
-				+ this.colorMaterial + ", transform=" + this.transform + ", parent=" + this.parent + ", active=" + this.active + ", name="
-				+ this.name + "]";
+				+ this.colorMaterial + ", transform=" + this.transform + ", active=" + this.active + ", name=" + this.name + "]";
 	}
 
 }

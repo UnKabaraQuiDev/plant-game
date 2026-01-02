@@ -46,7 +46,7 @@ public class FlatQuadUIObject extends TexturedQuadMeshUIObject implements TintOw
 	@Override
 	public String toString() {
 		return "FlatQuadUIObject [color=" + this.color + ", bounds=" + this.bounds + ", mesh=" + this.mesh + ", transform=" + this.transform
-				+ ", parent=" + this.parent + ", active=" + this.active + ", name=" + this.name + "]";
+				+ ", active=" + this.active + ", name=" + this.name + "]";
 	}
 
 }

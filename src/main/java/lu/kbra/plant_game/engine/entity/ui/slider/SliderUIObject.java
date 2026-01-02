@@ -135,7 +135,7 @@ public class SliderUIObject extends TextUIObject implements NeedsInput, NeedsPos
 	@Override
 	public String toString() {
 		return "SliderUIObject [min=" + this.min + ", max=" + this.max + ", value=" + this.value + ", divisors=" + this.divisors
-				+ ", transform=" + this.transform + ", parent=" + this.parent + ", active=" + this.active + ", name=" + this.name + "]";
+				+ ", transform=" + this.transform + ", active=" + this.active + ", name=" + this.name + "]";
 	}
 
 }

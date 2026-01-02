@@ -15,7 +15,7 @@ public interface LimitedObjectGroup<T extends SceneEntity> extends ObjectGroup<T
 		if (this.size() >= MAX_ITEMS) {
 			throw new UnsupportedOperationException("Max. " + MAX_ITEMS + " columns: " + this.getROEntities());
 		}
-		return this.add(e);
+		return ObjectGroup.super.add(e);
 	}
 
 	@Override
@@ -24,7 +24,7 @@ public interface LimitedObjectGroup<T extends SceneEntity> extends ObjectGroup<T
 		if (this.size() >= MAX_ITEMS || this.size() + c.size() > MAX_ITEMS) {
 			throw new UnsupportedOperationException("Max. " + MAX_ITEMS + " columns: " + this.getROEntities());
 		}
-		return this.addAll(c);
+		return ObjectGroup.super.addAll(c);
 	}
 
 	@Override
@@ -33,7 +33,7 @@ public interface LimitedObjectGroup<T extends SceneEntity> extends ObjectGroup<T
 		if (this.size() >= MAX_ITEMS || this.size() + e.length > MAX_ITEMS) {
 			throw new UnsupportedOperationException("Max. " + MAX_ITEMS + " columns: " + this.getROEntities());
 		}
-		return this.addAll(e);
+		return ObjectGroup.super.addAll(e);
 	}
 
 	@Override
@@ -42,7 +42,7 @@ public interface LimitedObjectGroup<T extends SceneEntity> extends ObjectGroup<T
 		if (this.size() >= MAX_ITEMS || this.size() + c.size() > MAX_ITEMS) {
 			throw new UnsupportedOperationException("Max. " + MAX_ITEMS + " columns: " + this.getROEntities());
 		}
-		return this.addChildren(c);
+		return ObjectGroup.super.addAll(c.getROEntities());
 	}
 
 }

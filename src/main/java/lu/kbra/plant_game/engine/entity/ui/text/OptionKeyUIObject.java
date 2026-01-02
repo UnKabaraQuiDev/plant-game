@@ -127,7 +127,7 @@ public class OptionKeyUIObject extends ProgrammaticGrowOnHoverTextUIObject
 	@Override
 	public String toString() {
 		return "OptionKeyUIObject [awaitInput=" + this.awaitInput + ", focused=" + this.focused + ", key=" + this.key + ", transform="
-				+ this.transform + ", parent=" + this.parent + ", active=" + this.active + ", name=" + this.name + "]";
+				+ this.transform + ", active=" + this.active + ", name=" + this.name + "]";
 	}
 
 }

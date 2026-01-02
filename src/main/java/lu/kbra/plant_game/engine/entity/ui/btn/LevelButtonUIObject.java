@@ -7,7 +7,7 @@ import lu.pcy113.pclib.PCUtils;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsClick;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsUpdate;
 import lu.kbra.plant_game.engine.entity.ui.impl.TextureOption;
-import lu.kbra.plant_game.engine.entity.ui.texture.TextureUIObject;
+import lu.kbra.plant_game.engine.entity.ui.prim.TexturedQuadMeshUIObject;
 import lu.kbra.plant_game.engine.mesh.TexturedQuadMesh;
 import lu.kbra.plant_game.engine.mesh.TintOwner;
 import lu.kbra.plant_game.engine.scene.world.LevelState;
@@ -18,7 +18,8 @@ import lu.kbra.standalone.gameengine.utils.gl.consts.TextureFilter;
 
 @DataPath("image:classpath:/icons/star-32.png")
 @TextureOption(textureFilter = TextureFilter.NEAREST)
-public class LevelButtonUIObject extends TextureUIObject implements NeedsClick, NeedsUpdate, TintOwner, Comparable<LevelButtonUIObject> {
+public class LevelButtonUIObject extends TexturedQuadMeshUIObject
+		implements NeedsClick, NeedsUpdate, TintOwner, Comparable<LevelButtonUIObject> {
 
 	private LevelState state = LevelState.NOT_STARTED;
 	private String levelId;
@@ -86,8 +87,8 @@ public class LevelButtonUIObject extends TextureUIObject implements NeedsClick, 
 	@Override
 	public String toString() {
 		return "LevelButtonUIObject [state=" + this.state + ", levelId=" + this.levelId + ", angularSpeed=" + this.angularSpeed
-				+ ", bounds=" + this.bounds + ", mesh=" + this.mesh + ", transform=" + this.transform + ", parent=" + this.parent
-				+ ", active=" + this.active + ", name=" + this.name + "]";
+				+ ", bounds=" + this.bounds + ", mesh=" + this.mesh + ", transform=" + this.transform + ", active=" + this.active
+				+ ", name=" + this.name + "]";
 	}
 
 }

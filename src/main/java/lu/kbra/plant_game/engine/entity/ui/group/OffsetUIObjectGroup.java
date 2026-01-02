@@ -52,8 +52,8 @@ public class OffsetUIObjectGroup extends UIObjectGroup implements Transform3DOwn
 
 	@Override
 	public String toString() {
-		return "OffsetUIObjectGroup [transform=" + this.transform + ", bounds=" + this.bounds + ", parent=" + this.parent + ", active="
-				+ this.active + ", name=" + this.name + "]";
+		return "OffsetUIObjectGroup [transform=" + this.transform + ", bounds=" + this.bounds + ", active=" + this.active + ", name="
+				+ this.name + "]";
 	}
 
 }
