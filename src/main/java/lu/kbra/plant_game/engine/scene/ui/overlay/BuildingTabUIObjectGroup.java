@@ -19,6 +19,7 @@ import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwnerParentAware;
 import lu.kbra.plant_game.engine.entity.ui.impl.IndexOwner;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
 import lu.kbra.plant_game.engine.scene.ui.layout.FlowLayout;
+import lu.kbra.plant_game.generated.ColorMaterial;
 
 public class BuildingTabUIObjectGroup extends AnchoredLayoutUIObjectGroup
 		implements IndexOwner, BoundsOwnerParentAware, LimitedObjectGroup<UIObject> {
@@ -27,19 +28,16 @@ public class BuildingTabUIObjectGroup extends AnchoredLayoutUIObjectGroup
 	protected int index;
 	protected float scrollX = 0;
 	protected Vector2f scrollXRange = new Vector2f();
-	protected Rectangle2D.Float fixedBounds;
+	protected Rectangle2D.Float fixedBounds = new Rectangle.Float();
 
-	public BuildingTabUIObjectGroup(final String titleKey, final int index) {
+	protected ColorMaterial accentColor;
+
+	public BuildingTabUIObjectGroup(final String titleKey, final int index, final ColorMaterial accentColor) {
 		super("building-tab-" + titleKey, null, Anchor.BOTTOM_CENTER, Anchor.BOTTOM_CENTER);
 		this.index = index;
 		this.titleKey = titleKey;
-		this.add(new LayoutOffsetUIObjectGroup(this.getId() + "-container", new FlowLayout(false, 0.05f, true)) {
-			@Override
-			public void doLayout() {
-				System.err.println("internal layout");
-				super.doLayout();
-			}
-		});
+		this.accentColor = accentColor;
+		this.add(new LayoutOffsetUIObjectGroup(this.getId() + "-container", new FlowLayout(false, 0.05f, true)));
 	}
 
 	public UIObjectGroup getContainer() {
@@ -72,7 +70,6 @@ public class BuildingTabUIObjectGroup extends AnchoredLayoutUIObjectGroup
 
 	@Override
 	public void doLayout() {
-		System.err.println("tab layout");
 		super.doLayout();
 		this.applyScrollX();
 	}
@@ -98,7 +95,7 @@ public class BuildingTabUIObjectGroup extends AnchoredLayoutUIObjectGroup
 				(float) superBounds.getWidth(),
 				(float) containerBounds.getHeight());
 		final boolean changed = !newFixedBounds.equals(this.fixedBounds);
-		this.fixedBounds = newFixedBounds;
+		this.fixedBounds.setFrame(newFixedBounds);
 		return changed;
 	}
 
@@ -153,6 +150,14 @@ public class BuildingTabUIObjectGroup extends AnchoredLayoutUIObjectGroup
 
 	public String getTitle() {
 		return LocalizationService.get(this.titleKey);
+	}
+
+	public ColorMaterial getAccentColor() {
+		return this.accentColor;
+	}
+
+	public void setAccentColor(final ColorMaterial accentColor) {
+		this.accentColor = accentColor;
 	}
 
 	@Override

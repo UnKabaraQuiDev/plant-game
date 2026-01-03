@@ -5,7 +5,7 @@ import java.awt.geom.Rectangle2D;
 import org.joml.Vector2f;
 import org.joml.Vector3fc;
 
-import lu.pcy113.pclib.concurrency.FutureTriggerLatch;
+import lu.pcy113.pclib.concurrency.ObjectTriggerLatch;
 
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
@@ -94,8 +94,8 @@ public class ScrollContainerUIObjectGroup extends OffsetUIObjectGroup implements
 		return this.scrollContent;
 	}
 
-	public <T extends ScrollBarUIObject> FutureTriggerLatch<? extends ScrollContainerUIObjectGroup> init(final Class<T> clazz) {
-		final FutureTriggerLatch<? extends ScrollContainerUIObjectGroup> latch = new FutureTriggerLatch<>(1, this);
+	public <T extends ScrollBarUIObject> ObjectTriggerLatch<? extends ScrollContainerUIObjectGroup> init(final Class<T> clazz) {
+		final ObjectTriggerLatch<? extends ScrollContainerUIObjectGroup> latch = new ObjectTriggerLatch<>(1, this);
 		UIObjectFactory.create(clazz)
 				.set(i -> i.setTransform(new Transform3D()))
 				.set(i -> i.setDir(this.scrollContent.getDirection()))

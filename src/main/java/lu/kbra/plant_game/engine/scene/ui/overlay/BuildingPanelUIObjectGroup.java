@@ -4,18 +4,13 @@ import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
-import java.util.OptionalInt;
 
-import org.joml.Vector2f;
+import lu.pcy113.pclib.concurrency.ObjectTriggerLatch;
+import lu.pcy113.pclib.logger.GlobalLogger;
 
-import lu.pcy113.pclib.concurrency.FutureTriggerLatch;
-
-import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
 import lu.kbra.plant_game.engine.entity.ui.group.BuildingTabListUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwnerParentAware;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsBoundsInput;
-import lu.kbra.plant_game.engine.entity.ui.text.ProgrammaticTextUIObject;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
 import lu.kbra.plant_game.engine.scene.ui.layout.AnchorLayout;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
@@ -30,7 +25,7 @@ public class BuildingPanelUIObjectGroup extends AnchoredLayoutUIObjectGroup impl
 
 	protected BuildingTabListUIObjectGroup tabList = new BuildingTabListUIObjectGroup();
 	protected Map<String, BuildingTabUIObjectGroup> buildingTabs = new HashMap<>();
-	protected String activeBuildingTabIndex;
+	protected String activeBuildingTabId;
 	protected float buildingTabScrollSpeed = 0.75f;
 
 	public BuildingPanelUIObjectGroup() {
@@ -41,43 +36,59 @@ public class BuildingPanelUIObjectGroup extends AnchoredLayoutUIObjectGroup impl
 	}
 
 	@Override
-	public boolean input(final WindowInputHandler inputHandler) {
+	public boolean boundsInput(final WindowInputHandler inputHandler) {
 		if (inputHandler.getMouseScroll().y() == 0) {
 			return false;
 		}
-		final BuildingTabUIObjectGroup buildingTab = this.buildingTabs.get(this.activeBuildingTabIndex);
-		if (buildingTab != null) {
-			buildingTab.addScrollX((float) inputHandler.getMouseScroll().y() * this.buildingTabScrollSpeed);
-			buildingTab.applyScrollX();
-//			this.doLayout();
-			return true;
+
+		final BuildingTabUIObjectGroup buildingTab = this.buildingTabs.get(this.activeBuildingTabId);
+		if (buildingTab == null) {
+			return false;
 		}
-		return false;
+
+		buildingTab.addScrollX((float) inputHandler.getMouseScroll().y() * this.buildingTabScrollSpeed);
+		buildingTab.applyScrollX();
+
+		return true;
 	}
 
-	public <T extends BuildingTabUIObjectGroup> FutureTriggerLatch<T> addTab(final T tab) {
-		final FutureTriggerLatch<T> latch = new FutureTriggerLatch<>(1, tab);
+	public <T extends BuildingTabUIObjectGroup> ObjectTriggerLatch<T> addTab(final T tab) {
+		final ObjectTriggerLatch<T> latch = new ObjectTriggerLatch<>(1, tab);
 
-		UIObjectFactory.createText(ProgrammaticTextUIObject.class,
-//						OptionalInt.of(4),
-				OptionalInt.empty(),
-				Optional.of(new Vector2f(0.1f)),
-				Optional.empty(),
-				Optional.of("btn-" + tab.getId()),
-				Optional.of(tab.getTitleKey())).set(i -> i.setTransform(new Transform3D()))
-//				.set(i -> i.setText("Text").flushText())
-				.add(this.tabList)
-				.postInit(i -> this.buildingTabs.put(tab.getId(), tab))
-				.postInit(i -> this.add(tab))
-				.postInit(i -> this.doLayout())
-				.latch(latch)
-				.push();
-
-		if (this.activeBuildingTabIndex == null) {
-			this.activeBuildingTabIndex = tab.getId();
-		}
+		new BuildingTabButtonUIObjectGroup(new Transform3D(), tab).init().then(obj -> {
+			obj.getTransform().scaleMul(this.tabList.getFixedHeight() / (float) obj.getBounds().getBounds2D().getHeight()).update();
+			this.tabList.add(obj);
+			this.buildingTabs.put(tab.getId(), tab);
+			this.add(tab);
+			if (this.activeBuildingTabId == null) {
+				this.setClickedTab(tab.getId(), true);
+				this.activeBuildingTabId = tab.getId();
+			} else {
+				this.setClickedTab(tab.getId(), false);
+			}
+			this.doLayout();
+			latch.trigger(obj);
+		});
 
 		return latch;
+	}
+
+	public void switchTab(final String tabId) {
+		this.setClickedTab(tabId, true);
+		this.setClickedTab(this.activeBuildingTabId, false);
+
+		this.activeBuildingTabId = tabId;
+	}
+
+	private void setClickedTab(final String tabId, final boolean active) {
+		final BuildingTabUIObjectGroup tab = this.buildingTabs.get(tabId);
+		if (tab != null) {
+			tab.setActive(active);
+			this.tabList.getButton(tabId)
+					.ifPresentOrElse(btn -> btn.setClicked(active), () -> GlobalLogger.warning("No button for tab named: " + tabId));
+		} else {
+			GlobalLogger.warning("No tab named: " + tabId);
+		}
 	}
 
 	@Override
@@ -135,7 +146,7 @@ public class BuildingPanelUIObjectGroup extends AnchoredLayoutUIObjectGroup impl
 	}
 
 	public String getActiveBuildingTabIndex() {
-		return this.activeBuildingTabIndex;
+		return this.activeBuildingTabId;
 	}
 
 	public Map<String, BuildingTabUIObjectGroup> getBuildingTabs() {

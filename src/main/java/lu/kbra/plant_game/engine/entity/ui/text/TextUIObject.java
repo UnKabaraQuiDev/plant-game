@@ -1,6 +1,6 @@
 package lu.kbra.plant_game.engine.entity.ui.text;
 
-import java.awt.Shape;
+import java.awt.geom.Rectangle2D;
 
 import javax.swing.GroupLayout.Alignment;
 
@@ -23,9 +23,11 @@ public class TextUIObject extends UIObject implements TextEmitterOwner, Transpar
 	}
 
 	@Override
-	public Shape getBounds() {
+	public Rectangle2D.Float getBounds() {
 		assert this.textEmitter.getLineCount() == 1;
-		return GameEngineUtils.toRectangleBounds(this.textEmitter.getTextBounds(), Alignment.LEADING, Alignment.CENTER);
+		return GameEngineUtils.toRectangleBounds(this.textEmitter.getTextBounds(),
+				this.textEmitter.getTextAlignment().asSwingAlignment(),
+				Alignment.CENTER);
 	}
 
 	public String getText() {

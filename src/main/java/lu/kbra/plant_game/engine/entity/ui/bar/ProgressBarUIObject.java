@@ -6,7 +6,7 @@ import org.joml.Vector3f;
 import org.joml.Vector4fc;
 
 import lu.pcy113.pclib.PCUtils;
-import lu.pcy113.pclib.concurrency.FutureTriggerLatch;
+import lu.pcy113.pclib.concurrency.ObjectTriggerLatch;
 import lu.pcy113.pclib.logger.GlobalLogger;
 
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
@@ -62,7 +62,7 @@ public class ProgressBarUIObject extends OffsetUIObjectGroup implements LimitedO
 		this.value = value;
 	}
 
-	public <T extends UIObject & ColorMaterialOwner, V extends UIObject & ColorMaterialOwner> FutureTriggerLatch<ProgressBarUIObject> init(
+	public <T extends UIObject & ColorMaterialOwner, V extends UIObject & ColorMaterialOwner> ObjectTriggerLatch<ProgressBarUIObject> init(
 			final Dispatcher workers,
 			final Dispatcher render,
 			final Class<T> bgClazz,
@@ -70,7 +70,7 @@ public class ProgressBarUIObject extends OffsetUIObjectGroup implements LimitedO
 			final ColorMaterial bg,
 			final ColorMaterial fg) {
 
-		final FutureTriggerLatch<ProgressBarUIObject> latch = new FutureTriggerLatch<>(2, this);
+		final ObjectTriggerLatch<ProgressBarUIObject> latch = new ObjectTriggerLatch<>(2, this);
 
 		UIObjectFactory.create(bgClazz)
 				.set(i -> i.setTransform(new Transform3D()))
@@ -100,7 +100,7 @@ public class ProgressBarUIObject extends OffsetUIObjectGroup implements LimitedO
 		return latch;
 	}
 
-	public <T extends UIObject & ColorMaterialOwner, V extends UIObject & ColorMaterialOwner> FutureTriggerLatch<ProgressBarUIObject> init(
+	public <T extends UIObject & ColorMaterialOwner, V extends UIObject & ColorMaterialOwner> ObjectTriggerLatch<ProgressBarUIObject> init(
 			final Dispatcher workers,
 			final Dispatcher render,
 			final Class<T> bgClazz,

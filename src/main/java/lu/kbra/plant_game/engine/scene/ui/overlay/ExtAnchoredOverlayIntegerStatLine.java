@@ -2,7 +2,7 @@ package lu.kbra.plant_game.engine.scene.ui.overlay;
 
 import java.awt.Shape;
 
-import lu.pcy113.pclib.concurrency.FutureTriggerLatch;
+import lu.pcy113.pclib.concurrency.ObjectTriggerLatch;
 
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.group.UIObjectGroup;
@@ -45,14 +45,14 @@ public class ExtAnchoredOverlayIntegerStatLine extends OverlayIntegerStatLine im
 	}
 
 	@Override
-	public <T extends TexturedQuadMeshUIObject, V extends IntegerTextUIObject, P extends SignedIntegerTextUIObject> FutureTriggerLatch<ExtAnchoredOverlayIntegerStatLine> init(
+	public <T extends TexturedQuadMeshUIObject, V extends IntegerTextUIObject, P extends SignedIntegerTextUIObject> ObjectTriggerLatch<ExtAnchoredOverlayIntegerStatLine> init(
 			final Dispatcher workers,
 			final Dispatcher render,
 			final float height,
 			final Class<T> iconClazz,
 			final Class<V> valueClazz,
 			final Class<P> popupClazz) {
-		return (FutureTriggerLatch<ExtAnchoredOverlayIntegerStatLine>) super.init(workers,
+		return (ObjectTriggerLatch<ExtAnchoredOverlayIntegerStatLine>) super.init(workers,
 				render,
 				height,
 				iconClazz,
@@ -61,7 +61,7 @@ public class ExtAnchoredOverlayIntegerStatLine extends OverlayIntegerStatLine im
 	}
 
 	@Override
-	public <T extends TexturedQuadMeshUIObject, V extends IntegerTextUIObject, P extends SignedIntegerTextUIObject> FutureTriggerLatch<ExtAnchoredOverlayIntegerStatLine> init(
+	public <T extends TexturedQuadMeshUIObject, V extends IntegerTextUIObject, P extends SignedIntegerTextUIObject> ObjectTriggerLatch<ExtAnchoredOverlayIntegerStatLine> init(
 			final Dispatcher workers,
 			final Dispatcher render,
 			final float height,
@@ -70,7 +70,7 @@ public class ExtAnchoredOverlayIntegerStatLine extends OverlayIntegerStatLine im
 			final Class<T> iconClazz,
 			final Class<V> valueClazz,
 			final Class<P> popupClazz) {
-		return (FutureTriggerLatch<ExtAnchoredOverlayIntegerStatLine>) super.init(workers,
+		return (ObjectTriggerLatch<ExtAnchoredOverlayIntegerStatLine>) super.init(workers,
 				render,
 				height,
 				valueLength,

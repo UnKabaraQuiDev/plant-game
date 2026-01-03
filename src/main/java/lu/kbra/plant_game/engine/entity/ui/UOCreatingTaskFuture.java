@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import lu.pcy113.pclib.PCUtils;
+import lu.pcy113.pclib.concurrency.DeferredTriggerLatch;
 import lu.pcy113.pclib.concurrency.GenericTriggerLatch;
 import lu.pcy113.pclib.pointer.ObjectPointer;
 
@@ -65,6 +66,13 @@ public class UOCreatingTaskFuture<T extends UIObject> extends TaskFuture<List<Ob
 	public UOCreatingTaskFuture<T> latch(final GenericTriggerLatch<? super T> latch) {
 		this.postInitHooks.add((final T v) -> latch.trigger(v));
 		return this;
+	}
+
+	public DeferredTriggerLatch<T> pushAsLatch() {
+		final DeferredTriggerLatch<T> latch = new DeferredTriggerLatch<>();
+		this.latch(latch);
+		this.push();
+		return latch;
 	}
 
 }

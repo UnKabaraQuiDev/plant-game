@@ -2,11 +2,13 @@ package lu.kbra.plant_game.engine.entity.ui.group;
 
 import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
+import java.util.Optional;
 
 import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwnerParentAware;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
 import lu.kbra.plant_game.engine.scene.ui.layout.FlowLayout;
 import lu.kbra.plant_game.engine.scene.ui.overlay.AnchoredLayoutUIObjectGroup;
+import lu.kbra.plant_game.engine.scene.ui.overlay.BuildingTabButtonUIObjectGroup;
 
 public class BuildingTabListUIObjectGroup extends AnchoredLayoutUIObjectGroup implements BoundsOwnerParentAware {
 
@@ -14,6 +16,8 @@ public class BuildingTabListUIObjectGroup extends AnchoredLayoutUIObjectGroup im
 	protected float boundsMarginX = 0f;
 	protected float boundsMarginY = 0f;
 	protected float fixedHeight = 0.1f;
+
+//	protected Map<String, BuildingTabButtonUIObjectGroup> tabButtons = new HashMap<>();
 
 	public BuildingTabListUIObjectGroup() {
 		super("building-tab-list", new FlowLayout(false, 0f, true), Anchor.TOP_CENTER, Anchor.TOP_CENTER);
@@ -33,6 +37,13 @@ public class BuildingTabListUIObjectGroup extends AnchoredLayoutUIObjectGroup im
 		final boolean changed = newBounds.equals(this.fixedBounds);
 		this.fixedBounds.setFrame(newBounds);
 		return changed;
+	}
+
+	public Optional<BuildingTabButtonUIObjectGroup> getButton(final String tabId) {
+		return this.stream()
+				.filter(t -> t instanceof BuildingTabButtonUIObjectGroup btn && btn.getTabId().equals(tabId))
+				.map(BuildingTabButtonUIObjectGroup.class::cast)
+				.findFirst();
 	}
 
 	@Override

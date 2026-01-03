@@ -14,6 +14,8 @@ import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.lwjgl.glfw.GLFW;
 
+import lu.pcy113.pclib.logger.GlobalLogger;
+
 import lu.kbra.plant_game.engine.UpdateFrameState;
 import lu.kbra.plant_game.engine.entity.impl.Transform3DOwner;
 import lu.kbra.plant_game.engine.entity.impl.TransformOwner;
@@ -28,6 +30,7 @@ import lu.kbra.plant_game.engine.entity.ui.impl.NeedsInput;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsUpdate;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.scene.ui.layout.LayoutOwner;
+import lu.kbra.plant_game.engine.scene.ui.overlay.BuildingPanelUIObjectGroup;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.GameEngine;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
@@ -84,18 +87,11 @@ public class UIScene extends Scene3D implements BoundsOwner {
 			this.camera.getProjection().update(inputHandler.getWindowSize());
 		}
 
+		final Point2D.Float mouseWorld2DPoint = new Point2D.Float(mouseWorld2D.x, mouseWorld2D.y);
+
 		synchronized (super.getEntitiesLock()) {
 			for (final SceneEntity e : this) {
-				this.checkInput(e,
-						inputHandler,
-						frameState,
-						new Point2D.Float(mouseWorld2D.x, mouseWorld2D.y),
-						newHovered,
-						GameEngine.IDENTITY_MATRIX4F);
-
-				if (resized && e instanceof final LayoutOwner lp) {
-					lp.doLayout();
-				}
+				this.checkInput(e, inputHandler, frameState, mouseWorld2DPoint, newHovered, GameEngine.IDENTITY_MATRIX4F);
 			}
 		}
 
@@ -145,29 +141,36 @@ public class UIScene extends Scene3D implements BoundsOwner {
 					&& uiObj.getTransformedBounds(parentTransform).contains(mousePos)) {
 //				frameState.uiSceneCaughtMouseInput = true;
 
+				if (uiObj instanceof BuildingPanelUIObjectGroup) {
+					System.err.println(uiObj.getTransformedBounds(parentTransform).contains(mousePos));
+				}
+
 				if (uiObj instanceof final NeedsHover uiObjectHover) {
 					uiObjectHover.hover(inputHandler, this.hovering.contains(uiObj) ? HoverState.STAY : HoverState.ENTER);
 					newHovered.add(uiObj);
 				}
 
-				if (!frameState.uiSceneCaughtMouseInput) {
-					if (uiObj instanceof final NeedsBoundsInput uiObjectInput) {
-						frameState.uiSceneCaughtMouseInput |= uiObjectInput.input(inputHandler);
-					}
-
-					if (uiObj instanceof final NeedsClick uiObjectClick
-							&& inputHandler.isMouseButtonPressedOnce(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
-						uiObjectClick.click(inputHandler);
-					}
-
-					if (uiObj instanceof Focusable && inputHandler.isMouseButtonPressedOnce(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
-						if (this.focused != null) {
-							this.focused.removeFocus();
-						}
-						this.focused = (Focusable) uiObj;
-						this.focused.giveFocus();
+//				if (!frameState.uiSceneCaughtMouseInput) {
+				if (uiObj instanceof final NeedsBoundsInput uiObjectInput) {
+					frameState.uiSceneCaughtMouseInput |= uiObjectInput.boundsInput(inputHandler);
+					if (frameState.uiSceneCaughtMouseInput) {
+						GlobalLogger.info("UIObject: " + uiObj.getId() + " took mouse input.");
 					}
 				}
+
+				if (uiObj instanceof final NeedsClick uiObjectClick && inputHandler.isMouseButtonPressedOnce(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
+					uiObjectClick.click(inputHandler);
+					frameState.uiSceneCaughtMouseInput = true;
+				}
+
+				if (uiObj instanceof Focusable && inputHandler.isMouseButtonPressedOnce(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
+					if (this.focused != null) {
+						this.focused.removeFocus();
+					}
+					this.focused = (Focusable) uiObj;
+					this.focused.giveFocus();
+				}
+//				}
 			}
 		}
 	}
@@ -177,6 +180,10 @@ public class UIScene extends Scene3D implements BoundsOwner {
 			final DeferredCompositor compositor,
 			final WorkerDispatcher workers,
 			final Dispatcher render) {
+		if (inputHandler.wasResized() && this instanceof LayoutOwner lo) {
+			lo.doLayout();
+		}
+
 		synchronized (super.getEntitiesLock()) {
 			for (final SceneEntity e : this) {
 				this.updateEntity(inputHandler, e);
@@ -184,7 +191,7 @@ public class UIScene extends Scene3D implements BoundsOwner {
 		}
 	}
 
-	private void updateEntity(final WindowInputHandler inputHandler, final SceneEntity e) {
+	protected void updateEntity(final WindowInputHandler inputHandler, final SceneEntity e) {
 		if (e instanceof final EntityContainer<?> ec) {
 			ec.forEach(e2 -> this.updateEntity(inputHandler, e2));
 		}

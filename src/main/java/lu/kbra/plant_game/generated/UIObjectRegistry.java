@@ -64,6 +64,7 @@ import lu.kbra.plant_game.engine.scene.ui.layout.Layout;
 import lu.kbra.plant_game.engine.scene.ui.overlay.AnchoredBoundedLayoutUIObjectGroup;
 import lu.kbra.plant_game.engine.scene.ui.overlay.AnchoredLayoutUIObjectGroup;
 import lu.kbra.plant_game.engine.scene.ui.overlay.BuildingPanelUIObjectGroup;
+import lu.kbra.plant_game.engine.scene.ui.overlay.BuildingTabButtonUIObjectGroup;
 import lu.kbra.plant_game.engine.scene.ui.overlay.BuildingTabUIObjectGroup;
 import lu.kbra.plant_game.engine.scene.ui.overlay.ExtAnchoredOverlayIntegerStatLine;
 import lu.kbra.plant_game.engine.scene.ui.overlay.OverlayIntegerStatLine;
@@ -289,6 +290,12 @@ public class UIObjectRegistry {
 		listScrollDrivenUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Transform3D.class, Supplier.class, Direction.class, float.class, UIObject[].class}, (Object[] arr) -> (UIObject) new ScrollDrivenUIObjectGroup((String) arr[0], (Transform3D) arr[1], (Supplier) arr[2], (Direction) arr[3], (float) arr[4], (UIObject[]) arr[5])));
 		UI_OBJECT_CONSTRUCTORS.put(ScrollDrivenUIObjectGroup.class, listScrollDrivenUIObjectGroup);
 
+		/*                 BuildingTabButtonUIObjectGroup                 */
+		final List<InternalConstructorFunction<UIObject>> listBuildingTabButtonUIObjectGroup = new ArrayList<>();
+		listBuildingTabButtonUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {Transform3D.class, BuildingTabUIObjectGroup.class}, (Object[] arr) -> (UIObject) new BuildingTabButtonUIObjectGroup((Transform3D) arr[0], (BuildingTabUIObjectGroup) arr[1])));
+		listBuildingTabButtonUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Transform3D.class, String.class, String.class, ColorMaterial.class}, (Object[] arr) -> (UIObject) new BuildingTabButtonUIObjectGroup((String) arr[0], (Transform3D) arr[1], (String) arr[2], (String) arr[3], (ColorMaterial) arr[4])));
+		UI_OBJECT_CONSTRUCTORS.put(BuildingTabButtonUIObjectGroup.class, listBuildingTabButtonUIObjectGroup);
+
 		/*                 LayoutOffsetUIObjectGroup                 */
 		final List<InternalConstructorFunction<UIObject>> listLayoutOffsetUIObjectGroup = new ArrayList<>();
 		listLayoutOffsetUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Layout.class, UIObject[].class}, (Object[] arr) -> (UIObject) new LayoutOffsetUIObjectGroup((String) arr[0], (Layout) arr[1], (UIObject[]) arr[2])));
@@ -412,7 +419,7 @@ public class UIObjectRegistry {
 
 		/*                 BuildingTabUIObjectGroup                 */
 		final List<InternalConstructorFunction<UIObject>> listBuildingTabUIObjectGroup = new ArrayList<>();
-		listBuildingTabUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, int.class}, (Object[] arr) -> (UIObject) new BuildingTabUIObjectGroup((String) arr[0], (int) arr[1])));
+		listBuildingTabUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, int.class, ColorMaterial.class}, (Object[] arr) -> (UIObject) new BuildingTabUIObjectGroup((String) arr[0], (int) arr[1], (ColorMaterial) arr[2])));
 		UI_OBJECT_CONSTRUCTORS.put(BuildingTabUIObjectGroup.class, listBuildingTabUIObjectGroup);
 
 		/*                 BuildingPanelUIObjectGroup                 */

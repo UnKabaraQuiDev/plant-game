@@ -4,7 +4,7 @@ import java.util.Comparator;
 import java.util.Optional;
 import java.util.OptionalInt;
 
-import lu.pcy113.pclib.concurrency.FutureTriggerLatch;
+import lu.pcy113.pclib.concurrency.ObjectTriggerLatch;
 
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.bar.LimitedObjectGroup;
@@ -78,7 +78,7 @@ public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup
 		super(str, new FlowLayout(false, gap), parent, values);
 	}
 
-	public <T extends TexturedQuadMeshUIObject, V extends IntegerTextUIObject, P extends SignedIntegerTextUIObject> FutureTriggerLatch<? extends OverlayIntegerStatLine> init(
+	public <T extends TexturedQuadMeshUIObject, V extends IntegerTextUIObject, P extends SignedIntegerTextUIObject> ObjectTriggerLatch<? extends OverlayIntegerStatLine> init(
 			final Dispatcher workers,
 			final Dispatcher render,
 			final float height,
@@ -91,7 +91,7 @@ public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup
 		final float iconHeightRatio = height / (float) TexturedQuadMeshUIObject.SQUARE_1_UNIT.getBounds2D().getHeight();
 		final float textHeightRatio = height / UIObjectFactory.DEFAULT_CHAR_SIZE.y();
 
-		final FutureTriggerLatch<? extends OverlayIntegerStatLine> latch = new FutureTriggerLatch<>(iconClazz == null ? 2 : 3, this);
+		final ObjectTriggerLatch<? extends OverlayIntegerStatLine> latch = new ObjectTriggerLatch<>(iconClazz == null ? 2 : 3, this);
 
 		if (iconClazz != null) {
 			UIObjectFactory.create(iconClazz)
@@ -140,7 +140,7 @@ public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup
 		return latch;
 	}
 
-	public <T extends TexturedQuadMeshUIObject, V extends IntegerTextUIObject, P extends SignedIntegerTextUIObject> FutureTriggerLatch<? extends OverlayIntegerStatLine> init(
+	public <T extends TexturedQuadMeshUIObject, V extends IntegerTextUIObject, P extends SignedIntegerTextUIObject> ObjectTriggerLatch<? extends OverlayIntegerStatLine> init(
 			final Dispatcher workers,
 			final Dispatcher render,
 			final float height,

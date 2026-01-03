@@ -67,14 +67,28 @@ public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner
 
 		final float height = 0.2f * STATS_GROUP_SCALE;
 
-		final BuildingTabUIObjectGroup buildings = new BuildingTabUIObjectGroup("Tab OwO", 0);
+		final BuildingTabUIObjectGroup buildings = new BuildingTabUIObjectGroup("Tab OwO", 0, ColorMaterial.CYAN);
 		this.buildingPanel.addTab(buildings);
+
+		final BuildingTabUIObjectGroup buildings2 = new BuildingTabUIObjectGroup("Tab :3c", 1, ColorMaterial.GREEN);
+		this.buildingPanel.addTab(buildings2);
+
+		final BuildingTabUIObjectGroup buildings3 = new BuildingTabUIObjectGroup("Tab 3", 2, ColorMaterial.PINK);
+		this.buildingPanel.addTab(buildings3);
 
 		IntStream.range(0, 10)
 				.forEach(index -> UIObjectFactory.create(IndexedFlatQuadUIObject.class)
 						.set(i -> i.setIndex(index))
 						.set(j -> j.setTransform(new Transform3D(0.3f)))
 						.set(j -> j.setColorMaterial(ColorMaterial.byId(ColorMaterial.CYAN.getId() - index - 1)))
+						.add(buildings2.getContainer())
+						.push());
+
+		IntStream.range(0, 10)
+				.forEach(index -> UIObjectFactory.create(IndexedFlatQuadUIObject.class)
+						.set(i -> i.setIndex(index))
+						.set(j -> j.setTransform(new Transform3D(0.3f)))
+						.set(j -> j.setColorMaterial(ColorMaterial.byId(ColorMaterial.WHITE.getId() - index - 1)))
 						.add(buildings.getContainer())
 						.push());
 

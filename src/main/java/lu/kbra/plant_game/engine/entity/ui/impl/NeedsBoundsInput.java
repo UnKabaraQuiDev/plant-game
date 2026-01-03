@@ -4,6 +4,6 @@ import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 
 public interface NeedsBoundsInput {
 
-	boolean input(final WindowInputHandler inputHandler);
+	boolean boundsInput(final WindowInputHandler inputHandler);
 
 }
