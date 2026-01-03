@@ -1,5 +1,6 @@
 package lu.kbra.plant_game.engine.entity.ui.group;
 
+import java.util.Collection;
 import java.util.function.Supplier;
 
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
@@ -30,6 +31,34 @@ public class LayoutScrollDrivenUIObjectGroup extends ScrollDrivenUIObjectGroup i
 			final Layout layout, final UIObject... values) {
 		super(str, scrollRatio, dir, margin, values);
 		this.setLayout(layout);
+	}
+
+	@Override
+	public <V extends UIObject> V add(final V e) {
+		final V v = super.add(e);
+		this.doLayout();
+		return v;
+	}
+
+	@Override
+	public <V extends UIObject> boolean addAll(final Collection<? extends V> c) {
+		final boolean v = super.addAll(c);
+		this.doLayout();
+		return v;
+	}
+
+	@Override
+	public <V extends UIObject> V[] addAll(final V... e) {
+		final V[] v = super.addAll(e);
+		this.doLayout();
+		return v;
+	}
+
+	@Override
+	public <V extends UIObject> boolean addChildren(final ObjectGroup<? extends V> c) {
+		final boolean v = super.addChildren(c);
+		this.doLayout();
+		return v;
 	}
 
 	@Override

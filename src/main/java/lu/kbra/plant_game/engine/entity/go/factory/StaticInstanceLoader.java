@@ -22,6 +22,7 @@ import lu.kbra.standalone.gameengine.geom.instance.InstanceEmitter;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.SkipThen;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
+import lu.kbra.standalone.gameengine.impl.future.YieldExecutionThrowable;
 import lu.kbra.standalone.gameengine.utils.transform.Transform;
 
 public class StaticInstanceLoader {
@@ -43,20 +44,20 @@ public class StaticInstanceLoader {
 		final String meshName = name + "-mesh";
 
 		TaskFuture tf = new TaskFuture<>(loader, (ThrowingSupplier<GenericMeshData, Throwable>) () -> {
-			System.err.println("Creating: " + name);
-			waitOrCreateLock(name);
-			System.err.println("Creating: " + meshName);
-			waitOrCreateLock(meshName);
+			if (!cache.hasInstanceEmitter(name) && !waitOrCreateLock(name)) {
+				throw new YieldExecutionThrowable(() -> cache.hasInstanceEmitter(name));
+			}
+			if (!cache.hasMesh(meshName) && !waitOrCreateLock(meshName)) {
+				throw new YieldExecutionThrowable(() -> cache.hasMesh(meshName));
+			}
 
 			if (cache.hasInstanceEmitter(name)) {
-				System.err.println("Got: " + name + " + " + meshName);
 				releaseLock(meshName);
 				releaseLock(name);
 				throw new SkipThen(2, cache.getInstanceEmitter(name));
 			}
 
 			if (cache.hasMesh(meshName)) {
-				System.err.println("Got: " + meshName);
 				releaseLock(meshName);
 				throw new SkipThen(cache.getMesh(meshName));
 			}
@@ -92,6 +93,9 @@ public class StaticInstanceLoader {
 				PCUtils.clamp(MIN_INSTANCE_BUFFER_LENGTH, MAX_INSTANCE_BUFFER_LENGTH, bufferSize),
 				transform,
 				attribs.toArray(AttribArray[]::new));
+		if (cache.hasInstanceEmitter(name)) {
+			throw new IllegalStateException("InstanceEmitter: " + name + " already exists.");
+		}
 		cache.addInstanceEmitter(te);
 		releaseLock(name);
 		return te;

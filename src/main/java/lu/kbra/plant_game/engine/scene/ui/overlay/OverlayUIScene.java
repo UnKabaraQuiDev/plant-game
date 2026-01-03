@@ -1,8 +1,13 @@
 package lu.kbra.plant_game.engine.scene.ui.overlay;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.stream.Collectors;
 
-import lu.pcy113.pclib.concurrency.ListTriggerLatch;
+import org.joml.Vector2f;
+
 import lu.pcy113.pclib.pointer.ObjectPointer;
 
 import lu.kbra.plant_game.PGLogic;
@@ -10,10 +15,12 @@ import lu.kbra.plant_game.engine.UpdateFrameState;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.bar.AnchoredProgressBarUIObject;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
+import lu.kbra.plant_game.engine.entity.ui.group.BuildingTabListUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.prim.FlatQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.IntegerTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.PercentageIntTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.PercentageSignedIntTextUIObject;
+import lu.kbra.plant_game.engine.entity.ui.text.ProgrammaticTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.SignedIntegerTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.texture.EnergyIconUIObject;
 import lu.kbra.plant_game.engine.entity.ui.texture.MoneyIconUIObject;
@@ -23,7 +30,6 @@ import lu.kbra.plant_game.engine.scene.ui.UIScene;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
 import lu.kbra.plant_game.engine.scene.ui.layout.AnchorLayout;
 import lu.kbra.plant_game.engine.scene.ui.layout.FlowLayout;
-import lu.kbra.plant_game.engine.scene.ui.layout.GridFlowLayout;
 import lu.kbra.plant_game.engine.scene.ui.layout.Layout;
 import lu.kbra.plant_game.engine.scene.ui.layout.LayoutParent;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
@@ -54,10 +60,9 @@ public class OverlayUIScene extends UIScene implements LayoutParent, PaddingOwne
 	protected AnchoredProgressBarUIObject progressBar;
 	protected ExtAnchoredOverlayIntegerStatLine progressGroup;
 
-	protected AnchoredLayoutUIObjectGroup buildingTab = new AnchoredBoundedUIObjectGroup("buildings",
-			new GridFlowLayout(0.08f * STATS_GROUP_SCALE),
-			Anchor.BOTTOM_CENTER,
-			Anchor.BOTTOM_CENTER);
+	protected BuildingPanelUIObjectGroup buildingPanel = new BuildingPanelUIObjectGroup();
+	protected BuildingTabListUIObjectGroup buildingTabList = new BuildingTabListUIObjectGroup();
+	protected Map<String, BuildingTabUIObjectGroup> buildingTabs = new HashMap<>();
 
 	protected Layout layout;
 
@@ -68,25 +73,37 @@ public class OverlayUIScene extends UIScene implements LayoutParent, PaddingOwne
 
 	@Override
 	public void init(final Dispatcher workers, final Dispatcher renderDispatcher) {
-		super.addAll(this.statsGroup, this.buildingTab);
+		super.addAll(this.statsGroup, this.buildingPanel);
+
+		this.buildingPanel.add(this.buildingTabList);
 
 		final float height = 0.2f * STATS_GROUP_SCALE;
 
+		final BuildingTabUIObjectGroup buildings = new BuildingTabUIObjectGroup("name", 0, () -> this.buildingPanel.getScroll());
+		this.buildingTabs.put(buildings.getId(), buildings);
+
+		UIObjectFactory
+				.createText(ProgrammaticTextUIObject.class,
+						OptionalInt.of(4),
+						Optional.of(new Vector2f(0.1f)),
+						Optional.empty(),
+						Optional.of("btn-" + buildings.getId()),
+						Optional.empty())
+				.set(i -> i.setTransform(new Transform3D()))
+				.set(i -> i.setText("Text").flushText())
+				.add(this.buildingTabList)
+				.push();
+
 		final ObjectPointer<ColorMaterial> col = new ObjectPointer<>(ColorMaterial.BLUE);
-		final ListTriggerLatch<UIObject> latch = new ListTriggerLatch<>(10, list -> {
-			System.err.println(list);
-			System.err.println(this.buildingTab.size());
-			System.err.println(list.size());
-//			this.buildingTab.doLayout();
-		});
 		for (int i = 0; i < 10; i++) {
 			UIObjectFactory.create(FlatQuadUIObject.class)
-					.set(j -> j.setTransform(new Transform3D(0.1f)))
+					.set(j -> j.setTransform(new Transform3D(0.3f)))
 					.set(j -> j.setColorMaterial(col.set(ColorMaterial::next).get()))
-					.add(this.buildingTab)
-					.latch(latch)
+					.add(buildings)
 					.push();
 		}
+
+		this.buildingTabs.values().forEach(this.buildingPanel::add);
 
 		this.waterGroup = new OverlayIntegerStatLine("water-counter");
 		this.waterGroup
@@ -165,10 +182,6 @@ public class OverlayUIScene extends UIScene implements LayoutParent, PaddingOwne
 	public void input(final WindowInputHandler inputHandler, final UpdateFrameState frameState) {
 		super.input(inputHandler, frameState);
 
-		if (inputHandler.wasResized()) {
-			this.doLayout();
-		}
-
 //		if (inputHandler.wasResized()) {
 //		final Rectangle2D bounds = this.statsGroup.getBounds().getBounds2D();
 //		this.statsGroup.getTransform().getTranslation().x = -(float) super.getBounds().getWidth() - (float) bounds.getMinX() + this.margin;
@@ -182,12 +195,13 @@ public class OverlayUIScene extends UIScene implements LayoutParent, PaddingOwne
 //		alignAnchors(this.statsGroup.getTransform(), objBounds, screenBounds, Anchor.TOP_LEFT, Anchor.TOP_LEFT, 0, 0);
 
 //		this.progressBar.getTransform().scaleSet(1.8f, 1, 0.5f).updateMatrix();
-		this.progressBar.setForegroundColor(GameEngineUtils.hsvToColorToVec4f((float) Math.sin(PGLogic.TOTAL_TIME()), 1, 1, 1));
-		this.progressBar.setValue((float) Math.sin(PGLogic.TOTAL_TIME()) / 2 + 0.5f).updateScaling();
 //		((Transform3DShear) this.progressBar.getTransform()).shearSet(GeoAxis.Z, GeoAxis.X, -0.8f).update();
 
-		if (Math.random() * 100 < 0.1 && this.progressGroup != null) {
-			this.progressGroup.add(1).flushValue();
+		if (this.progressGroup != null && this.progressBar != null) {
+			this.progressBar.setForegroundColor(GameEngineUtils.hsvToColorToVec4f((float) Math.sin(PGLogic.TOTAL_TIME()), 1, 1, 1));
+			this.progressBar.setValue((float) Math.sin(PGLogic.TOTAL_TIME()) / 2 + 0.5f).updateScaling();
+
+			this.progressGroup.set((int) (this.progressBar.getValue() * 101)).flushValue();
 		}
 
 //		this.setPadding(((float) Math.sin(PGLogic.TOTAL_TIME()) / 2 + 0.5f) * 0.2f);
@@ -200,6 +214,10 @@ public class OverlayUIScene extends UIScene implements LayoutParent, PaddingOwne
 			final DeferredCompositor compositor,
 			final WorkerDispatcher workers,
 			final Dispatcher render) {
+		if (inputHandler.wasResized()) {
+			this.doLayout();
+		}
+
 		super.update(inputHandler, compositor, workers, render);
 	}
 

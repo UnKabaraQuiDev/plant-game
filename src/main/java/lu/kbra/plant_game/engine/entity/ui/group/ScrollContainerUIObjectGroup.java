@@ -5,7 +5,10 @@ import java.awt.geom.Rectangle2D;
 import org.joml.Vector2f;
 import org.joml.Vector3fc;
 
+import lu.pcy113.pclib.concurrency.FutureTriggerLatch;
+
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
+import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
 import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwner;
 import lu.kbra.plant_game.engine.entity.ui.scroller.ScrollBarUIObject;
 import lu.kbra.plant_game.engine.scene.ui.layout.Layout;
@@ -74,7 +77,7 @@ public class ScrollContainerUIObjectGroup extends OffsetUIObjectGroup implements
 	}
 
 	public void updateScrollBar() {
-		if (this.scrollBar == null) {
+		if (this.scrollBar == null || !this.hasSceneParent()) {
 			return;
 		}
 		this.scrollBar.setActive(this.scrollContent.needsScrollBar());
@@ -89,6 +92,18 @@ public class ScrollContainerUIObjectGroup extends OffsetUIObjectGroup implements
 
 	public ScrollDrivenUIObjectGroup getScrollContent() {
 		return this.scrollContent;
+	}
+
+	public <T extends ScrollBarUIObject> FutureTriggerLatch<? extends ScrollContainerUIObjectGroup> init(final Class<T> clazz) {
+		final FutureTriggerLatch<? extends ScrollContainerUIObjectGroup> latch = new FutureTriggerLatch<>(1, this);
+		UIObjectFactory.create(clazz)
+				.set(i -> i.setTransform(new Transform3D()))
+				.set(i -> i.setDir(this.scrollContent.getDirection()))
+				.set(i -> i.setRange(new Vector2f(-1, 1)))
+				.postInit(this::setScrollBar)
+				.latch(latch)
+				.push();
+		return latch;
 	}
 
 	public void setScrollBar(final ScrollBarUIObject scrollBar) {

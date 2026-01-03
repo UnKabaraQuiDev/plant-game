@@ -9,18 +9,18 @@ import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
 import lu.kbra.plant_game.engine.scene.ui.layout.Layout;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-public class AnchoredBoundedUIObjectGroup extends AnchoredLayoutUIObjectGroup implements BoundsOwnerParentAware {
+public class AnchoredBoundedLayoutUIObjectGroup extends AnchoredLayoutUIObjectGroup implements BoundsOwnerParentAware {
 
-	public AnchoredBoundedUIObjectGroup(final String str, final Layout layout, final Anchor obj, final Anchor tar,
+	public AnchoredBoundedLayoutUIObjectGroup(final String str, final Layout layout, final Anchor obj, final Anchor tar,
 			final UIObject... values) {
 		super(str, layout, obj, tar, values);
 	}
 
-	public AnchoredBoundedUIObjectGroup(final String str, final Layout layout, final Transform3D transform, final UIObject... values) {
+	public AnchoredBoundedLayoutUIObjectGroup(final String str, final Layout layout, final Transform3D transform, final UIObject... values) {
 		super(str, layout, transform, values);
 	}
 
-	public AnchoredBoundedUIObjectGroup(final String str, final Layout layout, final UIObjectGroup parent, final UIObject... values) {
+	public AnchoredBoundedLayoutUIObjectGroup(final String str, final Layout layout, final UIObjectGroup parent, final UIObject... values) {
 		super(str, layout, parent, values);
 	}
 

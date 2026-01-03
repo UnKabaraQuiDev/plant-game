@@ -31,9 +31,7 @@ public class StaticFlatMeshLoader {
 			final Dispatcher render) {
 
 		return new TaskFuture<>(loader, (ThrowingSupplier<SingleTexture, Throwable>) () -> {
-			System.err.println(Thread.currentThread().getName() + " has mesh: " + cache.hasMesh(MESH_NAME));
 			if (!cache.hasMesh(MESH_NAME) && !waitOrCreateLock(MESH_NAME)) {
-				System.err.println(Thread.currentThread().getName() + " yielding");
 				throw new YieldExecutionThrowable(() -> cache.hasMesh(MESH_NAME));
 			}
 

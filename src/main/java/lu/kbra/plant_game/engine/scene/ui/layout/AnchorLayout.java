@@ -4,6 +4,8 @@ import java.awt.geom.Rectangle2D;
 import java.util.List;
 import java.util.Objects;
 
+import lu.pcy113.pclib.logger.GlobalLogger;
+
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwnerParentAware;
@@ -36,6 +38,7 @@ public class AnchorLayout implements Layout, BoundsOwnerParentAware {
 				continue;
 			}
 			if (!ao.isAnchored()) {
+				GlobalLogger.info("Skipping anchor: " + ao);
 				continue;
 			}
 			objectAnchor = ao.getObjectAnchor();

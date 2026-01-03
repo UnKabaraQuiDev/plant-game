@@ -72,17 +72,16 @@ public class UIObjectFactory {
 			final Optional<String> key,
 			final Supplier<AttribArray>... attribs) {
 
-		return StaticTextLoader
-				.getFuture(this.cache,
-						name.orElse(clazz.getSimpleName()),
-						key.orElse(DATA_PATH.get(clazz)),
-						charSize.orElse(DEFAULT_CHAR_SIZE),
-						textAlignment.orElse(DEFAULT_TEXT_ALIGNMENT),
-						bufferSize.isEmpty() ? BUFFER_SIZE.containsKey(clazz) ? OptionalInt.of(BUFFER_SIZE.get(clazz)) : OptionalInt.empty()
-								: OptionalInt.empty(),
-						attribs,
-						this.loader,
-						this.render)
+		return StaticTextLoader.getFuture(this.cache,
+				name.orElse(clazz.getSimpleName()),
+				key.orElse(DATA_PATH.get(clazz)),
+				charSize.orElse(DEFAULT_CHAR_SIZE),
+				textAlignment.orElse(DEFAULT_TEXT_ALIGNMENT),
+				bufferSize.isEmpty() ? (BUFFER_SIZE.containsKey(clazz) ? OptionalInt.of(BUFFER_SIZE.get(clazz)) : OptionalInt.empty())
+						: bufferSize,
+				attribs,
+				this.loader,
+				this.render)
 				.then(this.loader, (Function<TextEmitter, List<Object>>) Arrays::asList)
 				.then(new UOCreatingTaskFuture(this.loader, clazz));
 	}

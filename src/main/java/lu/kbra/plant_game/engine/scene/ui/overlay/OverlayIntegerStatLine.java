@@ -173,6 +173,14 @@ public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup
 		return this;
 	}
 
+	public OverlayIntegerStatLine set(final int value) {
+		if (this.getPopup() != null && this.getValue() != null) {
+			this.getPopup().setValue(value);
+			this.getValue().setValue(0);
+		}
+		return this;
+	}
+
 	public OverlayIntegerStatLine flushValue() {
 		if (this.getPopup() == null || this.getValue() == null) {
 			return this;

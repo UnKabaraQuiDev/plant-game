@@ -55,8 +55,8 @@ public class LevelData {
 		static class BuildingOverride {
 
 			protected int price;
-			protected List<JSONObject> unlockRequirements;
-			protected List<JSONObject> buildRequirements;
+			protected List<BuildingRequirement> unlockRequirements;
+			protected List<BuildingRequirement> buildRequirements;
 
 		}
 

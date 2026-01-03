@@ -5,7 +5,7 @@ import lu.kbra.standalone.gameengine.objs.entity.ParentAwareNode;
 public interface BoundsOwnerParentAware extends ParentAwareNode {
 
 	default boolean hasBoundsOwnerParent() {
-		return this.getBoundsOwnerParent() == null;
+		return this.getBoundsOwnerParent() != null;
 	}
 
 	default BoundsOwner getBoundsOwnerParent() {
