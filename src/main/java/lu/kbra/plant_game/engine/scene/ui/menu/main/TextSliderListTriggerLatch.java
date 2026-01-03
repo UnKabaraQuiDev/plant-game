@@ -6,7 +6,7 @@ import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.group.ObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.text.TextUIObject;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
-import lu.kbra.plant_game.engine.scene.ui.layout.LayoutParent;
+import lu.kbra.plant_game.engine.scene.ui.layout.LayoutOwner;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 
 public class TextSliderListTriggerLatch<A extends TextUIObject, B extends UIObject, V extends UIObject> extends ListTriggerLatch<V> {
@@ -30,7 +30,7 @@ public class TextSliderListTriggerLatch<A extends TextUIObject, B extends UIObje
 				parent.add((V) objB);
 			}
 
-			if (parent instanceof final LayoutParent lp) {
+			if (parent instanceof final LayoutOwner lp) {
 				lp.doLayout();
 			}
 		}));
@@ -55,7 +55,7 @@ public class TextSliderListTriggerLatch<A extends TextUIObject, B extends UIObje
 				parent.add(objB);
 			}
 
-			if (parent instanceof final LayoutParent lp) {
+			if (parent instanceof final LayoutOwner lp) {
 				lp.doLayout();
 			}
 		}));

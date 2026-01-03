@@ -21,16 +21,18 @@ public class BuildingTabListUIObjectGroup extends AnchoredLayoutUIObjectGroup im
 	}
 
 	@Override
-	public void recomputeBounds() {
+	public boolean recomputeBounds() {
 		if (!this.hasBoundsOwnerParent()) {
-			return;
+			return false;
 		}
 		final Rectangle2D superBounds = this.getBoundsOwnerParent().getBounds().getBounds2D();
-		this.fixedBounds.setFrame(superBounds.getMinX() + this.boundsMarginX,
+		final Rectangle2D.Float newBounds = new Rectangle2D.Float((float) superBounds.getMinX() + this.boundsMarginX,
 				-this.fixedHeight / 2 + this.boundsMarginY,
-				superBounds.getWidth() - 2 * this.boundsMarginX,
+				(float) superBounds.getWidth() - 2 * this.boundsMarginX,
 				this.fixedHeight - 2 * this.boundsMarginY);
-//		fixedBounds.setFrameFromCenter(0, 0, superBounds.getWidth()/2-boundsMarginX, superBounds.getHeight());
+		final boolean changed = newBounds.equals(this.fixedBounds);
+		this.fixedBounds.setFrame(newBounds);
+		return changed;
 	}
 
 	@Override
@@ -73,7 +75,7 @@ public class BuildingTabListUIObjectGroup extends AnchoredLayoutUIObjectGroup im
 		return "BuildingTabListUIObjectGroup [fixedBounds=" + this.fixedBounds + ", boundsMarginX=" + this.boundsMarginX
 				+ ", boundsMarginY=" + this.boundsMarginY + ", fixedHeight=" + this.fixedHeight + ", objectAnchor=" + this.objectAnchor
 				+ ", targetAnchor=" + this.targetAnchor + ", layout=" + this.layout + ", subEntitiesLock=" + this.subEntitiesLock
-				+ ", subEntities=" + this.subEntities + ", bounds=" + this.bounds + ", transform=" + this.transform + ", active="
+				+ ", subEntities=" + this.subEntities + ", bounds=" + this.computedBounds + ", transform=" + this.transform + ", active="
 				+ this.active + ", name=" + this.name + "]";
 	}
 

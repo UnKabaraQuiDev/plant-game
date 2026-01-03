@@ -5,10 +5,11 @@ import java.awt.geom.Rectangle2D;
 import javax.swing.GroupLayout.Alignment;
 
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
+import lu.kbra.plant_game.engine.entity.ui.impl.TransparentEntity;
 import lu.kbra.plant_game.engine.mesh.TexturedQuadMesh;
 import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
 
-public class TexturedQuadMeshUIObject extends UIObject implements TexturedQuadMeshOwner {
+public class TexturedQuadMeshUIObject extends UIObject implements TexturedQuadMeshOwner, TransparentEntity {
 
 	protected Rectangle2D.Float bounds;
 	protected TexturedQuadMesh mesh;

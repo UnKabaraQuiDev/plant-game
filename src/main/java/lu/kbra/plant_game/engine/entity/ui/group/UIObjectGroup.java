@@ -28,7 +28,7 @@ public class UIObjectGroup extends UIObject implements ObjectGroup<UIObject>, No
 	protected final Object subEntitiesLock = new Object();
 	protected List<UIObject> subEntities = Collections.synchronizedList(new ArrayList<>());
 
-	protected Shape bounds;
+	protected Shape computedBounds;
 
 	protected ParentAwareComponent parent;
 
@@ -104,7 +104,7 @@ public class UIObjectGroup extends UIObject implements ObjectGroup<UIObject>, No
 		return this.subEntities;
 	}
 
-	public void recomputeBounds() {
+	public boolean recomputeBounds() {
 		final Area combined = new Area();
 		synchronized (this.getEntitiesLock()) {
 			this.getWEntities().forEach(se -> {
@@ -114,21 +114,23 @@ public class UIObjectGroup extends UIObject implements ObjectGroup<UIObject>, No
 				combined.add(new Area(se.getTransformedBounds()));
 			});
 		}
-		this.bounds = combined;
+		final boolean changed = this.computedBounds == null || !this.computedBounds.equals(combined);
+		this.computedBounds = combined;
+		return changed;
 	}
 
 	@Override
 	public Shape getBounds() {
-		if (this.bounds == null) {
+		if (this.computedBounds == null) {
 			this.recomputeBounds();
 		}
-		return this.bounds;
+		return this.computedBounds;
 	}
 
 	@Override
 	public String toString() {
-		return "UIObjectGroup [subEntitiesLock=" + this.subEntitiesLock + ", subEntities=" + this.subEntities + ", bounds=" + this.bounds
-				+ ", transform=" + this.transform + ", active=" + this.active + ", name=" + this.name + "]";
+		return "UIObjectGroup [subEntitiesLock=" + this.subEntitiesLock + ", subEntities=" + this.subEntities + ", bounds="
+				+ this.computedBounds + ", transform=" + this.transform + ", active=" + this.active + ", name=" + this.name + "]";
 	}
 
 }

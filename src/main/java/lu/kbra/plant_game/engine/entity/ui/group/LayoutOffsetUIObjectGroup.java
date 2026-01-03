@@ -4,13 +4,13 @@ import java.util.Collection;
 
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.scene.ui.layout.Layout;
-import lu.kbra.plant_game.engine.scene.ui.layout.LayoutParent;
+import lu.kbra.plant_game.engine.scene.ui.layout.LayoutOwner;
 import lu.kbra.standalone.gameengine.objs.entity.ParentAwareComponent;
 import lu.kbra.standalone.gameengine.objs.entity.ParentAwareNode;
 import lu.kbra.standalone.gameengine.objs.entity.SceneParentAware;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-public class LayoutOffsetUIObjectGroup extends OffsetUIObjectGroup implements LayoutParent, SceneParentAware {
+public class LayoutOffsetUIObjectGroup extends OffsetUIObjectGroup implements LayoutOwner, SceneParentAware {
 
 	protected Layout layout;
 
@@ -32,28 +32,28 @@ public class LayoutOffsetUIObjectGroup extends OffsetUIObjectGroup implements La
 	@Override
 	public <V extends UIObject> V add(final V e) {
 		final V v = super.add(e);
-		this.doLayout();
+		this.getFirstParentMatching(LayoutOwner.class).ifPresent(LayoutOwner::doLayout);
 		return v;
 	}
 
 	@Override
 	public <V extends UIObject> boolean addAll(final Collection<? extends V> c) {
 		final boolean v = super.addAll(c);
-		this.doLayout();
+		this.getFirstParentMatching(LayoutOwner.class).ifPresent(LayoutOwner::doLayout);
 		return v;
 	}
 
 	@Override
 	public <V extends UIObject> V[] addAll(final V... e) {
 		final V[] v = super.addAll(e);
-		this.doLayout();
+		this.getFirstParentMatching(LayoutOwner.class).ifPresent(LayoutOwner::doLayout);
 		return v;
 	}
 
 	@Override
 	public <V extends UIObject> boolean addChildren(final ObjectGroup<? extends V> c) {
 		final boolean v = super.addChildren(c);
-		this.doLayout();
+		this.getFirstParentMatching(LayoutOwner.class).ifPresent(LayoutOwner::doLayout);
 		return v;
 	}
 
@@ -74,8 +74,9 @@ public class LayoutOffsetUIObjectGroup extends OffsetUIObjectGroup implements La
 	@Override
 	public void doLayout() {
 		synchronized (this.getEntitiesLock()) {
+			this.doSort();
 			this.getWEntities().stream().forEach(e -> {
-				if (e instanceof final LayoutParent lp) {
+				if (e instanceof final LayoutOwner lp) {
 					lp.doLayout();
 				}
 			});

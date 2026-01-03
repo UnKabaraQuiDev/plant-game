@@ -27,7 +27,7 @@ import lu.kbra.plant_game.engine.entity.ui.impl.NeedsHover;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsInput;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsUpdate;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
-import lu.kbra.plant_game.engine.scene.ui.layout.LayoutParent;
+import lu.kbra.plant_game.engine.scene.ui.layout.LayoutOwner;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.GameEngine;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
@@ -93,7 +93,7 @@ public class UIScene extends Scene3D implements BoundsOwner {
 						newHovered,
 						GameEngine.IDENTITY_MATRIX4F);
 
-				if (resized && e instanceof final LayoutParent lp) {
+				if (resized && e instanceof final LayoutOwner lp) {
 					lp.doLayout();
 				}
 			}
@@ -143,28 +143,30 @@ public class UIScene extends Scene3D implements BoundsOwner {
 
 			if ((e instanceof NeedsHover || e instanceof NeedsClick || e instanceof NeedsBoundsInput)
 					&& uiObj.getTransformedBounds(parentTransform).contains(mousePos)) {
-				frameState.uiSceneCaughtMouseInput = true;
+//				frameState.uiSceneCaughtMouseInput = true;
 
 				if (uiObj instanceof final NeedsHover uiObjectHover) {
 					uiObjectHover.hover(inputHandler, this.hovering.contains(uiObj) ? HoverState.STAY : HoverState.ENTER);
 					newHovered.add(uiObj);
 				}
 
-				if (uiObj instanceof final NeedsBoundsInput uiObjectInput) {
-					uiObjectInput.input(inputHandler);
-					newHovered.add(uiObj);
-				}
-
-				if (uiObj instanceof final NeedsClick uiObjectClick && inputHandler.isMouseButtonPressedOnce(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
-					uiObjectClick.click(inputHandler);
-				}
-
-				if (uiObj instanceof Focusable && inputHandler.isMouseButtonPressedOnce(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
-					if (this.focused != null) {
-						this.focused.removeFocus();
+				if (!frameState.uiSceneCaughtMouseInput) {
+					if (uiObj instanceof final NeedsBoundsInput uiObjectInput) {
+						frameState.uiSceneCaughtMouseInput |= uiObjectInput.input(inputHandler);
 					}
-					this.focused = (Focusable) uiObj;
-					this.focused.giveFocus();
+
+					if (uiObj instanceof final NeedsClick uiObjectClick
+							&& inputHandler.isMouseButtonPressedOnce(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
+						uiObjectClick.click(inputHandler);
+					}
+
+					if (uiObj instanceof Focusable && inputHandler.isMouseButtonPressedOnce(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
+						if (this.focused != null) {
+							this.focused.removeFocus();
+						}
+						this.focused = (Focusable) uiObj;
+						this.focused.giveFocus();
+					}
 				}
 			}
 		}

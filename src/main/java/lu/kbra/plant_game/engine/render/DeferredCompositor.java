@@ -1282,7 +1282,7 @@ public class DeferredCompositor implements Cleanupable {
 	}
 
 	private void drawDebugBounds(final Shape shape) {
-		if (!this.deferredPass && DEBUG_BOUNDS && this.lineDirectShader != null) {
+		if (!this.deferredPass && DEBUG_BOUNDS && this.lineDirectShader != null && shape != null) {
 			QUAD.bind();
 			this.lineDirectShader.bind();
 

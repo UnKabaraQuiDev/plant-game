@@ -1,26 +1,18 @@
 package lu.kbra.plant_game.engine.scene.ui.overlay;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.OptionalInt;
 import java.util.stream.Collectors;
-
-import org.joml.Vector2f;
-
-import lu.pcy113.pclib.pointer.ObjectPointer;
+import java.util.stream.IntStream;
 
 import lu.kbra.plant_game.PGLogic;
 import lu.kbra.plant_game.engine.UpdateFrameState;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.bar.AnchoredProgressBarUIObject;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
-import lu.kbra.plant_game.engine.entity.ui.group.BuildingTabListUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.prim.FlatQuadUIObject;
+import lu.kbra.plant_game.engine.entity.ui.prim.IndexedFlatQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.IntegerTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.PercentageIntTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.PercentageSignedIntTextUIObject;
-import lu.kbra.plant_game.engine.entity.ui.text.ProgrammaticTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.SignedIntegerTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.texture.EnergyIconUIObject;
 import lu.kbra.plant_game.engine.entity.ui.texture.MoneyIconUIObject;
@@ -31,7 +23,7 @@ import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
 import lu.kbra.plant_game.engine.scene.ui.layout.AnchorLayout;
 import lu.kbra.plant_game.engine.scene.ui.layout.FlowLayout;
 import lu.kbra.plant_game.engine.scene.ui.layout.Layout;
-import lu.kbra.plant_game.engine.scene.ui.layout.LayoutParent;
+import lu.kbra.plant_game.engine.scene.ui.layout.LayoutOwner;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
@@ -44,7 +36,7 @@ import lu.kbra.standalone.gameengine.utils.geo.GeoAxis;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3DShear;
 
-public class OverlayUIScene extends UIScene implements LayoutParent, PaddingOwner {
+public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner {
 
 	private static final float STATS_GROUP_SCALE = 0.35f;
 
@@ -61,8 +53,6 @@ public class OverlayUIScene extends UIScene implements LayoutParent, PaddingOwne
 	protected ExtAnchoredOverlayIntegerStatLine progressGroup;
 
 	protected BuildingPanelUIObjectGroup buildingPanel = new BuildingPanelUIObjectGroup();
-	protected BuildingTabListUIObjectGroup buildingTabList = new BuildingTabListUIObjectGroup();
-	protected Map<String, BuildingTabUIObjectGroup> buildingTabs = new HashMap<>();
 
 	protected Layout layout;
 
@@ -75,35 +65,18 @@ public class OverlayUIScene extends UIScene implements LayoutParent, PaddingOwne
 	public void init(final Dispatcher workers, final Dispatcher renderDispatcher) {
 		super.addAll(this.statsGroup, this.buildingPanel);
 
-		this.buildingPanel.add(this.buildingTabList);
-
 		final float height = 0.2f * STATS_GROUP_SCALE;
 
-		final BuildingTabUIObjectGroup buildings = new BuildingTabUIObjectGroup("name", 0, () -> this.buildingPanel.getScroll());
-		this.buildingTabs.put(buildings.getId(), buildings);
+		final BuildingTabUIObjectGroup buildings = new BuildingTabUIObjectGroup("Tab OwO", 0);
+		this.buildingPanel.addTab(buildings);
 
-		UIObjectFactory
-				.createText(ProgrammaticTextUIObject.class,
-						OptionalInt.of(4),
-						Optional.of(new Vector2f(0.1f)),
-						Optional.empty(),
-						Optional.of("btn-" + buildings.getId()),
-						Optional.empty())
-				.set(i -> i.setTransform(new Transform3D()))
-				.set(i -> i.setText("Text").flushText())
-				.add(this.buildingTabList)
-				.push();
-
-		final ObjectPointer<ColorMaterial> col = new ObjectPointer<>(ColorMaterial.BLUE);
-		for (int i = 0; i < 10; i++) {
-			UIObjectFactory.create(FlatQuadUIObject.class)
-					.set(j -> j.setTransform(new Transform3D(0.3f)))
-					.set(j -> j.setColorMaterial(col.set(ColorMaterial::next).get()))
-					.add(buildings)
-					.push();
-		}
-
-		this.buildingTabs.values().forEach(this.buildingPanel::add);
+		IntStream.range(0, 10)
+				.forEach(index -> UIObjectFactory.create(IndexedFlatQuadUIObject.class)
+						.set(i -> i.setIndex(index))
+						.set(j -> j.setTransform(new Transform3D(0.3f)))
+						.set(j -> j.setColorMaterial(ColorMaterial.byId(ColorMaterial.CYAN.getId() - index - 1)))
+						.add(buildings.getContainer())
+						.push());
 
 		this.waterGroup = new OverlayIntegerStatLine("water-counter");
 		this.waterGroup
@@ -204,6 +177,9 @@ public class OverlayUIScene extends UIScene implements LayoutParent, PaddingOwne
 			this.progressGroup.set((int) (this.progressBar.getValue() * 101)).flushValue();
 		}
 
+//		this.buildingPanel.getBuildingTabs().values().forEach(c -> c.setScrollX((float) Math.sin(PGLogic.TOTAL_TIME() * 1.5f) * 2 - 0.5f));
+//		this.buildingPanel.doLayout();
+
 //		this.setPadding(((float) Math.sin(PGLogic.TOTAL_TIME()) / 2 + 0.5f) * 0.2f);
 		// this.doLayout();
 	}
@@ -238,11 +214,7 @@ public class OverlayUIScene extends UIScene implements LayoutParent, PaddingOwne
 	@Override
 	public void doLayout() {
 		synchronized (this.getEntitiesLock()) {
-			this.getEntities()
-					.values()
-					.stream()
-					.filter(e -> e instanceof final LayoutParent lp)
-					.forEach(e -> ((LayoutParent) e).doLayout());
+			this.getEntities().values().stream().filter(e -> e instanceof final LayoutOwner lp).forEach(e -> ((LayoutOwner) e).doLayout());
 			if (this.layout == null) {
 				return;
 			}

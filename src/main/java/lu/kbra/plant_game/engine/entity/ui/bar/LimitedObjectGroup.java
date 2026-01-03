@@ -11,37 +11,32 @@ public interface LimitedObjectGroup<T extends SceneEntity> extends ObjectGroup<T
 
 	@Override
 	default <V extends T> V add(final V e) {
-		final int MAX_ITEMS = this.getMaxItems();
-		if (this.size() >= MAX_ITEMS) {
-			throw new UnsupportedOperationException("Max. " + MAX_ITEMS + " columns: " + this.getROEntities());
-		}
+		this.checkItemCount(1);
 		return ObjectGroup.super.add(e);
+	}
+
+	default void checkItemCount(final int addCount) {
+		final int MAX_ITEMS = this.getMaxItems();
+		if (this.size() >= MAX_ITEMS || this.size() + addCount > MAX_ITEMS) {
+			throw new UnsupportedOperationException("Max. " + MAX_ITEMS + " items: " + this.getROEntities());
+		}
 	}
 
 	@Override
 	default <V extends T> boolean addAll(final Collection<? extends V> c) {
-		final int MAX_ITEMS = this.getMaxItems();
-		if (this.size() >= MAX_ITEMS || this.size() + c.size() > MAX_ITEMS) {
-			throw new UnsupportedOperationException("Max. " + MAX_ITEMS + " columns: " + this.getROEntities());
-		}
+		this.checkItemCount(c.size());
 		return ObjectGroup.super.addAll(c);
 	}
 
 	@Override
 	default <V extends T> V[] addAll(final V... e) {
-		final int MAX_ITEMS = this.getMaxItems();
-		if (this.size() >= MAX_ITEMS || this.size() + e.length > MAX_ITEMS) {
-			throw new UnsupportedOperationException("Max. " + MAX_ITEMS + " columns: " + this.getROEntities());
-		}
+		this.checkItemCount(e.length);
 		return ObjectGroup.super.addAll(e);
 	}
 
 	@Override
 	default <V extends T> boolean addChildren(final ObjectGroup<? extends V> c) {
-		final int MAX_ITEMS = this.getMaxItems();
-		if (this.size() >= MAX_ITEMS || this.size() + c.size() > MAX_ITEMS) {
-			throw new UnsupportedOperationException("Max. " + MAX_ITEMS + " columns: " + this.getROEntities());
-		}
+		this.checkItemCount(c.size());
 		return ObjectGroup.super.addAll(c.getROEntities());
 	}
 

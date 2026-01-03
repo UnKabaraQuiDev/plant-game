@@ -128,7 +128,7 @@ public class ScrollDrivenUIObjectGroup extends OffsetUIObjectGroup implements Ne
 
 	@Override
 	public String toString() {
-		return "ScrollingUIObjectGroup [scrollRatio=" + this.scrollRatioSupplier + ", dir=" + this.dir + ", bounds=" + this.bounds
+		return "ScrollingUIObjectGroup [scrollRatio=" + this.scrollRatioSupplier + ", dir=" + this.dir + ", bounds=" + this.computedBounds
 				+ ", active=" + this.active + ", name=" + this.name + ", getTransform()=" + this.getTransform() + ", size()=" + this.size()
 				+ "]";
 	}

@@ -38,7 +38,7 @@ public class OffsetUIObjectGroup extends UIObjectGroup {
 
 	@Override
 	public String toString() {
-		return "OffsetUIObjectGroup [transform=" + this.transform + ", bounds=" + this.bounds + ", active=" + this.active + ", name="
+		return "OffsetUIObjectGroup [transform=" + this.transform + ", bounds=" + this.computedBounds + ", active=" + this.active + ", name="
 				+ this.name + "]";
 	}
 

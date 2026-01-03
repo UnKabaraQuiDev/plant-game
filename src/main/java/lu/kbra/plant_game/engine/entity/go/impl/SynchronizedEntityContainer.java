@@ -67,6 +67,9 @@ public interface SynchronizedEntityContainer<B extends SceneEntity> extends Enti
 
 	@Override
 	default <T extends B> T[] addAll(final T... entity) {
+		if (entity == null || entity.length == 0) {
+			return null;
+		}
 		synchronized (this.getEntitiesLock()) {
 			for (final T e : entity) {
 				this.add(e);

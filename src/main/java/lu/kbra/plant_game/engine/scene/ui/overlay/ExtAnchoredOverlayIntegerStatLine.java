@@ -153,7 +153,7 @@ public class ExtAnchoredOverlayIntegerStatLine extends OverlayIntegerStatLine im
 				+ this.popupSpawnDirection + ", popupSpawnDuration=" + this.popupSpawnDuration + ", popupStayDuration="
 				+ this.popupStayDuration + ", progress=" + this.progress + ", popupSpawnInterpolator=" + this.popupSpawnInterpolator
 				+ ", comparator=" + this.comparator + ", layout=" + this.layout + ", transform=" + this.transform + ", subEntitiesLock="
-				+ this.subEntitiesLock + ", subEntities=" + this.subEntities + ", bounds=" + this.bounds + ", active=" + this.active
+				+ this.subEntitiesLock + ", subEntities=" + this.subEntities + ", bounds=" + this.computedBounds + ", active=" + this.active
 				+ ", name=" + this.name + "]";
 	}
 
