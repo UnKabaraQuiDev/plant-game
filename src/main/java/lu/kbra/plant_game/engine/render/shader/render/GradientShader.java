@@ -1,4 +1,4 @@
-package lu.kbra.plant_game.engine.render.shader;
+package lu.kbra.plant_game.engine.render.shader.render;
 
 import org.joml.Vector2f;
 import org.joml.Vector4f;
