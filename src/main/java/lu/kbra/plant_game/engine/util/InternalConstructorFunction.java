@@ -1,29 +1,46 @@
 package lu.kbra.plant_game.engine.util;
 
-import java.util.Arrays;
 import java.util.function.Function;
 
-public class InternalConstructorFunction<T> implements Function<Object[], T> {
+public final class InternalConstructorFunction<T> implements Function<Object[], T> {
 
 	private final Class<?>[] params;
+	private final BuildingOption[] options;
 	private final Function<Object[], T> delegate;
 
-	public InternalConstructorFunction(final Class<?>[] params, final Function<Object[], T> delegate) {
+	public InternalConstructorFunction(final Class<?>[] params, final BuildingOption[] options, final Function<Object[], T> delegate) {
 		this.params = params;
+		this.options = options;
 		this.delegate = delegate;
 	}
 
 	@Override
-	public T apply(final Object[] t) {
-		return this.delegate.apply(t);
+	public T apply(final Object[] args) {
+		return this.delegate.apply(args);
 	}
 
 	public Class<?>[] getParams() {
 		return this.params;
 	}
 
-	public Function<Object[], T> getDelegate() {
-		return this.delegate;
+	public BuildingOption[] getOptions() {
+		return this.options;
+	}
+
+	public boolean matches(final Object[] objs) {
+		if (this.params.length != objs.length) {
+			return false;
+		}
+
+		for (int i = 0; i < this.params.length; i++) {
+			final Class<?> expected = wrap(this.params[i]);
+			final Class<?> actual = objs[i] == null ? null : wrap(objs[i].getClass());
+
+			if (actual == null || !expected.isAssignableFrom(actual)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	private static Class<?> wrap(final Class<?> c) {
@@ -56,27 +73,4 @@ public class InternalConstructorFunction<T> implements Function<Object[], T> {
 		}
 		return c;
 	}
-
-	public boolean matches(final Object[] objs) {
-		if (this.params.length != objs.length) {
-			return false;
-		}
-
-		for (int i = 0; i < this.params.length; i++) {
-			final Class<?> expected = wrap(this.params[i]);
-			final Class<?> actual = objs[i] == null ? null : wrap(objs[i].getClass());
-
-			if (actual == null || !expected.isAssignableFrom(actual)) {
-				return false;
-			}
-		}
-
-		return true;
-	}
-
-	@Override
-	public String toString() {
-		return "InternalConstructorFunction [params=" + Arrays.toString(this.params) + ", delegate=" + this.delegate + "]";
-	}
-
 }

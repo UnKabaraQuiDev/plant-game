@@ -2,14 +2,13 @@ package lu.kbra.plant_game;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.OptionalInt;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -34,10 +33,10 @@ import com.squareup.javapoet.TypeVariableName;
 import com.squareup.javapoet.WildcardTypeName;
 
 import lu.pcy113.pclib.PCUtils;
-import lu.pcy113.pclib.datastructure.pair.Pairs;
 
 import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.TextureOption;
+import lu.kbra.plant_game.engine.util.BuildingOption;
 import lu.kbra.plant_game.engine.util.InternalConstructorFunction;
 import lu.kbra.plant_game.engine.util.annotation.BufferSize;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
@@ -125,20 +124,20 @@ public class GameObjectRegistryGenMain extends GenMainConsts {
 		staticCodeBlock.add("\n");
 
 		for (final Class<? extends GameObject> c : classes) {
-			if (!c.isAnnotationPresent(DataPath.class)) {
-				System.err.println("Missing @DataPath on: " + c.getName());
+//			if (!c.isAnnotationPresent(DataPath.class)) {
+//				System.err.println("Missing @DataPath on: " + c.getName());
 //				continue;
-			}
+//			}
 			if (java.lang.reflect.Modifier.isAbstract(c.getModifiers())) {
 				continue;
 			}
 
-			final Optional<String> dataPath = c.isAnnotationPresent(DataPath.class) ? Optional.of(c.getAnnotation(DataPath.class).value())
+//			final Optional<DataPath> classDataPath = c.isAnnotationPresent(DataPath.class) ? Optional.of(c.getAnnotation(DataPath.class))
+//					: Optional.empty();
+			final Optional<BufferSize> classBufferSize = c.isAnnotationPresent(BufferSize.class)
+					? Optional.of(c.getAnnotation(BufferSize.class))
 					: Optional.empty();
-			final OptionalInt bufferSize = c.isAnnotationPresent(BufferSize.class)
-					? OptionalInt.of(c.getAnnotation(BufferSize.class).value())
-					: OptionalInt.empty();
-			final Optional<TextureOption> textureOption = Optional.ofNullable(c.getAnnotation(TextureOption.class));
+			final Optional<TextureOption> classTextureOption = Optional.ofNullable(c.getAnnotation(TextureOption.class));
 			final String listName = "list" + c.getSimpleName();
 
 			final TypeName specificSubListType = ParameterizedTypeName.get(ClassName.get(List.class),
@@ -147,31 +146,121 @@ public class GameObjectRegistryGenMain extends GenMainConsts {
 			staticCodeBlock.add("/* $L $T $L */\n", spacer, TypeName.get(c), spacer);
 			staticCodeBlock.addStatement("final $T $L = new $T<>()", specificSubListType, listName, ArrayList.class);
 
-			for (final Constructor<?> con : Arrays.stream(c.getConstructors())
-					.sorted(Comparator.comparing(Constructor<?>::getParameterCount))
-					.toList()) {
+			boolean invalidClass = false;
 
-				staticCodeBlock.addStatement("$L.add(new $T<>(new $T {"
-						+ IntStream.range(0, con.getParameterCount()).mapToObj(i -> "$T.class").collect(Collectors.joining(", "))
-						+ "}, ($T[] arr) -> ($T) new $T("
-						+ IntStream.range(0, con.getParameterCount()).mapToObj(i -> "($T) $L").collect(Collectors.joining(", ")) + ")))",
-						PCUtils.concatStreams(Stream.of(listName, InternalConstructorFunction.class, ArrayTypeName.of(Class.class)),
-								Arrays.stream(con.getParameterTypes()).map(TypeName::get),
-								Stream.of(Object.class, GameObject.class, c),
-								IntStream.range(0, con.getParameterCount())
-										.mapToObj(i -> Pairs.readOnly(TypeName.get(con.getParameters()[i].getType()), "arr[" + i + "]"))
-										.flatMap(z -> Stream.of(z.getKey(), z.getValue())))
+			for (final Constructor<?> con : c.getConstructors()) {
+
+				final Parameter[] parameters = con.getParameters();
+
+				if (parameters.length == 0 || parameters[0].getType() != String.class) {
+					continue;
+				}
+
+				final int paramCount = parameters.length - 1;
+
+				if (paramCount < 1) {
+					System.err.println("not enough params: " + con);
+					continue;
+				}
+
+				final Class<?>[] paramTypes = new Class<?>[paramCount];
+				final BuildingOption[] options = new BuildingOption[paramCount];
+
+				for (int i = 1; i < parameters.length; i++) {
+					final Parameter p = parameters[i];
+
+					paramTypes[i - 1] = p.getType();
+
+					final Optional<DataPath> dataPath = p.isAnnotationPresent(DataPath.class) ? Optional.of(p.getAnnotation(DataPath.class))
+							: Optional.empty();
+					final Optional<BufferSize> bufferSize = p.isAnnotationPresent(BufferSize.class)
+							? Optional.of(p.getAnnotation(BufferSize.class))
+							: classBufferSize;
+					final Optional<TextureOption> textureOption = p.isAnnotationPresent(TextureOption.class)
+							? Optional.ofNullable(p.getAnnotation(TextureOption.class))
+							: classTextureOption;
+
+					if (dataPath.isEmpty()) {
+						System.err.println("err: no datapath on " + c);
+						invalidClass = true;
+					}
+
+					if (invalidClass) {
+						break;
+					}
+
+					options[i - 1] = new BuildingOption(dataPath.get().value(),
+							textureOption.map(TextureOption::textureFilter).orElse(TextureFilter.NEAREST),
+							textureOption.map(TextureOption::textureWrap).orElse(TextureWrap.REPEAT),
+							bufferSize.map(BufferSize::value).orElse(0));
+				}
+
+				if (invalidClass) {
+					break;
+				}
+
+//				System.err.println(Arrays.toString(options));
+//
+//				System.err.println("$L.add(new $T(new $T[] {"
+//						+ Arrays.stream(paramTypes).map(clazz -> "$T.class").collect(Collectors.joining(", ")) + "}, new $T[] {"
+//						+ Arrays.stream(paramTypes).map(clazz -> "new $T($S, $T.$L, $T.$L, $L)").collect(Collectors.joining(", "))
+//						+ "}, (arr) -> ($T) new $T("
+//						+ IntStream.range(0, con.getParameterCount()).mapToObj(i -> "($T) arr[" + i + "]").collect(Collectors.joining(", "))
+//						+ ")))");
+//
+//				System.err.println(Arrays.toString(Arrays.stream(options)
+//						.flatMap(option -> Stream.of(TypeName.get(BuildingOption.class),
+//								option.getDataPath(),
+//								option.getTextureFilter(),
+//								option.getTextureWrap(),
+//								option.getBufferSize()))
+//						.toArray()));
+//
+//				System.err.println(Arrays.toString(PCUtils
+//						.concatStreams(Stream.of(listName, TypeName.get(InternalConstructorFunction.class), TypeName.get(Object.class)),
+//								Arrays.stream(paramTypes),
+//								Stream.of(TypeName.get(BuildingOption.class)),
+//								Arrays.stream(options)
+//										.flatMap(option -> Stream.of(TypeName.get(BuildingOption.class),
+//												option.getDataPath(),
+//												TypeName.get(TextureFilter.class),
+//												option.getTextureFilter(),
+//												TypeName.get(TextureWrap.class),
+//												option.getTextureWrap(),
+//												option.getBufferSize())),
+//								Stream.of(TypeName.get(GameObject.class), TypeName.get(c)),
+//								IntStream.range(0, con.getParameterCount()).mapToObj(i -> TypeName.get(con.getParameters()[i].getType())))
+//						.toArray()));
+
+				staticCodeBlock.addStatement(
+						"$L.add(new $T(new $T[] {" + Arrays.stream(paramTypes).map(clazz -> "$T.class").collect(Collectors.joining(", "))
+								+ "}, new $T[] {"
+								+ Arrays.stream(paramTypes).map(clazz -> "new $T<>($S, $T.$L, $T.$L, $L)").collect(Collectors.joining(", "))
+								+ "}, (arr) -> ($T) new $T("
+								+ IntStream.range(0, con.getParameterCount())
+										.mapToObj(i -> "($T) arr[" + i + "]")
+										.collect(Collectors.joining(", "))
+								+ ")))",
+						PCUtils.concatStreams(
+								Stream.of(listName,
+										TypeName.get(InternalConstructorFunction.class),
+										ParameterizedTypeName.get(ClassName.get(Class.class), WildcardTypeName.subtypeOf(Object.class))),
+								Arrays.stream(paramTypes),
+								Stream.of(TypeName.get(BuildingOption.class)),
+								Arrays.stream(options)
+										.flatMap(option -> Stream.of(TypeName.get(BuildingOption.class),
+												option.getDataPath(),
+												TypeName.get(TextureFilter.class),
+												option.getTextureFilter(),
+												TypeName.get(TextureWrap.class),
+												option.getTextureWrap(),
+												option.getBufferSize())),
+								Stream.of(TypeName.get(GameObject.class), TypeName.get(c)),
+								IntStream.range(0, con.getParameterCount()).mapToObj(i -> TypeName.get(con.getParameters()[i].getType())))
 								.toArray());
-
 			}
 
 			staticCodeBlock.addStatement("$N.put($T.class, $L)", constructorHashMap, c, listName);
-			bufferSize.ifPresent(i -> staticCodeBlock.addStatement("$N.put($T.class, $L)", bufferSizeHashMap, c, i));
-			dataPath.ifPresent(t -> staticCodeBlock.addStatement("$N.put($T.class, $S)", dataPathHashMap, c, t));
-			textureOption.ifPresent(t -> {
-				staticCodeBlock.addStatement("$N.put($T.class, $L)", textureFilterHashMap, c, t.textureFilter());
-				staticCodeBlock.addStatement("$N.put($T.class, $L)", textureWrapHashMap, c, t.textureWrap());
-			});
 			staticCodeBlock.add("\n");
 		}
 
