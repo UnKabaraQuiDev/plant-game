@@ -141,10 +141,6 @@ public class UIScene extends Scene3D implements BoundsOwner {
 					&& uiObj.getTransformedBounds(parentTransform).contains(mousePos)) {
 //				frameState.uiSceneCaughtMouseInput = true;
 
-				if (uiObj instanceof BuildingPanelUIObjectGroup) {
-					System.err.println(uiObj.getTransformedBounds(parentTransform).contains(mousePos));
-				}
-
 				if (uiObj instanceof final NeedsHover uiObjectHover) {
 					uiObjectHover.hover(inputHandler, this.hovering.contains(uiObj) ? HoverState.STAY : HoverState.ENTER);
 					newHovered.add(uiObj);
@@ -158,9 +154,10 @@ public class UIScene extends Scene3D implements BoundsOwner {
 					}
 				}
 
-				if (uiObj instanceof final NeedsClick uiObjectClick && inputHandler.isMouseButtonPressedOnce(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
+				if (uiObj instanceof final NeedsClick uiObjectClick && (inputHandler.isMouseButtonPressedOnce(GLFW.GLFW_MOUSE_BUTTON_LEFT) || inputHandler.isMouseButtonPressedOnce(GLFW.GLFW_MOUSE_BUTTON_RIGHT))) {
 					uiObjectClick.click(inputHandler);
 					frameState.uiSceneCaughtMouseInput = true;
+					GlobalLogger.info("UIObject: " + uiObj.getId() + " took mouse input.");
 				}
 
 				if (uiObj instanceof Focusable && inputHandler.isMouseButtonPressedOnce(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {

@@ -1050,7 +1050,6 @@ public class DeferredCompositor implements Cleanupable {
 				swayOwner = null;
 			}
 
-			System.err.println(swayOwner);
 			shader.setUniform(TransferShader.APPLY_SWAY, swayOwner != null);
 
 			if (swayOwner != null) {
