@@ -37,6 +37,7 @@ public class AnchorLayout implements Layout, BoundsOwnerParentAware {
 			final Anchor objectAnchor;
 			final Anchor targetAnchor;
 			if (!(obj instanceof final AnchorOwner ao)) {
+				GlobalLogger.info("Skipping not anchor: " + obj);
 				continue;
 			}
 			if (!ao.isAnchored()) {

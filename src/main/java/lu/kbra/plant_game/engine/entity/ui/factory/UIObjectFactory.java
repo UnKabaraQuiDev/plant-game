@@ -152,6 +152,24 @@ public class UIObjectFactory {
 		return INSTANCE.createText_(clazz, bufferSize, charSize, textAlignment, name, key, attribs);
 	}
 
+	public static <T extends UIObject & TextEmitterOwner & ProgrammaticUIObject> UOCreatingTaskFuture<T> createText(
+			final Class<T> clazz,
+			final String key) {
+		return INSTANCE.createText_(clazz, OptionalInt.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(key));
+	}
+
+	public static <T extends UIObject & TextEmitterOwner & ProgrammaticUIObject> UOCreatingTaskFuture<T> createText(
+			final Class<T> clazz,
+			final float charSize,
+			final String key) {
+		return INSTANCE.createText_(clazz,
+				OptionalInt.empty(),
+				Optional.of(new Vector2f(charSize)),
+				Optional.empty(),
+				Optional.empty(),
+				Optional.of(key));
+	}
+
 	public static <T extends UIObject & MeshOwner> UOCreatingTaskFuture<T> createManual(final Class<T> clazz, final Mesh mesh) {
 		return INSTANCE.createManual_(clazz, mesh);
 	}

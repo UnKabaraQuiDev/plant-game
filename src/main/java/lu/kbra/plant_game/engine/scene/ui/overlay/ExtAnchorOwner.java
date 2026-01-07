@@ -1,9 +1,15 @@
 package lu.kbra.plant_game.engine.scene.ui.overlay;
 
-import lu.kbra.plant_game.engine.entity.ui.UIObject;
-import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
+import java.awt.Shape;
 
-public interface ExtAnchorOwner extends AnchorOwner {
+import lu.kbra.plant_game.engine.entity.impl.Transform3DOwner;
+import lu.kbra.plant_game.engine.entity.ui.UIObject;
+import lu.kbra.plant_game.engine.entity.ui.impl.AbsoluteTransformedBoundsOwner;
+import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwner;
+import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
+import lu.kbra.plant_game.engine.scene.ui.layout.AnchorLayout;
+
+public interface ExtAnchorOwner extends AnchorOwner, Transform3DOwner, BoundsOwner {
 
 	UIObject getTarget();
 
@@ -13,6 +19,27 @@ public interface ExtAnchorOwner extends AnchorOwner {
 		this.setTarget(target);
 		this.setObjectAnchor(obj);
 		this.setTargetAnchor(tar);
+	}
+
+	@Override
+	default boolean isAnchored() {
+		return AnchorOwner.super.isAnchored() && this.getTarget() != null;
+	}
+
+	default void applyAnchor() {
+		if (!(this.isAnchored() && this.hasTransform())) {
+			return;
+		}
+
+		final Shape targetBounds = AbsoluteTransformedBoundsOwner.getAbsoluteTransformedBounds(this.getTarget());
+		final float margin = this instanceof MarginOwner mo ? mo.getMargin() : 0;
+		AnchorLayout.alignAnchors(this.getTransform(),
+				this.getBounds().getBounds2D(),
+				targetBounds.getBounds2D(),
+				this.getObjectAnchor(),
+				this.getTargetAnchor(),
+				margin,
+				margin);
 	}
 
 }

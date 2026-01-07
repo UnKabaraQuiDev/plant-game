@@ -1,7 +1,5 @@
 package lu.kbra.plant_game.engine.scene.ui.overlay;
 
-import java.awt.Shape;
-
 import lu.pcy113.pclib.concurrency.ObjectTriggerLatch;
 
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
@@ -12,32 +10,31 @@ import lu.kbra.plant_game.engine.entity.ui.prim.TexturedQuadMeshUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.IntegerTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.SignedIntegerTextUIObject;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
-import lu.kbra.plant_game.engine.scene.ui.layout.AnchorLayout;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.objs.entity.ParentAwareNode;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-public class ExtAnchoredOverlayIntegerStatLine extends OverlayIntegerStatLine implements ExtAnchorOwner, MarginOwner {
+public class ExtAnchoredIntegerStatLine extends IntegerStatLine implements ExtAnchorOwner, MarginOwner {
 
 	protected Anchor objAnchor;
 	protected Anchor tarAnchor;
 	protected UIObject target;
 	protected float margin;
 
-	public ExtAnchoredOverlayIntegerStatLine(final String str, final Transform3D transform, final UIObject... values) {
+	public ExtAnchoredIntegerStatLine(final String str, final Transform3D transform, final UIObject... values) {
 		super(str, transform, values);
 	}
 
-	public ExtAnchoredOverlayIntegerStatLine(final String str, final UIObject... values) {
+	public ExtAnchoredIntegerStatLine(final String str, final UIObject... values) {
 		super(str, values);
 	}
 
-	public ExtAnchoredOverlayIntegerStatLine(final String str, final UIObjectGroup parent, final UIObject... values) {
+	public ExtAnchoredIntegerStatLine(final String str, final UIObjectGroup parent, final UIObject... values) {
 		super(str, parent, values);
 	}
 
-	public ExtAnchoredOverlayIntegerStatLine(final String str, final Anchor obj, final Anchor tar, final UIObject target) {
+	public ExtAnchoredIntegerStatLine(final String str, final Anchor obj, final Anchor tar, final UIObject target) {
 		super(str);
 		this.objAnchor = obj;
 		this.tarAnchor = tar;
@@ -45,23 +42,18 @@ public class ExtAnchoredOverlayIntegerStatLine extends OverlayIntegerStatLine im
 	}
 
 	@Override
-	public <T extends TexturedQuadMeshUIObject, V extends IntegerTextUIObject, P extends SignedIntegerTextUIObject> ObjectTriggerLatch<ExtAnchoredOverlayIntegerStatLine> init(
+	public <T extends TexturedQuadMeshUIObject, V extends IntegerTextUIObject, P extends SignedIntegerTextUIObject> ObjectTriggerLatch<ExtAnchoredIntegerStatLine> init(
 			final Dispatcher workers,
 			final Dispatcher render,
 			final float height,
 			final Class<T> iconClazz,
 			final Class<V> valueClazz,
 			final Class<P> popupClazz) {
-		return (ObjectTriggerLatch<ExtAnchoredOverlayIntegerStatLine>) super.init(workers,
-				render,
-				height,
-				iconClazz,
-				valueClazz,
-				popupClazz);
+		return (ObjectTriggerLatch<ExtAnchoredIntegerStatLine>) super.init(workers, render, height, iconClazz, valueClazz, popupClazz);
 	}
 
 	@Override
-	public <T extends TexturedQuadMeshUIObject, V extends IntegerTextUIObject, P extends SignedIntegerTextUIObject> ObjectTriggerLatch<ExtAnchoredOverlayIntegerStatLine> init(
+	public <T extends TexturedQuadMeshUIObject, V extends IntegerTextUIObject, P extends SignedIntegerTextUIObject> ObjectTriggerLatch<ExtAnchoredIntegerStatLine> init(
 			final Dispatcher workers,
 			final Dispatcher render,
 			final float height,
@@ -70,7 +62,7 @@ public class ExtAnchoredOverlayIntegerStatLine extends OverlayIntegerStatLine im
 			final Class<T> iconClazz,
 			final Class<V> valueClazz,
 			final Class<P> popupClazz) {
-		return (ObjectTriggerLatch<ExtAnchoredOverlayIntegerStatLine>) super.init(workers,
+		return (ObjectTriggerLatch<ExtAnchoredIntegerStatLine>) super.init(workers,
 				render,
 				height,
 				valueLength,
@@ -84,17 +76,7 @@ public class ExtAnchoredOverlayIntegerStatLine extends OverlayIntegerStatLine im
 	public void update(final WindowInputHandler input) {
 		super.update(input);
 
-		if (this.isAnchored()) {
-			final Shape targetBounds = AbsoluteTransformedBoundsOwner.getAbsoluteTransformedBounds(this.target);
-
-			AnchorLayout.alignAnchors(this.transform, this.getBounds().getBounds2D(),
-//					this.target.getTransform(),
-					targetBounds.getBounds2D(),
-					this.objAnchor,
-					this.tarAnchor,
-					this.margin,
-					this.margin);
-		}
+		ExtAnchorOwner.super.applyAnchor();
 	}
 
 	@Override
@@ -105,11 +87,6 @@ public class ExtAnchoredOverlayIntegerStatLine extends OverlayIntegerStatLine im
 	@Override
 	public void setMargin(final float m) {
 		this.margin = m;
-	}
-
-	@Override
-	public boolean isAnchored() {
-		return ExtAnchorOwner.super.isAnchored() && this.target != null;
 	}
 
 	@Override

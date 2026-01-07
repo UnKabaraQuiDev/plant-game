@@ -26,8 +26,7 @@ import lu.kbra.standalone.gameengine.utils.interpolation.Interpolator;
 import lu.kbra.standalone.gameengine.utils.interpolation.Interpolators;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup
-		implements LimitedObjectGroup<UIObject>, NeedsUpdate, OverlayStatLine<OverlayIntegerStatLine> {
+public class IntegerStatLine extends LayoutOffsetUIObjectGroup implements LimitedObjectGroup<UIObject>, NeedsUpdate {
 
 	public static final float POPUP_TEXT_SCALE = 0.6f;
 	public static final int VALUE_LENGTH = 5, POPUP_LENGTH = 3;
@@ -66,19 +65,19 @@ public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup
 		return Integer.compare(r1, r2);
 	};
 
-	public OverlayIntegerStatLine(final String str, final Transform3D transform, final UIObject... values) {
+	public IntegerStatLine(final String str, final Transform3D transform, final UIObject... values) {
 		super(str, new FlowLayout(false, gap), transform, values);
 	}
 
-	public OverlayIntegerStatLine(final String str, final UIObject... values) {
+	public IntegerStatLine(final String str, final UIObject... values) {
 		super(str, new FlowLayout(false, gap), values);
 	}
 
-	public OverlayIntegerStatLine(final String str, final UIObjectGroup parent, final UIObject... values) {
+	public IntegerStatLine(final String str, final UIObjectGroup parent, final UIObject... values) {
 		super(str, new FlowLayout(false, gap), parent, values);
 	}
 
-	public <T extends TexturedQuadMeshUIObject, V extends IntegerTextUIObject, P extends SignedIntegerTextUIObject> ObjectTriggerLatch<? extends OverlayIntegerStatLine> init(
+	public <T extends TexturedQuadMeshUIObject, V extends IntegerTextUIObject, P extends SignedIntegerTextUIObject> ObjectTriggerLatch<? extends IntegerStatLine> init(
 			final Dispatcher workers,
 			final Dispatcher render,
 			final float height,
@@ -91,7 +90,7 @@ public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup
 		final float iconHeightRatio = height / (float) TexturedQuadMeshUIObject.SQUARE_1_UNIT.getBounds2D().getHeight();
 		final float textHeightRatio = height / UIObjectFactory.DEFAULT_CHAR_SIZE.y();
 
-		final ObjectTriggerLatch<? extends OverlayIntegerStatLine> latch = new ObjectTriggerLatch<>(iconClazz == null ? 2 : 3, this);
+		final ObjectTriggerLatch<? extends IntegerStatLine> latch = new ObjectTriggerLatch<>(iconClazz == null ? 2 : 3, this);
 
 		if (iconClazz != null) {
 			UIObjectFactory.create(iconClazz)
@@ -140,7 +139,7 @@ public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup
 		return latch;
 	}
 
-	public <T extends TexturedQuadMeshUIObject, V extends IntegerTextUIObject, P extends SignedIntegerTextUIObject> ObjectTriggerLatch<? extends OverlayIntegerStatLine> init(
+	public <T extends TexturedQuadMeshUIObject, V extends IntegerTextUIObject, P extends SignedIntegerTextUIObject> ObjectTriggerLatch<? extends IntegerStatLine> init(
 			final Dispatcher workers,
 			final Dispatcher render,
 			final float height,
@@ -166,14 +165,14 @@ public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup
 		return this.popup;
 	}
 
-	public OverlayIntegerStatLine add(final int value) {
+	public IntegerStatLine add(final int value) {
 		if (this.getPopup() != null) {
 			this.getPopup().setValue(this.getPopup().getValue() + value);
 		}
 		return this;
 	}
 
-	public OverlayIntegerStatLine set(final int value) {
+	public IntegerStatLine set(final int value) {
 		if (this.getPopup() != null && this.getValue() != null) {
 			this.getPopup().setValue(value);
 			this.getValue().setValue(0);
@@ -181,7 +180,7 @@ public class OverlayIntegerStatLine extends LayoutOffsetUIObjectGroup
 		return this;
 	}
 
-	public OverlayIntegerStatLine flushValue() {
+	public IntegerStatLine flushValue() {
 		if (this.getPopup() == null || this.getValue() == null) {
 			return this;
 		}

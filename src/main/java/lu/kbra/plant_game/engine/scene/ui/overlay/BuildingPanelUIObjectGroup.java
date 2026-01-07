@@ -74,6 +74,10 @@ public class BuildingPanelUIObjectGroup extends AnchoredLayoutUIObjectGroup impl
 	}
 
 	public void switchTab(final String tabId) {
+		if (tabId.equals(this.activeBuildingTabId)) {
+			return;
+		}
+
 		this.setClickedTab(tabId, true);
 		this.setClickedTab(this.activeBuildingTabId, false);
 

@@ -3,12 +3,13 @@ package lu.kbra.plant_game.engine.entity.ui.prim;
 import org.joml.Vector4f;
 import org.joml.Vector4fc;
 
+import lu.kbra.plant_game.engine.entity.ui.impl.TransparentEntity;
 import lu.kbra.plant_game.engine.entity.ui.text.ProgrammaticUIObject;
 import lu.kbra.plant_game.engine.mesh.TexturedQuadMesh;
 import lu.kbra.plant_game.engine.mesh.TintOwner;
 import lu.kbra.plant_game.generated.ColorMaterial;
 
-public class FlatQuadUIObject extends TexturedQuadMeshUIObject implements TintOwner, ProgrammaticUIObject {
+public class FlatQuadUIObject extends TexturedQuadMeshUIObject implements TintOwner, ProgrammaticUIObject, TransparentEntity {
 
 	protected Vector4f color;
 

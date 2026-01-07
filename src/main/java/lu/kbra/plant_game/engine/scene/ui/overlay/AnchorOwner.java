@@ -12,6 +12,11 @@ public interface AnchorOwner {
 
 	void setTargetAnchor(Anchor a);
 
+	default void setAnchors(final Anchor obj, final Anchor tar) {
+		this.setObjectAnchor(obj);
+		this.setTargetAnchor(tar);
+	}
+
 	default boolean isAnchored() {
 		return this.getTargetAnchor() != null && this.getObjectAnchor() != null;
 	}

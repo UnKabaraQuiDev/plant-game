@@ -1,4 +1,4 @@
-package lu.kbra.plant_game.engine.entity.go.obj.water;
+package lu.kbra.plant_game.engine.entity.go.obj.energy;
 
 import org.joml.Matrix4f;
 import org.joml.Vector2i;

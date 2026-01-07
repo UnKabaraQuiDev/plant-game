@@ -61,6 +61,9 @@ public class UIObjectGroup extends UIObject implements ObjectGroup<UIObject>, No
 
 	@Override
 	public <V extends UIObject> boolean addChildren(final ObjectGroup<? extends V> c) {
+		if (c == null || c.size() == 0) {
+			return false;
+		}
 		final boolean a = this.addAll(c.getROEntities());
 		this.recomputeBounds();
 		return a;
@@ -75,6 +78,9 @@ public class UIObjectGroup extends UIObject implements ObjectGroup<UIObject>, No
 
 	@Override
 	public <T extends UIObject> boolean addAll(final Collection<? extends T> entities) {
+		if (entities == null || entities.size() == 0) {
+			return false;
+		}
 		final boolean a = ObjectGroup.super.addAll(entities);
 		this.recomputeBounds();
 		return a;
@@ -82,6 +88,9 @@ public class UIObjectGroup extends UIObject implements ObjectGroup<UIObject>, No
 
 	@Override
 	public <T extends UIObject> T[] addAll(final T... entity) {
+		if (entity == null || entity.length == 0) {
+			return null;
+		}
 		final T[] a = ObjectGroup.super.addAll(entity);
 		this.recomputeBounds();
 		return a;
@@ -111,7 +120,11 @@ public class UIObjectGroup extends UIObject implements ObjectGroup<UIObject>, No
 				if (se instanceof final UIObjectGroup objGroup) {
 					objGroup.recomputeBounds();
 				}
-				combined.add(new Area(se.getTransformedBounds()));
+				final Shape otherBounds = se.getTransformedBounds();
+				if (otherBounds == null) {
+					return;
+				}
+				combined.add(new Area(otherBounds));
 			});
 		}
 		final boolean changed = this.computedBounds == null || !this.computedBounds.equals(combined);

@@ -46,11 +46,11 @@ public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner
 			new FlowLayout(true, 0.08f * STATS_GROUP_SCALE),
 			Anchor.TOP_LEFT,
 			Anchor.TOP_LEFT);
-	protected OverlayIntegerStatLine waterGroup;
-	protected OverlayIntegerStatLine moneyGroup;
-	protected OverlayIntegerStatLine energyGroup;
+	protected IntegerStatLine waterGroup;
+	protected IntegerStatLine moneyGroup;
+	protected IntegerStatLine energyGroup;
 	protected AnchoredProgressBarUIObject progressBar;
-	protected ExtAnchoredOverlayIntegerStatLine progressGroup;
+	protected ExtAnchoredIntegerStatLine progressGroup;
 
 	protected BuildingPanelUIObjectGroup buildingPanel = new BuildingPanelUIObjectGroup();
 
@@ -66,6 +66,11 @@ public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner
 		super.addAll(this.statsGroup, this.buildingPanel);
 
 		final float height = 0.2f * STATS_GROUP_SCALE;
+
+		new BuildingInfoUIObjectGroup().init(workers, renderDispatcher).then(v -> {
+			System.err.println(v);
+			this.add(v);
+		});
 
 		final BuildingTabUIObjectGroup buildings = new BuildingTabUIObjectGroup("Tab OwO", 0, ColorMaterial.CYAN);
 		this.buildingPanel.addTab(buildings);
@@ -92,7 +97,7 @@ public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner
 						.add(buildings.getContainer())
 						.push());
 
-		this.waterGroup = new OverlayIntegerStatLine("water-counter");
+		this.waterGroup = new IntegerStatLine("water-counter");
 		this.waterGroup
 				.init(workers,
 						renderDispatcher,
@@ -107,7 +112,7 @@ public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner
 				});
 		this.statsGroup.add(this.waterGroup);
 
-		this.moneyGroup = new OverlayIntegerStatLine("money-counter");
+		this.moneyGroup = new IntegerStatLine("money-counter");
 		this.moneyGroup
 				.init(workers,
 						renderDispatcher,
@@ -122,7 +127,7 @@ public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner
 				});
 		this.statsGroup.add(this.moneyGroup);
 
-		this.energyGroup = new OverlayIntegerStatLine("energy-counter");
+		this.energyGroup = new IntegerStatLine("energy-counter");
 		this.energyGroup
 				.init(workers,
 						renderDispatcher,
@@ -145,7 +150,7 @@ public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner
 				0.01f,
 				0.5f);
 		this.progressBar.init(workers, renderDispatcher, FlatQuadUIObject.class, FlatQuadUIObject.class).then(pb -> {
-			this.progressGroup = new ExtAnchoredOverlayIntegerStatLine("level-progress-counter");
+			this.progressGroup = new ExtAnchoredIntegerStatLine("level-progress-counter");
 			this.progressGroup
 					.init(workers,
 							renderDispatcher,
