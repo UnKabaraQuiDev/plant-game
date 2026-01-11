@@ -37,10 +37,11 @@ import lu.pcy113.pclib.PCUtils;
 import lu.pcy113.pclib.datastructure.pair.Pairs;
 
 import lu.kbra.plant_game.engine.entity.go.GameObject;
-import lu.kbra.plant_game.engine.entity.ui.impl.TextureOption;
 import lu.kbra.plant_game.engine.util.InternalConstructorFunction;
 import lu.kbra.plant_game.engine.util.annotation.BufferSize;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
+import lu.kbra.plant_game.engine.util.annotation.DefaultPrice;
+import lu.kbra.plant_game.engine.util.annotation.TextureOption;
 import lu.kbra.plant_game.engine.util.exceptions.GameObjectConstructorNotFound;
 import lu.kbra.plant_game.engine.util.exceptions.GameObjectNotFound;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextureFilter;
@@ -101,6 +102,14 @@ public class GameObjectRegistryGenMain extends GenMainConsts {
 						Modifier.FINAL)
 				.build();
 
+		final FieldSpec defaultPriceHashMap = FieldSpec
+				.builder(ParameterizedTypeName.get(ClassName.get(Map.class), gameObjectClassType, ClassName.get(Integer.class)),
+						PCUtils.camelCaseToConstant("defaultPrice"),
+						Modifier.PUBLIC,
+						Modifier.STATIC,
+						Modifier.FINAL)
+				.build();
+
 		final TypeSpec.Builder registry = TypeSpec.classBuilder("GameObjectRegistry")
 				.addModifiers(Modifier.PUBLIC)
 				.addField(constructorHashMap)
@@ -122,6 +131,7 @@ public class GameObjectRegistryGenMain extends GenMainConsts {
 		staticCodeBlock.addStatement("$N = new $T<>()", bufferSizeHashMap, HashMap.class);
 		staticCodeBlock.addStatement("$N = new $T<>()", textureFilterHashMap, HashMap.class);
 		staticCodeBlock.addStatement("$N = new $T<>()", textureWrapHashMap, HashMap.class);
+		staticCodeBlock.addStatement("$N = new $T<>()", defaultPriceHashMap, HashMap.class);
 		staticCodeBlock.add("\n");
 
 		for (final Class<? extends GameObject> c : classes) {
@@ -140,6 +150,7 @@ public class GameObjectRegistryGenMain extends GenMainConsts {
 					: OptionalInt.empty();
 			final Optional<TextureOption> textureOption = Optional.ofNullable(c.getAnnotation(TextureOption.class));
 			final String listName = "list" + c.getSimpleName();
+			final Optional<Integer> price = Optional.ofNullable(c.getAnnotation(DefaultPrice.class)).map(DefaultPrice::value);
 
 			final TypeName specificSubListType = ParameterizedTypeName.get(ClassName.get(List.class),
 					ParameterizedTypeName.get(ClassName.get(InternalConstructorFunction.class), ClassName.get(GameObject.class)));
@@ -172,6 +183,7 @@ public class GameObjectRegistryGenMain extends GenMainConsts {
 				staticCodeBlock.addStatement("$N.put($T.class, $L)", textureFilterHashMap, c, t.textureFilter());
 				staticCodeBlock.addStatement("$N.put($T.class, $L)", textureWrapHashMap, c, t.textureWrap());
 			});
+			price.ifPresent(p -> staticCodeBlock.addStatement("$N.put($T.class, $L)", defaultPriceHashMap, c, p));
 			staticCodeBlock.add("\n");
 		}
 

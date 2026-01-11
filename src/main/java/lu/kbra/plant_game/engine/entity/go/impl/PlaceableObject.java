@@ -2,6 +2,7 @@ package lu.kbra.plant_game.engine.entity.go.impl;
 
 import org.joml.Vector2i;
 
+import lu.kbra.plant_game.engine.entity.go.data.Footprint;
 import lu.kbra.plant_game.engine.entity.go.mesh.terrain.TerrainMesh;
 import lu.kbra.plant_game.engine.entity.go.obj.terrain.TerrainObject;
 import lu.kbra.plant_game.engine.entity.impl.FootprintOwner;

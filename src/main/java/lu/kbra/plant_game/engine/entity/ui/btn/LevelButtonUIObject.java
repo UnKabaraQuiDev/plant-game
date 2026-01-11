@@ -4,14 +4,14 @@ import org.joml.Vector4fc;
 
 import lu.pcy113.pclib.PCUtils;
 
+import lu.kbra.plant_game.engine.entity.impl.TintOwner;
+import lu.kbra.plant_game.engine.entity.ui.TexturedQuadMeshUIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsClick;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsUpdate;
-import lu.kbra.plant_game.engine.entity.ui.impl.TextureOption;
-import lu.kbra.plant_game.engine.entity.ui.prim.TexturedQuadMeshUIObject;
 import lu.kbra.plant_game.engine.mesh.TexturedQuadMesh;
-import lu.kbra.plant_game.engine.mesh.TintOwner;
 import lu.kbra.plant_game.engine.scene.world.LevelState;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
+import lu.kbra.plant_game.engine.util.annotation.TextureOption;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextureFilter;
 

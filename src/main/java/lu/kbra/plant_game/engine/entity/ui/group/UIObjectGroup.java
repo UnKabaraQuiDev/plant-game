@@ -8,10 +8,12 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import lu.kbra.plant_game.engine.entity.go.impl.SynchronizedEntityContainer;
 import lu.kbra.plant_game.engine.entity.impl.NoMeshObject;
+import lu.kbra.plant_game.engine.entity.impl.SynchronizedEntityContainer;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
+import lu.kbra.plant_game.engine.entity.ui.impl.IgnoreBounds;
 import lu.kbra.plant_game.engine.entity.ui.impl.IndexOwner;
+import lu.kbra.plant_game.engine.entity.ui.impl.ObjectGroup;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
 
 public class UIObjectGroup extends UIObject implements ObjectGroup<UIObject>, NoMeshObject, SynchronizedEntityContainer<UIObject> {

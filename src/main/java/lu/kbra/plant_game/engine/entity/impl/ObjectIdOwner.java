@@ -2,7 +2,7 @@ package lu.kbra.plant_game.engine.entity.impl;
 
 import org.joml.Vector3ic;
 
-import lu.kbra.plant_game.engine.mesh.data.AttributeLocation;
+import lu.kbra.plant_game.engine.entity.go.data.AttributeLocation;
 
 public interface ObjectIdOwner {
 

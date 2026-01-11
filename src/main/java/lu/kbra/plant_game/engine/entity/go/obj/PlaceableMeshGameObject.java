@@ -1,7 +1,7 @@
 package lu.kbra.plant_game.engine.entity.go.obj;
 
 import lu.kbra.plant_game.engine.entity.go.MeshGameObject;
-import lu.kbra.plant_game.engine.entity.go.impl.Footprint;
+import lu.kbra.plant_game.engine.entity.go.data.Footprint;
 import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
 import lu.kbra.plant_game.engine.entity.impl.NeedsPostConstruct;
 import lu.kbra.standalone.gameengine.geom.Mesh;

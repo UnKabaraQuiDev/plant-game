@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.function.Supplier;
 
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
+import lu.kbra.plant_game.engine.entity.ui.impl.ObjectGroup;
 import lu.kbra.plant_game.engine.scene.ui.layout.Layout;
 import lu.kbra.plant_game.engine.scene.ui.layout.LayoutOwner;
 import lu.kbra.standalone.gameengine.objs.entity.ParentAwareComponent;

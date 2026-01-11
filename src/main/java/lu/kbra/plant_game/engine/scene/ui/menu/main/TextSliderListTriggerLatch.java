@@ -3,7 +3,7 @@ package lu.kbra.plant_game.engine.scene.ui.menu.main;
 import lu.pcy113.pclib.concurrency.ListTriggerLatch;
 
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
-import lu.kbra.plant_game.engine.entity.ui.group.ObjectGroup;
+import lu.kbra.plant_game.engine.entity.ui.impl.ObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.text.TextUIObject;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
 import lu.kbra.plant_game.engine.scene.ui.layout.LayoutOwner;

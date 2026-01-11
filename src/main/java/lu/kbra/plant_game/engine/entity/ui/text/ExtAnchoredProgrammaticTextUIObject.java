@@ -1,8 +1,8 @@
 package lu.kbra.plant_game.engine.entity.ui.text;
 
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
+import lu.kbra.plant_game.engine.entity.ui.impl.ExtAnchorOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsUpdate;
-import lu.kbra.plant_game.engine.scene.ui.overlay.ExtAnchorOwner;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;

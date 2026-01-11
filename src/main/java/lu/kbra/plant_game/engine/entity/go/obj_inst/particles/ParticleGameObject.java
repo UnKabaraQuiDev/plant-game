@@ -7,9 +7,9 @@ import java.util.function.IntFunction;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
-import lu.kbra.plant_game.engine.entity.go.GOCreatingTaskFuture;
+import lu.kbra.plant_game.engine.entity.go.InstanceGameObject;
+import lu.kbra.plant_game.engine.entity.go.factory.GOCreatingTaskFuture;
 import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory;
-import lu.kbra.plant_game.engine.entity.go.impl.InstanceGameObject;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.standalone.gameengine.cache.attrib.Vec3fPaddedAttribArray;

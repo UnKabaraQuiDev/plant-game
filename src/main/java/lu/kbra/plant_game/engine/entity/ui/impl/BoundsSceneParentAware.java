@@ -2,7 +2,7 @@ package lu.kbra.plant_game.engine.entity.ui.impl;
 
 import java.util.Optional;
 
-import lu.kbra.plant_game.engine.scene.ui.SceneBoundsOwner;
+import lu.kbra.plant_game.engine.entity.impl.SceneBoundsOwner;
 import lu.kbra.standalone.gameengine.objs.entity.ParentAwareNode;
 import lu.kbra.standalone.gameengine.objs.entity.SceneParentAware;
 

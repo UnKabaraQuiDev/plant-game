@@ -3,9 +3,9 @@ package lu.kbra.plant_game.engine.entity.go;
 import org.joml.Vector3i;
 import org.joml.Vector3ic;
 
+import lu.kbra.plant_game.engine.entity.go.data.AttributeLocation;
 import lu.kbra.plant_game.engine.entity.impl.ObjectIdOwner;
 import lu.kbra.plant_game.engine.entity.impl.Transform3DOwner;
-import lu.kbra.plant_game.engine.mesh.data.AttributeLocation;
 import lu.kbra.standalone.gameengine.objs.entity.Entity;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 

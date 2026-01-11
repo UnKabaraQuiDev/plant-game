@@ -5,7 +5,7 @@ import org.joml.Vector2fc;
 
 import lu.pcy113.pclib.PCUtils;
 
-import lu.kbra.plant_game.engine.entity.ui.prim.FlatQuadUIObject;
+import lu.kbra.plant_game.engine.entity.ui.FlatQuadUIObject;
 import lu.kbra.plant_game.engine.mesh.TexturedQuadMesh;
 import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.standalone.gameengine.utils.consts.Direction;

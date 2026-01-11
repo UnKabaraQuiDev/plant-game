@@ -8,6 +8,9 @@ import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.json.JSONObject;
 
+import lu.kbra.plant_game.engine.scene.world.data.building.requirement.BuildingRequirement;
+import lu.kbra.plant_game.engine.scene.world.generator.WorldGenerationStrategy;
+
 public class LevelData {
 
 	static class World {

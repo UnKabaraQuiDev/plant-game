@@ -3,7 +3,7 @@ package lu.kbra.plant_game.engine.entity.go.obj;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 
-import lu.kbra.plant_game.engine.entity.go.impl.Footprint;
+import lu.kbra.plant_game.engine.entity.go.data.Footprint;
 import lu.kbra.plant_game.engine.entity.impl.FootprintOwner;
 import lu.kbra.plant_game.engine.entity.impl.MeshOwner;
 import lu.kbra.standalone.gameengine.geom.BoundingBox;

@@ -1,6 +1,6 @@
 import org.joml.Matrix4f;
 
-import lu.kbra.plant_game.engine.entity.go.impl.Footprint;
+import lu.kbra.plant_game.engine.entity.go.data.Footprint;
 import lu.kbra.plant_game.engine.entity.go.obj.AnimatedMeshFootprintOwner;
 import lu.kbra.plant_game.engine.mesh.AnimatedMesh;
 import lu.kbra.standalone.gameengine.utils.consts.Direction;

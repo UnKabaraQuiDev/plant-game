@@ -13,44 +13,44 @@ import java.util.Map;
 import java.util.Optional;
 import lu.kbra.plant_game.engine.entity.go.AnimatedMeshGameObject;
 import lu.kbra.plant_game.engine.entity.go.GameObject;
+import lu.kbra.plant_game.engine.entity.go.InstanceGameObject;
+import lu.kbra.plant_game.engine.entity.go.InstanceSwayGameObject;
 import lu.kbra.plant_game.engine.entity.go.MeshGameObject;
-import lu.kbra.plant_game.engine.entity.go.impl.InstanceGameObject;
-import lu.kbra.plant_game.engine.entity.go.impl.InstanceSwayGameObject;
-import lu.kbra.plant_game.engine.entity.go.impl.SwayGameObject;
+import lu.kbra.plant_game.engine.entity.go.SwayGameObject;
 import lu.kbra.plant_game.engine.entity.go.mesh.terrain.TerrainMesh;
-import lu.kbra.plant_game.engine.entity.go.obj.energy.SolarPanelObject;
-import lu.kbra.plant_game.engine.entity.go.obj.energy.WaterWheelObject;
-import lu.kbra.plant_game.engine.entity.go.obj.flower.champi.LargeChampiFlowerObject;
-import lu.kbra.plant_game.engine.entity.go.obj.flower.champi.MediumChampiFlowerObject;
-import lu.kbra.plant_game.engine.entity.go.obj.flower.champi.SmallChampiFlowerObject;
-import lu.kbra.plant_game.engine.entity.go.obj.flower.round.LargeRoundFlowerObject;
-import lu.kbra.plant_game.engine.entity.go.obj.flower.round.MediumRoundFlowerObject;
-import lu.kbra.plant_game.engine.entity.go.obj.flower.round.SmallRoundFlowerObject;
-import lu.kbra.plant_game.engine.entity.go.obj.grass.LargeGrassObject;
-import lu.kbra.plant_game.engine.entity.go.obj.grass.MediumGrassObject;
-import lu.kbra.plant_game.engine.entity.go.obj.grass.SmallGrassObject;
 import lu.kbra.plant_game.engine.entity.go.obj.terrain.TerrainEdgeObject;
 import lu.kbra.plant_game.engine.entity.go.obj.terrain.TerrainHighlightObject;
 import lu.kbra.plant_game.engine.entity.go.obj.terrain.TerrainObject;
-import lu.kbra.plant_game.engine.entity.go.obj.water.WaterSprinklerObject3x3;
-import lu.kbra.plant_game.engine.entity.go.obj.water.WaterSprinklerObject5x5;
-import lu.kbra.plant_game.engine.entity.go.obj.water.WaterSprinklerObject7x7;
-import lu.kbra.plant_game.engine.entity.go.obj.water.WaterTowerObject;
-import lu.kbra.plant_game.engine.entity.go.obj_inst.champi.InstanceLargeChampiFlowerObject;
-import lu.kbra.plant_game.engine.entity.go.obj_inst.champi.InstanceMediumChampiFlowerObject;
-import lu.kbra.plant_game.engine.entity.go.obj_inst.champi.InstanceSmallChampiFlowerObject;
-import lu.kbra.plant_game.engine.entity.go.obj_inst.grass.InstanceLargeGrassObject;
-import lu.kbra.plant_game.engine.entity.go.obj_inst.grass.InstanceMediumGrassObject;
-import lu.kbra.plant_game.engine.entity.go.obj_inst.grass.InstanceSmallGrassObject;
 import lu.kbra.plant_game.engine.entity.go.obj_inst.particles.GravityParticleGameObject;
 import lu.kbra.plant_game.engine.entity.go.obj_inst.particles.ParticleGameObject;
-import lu.kbra.plant_game.engine.entity.go.obj_inst.round.InstanceLargeRoundFlowerObject;
-import lu.kbra.plant_game.engine.entity.go.obj_inst.round.InstanceMediumRoundFlowerObject;
-import lu.kbra.plant_game.engine.entity.go.obj_inst.round.InstanceSmallRoundFlowerObject;
 import lu.kbra.plant_game.engine.mesh.AnimatedMesh;
 import lu.kbra.plant_game.engine.util.InternalConstructorFunction;
 import lu.kbra.plant_game.engine.util.exceptions.GameObjectConstructorNotFound;
 import lu.kbra.plant_game.engine.util.exceptions.GameObjectNotFound;
+import lu.kbra.plant_game.vanilla.entity.go.obj.energy.SolarPanelObject;
+import lu.kbra.plant_game.vanilla.entity.go.obj.energy.WaterWheelObject;
+import lu.kbra.plant_game.vanilla.entity.go.obj.flower.champi.LargeChampiFlowerObject;
+import lu.kbra.plant_game.vanilla.entity.go.obj.flower.champi.MediumChampiFlowerObject;
+import lu.kbra.plant_game.vanilla.entity.go.obj.flower.champi.SmallChampiFlowerObject;
+import lu.kbra.plant_game.vanilla.entity.go.obj.flower.round.LargeRoundFlowerObject;
+import lu.kbra.plant_game.vanilla.entity.go.obj.flower.round.MediumRoundFlowerObject;
+import lu.kbra.plant_game.vanilla.entity.go.obj.flower.round.SmallRoundFlowerObject;
+import lu.kbra.plant_game.vanilla.entity.go.obj.grass.LargeGrassObject;
+import lu.kbra.plant_game.vanilla.entity.go.obj.grass.MediumGrassObject;
+import lu.kbra.plant_game.vanilla.entity.go.obj.grass.SmallGrassObject;
+import lu.kbra.plant_game.vanilla.entity.go.obj.water.WaterSprinklerObject3x3;
+import lu.kbra.plant_game.vanilla.entity.go.obj.water.WaterSprinklerObject5x5;
+import lu.kbra.plant_game.vanilla.entity.go.obj.water.WaterSprinklerObject7x7;
+import lu.kbra.plant_game.vanilla.entity.go.obj.water.WaterTowerObject;
+import lu.kbra.plant_game.vanilla.entity.go.obj_inst.grass.InstanceLargeGrassObject;
+import lu.kbra.plant_game.vanilla.entity.go.obj_inst.grass.InstanceMediumGrassObject;
+import lu.kbra.plant_game.vanilla.entity.go.obj_inst.grass.InstanceSmallGrassObject;
+import lu.kbra.plant_game.vanilla.entity.go.obj_inst.round.InstanceLargeRoundFlowerObject;
+import lu.kbra.plant_game.vanilla.entity.go.obj_inst.round.InstanceMediumRoundFlowerObject;
+import lu.kbra.plant_game.vanilla.entity.go.obj_inst.round.InstanceSmallRoundFlowerObject;
+import lu.kbra.plant_game.vanilla.entity.go_inst.champi.InstanceLargeChampiFlowerObject;
+import lu.kbra.plant_game.vanilla.entity.go_inst.champi.InstanceMediumChampiFlowerObject;
+import lu.kbra.plant_game.vanilla.entity.go_inst.champi.InstanceSmallChampiFlowerObject;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.geom.instance.InstanceEmitter;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextureFilter;
@@ -73,6 +73,7 @@ public class GameObjectRegistry {
 		BUFFER_SIZE = new HashMap<>();
 		TEXTURE_FILTER = new HashMap<>();
 		TEXTURE_WRAP = new HashMap<>();
+		DEFAULT_PRICE = new HashMap<>();
 
 		/*                 MeshGameObject                 */
 		final List<InternalConstructorFunction<GameObject>> listMeshGameObject = new ArrayList<>();
@@ -120,53 +121,17 @@ public class GameObjectRegistry {
 		GAME_OBJECT_CONSTRUCTORS.put(ParticleGameObject.class, listParticleGameObject);
 		DATA_PATH.put(ParticleGameObject.class, "classpath:/models/cube.json");
 
-		/*                 WaterTowerObject                 */
-		final List<InternalConstructorFunction<GameObject>> listWaterTowerObject = new ArrayList<>();
-		listWaterTowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class}, (Object[] arr) -> (GameObject) new WaterTowerObject((String) arr[0], (Mesh) arr[1])));
-		GAME_OBJECT_CONSTRUCTORS.put(WaterTowerObject.class, listWaterTowerObject);
-		DATA_PATH.put(WaterTowerObject.class, "classpath:/models/water-tower-medium.json");
-
 		/*                 SolarPanelObject                 */
 		final List<InternalConstructorFunction<GameObject>> listSolarPanelObject = new ArrayList<>();
 		listSolarPanelObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class}, (Object[] arr) -> (GameObject) new SolarPanelObject((String) arr[0], (Mesh) arr[1])));
 		GAME_OBJECT_CONSTRUCTORS.put(SolarPanelObject.class, listSolarPanelObject);
 		DATA_PATH.put(SolarPanelObject.class, "classpath:/models/solar-panel-medium.json");
 
-		/*                 LargeRoundFlowerObject                 */
-		final List<InternalConstructorFunction<GameObject>> listLargeRoundFlowerObject = new ArrayList<>();
-		listLargeRoundFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class}, (Object[] arr) -> (GameObject) new LargeRoundFlowerObject((String) arr[0], (Mesh) arr[1])));
-		GAME_OBJECT_CONSTRUCTORS.put(LargeRoundFlowerObject.class, listLargeRoundFlowerObject);
-		DATA_PATH.put(LargeRoundFlowerObject.class, "classpath:/models/flower-round-large.json");
-
-		/*                 SmallGrassObject                 */
-		final List<InternalConstructorFunction<GameObject>> listSmallGrassObject = new ArrayList<>();
-		listSmallGrassObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class}, (Object[] arr) -> (GameObject) new SmallGrassObject((String) arr[0], (Mesh) arr[1])));
-		GAME_OBJECT_CONSTRUCTORS.put(SmallGrassObject.class, listSmallGrassObject);
-		DATA_PATH.put(SmallGrassObject.class, "classpath:/models/grass-small.json");
-
-		/*                 LargeChampiFlowerObject                 */
-		final List<InternalConstructorFunction<GameObject>> listLargeChampiFlowerObject = new ArrayList<>();
-		listLargeChampiFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class}, (Object[] arr) -> (GameObject) new LargeChampiFlowerObject((String) arr[0], (Mesh) arr[1])));
-		GAME_OBJECT_CONSTRUCTORS.put(LargeChampiFlowerObject.class, listLargeChampiFlowerObject);
-		DATA_PATH.put(LargeChampiFlowerObject.class, "classpath:/models/champi-large.json");
-
-		/*                 LargeGrassObject                 */
-		final List<InternalConstructorFunction<GameObject>> listLargeGrassObject = new ArrayList<>();
-		listLargeGrassObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class}, (Object[] arr) -> (GameObject) new LargeGrassObject((String) arr[0], (Mesh) arr[1])));
-		GAME_OBJECT_CONSTRUCTORS.put(LargeGrassObject.class, listLargeGrassObject);
-		DATA_PATH.put(LargeGrassObject.class, "classpath:/models/grass-large.json");
-
-		/*                 SmallChampiFlowerObject                 */
-		final List<InternalConstructorFunction<GameObject>> listSmallChampiFlowerObject = new ArrayList<>();
-		listSmallChampiFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class}, (Object[] arr) -> (GameObject) new SmallChampiFlowerObject((String) arr[0], (Mesh) arr[1])));
-		GAME_OBJECT_CONSTRUCTORS.put(SmallChampiFlowerObject.class, listSmallChampiFlowerObject);
-		DATA_PATH.put(SmallChampiFlowerObject.class, "classpath:/models/champi-small.json");
-
-		/*                 MediumGrassObject                 */
-		final List<InternalConstructorFunction<GameObject>> listMediumGrassObject = new ArrayList<>();
-		listMediumGrassObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class}, (Object[] arr) -> (GameObject) new MediumGrassObject((String) arr[0], (Mesh) arr[1])));
-		GAME_OBJECT_CONSTRUCTORS.put(MediumGrassObject.class, listMediumGrassObject);
-		DATA_PATH.put(MediumGrassObject.class, "classpath:/models/grass-medium.json");
+		/*                 WaterTowerObject                 */
+		final List<InternalConstructorFunction<GameObject>> listWaterTowerObject = new ArrayList<>();
+		listWaterTowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class}, (Object[] arr) -> (GameObject) new WaterTowerObject((String) arr[0], (Mesh) arr[1])));
+		GAME_OBJECT_CONSTRUCTORS.put(WaterTowerObject.class, listWaterTowerObject);
+		DATA_PATH.put(WaterTowerObject.class, "classpath:/models/water-tower-medium.json");
 
 		/*                 SmallRoundFlowerObject                 */
 		final List<InternalConstructorFunction<GameObject>> listSmallRoundFlowerObject = new ArrayList<>();
@@ -174,29 +139,53 @@ public class GameObjectRegistry {
 		GAME_OBJECT_CONSTRUCTORS.put(SmallRoundFlowerObject.class, listSmallRoundFlowerObject);
 		DATA_PATH.put(SmallRoundFlowerObject.class, "classpath:/models/flower-round-small.json");
 
+		/*                 LargeChampiFlowerObject                 */
+		final List<InternalConstructorFunction<GameObject>> listLargeChampiFlowerObject = new ArrayList<>();
+		listLargeChampiFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class}, (Object[] arr) -> (GameObject) new LargeChampiFlowerObject((String) arr[0], (Mesh) arr[1])));
+		GAME_OBJECT_CONSTRUCTORS.put(LargeChampiFlowerObject.class, listLargeChampiFlowerObject);
+		DATA_PATH.put(LargeChampiFlowerObject.class, "classpath:/models/champi-large.json");
+
+		/*                 LargeRoundFlowerObject                 */
+		final List<InternalConstructorFunction<GameObject>> listLargeRoundFlowerObject = new ArrayList<>();
+		listLargeRoundFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class}, (Object[] arr) -> (GameObject) new LargeRoundFlowerObject((String) arr[0], (Mesh) arr[1])));
+		GAME_OBJECT_CONSTRUCTORS.put(LargeRoundFlowerObject.class, listLargeRoundFlowerObject);
+		DATA_PATH.put(LargeRoundFlowerObject.class, "classpath:/models/flower-round-large.json");
+
+		/*                 MediumGrassObject                 */
+		final List<InternalConstructorFunction<GameObject>> listMediumGrassObject = new ArrayList<>();
+		listMediumGrassObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class}, (Object[] arr) -> (GameObject) new MediumGrassObject((String) arr[0], (Mesh) arr[1])));
+		GAME_OBJECT_CONSTRUCTORS.put(MediumGrassObject.class, listMediumGrassObject);
+		DATA_PATH.put(MediumGrassObject.class, "classpath:/models/grass-medium.json");
+
 		/*                 MediumChampiFlowerObject                 */
 		final List<InternalConstructorFunction<GameObject>> listMediumChampiFlowerObject = new ArrayList<>();
 		listMediumChampiFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class}, (Object[] arr) -> (GameObject) new MediumChampiFlowerObject((String) arr[0], (Mesh) arr[1])));
 		GAME_OBJECT_CONSTRUCTORS.put(MediumChampiFlowerObject.class, listMediumChampiFlowerObject);
 		DATA_PATH.put(MediumChampiFlowerObject.class, "classpath:/models/champi-medium.json");
 
+		/*                 LargeGrassObject                 */
+		final List<InternalConstructorFunction<GameObject>> listLargeGrassObject = new ArrayList<>();
+		listLargeGrassObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class}, (Object[] arr) -> (GameObject) new LargeGrassObject((String) arr[0], (Mesh) arr[1])));
+		GAME_OBJECT_CONSTRUCTORS.put(LargeGrassObject.class, listLargeGrassObject);
+		DATA_PATH.put(LargeGrassObject.class, "classpath:/models/grass-large.json");
+
+		/*                 SmallGrassObject                 */
+		final List<InternalConstructorFunction<GameObject>> listSmallGrassObject = new ArrayList<>();
+		listSmallGrassObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class}, (Object[] arr) -> (GameObject) new SmallGrassObject((String) arr[0], (Mesh) arr[1])));
+		GAME_OBJECT_CONSTRUCTORS.put(SmallGrassObject.class, listSmallGrassObject);
+		DATA_PATH.put(SmallGrassObject.class, "classpath:/models/grass-small.json");
+
+		/*                 SmallChampiFlowerObject                 */
+		final List<InternalConstructorFunction<GameObject>> listSmallChampiFlowerObject = new ArrayList<>();
+		listSmallChampiFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class}, (Object[] arr) -> (GameObject) new SmallChampiFlowerObject((String) arr[0], (Mesh) arr[1])));
+		GAME_OBJECT_CONSTRUCTORS.put(SmallChampiFlowerObject.class, listSmallChampiFlowerObject);
+		DATA_PATH.put(SmallChampiFlowerObject.class, "classpath:/models/champi-small.json");
+
 		/*                 MediumRoundFlowerObject                 */
 		final List<InternalConstructorFunction<GameObject>> listMediumRoundFlowerObject = new ArrayList<>();
 		listMediumRoundFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class}, (Object[] arr) -> (GameObject) new MediumRoundFlowerObject((String) arr[0], (Mesh) arr[1])));
 		GAME_OBJECT_CONSTRUCTORS.put(MediumRoundFlowerObject.class, listMediumRoundFlowerObject);
 		DATA_PATH.put(MediumRoundFlowerObject.class, "classpath:/models/flower-round-medium.json");
-
-		/*                 InstanceLargeRoundFlowerObject                 */
-		final List<InternalConstructorFunction<GameObject>> listInstanceLargeRoundFlowerObject = new ArrayList<>();
-		listInstanceLargeRoundFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, InstanceEmitter.class}, (Object[] arr) -> (GameObject) new InstanceLargeRoundFlowerObject((String) arr[0], (InstanceEmitter) arr[1])));
-		GAME_OBJECT_CONSTRUCTORS.put(InstanceLargeRoundFlowerObject.class, listInstanceLargeRoundFlowerObject);
-		DATA_PATH.put(InstanceLargeRoundFlowerObject.class, "classpath:/models/flower-round-large.json");
-
-		/*                 InstanceSmallGrassObject                 */
-		final List<InternalConstructorFunction<GameObject>> listInstanceSmallGrassObject = new ArrayList<>();
-		listInstanceSmallGrassObject.add(new InternalConstructorFunction<>(new Class[] {String.class, InstanceEmitter.class}, (Object[] arr) -> (GameObject) new InstanceSmallGrassObject((String) arr[0], (InstanceEmitter) arr[1])));
-		GAME_OBJECT_CONSTRUCTORS.put(InstanceSmallGrassObject.class, listInstanceSmallGrassObject);
-		DATA_PATH.put(InstanceSmallGrassObject.class, "classpath:/models/grass-small.json");
 
 		/*                 InstanceSmallRoundFlowerObject                 */
 		final List<InternalConstructorFunction<GameObject>> listInstanceSmallRoundFlowerObject = new ArrayList<>();
@@ -210,17 +199,23 @@ public class GameObjectRegistry {
 		GAME_OBJECT_CONSTRUCTORS.put(InstanceLargeGrassObject.class, listInstanceLargeGrassObject);
 		DATA_PATH.put(InstanceLargeGrassObject.class, "classpath:/models/grass-large.json");
 
-		/*                 InstanceLargeChampiFlowerObject                 */
-		final List<InternalConstructorFunction<GameObject>> listInstanceLargeChampiFlowerObject = new ArrayList<>();
-		listInstanceLargeChampiFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, InstanceEmitter.class}, (Object[] arr) -> (GameObject) new InstanceLargeChampiFlowerObject((String) arr[0], (InstanceEmitter) arr[1])));
-		GAME_OBJECT_CONSTRUCTORS.put(InstanceLargeChampiFlowerObject.class, listInstanceLargeChampiFlowerObject);
-		DATA_PATH.put(InstanceLargeChampiFlowerObject.class, "classpath:/models/champi-large.json");
+		/*                 InstanceLargeRoundFlowerObject                 */
+		final List<InternalConstructorFunction<GameObject>> listInstanceLargeRoundFlowerObject = new ArrayList<>();
+		listInstanceLargeRoundFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, InstanceEmitter.class}, (Object[] arr) -> (GameObject) new InstanceLargeRoundFlowerObject((String) arr[0], (InstanceEmitter) arr[1])));
+		GAME_OBJECT_CONSTRUCTORS.put(InstanceLargeRoundFlowerObject.class, listInstanceLargeRoundFlowerObject);
+		DATA_PATH.put(InstanceLargeRoundFlowerObject.class, "classpath:/models/flower-round-large.json");
 
-		/*                 InstanceMediumRoundFlowerObject                 */
-		final List<InternalConstructorFunction<GameObject>> listInstanceMediumRoundFlowerObject = new ArrayList<>();
-		listInstanceMediumRoundFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, InstanceEmitter.class}, (Object[] arr) -> (GameObject) new InstanceMediumRoundFlowerObject((String) arr[0], (InstanceEmitter) arr[1])));
-		GAME_OBJECT_CONSTRUCTORS.put(InstanceMediumRoundFlowerObject.class, listInstanceMediumRoundFlowerObject);
-		DATA_PATH.put(InstanceMediumRoundFlowerObject.class, "classpath:/models/flower-round-medium.json");
+		/*                 InstanceMediumChampiFlowerObject                 */
+		final List<InternalConstructorFunction<GameObject>> listInstanceMediumChampiFlowerObject = new ArrayList<>();
+		listInstanceMediumChampiFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, InstanceEmitter.class}, (Object[] arr) -> (GameObject) new InstanceMediumChampiFlowerObject((String) arr[0], (InstanceEmitter) arr[1])));
+		GAME_OBJECT_CONSTRUCTORS.put(InstanceMediumChampiFlowerObject.class, listInstanceMediumChampiFlowerObject);
+		DATA_PATH.put(InstanceMediumChampiFlowerObject.class, "classpath:/models/champi-medium.json");
+
+		/*                 InstanceSmallGrassObject                 */
+		final List<InternalConstructorFunction<GameObject>> listInstanceSmallGrassObject = new ArrayList<>();
+		listInstanceSmallGrassObject.add(new InternalConstructorFunction<>(new Class[] {String.class, InstanceEmitter.class}, (Object[] arr) -> (GameObject) new InstanceSmallGrassObject((String) arr[0], (InstanceEmitter) arr[1])));
+		GAME_OBJECT_CONSTRUCTORS.put(InstanceSmallGrassObject.class, listInstanceSmallGrassObject);
+		DATA_PATH.put(InstanceSmallGrassObject.class, "classpath:/models/grass-small.json");
 
 		/*                 InstanceSmallChampiFlowerObject                 */
 		final List<InternalConstructorFunction<GameObject>> listInstanceSmallChampiFlowerObject = new ArrayList<>();
@@ -228,11 +223,17 @@ public class GameObjectRegistry {
 		GAME_OBJECT_CONSTRUCTORS.put(InstanceSmallChampiFlowerObject.class, listInstanceSmallChampiFlowerObject);
 		DATA_PATH.put(InstanceSmallChampiFlowerObject.class, "classpath:/models/champi-small.json");
 
-		/*                 InstanceMediumChampiFlowerObject                 */
-		final List<InternalConstructorFunction<GameObject>> listInstanceMediumChampiFlowerObject = new ArrayList<>();
-		listInstanceMediumChampiFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, InstanceEmitter.class}, (Object[] arr) -> (GameObject) new InstanceMediumChampiFlowerObject((String) arr[0], (InstanceEmitter) arr[1])));
-		GAME_OBJECT_CONSTRUCTORS.put(InstanceMediumChampiFlowerObject.class, listInstanceMediumChampiFlowerObject);
-		DATA_PATH.put(InstanceMediumChampiFlowerObject.class, "classpath:/models/champi-medium.json");
+		/*                 InstanceMediumRoundFlowerObject                 */
+		final List<InternalConstructorFunction<GameObject>> listInstanceMediumRoundFlowerObject = new ArrayList<>();
+		listInstanceMediumRoundFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, InstanceEmitter.class}, (Object[] arr) -> (GameObject) new InstanceMediumRoundFlowerObject((String) arr[0], (InstanceEmitter) arr[1])));
+		GAME_OBJECT_CONSTRUCTORS.put(InstanceMediumRoundFlowerObject.class, listInstanceMediumRoundFlowerObject);
+		DATA_PATH.put(InstanceMediumRoundFlowerObject.class, "classpath:/models/flower-round-medium.json");
+
+		/*                 InstanceLargeChampiFlowerObject                 */
+		final List<InternalConstructorFunction<GameObject>> listInstanceLargeChampiFlowerObject = new ArrayList<>();
+		listInstanceLargeChampiFlowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, InstanceEmitter.class}, (Object[] arr) -> (GameObject) new InstanceLargeChampiFlowerObject((String) arr[0], (InstanceEmitter) arr[1])));
+		GAME_OBJECT_CONSTRUCTORS.put(InstanceLargeChampiFlowerObject.class, listInstanceLargeChampiFlowerObject);
+		DATA_PATH.put(InstanceLargeChampiFlowerObject.class, "classpath:/models/champi-large.json");
 
 		/*                 InstanceMediumGrassObject                 */
 		final List<InternalConstructorFunction<GameObject>> listInstanceMediumGrassObject = new ArrayList<>();

@@ -1,8 +1,8 @@
 package lu.kbra.plant_game.engine.entity.ui.prim;
 
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
+import lu.kbra.plant_game.engine.entity.ui.impl.ExtAnchorOwner;
 import lu.kbra.plant_game.engine.mesh.TexturedQuadMesh;
-import lu.kbra.plant_game.engine.scene.ui.overlay.ExtAnchorOwner;
 
 public class ExtAnchoredFlatQuadUIObject extends AnchoredFlatQuadUIObject implements ExtAnchorOwner {
 

@@ -4,6 +4,7 @@ import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
 import lu.kbra.plant_game.engine.entity.impl.Transform3DOwner;
+import lu.kbra.plant_game.engine.entity.ui.data.HoverState;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 
 public interface GrowOnHover extends /* NeedsUpdate, */Transform3DOwner, AnimatedOnHover {

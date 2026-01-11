@@ -2,11 +2,11 @@ package lu.kbra.plant_game.engine.entity.go;
 
 import org.joml.Vector3ic;
 
+import lu.kbra.plant_game.engine.entity.go.data.AttributeLocation;
 import lu.kbra.plant_game.engine.entity.impl.MaterialIdOwner;
 import lu.kbra.plant_game.engine.entity.impl.MeshOwner;
 import lu.kbra.plant_game.engine.mesh.MaterialMesh;
 import lu.kbra.plant_game.engine.mesh.TexturedMesh;
-import lu.kbra.plant_game.engine.mesh.data.AttributeLocation;
 import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 

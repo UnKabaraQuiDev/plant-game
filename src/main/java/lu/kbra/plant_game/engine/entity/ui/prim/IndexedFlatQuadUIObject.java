@@ -1,5 +1,6 @@
 package lu.kbra.plant_game.engine.entity.ui.prim;
 
+import lu.kbra.plant_game.engine.entity.ui.FlatQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.IndexOwner;
 import lu.kbra.plant_game.engine.mesh.TexturedQuadMesh;
 

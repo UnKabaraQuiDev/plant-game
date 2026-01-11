@@ -6,14 +6,15 @@ import java.awt.geom.Rectangle2D.Float;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
+import lu.kbra.plant_game.engine.entity.ui.data.HoverState;
 import lu.kbra.plant_game.engine.entity.ui.impl.AbsoluteTransformedBoundsOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.AnimatedOnHover;
-import lu.kbra.plant_game.engine.entity.ui.impl.HoverState;
 import lu.kbra.plant_game.engine.entity.ui.impl.UISceneParentAware;
 import lu.kbra.plant_game.engine.mesh.TexturedQuadMesh;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
-import lu.kbra.plant_game.engine.scene.ui.overlay.BuildingInfoUIObjectGroup;
 import lu.kbra.plant_game.engine.scene.ui.overlay.OverlayUIScene;
+import lu.kbra.plant_game.engine.scene.ui.overlay.group.building.BuildingInfoUIObjectGroup;
+import lu.kbra.plant_game.engine.scene.world.data.building.requirement.BuildingDeclaration;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.utils.interpolation.Interpolator;
 import lu.kbra.standalone.gameengine.utils.interpolation.Interpolators;
@@ -27,6 +28,8 @@ public class BuildingItemFlatQuadUIObject extends IndexedFlatQuadUIObject
 
 	protected boolean growing;
 	protected float progress = 0f;
+
+	protected BuildingDeclaration buildingDeclaration;
 
 	public BuildingItemFlatQuadUIObject(final String str, final TexturedQuadMesh mesh) {
 		super(str, mesh);
@@ -116,10 +119,23 @@ public class BuildingItemFlatQuadUIObject extends IndexedFlatQuadUIObject
 		return grow ? Interpolators.QUAD_OUT : Interpolators.BOUNCE_IN;
 	}
 
+	public boolean isGrowing() {
+		return this.growing;
+	}
+
+	public BuildingDeclaration getBuildingDeclaration() {
+		return this.buildingDeclaration;
+	}
+
+	public void setBuildingDeclaration(final BuildingDeclaration buildingDeclaration) {
+		this.buildingDeclaration = buildingDeclaration;
+	}
+
 	@Override
 	public String toString() {
-		return "BuildingItemFlatQuadUIObject@" + System.identityHashCode(this) + " [index=" + this.index + ", color=" + this.color
-				+ ", bounds=" + this.bounds + ", mesh=" + this.mesh + ", transform=" + this.transform + ", active=" + this.active
-				+ ", name=" + this.name + "]";
+		return "BuildingItemFlatQuadUIObject@" + System.identityHashCode(this) + " [growing=" + this.growing + ", progress=" + this.progress
+				+ ", index=" + this.index + ", color=" + this.color + ", bounds=" + this.bounds + ", mesh=" + this.mesh + ", transform="
+				+ this.transform + ", active=" + this.active + ", name=" + this.name + "]";
 	}
+
 }

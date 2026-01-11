@@ -3,7 +3,7 @@ package lu.kbra.plant_game.engine.render.shader.render;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
 
-import lu.kbra.plant_game.engine.render.GradientDirection;
+import lu.kbra.plant_game.engine.entity.ui.data.GradientDirection;
 import lu.kbra.standalone.gameengine.graph.shader.part.AbstractShaderPart;
 
 public class GradientShader extends DirectShader {

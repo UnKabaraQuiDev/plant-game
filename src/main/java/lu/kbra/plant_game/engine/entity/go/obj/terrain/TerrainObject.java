@@ -12,9 +12,9 @@ import org.joml.Vector4f;
 
 import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.entity.go.MeshGameObject;
-import lu.kbra.plant_game.engine.entity.go.impl.SynchronizedEntityContainer;
+import lu.kbra.plant_game.engine.entity.go.data.AttributeLocation;
 import lu.kbra.plant_game.engine.entity.go.mesh.terrain.TerrainMesh;
-import lu.kbra.plant_game.engine.mesh.data.AttributeLocation;
+import lu.kbra.plant_game.engine.entity.impl.SynchronizedEntityContainer;
 import lu.kbra.standalone.gameengine.objs.entity.ParentAwareComponent;
 import lu.kbra.standalone.gameengine.scene.camera.Camera3D;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;

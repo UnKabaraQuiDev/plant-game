@@ -7,13 +7,13 @@ import java.util.Objects;
 import lu.pcy113.pclib.logger.GlobalLogger;
 
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
+import lu.kbra.plant_game.engine.entity.ui.impl.AnchorOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwnerParentAware;
-import lu.kbra.plant_game.engine.scene.ui.overlay.AnchorOwner;
-import lu.kbra.plant_game.engine.scene.ui.overlay.Margin2DOwner;
-import lu.kbra.plant_game.engine.scene.ui.overlay.MarginOwner;
-import lu.kbra.plant_game.engine.scene.ui.overlay.Padding2DOwner;
-import lu.kbra.plant_game.engine.scene.ui.overlay.PaddingOwner;
+import lu.kbra.plant_game.engine.entity.ui.impl.Margin2DOwner;
+import lu.kbra.plant_game.engine.entity.ui.impl.MarginOwner;
+import lu.kbra.plant_game.engine.entity.ui.impl.Padding2DOwner;
+import lu.kbra.plant_game.engine.entity.ui.impl.PaddingOwner;
 import lu.kbra.standalone.gameengine.objs.entity.ParentAwareComponent;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 

@@ -2,11 +2,11 @@ package lu.kbra.plant_game.engine.util;
 
 import org.joml.Vector3f;
 
+import lu.kbra.plant_game.engine.loader.AnimatedMeshLoader.AnimationData;
 import lu.kbra.plant_game.engine.mesh.AnimatedLoadedMesh;
 import lu.kbra.plant_game.engine.mesh.AnimatedTexturedLoadedMesh;
 import lu.kbra.plant_game.engine.mesh.LoadedTexturedMesh;
 import lu.kbra.plant_game.engine.mesh.OffsetLoadedMesh;
-import lu.kbra.plant_game.engine.mesh.loader.AnimatedMeshLoader.AnimationData;
 import lu.kbra.standalone.gameengine.geom.utils.ObjLoader;
 import lu.kbra.standalone.gameengine.graph.material.Material;
 import lu.kbra.standalone.gameengine.graph.texture.SingleTexture;
