@@ -14,7 +14,6 @@ import lu.kbra.plant_game.engine.entity.impl.NoMeshObject;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.IndexOwner;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
-import lu.kbra.standalone.gameengine.objs.entity.ParentAwareComponent;
 
 public class UIObjectGroup extends UIObject implements ObjectGroup<UIObject>, NoMeshObject, SynchronizedEntityContainer<UIObject> {
 
@@ -24,13 +23,13 @@ public class UIObjectGroup extends UIObject implements ObjectGroup<UIObject>, No
 		}
 		return 0;
 	});
+	public static final Comparator<UIObject> UI_OBJECT_COMPARATOR = INDEX_COMPARATOR
+			.thenComparingDouble(b -> b.hasTransform() ? b.getTransform().getTranslation().y() : 0);
 
 	protected final Object subEntitiesLock = new Object();
 	protected List<UIObject> subEntities = Collections.synchronizedList(new ArrayList<>());
 
 	protected Shape computedBounds;
-
-	protected ParentAwareComponent parent;
 
 	public UIObjectGroup(final String str, final List<UIObject> entities, final Component... cs) {
 		super(str);
@@ -98,9 +97,7 @@ public class UIObjectGroup extends UIObject implements ObjectGroup<UIObject>, No
 
 	@Override
 	public void doSort() {
-		synchronized (this.getEntitiesLock()) {
-			this.getWEntities().sort(INDEX_COMPARATOR);
-		}
+		ObjectGroup.super.sort(INDEX_COMPARATOR);
 	}
 
 	@Override
@@ -117,6 +114,9 @@ public class UIObjectGroup extends UIObject implements ObjectGroup<UIObject>, No
 		final Area combined = new Area();
 		synchronized (this.getEntitiesLock()) {
 			this.getWEntities().forEach(se -> {
+				if (se instanceof IgnoreBounds) {
+					return;
+				}
 				if (se instanceof final UIObjectGroup objGroup) {
 					objGroup.recomputeBounds();
 				}
@@ -142,8 +142,9 @@ public class UIObjectGroup extends UIObject implements ObjectGroup<UIObject>, No
 
 	@Override
 	public String toString() {
-		return "UIObjectGroup [subEntitiesLock=" + this.subEntitiesLock + ", subEntities=" + this.subEntities + ", bounds="
-				+ this.computedBounds + ", transform=" + this.transform + ", active=" + this.active + ", name=" + this.name + "]";
+		return "UIObjectGroup@" + System.identityHashCode(this) + " [subEntitiesLock=" + this.subEntitiesLock + ", subEntities="
+				+ this.subEntities + ", computedBounds=" + this.computedBounds + ", transform=" + this.transform + ", active=" + this.active
+				+ ", name=" + this.name + "]";
 	}
 
 }

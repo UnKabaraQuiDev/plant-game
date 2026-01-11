@@ -6,14 +6,21 @@ import lu.kbra.plant_game.engine.entity.impl.Transform3DOwner;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.AbsoluteTransformedBoundsOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwner;
+import lu.kbra.plant_game.engine.entity.ui.impl.NeedsUpdate;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
 import lu.kbra.plant_game.engine.scene.ui.layout.AnchorLayout;
+import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 
-public interface ExtAnchorOwner extends AnchorOwner, Transform3DOwner, BoundsOwner {
+public interface ExtAnchorOwner extends AnchorOwner, Transform3DOwner, BoundsOwner, NeedsUpdate {
 
 	UIObject getTarget();
 
 	void setTarget(UIObject target);
+
+	@Override
+	default void update(final WindowInputHandler input) {
+		this.applyAnchor();
+	}
 
 	default void setTarget(final UIObject target, final Anchor obj, final Anchor tar) {
 		this.setTarget(target);

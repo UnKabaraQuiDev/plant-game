@@ -2,6 +2,7 @@ package lu.kbra.plant_game.engine.scene.ui.overlay;
 
 import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
+import java.util.function.ToDoubleFunction;
 
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.group.LayoutOffsetUIObjectGroup;
@@ -38,6 +39,48 @@ public class FixedBoundsUIObjectGroup extends LayoutOffsetUIObjectGroup implemen
 		this.size = size;
 	}
 
+	private static final ToDoubleFunction<? super UIObject> marginSumX = c -> {
+		float padding = 0;
+		if (c instanceof MarginOwner po) {
+			padding += po.getMargin();
+		}
+		if (c instanceof Margin2DOwner po) {
+			padding += po.getMarginX();
+		}
+		return padding;
+	};
+	private static final ToDoubleFunction<? super UIObject> marginSumZ = c -> {
+		float padding = 0;
+		if (c instanceof MarginOwner po) {
+			padding += po.getMargin();
+		}
+		if (c instanceof Margin2DOwner po) {
+			padding += po.getMarginZ();
+		}
+		return padding;
+	};
+
+	private static final ToDoubleFunction<? super UIObject> paddingSumX = c -> {
+		float padding = 0;
+		if (c instanceof PaddingOwner po) {
+			padding += po.getPadding();
+		}
+		if (c instanceof Padding2DOwner po) {
+			padding += po.getPaddingX();
+		}
+		return padding;
+	};
+	private static final ToDoubleFunction<? super UIObject> paddingSumZ = c -> {
+		float padding = 0;
+		if (c instanceof PaddingOwner po) {
+			padding += po.getPadding();
+		}
+		if (c instanceof Padding2DOwner po) {
+			padding += po.getPaddingZ();
+		}
+		return padding;
+	};
+
 	@Override
 	public boolean recomputeBounds() {
 		if (this.dir == null) {
@@ -47,11 +90,23 @@ public class FixedBoundsUIObjectGroup extends LayoutOffsetUIObjectGroup implemen
 		super.recomputeBounds();
 		final Rectangle2D compBounds = super.computedBounds.getBounds2D();
 
+		final float paddingX = (float) (this.parallelStream().mapToDouble(marginSumX).sum() + paddingSumX.applyAsDouble(this));
+		final float paddingZ = (float) (this.parallelStream().mapToDouble(marginSumZ).sum() + paddingSumZ.applyAsDouble(this));
+
+		System.err.println("padding: " + paddingX + "x" + paddingZ);
+
 		this.bounds.setFrame(switch (this.dir) {
-		case VERTICAL -> new Rectangle2D.Float(-this.size / 2, (float) compBounds.getY(), this.size / 2, (float) compBounds.getHeight());
-		case HORIZONTAL -> new Rectangle2D.Float((float) compBounds.getX(), -this.size / 2, (float) compBounds.getWidth(), this.size / 2);
-//		default -> compBounds;
+		case VERTICAL -> new Rectangle2D.Float(-this.size / 2 - paddingX,
+				(float) compBounds.getY() - paddingZ,
+				this.size / 2 + 2 * paddingX,
+				(float) compBounds.getHeight() + 2 * paddingZ);
+		case HORIZONTAL -> new Rectangle2D.Float((float) compBounds.getX() - paddingX,
+				-this.size / 2 - paddingZ,
+				(float) compBounds.getWidth() + 2 * paddingX,
+				this.size / 2 + 2 * paddingZ);
 		});
+
+		System.err.println(this.bounds);
 
 		return true;
 	}

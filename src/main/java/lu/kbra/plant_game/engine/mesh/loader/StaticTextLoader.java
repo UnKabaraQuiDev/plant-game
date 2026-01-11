@@ -21,6 +21,7 @@ import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.SkipThen;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
+import lu.kbra.standalone.gameengine.impl.future.YieldExecutionThrowable;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextAlignment;
 
@@ -41,9 +42,12 @@ public class StaticTextLoader {
 			final Dispatcher render) {
 
 		TaskFuture tf = new TaskFuture<>(loader, (ThrowingSupplier<String, Throwable>) () -> {
-			waitOrCreateLock(meshName);
+			if (!cache.hasTextEmitter(meshName) && !waitOrCreateLock(meshName)) {
+				throw new YieldExecutionThrowable(() -> cache.hasTextEmitter(meshName));
+			}
 
 			if (cache.hasTextEmitter(meshName)) {
+				releaseLock(meshName);
 				throw new SkipThen(cache.getTextEmitter(meshName));
 			}
 

@@ -10,4 +10,8 @@ public interface Margin2DOwner {
 
 	float getMarginZ();
 
+	default float[] getMargins() {
+		return new float[] { this.getMarginX(), this.getMarginZ() };
+	}
+
 }

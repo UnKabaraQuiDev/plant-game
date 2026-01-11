@@ -68,6 +68,7 @@ import lu.kbra.plant_game.engine.render.shader.render.LineDirectShader;
 import lu.kbra.plant_game.engine.render.shader.render.LineInstanceDirectShader;
 import lu.kbra.plant_game.engine.render.shader.render.TextDirectShader;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
+import lu.kbra.plant_game.engine.scene.ui.overlay.DebugBoundsColor;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.standalone.gameengine.GameEngine;
@@ -338,9 +339,8 @@ public class DeferredCompositor implements Cleanupable {
 			throw new NullPointerException("Mesh is null in " + entity.getId());
 		}
 		synchronized (mesh) {
-			final String txtMesh = Objects.toString(mesh);
-			if (!mesh.isValid()) {
-				throw new IllegalStateException("Mesh: " + txtMesh + " in " + entity.getId() + " isn't valid.");
+			if (mesh == null || !mesh.isValid()) {
+				throw new IllegalStateException("Mesh: " + Objects.toString(mesh) + " in " + entity.getId() + " isn't valid.");
 			}
 		}
 	}
@@ -748,7 +748,7 @@ public class DeferredCompositor implements Cleanupable {
 		}
 
 		if (entity instanceof final TransformedBoundsOwner tbo) {
-			this.drawDebugBounds(tbo.getTransformedBounds(parentTransformMatrix));
+			this.drawDebugBounds(entity, tbo.getTransformedBounds(parentTransformMatrix));
 		}
 
 //		if (entity instanceof final NeedsPostConstruct npc) {
@@ -1243,7 +1243,10 @@ public class DeferredCompositor implements Cleanupable {
 		}
 	}
 
-	private void drawDebugBounds(final Shape shape) {
+	private void drawDebugBounds(final SceneEntity entity, final Shape shape) {
+		if (shape == null) {
+			GlobalLogger.warning("Entity: " + entity.getId() + " has no/invalid bounds.");
+		}
 		if (!this.deferredPass && DEBUG_BOUNDS && this.lineDirectShader != null && shape != null) {
 			QUAD.bind();
 			this.lineDirectShader.bind();
@@ -1258,7 +1261,8 @@ public class DeferredCompositor implements Cleanupable {
 			final Matrix4f transform = new Matrix4f().identity().translate(centerX, 0, centerY).scale(width, 1, height);
 
 			this.lineDirectShader.setUniform(RenderShader.TRANSFORMATION_MATRIX, transform);
-			this.lineDirectShader.setUniform(LineDirectShader.TINT, DEBUG_BOUNDS_COLOR);
+			this.lineDirectShader.setUniform(LineDirectShader.TINT,
+					entity instanceof DebugBoundsColor dbc ? dbc.getBoundsColor().getColor() : DEBUG_BOUNDS_COLOR);
 
 			if (GL_LINE_SMOOTHING) {
 				GL_W.glEnable(GL_W.GL_LINE_SMOOTH);

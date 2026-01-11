@@ -4,6 +4,9 @@ import java.util.Comparator;
 import java.util.Optional;
 import java.util.OptionalInt;
 
+import org.joml.Vector2f;
+import org.joml.Vector2fc;
+
 import lu.pcy113.pclib.concurrency.ObjectTriggerLatch;
 
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
@@ -58,6 +61,10 @@ public class FixedIntegerStatLine extends LayoutOffsetUIObjectGroup implements L
 		super(str, new FlowLayout(false, GAP), values);
 	}
 
+	public FixedIntegerStatLine(final String str, final float gap) {
+		super(str, new FlowLayout(false, gap));
+	}
+
 	public FixedIntegerStatLine(final String str, final UIObjectGroup parent, final UIObject... values) {
 		super(str, new FlowLayout(false, GAP), parent, values);
 	}
@@ -72,6 +79,7 @@ public class FixedIntegerStatLine extends LayoutOffsetUIObjectGroup implements L
 
 		final float iconHeightRatio = height / (float) TexturedQuadMeshUIObject.SQUARE_1_UNIT.getBounds2D().getHeight();
 		final float textHeightRatio = height / UIObjectFactory.DEFAULT_CHAR_SIZE.y();
+		final Vector2fc charSize = new Vector2f(UIObjectFactory.DEFAULT_CHAR_SIZE).mul(textHeightRatio);
 
 		final ObjectTriggerLatch<? extends FixedIntegerStatLine> latch = new ObjectTriggerLatch<>(iconClazz == null ? 1 : 2, this);
 
@@ -87,7 +95,7 @@ public class FixedIntegerStatLine extends LayoutOffsetUIObjectGroup implements L
 		UIObjectFactory
 				.createText(valueClazz,
 						OptionalInt.of(valueLength),
-						Optional.empty(),
+						Optional.of(charSize),
 						Optional.empty(),
 						Optional.of(this.getId() + "-value"),
 						Optional.empty())
@@ -97,7 +105,7 @@ public class FixedIntegerStatLine extends LayoutOffsetUIObjectGroup implements L
 				.set(i -> i.setPaddingLength(valueLength))
 				.set(i -> i.setValue(0))
 				.set(i -> i.setColorMaterial(DEFAULT_TEXT_COLOR))
-				.set(i -> i.setTransform(new Transform3D().scaleMul(textHeightRatio)))
+				.set(i -> i.setTransform(new Transform3D()))
 				.postInit(i -> this.value = i)
 				.add(this)
 				.latch(latch)

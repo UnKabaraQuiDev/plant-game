@@ -44,7 +44,8 @@ public abstract class UIObject extends Entity implements Transform3DOwner, Trans
 
 	@Override
 	public String toString() {
-		return "UIObject [transform=" + this.transform + ", active=" + this.active + ", name=" + this.name + "]";
+		return "UIObject@" + System.identityHashCode(this) + " [transform=" + this.transform + ", active=" + this.active + ", name="
+				+ this.name + "]";
 	}
 
 }

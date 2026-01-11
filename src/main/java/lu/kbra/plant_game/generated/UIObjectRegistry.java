@@ -34,6 +34,7 @@ import lu.kbra.plant_game.engine.entity.ui.layout.SpacerUIObject;
 import lu.kbra.plant_game.engine.entity.ui.prim.AnchoredFlatQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.prim.ExtAnchoredFlatQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.prim.FlatQuadUIObject;
+import lu.kbra.plant_game.engine.entity.ui.prim.IBAnchoredFlatQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.prim.IndexedFlatQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.prim.MeshUIObject;
 import lu.kbra.plant_game.engine.entity.ui.prim.QuadMeshUIObject;
@@ -376,8 +377,9 @@ public class UIObjectRegistry {
 		/*                 FixedIntegerStatLine                 */
 		final List<InternalConstructorFunction<UIObject>> listFixedIntegerStatLine = new ArrayList<>();
 		listFixedIntegerStatLine.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObject[].class}, (Object[] arr) -> (UIObject) new FixedIntegerStatLine((String) arr[0], (UIObject[]) arr[1])));
-		listFixedIntegerStatLine.add(new InternalConstructorFunction<>(new Class[] {String.class, Transform3D.class, UIObject[].class}, (Object[] arr) -> (UIObject) new FixedIntegerStatLine((String) arr[0], (Transform3D) arr[1], (UIObject[]) arr[2])));
+		listFixedIntegerStatLine.add(new InternalConstructorFunction<>(new Class[] {String.class, float.class}, (Object[] arr) -> (UIObject) new FixedIntegerStatLine((String) arr[0], (float) arr[1])));
 		listFixedIntegerStatLine.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObjectGroup.class, UIObject[].class}, (Object[] arr) -> (UIObject) new FixedIntegerStatLine((String) arr[0], (UIObjectGroup) arr[1], (UIObject[]) arr[2])));
+		listFixedIntegerStatLine.add(new InternalConstructorFunction<>(new Class[] {String.class, Transform3D.class, UIObject[].class}, (Object[] arr) -> (UIObject) new FixedIntegerStatLine((String) arr[0], (Transform3D) arr[1], (UIObject[]) arr[2])));
 		UI_OBJECT_CONSTRUCTORS.put(FixedIntegerStatLine.class, listFixedIntegerStatLine);
 
 		/*                 IntegerStatLine                 */
@@ -397,8 +399,8 @@ public class UIObjectRegistry {
 		/*                 FixedBoundsUIObjectGroup                 */
 		final List<InternalConstructorFunction<UIObject>> listFixedBoundsUIObjectGroup = new ArrayList<>();
 		listFixedBoundsUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Layout.class, Direction2d.class, float.class, UIObject[].class}, (Object[] arr) -> (UIObject) new FixedBoundsUIObjectGroup((String) arr[0], (Layout) arr[1], (Direction2d) arr[2], (float) arr[3], (UIObject[]) arr[4])));
-		listFixedBoundsUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Layout.class, UIObjectGroup.class, Direction2d.class, float.class, UIObject[].class}, (Object[] arr) -> (UIObject) new FixedBoundsUIObjectGroup((String) arr[0], (Layout) arr[1], (UIObjectGroup) arr[2], (Direction2d) arr[3], (float) arr[4], (UIObject[]) arr[5])));
 		listFixedBoundsUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Layout.class, Transform3D.class, Direction2d.class, float.class, UIObject[].class}, (Object[] arr) -> (UIObject) new FixedBoundsUIObjectGroup((String) arr[0], (Layout) arr[1], (Transform3D) arr[2], (Direction2d) arr[3], (float) arr[4], (UIObject[]) arr[5])));
+		listFixedBoundsUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Layout.class, UIObjectGroup.class, Direction2d.class, float.class, UIObject[].class}, (Object[] arr) -> (UIObject) new FixedBoundsUIObjectGroup((String) arr[0], (Layout) arr[1], (UIObjectGroup) arr[2], (Direction2d) arr[3], (float) arr[4], (UIObject[]) arr[5])));
 		UI_OBJECT_CONSTRUCTORS.put(FixedBoundsUIObjectGroup.class, listFixedBoundsUIObjectGroup);
 
 		/*                 AnchoredProgressBarUIObject                 */
@@ -445,6 +447,11 @@ public class UIObjectRegistry {
 		listExtAnchoredFlatQuadUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new ExtAnchoredFlatQuadUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
 		UI_OBJECT_CONSTRUCTORS.put(ExtAnchoredFlatQuadUIObject.class, listExtAnchoredFlatQuadUIObject);
 
+		/*                 IBAnchoredFlatQuadUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listIBAnchoredFlatQuadUIObject = new ArrayList<>();
+		listIBAnchoredFlatQuadUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new IBAnchoredFlatQuadUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
+		UI_OBJECT_CONSTRUCTORS.put(IBAnchoredFlatQuadUIObject.class, listIBAnchoredFlatQuadUIObject);
+
 		/*                 ExtAnchoredFixedIntegerStatLine                 */
 		final List<InternalConstructorFunction<UIObject>> listExtAnchoredFixedIntegerStatLine = new ArrayList<>();
 		listExtAnchoredFixedIntegerStatLine.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObject[].class}, (Object[] arr) -> (UIObject) new ExtAnchoredFixedIntegerStatLine((String) arr[0], (UIObject[]) arr[1])));
@@ -459,6 +466,7 @@ public class UIObjectRegistry {
 		listAnchoredFixedIntegerStatLine.add(new InternalConstructorFunction<>(new Class[] {String.class, Anchor.class, Anchor.class}, (Object[] arr) -> (UIObject) new AnchoredFixedIntegerStatLine((String) arr[0], (Anchor) arr[1], (Anchor) arr[2])));
 		listAnchoredFixedIntegerStatLine.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObjectGroup.class, UIObject[].class}, (Object[] arr) -> (UIObject) new AnchoredFixedIntegerStatLine((String) arr[0], (UIObjectGroup) arr[1], (UIObject[]) arr[2])));
 		listAnchoredFixedIntegerStatLine.add(new InternalConstructorFunction<>(new Class[] {String.class, Transform3D.class, UIObject[].class}, (Object[] arr) -> (UIObject) new AnchoredFixedIntegerStatLine((String) arr[0], (Transform3D) arr[1], (UIObject[]) arr[2])));
+		listAnchoredFixedIntegerStatLine.add(new InternalConstructorFunction<>(new Class[] {String.class, float.class, Anchor.class, Anchor.class}, (Object[] arr) -> (UIObject) new AnchoredFixedIntegerStatLine((String) arr[0], (float) arr[1], (Anchor) arr[2], (Anchor) arr[3])));
 		UI_OBJECT_CONSTRUCTORS.put(AnchoredFixedIntegerStatLine.class, listAnchoredFixedIntegerStatLine);
 
 		/*                 ExtAnchoredIntegerStatLine                 */

@@ -48,7 +48,7 @@ public class UOCreatingTaskFuture<T extends UIObject> extends TaskFuture<List<Ob
 		return this;
 	}
 
-	public UOCreatingTaskFuture<T> get(final ObjectPointer<T> ptr) {
+	public UOCreatingTaskFuture<T> get(final ObjectPointer<? super T> ptr) {
 		this.postInitHooks.add(v -> ptr.set(v));
 		return this;
 	}

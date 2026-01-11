@@ -34,6 +34,12 @@ public class AnchoredFixedIntegerStatLine extends FixedIntegerStatLine implement
 		this.tarAnchor = tar;
 	}
 
+	public AnchoredFixedIntegerStatLine(final String str, final float gap, final Anchor obj, final Anchor tar) {
+		super(str, gap);
+		this.objAnchor = obj;
+		this.tarAnchor = tar;
+	}
+
 	@Override
 	public <T extends TexturedQuadMeshUIObject, V extends IntegerTextUIObject> ObjectTriggerLatch<? extends AnchoredFixedIntegerStatLine> init(
 			final Dispatcher workers,
