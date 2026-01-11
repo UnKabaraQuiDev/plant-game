@@ -1,6 +1,7 @@
 package lu.kbra.plant_game.engine.entity.ui.group;
 
 import java.awt.geom.Rectangle2D;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import lu.pcy113.pclib.PCUtils;
@@ -8,13 +9,13 @@ import lu.pcy113.pclib.PCUtils;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsUpdate;
+import lu.kbra.plant_game.engine.entity.ui.impl.UISceneParentAware;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
-import lu.kbra.standalone.gameengine.objs.entity.SceneParentAware;
 import lu.kbra.standalone.gameengine.utils.consts.Direction;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-public class ScrollDrivenUIObjectGroup extends OffsetUIObjectGroup implements NeedsUpdate, SceneParentAware {
+public class ScrollDrivenUIObjectGroup extends OffsetUIObjectGroup implements NeedsUpdate, UISceneParentAware {
 
 	protected Supplier<Float> scrollRatioSupplier;
 	protected float margin;
@@ -52,7 +53,7 @@ public class ScrollDrivenUIObjectGroup extends OffsetUIObjectGroup implements Ne
 
 //		this.recomputeBounds();
 		final Rectangle2D bounds = this.getBounds().getBounds2D();
-		final Rectangle2D sceneBounds = ((BoundsOwner) this.getSceneParent()).getBounds().getBounds2D();
+		final Rectangle2D sceneBounds = ((BoundsOwner) this.getSceneParent().get()).getBounds().getBounds2D();
 
 		if (this.dir.isHorizontal() && bounds.getWidth() < sceneBounds.getWidth()) {
 			this.getTransform().getTranslation().x = (float) (sceneBounds.getCenterX() - bounds.getCenterX());
@@ -85,12 +86,13 @@ public class ScrollDrivenUIObjectGroup extends OffsetUIObjectGroup implements Ne
 	}
 
 	public boolean needsScrollBar() {
-		if (!this.hasSceneParent()) {
+		final Optional<UIScene> uiScene = this.getUISceneParent();
+		if (uiScene.isEmpty()) {
 			return false;
 		}
 
 		final Rectangle2D bounds = this.getBounds().getBounds2D();
-		final Rectangle2D sceneBounds = ((UIScene) this.getSceneParent()).getBounds().getBounds2D();
+		final Rectangle2D sceneBounds = uiScene.get().getBounds().getBounds2D();
 
 		if (this.dir.isHorizontal() && bounds.getWidth() < sceneBounds.getWidth()) {
 			return false;

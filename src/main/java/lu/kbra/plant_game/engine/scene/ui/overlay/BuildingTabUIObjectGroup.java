@@ -34,6 +34,7 @@ public class BuildingTabUIObjectGroup extends AnchoredLayoutUIObjectGroup
 
 	public BuildingTabUIObjectGroup(final String titleKey, final int index, final ColorMaterial accentColor) {
 		super("building-tab-" + titleKey, null, Anchor.BOTTOM_CENTER, Anchor.BOTTOM_CENTER);
+		this.getTransform().translationAddY(0.1f);
 		this.index = index;
 		this.titleKey = titleKey;
 		this.accentColor = accentColor;

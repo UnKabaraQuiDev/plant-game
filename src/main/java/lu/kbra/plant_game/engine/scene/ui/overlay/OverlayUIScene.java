@@ -8,8 +8,8 @@ import lu.kbra.plant_game.engine.UpdateFrameState;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.bar.AnchoredProgressBarUIObject;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
+import lu.kbra.plant_game.engine.entity.ui.prim.BuildingItemFlatQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.prim.FlatQuadUIObject;
-import lu.kbra.plant_game.engine.entity.ui.prim.IndexedFlatQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.IntegerTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.PercentageIntTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.PercentageSignedIntTextUIObject;
@@ -17,7 +17,6 @@ import lu.kbra.plant_game.engine.entity.ui.text.SignedIntegerTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.texture.EnergyIconUIObject;
 import lu.kbra.plant_game.engine.entity.ui.texture.MoneyIconUIObject;
 import lu.kbra.plant_game.engine.entity.ui.texture.WaterIconUIObject;
-import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
 import lu.kbra.plant_game.engine.scene.ui.layout.AnchorLayout;
@@ -28,7 +27,6 @@ import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
-import lu.kbra.standalone.gameengine.impl.future.WorkerDispatcher;
 import lu.kbra.standalone.gameengine.objs.entity.ParentAwareComponent;
 import lu.kbra.standalone.gameengine.objs.entity.ParentAwareNode;
 import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
@@ -52,6 +50,7 @@ public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner
 	protected AnchoredProgressBarUIObject progressBar;
 	protected ExtAnchoredIntegerStatLine progressGroup;
 
+	protected BuildingInfoUIObjectGroup buildingInfo = new BuildingInfoUIObjectGroup();
 	protected BuildingPanelUIObjectGroup buildingPanel = new BuildingPanelUIObjectGroup();
 
 	protected Layout layout;
@@ -67,10 +66,7 @@ public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner
 
 		final float height = 0.2f * STATS_GROUP_SCALE;
 
-		new BuildingInfoUIObjectGroup().init(workers, renderDispatcher).then(v -> {
-			System.err.println(v);
-			this.add(v);
-		});
+		this.buildingInfo.init(workers, renderDispatcher).then(this::add);
 
 		final BuildingTabUIObjectGroup buildings = new BuildingTabUIObjectGroup("Tab OwO", 0, ColorMaterial.CYAN);
 		this.buildingPanel.addTab(buildings);
@@ -82,7 +78,7 @@ public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner
 		this.buildingPanel.addTab(buildings3);
 
 		IntStream.range(0, 10)
-				.forEach(index -> UIObjectFactory.create(IndexedFlatQuadUIObject.class)
+				.forEach(index -> UIObjectFactory.create(BuildingItemFlatQuadUIObject.class)
 						.set(i -> i.setIndex(index))
 						.set(j -> j.setTransform(new Transform3D(0.3f)))
 						.set(j -> j.setColorMaterial(ColorMaterial.byId(ColorMaterial.CYAN.getId() - index - 1)))
@@ -90,7 +86,7 @@ public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner
 						.push());
 
 		IntStream.range(0, 10)
-				.forEach(index -> UIObjectFactory.create(IndexedFlatQuadUIObject.class)
+				.forEach(index -> UIObjectFactory.create(BuildingItemFlatQuadUIObject.class)
 						.set(i -> i.setIndex(index))
 						.set(j -> j.setTransform(new Transform3D(0.3f)))
 						.set(j -> j.setColorMaterial(ColorMaterial.byId(ColorMaterial.WHITE.getId() - index - 1)))
@@ -203,17 +199,12 @@ public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner
 		// this.doLayout();
 	}
 
-	@Override
-	public void update(
-			final WindowInputHandler inputHandler,
-			final DeferredCompositor compositor,
-			final WorkerDispatcher workers,
-			final Dispatcher render) {
-		if (inputHandler.wasResized()) {
-			this.doLayout();
-		}
+	public BuildingInfoUIObjectGroup getBuildingInfo() {
+		return this.buildingInfo;
+	}
 
-		super.update(inputHandler, compositor, workers, render);
+	public BuildingPanelUIObjectGroup getBuildingPanel() {
+		return this.buildingPanel;
 	}
 
 	@Override

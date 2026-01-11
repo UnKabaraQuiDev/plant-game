@@ -3,6 +3,7 @@ package lu.kbra.plant_game.engine.scene.ui.layout;
 import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
+import java.util.Optional;
 
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwner;
@@ -20,14 +21,8 @@ public class MarginFlowLayout extends FlowLayout implements SceneParentAware {
 
 	protected ParentAwareComponent parent;
 
-	public MarginFlowLayout(
-			final boolean vertical,
-			final float gap,
-			final float marginLeft,
-			final float marginRight,
-			final float marginTop,
-			final float marginBottom,
-			final byte flags) {
+	public MarginFlowLayout(final boolean vertical, final float gap, final float marginLeft, final float marginRight, final float marginTop,
+			final float marginBottom, final byte flags) {
 		super(vertical, gap);
 		this.marginLeft = marginLeft;
 		this.marginRight = marginRight;
@@ -49,11 +44,11 @@ public class MarginFlowLayout extends FlowLayout implements SceneParentAware {
 		final boolean left = (this.flags & LEFT) != 0;
 		final boolean top = (this.flags & TOP) != 0;
 
-		final Scene sceneParent = this.getSceneParent();
-		if (sceneParent == null) {
+		final Optional<Scene> sceneParent = this.getSceneParent();
+		if (sceneParent.isEmpty()) {
 			return;
 		}
-		final float aspectRatio = (float) ((BoundsOwner) sceneParent).getBounds().getBounds2D().getWidth();
+		final float aspectRatio = (float) ((BoundsOwner) sceneParent.get()).getBounds().getBounds2D().getWidth();
 
 		float offsetX = left ? -aspectRatio + this.marginLeft : aspectRatio - this.marginRight;
 		float offsetY = top ? -1.0f + this.marginTop : 1.0f - this.marginBottom;

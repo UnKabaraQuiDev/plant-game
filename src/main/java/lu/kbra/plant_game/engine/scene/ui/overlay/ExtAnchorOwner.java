@@ -34,19 +34,24 @@ public interface ExtAnchorOwner extends AnchorOwner, Transform3DOwner, BoundsOwn
 	}
 
 	default void applyAnchor() {
-		if (!(this.isAnchored() && this.hasTransform())) {
+		if (!this.isAnchored() || !this.hasTransform()) {
 			return;
 		}
 
 		final Shape targetBounds = AbsoluteTransformedBoundsOwner.getAbsoluteTransformedBounds(this.getTarget());
-		final float margin = this instanceof MarginOwner mo ? mo.getMargin() : 0;
+
+		final float marginX = this instanceof MarginOwner mo ? mo.getMargin()
+				: 0 + (this instanceof Margin2DOwner m2o ? m2o.getMarginX() : 0);
+		final float marginZ = this instanceof MarginOwner mo ? mo.getMargin()
+				: 0 + (this instanceof Margin2DOwner m2o ? m2o.getMarginZ() : 0);
+
 		AnchorLayout.alignAnchors(this.getTransform(),
 				this.getBounds().getBounds2D(),
 				targetBounds.getBounds2D(),
 				this.getObjectAnchor(),
 				this.getTargetAnchor(),
-				margin,
-				margin);
+				-marginX,
+				-marginZ);
 	}
 
 }

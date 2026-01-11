@@ -1,5 +1,7 @@
 package lu.kbra.plant_game.engine.entity.ui.slider;
 
+import java.util.Optional;
+
 import org.joml.Math;
 import org.joml.Vector2f;
 import org.joml.Vector2fc;
@@ -8,15 +10,15 @@ import org.lwjgl.glfw.GLFW;
 import lu.kbra.plant_game.PGLogic;
 import lu.kbra.plant_game.engine.entity.impl.NeedsPostConstruct;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsInput;
+import lu.kbra.plant_game.engine.entity.ui.impl.UISceneParentAware;
 import lu.kbra.plant_game.engine.entity.ui.text.TextUIObject;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
-import lu.kbra.standalone.gameengine.objs.entity.SceneParentAware;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
 import lu.kbra.standalone.gameengine.utils.geo.GeoPlane;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextAlignment;
 
-public class SliderUIObject extends TextUIObject implements NeedsInput, NeedsPostConstruct, SceneParentAware {
+public class SliderUIObject extends TextUIObject implements NeedsInput, NeedsPostConstruct, UISceneParentAware {
 
 	protected float min;
 	protected float max;
@@ -38,7 +40,12 @@ public class SliderUIObject extends TextUIObject implements NeedsInput, NeedsPos
 			return;
 		}
 
-		final Vector2f coords = ((UIScene) this.getSceneParent()).getMouseCoords(inputHandler);
+		final Optional<UIScene> uiScene = this.getUISceneParent();
+		if (uiScene.isEmpty()) {
+			return;
+		}
+
+		final Vector2f coords = uiScene.get().getMouseCoords(inputHandler);
 		coords.sub(GeoPlane.XZ.projectToPlane(this.getTransform().getTranslation()));
 		coords.y += this.getTextEmitter().getCharSize().y() / 2;
 

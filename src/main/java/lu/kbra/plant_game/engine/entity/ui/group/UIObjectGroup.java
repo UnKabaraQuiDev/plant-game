@@ -1,6 +1,5 @@
 package lu.kbra.plant_game.engine.entity.ui.group;
 
-import java.awt.Component;
 import java.awt.Shape;
 import java.awt.geom.Area;
 import java.util.ArrayList;
@@ -31,7 +30,7 @@ public class UIObjectGroup extends UIObject implements ObjectGroup<UIObject>, No
 
 	protected Shape computedBounds;
 
-	public UIObjectGroup(final String str, final List<UIObject> entities, final Component... cs) {
+	public UIObjectGroup(final String str, final List<UIObject> entities) {
 		super(str);
 	}
 

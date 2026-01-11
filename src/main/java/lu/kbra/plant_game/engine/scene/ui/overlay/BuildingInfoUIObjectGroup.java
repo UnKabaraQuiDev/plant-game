@@ -152,8 +152,11 @@ public class BuildingInfoUIObjectGroup extends FixedBoundsUIObjectGroup implemen
 
 	@Override
 	public void setTarget(final UIObject target) {
-		this.target = new WeakReference<>(target);
-
+		if (target == null) {
+			this.target = null;
+		} else if (this.getTarget() != target) {
+			this.target = new WeakReference<>(target);
+		}
 	}
 
 	@Override

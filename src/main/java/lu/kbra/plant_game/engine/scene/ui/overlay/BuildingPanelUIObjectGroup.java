@@ -5,6 +5,8 @@ import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.joml.Vector3f;
+
 import lu.pcy113.pclib.concurrency.ObjectTriggerLatch;
 import lu.pcy113.pclib.logger.GlobalLogger;
 
@@ -31,7 +33,6 @@ public class BuildingPanelUIObjectGroup extends AnchoredLayoutUIObjectGroup impl
 	public BuildingPanelUIObjectGroup() {
 		super("building-tab", new AnchorLayout(), Anchor.BOTTOM_CENTER, Anchor.BOTTOM_CENTER);
 		this.fixedBounds = new Rectangle2D.Float(0, 0, 1, 1);
-
 		this.add(this.tabList);
 	}
 
@@ -55,7 +56,7 @@ public class BuildingPanelUIObjectGroup extends AnchoredLayoutUIObjectGroup impl
 	public <T extends BuildingTabUIObjectGroup> ObjectTriggerLatch<T> addTab(final T tab) {
 		final ObjectTriggerLatch<T> latch = new ObjectTriggerLatch<>(1, tab);
 
-		new BuildingTabButtonUIObjectGroup(new Transform3D(), tab).init().then(obj -> {
+		new BuildingTabButtonUIObjectGroup(new Transform3D(new Vector3f(0, -0.5f, 0)), tab).init().then(obj -> {
 			obj.getTransform().scaleMul(this.tabList.getFixedHeight() / (float) obj.getBounds().getBounds2D().getHeight()).update();
 			this.tabList.add(obj);
 			this.buildingTabs.put(tab.getId(), tab);
@@ -159,9 +160,13 @@ public class BuildingPanelUIObjectGroup extends AnchoredLayoutUIObjectGroup impl
 
 	@Override
 	public String toString() {
-		return "BuildingTabUIObjectGroup [objectAnchor=" + this.objectAnchor + ", targetAnchor=" + this.targetAnchor + ", subEntitiesLock="
-				+ this.subEntitiesLock + ", subEntities=" + this.subEntities + ", bounds=" + this.computedBounds + ", transform="
-				+ this.transform + ", active=" + this.active + ", name=" + this.name + "]";
+		return "BuildingPanelUIObjectGroup@" + System.identityHashCode(this) + " [fixedBounds=" + this.fixedBounds + ", boundsMarginX="
+				+ this.boundsMarginX + ", boundsMarginY=" + this.boundsMarginY + ", heightRatio=" + this.heightRatio + ", tabList="
+				+ this.tabList + ", buildingTabs=" + this.buildingTabs + ", activeBuildingTabId=" + this.activeBuildingTabId
+				+ ", buildingTabScrollSpeed=" + this.buildingTabScrollSpeed + ", objectAnchor=" + this.objectAnchor + ", targetAnchor="
+				+ this.targetAnchor + ", layout=" + this.layout + ", subEntitiesLock=" + this.subEntitiesLock + ", subEntities="
+				+ this.subEntities + ", computedBounds=" + this.computedBounds + ", transform=" + this.transform + ", active=" + this.active
+				+ ", name=" + this.name + "]";
 	}
 
 }

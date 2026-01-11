@@ -1,7 +1,6 @@
 // @formatter:off
 package lu.kbra.plant_game.generated;
 
-import java.awt.Component;
 import java.lang.Class;
 import java.lang.Integer;
 import java.lang.Object;
@@ -32,6 +31,7 @@ import lu.kbra.plant_game.engine.entity.ui.group.UIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.impl.Direction2d;
 import lu.kbra.plant_game.engine.entity.ui.layout.SpacerUIObject;
 import lu.kbra.plant_game.engine.entity.ui.prim.AnchoredFlatQuadUIObject;
+import lu.kbra.plant_game.engine.entity.ui.prim.BuildingItemFlatQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.prim.ExtAnchoredFlatQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.prim.FlatQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.prim.IBAnchoredFlatQuadUIObject;
@@ -114,8 +114,8 @@ public class UIObjectRegistry {
 		/*                 UIObjectGroup                 */
 		final List<InternalConstructorFunction<UIObject>> listUIObjectGroup = new ArrayList<>();
 		listUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObject[].class}, (Object[] arr) -> (UIObject) new UIObjectGroup((String) arr[0], (UIObject[]) arr[1])));
+		listUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, List.class}, (Object[] arr) -> (UIObject) new UIObjectGroup((String) arr[0], (List) arr[1])));
 		listUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObjectGroup.class, UIObject[].class}, (Object[] arr) -> (UIObject) new UIObjectGroup((String) arr[0], (UIObjectGroup) arr[1], (UIObject[]) arr[2])));
-		listUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, List.class, Component[].class}, (Object[] arr) -> (UIObject) new UIObjectGroup((String) arr[0], (List) arr[1], (Component[]) arr[2])));
 		listUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, UIScene.class, UIObject[].class}, (Object[] arr) -> (UIObject) new UIObjectGroup((String) arr[0], (UIScene) arr[1], (UIObject[]) arr[2])));
 		UI_OBJECT_CONSTRUCTORS.put(UIObjectGroup.class, listUIObjectGroup);
 
@@ -441,6 +441,11 @@ public class UIObjectRegistry {
 		listExtAnchoredProgrammaticTextUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TextEmitter.class}, (Object[] arr) -> (UIObject) new ExtAnchoredProgrammaticTextUIObject((String) arr[0], (TextEmitter) arr[1])));
 		UI_OBJECT_CONSTRUCTORS.put(ExtAnchoredProgrammaticTextUIObject.class, listExtAnchoredProgrammaticTextUIObject);
 		DATA_PATH.put(ExtAnchoredProgrammaticTextUIObject.class, "localization:string-placeholder");
+
+		/*                 BuildingItemFlatQuadUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listBuildingItemFlatQuadUIObject = new ArrayList<>();
+		listBuildingItemFlatQuadUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new BuildingItemFlatQuadUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
+		UI_OBJECT_CONSTRUCTORS.put(BuildingItemFlatQuadUIObject.class, listBuildingItemFlatQuadUIObject);
 
 		/*                 ExtAnchoredFlatQuadUIObject                 */
 		final List<InternalConstructorFunction<UIObject>> listExtAnchoredFlatQuadUIObject = new ArrayList<>();

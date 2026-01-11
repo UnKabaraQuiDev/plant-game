@@ -1,6 +1,7 @@
 package lu.kbra.plant_game.engine.entity.ui.group;
 
 import java.awt.geom.Rectangle2D;
+import java.util.Optional;
 
 import org.joml.Vector2f;
 import org.joml.Vector3fc;
@@ -9,14 +10,14 @@ import lu.pcy113.pclib.concurrency.ObjectTriggerLatch;
 
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
-import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwner;
+import lu.kbra.plant_game.engine.entity.ui.impl.BoundsSceneParentAware;
 import lu.kbra.plant_game.engine.entity.ui.scroller.ScrollBarUIObject;
+import lu.kbra.plant_game.engine.scene.ui.SceneBoundsOwner;
 import lu.kbra.plant_game.engine.scene.ui.layout.Layout;
-import lu.kbra.standalone.gameengine.objs.entity.SceneParentAware;
 import lu.kbra.standalone.gameengine.utils.consts.Direction;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-public class ScrollContainerUIObjectGroup extends OffsetUIObjectGroup implements SceneParentAware {
+public class ScrollContainerUIObjectGroup extends OffsetUIObjectGroup implements BoundsSceneParentAware {
 
 	private final ScrollDrivenUIObjectGroup scrollContent;
 	private ScrollBarUIObject scrollBar;
@@ -77,11 +78,12 @@ public class ScrollContainerUIObjectGroup extends OffsetUIObjectGroup implements
 	}
 
 	public void updateScrollBar() {
-		if (this.scrollBar == null || !this.hasSceneParent()) {
+		final Optional<SceneBoundsOwner> scene = this.getBoundsSceneParent();
+		if (this.scrollBar == null || scene.isEmpty()) {
 			return;
 		}
 		this.scrollBar.setActive(this.scrollContent.needsScrollBar());
-		final Rectangle2D sceneBounds = ((BoundsOwner) this.getSceneParent()).getBounds().getBounds2D();
+		final Rectangle2D sceneBounds = scene.get().getBounds().getBounds2D();
 		this.scrollBar.setRange(new Vector2f((float) sceneBounds.getMinX() + this.scrollBar.getMargin() - (float) sceneBounds.getCenterX(),
 				(float) sceneBounds.getMaxX() - this.scrollBar.getMargin() + (float) sceneBounds.getCenterX()));
 	}

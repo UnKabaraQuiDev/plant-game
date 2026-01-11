@@ -20,7 +20,6 @@ import lu.kbra.plant_game.engine.UpdateFrameState;
 import lu.kbra.plant_game.engine.entity.impl.Transform3DOwner;
 import lu.kbra.plant_game.engine.entity.impl.TransformOwner;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
-import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.Focusable;
 import lu.kbra.plant_game.engine.entity.ui.impl.HoverState;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsBoundsInput;
@@ -41,7 +40,7 @@ import lu.kbra.standalone.gameengine.scene.EntityContainer;
 import lu.kbra.standalone.gameengine.scene.Scene3D;
 import lu.kbra.standalone.gameengine.scene.camera.Camera;
 
-public class UIScene extends Scene3D implements BoundsOwner {
+public class UIScene extends Scene3D implements SceneBoundsOwner {
 
 	public static final Comparator<Entity> DEPTH_COMPARATOR = Comparator
 			.comparing((final Entity e) -> e instanceof Transform3DOwner && ((Transform3DOwner) e).hasTransform()
@@ -123,6 +122,10 @@ public class UIScene extends Scene3D implements BoundsOwner {
 			final Point2D.Float mousePos,
 			final Set<UIObject> newHovered,
 			final Matrix4fc parentTransform) {
+		if (!e.isActive()) {
+			System.err.println(e + " is inactive");
+			return;
+		}
 
 		// treat children first so they are earlier in the hovered stack
 		if (e instanceof final EntityContainer<?> ec) {
@@ -194,8 +197,6 @@ public class UIScene extends Scene3D implements BoundsOwner {
 		if (e instanceof final EntityContainer<?> ec) {
 			ec.forEach(e2 -> this.updateEntity(inputHandler, e2));
 		}
-
-//		final float dTime = inputHandler.dTime();
 
 		if (e instanceof final NeedsUpdate needsUpdate) {
 			needsUpdate.update(inputHandler);
