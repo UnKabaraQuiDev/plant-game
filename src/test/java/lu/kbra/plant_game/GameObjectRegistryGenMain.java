@@ -116,7 +116,8 @@ public class GameObjectRegistryGenMain extends GenMainConsts {
 				.addField(dataPathHashMap)
 				.addField(bufferSizeHashMap)
 				.addField(textureFilterHashMap)
-				.addField(textureWrapHashMap);
+				.addField(textureWrapHashMap)
+				.addField(defaultPriceHashMap);
 
 		final Reflections reflections = new Reflections(MAIN_PACKAGE);
 		final Set<Class<? extends GameObject>> classes = reflections.getSubTypesOf(GameObject.class);

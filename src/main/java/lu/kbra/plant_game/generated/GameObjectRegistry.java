@@ -67,6 +67,8 @@ public class GameObjectRegistry {
 
 	public static final Map<Class<? extends GameObject>, TextureWrap> TEXTURE_WRAP;
 
+	public static final Map<Class<? extends GameObject>, Integer> DEFAULT_PRICE;
+
 	static {
 		GAME_OBJECT_CONSTRUCTORS = new HashMap<>();
 		DATA_PATH = new HashMap<>();

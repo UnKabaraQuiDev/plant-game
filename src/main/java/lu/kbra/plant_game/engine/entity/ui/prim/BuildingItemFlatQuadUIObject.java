@@ -14,7 +14,7 @@ import lu.kbra.plant_game.engine.mesh.TexturedQuadMesh;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
 import lu.kbra.plant_game.engine.scene.ui.overlay.OverlayUIScene;
 import lu.kbra.plant_game.engine.scene.ui.overlay.group.building.BuildingInfoUIObjectGroup;
-import lu.kbra.plant_game.engine.scene.world.data.building.requirement.BuildingDeclaration;
+import lu.kbra.plant_game.engine.scene.world.data.building.BuildingDeclaration;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.utils.interpolation.Interpolator;
 import lu.kbra.standalone.gameengine.utils.interpolation.Interpolators;
