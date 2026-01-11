@@ -4,6 +4,7 @@ import org.joml.Vector4f;
 import org.joml.Vector4fc;
 
 import lu.kbra.plant_game.PGLogic;
+import lu.kbra.plant_game.engine.entity.ui.impl.HoverState;
 import lu.kbra.plant_game.engine.entity.ui.impl.IndexOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsClick;
 import lu.kbra.plant_game.engine.entity.ui.impl.Scale2dDir;
@@ -30,11 +31,10 @@ public class QuitButtonUIObject extends GrowOnHoverTextUIObject implements Needs
 	}
 
 	@Override
-	public void update(final WindowInputHandler input) {
-		final float factor = super.grow(input.dTime(), this.isHovered());
-		this.getTransform().updateMatrix();
-
-		TextEmitter.DEFAULT_FG_COLOR.lerp(TARGET_RED, factor, this.getTextEmitter().getForegroundColor());
+	public boolean hover(final WindowInputHandler input, final HoverState hoverState) {
+		final boolean b = super.hover(input, hoverState);
+		TextEmitter.DEFAULT_FG_COLOR.lerp(TARGET_RED, this.progress, this.getTextEmitter().getForegroundColor());
+		return b;
 	}
 
 	@Override

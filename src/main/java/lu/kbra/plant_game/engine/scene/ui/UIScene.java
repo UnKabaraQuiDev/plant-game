@@ -30,7 +30,6 @@ import lu.kbra.plant_game.engine.entity.ui.impl.NeedsInput;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsUpdate;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.scene.ui.layout.LayoutOwner;
-import lu.kbra.plant_game.engine.scene.ui.overlay.BuildingPanelUIObjectGroup;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.GameEngine;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
@@ -97,7 +96,9 @@ public class UIScene extends Scene3D implements BoundsOwner {
 
 		this.hovering.removeAll(newHovered);
 		for (final UIObject uiObj : this.hovering) {
-			((NeedsHover) uiObj).hover(inputHandler, HoverState.LEAVE);
+			if (!((NeedsHover) uiObj).hover(inputHandler, HoverState.LEAVE)) {
+				newHovered.add(uiObj);
+			}
 		}
 
 		this.hovering = newHovered;
@@ -154,7 +155,8 @@ public class UIScene extends Scene3D implements BoundsOwner {
 					}
 				}
 
-				if (uiObj instanceof final NeedsClick uiObjectClick && (inputHandler.isMouseButtonPressedOnce(GLFW.GLFW_MOUSE_BUTTON_LEFT) || inputHandler.isMouseButtonPressedOnce(GLFW.GLFW_MOUSE_BUTTON_RIGHT))) {
+				if (uiObj instanceof final NeedsClick uiObjectClick && (inputHandler.isMouseButtonPressedOnce(GLFW.GLFW_MOUSE_BUTTON_LEFT)
+						|| inputHandler.isMouseButtonPressedOnce(GLFW.GLFW_MOUSE_BUTTON_RIGHT))) {
 					uiObjectClick.click(inputHandler);
 					frameState.uiSceneCaughtMouseInput = true;
 					GlobalLogger.info("UIObject: " + uiObj.getId() + " took mouse input.");

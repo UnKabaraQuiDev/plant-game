@@ -12,28 +12,32 @@ import lu.kbra.standalone.gameengine.objs.entity.ParentAwareNode;
 public interface AbsoluteTransform3DOwner extends Transform3DOwner, ParentAwareNode {
 
 	default Matrix4f getAbsoluteTransform() {
-//		final Matrix4f combined = new Matrix4f().identity();
-//
-//		final Deque<Matrix4f> stack = new ArrayDeque<>();
-//		Object current = this;
-//		while (current instanceof ParentAware) {
-//			if (current instanceof final Transform3DOwner trOwner) {
-//				final Matrix4f matrix = trOwner.getTransform().getMatrix();
-//				stack.push(matrix);
-//			}
-//			current = ((ParentAware) current).getParent();
-//		}
-//
-//		while (!stack.isEmpty()) {
-//			combined.mul(stack.pop());
-//		}
-//
-//		return combined;
+		final Matrix4f combined = new Matrix4f().identity();
 
-		return getAbsoluteTransform(this);
+		final Deque<Matrix4f> stack = new ArrayDeque<>();
+		Object current = this;
+		while (current instanceof ParentAwareNode) {
+			if (current instanceof final Transform3DOwner trOwner) {
+				final Matrix4f matrix = trOwner.getTransform().getMatrix();
+				stack.push(matrix);
+			}
+			current = ((ParentAwareNode) current).getParent();
+		}
+
+		while (!stack.isEmpty()) {
+			combined.mul(stack.pop());
+		}
+
+		return combined;
+
+//		return getAbsoluteTransform(this);
 	}
 
 	static <T extends Transform3DOwner & ParentAwareNode> Matrix4f getAbsoluteTransform(final T entity) {
+		if (entity instanceof AbsoluteTransform3DOwner ato) {
+			return ato.getAbsoluteTransform();
+		}
+
 		final Matrix4f combined = new Matrix4f().identity();
 
 		final Deque<Matrix4f> stack = new ArrayDeque<>();

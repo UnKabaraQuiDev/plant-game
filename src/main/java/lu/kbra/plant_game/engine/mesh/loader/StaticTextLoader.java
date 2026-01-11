@@ -41,6 +41,13 @@ public class StaticTextLoader {
 			final Dispatcher loader,
 			final Dispatcher render) {
 
+		final String absKey;
+		if (key.startsWith("localization:")) {
+			absKey = key.replaceFirst("localization:", "");
+		} else {
+			absKey = key;
+		}
+
 		TaskFuture tf = new TaskFuture<>(loader, (ThrowingSupplier<String, Throwable>) () -> {
 			if (!cache.hasTextEmitter(meshName) && !waitOrCreateLock(meshName)) {
 				throw new YieldExecutionThrowable(() -> cache.hasTextEmitter(meshName));
@@ -51,7 +58,7 @@ public class StaticTextLoader {
 				throw new SkipThen(cache.getTextEmitter(meshName));
 			}
 
-			return LocalizationService.get(key);
+			return LocalizationService.get(absKey);
 		});
 
 		final List<AttribArray> createdAttribs = new ArrayList<>();

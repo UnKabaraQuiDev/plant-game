@@ -438,9 +438,9 @@ public class MainMenuUIScene extends UIScene {
 		if (this.cursor != null && this.currentGroup == MAIN && this.mainButtonsMenuGroup.size() > 1) {
 			this.cursor.setActive(true);
 
-			final float z1 = ((AbsoluteTransform3DOwner) this.mainButtonsMenuGroup.get(0)).getAbsoluteTransform()
+			final float z1 = AbsoluteTransform3DOwner.getAbsoluteTransform(this.mainButtonsMenuGroup.get(0))
 					.getTranslation(new Vector3f()).z;
-			final float z2 = ((AbsoluteTransform3DOwner) this.mainButtonsMenuGroup.get(1)).getAbsoluteTransform()
+			final float z2 = AbsoluteTransform3DOwner.getAbsoluteTransform(this.mainButtonsMenuGroup.get(1))
 					.getTranslation(new Vector3f()).z;
 
 			this.cursor.setSnapPhase(Math.max(z1, z2));

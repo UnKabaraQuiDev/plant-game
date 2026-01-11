@@ -78,9 +78,14 @@ public class BuildingTabUIObjectGroup extends AnchoredLayoutUIObjectGroup
 		if (!this.hasBoundsOwnerParent()) {
 			return;
 		}
-		final Rectangle2D containerBounds = this.getContainer().getLocalTransformedBounds().getBounds2D();
-		final Rectangle2D superBounds = this.getBoundsOwnerParent().getBounds().getBounds2D();
-		this.scrollXRange.set(superBounds.getMinX() - containerBounds.getMinX(), superBounds.getMaxX() - containerBounds.getMaxX());
+		final Rectangle2D contentBounds = this.getContainer().getLocalTransformedBounds().getBounds2D();
+		final Rectangle2D parentBounds = this.getBoundsOwnerParent().getBounds().getBounds2D();
+		if (parentBounds.getWidth() > contentBounds.getWidth()) {
+			this.scrollXRange.set(parentBounds.getCenterX() - contentBounds.getCenterX(),
+					parentBounds.getCenterX() - contentBounds.getCenterX());
+		} else {
+			this.scrollXRange.set(parentBounds.getMinX() - contentBounds.getMinX(), parentBounds.getMaxX() - contentBounds.getMaxX());
+		}
 	}
 
 	@Override

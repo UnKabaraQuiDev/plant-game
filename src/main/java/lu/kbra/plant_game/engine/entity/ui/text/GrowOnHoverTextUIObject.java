@@ -3,29 +3,17 @@ package lu.kbra.plant_game.engine.entity.ui.text;
 import org.joml.Vector3fc;
 
 import lu.kbra.plant_game.engine.entity.ui.impl.GrowOnHover;
-import lu.kbra.plant_game.engine.entity.ui.impl.HoverState;
 import lu.kbra.plant_game.engine.entity.ui.impl.Scale2dDir;
-import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.GameEngine;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
 
 public class GrowOnHoverTextUIObject extends TextUIObject implements GrowOnHover {
 
-	private boolean hovered;
-	private Scale2dDir dir;
+	protected Scale2dDir dir;
+	protected float progress;
 
 	public GrowOnHoverTextUIObject(final String str, final TextEmitter text) {
 		super(str, text);
-	}
-
-	@Override
-	public void hover(final WindowInputHandler input, final HoverState hoverState) {
-		this.hovered = (hoverState == HoverState.ENTER || hoverState == HoverState.STAY);
-	}
-
-	@Override
-	public boolean isHovered() {
-		return this.hovered;
 	}
 
 	@Override
@@ -39,7 +27,7 @@ public class GrowOnHoverTextUIObject extends TextUIObject implements GrowOnHover
 
 	@Override
 	public float getGrowthRate(final boolean grow) {
-		return grow ? 1.5f : 3f;
+		return grow ? 3f : 5f;
 	}
 
 	public Scale2dDir getDir() {
@@ -48,6 +36,16 @@ public class GrowOnHoverTextUIObject extends TextUIObject implements GrowOnHover
 
 	public void setDir(final Scale2dDir dir) {
 		this.dir = dir;
+	}
+
+	@Override
+	public float getGrowthProgress() {
+		return this.progress;
+	}
+
+	@Override
+	public void setGrowthProgress(final float f) {
+		this.progress = f;
 	}
 
 }
