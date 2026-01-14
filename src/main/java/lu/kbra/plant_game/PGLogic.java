@@ -23,11 +23,11 @@ import lu.kbra.plant_game.engine.entity.go.obj_inst.particles.ParticleGameObject
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
-import lu.kbra.plant_game.engine.scene.ui.menu.main.MainMenuUIScene;
-import lu.kbra.plant_game.engine.scene.ui.overlay.OverlayUIScene;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.plant_game.engine.window.input.MappingInputHandler;
 import lu.kbra.plant_game.generated.ColorMaterial;
+import lu.kbra.plant_game.vanilla.scene.menu.main.MainMenuUIScene;
+import lu.kbra.plant_game.vanilla.scene.overlay.OverlayUIScene;
 import lu.kbra.standalone.gameengine.impl.GameLogic;
 import lu.kbra.standalone.gameengine.impl.future.WorkerDispatcher;
 import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
@@ -85,8 +85,8 @@ public class PGLogic extends GameLogic {
 		this.overlayUIScene.init(this.WORKERS, this.RENDER_DISPATCHER);
 		this.worldScene.init(this.WORKERS, this.RENDER_DISPATCHER);
 
-		this.uiScene = null;
-		this.uiScene = this.overlayUIScene;
+//		this.uiScene = null;
+//		this.uiScene = this.overlayUIScene;
 
 //		final byte[] colors = new byte[20];
 //		for (int i = 0; i < colors.length; i++) {

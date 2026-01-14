@@ -1,4 +1,4 @@
-package lu.kbra.plant_game.engine.scene.ui.overlay.group.building;
+package lu.kbra.plant_game.vanilla.scene.overlay.group.building;
 
 import java.awt.geom.Rectangle2D;
 import java.lang.ref.WeakReference;
@@ -30,12 +30,12 @@ import lu.kbra.plant_game.engine.entity.ui.text.IntegerTextUIObject;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
 import lu.kbra.plant_game.engine.scene.ui.layout.AnchorLayout;
 import lu.kbra.plant_game.engine.scene.ui.layout.FlowLayout;
-import lu.kbra.plant_game.engine.scene.ui.overlay.group.impl.AnchoredLayoutUIObjectGroup;
-import lu.kbra.plant_game.engine.scene.ui.overlay.group.impl.BoundedUIObjectGroup;
-import lu.kbra.plant_game.engine.scene.ui.overlay.group.impl.FixedBoundsUIObjectGroup;
-import lu.kbra.plant_game.engine.scene.ui.overlay.stat_line.integer.AnchoredFixedIntegerStatLine;
-import lu.kbra.plant_game.engine.scene.ui.overlay.stat_line.integer.FixedIntegerStatLine;
 import lu.kbra.plant_game.generated.ColorMaterial;
+import lu.kbra.plant_game.vanilla.scene.overlay.group.impl.AnchoredLayoutUIObjectGroup;
+import lu.kbra.plant_game.vanilla.scene.overlay.group.impl.BoundedUIObjectGroup;
+import lu.kbra.plant_game.vanilla.scene.overlay.group.impl.FixedBoundsUIObjectGroup;
+import lu.kbra.plant_game.vanilla.scene.overlay.stat_line.integer.AnchoredFixedIntegerStatLine;
+import lu.kbra.plant_game.vanilla.scene.overlay.stat_line.integer.FixedIntegerStatLine;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 

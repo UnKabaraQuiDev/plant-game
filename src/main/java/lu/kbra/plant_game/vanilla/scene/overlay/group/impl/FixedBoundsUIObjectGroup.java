@@ -1,4 +1,4 @@
-package lu.kbra.plant_game.engine.scene.ui.overlay.group.impl;
+package lu.kbra.plant_game.vanilla.scene.overlay.group.impl;
 
 import java.awt.Shape;
 import java.awt.geom.Rectangle2D;

@@ -1,4 +1,4 @@
-package lu.kbra.plant_game.engine.scene.ui.overlay;
+package lu.kbra.plant_game.vanilla.scene.overlay;
 
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -24,14 +24,14 @@ import lu.kbra.plant_game.engine.scene.ui.layout.AnchorLayout;
 import lu.kbra.plant_game.engine.scene.ui.layout.FlowLayout;
 import lu.kbra.plant_game.engine.scene.ui.layout.Layout;
 import lu.kbra.plant_game.engine.scene.ui.layout.LayoutOwner;
-import lu.kbra.plant_game.engine.scene.ui.overlay.group.building.BuildingInfoUIObjectGroup;
-import lu.kbra.plant_game.engine.scene.ui.overlay.group.building.BuildingPanelUIObjectGroup;
-import lu.kbra.plant_game.engine.scene.ui.overlay.group.building.BuildingTabUIObjectGroup;
-import lu.kbra.plant_game.engine.scene.ui.overlay.group.impl.AnchoredLayoutUIObjectGroup;
-import lu.kbra.plant_game.engine.scene.ui.overlay.stat_line.integer.ExtAnchoredIntegerStatLine;
-import lu.kbra.plant_game.engine.scene.ui.overlay.stat_line.integer.IntegerStatLine;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.plant_game.generated.ColorMaterial;
+import lu.kbra.plant_game.vanilla.scene.overlay.group.building.BuildingInfoUIObjectGroup;
+import lu.kbra.plant_game.vanilla.scene.overlay.group.building.BuildingPanelUIObjectGroup;
+import lu.kbra.plant_game.vanilla.scene.overlay.group.building.BuildingTabUIObjectGroup;
+import lu.kbra.plant_game.vanilla.scene.overlay.group.impl.AnchoredLayoutUIObjectGroup;
+import lu.kbra.plant_game.vanilla.scene.overlay.stat_line.integer.ExtAnchoredIntegerStatLine;
+import lu.kbra.plant_game.vanilla.scene.overlay.stat_line.integer.IntegerStatLine;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.objs.entity.ParentAwareComponent;
@@ -169,6 +169,7 @@ public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner
 						obj.getPopup().setPadding(false);
 						obj.setTarget(pb.getForeground(), Anchor.TOP_CENTER, Anchor.BOTTOM_RIGHT);
 					});
+			this.progressGroup.doLayout();
 			super.add(this.progressGroup);
 		});
 	}
@@ -177,33 +178,12 @@ public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner
 	public void input(final WindowInputHandler inputHandler, final UpdateFrameState frameState) {
 		super.input(inputHandler, frameState);
 
-//		if (inputHandler.wasResized()) {
-//		final Rectangle2D bounds = this.statsGroup.getBounds().getBounds2D();
-//		this.statsGroup.getTransform().getTranslation().x = -(float) super.getBounds().getWidth() - (float) bounds.getMinX() + this.margin;
-//		this.statsGroup.getTransform().getTranslation().z = -1f + this.margin;
-//		this.statsGroup.getTransform().scaleSet(0.35f).updateMatrix();
-//		}
-
-//		final Rectangle2D objBounds = this.statsGroup.getBounds().getBounds2D();
-//		final Rectangle2D.Float screenBounds = super.getBounds();
-//		this.statsGroup.getTransform().scaleSet(0.35f);
-//		alignAnchors(this.statsGroup.getTransform(), objBounds, screenBounds, Anchor.TOP_LEFT, Anchor.TOP_LEFT, 0, 0);
-
-//		this.progressBar.getTransform().scaleSet(1.8f, 1, 0.5f).updateMatrix();
-//		((Transform3DShear) this.progressBar.getTransform()).shearSet(GeoAxis.Z, GeoAxis.X, -0.8f).update();
-
 		if (this.progressGroup != null && this.progressBar != null) {
 			this.progressBar.setForegroundColor(GameEngineUtils.hsvToColorToVec4f((float) Math.sin(PGLogic.TOTAL_TIME()), 1, 1, 1));
 			this.progressBar.setValue((float) Math.sin(PGLogic.TOTAL_TIME()) / 2 + 0.5f).updateScaling();
 
 			this.progressGroup.set((int) (this.progressBar.getValue() * 101)).flushValue();
 		}
-
-//		this.buildingPanel.getBuildingTabs().values().forEach(c -> c.setScrollX((float) Math.sin(PGLogic.TOTAL_TIME() * 1.5f) * 2 - 0.5f));
-//		this.buildingPanel.doLayout();
-
-//		this.setPadding(((float) Math.sin(PGLogic.TOTAL_TIME()) / 2 + 0.5f) * 0.2f);
-		// this.doLayout();
 	}
 
 	public BuildingInfoUIObjectGroup getBuildingInfo() {

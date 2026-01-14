@@ -15,12 +15,17 @@ import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.utils.consts.Direction;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
+@Deprecated
 public class ScrollDrivenUIObjectGroup extends OffsetUIObjectGroup implements NeedsUpdate, UISceneParentAware {
 
+	@Deprecated
 	protected Supplier<Float> scrollRatioSupplier;
+	@Deprecated
 	protected float margin;
+	@Deprecated
 	protected Direction dir;
 
+	@Deprecated
 	public ScrollDrivenUIObjectGroup(final String str, final Transform3D transform, final Supplier<Float> scrollRatio, final Direction dir,
 			final float margin, final UIObject... values) {
 		super(str, transform, values);
@@ -29,6 +34,7 @@ public class ScrollDrivenUIObjectGroup extends OffsetUIObjectGroup implements Ne
 		this.margin = margin;
 	}
 
+	@Deprecated
 	public ScrollDrivenUIObjectGroup(final String str, final Supplier<Float> scrollRatio, final Direction dir, final float margin,
 			final UIObject... values) {
 		super(str, values);
@@ -37,6 +43,7 @@ public class ScrollDrivenUIObjectGroup extends OffsetUIObjectGroup implements Ne
 		this.margin = margin;
 	}
 
+	@Deprecated
 	public ScrollDrivenUIObjectGroup(final String str, final UIObjectGroup parent, final Supplier<Float> scrollRatio, final Direction dir,
 			final float margin, final UIObject... values) {
 		super(str, parent, values);
@@ -45,6 +52,7 @@ public class ScrollDrivenUIObjectGroup extends OffsetUIObjectGroup implements Ne
 		this.margin = margin;
 	}
 
+	@Deprecated
 	@Override
 	public void update(final WindowInputHandler input) {
 		if (!this.isActive() || !this.hasTransform()) {
@@ -85,6 +93,7 @@ public class ScrollDrivenUIObjectGroup extends OffsetUIObjectGroup implements Ne
 		this.getTransform().updateMatrix();
 	}
 
+	@Deprecated
 	public boolean needsScrollBar() {
 		final Optional<UIScene> uiScene = this.getUISceneParent();
 		if (uiScene.isEmpty()) {
@@ -104,30 +113,37 @@ public class ScrollDrivenUIObjectGroup extends OffsetUIObjectGroup implements Ne
 		return true;
 	}
 
+	@Deprecated
 	public float getMargin() {
 		return this.margin;
 	}
 
+	@Deprecated
 	public Supplier<Float> getScrollRatioSupplier() {
 		return this.scrollRatioSupplier;
 	}
 
+	@Deprecated
 	public void setMargin(final float margin) {
 		this.margin = margin;
 	}
 
+	@Deprecated
 	public void setScrollRatioSupplier(final Supplier<Float> scrollRatio) {
 		this.scrollRatioSupplier = scrollRatio;
 	}
 
+	@Deprecated
 	public Direction getDirection() {
 		return this.dir;
 	}
 
+	@Deprecated
 	public void setDirection(final Direction dir) {
 		this.dir = dir;
 	}
 
+	@Deprecated
 	@Override
 	public String toString() {
 		return "ScrollingUIObjectGroup [scrollRatio=" + this.scrollRatioSupplier + ", dir=" + this.dir + ", bounds=" + this.computedBounds

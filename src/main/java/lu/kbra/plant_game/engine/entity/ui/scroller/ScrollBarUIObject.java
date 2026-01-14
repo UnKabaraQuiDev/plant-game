@@ -10,18 +10,26 @@ import lu.kbra.plant_game.engine.mesh.TexturedQuadMesh;
 import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.standalone.gameengine.utils.consts.Direction;
 
+@Deprecated
 public class ScrollBarUIObject extends FlatQuadUIObject {
 
+	@Deprecated
 	protected Direction dir;
+	@Deprecated
 	protected Vector2f range;
+	@Deprecated
 	protected Vector2f size;
+	@Deprecated
 	protected float speed = 1f;
+	@Deprecated
 	protected float margin = 0.00f;
 
+	@Deprecated
 	public ScrollBarUIObject(final String str, final TexturedQuadMesh mesh) {
 		super(str, mesh);
 	}
 
+	@Deprecated
 	public void addScrollPosition(final float f) {
 		if (!this.hasTransform() || !this.isActive()) {
 			return;
@@ -41,6 +49,7 @@ public class ScrollBarUIObject extends FlatQuadUIObject {
 		this.getTransform().updateMatrix();
 	}
 
+	@Deprecated
 	public float getScrollRatio() {
 		if (!this.hasTransform()) {
 			return 0;
@@ -56,6 +65,7 @@ public class ScrollBarUIObject extends FlatQuadUIObject {
 		return 0;
 	}
 
+	@Deprecated
 	public float setScrollRatio(final float t) {
 		if (!this.hasTransform()) {
 			return 0;
@@ -72,6 +82,7 @@ public class ScrollBarUIObject extends FlatQuadUIObject {
 		return 0;
 	}
 
+	@Deprecated
 	public void setScrollPosition(final float t) {
 		if (!this.hasTransform() || !this.isActive()) {
 			return;
@@ -89,27 +100,33 @@ public class ScrollBarUIObject extends FlatQuadUIObject {
 		this.getTransform().updateMatrix();
 	}
 
+	@Deprecated
 	@Override
 	public void setColorMaterial(final ColorMaterial mt) {
 		super.setTint(mt.getColor());
 	}
 
+	@Deprecated
 	public void setScrollBounds(final Vector2fc b) {
 		this.range.set(b);
 	}
 
+	@Deprecated
 	public float getSpeed() {
 		return this.speed;
 	}
 
+	@Deprecated
 	public void setSpeed(final float speed) {
 		this.speed = speed;
 	}
 
+	@Deprecated
 	public Vector2fc getRange() {
 		return this.range;
 	}
 
+	@Deprecated
 	public void setRange(final Vector2fc v) {
 		if (this.range == null) {
 			this.range = new Vector2f(v);
@@ -120,26 +137,32 @@ public class ScrollBarUIObject extends FlatQuadUIObject {
 		}
 	}
 
+	@Deprecated
 	public float getMargin() {
 		return this.margin;
 	}
 
+	@Deprecated
 	public void setMargin(final float margin) {
 		this.margin = margin;
 	}
 
+	@Deprecated
 	public Direction getDir() {
 		return this.dir;
 	}
 
+	@Deprecated
 	public void setDir(final Direction dir) {
 		this.dir = dir;
 	}
 
+	@Deprecated
 	public Vector2fc getSize() {
 		return this.size;
 	}
 
+	@Deprecated
 	public void setSize(final Vector2fc size) {
 		this.size = new Vector2f(size);
 		if (this.hasTransform()) {
@@ -152,6 +175,7 @@ public class ScrollBarUIObject extends FlatQuadUIObject {
 		}
 	}
 
+	@Deprecated
 	@Override
 	public String toString() {
 		return "ScrollBarUIObject [dir=" + this.dir + ", bounds=" + this.range + ", size=" + this.size + ", color=" + this.color

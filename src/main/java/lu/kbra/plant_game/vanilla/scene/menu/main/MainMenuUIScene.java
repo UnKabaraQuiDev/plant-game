@@ -1,4 +1,4 @@
-package lu.kbra.plant_game.engine.scene.ui.menu.main;
+package lu.kbra.plant_game.vanilla.scene.menu.main;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -29,14 +29,13 @@ import lu.kbra.plant_game.engine.entity.ui.btn.OptionsButtonUIObject;
 import lu.kbra.plant_game.engine.entity.ui.btn.PlayButtonUIObject;
 import lu.kbra.plant_game.engine.entity.ui.btn.QuitButtonUIObject;
 import lu.kbra.plant_game.engine.entity.ui.data.GradientDirection;
-import lu.kbra.plant_game.engine.entity.ui.data.Scale2dDir;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
-import lu.kbra.plant_game.engine.entity.ui.gradient.GradientQuadUIObject;
+import lu.kbra.plant_game.engine.entity.ui.gradient.AnchoredGradientQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.group.LayoutOffsetUIObjectGroup;
-import lu.kbra.plant_game.engine.entity.ui.group.LayoutScrollDrivenUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.group.OffsetUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.group.ScrollContainerUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.group.ScrollDrivenUIObjectGroup;
+import lu.kbra.plant_game.engine.entity.ui.group.UIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.icon.CursorUIObject;
 import lu.kbra.plant_game.engine.entity.ui.icon.LargeLogoUIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.AbsoluteTransform3DOwner;
@@ -44,21 +43,22 @@ import lu.kbra.plant_game.engine.entity.ui.layout.SpacerUIObject;
 import lu.kbra.plant_game.engine.entity.ui.mesh.line.TimelineMesh;
 import lu.kbra.plant_game.engine.entity.ui.scroller.ScrollBarUIObject;
 import lu.kbra.plant_game.engine.entity.ui.slider.VolumeSliderUIObject;
-import lu.kbra.plant_game.engine.entity.ui.text.OptionKeyUIObject;
-import lu.kbra.plant_game.engine.entity.ui.text.ProgrammaticTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.TextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.VolumeTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.textinput.TextFieldUIObject;
 import lu.kbra.plant_game.engine.loader.StaticFlatMeshLoader;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
+import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
+import lu.kbra.plant_game.engine.scene.ui.layout.AnchorLayout;
 import lu.kbra.plant_game.engine.scene.ui.layout.EdgeStickLayout;
 import lu.kbra.plant_game.engine.scene.ui.layout.FlowLayout;
-import lu.kbra.plant_game.engine.scene.ui.layout.MarginFlowLayout;
-import lu.kbra.plant_game.engine.window.input.MappingInputHandler;
+import lu.kbra.plant_game.engine.scene.ui.layout.Layout;
 import lu.kbra.plant_game.engine.window.input.StandardKeyOption;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.plant_game.generated.ColorMaterial;
+import lu.kbra.plant_game.vanilla.scene.overlay.group.impl.MarginAnchoredUIObjectGroup;
+import lu.kbra.plant_game.vanilla.scene.overlay.group.impl.ParentUIObjectGroup;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.cache.attrib.UIntAttribArray;
 import lu.kbra.standalone.gameengine.cache.attrib.Vec3fAttribArray;
@@ -94,22 +94,22 @@ public class MainMenuUIScene extends UIScene {
 
 	protected Vector3fc[] restPositions = { new Vector3f(), new Vector3f(5, 0, 5), new Vector3f(5, 0, 0), null };
 
-	protected OffsetUIObjectGroup mainMenuGroup = new OffsetUIObjectGroup("main", new Transform3D(new Vector3f(this.restPositions[MAIN])));
+	protected ParentUIObjectGroup mainMenuGroup = new ParentUIObjectGroup("main",
+			new AnchorLayout(),
+			new Transform3D(new Vector3f(this.restPositions[MAIN])));
 
-	protected LayoutOffsetUIObjectGroup mainLeftMenuGroup = new LayoutOffsetUIObjectGroup("main.left",
-			new MarginFlowLayout(true, 0.02f, 0.3f, 0, 0.5f, 0.5f, MarginFlowLayout.LEFT),
-			this.mainMenuGroup);
-	protected LayoutOffsetUIObjectGroup mainButtonsMenuGroup = new LayoutOffsetUIObjectGroup("main.buttons",
+	protected MarginAnchoredUIObjectGroup mainButtonsMenuGroup = new MarginAnchoredUIObjectGroup("main.buttons",
 			new FlowLayout(true, 0.02f),
-			this.mainLeftMenuGroup);
+			this.mainMenuGroup,
+			Anchor.CENTER_LEFT,
+			Anchor.CENTER_LEFT,
+			0.25f);
 
-	protected ScrollContainerUIObjectGroup optionsMenuGroup = new ScrollContainerUIObjectGroup("options",
-			this.restPositions[OPTIONS],
-			Direction.SOUTH,
-			0.05f,
-			new FlowLayout(true, 0.0f));
-	protected LayoutScrollDrivenUIObjectGroup optionsEntriesMenuGroup = (LayoutScrollDrivenUIObjectGroup) this.optionsMenuGroup
-			.getScrollContent();
+	protected ParentUIObjectGroup optionsMenuGroup = new ParentUIObjectGroup("options",
+			new AnchorLayout(),
+			new Transform3D(this.restPositions[OPTIONS]));
+	protected OptionsUIObjectGroup optionsVerticalGroup = new OptionsUIObjectGroup(this.optionsMenuGroup);
+	protected UIObjectGroup optionsEntriesGroup = this.optionsVerticalGroup.getContainer();
 
 	protected ScrollContainerUIObjectGroup playMenuGroup = new ScrollContainerUIObjectGroup("play",
 			this.restPositions[PLAY],
@@ -123,11 +123,9 @@ public class MainMenuUIScene extends UIScene {
 			this.optionsMenuGroup,
 			null };
 
-	protected CursorUIObject cursor;
+	protected Layout layout;
 
-	protected GradientQuadUIObject greenGradient;
-	protected GradientQuadUIObject blueGradient;
-	protected BackButtonUIObject optionsBackBtn;
+	protected CursorUIObject cursor;
 
 	public MainMenuUIScene(final CacheManager parent) {
 		super("main-menu", parent);
@@ -230,30 +228,35 @@ public class MainMenuUIScene extends UIScene {
 		final LayoutOffsetUIObjectGroup optionsVolumeGroup = new LayoutOffsetUIObjectGroup("options.volume",
 				new EdgeStickLayout(true, 0, SMALL_TEXT_CHAR_SIZE.get().x() * OPTIONS_COLUMN_COUNT));
 
-		this.optionsEntriesMenuGroup.add(optionsVolumeGroup);
-		this.optionsEntriesMenuGroup.add(SpacerUIObject.getVerticalSpacer(2 * SMALL_TEXT_CHAR_SIZE.get().y()));
+		this.optionsEntriesGroup.add(optionsVolumeGroup);
+		this.optionsEntriesGroup.add(SpacerUIObject.getVerticalSpacer(2 * SMALL_TEXT_CHAR_SIZE.get().y()));
 
-		final ListTriggerLatch<OptionKeyUIObject> optionKeyGroupLatch = new ListTriggerLatch<>(StandardKeyOption.values().length,
-				l -> workers.post(() -> {
-					l.forEach(this.optionsEntriesMenuGroup::add);
-					this.updateKeys();
-				}));
-
-		final OptionalInt SMALL_TEXT_BUFFER_SIZE = OptionalInt.of(OPTIONS_COLUMN_COUNT);
 		for (final StandardKeyOption key : StandardKeyOption.values()) {
-			UIObjectFactory
-					.createText(OptionKeyUIObject.class,
-							SMALL_TEXT_BUFFER_SIZE,
-							SMALL_TEXT_CHAR_SIZE,
-							SMALL_TEXT_TEXT_ALIGNMENT,
-							Optional.of("options.keys" + key),
-							Optional.of(key.name().toLowerCase()))
-					.set(i -> i.setTransform(new Transform3D()))
-					.set(i -> i.setDir(Scale2dDir.BOTH))
-					.set(i -> i.setKey(key.name().toLowerCase()))
-					.latch(optionKeyGroupLatch)
-					.push();
+			new OptionKeyUIObjectGroup(key, this.optionsEntriesGroup).init(PGLogic.INSTANCE.getInputHandler());
 		}
+
+		// final ListTriggerLatch<OptionKeyUIObject> optionKeyGroupLatch = new
+		// ListTriggerLatch<>(StandardKeyOption.values().length,
+//				l -> workers.post(() -> {
+//					l.forEach(this.optionsEntriesGroup::add);
+//					this.updateKeys();
+//				}));
+//
+		final OptionalInt SMALL_TEXT_BUFFER_SIZE = OptionalInt.of(OPTIONS_COLUMN_COUNT);
+//		for (final StandardKeyOption key : StandardKeyOption.values()) {
+//			UIObjectFactory
+//					.createText(OptionKeyUIObject.class,
+//							SMALL_TEXT_BUFFER_SIZE,
+//							SMALL_TEXT_CHAR_SIZE,
+//							SMALL_TEXT_TEXT_ALIGNMENT,
+//							Optional.of("options.keys" + key),
+//							Optional.of(key.name().toLowerCase()))
+//					.set(i -> i.setTransform(new Transform3D()))
+//					.set(i -> i.setDir(Scale2dDir.BOTH))
+//					.set(i -> i.setKey(key.name().toLowerCase()))
+//					.latch(optionKeyGroupLatch)
+//					.push();
+//		}
 
 		/* volume */
 		final ListTriggerLatch<UIObject> optionsVolumeGroupLatch = new TextSliderListTriggerLatch<>(workers,
@@ -283,25 +286,20 @@ public class MainMenuUIScene extends UIScene {
 				.latch(optionsVolumeGroupLatch)
 				.push();
 
-		UIObjectFactory.create(ScrollBarUIObject.class)
-				.set(i -> i.setTransform(new Transform3D()))
-				.set(i -> i.setColorMaterial(ColorMaterial.GRAY))
-				.set(i -> i.setDir(Direction.NORTH))
-				.set(i -> i.setRange(new Vector2f(0.8f, -0.8f)))
-				.set(i -> i.setSize(new Vector2f(0.05f, 0.2f)))
-				.set(i -> i.setSpeed(OPTIONS_SCROLL_SPEED))
-				.set(this.optionsMenuGroup::setScrollBar)
-				.push();
+//		UIObjectFactory.create(ScrollBarUIObject.class)
+//				.set(i -> i.setTransform(new Transform3D()))
+//				.set(i -> i.setColorMaterial(ColorMaterial.GRAY))
+//				.set(i -> i.setDir(Direction.NORTH))
+//				.set(i -> i.setRange(new Vector2f(0.8f, -0.8f)))
+//				.set(i -> i.setSize(new Vector2f(0.05f, 0.2f)))
+//				.set(i -> i.setSpeed(OPTIONS_SCROLL_SPEED))
+//				.set(this.optionsMenuGroup::setScrollBar)
+//				.push();
 	}
 
 	private void buildMainMenu(final Dispatcher workers, final Dispatcher renderDispatcher) {
 		final Optional<Vector2fc> SMALL_TEXT_CHAR_SIZE = Optional.of(new Vector2f(0.2f));
 		final Optional<TextAlignment> SMALL_TEXT_TEXT_ALIGNMENT = Optional.of(TextAlignment.TEXT_CENTER);
-
-		final ListTriggerLatch<UIObject> mainButtonsLatch = new ListTriggerLatch<>(3, l -> workers.post(() -> {
-			l.forEach(this.mainButtonsMenuGroup::add);
-			this.mainLeftMenuGroup.doLayout();
-		}));
 
 		UIObjectFactory
 				.createText(PlayButtonUIObject.class,
@@ -311,7 +309,7 @@ public class MainMenuUIScene extends UIScene {
 						Optional.empty(),
 						Optional.empty())
 				.set(i -> i.setTransform(new Transform3D()))
-				.latch(mainButtonsLatch)
+				.add(this.mainButtonsMenuGroup)
 				.push();
 		UIObjectFactory
 				.createText(OptionsButtonUIObject.class,
@@ -321,7 +319,7 @@ public class MainMenuUIScene extends UIScene {
 						Optional.empty(),
 						Optional.empty())
 				.set(i -> i.setTransform(new Transform3D()))
-				.latch(mainButtonsLatch)
+				.add(this.mainButtonsMenuGroup)
 				.push();
 		UIObjectFactory
 				.createText(QuitButtonUIObject.class,
@@ -331,32 +329,34 @@ public class MainMenuUIScene extends UIScene {
 						Optional.empty(),
 						Optional.empty())
 				.set(i -> i.setTransform(new Transform3D()))
-				.latch(mainButtonsLatch)
+				.add(this.mainButtonsMenuGroup)
 				.push();
 
 		UIObjectFactory.create(LargeLogoUIObject.class)
-				.set(i -> i.setTransform(new Transform3D(new Vector3f(0, 0, -0.75f), new Quaternionf(), new Vector3f(2))))
+				.set(i -> i.setTransform(new Transform3D(2)))
+				.set(i -> i.setAnchors(Anchor.CENTER_CENTER, Anchor.TOP_CENTER))
+				.set(i -> i.setMargin(0.25f))
 				.add(this.mainMenuGroup)
 				.push();
 
-		UIObjectFactory.create(GradientQuadUIObject.class)
+		UIObjectFactory.create(AnchoredGradientQuadUIObject.class)
 				.set(i -> i.setTransform(new Transform3D(new Vector3f(0, GRADIENT_DEPTH, 0), new Quaternionf(), new Vector3f(2.5f, 1, 2))))
 				.set(i -> i.setDirection(GradientDirection.UV_X))
 				.set(i -> i.setTint(GameEngineUtils.hexToColorToVec4f("3b784a")))
+				.set(i -> i.setAnchors(Anchor.CENTER_LEFT, Anchor.CENTER_LEFT))
 				.add(this.mainMenuGroup)
-				.postInit(i -> this.greenGradient = i)
 				.push();
 
 		/** options */
 
-		UIObjectFactory.create(GradientQuadUIObject.class)
+		UIObjectFactory.create(AnchoredGradientQuadUIObject.class)
 				.set(i -> i.setTransform(new Transform3D(new Vector3f(0, GRADIENT_DEPTH, 0),
 						new Quaternionf().rotateY((float) Math.PI),
 						new Vector3f(2.5f, 1, 2))))
 				.set(i -> i.setDirection(GradientDirection.UV_X))
 				.set(i -> i.setTint(GameEngineUtils.hexToColorToVec4f("317dac8c")))
-				.add(this.mainMenuGroup)
-				.postInit(i -> this.blueGradient = i)
+				.set(i -> i.setAnchors(Anchor.CENTER_RIGHT, Anchor.CENTER_RIGHT))
+				.add(this.optionsMenuGroup)
 				.push();
 
 		UIObjectFactory
@@ -368,36 +368,38 @@ public class MainMenuUIScene extends UIScene {
 						Optional.empty())
 				.set(i -> i.setTransform(new Transform3D(new Vector3f(-0.5f, 0, -0.5f), new Quaternionf(), new Vector3f(0.5f))))
 				.add(this.optionsMenuGroup)
-				.postInit(i -> this.optionsBackBtn = i)
+				.set(i -> i.setAnchors(Anchor.TOP_LEFT, Anchor.TOP_LEFT))
+				.set(i -> i.setMargin(0.1f))
+//				.postInit(i -> this.optionsBackBtn = i)
 				.push();
 	}
 
-	private void updateKeys() {
-		final MappingInputHandler inputHandler = PGLogic.INSTANCE.getInputHandler();
-
-		this.optionsEntriesMenuGroup.parallelStream()
-				.filter(OptionKeyUIObject.class::isInstance)
-				.map(e -> (OptionKeyUIObject) e)
-				.forEach(e -> e.setKeyValue(inputHandler.getInputName(e.getKeyOption().getPhysicalKey())));
-
-		final OptionKeyUIObject example = this.optionsEntriesMenuGroup.parallelStream()
-				.filter(OptionKeyUIObject.class::isInstance)
-				.map(e -> (OptionKeyUIObject) e)
-				.findFirst()
-				.orElseThrow(IllegalStateException::new);
-
-		PGLogic.INSTANCE.RENDER_DISPATCHER.post(() -> this.optionsEntriesMenuGroup.stream()
-				.filter(ProgrammaticTextUIObject.class::isInstance)
-				.map(e -> (ProgrammaticTextUIObject) e)
-				.forEach(ProgrammaticTextUIObject::updateText));
-
-		((FlowLayout) this.optionsEntriesMenuGroup.getLayout()).setGap((float) (example.getBounds().getBounds2D().getHeight()
-				* (example.getTargetScale(true).z() - example.getTargetScale(false).z())));
-
-		this.optionsEntriesMenuGroup.doLayout();
-
-		this.optionsEntriesMenuGroup.getTransform().translationSet(0, 0, -1f + 0.3f).updateMatrix();
-	}
+//	private void updateKeys() {
+//		final MappingInputHandler inputHandler = PGLogic.INSTANCE.getInputHandler();
+//
+//		this.optionsEntriesGroup.parallelStream()
+//				.filter(OptionKeyUIObject.class::isInstance)
+//				.map(e -> (OptionKeyUIObject) e)
+//				.forEach(e -> e.setKeyValue(inputHandler.getInputName(e.getKeyOption().getPhysicalKey())));
+//
+//		final OptionKeyUIObject example = this.optionsEntriesGroup.parallelStream()
+//				.filter(OptionKeyUIObject.class::isInstance)
+//				.map(e -> (OptionKeyUIObject) e)
+//				.findFirst()
+//				.orElseThrow(IllegalStateException::new);
+//
+//		PGLogic.INSTANCE.RENDER_DISPATCHER.post(() -> this.optionsEntriesGroup.stream()
+//				.filter(ProgrammaticTextUIObject.class::isInstance)
+//				.map(e -> (ProgrammaticTextUIObject) e)
+//				.forEach(ProgrammaticTextUIObject::updateText));
+//
+////		((FlowLayout) this.optionsEntriesGroup.getLayout()).setGap((float) (example.getBounds().getBounds2D().getHeight()
+////				* (example.getTargetScale(true).z() - example.getTargetScale(false).z())));
+//
+////		this.optionsEntriesGroup.doLayout();
+//
+//		this.optionsEntriesGroup.getTransform().translationSet(0, 0, -1f + 0.3f).updateMatrix();
+//	}
 
 	@Override
 	public void input(final WindowInputHandler inputHandler, final UpdateFrameState frameState) {
@@ -447,27 +449,27 @@ public class MainMenuUIScene extends UIScene {
 			this.cursor.setSnapAngle(Math.abs(Math.min(z1, z2) - Math.max(z1, z2)));
 		}
 
-		// TODO: This should be managed by layout or self-managed
-		if (this.greenGradient != null) {
-			this.greenGradient.getTransform().getTranslation().x = -this.camera.getProjection().getAspectRatio()
-					+ (this.greenGradient.getTransform().getScale().x * (float) (this.greenGradient.getBounds().getWidth() / 2));
-			this.greenGradient.getTransform().updateMatrix();
-		}
+//		// TODO: This should be managed by layout or self-managed
+//		if (this.greenGradient != null) {
+//			this.greenGradient.getTransform().getTranslation().x = -this.camera.getProjection().getAspectRatio()
+//					+ (this.greenGradient.getTransform().getScale().x * (float) (this.greenGradient.getBounds().getWidth() / 2));
+//			this.greenGradient.getTransform().updateMatrix();
+//		}
+//
+//		if (this.blueGradient != null) {
+//			this.blueGradient.getTransform().getTranslation().x = this.camera.getProjection().getAspectRatio()
+//					- (this.blueGradient.getTransform().getScale().x * (float) (this.blueGradient.getBounds().getWidth() / 2));
+//			this.blueGradient.getTransform().updateMatrix();
+//		}
 
-		if (this.blueGradient != null) {
-			this.blueGradient.getTransform().getTranslation().x = this.camera.getProjection().getAspectRatio()
-					- (this.blueGradient.getTransform().getScale().x * (float) (this.blueGradient.getBounds().getWidth() / 2));
-			this.blueGradient.getTransform().updateMatrix();
-		}
-
-		if (this.optionsBackBtn != null) {
-			this.optionsBackBtn.getTransform().getTranslation().x = -this.camera.getProjection().getAspectRatio()
-					+ (this.optionsBackBtn.getTransform().getScale().x
-							* (float) (this.optionsBackBtn.getBounds().getBounds2D().getWidth() / 2));
-			this.optionsBackBtn.getTransform().getTranslation().z = -1
-					+ (float) (this.optionsBackBtn.getBounds().getBounds2D().getHeight() / 2);
-			this.optionsBackBtn.getTransform().updateMatrix();
-		}
+//		if (this.optionsBackBtn != null) {
+//			this.optionsBackBtn.getTransform().getTranslation().x = -this.camera.getProjection().getAspectRatio()
+//					+ (this.optionsBackBtn.getTransform().getScale().x
+//							* (float) (this.optionsBackBtn.getBounds().getBounds2D().getWidth() / 2));
+//			this.optionsBackBtn.getTransform().getTranslation().z = -1
+//					+ (float) (this.optionsBackBtn.getBounds().getBounds2D().getHeight() / 2);
+//			this.optionsBackBtn.getTransform().updateMatrix();
+//		}
 
 		if (this.targetGroup != this.currentGroup) {
 			this.cursor.setActive(this.targetGroup == MAIN);

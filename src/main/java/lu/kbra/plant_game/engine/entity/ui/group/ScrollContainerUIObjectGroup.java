@@ -17,11 +17,13 @@ import lu.kbra.plant_game.engine.scene.ui.layout.Layout;
 import lu.kbra.standalone.gameengine.utils.consts.Direction;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
+@Deprecated
 public class ScrollContainerUIObjectGroup extends OffsetUIObjectGroup implements BoundsSceneParentAware {
 
 	private final ScrollDrivenUIObjectGroup scrollContent;
 	private ScrollBarUIObject scrollBar;
 
+	@Deprecated
 	public ScrollContainerUIObjectGroup(final String str, final Transform3D transform, final Direction dir, final float margin,
 			final UIObject... values) {
 		super(str, transform, values);
@@ -29,12 +31,14 @@ public class ScrollContainerUIObjectGroup extends OffsetUIObjectGroup implements
 				+ ".scroll-content", this, () -> this.scrollBar == null ? 0 : this.scrollBar.getScrollRatio(), dir, margin, values);
 	}
 
+	@Deprecated
 	public ScrollContainerUIObjectGroup(final String str, final Direction dir, final float margin, final UIObject... values) {
 		super(str, values);
 		this.scrollContent = new ScrollDrivenUIObjectGroup(str
 				+ ".scroll-content", this, () -> this.scrollBar == null ? 0 : this.scrollBar.getScrollRatio(), dir, margin, values);
 	}
 
+	@Deprecated
 	public ScrollContainerUIObjectGroup(final String str, final Vector3fc pos, final Direction dir, final float margin,
 			final UIObject... values) {
 		super(str, new Transform3D(pos), values);
@@ -42,6 +46,7 @@ public class ScrollContainerUIObjectGroup extends OffsetUIObjectGroup implements
 				+ ".scroll-content", this, () -> this.scrollBar == null ? 0 : this.scrollBar.getScrollRatio(), dir, margin, values);
 	}
 
+	@Deprecated
 	public ScrollContainerUIObjectGroup(final String str, final UIObjectGroup parent, final Direction dir, final float margin,
 			final UIObject... values) {
 		super(str, parent, values);
@@ -49,6 +54,7 @@ public class ScrollContainerUIObjectGroup extends OffsetUIObjectGroup implements
 				+ ".scroll-content", this, () -> this.scrollBar == null ? 0 : this.scrollBar.getScrollRatio(), dir, margin, values);
 	}
 
+	@Deprecated
 	public ScrollContainerUIObjectGroup(final String str, final Transform3D transform, final Direction dir, final float margin,
 			final Layout layout, final UIObject... values) {
 		super(str, transform, values);
@@ -56,6 +62,7 @@ public class ScrollContainerUIObjectGroup extends OffsetUIObjectGroup implements
 				+ ".scroll-content", this, () -> this.scrollBar == null ? 0 : this.scrollBar.getScrollRatio(), dir, margin, layout, values);
 	}
 
+	@Deprecated
 	public ScrollContainerUIObjectGroup(final String str, final Direction dir, final float margin, final Layout layout,
 			final UIObject... values) {
 		super(str, values);
@@ -63,6 +70,7 @@ public class ScrollContainerUIObjectGroup extends OffsetUIObjectGroup implements
 				+ ".scroll-content", this, () -> this.scrollBar == null ? 0 : this.scrollBar.getScrollRatio(), dir, margin, layout, values);
 	}
 
+	@Deprecated
 	public ScrollContainerUIObjectGroup(final String str, final Vector3fc pos, final Direction dir, final float margin, final Layout layout,
 			final UIObject... values) {
 		super(str, new Transform3D(pos), values);
@@ -70,6 +78,7 @@ public class ScrollContainerUIObjectGroup extends OffsetUIObjectGroup implements
 				+ ".scroll-content", this, () -> this.scrollBar == null ? 0 : this.scrollBar.getScrollRatio(), dir, margin, layout, values);
 	}
 
+	@Deprecated
 	public ScrollContainerUIObjectGroup(final String str, final UIObjectGroup parent, final Direction dir, final float margin,
 			final Layout layout, final UIObject... values) {
 		super(str, parent, values);
@@ -77,6 +86,7 @@ public class ScrollContainerUIObjectGroup extends OffsetUIObjectGroup implements
 				+ ".scroll-content", this, () -> this.scrollBar == null ? 0 : this.scrollBar.getScrollRatio(), dir, margin, layout, values);
 	}
 
+	@Deprecated
 	public void updateScrollBar() {
 		final Optional<SceneBoundsOwner> scene = this.getBoundsSceneParent();
 		if (this.scrollBar == null || scene.isEmpty()) {
@@ -88,14 +98,17 @@ public class ScrollContainerUIObjectGroup extends OffsetUIObjectGroup implements
 				(float) sceneBounds.getMaxX() - this.scrollBar.getMargin() + (float) sceneBounds.getCenterX()));
 	}
 
+	@Deprecated
 	public ScrollBarUIObject getScrollBar() {
 		return this.scrollBar;
 	}
 
+	@Deprecated
 	public ScrollDrivenUIObjectGroup getScrollContent() {
 		return this.scrollContent;
 	}
 
+	@Deprecated
 	public <T extends ScrollBarUIObject> ObjectTriggerLatch<? extends ScrollContainerUIObjectGroup> init(final Class<T> clazz) {
 		final ObjectTriggerLatch<? extends ScrollContainerUIObjectGroup> latch = new ObjectTriggerLatch<>(1, this);
 		UIObjectFactory.create(clazz)
@@ -108,6 +121,7 @@ public class ScrollContainerUIObjectGroup extends OffsetUIObjectGroup implements
 		return latch;
 	}
 
+	@Deprecated
 	public void setScrollBar(final ScrollBarUIObject scrollBar) {
 		this.replace(this.scrollBar, scrollBar);
 		this.scrollBar = scrollBar;
@@ -115,6 +129,7 @@ public class ScrollContainerUIObjectGroup extends OffsetUIObjectGroup implements
 		this.updateScrollBar();
 	}
 
+	@Deprecated
 	@Override
 	public String toString() {
 		return "ScrollContainerUIObjectGroup [scrollContent=" + this.scrollContent + ", scrollBar=" + this.scrollBar + ", active="

@@ -1,9 +1,10 @@
-package lu.kbra.plant_game.engine.scene.ui.overlay.group.building;
+package lu.kbra.plant_game.vanilla.scene.overlay.group.building;
 
 import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.joml.Vector3f;
 
@@ -11,12 +12,13 @@ import lu.pcy113.pclib.concurrency.ObjectTriggerLatch;
 import lu.pcy113.pclib.logger.GlobalLogger;
 
 import lu.kbra.plant_game.engine.entity.ui.group.BuildingTabListUIObjectGroup;
+import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwnerParentAware;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsBoundsInput;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
 import lu.kbra.plant_game.engine.scene.ui.layout.AnchorLayout;
-import lu.kbra.plant_game.engine.scene.ui.overlay.group.impl.AnchoredLayoutUIObjectGroup;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
+import lu.kbra.plant_game.vanilla.scene.overlay.group.impl.AnchoredLayoutUIObjectGroup;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;;
 
 public class BuildingPanelUIObjectGroup extends AnchoredLayoutUIObjectGroup implements BoundsOwnerParentAware, NeedsBoundsInput {
@@ -99,10 +101,11 @@ public class BuildingPanelUIObjectGroup extends AnchoredLayoutUIObjectGroup impl
 
 	@Override
 	public boolean recomputeBounds() {
-		if (!this.hasBoundsOwnerParent()) {
+		final Optional<BoundsOwner> obo = this.getBoundsOwnerParent();
+		if (obo.isEmpty()) {
 			return false;
 		}
-		final Rectangle2D superBounds = this.getBoundsOwnerParent().getBounds().getBounds2D();
+		final Rectangle2D superBounds = obo.get().getBounds().getBounds2D();
 		final Rectangle2D.Float newBounds = new Rectangle2D.Float((float) superBounds.getMinX() + this.boundsMarginX,
 				(float) superBounds.getMaxY() - this.boundsMarginY,
 				(float) superBounds.getWidth() - 2 * this.boundsMarginX,

@@ -3,8 +3,10 @@ package lu.kbra.plant_game.engine.scene.ui.layout;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
+import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwnerParentAware;
 import lu.kbra.standalone.gameengine.objs.entity.ParentAwareComponent;
 
@@ -38,8 +40,12 @@ public class GridFlowLayout implements Layout, BoundsOwnerParentAware {
 		if (children.isEmpty()) {
 			return;
 		}
+		final Optional<BoundsOwner> obo = this.getBoundsOwnerParent();
+		if (obo.isEmpty()) {
+			return;
+		}
 
-		final Rectangle2D parentBounds = this.getBoundsOwnerParent().getBounds().getBounds2D();
+		final Rectangle2D parentBounds = obo.get().getBounds().getBounds2D();
 
 		final float minX = (float) (parentBounds.getX() + this.outerMarginX);
 		final float maxX = (float) (parentBounds.getX() + parentBounds.getWidth() - this.outerMarginX);

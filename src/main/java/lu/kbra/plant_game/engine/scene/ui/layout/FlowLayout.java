@@ -2,10 +2,12 @@ package lu.kbra.plant_game.engine.scene.ui.layout;
 
 import java.awt.geom.Rectangle2D;
 import java.util.List;
+import java.util.Optional;
 
 import lu.pcy113.pclib.logger.GlobalLogger;
 
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
+import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwnerParentAware;
 import lu.kbra.standalone.gameengine.objs.entity.ParentAwareComponent;
 
@@ -42,11 +44,12 @@ public class FlowLayout implements Layout, BoundsOwnerParentAware {
 		float offsetY = 0;
 
 		if (this.fixed) {
-			if (!this.hasBoundsOwnerParent()) {
+			final Optional<BoundsOwner> obo = this.getBoundsOwnerParent();
+			if (obo.isEmpty()) {
 				GlobalLogger.warning("Hierarchy incomplete: FlowLayout doesn't have a BoundsOwner parent.");
 				return;
 			}
-			final Rectangle2D superBounds = this.getBoundsOwnerParent().getBounds().getBounds2D();
+			final Rectangle2D superBounds = obo.get().getBounds().getBounds2D();
 			offsetX = (float) superBounds.getMinX();
 			offsetY = (float) superBounds.getMinY();
 		}

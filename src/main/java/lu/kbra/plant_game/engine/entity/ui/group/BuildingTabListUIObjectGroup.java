@@ -4,11 +4,12 @@ import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
 import java.util.Optional;
 
+import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwnerParentAware;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
 import lu.kbra.plant_game.engine.scene.ui.layout.FlowLayout;
-import lu.kbra.plant_game.engine.scene.ui.overlay.group.building.BuildingTabButtonUIObjectGroup;
-import lu.kbra.plant_game.engine.scene.ui.overlay.group.impl.AnchoredLayoutUIObjectGroup;
+import lu.kbra.plant_game.vanilla.scene.overlay.group.building.BuildingTabButtonUIObjectGroup;
+import lu.kbra.plant_game.vanilla.scene.overlay.group.impl.AnchoredLayoutUIObjectGroup;
 
 public class BuildingTabListUIObjectGroup extends AnchoredLayoutUIObjectGroup implements BoundsOwnerParentAware {
 
@@ -26,10 +27,11 @@ public class BuildingTabListUIObjectGroup extends AnchoredLayoutUIObjectGroup im
 
 	@Override
 	public boolean recomputeBounds() {
-		if (!this.hasBoundsOwnerParent()) {
+		final Optional<BoundsOwner> obo = this.getBoundsOwnerParent();
+		if (obo.isEmpty()) {
 			return false;
 		}
-		final Rectangle2D superBounds = this.getBoundsOwnerParent().getBounds().getBounds2D();
+		final Rectangle2D superBounds = obo.get().getBounds().getBounds2D();
 		final Rectangle2D.Float newBounds = new Rectangle2D.Float((float) superBounds.getMinX() + this.boundsMarginX,
 				-this.fixedHeight / 2 + this.boundsMarginY,
 				(float) superBounds.getWidth() - 2 * this.boundsMarginX,

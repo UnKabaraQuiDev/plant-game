@@ -1,9 +1,11 @@
-package lu.kbra.plant_game.engine.scene.ui.overlay.group.impl;
+package lu.kbra.plant_game.vanilla.scene.overlay.group.impl;
 
 import java.awt.Shape;
+import java.awt.geom.Rectangle2D;
 
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.group.UIObjectGroup;
+import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwnerParentAware;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
 import lu.kbra.plant_game.engine.scene.ui.layout.Layout;
@@ -26,7 +28,7 @@ public class AnchoredParentUIObjectGroup extends AnchoredLayoutUIObjectGroup imp
 
 	@Override
 	public Shape getBounds() {
-		return this.getBoundsOwnerParent().getBounds();
+		return this.getBoundsOwnerParent().map(BoundsOwner::getBounds).orElse(new Rectangle2D.Float(0, 0, 0, 0));
 	}
 
 }

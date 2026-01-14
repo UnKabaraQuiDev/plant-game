@@ -12,28 +12,34 @@ import lu.kbra.standalone.gameengine.objs.entity.ParentAwareNode;
 import lu.kbra.standalone.gameengine.utils.consts.Direction;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
+@Deprecated
 public class LayoutScrollDrivenUIObjectGroup extends ScrollDrivenUIObjectGroup implements LayoutOwner {
 
+	@Deprecated
 	protected Layout layout;
 
+	@Deprecated
 	public LayoutScrollDrivenUIObjectGroup(final String str, final Transform3D transform, final Supplier<Float> scrollRatio,
 			final Direction dir, final float margin, final Layout layout, final UIObject... values) {
 		super(str, transform, scrollRatio, dir, margin, values);
 		this.setLayout(layout);
 	}
 
+	@Deprecated
 	public LayoutScrollDrivenUIObjectGroup(final String str, final UIObjectGroup parent, final Supplier<Float> scrollRatio,
 			final Direction dir, final float margin, final Layout layout, final UIObject... values) {
 		super(str, parent, scrollRatio, dir, margin, values);
 		this.setLayout(layout);
 	}
 
+	@Deprecated
 	public LayoutScrollDrivenUIObjectGroup(final String str, final Supplier<Float> scrollRatio, final Direction dir, final float margin,
 			final Layout layout, final UIObject... values) {
 		super(str, scrollRatio, dir, margin, values);
 		this.setLayout(layout);
 	}
 
+	@Deprecated
 	@Override
 	public <V extends UIObject> V add(final V e) {
 		final V v = super.add(e);
@@ -41,6 +47,7 @@ public class LayoutScrollDrivenUIObjectGroup extends ScrollDrivenUIObjectGroup i
 		return v;
 	}
 
+	@Deprecated
 	@Override
 	public <V extends UIObject> boolean addAll(final Collection<? extends V> c) {
 		final boolean v = super.addAll(c);
@@ -48,6 +55,7 @@ public class LayoutScrollDrivenUIObjectGroup extends ScrollDrivenUIObjectGroup i
 		return v;
 	}
 
+	@Deprecated
 	@Override
 	public <V extends UIObject> V[] addAll(final V... e) {
 		final V[] v = super.addAll(e);
@@ -55,6 +63,7 @@ public class LayoutScrollDrivenUIObjectGroup extends ScrollDrivenUIObjectGroup i
 		return v;
 	}
 
+	@Deprecated
 	@Override
 	public <V extends UIObject> boolean addChildren(final ObjectGroup<? extends V> c) {
 		final boolean v = super.addChildren(c);
@@ -62,6 +71,7 @@ public class LayoutScrollDrivenUIObjectGroup extends ScrollDrivenUIObjectGroup i
 		return v;
 	}
 
+	@Deprecated
 	@Override
 	public void setLayout(final Layout layout) {
 		this.layout = layout;
@@ -71,11 +81,13 @@ public class LayoutScrollDrivenUIObjectGroup extends ScrollDrivenUIObjectGroup i
 		}
 	}
 
+	@Deprecated
 	@Override
 	public Layout getLayout() {
 		return this.layout;
 	}
 
+	@Deprecated
 	@Override
 	public void doLayout() {
 		synchronized (this.getEntitiesLock()) {
@@ -92,6 +104,7 @@ public class LayoutScrollDrivenUIObjectGroup extends ScrollDrivenUIObjectGroup i
 		this.recomputeBounds();
 	}
 
+	@Deprecated
 	@Override
 	public String toString() {
 		return "LayoutScrollDrivenUIObjectGroup [layout=" + this.layout + ", scrollRatio=" + this.scrollRatioSupplier + ", dir=" + this.dir

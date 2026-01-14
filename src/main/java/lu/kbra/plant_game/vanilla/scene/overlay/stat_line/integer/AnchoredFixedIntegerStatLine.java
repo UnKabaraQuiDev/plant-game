@@ -1,4 +1,4 @@
-package lu.kbra.plant_game.engine.scene.ui.overlay.stat_line.integer;
+package lu.kbra.plant_game.vanilla.scene.overlay.stat_line.integer;
 
 import lu.pcy113.pclib.concurrency.ObjectTriggerLatch;
 

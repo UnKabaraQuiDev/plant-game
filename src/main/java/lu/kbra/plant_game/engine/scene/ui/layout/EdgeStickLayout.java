@@ -11,17 +11,22 @@ import lu.kbra.standalone.gameengine.objs.entity.ParentAwareComponent;
 import lu.kbra.standalone.gameengine.objs.entity.SceneParentAware;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
+@Deprecated
 public class EdgeStickLayout extends FlowLayout implements BoundsOwnerParentAware, SceneParentAware {
 
+	@Deprecated
 	protected ParentAwareComponent parent;
+	@Deprecated
 	protected float size;
 
+	@Deprecated
 	public EdgeStickLayout(final boolean vertical, final float gap, final float size) {
 		super(vertical, gap);
 		assert vertical : "horizontal not supported";
 		this.size = size;
 	}
 
+	@Deprecated
 	@Override
 	public void doLayout(final List<UIObject> children) {
 		if (children.isEmpty()) {
@@ -61,19 +66,23 @@ public class EdgeStickLayout extends FlowLayout implements BoundsOwnerParentAwar
 
 	}
 
+	@Deprecated
 	public float getSize() {
 		return this.size;
 	}
 
+	@Deprecated
 	public void setSize(final float size) {
 		this.size = size;
 	}
 
+	@Deprecated
 	@Override
 	public <T extends ParentAwareComponent> void setParent(final T e) {
 		this.parent = e;
 	}
 
+	@Deprecated
 	@Override
 	public ParentAwareComponent getParent() {
 		return this.parent;

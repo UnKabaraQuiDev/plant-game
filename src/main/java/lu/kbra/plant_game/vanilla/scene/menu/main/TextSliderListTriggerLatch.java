@@ -1,4 +1,4 @@
-package lu.kbra.plant_game.engine.scene.ui.menu.main;
+package lu.kbra.plant_game.vanilla.scene.menu.main;
 
 import lu.pcy113.pclib.concurrency.ListTriggerLatch;
 

@@ -124,7 +124,6 @@ public class UIScene extends Scene3D implements SceneBoundsOwner {
 			final Set<UIObject> newHovered,
 			final Matrix4fc parentTransform) {
 		if (!e.isActive()) {
-			System.err.println(e + " is inactive");
 			return;
 		}
 
@@ -197,6 +196,10 @@ public class UIScene extends Scene3D implements SceneBoundsOwner {
 	protected void updateEntity(final WindowInputHandler inputHandler, final SceneEntity e) {
 		if (e instanceof final EntityContainer<?> ec) {
 			ec.forEach(e2 -> this.updateEntity(inputHandler, e2));
+		}
+
+		if (inputHandler.wasResized() && e instanceof final LayoutOwner lo && !(this instanceof LayoutOwner)) {
+			lo.doLayout();
 		}
 
 		if (e instanceof final NeedsUpdate needsUpdate) {

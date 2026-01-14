@@ -1,4 +1,4 @@
-package lu.kbra.plant_game.engine.scene.ui.overlay.group.building;
+package lu.kbra.plant_game.vanilla.scene.overlay.group.building;
 
 import java.util.Optional;
 import java.util.OptionalInt;

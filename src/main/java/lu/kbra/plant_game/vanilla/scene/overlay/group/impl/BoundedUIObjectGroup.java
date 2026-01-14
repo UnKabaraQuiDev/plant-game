@@ -1,12 +1,14 @@
-package lu.kbra.plant_game.engine.scene.ui.overlay.group.impl;
+package lu.kbra.plant_game.vanilla.scene.overlay.group.impl;
 
 import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
+import java.util.Optional;
 
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.data.Direction2d;
 import lu.kbra.plant_game.engine.entity.ui.group.LayoutOffsetUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.group.UIObjectGroup;
+import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwnerParentAware;
 import lu.kbra.plant_game.engine.entity.ui.impl.DebugBoundsColor;
 import lu.kbra.plant_game.engine.scene.ui.layout.Layout;
@@ -37,20 +39,21 @@ public class BoundedUIObjectGroup extends LayoutOffsetUIObjectGroup implements B
 
 	@Override
 	public boolean recomputeBounds() {
-		if (!this.hasBoundsOwnerParent() || this.dir == null) {
+		final Optional<BoundsOwner> obo = this.getBoundsOwnerParent();
+		if (obo.isEmpty() || this.dir == null) {
 			return false;
 		}
 
 //		((UIObjectGroup) this.getBoundsOwnerParent()).recomputeBounds();
 
-		if (!this.getBoundsOwnerParent().areBoundsValid()) {
+		if (!obo.get().areBoundsValid()) {
 			super.recomputeBounds();
 			final Rectangle2D b2d = super.computedBounds.getBounds2D();
 			this.bounds = new Rectangle2D.Float((float) b2d.getX(), (float) b2d.getY(), (float) b2d.getWidth(), (float) b2d.getHeight());
 			return true;
 		}
 
-		final Rectangle2D parentBounds = this.getBoundsOwnerParent().getBounds().getBounds2D();
+		final Rectangle2D parentBounds = obo.get().getBounds().getBounds2D();
 		super.recomputeBounds();
 		final Rectangle2D compBounds = super.computedBounds.getBounds2D();
 

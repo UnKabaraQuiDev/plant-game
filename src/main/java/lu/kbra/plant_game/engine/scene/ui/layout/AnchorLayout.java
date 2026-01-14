@@ -3,6 +3,7 @@ package lu.kbra.plant_game.engine.scene.ui.layout;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import lu.pcy113.pclib.logger.GlobalLogger;
 
@@ -23,10 +24,12 @@ public class AnchorLayout implements Layout, BoundsOwnerParentAware {
 
 	@Override
 	public void doLayout(final List<UIObject> children) {
-		final BoundsOwner boundsParent = this.getBoundsOwnerParent();
-		if (boundsParent == null) {
+		final Optional<BoundsOwner> boundsParentOpt = this.getBoundsOwnerParent();
+		if (boundsParentOpt.isEmpty()) {
 			return;
 		}
+
+		final BoundsOwner boundsParent = boundsParentOpt.get();
 
 		final Rectangle2D screenBounds = boundsParent.getBounds().getBounds2D();
 

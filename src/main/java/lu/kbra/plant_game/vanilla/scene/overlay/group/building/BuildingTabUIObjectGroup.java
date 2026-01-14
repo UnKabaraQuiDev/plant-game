@@ -1,9 +1,10 @@
-package lu.kbra.plant_game.engine.scene.ui.overlay.group.building;
+package lu.kbra.plant_game.vanilla.scene.overlay.group.building;
 
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
 import java.util.Collection;
+import java.util.Optional;
 
 import org.joml.Vector2f;
 
@@ -14,14 +15,16 @@ import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.bar.LimitedObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.group.LayoutOffsetUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.group.UIObjectGroup;
+import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwnerParentAware;
 import lu.kbra.plant_game.engine.entity.ui.impl.IndexOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.ObjectGroup;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
 import lu.kbra.plant_game.engine.scene.ui.layout.FlowLayout;
-import lu.kbra.plant_game.engine.scene.ui.overlay.group.impl.AnchoredLayoutUIObjectGroup;
 import lu.kbra.plant_game.generated.ColorMaterial;
+import lu.kbra.plant_game.vanilla.scene.overlay.group.impl.AnchoredLayoutUIObjectGroup;
 
+// TODO: switch this to BoundedUIObjectGroup
 public class BuildingTabUIObjectGroup extends AnchoredLayoutUIObjectGroup
 		implements IndexOwner, BoundsOwnerParentAware, LimitedObjectGroup<UIObject> {
 
@@ -77,11 +80,12 @@ public class BuildingTabUIObjectGroup extends AnchoredLayoutUIObjectGroup
 	}
 
 	public void recomputeRange() {
-		if (!this.hasBoundsOwnerParent()) {
+		final Optional<BoundsOwner> obo = this.getBoundsOwnerParent();
+		if (obo.isEmpty()) {
 			return;
 		}
 		final Rectangle2D contentBounds = this.getContainer().getLocalTransformedBounds().getBounds2D();
-		final Rectangle2D parentBounds = this.getBoundsOwnerParent().getBounds().getBounds2D();
+		final Rectangle2D parentBounds = obo.get().getBounds().getBounds2D();
 		if (parentBounds.getWidth() > contentBounds.getWidth()) {
 			this.scrollXRange.set(parentBounds.getCenterX() - contentBounds.getCenterX(),
 					parentBounds.getCenterX() - contentBounds.getCenterX());
@@ -92,11 +96,12 @@ public class BuildingTabUIObjectGroup extends AnchoredLayoutUIObjectGroup
 
 	@Override
 	public boolean recomputeBounds() {
-		if (!this.hasBoundsOwnerParent()) {
+		final Optional<BoundsOwner> obo = this.getBoundsOwnerParent();
+		if (obo.isEmpty()) {
 			return true;
 		}
 		final Rectangle2D containerBounds = this.getContainer().getLocalTransformedBounds().getBounds2D();
-		final Rectangle2D superBounds = this.getBoundsOwnerParent().getBounds().getBounds2D();
+		final Rectangle2D superBounds = obo.get().getBounds().getBounds2D();
 		final Rectangle.Float newFixedBounds = new Rectangle.Float((float) superBounds.getMinX(),
 				(float) containerBounds.getMinY(),
 				(float) superBounds.getWidth(),
