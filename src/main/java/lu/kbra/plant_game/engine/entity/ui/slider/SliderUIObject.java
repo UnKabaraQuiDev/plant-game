@@ -1,24 +1,24 @@
 package lu.kbra.plant_game.engine.entity.ui.slider;
 
+import java.awt.geom.Rectangle2D;
 import java.util.Optional;
 
 import org.joml.Math;
 import org.joml.Vector2f;
-import org.joml.Vector2fc;
 import org.lwjgl.glfw.GLFW;
 
 import lu.kbra.plant_game.PGLogic;
 import lu.kbra.plant_game.engine.entity.impl.NeedsPostConstruct;
-import lu.kbra.plant_game.engine.entity.ui.impl.NeedsInput;
+import lu.kbra.plant_game.engine.entity.ui.impl.AbsoluteTransformedBoundsOwner;
+import lu.kbra.plant_game.engine.entity.ui.impl.NeedsBoundsInput;
 import lu.kbra.plant_game.engine.entity.ui.impl.UISceneParentAware;
 import lu.kbra.plant_game.engine.entity.ui.text.TextUIObject;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
-import lu.kbra.standalone.gameengine.utils.geo.GeoPlane;
-import lu.kbra.standalone.gameengine.utils.gl.consts.TextAlignment;
 
-public class SliderUIObject extends TextUIObject implements NeedsInput, NeedsPostConstruct, UISceneParentAware {
+public class SliderUIObject extends TextUIObject
+		implements NeedsBoundsInput, NeedsPostConstruct, UISceneParentAware, AbsoluteTransformedBoundsOwner {
 
 	protected float min;
 	protected float max;
@@ -35,60 +35,51 @@ public class SliderUIObject extends TextUIObject implements NeedsInput, NeedsPos
 	}
 
 	@Override
-	public void input(final WindowInputHandler inputHandler) {
+	public boolean boundsInput(final WindowInputHandler inputHandler) {
 		if (!inputHandler.isMouseButtonPressed(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
-			return;
+			return false;
 		}
 
 		final Optional<UIScene> uiScene = this.getUISceneParent();
 		if (uiScene.isEmpty()) {
-			return;
+			return false;
 		}
 
-		final Vector2f coords = uiScene.get().getMouseCoords(inputHandler);
-		coords.sub(GeoPlane.XZ.projectToPlane(this.getTransform().getTranslation()));
-		coords.y += this.getTextEmitter().getCharSize().y() / 2;
-
-		assert this.getTextEmitter().getTextAlignment() == TextAlignment.TEXT_LEFT : this.getTextEmitter().getTextAlignment();
+//		assert this.getTextEmitter().getTextAlignment() == TextAlignment.TEXT_LEFT : this.getTextEmitter().getTextAlignment();
 		assert this.getTextEmitter().getLineCount() == 1;
 
-		final Vector2fc charSize = this.getTextEmitter()
-				.getCharSize()
-				.mul(GeoPlane.XZ.projectToPlane(this.getTransform().getScale()), new Vector2f());
+		final Vector2f click = uiScene.get().getMouseCoords(inputHandler);
+		final float clickX = click.x();
+		final Rectangle2D bounds = this.getAbsoluteTransformedBounds().getBounds2D();
+		final int charCount = this.getTextEmitter().getStringLength();
+		final float partWidth = (float) bounds.getWidth() / charCount;
+		final float localX = clickX - (float) bounds.getMinX();
+		final int index = (int) (localX / partWidth);
 
-		final Vector2fc firstCharBounds = charSize;
-		final Vector2fc lastCharBounds = charSize.mul(this.getTextEmitter().getColumnsCount(), 1, new Vector2f());
+		assert index >= 0 && index < charCount : "Invalid index: " + index + " in range: [0, " + charCount + "]";
 
-		final boolean dirty;
-		if (coords.x() >= firstCharBounds.x() - charSize.x() && firstCharBounds.y() - charSize.y() >= 0 && coords.x() <= firstCharBounds.x()
-				&& coords.y() <= firstCharBounds.y()) {
+		if (index == 0) {
 			if (!inputHandler.isMouseButtonPressedOnce(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
-				return;
+				return false;
 			}
 
 			this.value = Math.clamp(this.min, this.max, this.value - (this.max - this.min) / this.divisors);
-			dirty = true;
-		} else if (coords.x() >= lastCharBounds.x() - charSize.x() && coords.y() >= 0 && coords.x() <= lastCharBounds.x()
-				&& coords.y() <= lastCharBounds.y()) {
+		} else if (index == charCount - 1) {
 			if (!inputHandler.isMouseButtonPressedOnce(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
-				return;
+				return false;
 			}
 
 			this.value = Math.clamp(this.min, this.max, this.value + (this.max - this.min) / this.divisors);
-			dirty = true;
 		} else {
-			final float startX = firstCharBounds.x();
-			final float endX = lastCharBounds.x() - firstCharBounds.x() - charSize.x() * 2;
-			final float usableWidth = endX - startX;
+			float t = (index) / (charCount - 3f); // idk why this is 3 but it works
 
-			float t = (coords.x() - startX) / usableWidth;
 			t = Math.clamp(0f, 1f, t);
 			this.value = Math.lerp(this.min, this.max, t);
-
-			dirty = true;
 		}
 
-		this.updateText(dirty);
+		this.updateText(true);
+
+		return true;
 	}
 
 	public String buildString() {

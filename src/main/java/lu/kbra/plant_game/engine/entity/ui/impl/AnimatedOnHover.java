@@ -14,7 +14,7 @@ public interface AnimatedOnHover extends NeedsHover {
 	void setGrowthProgress(float f);
 
 	default Interpolator getInterpolator(final boolean grow) {
-		return Interpolators.BACK_OUT;
+		return grow ? Interpolators.BACK_OUT : Interpolators.EXPO_OUT;
 	}
 
 	default float compute(final float dTime, final boolean grow) {

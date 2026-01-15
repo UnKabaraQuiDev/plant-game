@@ -10,12 +10,10 @@ import lu.kbra.plant_game.engine.entity.ui.group.LayoutOffsetUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.group.UIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwnerParentAware;
-import lu.kbra.plant_game.engine.entity.ui.impl.DebugBoundsColor;
 import lu.kbra.plant_game.engine.scene.ui.layout.Layout;
-import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-public class BoundedUIObjectGroup extends LayoutOffsetUIObjectGroup implements BoundsOwnerParentAware, DebugBoundsColor {
+public class BoundedUIObjectGroup extends LayoutOffsetUIObjectGroup implements BoundsOwnerParentAware {
 
 	protected Direction2d dir;
 	protected Rectangle2D.Float bounds = new Rectangle2D.Float();
@@ -43,8 +41,6 @@ public class BoundedUIObjectGroup extends LayoutOffsetUIObjectGroup implements B
 		if (obo.isEmpty() || this.dir == null) {
 			return false;
 		}
-
-//		((UIObjectGroup) this.getBoundsOwnerParent()).recomputeBounds();
 
 		if (!obo.get().areBoundsValid()) {
 			super.recomputeBounds();
@@ -74,11 +70,6 @@ public class BoundedUIObjectGroup extends LayoutOffsetUIObjectGroup implements B
 	@Override
 	public Shape getBounds() {
 		return this.bounds;
-	}
-
-	@Override
-	public ColorMaterial getBoundsColor() {
-		return ColorMaterial.YELLOW;
 	}
 
 	@Override

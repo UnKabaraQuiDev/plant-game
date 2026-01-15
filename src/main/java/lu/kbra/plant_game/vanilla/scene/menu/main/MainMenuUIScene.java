@@ -31,7 +31,6 @@ import lu.kbra.plant_game.engine.entity.ui.btn.QuitButtonUIObject;
 import lu.kbra.plant_game.engine.entity.ui.data.GradientDirection;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
 import lu.kbra.plant_game.engine.entity.ui.gradient.AnchoredGradientQuadUIObject;
-import lu.kbra.plant_game.engine.entity.ui.group.LayoutOffsetUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.group.OffsetUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.group.ScrollContainerUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.group.ScrollDrivenUIObjectGroup;
@@ -41,7 +40,6 @@ import lu.kbra.plant_game.engine.entity.ui.icon.LargeLogoUIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.AbsoluteTransform3DOwner;
 import lu.kbra.plant_game.engine.entity.ui.layout.SpacerUIObject;
 import lu.kbra.plant_game.engine.entity.ui.mesh.line.TimelineMesh;
-import lu.kbra.plant_game.engine.entity.ui.scroller.ScrollBarUIObject;
 import lu.kbra.plant_game.engine.entity.ui.slider.VolumeSliderUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.TextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.VolumeTextUIObject;
@@ -51,12 +49,10 @@ import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
 import lu.kbra.plant_game.engine.scene.ui.layout.AnchorLayout;
-import lu.kbra.plant_game.engine.scene.ui.layout.EdgeStickLayout;
 import lu.kbra.plant_game.engine.scene.ui.layout.FlowLayout;
 import lu.kbra.plant_game.engine.scene.ui.layout.Layout;
 import lu.kbra.plant_game.engine.window.input.StandardKeyOption;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
-import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.plant_game.vanilla.scene.overlay.group.impl.MarginAnchoredUIObjectGroup;
 import lu.kbra.plant_game.vanilla.scene.overlay.group.impl.ParentUIObjectGroup;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
@@ -73,7 +69,6 @@ import lu.kbra.standalone.gameengine.utils.gl.consts.BufferType;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextAlignment;
 import lu.kbra.standalone.gameengine.utils.interpolation.Interpolators;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
-import lu.kbra.standalone.gameengine.utils.transform.Transform3DPivot;
 
 public class MainMenuUIScene extends UIScene {
 
@@ -136,10 +131,10 @@ public class MainMenuUIScene extends UIScene {
 		super.addAll(this.mainMenuGroup, this.optionsMenuGroup, this.playMenuGroup);
 
 		/* main menu */
-		this.buildMainMenu(workers, renderDispatcher);
+		this.buildMainMenu();
 
 		/* option content */
-		this.buildOptionsMenu(workers, renderDispatcher);
+		this.buildOptionsMenu();
 
 		/* play content */
 		this.buildPlayMenu(workers, renderDispatcher);
@@ -156,16 +151,16 @@ public class MainMenuUIScene extends UIScene {
 	}
 
 	private void buildPlayMenu(final Dispatcher workers, final Dispatcher renderDispatcher) {
-		UIObjectFactory.create(ScrollBarUIObject.class)
-				.set(i -> i.setTransform(new Transform3D()))
-				.set(i -> i.setColorMaterial(ColorMaterial.GRAY))
-				.set(i -> i.setDir(Direction.EAST))
-				.set(i -> i.setRange(new Vector2f(-1, 1)))
-				.set(i -> i.setSize(new Vector2f(0.05f, 0.2f)))
-				.set(i -> i.setSpeed(PLAY_SCROLL_SPEED))
-//				.add(this.playMenuGroup)
-				.postInit(this.playMenuGroup::setScrollBar)
-				.push();
+//		UIObjectFactory.create(ScrollBarUIObject.class)
+//				.set(i -> i.setTransform(new Transform3D()))
+//				.set(i -> i.setColorMaterial(ColorMaterial.GRAY))
+//				.set(i -> i.setDir(Direction.EAST))
+//				.set(i -> i.setRange(new Vector2f(-1, 1)))
+//				.set(i -> i.setSize(new Vector2f(0.05f, 0.2f)))
+//				.set(i -> i.setSpeed(PLAY_SCROLL_SPEED))
+////				.add(this.playMenuGroup)
+//				.postInit(this.playMenuGroup::setScrollBar)
+//				.push();
 
 		final int count = 5;
 		final ListTriggerLatch<LevelButtonUIObject> btns = new ListTriggerLatch<>(count, list -> {
@@ -221,83 +216,19 @@ public class MainMenuUIScene extends UIScene {
 						.push());
 	}
 
-	private void buildOptionsMenu(final Dispatcher workers, final Dispatcher renderDispatcher) {
-		final Optional<Vector2fc> SMALL_TEXT_CHAR_SIZE = Optional.of(new Vector2f(0.1f));
-		Optional<TextAlignment> SMALL_TEXT_TEXT_ALIGNMENT = Optional.of(TextAlignment.TEXT_CENTER);
+	private void buildOptionsMenu() {
+		final float charSize = 0.1f;
 
-		final LayoutOffsetUIObjectGroup optionsVolumeGroup = new LayoutOffsetUIObjectGroup("options.volume",
-				new EdgeStickLayout(true, 0, SMALL_TEXT_CHAR_SIZE.get().x() * OPTIONS_COLUMN_COUNT));
+		new OptionVolumeUIObjectGroup(this.optionsEntriesGroup).init(VolumeTextUIObject.class, VolumeSliderUIObject.class, charSize);
 
-		this.optionsEntriesGroup.add(optionsVolumeGroup);
-		this.optionsEntriesGroup.add(SpacerUIObject.getVerticalSpacer(2 * SMALL_TEXT_CHAR_SIZE.get().y()));
+		this.optionsEntriesGroup.add(SpacerUIObject.getVerticalSpacer(0.1f));
 
 		for (final StandardKeyOption key : StandardKeyOption.values()) {
-			new OptionKeyUIObjectGroup(key, this.optionsEntriesGroup).init(PGLogic.INSTANCE.getInputHandler());
+			new OptionKeyUIObjectGroup(key, this.optionsEntriesGroup).init(PGLogic.INSTANCE.getInputHandler(), charSize);
 		}
-
-		// final ListTriggerLatch<OptionKeyUIObject> optionKeyGroupLatch = new
-		// ListTriggerLatch<>(StandardKeyOption.values().length,
-//				l -> workers.post(() -> {
-//					l.forEach(this.optionsEntriesGroup::add);
-//					this.updateKeys();
-//				}));
-//
-		final OptionalInt SMALL_TEXT_BUFFER_SIZE = OptionalInt.of(OPTIONS_COLUMN_COUNT);
-//		for (final StandardKeyOption key : StandardKeyOption.values()) {
-//			UIObjectFactory
-//					.createText(OptionKeyUIObject.class,
-//							SMALL_TEXT_BUFFER_SIZE,
-//							SMALL_TEXT_CHAR_SIZE,
-//							SMALL_TEXT_TEXT_ALIGNMENT,
-//							Optional.of("options.keys" + key),
-//							Optional.of(key.name().toLowerCase()))
-//					.set(i -> i.setTransform(new Transform3D()))
-//					.set(i -> i.setDir(Scale2dDir.BOTH))
-//					.set(i -> i.setKey(key.name().toLowerCase()))
-//					.latch(optionKeyGroupLatch)
-//					.push();
-//		}
-
-		/* volume */
-		final ListTriggerLatch<UIObject> optionsVolumeGroupLatch = new TextSliderListTriggerLatch<>(workers,
-				optionsVolumeGroup,
-				VolumeTextUIObject.class,
-				VolumeSliderUIObject.class);
-
-		SMALL_TEXT_TEXT_ALIGNMENT = Optional.of(TextAlignment.TEXT_LEFT);
-		UIObjectFactory
-				.createText(VolumeTextUIObject.class,
-						SMALL_TEXT_BUFFER_SIZE,
-						SMALL_TEXT_CHAR_SIZE,
-						SMALL_TEXT_TEXT_ALIGNMENT,
-						Optional.empty(),
-						Optional.empty())
-				.set(i -> i.setTransform(new Transform3DPivot()))
-				.latch(optionsVolumeGroupLatch)
-				.push();
-		UIObjectFactory
-				.createText(VolumeSliderUIObject.class,
-						SMALL_TEXT_BUFFER_SIZE,
-						SMALL_TEXT_CHAR_SIZE,
-						SMALL_TEXT_TEXT_ALIGNMENT,
-						Optional.empty(),
-						Optional.empty())
-				.set(i -> i.setTransform(new Transform3DPivot()))
-				.latch(optionsVolumeGroupLatch)
-				.push();
-
-//		UIObjectFactory.create(ScrollBarUIObject.class)
-//				.set(i -> i.setTransform(new Transform3D()))
-//				.set(i -> i.setColorMaterial(ColorMaterial.GRAY))
-//				.set(i -> i.setDir(Direction.NORTH))
-//				.set(i -> i.setRange(new Vector2f(0.8f, -0.8f)))
-//				.set(i -> i.setSize(new Vector2f(0.05f, 0.2f)))
-//				.set(i -> i.setSpeed(OPTIONS_SCROLL_SPEED))
-//				.set(this.optionsMenuGroup::setScrollBar)
-//				.push();
 	}
 
-	private void buildMainMenu(final Dispatcher workers, final Dispatcher renderDispatcher) {
+	private void buildMainMenu() {
 		final Optional<Vector2fc> SMALL_TEXT_CHAR_SIZE = Optional.of(new Vector2f(0.2f));
 		final Optional<TextAlignment> SMALL_TEXT_TEXT_ALIGNMENT = Optional.of(TextAlignment.TEXT_CENTER);
 

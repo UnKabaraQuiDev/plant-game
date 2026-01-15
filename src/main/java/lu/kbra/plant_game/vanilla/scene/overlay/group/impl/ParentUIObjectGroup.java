@@ -26,12 +26,6 @@ public class ParentUIObjectGroup extends LayoutOffsetUIObjectGroup implements Bo
 	}
 
 	@Override
-	public void doLayout() {
-		System.err.println("id: " + this.getId());
-		super.doLayout();
-	}
-
-	@Override
 	public Shape getBounds() {
 		return this.getBoundsOwnerParent().map(BoundsOwner::getBounds).orElse(new Rectangle2D.Float(0, 0, 0, 0));
 	}

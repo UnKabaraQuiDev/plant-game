@@ -10,18 +10,19 @@ import lu.pcy113.pclib.PCUtils;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.bar.LimitedObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.data.Direction2d;
-import lu.kbra.plant_game.engine.entity.ui.group.LayoutOffsetUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.group.UIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.DebugBoundsColor;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsBoundsInput;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
+import lu.kbra.plant_game.engine.scene.ui.layout.AnchorLayout;
 import lu.kbra.plant_game.engine.scene.ui.layout.FlowLayout;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.plant_game.generated.ColorMaterial;
-import lu.kbra.plant_game.vanilla.scene.overlay.group.impl.AnchoredBoundedUIObjectGroup;
+import lu.kbra.plant_game.vanilla.scene.overlay.group.impl.AnchoredFixedPBUIObjectGroup;
+import lu.kbra.plant_game.vanilla.scene.overlay.group.impl.BoundedUIObjectGroup;
 
-public class OptionsUIObjectGroup extends AnchoredBoundedUIObjectGroup
+public class OptionsUIObjectGroup extends AnchoredFixedPBUIObjectGroup
 		implements NeedsBoundsInput, LimitedObjectGroup<UIObject>, DebugBoundsColor {
 
 	protected float scrollSpeed = 0.8f;
@@ -30,12 +31,18 @@ public class OptionsUIObjectGroup extends AnchoredBoundedUIObjectGroup
 	protected Vector2f scrollYRange = new Vector2f();
 
 	public OptionsUIObjectGroup(final UIObjectGroup parent) {
-		super("options.vert", new FlowLayout(true, 0.04f), parent, Direction2d.HORIZONTAL, Anchor.CENTER_CENTER, Anchor.CENTER_CENTER);
-		super.add(new LayoutOffsetUIObjectGroup(this.getId() + "-content", new FlowLayout(true, 0.04f, true)));
+		super("options.vert", new AnchorLayout(), parent, Direction2d.VERTICAL, 3f, Anchor.CENTER_CENTER, Anchor.CENTER_CENTER);
+		super.add(new BoundedUIObjectGroup(this.getId() + "-content", new FlowLayout(true, 0.04f, true), Direction2d.VERTICAL));
 	}
 
 	public UIObjectGroup getContainer() {
 		return (UIObjectGroup) this.get(0);
+	}
+
+	@Override
+	public void doLayout() {
+		this.applyScrollY();
+		super.doLayout();
 	}
 
 	@Override

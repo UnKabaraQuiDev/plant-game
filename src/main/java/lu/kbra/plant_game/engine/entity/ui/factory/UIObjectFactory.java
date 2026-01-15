@@ -72,16 +72,19 @@ public class UIObjectFactory {
 			final Optional<String> key,
 			final Supplier<AttribArray>... attribs) {
 
-		return StaticTextLoader.getFuture(this.cache,
-				name.orElse(clazz.getSimpleName()),
-				key.orElse(DATA_PATH.get(clazz)),
-				charSize.orElse(DEFAULT_CHAR_SIZE),
-				textAlignment.orElse(DEFAULT_TEXT_ALIGNMENT),
-				bufferSize.isEmpty() ? (BUFFER_SIZE.containsKey(clazz) ? OptionalInt.of(BUFFER_SIZE.get(clazz)) : OptionalInt.empty())
-						: bufferSize,
-				attribs,
-				this.loader,
-				this.render)
+		return StaticTextLoader
+				.getFuture(this.cache,
+						name.orElse(ProgrammaticUIObject.class.isAssignableFrom(clazz) ? key.orElse(clazz.getSimpleName())
+								: clazz.getSimpleName()),
+						key.orElse(DATA_PATH.get(clazz)),
+						charSize.orElse(DEFAULT_CHAR_SIZE),
+						textAlignment.orElse(DEFAULT_TEXT_ALIGNMENT),
+						bufferSize.isEmpty()
+								? (BUFFER_SIZE.containsKey(clazz) ? OptionalInt.of(BUFFER_SIZE.get(clazz)) : OptionalInt.empty())
+								: bufferSize,
+						attribs,
+						this.loader,
+						this.render)
 				.then(this.loader, (Function<TextEmitter, List<Object>>) Arrays::asList)
 				.then(new UOCreatingTaskFuture(this.loader, clazz));
 	}
@@ -152,10 +155,23 @@ public class UIObjectFactory {
 		return INSTANCE.createText_(clazz, bufferSize, charSize, textAlignment, name, key, attribs);
 	}
 
+	public static <T extends UIObject & TextEmitterOwner> UOCreatingTaskFuture<T> createText(final Class<T> clazz) {
+		return INSTANCE.createText_(clazz, OptionalInt.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
+	}
+
 	public static <T extends UIObject & TextEmitterOwner & ProgrammaticUIObject> UOCreatingTaskFuture<T> createText(
 			final Class<T> clazz,
 			final String key) {
 		return INSTANCE.createText_(clazz, OptionalInt.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(key));
+	}
+
+	public static <T extends UIObject & TextEmitterOwner> UOCreatingTaskFuture<T> createText(final Class<T> clazz, final float charSize) {
+		return INSTANCE.createText_(clazz,
+				OptionalInt.empty(),
+				Optional.of(new Vector2f(charSize)),
+				Optional.empty(),
+				Optional.empty(),
+				Optional.empty());
 	}
 
 	public static <T extends UIObject & TextEmitterOwner & ProgrammaticUIObject> UOCreatingTaskFuture<T> createText(
@@ -166,7 +182,7 @@ public class UIObjectFactory {
 				OptionalInt.empty(),
 				Optional.of(new Vector2f(charSize)),
 				Optional.empty(),
-				Optional.empty(),
+				Optional.of(key),
 				Optional.of(key));
 	}
 

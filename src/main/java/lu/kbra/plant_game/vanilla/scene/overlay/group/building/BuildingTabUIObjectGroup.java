@@ -75,8 +75,8 @@ public class BuildingTabUIObjectGroup extends AnchoredLayoutUIObjectGroup
 
 	@Override
 	public void doLayout() {
-		super.doLayout();
 		this.applyScrollX();
+		super.doLayout();
 	}
 
 	public void recomputeRange() {

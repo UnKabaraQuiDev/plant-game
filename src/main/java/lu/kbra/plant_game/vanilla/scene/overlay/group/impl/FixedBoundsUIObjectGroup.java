@@ -43,7 +43,7 @@ public class FixedBoundsUIObjectGroup extends LayoutOffsetUIObjectGroup implemen
 		this.size = size;
 	}
 
-	private static final ToDoubleFunction<? super UIObject> marginSumX = c -> {
+	protected static final ToDoubleFunction<? super UIObject> marginSumX = c -> {
 		float padding = 0;
 		if (c instanceof MarginOwner po) {
 			padding += po.getMargin();
@@ -53,7 +53,7 @@ public class FixedBoundsUIObjectGroup extends LayoutOffsetUIObjectGroup implemen
 		}
 		return padding;
 	};
-	private static final ToDoubleFunction<? super UIObject> marginSumZ = c -> {
+	protected static final ToDoubleFunction<? super UIObject> marginSumZ = c -> {
 		float padding = 0;
 		if (c instanceof MarginOwner po) {
 			padding += po.getMargin();
@@ -64,7 +64,7 @@ public class FixedBoundsUIObjectGroup extends LayoutOffsetUIObjectGroup implemen
 		return padding;
 	};
 
-	private static final ToDoubleFunction<? super UIObject> paddingSumX = c -> {
+	protected static final ToDoubleFunction<? super UIObject> paddingSumX = c -> {
 		float padding = 0;
 		if (c instanceof PaddingOwner po) {
 			padding += po.getPadding();
@@ -74,7 +74,7 @@ public class FixedBoundsUIObjectGroup extends LayoutOffsetUIObjectGroup implemen
 		}
 		return padding;
 	};
-	private static final ToDoubleFunction<? super UIObject> paddingSumZ = c -> {
+	protected static final ToDoubleFunction<? super UIObject> paddingSumZ = c -> {
 		float padding = 0;
 		if (c instanceof PaddingOwner po) {
 			padding += po.getPadding();
@@ -97,8 +97,6 @@ public class FixedBoundsUIObjectGroup extends LayoutOffsetUIObjectGroup implemen
 		final float paddingX = (float) (this.parallelStream().mapToDouble(marginSumX).sum() + paddingSumX.applyAsDouble(this));
 		final float paddingZ = (float) (this.parallelStream().mapToDouble(marginSumZ).sum() + paddingSumZ.applyAsDouble(this));
 
-		System.err.println("padding: " + paddingX + "x" + paddingZ);
-
 		this.bounds.setFrame(switch (this.dir) {
 		case VERTICAL -> new Rectangle2D.Float(-this.size / 2 - paddingX,
 				(float) compBounds.getY() - paddingZ,
@@ -109,8 +107,6 @@ public class FixedBoundsUIObjectGroup extends LayoutOffsetUIObjectGroup implemen
 				(float) compBounds.getWidth() + 2 * paddingX,
 				this.size / 2 + 2 * paddingZ);
 		});
-
-		System.err.println(this.bounds);
 
 		return true;
 	}

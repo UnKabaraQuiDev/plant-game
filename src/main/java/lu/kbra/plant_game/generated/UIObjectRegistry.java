@@ -77,7 +77,7 @@ import lu.kbra.plant_game.vanilla.scene.overlay.group.building.BuildingInfoUIObj
 import lu.kbra.plant_game.vanilla.scene.overlay.group.building.BuildingPanelUIObjectGroup;
 import lu.kbra.plant_game.vanilla.scene.overlay.group.building.BuildingTabButtonUIObjectGroup;
 import lu.kbra.plant_game.vanilla.scene.overlay.group.building.BuildingTabUIObjectGroup;
-import lu.kbra.plant_game.vanilla.scene.overlay.group.impl.AnchoredBoundedUIObjectGroup;
+import lu.kbra.plant_game.vanilla.scene.overlay.group.impl.AnchoredPBUIObjectGroup;
 import lu.kbra.plant_game.vanilla.scene.overlay.group.impl.AnchoredLayoutUIObjectGroup;
 import lu.kbra.plant_game.vanilla.scene.overlay.group.impl.AnchoredParentUIObjectGroup;
 import lu.kbra.plant_game.vanilla.scene.overlay.group.impl.BoundedUIObjectGroup;
@@ -502,11 +502,11 @@ public class UIObjectRegistry {
 
 		/*                 AnchoredBoundedUIObjectGroup                 */
 		final List<InternalConstructorFunction<UIObject>> listAnchoredBoundedUIObjectGroup = new ArrayList<>();
-		listAnchoredBoundedUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Layout.class, UIObjectGroup.class, Direction2d.class, UIObject[].class}, (Object[] arr) -> (UIObject) new AnchoredBoundedUIObjectGroup((String) arr[0], (Layout) arr[1], (UIObjectGroup) arr[2], (Direction2d) arr[3], (UIObject[]) arr[4])));
-		listAnchoredBoundedUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Layout.class, Transform3D.class, Direction2d.class, UIObject[].class}, (Object[] arr) -> (UIObject) new AnchoredBoundedUIObjectGroup((String) arr[0], (Layout) arr[1], (Transform3D) arr[2], (Direction2d) arr[3], (UIObject[]) arr[4])));
-		listAnchoredBoundedUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Layout.class, Direction2d.class, Anchor.class, Anchor.class, UIObject[].class}, (Object[] arr) -> (UIObject) new AnchoredBoundedUIObjectGroup((String) arr[0], (Layout) arr[1], (Direction2d) arr[2], (Anchor) arr[3], (Anchor) arr[4], (UIObject[]) arr[5])));
-		listAnchoredBoundedUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Layout.class, UIObjectGroup.class, Direction2d.class, Anchor.class, Anchor.class, UIObject[].class}, (Object[] arr) -> (UIObject) new AnchoredBoundedUIObjectGroup((String) arr[0], (Layout) arr[1], (UIObjectGroup) arr[2], (Direction2d) arr[3], (Anchor) arr[4], (Anchor) arr[5], (UIObject[]) arr[6])));
-		UI_OBJECT_CONSTRUCTORS.put(AnchoredBoundedUIObjectGroup.class, listAnchoredBoundedUIObjectGroup);
+		listAnchoredBoundedUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Layout.class, UIObjectGroup.class, Direction2d.class, UIObject[].class}, (Object[] arr) -> (UIObject) new AnchoredPBUIObjectGroup((String) arr[0], (Layout) arr[1], (UIObjectGroup) arr[2], (Direction2d) arr[3], (UIObject[]) arr[4])));
+		listAnchoredBoundedUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Layout.class, Transform3D.class, Direction2d.class, UIObject[].class}, (Object[] arr) -> (UIObject) new AnchoredPBUIObjectGroup((String) arr[0], (Layout) arr[1], (Transform3D) arr[2], (Direction2d) arr[3], (UIObject[]) arr[4])));
+		listAnchoredBoundedUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Layout.class, Direction2d.class, Anchor.class, Anchor.class, UIObject[].class}, (Object[] arr) -> (UIObject) new AnchoredPBUIObjectGroup((String) arr[0], (Layout) arr[1], (Direction2d) arr[2], (Anchor) arr[3], (Anchor) arr[4], (UIObject[]) arr[5])));
+		listAnchoredBoundedUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Layout.class, UIObjectGroup.class, Direction2d.class, Anchor.class, Anchor.class, UIObject[].class}, (Object[] arr) -> (UIObject) new AnchoredPBUIObjectGroup((String) arr[0], (Layout) arr[1], (UIObjectGroup) arr[2], (Direction2d) arr[3], (Anchor) arr[4], (Anchor) arr[5], (UIObject[]) arr[6])));
+		UI_OBJECT_CONSTRUCTORS.put(AnchoredPBUIObjectGroup.class, listAnchoredBoundedUIObjectGroup);
 
 		/*                 BuildingTabUIObjectGroup                 */
 		final List<InternalConstructorFunction<UIObject>> listBuildingTabUIObjectGroup = new ArrayList<>();
