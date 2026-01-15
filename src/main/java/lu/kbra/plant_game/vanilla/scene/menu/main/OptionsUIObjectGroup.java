@@ -15,7 +15,6 @@ import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.DebugBoundsColor;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsBoundsInput;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
-import lu.kbra.plant_game.engine.scene.ui.layout.AnchorLayout;
 import lu.kbra.plant_game.engine.scene.ui.layout.FlowLayout;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.plant_game.generated.ColorMaterial;
@@ -31,7 +30,7 @@ public class OptionsUIObjectGroup extends AnchoredFixedPBUIObjectGroup
 	protected Vector2f scrollYRange = new Vector2f();
 
 	public OptionsUIObjectGroup(final UIObjectGroup parent) {
-		super("options.vert", new AnchorLayout(), parent, Direction2d.VERTICAL, 3f, Anchor.CENTER_CENTER, Anchor.CENTER_CENTER);
+		super("options.vert", null, parent, Direction2d.VERTICAL, 3f, Anchor.CENTER_CENTER, Anchor.CENTER_CENTER);
 		super.add(new BoundedUIObjectGroup(this.getId() + "-content", new FlowLayout(true, 0.04f, true), Direction2d.VERTICAL));
 	}
 

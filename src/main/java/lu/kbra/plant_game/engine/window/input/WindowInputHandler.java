@@ -155,4 +155,8 @@ public interface WindowInputHandler {
 
 	boolean hasPressedKey();
 
+	boolean hasPressedMouseOnce();
+
+	boolean hasPressedKeyOnce();
+
 }

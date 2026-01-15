@@ -2,6 +2,7 @@ package lu.kbra.plant_game.engine.entity.ui.factory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 import lu.pcy113.pclib.PCUtils;
@@ -45,11 +46,13 @@ public class UOCreatingTaskFuture<T extends UIObject> extends TaskFuture<List<Ob
 	}
 
 	public UOCreatingTaskFuture<T> add(final EntityContainer<? super T> parent) {
+		Objects.requireNonNull(parent);
 		this.postInitHooks.add(v -> parent.add(v));
 		return this;
 	}
 
 	public UOCreatingTaskFuture<T> get(final ObjectPointer<? super T> ptr) {
+		Objects.requireNonNull(ptr);
 		this.postInitHooks.add(v -> ptr.set(v));
 		return this;
 	}
@@ -65,6 +68,7 @@ public class UOCreatingTaskFuture<T extends UIObject> extends TaskFuture<List<Ob
 	}
 
 	public UOCreatingTaskFuture<T> latch(final GenericTriggerLatch<? super T> latch) {
+		Objects.requireNonNull(latch);
 		this.postInitHooks.add((final T v) -> latch.trigger(v));
 		return this;
 	}

@@ -31,6 +31,7 @@ import lu.kbra.plant_game.engine.entity.ui.impl.NeedsUpdate;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.scene.ui.layout.LayoutOwner;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
+import lu.kbra.plant_game.vanilla.scene.menu.main.NeedsFocusInput;
 import lu.kbra.standalone.gameengine.GameEngine;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
@@ -103,8 +104,17 @@ public class UIScene extends Scene3D implements SceneBoundsOwner {
 
 		this.hovering = newHovered;
 
-		if (this.focused != null && this.focused.hasFocus()) {
-			frameState.uiSceneCaughtKeyboardInput = true;
+		if (this.focused != null) {
+			if (this.focused instanceof NeedsFocusInput nfi) {
+				if (nfi.focusInput(inputHandler)) {
+					frameState.uiSceneCaughtKeyboardInput = true;
+				} else {
+					this.focused.removeFocus();
+					this.focused = null;
+				}
+			} else if (this.focused.hasFocus()) {
+				frameState.uiSceneCaughtKeyboardInput = true;
+			}
 		}
 	}
 
@@ -165,11 +175,13 @@ public class UIScene extends Scene3D implements SceneBoundsOwner {
 					GlobalLogger.info("UIObject: " + uiObj.getId() + " took mouse input.");
 				}
 
-				if (uiObj instanceof Focusable && inputHandler.isMouseButtonPressedOnce(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
+				if (uiObj instanceof Focusable foc && foc != this.focused
+						&& inputHandler.isMouseButtonPressedOnce(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
+					System.err.println("focus clicked: " + uiObj);
 					if (this.focused != null) {
 						this.focused.removeFocus();
 					}
-					this.focused = (Focusable) uiObj;
+					this.focused = foc;
 					this.focused.giveFocus();
 				}
 //				}

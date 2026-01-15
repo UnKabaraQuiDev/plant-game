@@ -53,8 +53,8 @@ public class SliderUIObject extends TextUIObject
 		final Rectangle2D bounds = this.getAbsoluteTransformedBounds().getBounds2D();
 		final int charCount = this.getTextEmitter().getStringLength();
 		final float partWidth = (float) bounds.getWidth() / charCount;
-		final float localX = clickX - (float) bounds.getMinX();
-		final int index = (int) (localX / partWidth);
+		final float localX = clickX - (float) bounds.getMinX() /*- this.getTextEmitter().getCharSize().x() / 2*/;
+		final int index = (int) ((localX + this.getTextEmitter().getCharSize().x() / 2) / partWidth);
 
 		assert index >= 0 && index < charCount : "Invalid index: " + index + " in range: [0, " + charCount + "]";
 
@@ -84,7 +84,7 @@ public class SliderUIObject extends TextUIObject
 
 	public String buildString() {
 		final int dCount = (int) (this.value / (this.max - this.min) * this.divisors);
-		return "<[" + ("+".repeat(dCount) + " ".repeat(this.divisors - dCount)) + "]>";
+		return "<[" + ("O".repeat(dCount) + " ".repeat(this.divisors - dCount)) + "]>";
 	}
 
 	public void updateText(final boolean push) {

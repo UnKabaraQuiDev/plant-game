@@ -277,6 +277,26 @@ public class DefaultInputHandler implements WindowInputHandler {
 	}
 
 	@Override
+	public boolean hasPressedMouseOnce() {
+		for (int i = 0; i < this.currMouse.length; i++) {
+			if (!this.prevMouse[i] && this.currMouse[i]) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public boolean hasPressedKeyOnce() {
+		for (int i = 0; i < this.currKeys.length; i++) {
+			if (!this.prevKeys[i] && this.currKeys[i]) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
 	public String toString() {
 		return "DefaultInputHandler [engine=" + this.engine + ", window=" + this.window + ", prevKeys=" + Arrays.toString(this.prevKeys)
 				+ ", currKeys=" + Arrays.toString(this.currKeys) + ", prevMouse=" + Arrays.toString(this.prevMouse) + ", currMouse="

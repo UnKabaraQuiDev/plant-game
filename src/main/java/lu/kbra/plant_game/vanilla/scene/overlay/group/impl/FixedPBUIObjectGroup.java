@@ -51,8 +51,6 @@ public class FixedPBUIObjectGroup extends FixedBoundsUIObjectGroup {
 				this.size + 2 * paddingZ);
 		});
 
-		System.err.println(parentBounds + " " + this.bounds);
-
 		return true;
 	}
 }
