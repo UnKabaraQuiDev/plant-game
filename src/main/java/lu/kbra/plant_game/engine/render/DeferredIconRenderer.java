@@ -1,5 +1,7 @@
 package lu.kbra.plant_game.engine.render;
 
+import java.lang.ref.Cleaner.Cleanable;
+
 import org.joml.Vector3f;
 
 import lu.kbra.plant_game.engine.entity.go.MeshGameObject;
@@ -9,11 +11,8 @@ import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.generated.gl_wrapper.GL_W;
 import lu.kbra.standalone.gameengine.geom.BoundingBox;
 import lu.kbra.standalone.gameengine.geom.Mesh;
-import lu.kbra.standalone.gameengine.graph.texture.SingleTexture;
-import lu.kbra.standalone.gameengine.utils.gl.consts.DataType;
-import lu.kbra.standalone.gameengine.utils.gl.consts.TexelFormat;
-import lu.kbra.standalone.gameengine.utils.gl.consts.TexelInternalFormat;
-import lu.kbra.standalone.gameengine.utils.gl.consts.TextureFilter;
+import lu.kbra.standalone.gameengine.objs.entity.ParentAwareNode;
+import lu.kbra.standalone.gameengine.utils.mem.img.MemImage;
 
 public class DeferredIconRenderer extends DeferredCompositor {
 
@@ -30,7 +29,7 @@ public class DeferredIconRenderer extends DeferredCompositor {
 		this.fakeWorld.getCamera().updateMatrix();
 	}
 
-	public SingleTexture renderIcon(
+	public MemImage renderIcon(
 			final GameEngine engine,
 			final MeshGameObject obj,
 			final int size,
@@ -57,6 +56,17 @@ public class DeferredIconRenderer extends DeferredCompositor {
 			this.fakeWorld.getCamera().getProjection().update();
 		}
 
+		synchronized (fakeWorld.getEntitiesLock()) {
+			this.fakeWorld.getEntities().values().forEach(c -> {
+				if (c instanceof ParentAwareNode pa) {
+					pa.setParent(null);
+				}
+				if (c instanceof Cleanable cp) {
+					cp.clean();
+				}
+			});
+			this.fakeWorld.getEntities().clear();
+		}
 		this.fakeWorld.add(obj);
 
 		// super.render(engine, fakeWorld, null);
@@ -75,53 +85,49 @@ public class DeferredIconRenderer extends DeferredCompositor {
 		this.deferredPass = true;
 		this.renderWorldScene(cache, this.fakeWorld, this.renderResolution, true);
 		this.deferredPass = false;
-		
+
 		this.renderMaterials(cache, this.fakeWorld, this.renderResolution, true);
 
 		this.renderOutlines(cache, this.renderResolution, true);
 
 		this.blitToScreen(cache, engine.getWindow().getSize(), true);
 
-		final SingleTexture texture = new SingleTexture(obj.getId(), this.renderResolution);
-		cache.addTexture(texture);
-		texture.setDataType(DataType.UBYTE);
-		texture.setFormat(TexelFormat.RGBA);
-		texture.setInternalFormat(TexelInternalFormat.RGBA8);
-		texture.setFilters(TextureFilter.NEAREST);
-		texture.setGenerateMipmaps(false);
-		texture.setup();
+//		final SingleTexture texture = new SingleTexture(obj.getId(), this.renderResolution);
+//		cache.addTexture(texture);
+//		texture.setDataType(DataType.UBYTE);
+//		texture.setFormat(TexelFormat.RGBA);
+//		texture.setInternalFormat(TexelInternalFormat.RGBA8);
+//		texture.setFilters(TextureFilter.NEAREST);
+//		texture.setGenerateMipmaps(false);
+//		texture.setup();
 
-		GL_W
-				.glCopyImageSubData(this.outputTxt.getGlId(),
-						this.outputTxt.getTextureType().getGlId(),
-						0,
-						0,
-						0,
-						0,
-						texture.getGlId(),
-						texture.getTextureType().getGlId(),
-						0,
-						0,
-						0,
-						0,
-						texture.getWidth(),
-						texture.getHeight(),
-						1);
+//		ByteBuffer buffer = BufferUtils.createByteBuffer(size * size* 4);
+//
+//		GL_W.glReadBuffer(GL_W.GL_FRONT);
+//		GL_W.glReadPixels(0, 0, size, size, GL_W.GL_RGBA, GL_W.GL_UNSIGNED_BYTE, buffer);
 
-//		synchronized (fakeWorld.getEntitiesLock()) {
-//			this.fakeWorld.getEntities().values().forEach(c -> {
-//				if (c instanceof ParentAwareNode pa) {
-//					pa.setParent(null);
-//				}
-//				if (c instanceof Cleanable cp) {
-//					cp.clean();
-//				}
-//			});
-//			this.fakeWorld.getEntities().clear();
-//		}
+//		GL_W
+//				.glCopyImageSubData(this.outputTxt.getGlId(),
+//						this.outputTxt.getTextureType().getGlId(),
+//						0,
+//						0,
+//						0,
+//						0,
+//						texture.getGlId(),
+//						texture.getTextureType().getGlId(),
+//						0,
+//						0,
+//						0,
+//						0,
+//						texture.getWidth(),
+//						texture.getHeight(),
+//						1);
+
 //		cache.cleanup();
 
-		return texture;
+//		return buffer;
+
+		return outputTxt.getStoredImage();
 	}
 
 	public WorldLevelScene getFakeWorld() {

@@ -3,6 +3,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Properties;
 import java.util.Queue;
@@ -20,7 +21,6 @@ import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.render.DeferredIconRenderer;
 import lu.kbra.plant_game.generated.GameObjectRegistry;
 import lu.kbra.standalone.gameengine.GameEngine;
-import lu.kbra.standalone.gameengine.graph.texture.SingleTexture;
 import lu.kbra.standalone.gameengine.graph.window.WindowOptions;
 import lu.kbra.standalone.gameengine.impl.GameLogic;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
@@ -29,6 +29,7 @@ import lu.kbra.standalone.gameengine.impl.future.WorkerDispatcher;
 import lu.kbra.standalone.gameengine.utils.file.FileUtils;
 import lu.kbra.standalone.gameengine.utils.gl.consts.Consts;
 import lu.kbra.standalone.gameengine.utils.mem.img.MemImage;
+import lu.kbra.standalone.gameengine.utils.mem.img.MemImageOrigin;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 import lu.pcy113.pclib.PCUtils;
 import lu.pcy113.pclib.logger.GlobalLogger;
@@ -88,14 +89,15 @@ public class IconRendererTestLogic extends GameLogic {
 		}
 
 		final MeshGameObject obj = objs.poll();
+		final int size = 1024;
 
 		GlobalLogger.info("Starting rendering.");
-		final SingleTexture txt = this.iconRenderer
-				.renderIcon(this.engine, obj, 128, new Vector3f(1), new Vector3f(1, 1, 1).normalize(), 0.1f);
+		final MemImage img = this.iconRenderer
+				.renderIcon(this.engine, obj, size, new Vector3f(1), new Vector3f(1, 1, 1).normalize(), 0.1f);
 		GlobalLogger.info("Rendering done.");
-		GlobalLogger.info("Fetching image.");
-		final MemImage img = txt.getStoredImage();
-		GlobalLogger.info("Saving image.");
+//		GlobalLogger.info("Fetching image.");
+//		final MemImage img = new MemImage(size, size, 4, bb, MemImageOrigin.MEMORY);
+//		GlobalLogger.info("Saving image.");
 		final File outFile = new File(Consts.ICONS_BAKES_RES_DIR, obj.getClass().getSimpleName() + ".png");
 		FileUtils.STBISave(outFile, img);
 		GlobalLogger.info("Saved to: " + outFile.getAbsolutePath());
@@ -103,11 +105,11 @@ public class IconRendererTestLogic extends GameLogic {
 		System.err.println(obj.getClass().getName());
 
 		img.cleanup();
-		txt.cleanup();
+//		txt.cleanup();
 
-		synchronized (iconRenderer.getFakeWorld().getEntitiesLock()) {
-			iconRenderer.getFakeWorld().getEntities().clear();
-		}
+//		synchronized (iconRenderer.getFakeWorld().getEntitiesLock()) {
+//			iconRenderer.getFakeWorld().getEntities().clear();
+//		}
 
 		renderedCount++;
 	}
