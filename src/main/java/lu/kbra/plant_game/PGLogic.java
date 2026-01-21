@@ -122,10 +122,7 @@ public class PGLogic extends GameLogic {
 								.mul(PCUtils.randomFloatRange(0.8f, 1.5f)),
 						null,
 						i -> new Vector3f(0, 2, 0),
-						i -> new Quaternionf(new AxisAngle4d((float) Math.random() * 2 - 1,
-								(float) Math.random() * 2 - 1,
-								(float) Math.random() * 2 - 1,
-								(float) Math.random() * 2 - 1)),
+						i -> GameEngineUtils.randomQuaterionf(),
 						i -> PCUtils.randomFloatRange(0.08f, 0.1f))
 				.then(this.WORKERS,
 						(Consumer<GravityParticleGameObject>) parts -> this.worldScene.getParticleManager().getActiveObjects().add(parts))

@@ -3,21 +3,22 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.List;
 import java.util.Properties;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.joml.Vector3f;
 import org.junit.Test;
 
-import lu.pcy113.pclib.PCUtils;
-import lu.pcy113.pclib.logger.GlobalLogger;
-
+import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.entity.go.MeshGameObject;
 import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory;
+import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.render.DeferredIconRenderer;
-import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
-import lu.kbra.plant_game.vanilla.entity.go.obj.water.WaterTowerObject;
+import lu.kbra.plant_game.generated.GameObjectRegistry;
 import lu.kbra.standalone.gameengine.GameEngine;
 import lu.kbra.standalone.gameengine.graph.texture.SingleTexture;
 import lu.kbra.standalone.gameengine.graph.window.WindowOptions;
@@ -29,6 +30,8 @@ import lu.kbra.standalone.gameengine.utils.file.FileUtils;
 import lu.kbra.standalone.gameengine.utils.gl.consts.Consts;
 import lu.kbra.standalone.gameengine.utils.mem.img.MemImage;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
+import lu.pcy113.pclib.PCUtils;
+import lu.pcy113.pclib.logger.GlobalLogger;
 
 public class IconRendererTestLogic extends GameLogic {
 
@@ -37,9 +40,9 @@ public class IconRendererTestLogic extends GameLogic {
 	private DeferredCompositor deferredCompositor;
 	private DeferredIconRenderer iconRenderer;
 
-	private WorldLevelScene world;
-
-	private TaskFuture<?, ? extends MeshGameObject>.TaskState<? extends MeshGameObject> state;
+//	private WorldLevelScene world;
+	private final Queue<MeshGameObject> objs = new ConcurrentLinkedQueue<>();
+	private int awaitingCount = 0;
 
 	@Override
 	public void init() throws Exception {
@@ -49,8 +52,19 @@ public class IconRendererTestLogic extends GameLogic {
 		GameObjectFactory.INSTANCE = new GameObjectFactory(this.cache, this.WORKERS, this.RENDER_DISPATCHER);
 		UIObjectFactory.INSTANCE = new UIObjectFactory(this.cache, this.WORKERS, this.RENDER_DISPATCHER);
 
-		this.state = GameObjectFactory.create(WaterTowerObject.class).set(i -> i.setTransform(new Transform3D())).push();
-		this.world = new WorldLevelScene("world", this.cache);
+//		this.world = new WorldLevelScene("world", this.cache);
+
+		for (Class<? extends GameObject> goClazz : GameObjectRegistry.GAME_OBJECT_CONSTRUCTORS.keySet()) {
+			if (!MeshGameObject.class.isAssignableFrom(goClazz) || !PlaceableObject.class.isAssignableFrom(goClazz)) {
+				continue;
+			}
+			final TaskFuture<List<Object>, ? extends GameObject>.TaskState<? extends GameObject> state = GameObjectFactory
+					.create(goClazz)
+					.set(t -> t.setTransform(new Transform3D()))
+					.set(t -> objs.offer((MeshGameObject) t))
+					.push();
+			awaitingCount++;
+		}
 	}
 
 	@Override
@@ -61,24 +75,41 @@ public class IconRendererTestLogic extends GameLogic {
 	public void update(final float dTime) {
 	}
 
+	private int renderedCount = 0;
+
 	@Override
 	public void render(final float dTime) {
-		if (!this.state.isDone()) {
+		if (renderedCount == awaitingCount) {
+			super.stop();
+			return;
+		}
+		if (objs.isEmpty()) {
 			return;
 		}
 
+		final MeshGameObject obj = objs.poll();
+
 		GlobalLogger.info("Starting rendering.");
 		final SingleTexture txt = this.iconRenderer
-				.renderIcon(this.engine, this.state.getResult(), 128, new Vector3f(1), new Vector3f(1, 1, 1).normalize(), 0.1f);
+				.renderIcon(this.engine, obj, 128, new Vector3f(1), new Vector3f(1, 1, 1).normalize(), 0.1f);
 		GlobalLogger.info("Rendering done.");
 		GlobalLogger.info("Fetching image.");
 		final MemImage img = txt.getStoredImage();
 		GlobalLogger.info("Saving image.");
-		final File outFile = new File(Consts.ICONS_BAKES_RES_DIR, this.state.getResult().getClass().getSimpleName() + ".png");
+		final File outFile = new File(Consts.ICONS_BAKES_RES_DIR, obj.getClass().getSimpleName() + ".png");
 		FileUtils.STBISave(outFile, img);
 		GlobalLogger.info("Saved to: " + outFile.getAbsolutePath());
 
-		super.stop();
+		System.err.println(obj.getClass().getName());
+
+		img.cleanup();
+		txt.cleanup();
+
+		synchronized (iconRenderer.getFakeWorld().getEntitiesLock()) {
+			iconRenderer.getFakeWorld().getEntities().clear();
+		}
+
+		renderedCount++;
 	}
 
 	@Override

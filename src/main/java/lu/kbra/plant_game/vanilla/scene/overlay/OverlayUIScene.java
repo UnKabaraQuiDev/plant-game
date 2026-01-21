@@ -168,6 +168,7 @@ public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner
 						obj.getPopup().setValue(0).flushValue();
 						obj.getPopup().setPadding(false);
 						obj.setTarget(pb.getForeground(), Anchor.TOP_CENTER, Anchor.BOTTOM_RIGHT);
+						obj.doLayout();
 					});
 			this.progressGroup.doLayout();
 			super.add(this.progressGroup);

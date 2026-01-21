@@ -98,14 +98,10 @@ public class FixedBoundsUIObjectGroup extends LayoutOffsetUIObjectGroup implemen
 		final float paddingZ = (float) (this.parallelStream().mapToDouble(marginSumZ).sum() + paddingSumZ.applyAsDouble(this));
 
 		this.bounds.setFrame(switch (this.dir) {
-		case VERTICAL -> new Rectangle2D.Float(-this.size / 2 - paddingX,
-				(float) compBounds.getY() - paddingZ,
-				this.size / 2 + 2 * paddingX,
-				(float) compBounds.getHeight() + 2 * paddingZ);
-		case HORIZONTAL -> new Rectangle2D.Float((float) compBounds.getX() - paddingX,
-				-this.size / 2 - paddingZ,
-				(float) compBounds.getWidth() + 2 * paddingX,
-				this.size / 2 + 2 * paddingZ);
+		case VERTICAL -> new Rectangle2D.Float(-this.size / 2 - paddingX, (float) compBounds.getY() - paddingZ,
+				this.size / 2 + 2 * paddingX, (float) compBounds.getHeight() + 2 * paddingZ);
+		case HORIZONTAL -> new Rectangle2D.Float((float) compBounds.getX() - paddingX, -this.size / 2 - paddingZ,
+				(float) compBounds.getWidth() + 2 * paddingX, this.size / 2 + 2 * paddingZ);
 		});
 
 		return true;

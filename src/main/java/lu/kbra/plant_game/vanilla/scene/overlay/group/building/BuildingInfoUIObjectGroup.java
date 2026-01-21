@@ -58,9 +58,7 @@ public class BuildingInfoUIObjectGroup extends FixedBoundsUIObjectGroup implemen
 	public BuildingInfoUIObjectGroup() {
 		super("building-info", new AnchorLayout(), Direction2d.VERTICAL, FONT_HEIGHT * COLUMN_COUNT);
 
-		this.content = new AnchoredLayoutUIObjectGroup(super.getId() + "-content",
-				new FlowLayout(true, 0.05f),
-				Anchor.CENTER_CENTER,
+		this.content = new AnchoredLayoutUIObjectGroup(super.getId() + "-content", new FlowLayout(true, 0.05f), Anchor.CENTER_CENTER,
 				Anchor.CENTER_CENTER);
 		this.add(this.content);
 	}
@@ -72,7 +70,8 @@ public class BuildingInfoUIObjectGroup extends FixedBoundsUIObjectGroup implemen
 		this.addIntLine(workers, render, "cost-line", MoneyIconUIObject.class, "text.cost").latch(latch);
 
 		/* backdrop */
-		UIObjectFactory.create(IBAnchoredFlatQuadUIObject.class)
+		UIObjectFactory
+				.create(IBAnchoredFlatQuadUIObject.class)
 				.set(i -> i.setTransform(new Transform3D(new Vector3f(0, -0.2f, 0), new Quaternionf(), new Vector3f(1f / this.size, 1, 1))))
 				.set(i -> i.setColor(new Vector4f(ColorMaterial.DARK_GRAY.getColor()).mul(1, 1, 1, 0.5f)))
 				.set(i -> i.setAnchors(Anchor.CENTER_CENTER, Anchor.CENTER_CENTER))
@@ -92,21 +91,20 @@ public class BuildingInfoUIObjectGroup extends FixedBoundsUIObjectGroup implemen
 			final String id,
 			final Class<? extends TexturedQuadMeshUIObject> iconClazz,
 			final String key) {
-		final AnchoredFixedIntegerStatLine costValue = new AnchoredFixedIntegerStatLine(id + "-value",
-				0f,
-				Anchor.CENTER_RIGHT,
+		final AnchoredFixedIntegerStatLine costValue = new AnchoredFixedIntegerStatLine(id + "-value", 0f, Anchor.CENTER_RIGHT,
 				Anchor.CENTER_RIGHT);
-		return this.addLine(id,
-				(Consumer<ListTriggerLatch<UIObject>>) cost -> UIObjectFactory
-						.createText(AnchoredProgrammaticTextUIObject.class, FONT_HEIGHT, key)
-						.set(i -> i.setTransform(new Transform3D()))
-						.set(i -> i.setAnchors(Anchor.CENTER_LEFT, Anchor.CENTER_LEFT))
-						.latch(cost)
-						.push(),
-				(Consumer<ListTriggerLatch<UIObject>>) cost -> costValue
-						.init(workers, render, FONT_HEIGHT, iconClazz, IntegerTextUIObject.class)
-						.latch(cost)
-						.then(AnchoredFixedIntegerStatLine::flushValue));
+		return this
+				.addLine(id,
+						(Consumer<ListTriggerLatch<UIObject>>) cost -> UIObjectFactory
+								.createText(AnchoredProgrammaticTextUIObject.class, FONT_HEIGHT, key)
+								.set(i -> i.setTransform(new Transform3D()))
+								.set(i -> i.setAnchors(Anchor.CENTER_LEFT, Anchor.CENTER_LEFT))
+								.latch(cost)
+								.push(),
+						(Consumer<ListTriggerLatch<UIObject>>) cost -> costValue
+								.init(workers, render, FONT_HEIGHT, iconClazz, IntegerTextUIObject.class)
+								.latch(cost)
+								.then(AnchoredFixedIntegerStatLine::flushValue));
 	}
 
 	public ListTriggerLatch<UIObject> addLine(
