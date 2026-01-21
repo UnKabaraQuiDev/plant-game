@@ -41,9 +41,9 @@ public class BuildingTabListUIObjectGroup extends AnchoredLayoutUIObjectGroup im
 		return changed;
 	}
 
-	public Optional<BuildingTabButtonUIObjectGroup> getButton(final String tabId) {
+	public Optional<BuildingTabButtonUIObjectGroup> getButton(final String titleKey) {
 		return this.stream()
-				.filter(t -> t instanceof BuildingTabButtonUIObjectGroup btn && btn.getTabId().equals(tabId))
+				.filter(t -> t instanceof BuildingTabButtonUIObjectGroup btn && btn.getTitleKey().equals(titleKey))
 				.map(BuildingTabButtonUIObjectGroup.class::cast)
 				.findFirst();
 	}

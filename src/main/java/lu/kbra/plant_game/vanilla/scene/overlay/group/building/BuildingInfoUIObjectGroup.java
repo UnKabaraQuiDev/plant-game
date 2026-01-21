@@ -14,13 +14,12 @@ import lu.pcy113.pclib.concurrency.ListTriggerLatch;
 import lu.pcy113.pclib.concurrency.ObjectTriggerLatch;
 import lu.pcy113.pclib.pointer.ObjectPointer;
 
-import lu.kbra.plant_game.engine.entity.ui.TexturedQuadMeshUIObject;
+import lu.kbra.plant_game.BuildingDefinition;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.data.Direction2d;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
 import lu.kbra.plant_game.engine.entity.ui.factory.UOCreatingTaskFuture;
 import lu.kbra.plant_game.engine.entity.ui.group.LayoutOffsetUIObjectGroup;
-import lu.kbra.plant_game.engine.entity.ui.icon.MoneyIconUIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.ExtAnchorOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.MarginOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.PaddingOwner;
@@ -30,6 +29,8 @@ import lu.kbra.plant_game.engine.entity.ui.text.IntegerTextUIObject;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
 import lu.kbra.plant_game.engine.scene.ui.layout.AnchorLayout;
 import lu.kbra.plant_game.engine.scene.ui.layout.FlowLayout;
+import lu.kbra.plant_game.engine.scene.world.data.resource.DefaultResourceType;
+import lu.kbra.plant_game.engine.scene.world.data.resource.ResourceType;
 import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.plant_game.vanilla.scene.overlay.group.impl.AnchoredLayoutUIObjectGroup;
 import lu.kbra.plant_game.vanilla.scene.overlay.group.impl.BoundedUIObjectGroup;
@@ -58,20 +59,25 @@ public class BuildingInfoUIObjectGroup extends FixedBoundsUIObjectGroup implemen
 	public BuildingInfoUIObjectGroup() {
 		super("building-info", new AnchorLayout(), Direction2d.VERTICAL, FONT_HEIGHT * COLUMN_COUNT);
 
-		this.content = new AnchoredLayoutUIObjectGroup(super.getId() + "-content", new FlowLayout(true, 0.05f), Anchor.CENTER_CENTER,
+		this.content = new AnchoredLayoutUIObjectGroup(super.getId() + "-content",
+				new FlowLayout(true, 0.05f),
+				Anchor.CENTER_CENTER,
 				Anchor.CENTER_CENTER);
 		this.add(this.content);
+	}
+
+	public void setBuildingDefinition(final BuildingDefinition<?> buildingDefinition) {
+		buildingDefinition.accept(this);
 	}
 
 	public ObjectTriggerLatch<? extends BuildingInfoUIObjectGroup> init(final Dispatcher workers, final Dispatcher render) {
 		final ObjectTriggerLatch<? extends BuildingInfoUIObjectGroup> latch = new ObjectTriggerLatch<>(2, this);
 
 		/* cost */
-		this.addIntLine(workers, render, "cost-line", MoneyIconUIObject.class, "text.cost").latch(latch);
+		this.addIntLine(workers, render, "cost-line", DefaultResourceType.MONEY, "text.cost").latch(latch);
 
 		/* backdrop */
-		UIObjectFactory
-				.create(IBAnchoredFlatQuadUIObject.class)
+		UIObjectFactory.create(IBAnchoredFlatQuadUIObject.class)
 				.set(i -> i.setTransform(new Transform3D(new Vector3f(0, -0.2f, 0), new Quaternionf(), new Vector3f(1f / this.size, 1, 1))))
 				.set(i -> i.setColor(new Vector4f(ColorMaterial.DARK_GRAY.getColor()).mul(1, 1, 1, 0.5f)))
 				.set(i -> i.setAnchors(Anchor.CENTER_CENTER, Anchor.CENTER_CENTER))
@@ -89,31 +95,34 @@ public class BuildingInfoUIObjectGroup extends FixedBoundsUIObjectGroup implemen
 			final Dispatcher workers,
 			final Dispatcher render,
 			final String id,
-			final Class<? extends TexturedQuadMeshUIObject> iconClazz,
+			final ResourceType rt,
 			final String key) {
-		final AnchoredFixedIntegerStatLine costValue = new AnchoredFixedIntegerStatLine(id + "-value", 0f, Anchor.CENTER_RIGHT,
+		final AnchoredFixedIntegerStatLine costValue = new AnchoredFixedIntegerStatLine(id + "-value",
+				0f,
+				Anchor.CENTER_RIGHT,
 				Anchor.CENTER_RIGHT);
-		return this
-				.addLine(id,
-						(Consumer<ListTriggerLatch<UIObject>>) cost -> UIObjectFactory
-								.createText(AnchoredProgrammaticTextUIObject.class, FONT_HEIGHT, key)
-								.set(i -> i.setTransform(new Transform3D()))
-								.set(i -> i.setAnchors(Anchor.CENTER_LEFT, Anchor.CENTER_LEFT))
-								.latch(cost)
-								.push(),
-						(Consumer<ListTriggerLatch<UIObject>>) cost -> costValue
-								.init(workers, render, FONT_HEIGHT, iconClazz, IntegerTextUIObject.class)
-								.latch(cost)
-								.then(AnchoredFixedIntegerStatLine::flushValue));
+		return this.addLine(id,
+				rt,
+				(Consumer<ListTriggerLatch<UIObject>>) line -> UIObjectFactory
+						.createText(AnchoredProgrammaticTextUIObject.class, FONT_HEIGHT, key)
+						.set(i -> i.setTransform(new Transform3D()))
+						.set(i -> i.setAnchors(Anchor.CENTER_LEFT, Anchor.CENTER_LEFT))
+						.latch(line)
+						.push(),
+				(Consumer<ListTriggerLatch<UIObject>>) line -> costValue
+						.init(workers, render, FONT_HEIGHT, rt.getIconClass(), IntegerTextUIObject.class)
+						.latch(line)
+						.then(AnchoredFixedIntegerStatLine::flushValue));
 	}
 
 	public ListTriggerLatch<UIObject> addLine(
 			final String id,
+			final ResourceType rt,
 			final Function<ListTriggerLatch<UIObject>, UOCreatingTaskFuture<? extends UIObject>>... funcs) {
-		final ListTriggerLatch<UIObject> line = new ListTriggerLatch<>(funcs.length, (final List<UIObject> list) -> {
-			final BoundedUIObjectGroup costLine = new BoundedUIObjectGroup(id, new AnchorLayout(), Direction2d.VERTICAL);
-			costLine.addAll(list);
-			this.content.add(costLine);
+		final ListTriggerLatch<UIObject> line = new ListTriggerLatch<>(funcs.length, (final List<UIObject> lineChildren) -> {
+			final BoundedUIObjectGroup lineObj = new ResourceLineUIObjectGroup(id, new AnchorLayout(), Direction2d.VERTICAL, rt);
+			lineObj.addAll(lineChildren);
+			this.content.add(lineObj);
 		});
 
 		for (Function<ListTriggerLatch<UIObject>, UOCreatingTaskFuture<? extends UIObject>> func : funcs) {
@@ -123,9 +132,9 @@ public class BuildingInfoUIObjectGroup extends FixedBoundsUIObjectGroup implemen
 		return line;
 	}
 
-	public ListTriggerLatch<UIObject> addLine(final String id, final Consumer<ListTriggerLatch<UIObject>>... funcs) {
+	public ListTriggerLatch<UIObject> addLine(final String id, final ResourceType rt, final Consumer<ListTriggerLatch<UIObject>>... funcs) {
 		final ListTriggerLatch<UIObject> line = new ListTriggerLatch<>(funcs.length, (final List<UIObject> list) -> {
-			final BoundedUIObjectGroup costLine = new BoundedUIObjectGroup(id, new AnchorLayout(), Direction2d.VERTICAL);
+			final BoundedUIObjectGroup costLine = new ResourceLineUIObjectGroup(id, new AnchorLayout(), Direction2d.VERTICAL, rt);
 			costLine.addAll(list);
 			this.content.add(costLine);
 		});

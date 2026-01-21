@@ -22,30 +22,28 @@ import lu.kbra.standalone.gameengine.utils.transform.Transform3DShear;
 
 public class BuildingTabButtonUIObjectGroup extends OffsetUIObjectGroup implements NeedsClick, LimitedObjectGroup<UIObject> {
 
-	protected String tabId;
-	protected String tabKey;
+	protected String titleKey;
 	protected ColorMaterial activeTabColor;
 	protected boolean isClicked = false;
 
 	protected ProgrammaticTextUIObject textComponent;
 	protected FlatQuadUIObject backgroundComponent;
 
-	public BuildingTabButtonUIObjectGroup(final String str, final Transform3D transform, final String tabId, final String tabKey,
+	public BuildingTabButtonUIObjectGroup(final String str, final Transform3D transform, final String titleKey,
 			final ColorMaterial activeTabColor) {
 		super(str, transform);
-		this.tabId = tabId;
-		this.tabKey = tabKey;
+		this.titleKey = titleKey;
 		this.activeTabColor = activeTabColor;
 	}
 
 	public BuildingTabButtonUIObjectGroup(final Transform3D transform, final BuildingTabUIObjectGroup tab) {
-		this("building-tab-btn-" + tab.getId(), transform, tab.getId(), tab.getTitleKey(), tab.getAccentColor());
+		this("btn-" + tab.getId(), transform, tab.getTitleKey(), tab.getAccentColor());
 	}
 
 	@Override
 	public void click(final WindowInputHandler input) {
 		this.getLastParentMatching(BuildingPanelUIObjectGroup.class)
-				.ifPresentOrElse(panel -> panel.switchTab(this.tabId),
+				.ifPresentOrElse(panel -> panel.switchTab(this.titleKey),
 						() -> GlobalLogger
 								.warning("Invalid hierarchy: No " + BuildingPanelUIObjectGroup.class.getSimpleName() + " in parents."));
 	}
@@ -63,8 +61,8 @@ public class BuildingTabButtonUIObjectGroup extends OffsetUIObjectGroup implemen
 						OptionalInt.empty(),
 						Optional.empty(),
 						Optional.of(TextAlignment.TEXT_CENTER),
-						Optional.of("btn-" + this.tabId),
-						Optional.of(this.tabKey))
+						Optional.of("btn-" + this.titleKey),
+						Optional.of(this.titleKey))
 				.set(i -> i.setTransform(new Transform3D(1 - 2 * textMargins)))
 				.set(i -> i.getTextEmitter().setForegroundColor(ColorMaterial.WHITE.getColor()))
 				.add(this)
@@ -85,12 +83,8 @@ public class BuildingTabButtonUIObjectGroup extends OffsetUIObjectGroup implemen
 		return latch;
 	}
 
-	public String getTabId() {
-		return this.tabId;
-	}
-
-	public void setTabId(final String tabId) {
-		this.tabId = tabId;
+	public String getTitleKey() {
+		return this.titleKey;
 	}
 
 	public ColorMaterial getActiveTabColor() {
@@ -131,8 +125,8 @@ public class BuildingTabButtonUIObjectGroup extends OffsetUIObjectGroup implemen
 
 	@Override
 	public String toString() {
-		return "BuildingTabButtonUIObjectGroup [tabId=" + this.tabId + ", tabKey=" + this.tabKey + ", activeTabColor=" + this.activeTabColor
-				+ ", isClicked=" + this.isClicked + ", textComponent=" + this.textComponent + ", backgroundComponent="
+		return "BuildingTabButtonUIObjectGroup@" + System.identityHashCode(this) + " [titleKey=" + this.titleKey + ", activeTabColor="
+				+ this.activeTabColor + ", isClicked=" + this.isClicked + ", textComponent=" + this.textComponent + ", backgroundComponent="
 				+ this.backgroundComponent + ", subEntitiesLock=" + this.subEntitiesLock + ", subEntities=" + this.subEntities
 				+ ", computedBounds=" + this.computedBounds + ", transform=" + this.transform + ", active=" + this.active + ", name="
 				+ this.name + "]";

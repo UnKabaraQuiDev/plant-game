@@ -6,21 +6,23 @@ import java.awt.geom.Rectangle2D.Float;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
+import lu.kbra.plant_game.BuildingDefinition;
+import lu.kbra.plant_game.engine.entity.ui.ProgrammaticTexturedQuadMeshUIObject;
 import lu.kbra.plant_game.engine.entity.ui.data.HoverState;
 import lu.kbra.plant_game.engine.entity.ui.impl.AbsoluteTransformedBoundsOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.AnimatedOnHover;
+import lu.kbra.plant_game.engine.entity.ui.impl.IndexOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.UISceneParentAware;
 import lu.kbra.plant_game.engine.mesh.TexturedQuadMesh;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
-import lu.kbra.plant_game.engine.scene.world.data.building.BuildingDeclaration;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.plant_game.vanilla.scene.overlay.OverlayUIScene;
 import lu.kbra.plant_game.vanilla.scene.overlay.group.building.BuildingInfoUIObjectGroup;
 import lu.kbra.standalone.gameengine.utils.interpolation.Interpolator;
 import lu.kbra.standalone.gameengine.utils.interpolation.Interpolators;
 
-public class BuildingItemFlatQuadUIObject extends IndexedFlatQuadUIObject
-		implements AnimatedOnHover, AbsoluteTransformedBoundsOwner, UISceneParentAware {
+public class BuildingItemFlatQuadUIObject extends ProgrammaticTexturedQuadMeshUIObject
+		implements IndexOwner, AnimatedOnHover, AbsoluteTransformedBoundsOwner, UISceneParentAware {
 
 	protected static final Vector3fc TARGET_SCALE = new Vector3f(1.05f);
 
@@ -29,7 +31,7 @@ public class BuildingItemFlatQuadUIObject extends IndexedFlatQuadUIObject
 	protected boolean growing;
 	protected float progress = 0f;
 
-	protected BuildingDeclaration buildingDeclaration;
+	protected BuildingDefinition<?> BuildingDefinition;
 
 	public BuildingItemFlatQuadUIObject(final String str, final TexturedQuadMesh mesh) {
 		super(str, mesh);
@@ -47,6 +49,7 @@ public class BuildingItemFlatQuadUIObject extends IndexedFlatQuadUIObject
 				final BuildingInfoUIObjectGroup buildingInfo = scene.getBuildingInfo();
 				buildingInfo.setActive(true);
 				buildingInfo.setTarget(this);
+				buildingInfo.setBuildingDefinition(this.getBuildingDefinition());
 
 				final Rectangle2D infoBounds = buildingInfo.getLocalTransformedBounds().getBounds2D();
 				final Rectangle2D selfBounds = this.getAbsoluteTransformedBounds().getBounds2D();
@@ -60,14 +63,15 @@ public class BuildingItemFlatQuadUIObject extends IndexedFlatQuadUIObject
 				}
 			});
 		} else if (hoverState == HoverState.LEAVE) {
-			this.getUISceneParent().filter(OverlayUIScene.class::isInstance).map(OverlayUIScene.class::cast).ifPresent(scene -> {
-				final BuildingInfoUIObjectGroup buildingInfo = scene.getBuildingInfo();
-				if (buildingInfo.getTarget() != BuildingItemFlatQuadUIObject.this) {
-					return;
-				}
-				buildingInfo.setActive(false);
-				buildingInfo.setTarget(null);
-			});
+			this.getUISceneParent()
+					.filter(OverlayUIScene.class::isInstance)
+					.map(OverlayUIScene.class::cast)
+					.map(OverlayUIScene::getBuildingInfo)
+					.filter(buildingInfo -> buildingInfo.getTarget() == BuildingItemFlatQuadUIObject.this)
+					.ifPresent(buildingInfo -> {
+						buildingInfo.setActive(false);
+						buildingInfo.setTarget(null);
+					});
 		}
 
 		final Interpolator interpol = this.getInterpolator(grow);
@@ -123,19 +127,18 @@ public class BuildingItemFlatQuadUIObject extends IndexedFlatQuadUIObject
 		return this.growing;
 	}
 
-	public BuildingDeclaration getBuildingDeclaration() {
-		return this.buildingDeclaration;
+	public BuildingDefinition<?> getBuildingDefinition() {
+		return this.BuildingDefinition;
 	}
 
-	public void setBuildingDeclaration(final BuildingDeclaration buildingDeclaration) {
-		this.buildingDeclaration = buildingDeclaration;
+	public void setBuildingDefinition(final BuildingDefinition<?> BuildingDefinition) {
+		this.BuildingDefinition = BuildingDefinition;
 	}
 
 	@Override
 	public String toString() {
 		return "BuildingItemFlatQuadUIObject@" + System.identityHashCode(this) + " [growing=" + this.growing + ", progress=" + this.progress
-				+ ", index=" + this.index + ", color=" + this.color + ", bounds=" + this.bounds + ", mesh=" + this.mesh + ", transform="
-				+ this.transform + ", active=" + this.active + ", name=" + this.name + "]";
+				+ ", BuildingDefinition=" + this.BuildingDefinition + "]";
 	}
 
 }

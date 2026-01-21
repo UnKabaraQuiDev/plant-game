@@ -160,6 +160,7 @@ public class BuildingTabUIObjectGroup extends AnchoredLayoutUIObjectGroup
 		return this.titleKey;
 	}
 
+	@Deprecated
 	public String getTitle() {
 		return LocalizationService.get(this.titleKey);
 	}

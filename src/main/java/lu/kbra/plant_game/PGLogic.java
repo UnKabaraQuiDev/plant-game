@@ -4,8 +4,6 @@ import java.io.File;
 import java.util.Locale;
 import java.util.function.Consumer;
 
-import org.joml.AxisAngle4d;
-import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 
@@ -67,6 +65,8 @@ public class PGLogic extends GameLogic {
 		this.inputHandler.setOwner(this.engine.getUpdateThread());
 		this.inputHandler.loadMappings(new File(Consts.CONFIG_DIR, "mappings.json"));
 		// this.inputHandler.saveMappings(new File(Consts.CONFIG_DIR, "mappings.json"));
+
+		VanillaBuildingDefinitionRegistry.init();
 
 		this.compositor = new DeferredCompositor(this.engine, this.engine.getRenderThread());
 		this.compositor.getBackgroundColor().set(1, 1, 0, 1);

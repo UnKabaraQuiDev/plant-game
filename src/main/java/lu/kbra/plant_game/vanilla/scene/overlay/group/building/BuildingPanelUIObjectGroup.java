@@ -30,7 +30,7 @@ public class BuildingPanelUIObjectGroup extends AnchoredLayoutUIObjectGroup impl
 
 	protected BuildingTabListUIObjectGroup tabList = new BuildingTabListUIObjectGroup();
 	protected Map<String, BuildingTabUIObjectGroup> buildingTabs = new HashMap<>();
-	protected String activeBuildingTabId;
+	protected String activeBuildingTabKey;
 	protected float buildingTabScrollSpeed = 0.75f;
 
 	public BuildingPanelUIObjectGroup() {
@@ -45,7 +45,7 @@ public class BuildingPanelUIObjectGroup extends AnchoredLayoutUIObjectGroup impl
 			return false;
 		}
 
-		final BuildingTabUIObjectGroup buildingTab = this.buildingTabs.get(this.activeBuildingTabId);
+		final BuildingTabUIObjectGroup buildingTab = this.buildingTabs.get(this.activeBuildingTabKey);
 		if (buildingTab == null) {
 			return false;
 		}
@@ -61,15 +61,18 @@ public class BuildingPanelUIObjectGroup extends AnchoredLayoutUIObjectGroup impl
 
 		new BuildingTabButtonUIObjectGroup(new Transform3D(new Vector3f(0, -0.5f, 0)), tab).init().then(obj -> {
 			obj.getTransform().scaleMul(this.tabList.getFixedHeight() / (float) obj.getBounds().getBounds2D().getHeight()).update();
+
 			this.tabList.add(obj);
-			this.buildingTabs.put(tab.getId(), tab);
+			this.buildingTabs.put(tab.getTitleKey(), tab);
 			this.add(tab);
-			if (this.activeBuildingTabId == null) {
-				this.setClickedTab(tab.getId(), true);
-				this.activeBuildingTabId = tab.getId();
+
+			if (this.activeBuildingTabKey == null) {
+				this.setClickedTab(tab.getTitleKey(), true);
+				this.activeBuildingTabKey = tab.getTitleKey();
 			} else {
-				this.setClickedTab(tab.getId(), false);
+				this.setClickedTab(tab.getTitleKey(), false);
 			}
+
 			this.doLayout();
 			latch.trigger(obj);
 		});
@@ -77,25 +80,25 @@ public class BuildingPanelUIObjectGroup extends AnchoredLayoutUIObjectGroup impl
 		return latch;
 	}
 
-	public void switchTab(final String tabId) {
-		if (tabId.equals(this.activeBuildingTabId)) {
+	public void switchTab(final String tabKey) {
+		if (tabKey.equals(this.activeBuildingTabKey)) {
 			return;
 		}
 
-		this.setClickedTab(tabId, true);
-		this.setClickedTab(this.activeBuildingTabId, false);
+		this.setClickedTab(tabKey, true);
+		this.setClickedTab(this.activeBuildingTabKey, false);
 
-		this.activeBuildingTabId = tabId;
+		this.activeBuildingTabKey = tabKey;
 	}
 
-	private void setClickedTab(final String tabId, final boolean active) {
-		final BuildingTabUIObjectGroup tab = this.buildingTabs.get(tabId);
+	private void setClickedTab(final String tabKey, final boolean active) {
+		final BuildingTabUIObjectGroup tab = this.buildingTabs.get(tabKey);
 		if (tab != null) {
 			tab.setActive(active);
-			this.tabList.getButton(tabId)
-					.ifPresentOrElse(btn -> btn.setClicked(active), () -> GlobalLogger.warning("No button for tab named: " + tabId));
+			this.tabList.getButton(tabKey)
+					.ifPresentOrElse(btn -> btn.setClicked(active), () -> GlobalLogger.warning("No button for tab named: " + tabKey));
 		} else {
-			GlobalLogger.warning("No tab named: " + tabId);
+			GlobalLogger.warning("No tab named: " + tabKey);
 		}
 	}
 
@@ -155,7 +158,7 @@ public class BuildingPanelUIObjectGroup extends AnchoredLayoutUIObjectGroup impl
 	}
 
 	public String getActiveBuildingTabIndex() {
-		return this.activeBuildingTabId;
+		return this.activeBuildingTabKey;
 	}
 
 	public Map<String, BuildingTabUIObjectGroup> getBuildingTabs() {
@@ -166,7 +169,7 @@ public class BuildingPanelUIObjectGroup extends AnchoredLayoutUIObjectGroup impl
 	public String toString() {
 		return "BuildingPanelUIObjectGroup@" + System.identityHashCode(this) + " [fixedBounds=" + this.fixedBounds + ", boundsMarginX="
 				+ this.boundsMarginX + ", boundsMarginY=" + this.boundsMarginY + ", heightRatio=" + this.heightRatio + ", tabList="
-				+ this.tabList + ", buildingTabs=" + this.buildingTabs + ", activeBuildingTabId=" + this.activeBuildingTabId
+				+ this.tabList + ", buildingTabs=" + this.buildingTabs + ", activeBuildingTabId=" + this.activeBuildingTabKey
 				+ ", buildingTabScrollSpeed=" + this.buildingTabScrollSpeed + ", objectAnchor=" + this.objectAnchor + ", targetAnchor="
 				+ this.targetAnchor + ", layout=" + this.layout + ", subEntitiesLock=" + this.subEntitiesLock + ", subEntities="
 				+ this.subEntities + ", computedBounds=" + this.computedBounds + ", transform=" + this.transform + ", active=" + this.active

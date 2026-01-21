@@ -76,9 +76,8 @@ public class UIObjectFactory {
 
 		return StaticTextLoader
 				.getFuture(this.cache,
-						name
-								.orElse(ProgrammaticUIObject.class.isAssignableFrom(clazz) ? key.orElse(clazz.getSimpleName())
-										: clazz.getSimpleName()),
+						name.orElse(ProgrammaticUIObject.class.isAssignableFrom(clazz) ? key.orElse(clazz.getSimpleName())
+								: clazz.getSimpleName()),
 						key.orElse(DATA_PATH.get(clazz)),
 						charSize.orElse(DEFAULT_CHAR_SIZE),
 						textAlignment.orElse(DEFAULT_TEXT_ALIGNMENT),
@@ -93,16 +92,14 @@ public class UIObjectFactory {
 	}
 
 	public <T extends UIObject & MeshOwner> UOCreatingTaskFuture<T> createMesh_(final Class<T> clazz) {
-		return StaticMeshLoader
-				.getStaticFuture(this.cache, clazz.getName(), DATA_PATH.get(clazz), this.loader, this.render)
+		return StaticMeshLoader.getStaticFuture(this.cache, clazz.getName(), DATA_PATH.get(clazz), this.loader, this.render)
 				.then(this.loader, (Function<Mesh, List<Object>>) Arrays::asList)
 				.then(new UOCreatingTaskFuture(this.loader, clazz));
 	}
 
 	public <T extends UIObject & MeshOwner> UOCreatingTaskFuture<T> createQuadMesh_(final Class<T> clazz) {
 		if (ProgrammaticUIObject.class.isAssignableFrom(clazz)) {
-			return StaticFlatMeshLoader
-					.getStaticFuture(this.cache, this.loader, this.render)
+			return StaticFlatMeshLoader.getStaticFuture(this.cache, this.loader, this.render)
 					.then(this.loader, (Function<TexturedQuadMesh, List<Object>>) Arrays::asList)
 					.then(new UOCreatingTaskFuture(this.loader, clazz));
 		}
@@ -129,8 +126,7 @@ public class UIObjectFactory {
 			final String path,
 			final TextureFilter textureFilter,
 			final TextureWrap textureWrap) {
-		return StaticTexturedMeshLoader
-				.getStaticFuture(cache, meshName, path, textureFilter, textureWrap, loader, render)
+		return StaticTexturedMeshLoader.getStaticFuture(this.cache, meshName, path, textureFilter, textureWrap, this.loader, this.render)
 				.then(this.loader, (Function<TexturedQuadMesh, List<Object>>) Arrays::asList)
 				.then(new UOCreatingTaskFuture(this.loader, clazz));
 	}
@@ -138,10 +134,9 @@ public class UIObjectFactory {
 	public <T extends UIObject & TexturedQuadMeshOwner & ProgrammaticUIObject> UOCreatingTaskFuture<T> createManual_(
 			final Class<T> clazz,
 			final SingleTexture txt) {
-		return StaticTexturedMeshLoader
-				.getStaticFuture(cache, clazz.getSimpleName(), txt, loader, render)
-				.then(loader, (Function<TexturedQuadMesh, List<Object>>) Arrays::asList)
-				.then(new UOCreatingTaskFuture<>(loader, clazz));
+		return StaticTexturedMeshLoader.getStaticFuture(this.cache, clazz.getSimpleName(), txt, this.loader, this.render)
+				.then(this.loader, (Function<TexturedQuadMesh, List<Object>>) Arrays::asList)
+				.then(new UOCreatingTaskFuture<>(this.loader, clazz));
 	}
 
 	public <T extends UIObject & NoMeshObject> UOCreatingTaskFuture<T> createNoMesh_(final Class<T> clazz) {
@@ -159,13 +154,12 @@ public class UIObjectFactory {
 			return INSTANCE.createMesh_((Class) clazz);
 		}
 		if (TextEmitterOwner.class.isAssignableFrom(clazz) && !(ProgrammaticUIObject.class.isAssignableFrom(clazz))) {
-			return INSTANCE
-					.createText_((Class) clazz,
-							OptionalInt.empty(),
-							Optional.empty(),
-							Optional.empty(),
-							Optional.empty(),
-							Optional.empty());
+			return INSTANCE.createText_((Class) clazz,
+					OptionalInt.empty(),
+					Optional.empty(),
+					Optional.empty(),
+					Optional.empty(),
+					Optional.empty());
 		}
 		throw new UnsupportedOperationException(clazz.getName());
 	}
@@ -193,26 +187,24 @@ public class UIObjectFactory {
 	}
 
 	public static <T extends UIObject & TextEmitterOwner> UOCreatingTaskFuture<T> createText(final Class<T> clazz, final float charSize) {
-		return INSTANCE
-				.createText_(clazz,
-						OptionalInt.empty(),
-						Optional.of(new Vector2f(charSize)),
-						Optional.empty(),
-						Optional.empty(),
-						Optional.empty());
+		return INSTANCE.createText_(clazz,
+				OptionalInt.empty(),
+				Optional.of(new Vector2f(charSize)),
+				Optional.empty(),
+				Optional.empty(),
+				Optional.empty());
 	}
 
 	public static <T extends UIObject & TextEmitterOwner & ProgrammaticUIObject> UOCreatingTaskFuture<T> createText(
 			final Class<T> clazz,
 			final float charSize,
 			final String key) {
-		return INSTANCE
-				.createText_(clazz,
-						OptionalInt.empty(),
-						Optional.of(new Vector2f(charSize)),
-						Optional.empty(),
-						Optional.of(key),
-						Optional.of(key));
+		return INSTANCE.createText_(clazz,
+				OptionalInt.empty(),
+				Optional.of(new Vector2f(charSize)),
+				Optional.empty(),
+				Optional.of(key),
+				Optional.of(key));
 	}
 
 	public static <T extends UIObject & MeshOwner> UOCreatingTaskFuture<T> createManual(final Class<T> clazz, final Mesh mesh) {
@@ -228,12 +220,11 @@ public class UIObjectFactory {
 	public static <T extends UIObject & TexturedQuadMeshOwner & ProgrammaticUIObject> UOCreatingTaskFuture<T> createManual(
 			final Class<T> clazz,
 			final String path) {
-		return INSTANCE
-				.createManual_(clazz,
-						clazz.getSimpleName(),
-						path,
-						TEXTURE_FILTER.getOrDefault(clazz, DEFAULT_TEXTURE_FILTER),
-						TEXTURE_WRAP.getOrDefault(clazz, DEFAULT_TEXTURE_WRAP));
+		return INSTANCE.createManual_(clazz,
+				clazz.getSimpleName() + ":" + path,
+				path,
+				TEXTURE_FILTER.getOrDefault(clazz, DEFAULT_TEXTURE_FILTER),
+				TEXTURE_WRAP.getOrDefault(clazz, DEFAULT_TEXTURE_WRAP));
 	}
 
 }
