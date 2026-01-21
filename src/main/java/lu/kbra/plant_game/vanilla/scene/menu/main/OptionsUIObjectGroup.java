@@ -34,7 +34,7 @@ public class OptionsUIObjectGroup extends AnchoredFixedPBUIObjectGroup
 		super.add(new BoundedUIObjectGroup(this.getId() + "-content", new FlowLayout(true, 0.04f, true), Direction2d.VERTICAL));
 	}
 
-	public UIObjectGroup getContainer() {
+	public UIObjectGroup getContent() {
 		return (UIObjectGroup) this.get(0);
 	}
 
@@ -61,7 +61,7 @@ public class OptionsUIObjectGroup extends AnchoredFixedPBUIObjectGroup
 		if (obo.isEmpty()) {
 			return;
 		}
-		final Rectangle2D contentBounds = this.getContainer().getLocalTransformedBounds().getBounds2D();
+		final Rectangle2D contentBounds = this.getContent().getLocalTransformedBounds().getBounds2D();
 		final Rectangle2D parentBounds = obo.get().getBounds().getBounds2D();
 		if (parentBounds.getWidth() > contentBounds.getWidth()) {
 			this.scrollYRange.set(parentBounds.getCenterY() - contentBounds.getCenterY(),
@@ -84,7 +84,7 @@ public class OptionsUIObjectGroup extends AnchoredFixedPBUIObjectGroup
 	public void applyScrollY() {
 		this.recomputeRange();
 		this.scrollY = PCUtils.clampRange(this.scrollYRange.x(), this.scrollYRange.y(), this.scrollY);
-		this.getContainer().getTransform().translationSetZ(this.scrollY).update();
+		this.getContent().getTransform().translationSetZ(this.scrollY).update();
 	}
 
 	@Override

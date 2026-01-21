@@ -45,7 +45,7 @@ public class BuildingTabUIObjectGroup extends AnchoredLayoutUIObjectGroup
 		this.add(new LayoutOffsetUIObjectGroup(this.getId() + "-container", new FlowLayout(false, 0.05f, true)));
 	}
 
-	public UIObjectGroup getContainer() {
+	public UIObjectGroup getContent() {
 		return (UIObjectGroup) this.get(0);
 	}
 
@@ -84,7 +84,7 @@ public class BuildingTabUIObjectGroup extends AnchoredLayoutUIObjectGroup
 		if (obo.isEmpty()) {
 			return;
 		}
-		final Rectangle2D contentBounds = this.getContainer().getLocalTransformedBounds().getBounds2D();
+		final Rectangle2D contentBounds = this.getContent().getLocalTransformedBounds().getBounds2D();
 		final Rectangle2D parentBounds = obo.get().getBounds().getBounds2D();
 		if (parentBounds.getWidth() > contentBounds.getWidth()) {
 			this.scrollXRange.set(parentBounds.getCenterX() - contentBounds.getCenterX(),
@@ -100,7 +100,7 @@ public class BuildingTabUIObjectGroup extends AnchoredLayoutUIObjectGroup
 		if (obo.isEmpty()) {
 			return true;
 		}
-		final Rectangle2D containerBounds = this.getContainer().getLocalTransformedBounds().getBounds2D();
+		final Rectangle2D containerBounds = this.getContent().getLocalTransformedBounds().getBounds2D();
 		final Rectangle2D superBounds = obo.get().getBounds().getBounds2D();
 		final Rectangle.Float newFixedBounds = new Rectangle.Float((float) superBounds.getMinX(),
 				(float) containerBounds.getMinY(),
@@ -149,7 +149,7 @@ public class BuildingTabUIObjectGroup extends AnchoredLayoutUIObjectGroup
 	public void applyScrollX() {
 		this.recomputeRange();
 		this.scrollX = PCUtils.clampRange(this.scrollXRange.x(), this.scrollXRange.y(), this.scrollX);
-		this.getContainer().getTransform().translationSetX(this.scrollX).update();
+		this.getContent().getTransform().translationSetX(this.scrollX).update();
 	}
 
 	public float getScrollX() {

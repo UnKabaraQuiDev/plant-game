@@ -104,7 +104,7 @@ public class MainMenuUIScene extends UIScene {
 			new AnchorLayout(),
 			new Transform3D(this.restPositions[OPTIONS]));
 	protected OptionsUIObjectGroup optionsVerticalGroup = new OptionsUIObjectGroup(this.optionsMenuGroup);
-	protected UIObjectGroup optionsEntriesGroup = this.optionsVerticalGroup.getContainer();
+	protected UIObjectGroup optionsEntriesGroup = this.optionsVerticalGroup.getContent();
 
 	protected ScrollContainerUIObjectGroup playMenuGroup = new ScrollContainerUIObjectGroup("play",
 			this.restPositions[PLAY],

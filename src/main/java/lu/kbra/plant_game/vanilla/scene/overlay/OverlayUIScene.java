@@ -14,7 +14,7 @@ import lu.kbra.plant_game.engine.entity.ui.icon.EnergyIconUIObject;
 import lu.kbra.plant_game.engine.entity.ui.icon.MoneyIconUIObject;
 import lu.kbra.plant_game.engine.entity.ui.icon.WaterIconUIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.PaddingOwner;
-import lu.kbra.plant_game.engine.entity.ui.prim.BuildingItemFlatQuadUIObject;
+import lu.kbra.plant_game.engine.entity.ui.prim.BuildingItemUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.IntegerTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.PercentageIntTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.PercentageSignedIntTextUIObject;
@@ -70,9 +70,11 @@ public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner
 
 	@Override
 	public void init(final Dispatcher workers, final Dispatcher renderDispatcher) {
-		super.addAll(this.statsGroup, this.buildingPanel);
+		super.addAll(this.statsGroup);
 
 		final float height = 0.2f * STATS_GROUP_SCALE;
+
+		this.buildingPanel.init().then(this::add);
 
 		this.buildingInfo.init(workers, renderDispatcher).then(this::add);
 
@@ -81,32 +83,14 @@ public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner
 						.addTab(new BuildingTabUIObjectGroup(p.getLocalizationKey(), p.getIndex(), p.getAccentColor()))
 						.then(tab -> BuildingDefinitionRegistry.BUILDING_DEFS.get(p)
 								.forEach(f -> UIObjectFactory
-										.createManual(BuildingItemFlatQuadUIObject.class,
+										.createManual(BuildingItemUIObject.class,
 												"image:" + new File(Consts.ICONS_BAKES_RES_DIR,
 														f.getInternalName().replace('.', '/') + ".png").getPath())
 										.set(i -> i.setIndex(p.getIndex()))
 										.set(j -> j.setTransform(new Transform3D(0.3f)))
 										.set(i -> i.setBuildingDefinition(f))
-										.add(tab.getContainer())
+										.add(tab.getContent())
 										.push())));
-
-//		IntStream.range(0, 10)
-//				.forEach(index -> UIObjectFactory.create(BuildingItemFlatQuadUIObject.class)
-//						.set(i -> i.setIndex(index))
-//						.set(j -> j.setTransform(new Transform3D(0.3f)))
-//						.set(j -> j.setColorMaterial(ColorMaterial.byId(ColorMaterial.CYAN.getId() - index - 1)))
-//						.add(buildings2.getContainer())
-//						.push());
-
-//		IntStream
-//				.range(0, 10)
-//				.forEach(index -> UIObjectFactory
-//						.create(BuildingItemFlatQuadUIObject.class)
-//						.set(i -> i.setIndex(index))
-//						.set(j -> j.setTransform(new Transform3D(0.3f)))
-//						.set(j -> j.setColorMaterial(ColorMaterial.byId(ColorMaterial.WHITE.getId() - index - 1)))
-//						.add(buildings.getContainer())
-//						.push());
 
 		this.waterGroup = new IntegerStatLine("water-counter");
 		this.waterGroup

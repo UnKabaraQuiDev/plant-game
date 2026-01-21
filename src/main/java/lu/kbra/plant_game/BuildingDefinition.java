@@ -5,6 +5,7 @@ import java.util.function.Consumer;
 
 import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
+import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.plant_game.engine.scene.world.data.building.requirement.BuildingRequirement;
 import lu.kbra.plant_game.engine.scene.world.data.resource.DefaultResourceType;
 import lu.kbra.plant_game.vanilla.scene.overlay.group.building.BuildingInfoUIObjectGroup;
@@ -28,6 +29,14 @@ public class BuildingDefinition<T extends GameObject & PlaceableObject> implemen
 		this.index = index;
 	}
 
+	public boolean isUnlocked(final WorldLevelScene world) {
+		return this.unlockRequirements.stream().allMatch(c -> c.isFulfilled(world));
+	}
+
+	public boolean canBuild(final WorldLevelScene world) {
+		return this.buildingRequirements.stream().allMatch(c -> c.isFulfilled(world));
+	}
+
 	@Override
 	public void accept(final BuildingInfoUIObjectGroup t) {
 		t.getContent()
@@ -37,11 +46,15 @@ public class BuildingDefinition<T extends GameObject & PlaceableObject> implemen
 				.map(ResourceLineUIObjectGroup.class::cast)
 				.forEach(b -> {
 					if (b.getResourceType() == DefaultResourceType.MONEY) {
-						b.stream().forEach(System.err::println);
 						b.stream()
 								.filter(FixedIntegerStatLine.class::isInstance)
 								.map(FixedIntegerStatLine.class::cast)
 								.forEach(f -> f.set(this.price).flushValue());
+					} else {
+						b.stream()
+								.filter(FixedIntegerStatLine.class::isInstance)
+								.map(FixedIntegerStatLine.class::cast)
+								.forEach(f -> f.set(0).flushValue());
 					}
 				});
 	}

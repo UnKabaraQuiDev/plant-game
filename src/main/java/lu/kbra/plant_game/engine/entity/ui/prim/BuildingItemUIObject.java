@@ -5,24 +5,28 @@ import java.awt.geom.Rectangle2D.Float;
 
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
+import org.joml.Vector4f;
+import org.joml.Vector4fc;
 
 import lu.kbra.plant_game.BuildingDefinition;
+import lu.kbra.plant_game.engine.entity.impl.TintOwner;
 import lu.kbra.plant_game.engine.entity.ui.ProgrammaticTexturedQuadMeshUIObject;
 import lu.kbra.plant_game.engine.entity.ui.data.HoverState;
 import lu.kbra.plant_game.engine.entity.ui.impl.AbsoluteTransformedBoundsOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.AnimatedOnHover;
-import lu.kbra.plant_game.engine.entity.ui.impl.IndexOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.UISceneParentAware;
 import lu.kbra.plant_game.engine.mesh.TexturedQuadMesh;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
+import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
+import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.plant_game.vanilla.scene.overlay.OverlayUIScene;
 import lu.kbra.plant_game.vanilla.scene.overlay.group.building.BuildingInfoUIObjectGroup;
 import lu.kbra.standalone.gameengine.utils.interpolation.Interpolator;
 import lu.kbra.standalone.gameengine.utils.interpolation.Interpolators;
 
-public class BuildingItemFlatQuadUIObject extends ProgrammaticTexturedQuadMeshUIObject
-		implements IndexOwner, AnimatedOnHover, AbsoluteTransformedBoundsOwner, UISceneParentAware {
+public class BuildingItemUIObject extends ProgrammaticTexturedQuadMeshUIObject
+		implements AnimatedOnHover, AbsoluteTransformedBoundsOwner, UISceneParentAware, TintOwner {
 
 	protected static final Vector3fc TARGET_SCALE = new Vector3f(1.05f);
 
@@ -30,10 +34,11 @@ public class BuildingItemFlatQuadUIObject extends ProgrammaticTexturedQuadMeshUI
 
 	protected boolean growing;
 	protected float progress = 0f;
+	protected Vector4f tint;
 
-	protected BuildingDefinition<?> BuildingDefinition;
+	protected BuildingDefinition<?> buildingDefinition;
 
-	public BuildingItemFlatQuadUIObject(final String str, final TexturedQuadMesh mesh) {
+	public BuildingItemUIObject(final String str, final TexturedQuadMesh mesh) {
 		super(str, mesh);
 	}
 
@@ -67,7 +72,7 @@ public class BuildingItemFlatQuadUIObject extends ProgrammaticTexturedQuadMeshUI
 					.filter(OverlayUIScene.class::isInstance)
 					.map(OverlayUIScene.class::cast)
 					.map(OverlayUIScene::getBuildingInfo)
-					.filter(buildingInfo -> buildingInfo.getTarget() == BuildingItemFlatQuadUIObject.this)
+					.filter(buildingInfo -> buildingInfo.getTarget() == BuildingItemUIObject.this)
 					.ifPresent(buildingInfo -> {
 						buildingInfo.setActive(false);
 						buildingInfo.setTarget(null);
@@ -89,6 +94,16 @@ public class BuildingItemFlatQuadUIObject extends ProgrammaticTexturedQuadMeshUI
 		this.getTransform().updateMatrix();
 
 		return this.progress == 0;
+	}
+
+	public void updateTintStatus(final WorldLevelScene world) {
+		if (this.buildingDefinition.canBuild(world)) {
+			this.setColorMaterial(ColorMaterial.GREEN);
+		} else if (this.buildingDefinition.isUnlocked(world)) {
+			this.setColorMaterial(ColorMaterial.ORANGE);
+		} else {
+			this.setColorMaterial(ColorMaterial.GRAY);
+		}
 	}
 
 	@Override
@@ -128,17 +143,31 @@ public class BuildingItemFlatQuadUIObject extends ProgrammaticTexturedQuadMeshUI
 	}
 
 	public BuildingDefinition<?> getBuildingDefinition() {
-		return this.BuildingDefinition;
+		return this.buildingDefinition;
 	}
 
 	public void setBuildingDefinition(final BuildingDefinition<?> BuildingDefinition) {
-		this.BuildingDefinition = BuildingDefinition;
+		this.buildingDefinition = BuildingDefinition;
+	}
+
+	@Override
+	public Vector4f getTint() {
+		return this.tint;
+	}
+
+	@Override
+	public void setTint(final Vector4fc tint) {
+		if (this.tint == null) {
+			this.tint = new Vector4f(tint);
+		} else {
+			this.tint.set(tint);
+		}
 	}
 
 	@Override
 	public String toString() {
 		return "BuildingItemFlatQuadUIObject@" + System.identityHashCode(this) + " [growing=" + this.growing + ", progress=" + this.progress
-				+ ", BuildingDefinition=" + this.BuildingDefinition + "]";
+				+ ", BuildingDefinition=" + this.buildingDefinition + "]";
 	}
 
 }

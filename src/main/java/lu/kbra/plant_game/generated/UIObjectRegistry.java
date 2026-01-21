@@ -45,7 +45,7 @@ import lu.kbra.plant_game.engine.entity.ui.icon.StarIconUIObject;
 import lu.kbra.plant_game.engine.entity.ui.icon.WaterIconUIObject;
 import lu.kbra.plant_game.engine.entity.ui.layout.SpacerUIObject;
 import lu.kbra.plant_game.engine.entity.ui.prim.AnchoredFlatQuadUIObject;
-import lu.kbra.plant_game.engine.entity.ui.prim.BuildingItemFlatQuadUIObject;
+import lu.kbra.plant_game.engine.entity.ui.prim.BuildingItemUIObject;
 import lu.kbra.plant_game.engine.entity.ui.prim.ExtAnchoredFlatQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.prim.IBAnchoredFlatQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.prim.IndexedFlatQuadUIObject;
@@ -390,8 +390,8 @@ public class UIObjectRegistry {
 
 		/*                 BuildingItemFlatQuadUIObject                 */
 		final List<InternalConstructorFunction<UIObject>> listBuildingItemFlatQuadUIObject = new ArrayList<>();
-		listBuildingItemFlatQuadUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new BuildingItemFlatQuadUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
-		UI_OBJECT_CONSTRUCTORS.put(BuildingItemFlatQuadUIObject.class, listBuildingItemFlatQuadUIObject);
+		listBuildingItemFlatQuadUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new BuildingItemUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
+		UI_OBJECT_CONSTRUCTORS.put(BuildingItemUIObject.class, listBuildingItemFlatQuadUIObject);
 
 		/*                 LayoutScrollDrivenUIObjectGroup                 */
 		final List<InternalConstructorFunction<UIObject>> listLayoutScrollDrivenUIObjectGroup = new ArrayList<>();

@@ -1,29 +1,40 @@
 package lu.kbra.plant_game.vanilla.scene.overlay.group.building;
 
-import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 import lu.pcy113.pclib.concurrency.ObjectTriggerLatch;
 import lu.pcy113.pclib.logger.GlobalLogger;
+import lu.pcy113.pclib.pointer.ObjectPointer;
 
+import lu.kbra.plant_game.PGLogic;
+import lu.kbra.plant_game.engine.entity.ui.UIObject;
+import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
 import lu.kbra.plant_game.engine.entity.ui.group.BuildingTabListUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwnerParentAware;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsBoundsInput;
+import lu.kbra.plant_game.engine.entity.ui.impl.NeedsUpdate;
+import lu.kbra.plant_game.engine.entity.ui.prim.BuildingItemUIObject;
+import lu.kbra.plant_game.engine.entity.ui.prim.IBAnchoredFlatQuadUIObject;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
 import lu.kbra.plant_game.engine.scene.ui.layout.AnchorLayout;
+import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
+import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.plant_game.vanilla.scene.overlay.group.impl.AnchoredLayoutUIObjectGroup;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;;
 
-public class BuildingPanelUIObjectGroup extends AnchoredLayoutUIObjectGroup implements BoundsOwnerParentAware, NeedsBoundsInput {
+public class BuildingPanelUIObjectGroup extends AnchoredLayoutUIObjectGroup
+		implements BoundsOwnerParentAware, NeedsBoundsInput, NeedsUpdate {
 
-	protected Rectangle2D.Float fixedBounds;
+	protected Rectangle2D.Float fixedBounds = new Rectangle2D.Float(0, 0, 1, 1);
 	protected float boundsMarginX = 0.05f;
 	protected float boundsMarginY = 0f;
 	protected float heightRatio = 1f / 10 * 2;
@@ -33,10 +44,31 @@ public class BuildingPanelUIObjectGroup extends AnchoredLayoutUIObjectGroup impl
 	protected String activeBuildingTabKey;
 	protected float buildingTabScrollSpeed = 0.75f;
 
+	protected ObjectPointer<UIObject> backdrop = new ObjectPointer<>();
+
 	public BuildingPanelUIObjectGroup() {
 		super("building-tab", new AnchorLayout(), Anchor.BOTTOM_CENTER, Anchor.BOTTOM_CENTER);
-		this.fixedBounds = new Rectangle2D.Float(0, 0, 1, 1);
+	}
+
+	public ObjectTriggerLatch<? extends BuildingPanelUIObjectGroup> init() {
+		final ObjectTriggerLatch<? extends BuildingPanelUIObjectGroup> latch = new ObjectTriggerLatch<>(1, this);
+
 		this.add(this.tabList);
+
+		UIObjectFactory.create(IBAnchoredFlatQuadUIObject.class)
+				.set(i -> i.setTransform(new Transform3D(new Vector3f(0, -0.2f, 0),
+						new Quaternionf(),
+						new Vector3f(this.getBounds().width, 1, this.getBounds().height))))
+				.set(i -> i.setColor(new Vector4f(ColorMaterial.DARK_GRAY.getColor()).mul(1, 1, 1, 0.5f)))
+				.set(i -> i.setAnchors(Anchor.CENTER_CENTER, Anchor.CENTER_CENTER))
+				.add(this)
+				.get(this.backdrop)
+				.latch(latch)
+				.push();
+
+		latch.thenOther(BuildingPanelUIObjectGroup::recomputeBounds);
+
+		return latch;
 	}
 
 	@Override
@@ -51,9 +83,26 @@ public class BuildingPanelUIObjectGroup extends AnchoredLayoutUIObjectGroup impl
 		}
 
 		buildingTab.addScrollX((float) inputHandler.getMouseScroll().y() * this.buildingTabScrollSpeed);
-		buildingTab.applyScrollX();
 
 		return true;
+	}
+
+	@Override
+	public void update(final WindowInputHandler input) {
+		final WorldLevelScene world = PGLogic.INSTANCE.getWorldScene();
+
+		final BuildingTabUIObjectGroup buildingTab = this.buildingTabs.get(this.activeBuildingTabKey);
+		if (buildingTab == null) {
+			return;
+		}
+
+		buildingTab.applyScrollX();
+
+		buildingTab.getContent()
+				.parallelStream()
+				.filter(BuildingItemUIObject.class::isInstance)
+				.map(BuildingItemUIObject.class::cast)
+				.forEach(c -> c.updateTintStatus(world));
 	}
 
 	public <T extends BuildingTabUIObjectGroup> ObjectTriggerLatch<T> addTab(final T tab) {
@@ -115,6 +164,7 @@ public class BuildingPanelUIObjectGroup extends AnchoredLayoutUIObjectGroup impl
 				(float) superBounds.getHeight() * this.heightRatio);
 		final boolean changed = newBounds.equals(this.fixedBounds);
 		this.fixedBounds.setFrame(newBounds);
+		this.backdrop.ifSet(p -> p.getTransform().scaleSet(this.fixedBounds.width, 1, this.fixedBounds.height).update());
 		return changed;
 	}
 
@@ -125,7 +175,7 @@ public class BuildingPanelUIObjectGroup extends AnchoredLayoutUIObjectGroup impl
 	}
 
 	@Override
-	public Shape getBounds() {
+	public Rectangle2D.Float getBounds() {
 		return this.fixedBounds;
 	}
 
