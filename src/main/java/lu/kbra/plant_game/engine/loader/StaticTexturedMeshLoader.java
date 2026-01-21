@@ -5,10 +5,6 @@ import static lu.kbra.plant_game.engine.loader.MeshLoaderLocks.waitOrCreateLock;
 
 import java.util.function.Function;
 
-import lu.pcy113.pclib.datastructure.pair.Pair;
-import lu.pcy113.pclib.datastructure.pair.Pairs;
-import lu.pcy113.pclib.impl.ThrowingSupplier;
-
 import lu.kbra.plant_game.engine.mesh.TexturedQuadLoadedMesh;
 import lu.kbra.plant_game.engine.mesh.TexturedQuadMesh;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
@@ -22,8 +18,32 @@ import lu.kbra.standalone.gameengine.utils.file.FileUtils;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextureFilter;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextureWrap;
 import lu.kbra.standalone.gameengine.utils.mem.img.MemImage;
+import lu.pcy113.pclib.datastructure.pair.Pair;
+import lu.pcy113.pclib.datastructure.pair.Pairs;
+import lu.pcy113.pclib.impl.ThrowingFunction;
+import lu.pcy113.pclib.impl.ThrowingSupplier;
 
 public class StaticTexturedMeshLoader {
+
+	public static TaskFuture<?, TexturedQuadMesh> getStaticFuture(
+			final CacheManager cache,
+			final String meshName,
+			final SingleTexture txt,
+			final Dispatcher loader,
+			final Dispatcher render) {
+		return new TaskFuture<>(loader, (ThrowingSupplier<SingleTexture, Throwable>) () -> {
+			if (!waitOrCreateLock(meshName)) {
+				throw new YieldExecutionThrowable(() -> cache.hasMesh(meshName));
+			}
+
+			if (cache.hasMesh(meshName)) {
+				releaseLock(meshName);
+				throw new SkipThen(cache.getMesh(meshName));
+			}
+			
+			return txt;
+		}).then(render, (ThrowingFunction<SingleTexture, TexturedQuadMesh, Throwable>) txt2 -> createStaticQuad(cache, meshName, txt2));
+	}
 
 	public static TaskFuture<?, TexturedQuadMesh> getStaticFuture(
 			final CacheManager cache,
@@ -70,8 +90,7 @@ public class StaticTexturedMeshLoader {
 	}
 
 	static TexturedQuadMesh createStaticQuad(final CacheManager cache, final String meshName, final SingleTexture txt) {
-		final TexturedQuadMesh staticMesh = new TexturedQuadLoadedMesh(meshName,
-				txt,
+		final TexturedQuadMesh staticMesh = new TexturedQuadLoadedMesh(meshName, txt,
 				GameEngineUtils.normalizeSize(txt.getWidth(), txt.getHeight()));
 		cache.addMesh(staticMesh);
 		releaseLock(meshName);
