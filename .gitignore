@@ -101,3 +101,4 @@ build/*
 !config/main.properties
 
 # pom.xml
+.local/
