@@ -10,7 +10,8 @@ out vec4 fragColor;
 
 uniform sampler2D txt0;
 uniform vec4 tint;
+uniform bool hasTexture;
 
 void main() {
-    fragColor = texture(txt0, bet_UV) * tint;
+    fragColor = hasTexture ? texture(txt0, bet_UV) * tint : tint;
 }

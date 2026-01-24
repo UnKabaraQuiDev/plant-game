@@ -1,16 +1,12 @@
 // @formatter:off
 package lu.kbra.plant_game.generated;
 
-import java.lang.Class;
-import java.lang.Integer;
-import java.lang.Object;
-import java.lang.String;
-import java.lang.SuppressWarnings;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
 import lu.kbra.plant_game.engine.entity.go.AnimatedMeshGameObject;
 import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.entity.go.InstanceGameObject;
@@ -287,15 +283,14 @@ public class GameObjectRegistry {
 
 	public static <T extends GameObject> InternalConstructorFunction<GameObject> get(
 			final Class<T> clazz, final Object... args) {
-		if (GAME_OBJECT_CONSTRUCTORS.containsKey(clazz)) {
-			final Optional<InternalConstructorFunction<GameObject>> bestConstructor = GAME_OBJECT_CONSTRUCTORS.get(clazz).parallelStream().filter((v) -> v.matches(args)).findFirst();
-			if (bestConstructor.isPresent()) {
-				return bestConstructor.get();
-			} else {
-				throw new GameObjectConstructorNotFound(clazz, args);
-			}
-		} else {
+		if (!GAME_OBJECT_CONSTRUCTORS.containsKey(clazz)) {
 			throw new GameObjectNotFound(clazz, args);
+		}
+		final Optional<InternalConstructorFunction<GameObject>> bestConstructor = GAME_OBJECT_CONSTRUCTORS.get(clazz).parallelStream().filter(v -> v.matches(args)).findFirst();
+		if (bestConstructor.isPresent()) {
+			return bestConstructor.get();
+		} else {
+			throw new GameObjectConstructorNotFound(clazz, args);
 		}
 	}
 }

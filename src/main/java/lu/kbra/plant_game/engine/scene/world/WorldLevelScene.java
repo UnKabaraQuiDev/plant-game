@@ -104,11 +104,11 @@ public class WorldLevelScene extends Scene3D {
 	private Direction targetRotation = Direction.NONE;
 	private TaskFuture<?, Void>.TaskState<Void> moveObjectTaskState;
 
-	public WorldLevelScene(final String name, final CacheManager parent) {
+	public WorldLevelScene(final String name, final CacheManager parentCache) {
 		super(name);
-		this.worldCache = new CacheManager(name, parent);
+		this.worldCache = new CacheManager(name, parentCache);
 
-		this.particleManager = new ParticleManager(parent, this);
+		this.particleManager = new ParticleManager(parentCache, this);
 
 		this.getCamera().setPosition(new Vector3f(-20, 25, 20).mul(1.5f));
 		this.getCamera().lookAt(this.getCamera().getPosition(), new Vector3f(0, 0, 0)).updateMatrix();
@@ -531,6 +531,7 @@ public class WorldLevelScene extends Scene3D {
 
 		final Camera3D camera = super.getCamera();
 		camera.getProjection().setFov(camera.getProjection().getFov() + this.fovDiff);
+//		System.err.println(camera.getProjection().getFov());
 		camera.getPosition().fma(dTime * 10, this.posAdd);
 		camera.getRotation().rotateY((float) Math.toRadians(this.rotation * 50 * dTime));
 		camera.updateMatrix();

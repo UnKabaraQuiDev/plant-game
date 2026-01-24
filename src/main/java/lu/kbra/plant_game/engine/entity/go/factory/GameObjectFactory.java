@@ -1,7 +1,6 @@
 package lu.kbra.plant_game.engine.entity.go.factory;
 
-import static lu.kbra.plant_game.generated.GameObjectRegistry.BUFFER_SIZE;
-import static lu.kbra.plant_game.generated.GameObjectRegistry.DATA_PATH;
+import static lu.kbra.plant_game.generated.GameObjectRegistry.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -17,9 +16,9 @@ import lu.kbra.plant_game.engine.entity.impl.InstanceEmitterOwner;
 import lu.kbra.plant_game.engine.entity.impl.MeshOwner;
 import lu.kbra.plant_game.engine.entity.impl.NoMeshObject;
 import lu.kbra.plant_game.engine.loader.AnimatedMeshLoader;
+import lu.kbra.plant_game.engine.loader.AnimatedMeshLoader.AnimatedMeshes;
 import lu.kbra.plant_game.engine.loader.StaticInstanceLoader;
 import lu.kbra.plant_game.engine.loader.StaticMeshLoader;
-import lu.kbra.plant_game.engine.loader.AnimatedMeshLoader.AnimatedMeshes;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.cache.attrib.impl.AttribArray;
 import lu.kbra.standalone.gameengine.geom.Mesh;

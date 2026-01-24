@@ -9,6 +9,7 @@ public class DirectShader extends RenderShader {
 
 	public static final String TXT0 = "txt0";
 	public static final String TINT = "tint";
+	public static final String HAS_TEXTURE = "hasTexture";
 
 	public static final Vector4f DEFAULT_TINT = new Vector4f(1);
 

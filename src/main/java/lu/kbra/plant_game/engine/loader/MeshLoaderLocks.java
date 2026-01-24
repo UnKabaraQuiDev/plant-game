@@ -8,10 +8,13 @@ import lu.pcy113.pclib.PCUtils;
 import lu.pcy113.pclib.logger.GlobalLogger;
 import lu.pcy113.pclib.pointer.prim.BooleanPointer;
 
-import lu.kbra.plant_game.PGLogic;
+import lu.kbra.standalone.gameengine.impl.GameLogic;
 import lu.kbra.standalone.gameengine.impl.future.YieldExecutionThrowable;
 
 public final class MeshLoaderLocks {
+
+	public static final String DEBUG_LOCKS_PROPERTY = MeshLoaderLocks.class.getSimpleName() + ".debug_locks";
+	public static boolean DEBUG_LOCKS = Boolean.getBoolean(DEBUG_LOCKS_PROPERTY);
 
 	protected static final class ObjectLock extends BooleanPointer {
 
@@ -42,13 +45,12 @@ public final class MeshLoaderLocks {
 			return new ObjectLock(Thread.currentThread());
 		});
 
-		if (/* Thread.currentThread() == lock.owner */ bp.getValue()) {
-			GlobalLogger.log(Level.FINEST,
-					"Thread: " + Thread.currentThread().getName() + " created lock on: " + meshName + " (" + source + ") ");
+		if (bp.getValue()) {
+			log(Level.FINEST, "Thread: " + Thread.currentThread().getName() + " created lock on: " + meshName + " (" + source + ") ");
 			return true;
 		}
 
-		if (Thread.currentThread() == PGLogic.INSTANCE.getGameEngine().getRenderThread()) {
+		if (Thread.currentThread() == GameLogic.INSTANCE.getGameEngine().getRenderThread()) {
 			throw new IllegalStateException("Render thread can't create nor wait on locks (" + source + ")");
 		}
 
@@ -58,45 +60,13 @@ public final class MeshLoaderLocks {
 //		}
 
 		if (lock.getValue()) {
-			GlobalLogger.log(Level.FINEST,
-					"Thread: " + Thread.currentThread().getName() + " skipped lock: " + meshName + " (" + source + ") " + lock);
+			log(Level.FINEST, "Thread: " + Thread.currentThread().getName() + " skipped lock: " + meshName + " (" + source + ") " + lock);
 			return true;
 		}
 
-		GlobalLogger.log(Level.FINEST,
-				"Thread: " + Thread.currentThread().getName() + " waiting on: " + meshName + " (" + source + ") " + lock);
+		log(Level.FINEST, "Thread: " + Thread.currentThread().getName() + " waiting on: " + meshName + " (" + source + ") " + lock);
 
-//		if (lock.waitForTrue(100)) {
-//			return;
-//		}
-
-//		throw new YieldExecutionThrowable(lock);
 		return false;
-
-//		if (!lock.waitForTrue(LOAD_WAIT_TIMEOUT)) {
-//			if (Thread.currentThread().isInterrupted()) {
-//				Thread.interrupted();
-//				throw new RuntimeException("Thread: " + Thread.currentThread().getName() + " interrupted while waiting on: " + meshName
-//						+ " (" + source + "), lock held by: " + lock.owner);
-//			}
-//
-//			throw new YieldExecutionThrowable();
-//
-////			throw new IllegalStateException(
-////					"Thread: " + Thread.currentThread() + " exceeded timeout when waiting for " + meshName + " (" + lock + ")");
-//		}
-
-//		if (Thread.interrupted()) {
-//			final int lockId = System.identityHashCode(lock);
-//			final String threadName = Arrays.stream(ManagementFactory.getThreadMXBean().dumpAllThreads(true, true))
-//					.filter(info -> (info.getLockedMonitors().length > 0 || info.getLockInfo() != null)
-//							&& Arrays.stream(info.getLockedMonitors()).anyMatch(monitor -> monitor.getIdentityHashCode() == lockId))
-//					.findFirst()
-//					.map(ThreadInfo::getThreadName)
-//					.orElse(null);
-//			throw new RuntimeException("Thread: " + Thread.currentThread().getName() + " interrupted while waiting on: " + meshName + " ("
-//					+ source + "), lock held by: " + lock.owner);
-//		}
 	}
 
 	public static void releaseLock(final String meshName) {
@@ -105,10 +75,15 @@ public final class MeshLoaderLocks {
 		final ObjectLock lock = locks.remove(meshName);
 		if (lock != null) {
 			lock.setValue(true);
-			GlobalLogger.log(Level.FINEST,
-					"Thread " + Thread.currentThread().getName() + " released lock: " + meshName + " (" + source + ") " + lock);
+			log(Level.FINEST, "Thread " + Thread.currentThread().getName() + " released lock: " + meshName + " (" + source + ") " + lock);
 		} else {
-			GlobalLogger.severe("Lock wasn't held for: " + meshName + " (" + source + ")");
+			log(Level.SEVERE, "Lock wasn't held for: " + meshName + " (" + source + ")");
+		}
+	}
+
+	public static void log(final Level l, final String str) {
+		if (DEBUG_LOCKS) {
+			GlobalLogger.log(l, str);
 		}
 	}
 

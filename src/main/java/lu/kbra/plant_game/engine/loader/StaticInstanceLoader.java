@@ -26,8 +26,8 @@ import lu.kbra.standalone.gameengine.utils.transform.Transform;
 
 public class StaticInstanceLoader {
 
-	public static final int MAX_INSTANCE_BUFFER_LENGTH = 1024;
-	public static final int MIN_INSTANCE_BUFFER_LENGTH = 0;
+	public static int MAX_INSTANCE_BUFFER_LENGTH = 1024;
+	public static int MIN_INSTANCE_BUFFER_LENGTH = 0;
 
 	@SuppressWarnings("unchecked")
 	public static TaskFuture<?, InstanceEmitter> getFuture(

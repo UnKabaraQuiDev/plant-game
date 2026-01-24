@@ -48,6 +48,7 @@ import lu.kbra.plant_game.engine.entity.impl.InstanceEmitterOwner;
 import lu.kbra.plant_game.engine.entity.impl.MaterialIdOwner;
 import lu.kbra.plant_game.engine.entity.impl.MeshOwner;
 import lu.kbra.plant_game.engine.entity.impl.ObjectIdOwner;
+import lu.kbra.plant_game.engine.entity.impl.ParticleCountOwner;
 import lu.kbra.plant_game.engine.entity.impl.RenderConditionOwner;
 import lu.kbra.plant_game.engine.entity.impl.SwayOwner;
 import lu.kbra.plant_game.engine.entity.impl.TintOwner;
@@ -117,10 +118,10 @@ public class DeferredCompositor implements Cleanupable {
 		DIRECT, DEFERRED;
 	}
 
-	private static final String SWAY_NOISE_PATH = System
-			.getProperty(DeferredCompositor.class.getSimpleName() + ".path.sway_noise", "classpath:/bakes/noise/sway/512.png");
-	private static final String FONT_PATH = System
-			.getProperty(DeferredCompositor.class.getSimpleName() + ".path.font", "classpath:/bakes/fonts/QuinqueFive.ttf/48.png");
+	private static final String SWAY_NOISE_PATH = System.getProperty(DeferredCompositor.class.getSimpleName() + ".path.sway_noise",
+			"classpath:/bakes/noise/sway/512.png");
+	private static final String FONT_PATH = System.getProperty(DeferredCompositor.class.getSimpleName() + ".path.font",
+			"classpath:/bakes/fonts/QuinqueFive.ttf/48.png");
 
 	private static final String WORLD_FRAMEBUFFER_NAME = "_WORLD_FRAMEBUFFER";
 	private static final int WORLD_FRAMEBUFFER_POS_IDX = 0;
@@ -168,12 +169,18 @@ public class DeferredCompositor implements Cleanupable {
 			+ ".gl_force_sync_compute_shaders";
 	public static final boolean GL_FORCE_SYNC_COMPUTE_SHADERS = Boolean.getBoolean(GL_FORCE_SYNC_COMPUTE_SHADERS_PROPERTY);
 
-	private static Mesh SCREEN = new LoadedMesh(PASS_SCREEN, null,
-			new Vec3fAttribArray("pos", 0,
+	private static Mesh SCREEN = new LoadedMesh(PASS_SCREEN,
+			null,
+			new Vec3fAttribArray("pos",
+					0,
 					new Vector3f[] { new Vector3f(-1, 1, 0), new Vector3f(1, 1, 0), new Vector3f(1, -1, 0), new Vector3f(-1, -1, 0) }),
-			new UIntAttribArray("ind", -1, new int[] { 0, 1, 2, 0, 2, 3 }, BufferType.ELEMENT_ARRAY), new Vec2fAttribArray("uv", 1,
+			new UIntAttribArray("ind", -1, new int[] { 0, 1, 2, 0, 2, 3 }, BufferType.ELEMENT_ARRAY),
+			new Vec2fAttribArray("uv",
+					1,
 					new Vector2f[] { new Vector2f(0, 1), new Vector2f(1, 1), new Vector2f(1, 0), new Vector2f(0, 0) }));
-	private static QuadMesh QUAD = new QuadLoadedMesh(PASS_BOUNDS, null, new Vector2f(1),
+	private static QuadMesh QUAD = new QuadLoadedMesh(PASS_BOUNDS,
+			null,
+			new Vector2f(1),
 			new UByteAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_NAME, GameObject.MESH_ATTRIB_MATERIAL_ID_ID, new byte[4]));
 
 	protected Thread ownerThread;
@@ -192,7 +199,6 @@ public class DeferredCompositor implements Cleanupable {
 	protected GradientShader directGradientShader;
 	protected InstanceDirectShader directInstanceShader;
 	protected TextDirectShader directTextShader;
-	protected SingleTexture whiteTexture;
 
 	// material passes
 	protected Vector4f backgroundColor = new Vector4f(0, 0, 0, 1);
@@ -247,13 +253,12 @@ public class DeferredCompositor implements Cleanupable {
 		this.fontTexture.genMipMaps();
 		cache.addTexture(this.fontTexture);
 
-		this.swayMap = SingleTexture
-				.loadSingleTexture(cache,
-						TransferShader.SWAY_MAP_TEXTURE_NAME,
-						SWAY_NOISE_PATH,
-						TextureFilter.LINEAR,
-						TextureType.TXT2D,
-						TextureWrap.REPEAT);
+		this.swayMap = SingleTexture.loadSingleTexture(cache,
+				TransferShader.SWAY_MAP_TEXTURE_NAME,
+				SWAY_NOISE_PATH,
+				TextureFilter.LINEAR,
+				TextureType.TXT2D,
+				TextureWrap.REPEAT);
 		this.swayMap.setGenerateMipmaps(true);
 		this.swayMap.genMipMaps();
 		cache.addTexture(this.fontTexture);
@@ -386,14 +391,13 @@ public class DeferredCompositor implements Cleanupable {
 		}
 
 		if (needRegen) {
-			GL_W
-					.glBindImageTexture(0,
-							this.outputTxt.getGlId(),
-							0,
-							false,
-							0,
-							GL_W.GL_READ_WRITE,
-							this.outputTxt.getInternalFormat().getGlId());
+			GL_W.glBindImageTexture(0,
+					this.outputTxt.getGlId(),
+					0,
+					false,
+					0,
+					GL_W.GL_READ_WRITE,
+					this.outputTxt.getInternalFormat().getGlId());
 
 			this.posTexture.bindUniform(computeShader.getUniformLocation("uPosTex"), 0);
 			this.normalTexture.bindUniform(computeShader.getUniformLocation("uNormalTex"), 1);
@@ -446,12 +450,8 @@ public class DeferredCompositor implements Cleanupable {
 			this.outputTxt.resize();
 			this.outputTxt.unbind();
 		}
-		GL_W
-				.glClearTexImage(this.outputTxt.getGlId(),
-						0,
-						this.outputTxt.getFormat().getGlId(),
-						this.outputTxt.getDataType().getGlId(),
-						new float[] { 0, 0, 0, 0 });
+		GL_W.glClearTexImage(this.outputTxt
+				.getGlId(), 0, this.outputTxt.getFormat().getGlId(), this.outputTxt.getDataType().getGlId(), new float[] { 0, 0, 0, 0 });
 
 		GL_W.glViewport(0, 0, resolution.x, resolution.y);
 
@@ -581,14 +581,13 @@ public class DeferredCompositor implements Cleanupable {
 		computeShader.setUniform(MaterialComputeShader.AMBIENT_LIGHT, worldScene.getAmbientLight());
 
 		if (needRegen) {
-			GL_W
-					.glBindImageTexture(0,
-							this.outputTxt.getGlId(),
-							0,
-							false,
-							0,
-							GL_W.GL_WRITE_ONLY,
-							this.outputTxt.getInternalFormat().getGlId());
+			GL_W.glBindImageTexture(0,
+					this.outputTxt.getGlId(),
+					0,
+					false,
+					0,
+					GL_W.GL_WRITE_ONLY,
+					this.outputTxt.getInternalFormat().getGlId());
 
 			this.posTexture.bindUniform(computeShader.getUniformLocation("uPosTex"), 0);
 			this.normalTexture.bindUniform(computeShader.getUniformLocation("uNormalTex"), 1);
@@ -876,9 +875,8 @@ public class DeferredCompositor implements Cleanupable {
 				tintOwner = null;
 			}
 
-			shader
-					.setUniform(DirectShader.TINT,
-							(tintOwner == null || tintOwner.getTint() == null) ? DirectShader.DEFAULT_TINT : tintOwner.getTint());
+			shader.setUniform(DirectShader.TINT,
+					(tintOwner == null || tintOwner.getTint() == null) ? DirectShader.DEFAULT_TINT : tintOwner.getTint());
 		}
 
 		if (shader.createUniform(TransferShader.DEFORM_RATIO)) {
@@ -902,6 +900,8 @@ public class DeferredCompositor implements Cleanupable {
 			}
 		}
 
+//		System.err.println(mesh.getId() + " " + (entity instanceof MaterialIdOwner) + " "
+//				+ (entity instanceof MaterialIdOwner go && go.isEntityMaterialId()));
 		if (entity instanceof final MaterialIdOwner go && go.isEntityMaterialId()) {
 			// id is in the entity
 			final int matId = go.getMaterialId();
@@ -929,6 +929,9 @@ public class DeferredCompositor implements Cleanupable {
 			final Vector3ic objId = go.getObjectId();
 			GL_W.glDisableVertexAttribArray(GameObject.MESH_ATTRIB_OBJECT_ID_ID);
 			GL_W.glVertexAttribI3ui(GameObject.MESH_ATTRIB_OBJECT_ID_ID, objId.x(), objId.y(), objId.z());
+		} else if (entity instanceof final GameObject go && go.getObjectIdLocation() == AttributeLocation.MESH) {
+			// object id is in the mesh
+			GL_W.glEnableVertexAttribArray(GameObject.MESH_ATTRIB_OBJECT_ID_ID);
 		}
 
 		GL_W.glPolygonMode(PolygonMode.FRONT_AND_BACK.getGlId(), PolygonDrawMode.FILL.getGlId());
@@ -944,14 +947,10 @@ public class DeferredCompositor implements Cleanupable {
 			GL_W.glLineWidth(lineMesh.getLineWidth());
 		}
 
-		GL_W
-				.glDrawElementsInstanced(shader.getBeginMode().getGlId(),
-						mesh.getIndicesCount(),
-						GL_W.GL_UNSIGNED_INT,
-						0,
-						obj.getParticleCount());
+		final int particleCount = entity instanceof ParticleCountOwner pco ? pco.getParticleCount() : obj.getParticleCount();
+		GL_W.glDrawElementsInstanced(shader.getBeginMode().getGlId(), mesh.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0, particleCount);
 
-		this.drawDebugTrianglesInstanced(mesh, transformationMatrix, obj);
+		this.drawDebugTrianglesInstanced(mesh, transformationMatrix, obj, particleCount);
 
 		shader.unbind();
 
@@ -982,14 +981,12 @@ public class DeferredCompositor implements Cleanupable {
 
 		this.fontTexture.bindUniform(shader.getUniformLocation(TextDirectShader.TXT0), 1);
 
-		shader
-				.setUniform(TextDirectShader.FG_COLOR,
-						(obj.getForegroundColor() != null ? obj.getForegroundColor() : TextEmitter.DEFAULT_FG_COLOR)
-								.mul(1, 1, 1, obj.getOpacity(), new Vector4f()));
-		shader
-				.setUniform(TextDirectShader.BG_COLOR,
-						(obj.getBackgroundColor() != null ? obj.getBackgroundColor() : TextEmitter.DEFAULT_BG_COLOR)
-								.mul(1, 1, 1, obj.getOpacity(), new Vector4f()));
+		shader.setUniform(TextDirectShader.FG_COLOR,
+				(obj.getForegroundColor() != null ? obj.getForegroundColor() : TextEmitter.DEFAULT_FG_COLOR)
+						.mul(1, 1, 1, obj.getOpacity(), new Vector4f()));
+		shader.setUniform(TextDirectShader.BG_COLOR,
+				(obj.getBackgroundColor() != null ? obj.getBackgroundColor() : TextEmitter.DEFAULT_BG_COLOR)
+						.mul(1, 1, 1, obj.getOpacity(), new Vector4f()));
 		shader.setUniform(TextDirectShader.TRANSPARENT, transparent);
 		shader.setUniformUnsigned(TextDirectShader.TEXT_LENGTH, obj.getCharCount());
 
@@ -1001,12 +998,8 @@ public class DeferredCompositor implements Cleanupable {
 			GL_W.glDisable(GL_W.GL_BLEND);
 		}
 
-		GL_W
-				.glDrawElementsInstanced(shader.getBeginMode().getGlId(),
-						mesh.getIndicesCount(),
-						GL_W.GL_UNSIGNED_INT,
-						0,
-						instances.getParticleCount());
+		GL_W.glDrawElementsInstanced(shader.getBeginMode()
+				.getGlId(), mesh.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0, instances.getParticleCount());
 
 		GL_W.glDisable(GL_W.GL_BLEND);
 		GL_W.glEnable(GL_W.GL_CULL_FACE);
@@ -1034,6 +1027,9 @@ public class DeferredCompositor implements Cleanupable {
 
 		if (mesh instanceof final TexturedMesh txtMesh && shader.createUniform(DirectShader.TXT0)) {
 			txtMesh.getTexture().bindUniform(shader.getUniformLocation(DirectShader.TXT0), 0);
+			shader.setUniform(DirectShader.HAS_TEXTURE, true);
+		} else {
+			shader.setUniform(DirectShader.HAS_TEXTURE, false);
 		}
 
 		if (shader.createUniform(DirectShader.TINT)) {
@@ -1046,9 +1042,8 @@ public class DeferredCompositor implements Cleanupable {
 				tintOwner = null;
 			}
 
-			shader
-					.setUniform(DirectShader.TINT,
-							(tintOwner == null || tintOwner.getTint() == null) ? DirectShader.DEFAULT_TINT : tintOwner.getTint());
+			shader.setUniform(DirectShader.TINT,
+					(tintOwner == null || tintOwner.getTint() == null) ? DirectShader.DEFAULT_TINT : tintOwner.getTint());
 		}
 
 		if (shader.createUniform(TransferShader.APPLY_SWAY)) {
@@ -1083,22 +1078,17 @@ public class DeferredCompositor implements Cleanupable {
 				gradientOwner = null;
 			}
 
-			shader
-					.setUniformUnsigned(GradientShader.GRADIENT_DIRECTION,
-							((gradientOwner == null || gradientOwner.getDirection() == null) ? GradientShader.DEFAULT_DIRECTION
-									: gradientOwner.getDirection()).getId());
-			shader
-					.setUniform(GradientShader.GRADIENT_RANGE,
-							(gradientOwner == null || gradientOwner.getRange() == null) ? GradientShader.DEFAULT_RANGE
-									: gradientOwner.getRange());
-			shader
-					.setUniform(GradientShader.START_COLOR,
-							(gradientOwner == null || gradientOwner.getStartColor() == null) ? GradientShader.DEFAULT_START_COLOR
-									: gradientOwner.getStartColor());
-			shader
-					.setUniform(GradientShader.END_COLOR,
-							(gradientOwner == null || gradientOwner.getEndColor() == null) ? GradientShader.DEFAULT_END_COLOR
-									: gradientOwner.getEndColor());
+			shader.setUniformUnsigned(GradientShader.GRADIENT_DIRECTION,
+					((gradientOwner == null || gradientOwner.getDirection() == null) ? GradientShader.DEFAULT_DIRECTION
+							: gradientOwner.getDirection()).getId());
+			shader.setUniform(GradientShader.GRADIENT_RANGE,
+					(gradientOwner == null || gradientOwner.getRange() == null) ? GradientShader.DEFAULT_RANGE : gradientOwner.getRange());
+			shader.setUniform(GradientShader.START_COLOR,
+					(gradientOwner == null || gradientOwner.getStartColor() == null) ? GradientShader.DEFAULT_START_COLOR
+							: gradientOwner.getStartColor());
+			shader.setUniform(GradientShader.END_COLOR,
+					(gradientOwner == null || gradientOwner.getEndColor() == null) ? GradientShader.DEFAULT_END_COLOR
+							: gradientOwner.getEndColor());
 		}
 
 		if (entity instanceof final MaterialIdOwner mo && mo.isEntityMaterialId()) {
@@ -1129,8 +1119,11 @@ public class DeferredCompositor implements Cleanupable {
 			// object id is in the entity
 			final Vector3ic objId = oio.getObjectId();
 
-//			GL_W.glDisableVertexAttribArray(GameObject.MESH_ATTRIB_OBJECT_ID_ID);
+			GL_W.glDisableVertexAttribArray(GameObject.MESH_ATTRIB_OBJECT_ID_ID);
 			GL_W.glVertexAttribI3ui(GameObject.MESH_ATTRIB_OBJECT_ID_ID, objId.x(), objId.y(), objId.z());
+		} else if (entity instanceof final ObjectIdOwner oio && oio.getObjectIdLocation() == AttributeLocation.MESH) {
+			// object id is in the mesh
+			GL_W.glEnableVertexAttribArray(GameObject.MESH_ATTRIB_OBJECT_ID_ID);
 		}
 
 		if (mesh instanceof final LineMesh lineMesh) {
@@ -1213,7 +1206,11 @@ public class DeferredCompositor implements Cleanupable {
 		}
 	}
 
-	private void drawDebugTrianglesInstanced(final Mesh mesh, final Matrix4f transformationMatrix, final InstanceEmitter instances) {
+	private void drawDebugTrianglesInstanced(
+			final Mesh mesh,
+			final Matrix4f transformationMatrix,
+			final InstanceEmitter instances,
+			final int count) {
 		if (!this.deferredPass && DEBUG_TRIANGLES && this.lineInstanceDirectShader != null) {
 			this.lineInstanceDirectShader.bind();
 
@@ -1228,12 +1225,8 @@ public class DeferredCompositor implements Cleanupable {
 
 			GL_W.glPolygonMode(GL_W.GL_FRONT_AND_BACK, GL_W.GL_LINE);
 
-			GL_W
-					.glDrawElementsInstanced(this.lineInstanceDirectShader.getBeginMode().getGlId(),
-							mesh.getIndicesCount(),
-							GL_W.GL_UNSIGNED_INT,
-							0,
-							instances.getParticleCount());
+			GL_W.glDrawElementsInstanced(this.lineInstanceDirectShader.getBeginMode()
+					.getGlId(), mesh.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0, count);
 
 //			GL_W.glEnable(GL_W.GL_DEPTH_TEST);
 			GL_W.glPolygonMode(GL_W.GL_FRONT_AND_BACK, GL_W.GL_FILL);
@@ -1255,12 +1248,8 @@ public class DeferredCompositor implements Cleanupable {
 
 			GL_W.glPolygonMode(GL_W.GL_FRONT_AND_BACK, GL_W.GL_LINE);
 
-			GL_W
-					.glDrawElementsInstanced(this.lineInstanceDirectShader.getBeginMode().getGlId(),
-							mesh.getIndicesCount(),
-							GL_W.GL_UNSIGNED_INT,
-							0,
-							emitter.getStringLength());
+			GL_W.glDrawElementsInstanced(this.lineInstanceDirectShader.getBeginMode()
+					.getGlId(), mesh.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0, emitter.getStringLength());
 
 //			GL_W.glEnable(GL_W.GL_DEPTH_TEST);
 			GL_W.glPolygonMode(GL_W.GL_FRONT_AND_BACK, GL_W.GL_FILL);
@@ -1285,9 +1274,8 @@ public class DeferredCompositor implements Cleanupable {
 			final Matrix4f transform = new Matrix4f().identity().translate(centerX, 0, centerY).scale(width, 1, height);
 
 			this.lineDirectShader.setUniform(RenderShader.TRANSFORMATION_MATRIX, transform);
-			this.lineDirectShader
-					.setUniform(LineDirectShader.TINT,
-							entity instanceof DebugBoundsColor dbc ? dbc.getBoundsColor().getColor() : DEBUG_BOUNDS_COLOR);
+			this.lineDirectShader.setUniform(LineDirectShader.TINT,
+					entity instanceof DebugBoundsColor dbc ? dbc.getBoundsColor().getColor() : DEBUG_BOUNDS_COLOR);
 
 			if (GL_LINE_SMOOTHING) {
 				GL_W.glEnable(GL_W.GL_LINE_SMOOTH);
@@ -1424,9 +1412,8 @@ public class DeferredCompositor implements Cleanupable {
 		GL_W.glReadBuffer(FrameBufferAttachment.COLOR_FIRST.getGlId() + WORLD_FRAMEBUFFER_IDS_IDX);
 		final IntBuffer pixel = BufferUtils.createIntBuffer(4);
 		GL11.glReadPixels(x, y, 1, 1, this.idsTexture.getFormat().getGlId(), this.idsTexture.getDataType().getGlId(), pixel);
-		assert GL_W
-				.checkError(
-						"ReadPixels(" + mousePosition + ", " + this.idsTexture.getFormat() + ", " + this.idsTexture.getDataType() + ")");
+		assert GL_W.checkError(
+				"ReadPixels(" + mousePosition + ", " + this.idsTexture.getFormat() + ", " + this.idsTexture.getDataType() + ")");
 		this.worldFramebuffer.unbind(GL_W.GL_READ_FRAMEBUFFER);
 
 		final int r = pixel.get(0);
