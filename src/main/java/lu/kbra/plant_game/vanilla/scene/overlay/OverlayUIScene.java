@@ -1,6 +1,5 @@
 package lu.kbra.plant_game.vanilla.scene.overlay;
 
-import java.io.File;
 import java.util.stream.Collectors;
 
 import lu.kbra.plant_game.BuildingDefinitionRegistry;
@@ -9,7 +8,6 @@ import lu.kbra.plant_game.engine.UpdateFrameState;
 import lu.kbra.plant_game.engine.entity.ui.FlatQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.bar.AnchoredProgressBarUIObject;
-import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
 import lu.kbra.plant_game.engine.entity.ui.icon.EnergyIconUIObject;
 import lu.kbra.plant_game.engine.entity.ui.icon.MoneyIconUIObject;
 import lu.kbra.plant_game.engine.entity.ui.icon.WaterIconUIObject;
@@ -38,7 +36,6 @@ import lu.kbra.standalone.gameengine.objs.entity.ParentAwareComponent;
 import lu.kbra.standalone.gameengine.objs.entity.ParentAwareNode;
 import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
 import lu.kbra.standalone.gameengine.utils.geo.GeoAxis;
-import lu.kbra.standalone.gameengine.utils.gl.consts.Consts;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3DShear;
 
@@ -82,15 +79,10 @@ public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner
 				.forEach(p -> this.buildingPanel
 						.addTab(new BuildingTabUIObjectGroup(p.getLocalizationKey(), p.getIndex(), p.getAccentColor()))
 						.then(tab -> BuildingDefinitionRegistry.BUILDING_DEFS.get(p)
-								.forEach(f -> UIObjectFactory
-										.createManual(BuildingItemUIObject.class,
-												"image:" + new File(Consts.ICONS_BAKES_RES_DIR,
-														f.getInternalName().replace('.', '/') + ".png").getPath())
-										.set(i -> i.setIndex(p.getIndex()))
-										.set(j -> j.setTransform(new Transform3D(0.3f)))
-										.set(i -> i.setBuildingDefinition(f))
-										.add(tab.getContent())
-										.push())));
+								.forEach(f -> new BuildingItemUIObject(f).init().then(obj -> {
+									obj.setTransform(new Transform3D(0.3f));
+									tab.getContent().add(obj);
+								}))));
 
 		this.waterGroup = new IntegerStatLine("water-counter");
 		this.waterGroup
@@ -100,9 +92,7 @@ public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner
 						WaterIconUIObject.class,
 						IntegerTextUIObject.class,
 						SignedIntegerTextUIObject.class)
-				.then(obj ->
-
-				{
+				.then(obj -> {
 					obj.getValue().setValue(1000).flushValue();
 
 					obj.getPopup().setValue(999).flushValue();

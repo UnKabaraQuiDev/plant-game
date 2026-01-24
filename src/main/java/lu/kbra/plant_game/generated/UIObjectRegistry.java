@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
+import lu.kbra.plant_game.BuildingDefinition;
 import lu.kbra.plant_game.engine.entity.ui.FlatQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.MeshUIObject;
 import lu.kbra.plant_game.engine.entity.ui.ProgrammaticTexturedQuadMeshUIObject;
@@ -72,6 +73,7 @@ import lu.kbra.plant_game.engine.mesh.TexturedQuadMesh;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
 import lu.kbra.plant_game.engine.scene.ui.layout.Layout;
+import lu.kbra.plant_game.engine.scene.world.data.resource.ResourceType;
 import lu.kbra.plant_game.engine.util.InternalConstructorFunction;
 import lu.kbra.plant_game.engine.util.exceptions.UIObjectConstructorNotFound;
 import lu.kbra.plant_game.engine.util.exceptions.UIObjectNotFound;
@@ -83,6 +85,7 @@ import lu.kbra.plant_game.vanilla.scene.overlay.group.building.BuildingInfoUIObj
 import lu.kbra.plant_game.vanilla.scene.overlay.group.building.BuildingPanelUIObjectGroup;
 import lu.kbra.plant_game.vanilla.scene.overlay.group.building.BuildingTabButtonUIObjectGroup;
 import lu.kbra.plant_game.vanilla.scene.overlay.group.building.BuildingTabUIObjectGroup;
+import lu.kbra.plant_game.vanilla.scene.overlay.group.building.ResourceLineUIObjectGroup;
 import lu.kbra.plant_game.vanilla.scene.overlay.group.impl.AnchoredFixedPBUIObjectGroup;
 import lu.kbra.plant_game.vanilla.scene.overlay.group.impl.AnchoredLayoutUIObjectGroup;
 import lu.kbra.plant_game.vanilla.scene.overlay.group.impl.AnchoredPBUIObjectGroup;
@@ -296,6 +299,11 @@ public class UIObjectRegistry {
 		listScrollContainerUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObjectGroup.class, Direction.class, float.class, Layout.class, UIObject[].class}, (Object[] arr) -> (UIObject) new ScrollContainerUIObjectGroup((String) arr[0], (UIObjectGroup) arr[1], (Direction) arr[2], (float) arr[3], (Layout) arr[4], (UIObject[]) arr[5])));
 		UI_OBJECT_CONSTRUCTORS.put(ScrollContainerUIObjectGroup.class, listScrollContainerUIObjectGroup);
 
+		/*                 BuildingItemUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listBuildingItemUIObject = new ArrayList<>();
+		listBuildingItemUIObject.add(new InternalConstructorFunction<>(new Class[] {BuildingDefinition.class}, (Object[] arr) -> (UIObject) new BuildingItemUIObject((BuildingDefinition) arr[0])));
+		UI_OBJECT_CONSTRUCTORS.put(BuildingItemUIObject.class, listBuildingItemUIObject);
+
 		/*                 ProgressBarUIObject                 */
 		final List<InternalConstructorFunction<UIObject>> listProgressBarUIObject = new ArrayList<>();
 		listProgressBarUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObject[].class}, (Object[] arr) -> (UIObject) new ProgressBarUIObject((String) arr[0], (UIObject[]) arr[1])));
@@ -387,11 +395,6 @@ public class UIObjectRegistry {
 		final List<InternalConstructorFunction<UIObject>> listAnchoredFlatQuadUIObject = new ArrayList<>();
 		listAnchoredFlatQuadUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new AnchoredFlatQuadUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
 		UI_OBJECT_CONSTRUCTORS.put(AnchoredFlatQuadUIObject.class, listAnchoredFlatQuadUIObject);
-
-		/*                 BuildingItemFlatQuadUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listBuildingItemFlatQuadUIObject = new ArrayList<>();
-		listBuildingItemFlatQuadUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new BuildingItemUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
-		UI_OBJECT_CONSTRUCTORS.put(BuildingItemUIObject.class, listBuildingItemFlatQuadUIObject);
 
 		/*                 LayoutScrollDrivenUIObjectGroup                 */
 		final List<InternalConstructorFunction<UIObject>> listLayoutScrollDrivenUIObjectGroup = new ArrayList<>();
@@ -503,6 +506,11 @@ public class UIObjectRegistry {
 		final List<InternalConstructorFunction<UIObject>> listIBAnchoredFlatQuadUIObject = new ArrayList<>();
 		listIBAnchoredFlatQuadUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new IBAnchoredFlatQuadUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
 		UI_OBJECT_CONSTRUCTORS.put(IBAnchoredFlatQuadUIObject.class, listIBAnchoredFlatQuadUIObject);
+
+		/*                 ResourceLineUIObjectGroup                 */
+		final List<InternalConstructorFunction<UIObject>> listResourceLineUIObjectGroup = new ArrayList<>();
+		listResourceLineUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Layout.class, Direction2d.class, ResourceType.class}, (Object[] arr) -> (UIObject) new ResourceLineUIObjectGroup((String) arr[0], (Layout) arr[1], (Direction2d) arr[2], (ResourceType) arr[3])));
+		UI_OBJECT_CONSTRUCTORS.put(ResourceLineUIObjectGroup.class, listResourceLineUIObjectGroup);
 
 		/*                 OptionVolumeUIObjectGroup                 */
 		final List<InternalConstructorFunction<UIObject>> listOptionVolumeUIObjectGroup = new ArrayList<>();
