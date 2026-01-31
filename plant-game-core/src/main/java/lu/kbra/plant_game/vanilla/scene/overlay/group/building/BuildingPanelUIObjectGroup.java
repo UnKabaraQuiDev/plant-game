@@ -19,6 +19,7 @@ import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
 import lu.kbra.plant_game.engine.entity.ui.group.BuildingTabListUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwnerParentAware;
+import lu.kbra.plant_game.engine.entity.ui.impl.MarginOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsBoundsInput;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsUpdate;
 import lu.kbra.plant_game.engine.entity.ui.prim.BuildingItemUIObject;
@@ -32,7 +33,7 @@ import lu.kbra.plant_game.vanilla.scene.overlay.group.impl.AnchoredLayoutUIObjec
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;;
 
 public class BuildingPanelUIObjectGroup extends AnchoredLayoutUIObjectGroup
-		implements BoundsOwnerParentAware, NeedsBoundsInput, NeedsUpdate {
+		implements BoundsOwnerParentAware, NeedsBoundsInput, NeedsUpdate, MarginOwner {
 
 	protected Rectangle2D.Float fixedBounds = new Rectangle2D.Float(0, 0, 1, 1);
 	protected float boundsMarginX = 0.05f;
@@ -224,6 +225,16 @@ public class BuildingPanelUIObjectGroup extends AnchoredLayoutUIObjectGroup
 				+ this.targetAnchor + ", layout=" + this.layout + ", subEntitiesLock=" + this.subEntitiesLock + ", subEntities="
 				+ this.subEntities + ", computedBounds=" + this.computedBounds + ", transform=" + this.transform + ", active=" + this.active
 				+ ", name=" + this.name + "]";
+	}
+
+	@Override
+	public float getMargin() {
+		return 0.02f;
+	}
+
+	@Override
+	public void setMargin(final float m) {
+		throw new UnsupportedOperationException();
 	}
 
 }

@@ -26,15 +26,15 @@
      inkscape:deskcolor="#cccccc"
      inkscape:document-units="px"
      showgrid="true"
-     inkscape:zoom="6.5625002"
-     inkscape:cx="550.09522"
-     inkscape:cy="39.923808"
+     inkscape:zoom="4.6403884"
+     inkscape:cx="625.59419"
+     inkscape:cy="26.9374"
      inkscape:window-width="1920"
      inkscape:window-height="992"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
-     inkscape:current-layer="layer8">
+     inkscape:current-layer="layer10">
     <inkscape:grid
        type="xygrid"
        id="grid557"
@@ -116,9 +116,34 @@
        margin="0"
        bleed="0"
        inkscape:label="star" />
+    <inkscape:page
+       x="592"
+       y="0"
+       width="128"
+       height="64"
+       id="page5"
+       margin="0"
+       bleed="0" />
   </sodipodi:namedview>
   <defs
      id="defs429">
+    <inkscape:path-effect
+       effect="fillet_chamfer"
+       id="path-effect6"
+       is_visible="true"
+       lpeversion="1"
+       nodesatellites_param="F,0,0,1,0,6.8383557,0,1 @ F,0,0,1,0,6.8383557,0,1 @ F,0,0,1,0,6.8383557,0,1 @ F,0,0,1,0,6.8383557,0,1 @ F,0,0,1,0,6.8383557,0,1 @ F,0,0,1,0,6.8383557,0,1"
+       radius="6"
+       unit="px"
+       method="auto"
+       mode="F"
+       chamfer_steps="1"
+       flexible="false"
+       use_knot_distance="true"
+       apply_no_radius="true"
+       apply_with_radius="true"
+       only_selected="false"
+       hide_knots="false" />
     <inkscape:path-effect
        effect="spiro"
        id="path-effect10177"
@@ -325,8 +350,40 @@
   </defs>
   <g
      inkscape:groupmode="layer"
-     id="layer8"
-     inkscape:label="page8">
+     id="layer10"
+     inkscape:label="page10">
+    <rect
+       style="fill:#b9b9b9;stroke-width:10;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.7;fill-opacity:0.64999998"
+       id="rect6"
+       width="128"
+       height="64"
+       x="592"
+       y="0"
+       ry="10" />
+    <path
+       sodipodi:type="star"
+       style="fill:#ffffff;fill-opacity:0.65;stroke-width:10;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.7"
+       id="path6"
+       inkscape:flatsided="false"
+       sodipodi:sides="3"
+       sodipodi:cx="656"
+       sodipodi:cy="6.6804752"
+       sodipodi:r1="43.811367"
+       sodipodi:r2="21.905684"
+       sodipodi:arg1="0.53489298"
+       sodipodi:arg2="1.5820905"
+       inkscape:rounded="0"
+       inkscape:randomized="0"
+       d="m 686.85402,28.936042 -24.2635,-0.274048 -37.93934,-0.428513 a 3.9481265,3.9481265 60.64711 0 1 -3.35207,-5.960428 L 633.66819,1.3972722 653.00896,-31.244902 a 3.9481265,3.9481265 0.64711025 0 1 6.83792,0.07723 l 11.89441,21.149829 18.59857,33.070686 a 3.9481265,3.9481265 120.64711 0 1 -3.48584,5.883196 z"
+       inkscape:transform-center-x="0.21706963"
+       inkscape:transform-center-y="-9.4214632"
+       transform="matrix(0.87740391,0,0,0.87740391,80.600983,33.86193)"
+       inkscape:path-effect="#path-effect6" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer9"
+     inkscape:label="page9">
     <g
        id="g1"
        transform="matrix(0.38487166,0,0,0.39069041,-227.75222,34.353941)">
@@ -349,9 +406,9 @@
          transform="translate(204.21557,29.311549)"><tspan
            x="428.19336"
            y="191.22929"
-           id="tspan6"><tspan
+           id="tspan2"><tspan
              style="font-weight:normal;font-family:'Days One';-inkscape-font-specification:'Days One'"
-             id="tspan5">SATISFACTORY</tspan></tspan></text>
+             id="tspan1">SATISFACTORY</tspan></tspan></text>
       <rect
          style="fill:#000000;stroke-width:4.23273;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.7;paint-order:markers fill stroke"
          id="rect5"
@@ -366,10 +423,15 @@
          transform="matrix(0.71304789,-0.09672292,0.09672292,0.71304789,325.84954,-42.947042)"><tspan
            x="873.9067"
            y="508.33805"
-           id="tspan8"><tspan
+           id="tspan4"><tspan
              style="font-weight:bold;font-family:Purisa;-inkscape-font-specification:'Purisa Bold'"
-             id="tspan7">PLANT</tspan></tspan></text>
+             id="tspan3">PLANT</tspan></tspan></text>
     </g>
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer8"
+     inkscape:label="page8">
     <path
        sodipodi:type="star"
        style="fill:#ffffff;stroke-width:10;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.7;fill-opacity:1"

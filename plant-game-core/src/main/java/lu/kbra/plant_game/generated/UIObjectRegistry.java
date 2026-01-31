@@ -81,10 +81,13 @@ import lu.kbra.plant_game.engine.window.input.KeyOption;
 import lu.kbra.plant_game.vanilla.scene.menu.main.OptionKeyUIObjectGroup;
 import lu.kbra.plant_game.vanilla.scene.menu.main.OptionVolumeUIObjectGroup;
 import lu.kbra.plant_game.vanilla.scene.menu.main.OptionsUIObjectGroup;
+import lu.kbra.plant_game.vanilla.scene.overlay.group.building.AnchoredTexturedQuadMeshUIObject;
 import lu.kbra.plant_game.vanilla.scene.overlay.group.building.BuildingInfoUIObjectGroup;
+import lu.kbra.plant_game.vanilla.scene.overlay.group.building.BuildingPanelShowButtonUIObject;
 import lu.kbra.plant_game.vanilla.scene.overlay.group.building.BuildingPanelUIObjectGroup;
 import lu.kbra.plant_game.vanilla.scene.overlay.group.building.BuildingTabButtonUIObjectGroup;
 import lu.kbra.plant_game.vanilla.scene.overlay.group.building.BuildingTabUIObjectGroup;
+import lu.kbra.plant_game.vanilla.scene.overlay.group.building.ExtAnchoredTexturedQuadMeshUIObject;
 import lu.kbra.plant_game.vanilla.scene.overlay.group.building.ResourceLineUIObjectGroup;
 import lu.kbra.plant_game.vanilla.scene.overlay.group.impl.AnchoredFixedPBUIObjectGroup;
 import lu.kbra.plant_game.vanilla.scene.overlay.group.impl.AnchoredLayoutUIObjectGroup;
@@ -222,6 +225,11 @@ public class UIObjectRegistry {
 		UI_OBJECT_CONSTRUCTORS.put(CursorUIObject.class, listCursorUIObject);
 		DATA_PATH.put(CursorUIObject.class, "image:classpath:/icons/cursor-128.png");
 
+		/*                 AnchoredTexturedQuadMeshUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listAnchoredTexturedQuadMeshUIObject = new ArrayList<>();
+		listAnchoredTexturedQuadMeshUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new AnchoredTexturedQuadMeshUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
+		UI_OBJECT_CONSTRUCTORS.put(AnchoredTexturedQuadMeshUIObject.class, listAnchoredTexturedQuadMeshUIObject);
+
 		/*                 StarIconUIObject                 */
 		final List<InternalConstructorFunction<UIObject>> listStarIconUIObject = new ArrayList<>();
 		listStarIconUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new StarIconUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
@@ -266,6 +274,11 @@ public class UIObjectRegistry {
 		DATA_PATH.put(LevelButtonUIObject.class, "image:classpath:/icons/star-32.png");
 		TEXTURE_FILTER.put(LevelButtonUIObject.class, TextureFilter.NEAREST);
 		TEXTURE_WRAP.put(LevelButtonUIObject.class, TextureWrap.REPEAT);
+
+		/*                 ExtAnchoredTexturedQuadMeshUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listExtAnchoredTexturedQuadMeshUIObject = new ArrayList<>();
+		listExtAnchoredTexturedQuadMeshUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new ExtAnchoredTexturedQuadMeshUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
+		UI_OBJECT_CONSTRUCTORS.put(ExtAnchoredTexturedQuadMeshUIObject.class, listExtAnchoredTexturedQuadMeshUIObject);
 
 		/*                 BuildingTabButtonUIObjectGroup                 */
 		final List<InternalConstructorFunction<UIObject>> listBuildingTabButtonUIObjectGroup = new ArrayList<>();
@@ -395,6 +408,14 @@ public class UIObjectRegistry {
 		final List<InternalConstructorFunction<UIObject>> listAnchoredFlatQuadUIObject = new ArrayList<>();
 		listAnchoredFlatQuadUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new AnchoredFlatQuadUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
 		UI_OBJECT_CONSTRUCTORS.put(AnchoredFlatQuadUIObject.class, listAnchoredFlatQuadUIObject);
+
+		/*                 BuildingPanelShowButtonUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listBuildingPanelShowButtonUIObject = new ArrayList<>();
+		listBuildingPanelShowButtonUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new BuildingPanelShowButtonUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
+		UI_OBJECT_CONSTRUCTORS.put(BuildingPanelShowButtonUIObject.class, listBuildingPanelShowButtonUIObject);
+		DATA_PATH.put(BuildingPanelShowButtonUIObject.class, "image:classpath:/icons/Arrow-128.png");
+		TEXTURE_FILTER.put(BuildingPanelShowButtonUIObject.class, TextureFilter.LINEAR);
+		TEXTURE_WRAP.put(BuildingPanelShowButtonUIObject.class, TextureWrap.REPEAT);
 
 		/*                 LayoutScrollDrivenUIObjectGroup                 */
 		final List<InternalConstructorFunction<UIObject>> listLayoutScrollDrivenUIObjectGroup = new ArrayList<>();

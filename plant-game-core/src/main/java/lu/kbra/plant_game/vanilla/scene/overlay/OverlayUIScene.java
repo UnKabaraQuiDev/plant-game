@@ -8,6 +8,7 @@ import lu.kbra.plant_game.engine.UpdateFrameState;
 import lu.kbra.plant_game.engine.entity.ui.FlatQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.bar.AnchoredProgressBarUIObject;
+import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
 import lu.kbra.plant_game.engine.entity.ui.icon.EnergyIconUIObject;
 import lu.kbra.plant_game.engine.entity.ui.icon.MoneyIconUIObject;
 import lu.kbra.plant_game.engine.entity.ui.icon.WaterIconUIObject;
@@ -25,6 +26,7 @@ import lu.kbra.plant_game.engine.scene.ui.layout.Layout;
 import lu.kbra.plant_game.engine.scene.ui.layout.LayoutOwner;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.plant_game.vanilla.scene.overlay.group.building.BuildingInfoUIObjectGroup;
+import lu.kbra.plant_game.vanilla.scene.overlay.group.building.BuildingPanelShowButtonUIObject;
 import lu.kbra.plant_game.vanilla.scene.overlay.group.building.BuildingPanelUIObjectGroup;
 import lu.kbra.plant_game.vanilla.scene.overlay.group.building.BuildingTabUIObjectGroup;
 import lu.kbra.plant_game.vanilla.scene.overlay.group.impl.AnchoredLayoutUIObjectGroup;
@@ -71,7 +73,14 @@ public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner
 
 		final float height = 0.2f * STATS_GROUP_SCALE;
 
-		this.buildingPanel.init().then(this::add);
+		this.buildingPanel.init().then(c -> {
+			this.add(c);
+			UIObjectFactory.create(BuildingPanelShowButtonUIObject.class)
+					.set(i -> i.setTransform(new Transform3D(0.2f).rotationSet(0, (float) Math.PI, 0).update()))
+					.set(i -> i.setTarget(c, Anchor.BOTTOM_CENTER, Anchor.TOP_CENTER))
+					.add(this)
+					.push();
+		});
 
 		this.buildingInfo.init(workers, renderDispatcher).then(this::add);
 

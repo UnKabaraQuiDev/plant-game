@@ -8,7 +8,7 @@ import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
 import lu.kbra.plant_game.engine.scene.ui.layout.AnchorLayout;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 
-public interface ExtAnchorOwner extends AnchorOwner, Transform3DOwner, BoundsOwner, NeedsUpdate {
+public interface ExtAnchorOwner extends AnchorOwner, Transform3DOwner, BoundsOwner, NeedsUpdate, TransformedBoundsOwner {
 
 	UIObject getTarget();
 
@@ -25,13 +25,12 @@ public interface ExtAnchorOwner extends AnchorOwner, Transform3DOwner, BoundsOwn
 		this.setTargetAnchor(tar);
 	}
 
-	@Override
-	default boolean isAnchored() {
+	default boolean isExtAnchored() {
 		return AnchorOwner.super.isAnchored() && this.getTarget() != null;
 	}
 
 	default void applyAnchor() {
-		if (!this.isAnchored() || !this.hasTransform()) {
+		if (!this.isExtAnchored() || !this.hasTransform()) {
 			return;
 		}
 
@@ -43,7 +42,7 @@ public interface ExtAnchorOwner extends AnchorOwner, Transform3DOwner, BoundsOwn
 				: 0 + (this instanceof Margin2DOwner m2o ? m2o.getMarginZ() : 0);
 
 		AnchorLayout.alignAnchors(this.getTransform(),
-				this.getBounds().getBounds2D(),
+				this.getLocalTransformedBounds().getBounds2D(),
 				targetBounds.getBounds2D(),
 				this.getObjectAnchor(),
 				this.getTargetAnchor(),
