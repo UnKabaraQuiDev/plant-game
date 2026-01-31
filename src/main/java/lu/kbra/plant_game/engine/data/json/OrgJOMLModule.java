@@ -29,7 +29,7 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
-public class OrgJOMLModule extends SimpleModule {
+public final class OrgJOMLModule extends SimpleModule {
 
 	public OrgJOMLModule() {
 		super("OrgJOMLModule");

@@ -15,7 +15,7 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
-public class OrgJSONModule extends SimpleModule {
+public final class OrgJSONModule extends SimpleModule {
 
 	public OrgJSONModule() {
 		super("OrgJSONModule");

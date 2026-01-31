@@ -1,6 +1,7 @@
 package lu.kbra.plant_game;
 
 import java.io.File;
+import java.nio.file.Paths;
 import java.util.Locale;
 import java.util.function.Consumer;
 
@@ -14,6 +15,7 @@ import lu.pcy113.pclib.PCUtils;
 import lu.kbra.plant_game.engine.UpdateFrameState;
 import lu.kbra.plant_game.engine.data.json.OrgJOMLModule;
 import lu.kbra.plant_game.engine.data.json.OrgJSONModule;
+import lu.kbra.plant_game.engine.data.json.VersionMatcherModule;
 import lu.kbra.plant_game.engine.data.locale.LocalizationService;
 import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory;
 import lu.kbra.plant_game.engine.entity.go.obj_inst.particles.GravityParticleGameObject;
@@ -41,6 +43,7 @@ public class PGLogic extends GameLogic {
 		OBJECT_MAPPER = new ObjectMapper();
 		OBJECT_MAPPER.registerModule(new OrgJSONModule());
 		OBJECT_MAPPER.registerModule(new OrgJOMLModule());
+		OBJECT_MAPPER.registerModule(new VersionMatcherModule());
 	}
 
 	public final WorkerDispatcher WORKERS = new WorkerDispatcher("WORKERS", 8);
@@ -52,6 +55,8 @@ public class PGLogic extends GameLogic {
 	private DeferredCompositor compositor;
 
 	private MappingInputHandler inputHandler;
+
+	private PluginJarLoader pluginJarLoader = new PluginJarLoader();
 
 	public PGLogic() {
 		INSTANCE = this;
@@ -67,6 +72,8 @@ public class PGLogic extends GameLogic {
 		// this.inputHandler.saveMappings(new File(Consts.CONFIG_DIR, "mappings.json"));
 
 		VanillaBuildingDefinitionRegistry.init();
+
+		this.pluginJarLoader.loadAll(Paths.get("plugins"));
 
 		this.compositor = new DeferredCompositor(this.engine, this.engine.getRenderThread());
 		this.compositor.getBackgroundColor().set(1, 1, 0, 1);
