@@ -2,104 +2,47 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	
 	<groupId>lu.kbra</groupId>
 	<artifactId>plant-game</artifactId>
 	<version>0.1</version>
-
+	<packaging>pom</packaging>
 	<name>Plant Game</name>
 	<description>A game about plants</description>
-
+	<modules>
+		<module>plant-game-core</module>
+		<module>plant-game-vanilla</module>
+	</modules>
 	<properties>
 		<java.version>21</java.version>
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
+		<plugins.dir>${project.basedir}/plugins</plugins.dir>
 	</properties>
-
-	<dependencies>
-		<dependency>
-			<groupId>lu.kbra</groupId>
-			<artifactId>gameengine</artifactId>
-			<version>0.1</version>
-		</dependency>
-
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.13.2</version>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>com.squareup</groupId>
-			<artifactId>javapoet</artifactId>
-			<version>1.10.0</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.reflections</groupId>
-			<artifactId>reflections</artifactId>
-			<version>0.10.2</version>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
-
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.11.0</version>
-				<executions>
-					<execution>
-						<id>compile-generator</id>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>compile</goal>
-						</goals>
-						<configuration>
-							<includes>
-								<include>**/*GenMain.java</include>
-							</includes>
-							<outputDirectory>
-								${project.build.directory}/generated-classes</outputDirectory>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.1.2</version>
-				<configuration>
-					<includes>
-						<include>**/*GenMain.java</include>
-					</includes>
-					<additionalClasspathElements>
-						<additionalClasspathElement>
-							${project.build.directory}/generated-classes</additionalClasspathElement>
-					</additionalClasspathElements>
-				</configuration>
-			</plugin>
-
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>exec-maven-plugin</artifactId>
-				<version>3.5.0</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>java</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<mainClass>lu.kbra.plant_game.PGMain</mainClass>
-				</configuration>
-			</plugin>
-
-		</plugins>
-	</build>
-
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>lu.kbra</groupId>
+				<artifactId>gameengine</artifactId>
+				<version>0.1</version>
+			</dependency>
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>4.13.2</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>com.squareup</groupId>
+				<artifactId>javapoet</artifactId>
+				<version>1.10.0</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.reflections</groupId>
+				<artifactId>reflections</artifactId>
+				<version>0.10.2</version>
+				<scope>test</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 </project>
