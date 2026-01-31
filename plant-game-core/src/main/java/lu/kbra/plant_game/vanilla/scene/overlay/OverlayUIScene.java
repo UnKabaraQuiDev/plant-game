@@ -13,20 +13,22 @@ import lu.kbra.plant_game.engine.entity.ui.icon.EnergyIconUIObject;
 import lu.kbra.plant_game.engine.entity.ui.icon.MoneyIconUIObject;
 import lu.kbra.plant_game.engine.entity.ui.icon.WaterIconUIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.PaddingOwner;
-import lu.kbra.plant_game.engine.entity.ui.prim.BuildingItemUIObject;
+import lu.kbra.plant_game.engine.entity.ui.prim.BuildingItemUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.text.IntegerTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.PercentageIntTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.PercentageSignedIntTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.SignedIntegerTextUIObject;
+import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
 import lu.kbra.plant_game.engine.scene.ui.layout.AnchorLayout;
 import lu.kbra.plant_game.engine.scene.ui.layout.FlowLayout;
 import lu.kbra.plant_game.engine.scene.ui.layout.Layout;
 import lu.kbra.plant_game.engine.scene.ui.layout.LayoutOwner;
+import lu.kbra.plant_game.engine.scene.world.data.resource.DefaultResourceType;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.plant_game.vanilla.scene.overlay.group.building.BuildingInfoUIObjectGroup;
-import lu.kbra.plant_game.vanilla.scene.overlay.group.building.BuildingPanelShowButtonUIObject;
+import lu.kbra.plant_game.vanilla.scene.overlay.group.building.BuildingPanelToggleButtonUIObject;
 import lu.kbra.plant_game.vanilla.scene.overlay.group.building.BuildingPanelUIObjectGroup;
 import lu.kbra.plant_game.vanilla.scene.overlay.group.building.BuildingTabUIObjectGroup;
 import lu.kbra.plant_game.vanilla.scene.overlay.group.impl.AnchoredLayoutUIObjectGroup;
@@ -34,6 +36,7 @@ import lu.kbra.plant_game.vanilla.scene.overlay.stat_line.integer.ExtAnchoredInt
 import lu.kbra.plant_game.vanilla.scene.overlay.stat_line.integer.IntegerStatLine;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
+import lu.kbra.standalone.gameengine.impl.future.WorkerDispatcher;
 import lu.kbra.standalone.gameengine.objs.entity.ParentAwareComponent;
 import lu.kbra.standalone.gameengine.objs.entity.ParentAwareNode;
 import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
@@ -75,67 +78,53 @@ public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner
 
 		this.buildingPanel.init().then(c -> {
 			this.add(c);
-			UIObjectFactory.create(BuildingPanelShowButtonUIObject.class)
+			UIObjectFactory.create(BuildingPanelToggleButtonUIObject.class)
 					.set(i -> i.setTransform(new Transform3D(0.2f).rotationSet(0, (float) Math.PI, 0).update()))
 					.set(i -> i.setTarget(c, Anchor.BOTTOM_CENTER, Anchor.TOP_CENTER))
 					.add(this)
 					.push();
 		});
 
-		this.buildingInfo.init(workers, renderDispatcher).then(this::add);
+		this.buildingInfo.init(workers, renderDispatcher).then(c -> {
+			c.getTransform().translationAddY(0.5f);
+			c.setActive(false);
+			this.add(c);
+		});
 
 		BuildingDefinitionRegistry.BUILDING_DEFS.keySet()
 				.forEach(p -> this.buildingPanel
 						.addTab(new BuildingTabUIObjectGroup(p.getLocalizationKey(), p.getIndex(), p.getAccentColor()))
 						.then(tab -> BuildingDefinitionRegistry.BUILDING_DEFS.get(p)
-								.forEach(f -> new BuildingItemUIObject(f).init().then(obj -> {
+								.forEach(f -> new BuildingItemUIObjectGroup(f).init().then(obj -> {
 									obj.setTransform(new Transform3D(0.3f));
 									tab.getContent().add(obj);
 								}))));
 
 		this.waterGroup = new IntegerStatLine("water-counter");
-		this.waterGroup
-				.init(workers,
-						renderDispatcher,
-						height,
-						WaterIconUIObject.class,
-						IntegerTextUIObject.class,
-						SignedIntegerTextUIObject.class)
-				.then(obj -> {
-					obj.getValue().setValue(1000).flushValue();
-
-					obj.getPopup().setValue(999).flushValue();
-				});
+		this.waterGroup.init(workers,
+				renderDispatcher,
+				height,
+				WaterIconUIObject.class,
+				IntegerTextUIObject.class,
+				SignedIntegerTextUIObject.class);
 		this.statsGroup.add(this.waterGroup);
 
 		this.moneyGroup = new IntegerStatLine("money-counter");
-		this.moneyGroup
-				.init(workers,
-						renderDispatcher,
-						height,
-						MoneyIconUIObject.class,
-						IntegerTextUIObject.class,
-						SignedIntegerTextUIObject.class)
-				.then(obj -> {
-					obj.getValue().setValue(65).flushValue();
-
-					obj.getPopup().setValue(10).flushValue();
-				});
+		this.moneyGroup.init(workers,
+				renderDispatcher,
+				height,
+				MoneyIconUIObject.class,
+				IntegerTextUIObject.class,
+				SignedIntegerTextUIObject.class);
 		this.statsGroup.add(this.moneyGroup);
 
 		this.energyGroup = new IntegerStatLine("energy-counter");
-		this.energyGroup
-				.init(workers,
-						renderDispatcher,
-						height,
-						EnergyIconUIObject.class,
-						IntegerTextUIObject.class,
-						SignedIntegerTextUIObject.class)
-				.then(obj -> {
-					obj.getValue().setValue(99999).flushValue();
-
-					obj.getPopup().setValue(100).flushValue();
-				});
+		this.energyGroup.init(workers,
+				renderDispatcher,
+				height,
+				EnergyIconUIObject.class,
+				IntegerTextUIObject.class,
+				SignedIntegerTextUIObject.class);
 		this.statsGroup.add(this.energyGroup);
 
 		this.progressBar = new AnchoredProgressBarUIObject("level-progress-bar",
@@ -178,6 +167,24 @@ public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner
 
 			this.progressGroup.set((int) (this.progressBar.getValue() * 101)).flushValue();
 		}
+	}
+
+	int frameCounter = 0;
+
+	@Override
+	public void update(
+			final WindowInputHandler inputHandler,
+			final DeferredCompositor compositor,
+			final WorkerDispatcher workers,
+			final Dispatcher render) {
+		super.update(inputHandler, compositor, workers, render);
+//		PGLogic.INSTANCE.getGameData()
+//				.getResources()
+//				.compute(DefaultResourceType.WATER, (k, v) -> v + (this.frameCounter++ % 200 == 0 ? (int) Math.rint(Math.random()) : 0));
+
+		this.waterGroup.setTarget(PGLogic.INSTANCE.getGameData().getResources().get(DefaultResourceType.WATER));
+		this.energyGroup.setTarget(PGLogic.INSTANCE.getGameData().getResources().get(DefaultResourceType.ENERGY));
+		this.moneyGroup.setTarget(PGLogic.INSTANCE.getGameData().getResources().get(DefaultResourceType.MONEY));
 	}
 
 	public BuildingInfoUIObjectGroup getBuildingInfo() {

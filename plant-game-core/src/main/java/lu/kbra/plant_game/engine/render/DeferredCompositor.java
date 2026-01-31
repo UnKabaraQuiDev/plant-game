@@ -628,30 +628,21 @@ public class DeferredCompositor implements Cleanupable {
 
 	protected void renderScene(final Scene scene, final Method method) {
 		final RenderShader meshShader;
-//		final RenderShader animatedMeshShader;
 		final RenderShader textEmitterShader;
 		final RenderShader instanceEmitterShader;
 		final RenderShader gradientMeshShader;
-//		final RenderShader swayMeshShader;
-//		final RenderShader swayInstanceEmitterShader;
 		switch (method) {
 		case DEFERRED -> {
 			meshShader = this.deferredTransferShader;
-//			animatedMeshShader = this.deferredTransferShader;
 			textEmitterShader = null;
 			instanceEmitterShader = this.deferredInstanceTransferShader;
 			gradientMeshShader = null;
-//			swayMeshShader = this.deferredTransferShader;
-//			swayInstanceEmitterShader = this.deferredSwayInstanceTransferShader;
 		}
 		case DIRECT -> {
 			meshShader = this.directShader;
-//			animatedMeshShader = this.directShader;
 			textEmitterShader = this.directTextShader;
 			instanceEmitterShader = this.directInstanceShader;
 			gradientMeshShader = this.directGradientShader;
-//			swayMeshShader = null;
-//			swayInstanceEmitterShader = null;
 		}
 		default -> {
 			throw new IllegalArgumentException(Objects.toString(method));
@@ -659,22 +650,17 @@ public class DeferredCompositor implements Cleanupable {
 		}
 
 		this.setupSceneUniforms(Arrays.asList(meshShader,
-//				animatedMeshShader,
 				textEmitterShader,
 				instanceEmitterShader,
 				gradientMeshShader,
-//				swayMeshShader,
-//				swayInstanceEmitterShader,
 				this.lineDirectShader,
 				this.lineInstanceDirectShader), scene);
 
-		scene.forEach(entity -> this.renderEntityRecursive(entity, meshShader,
-//				animatedMeshShader,
+		scene.forEach(entity -> this.renderEntityRecursive(entity,
+				meshShader,
 				textEmitterShader,
 				instanceEmitterShader,
 				gradientMeshShader,
-//				swayMeshShader,
-//				swayInstanceEmitterShader,
 				method,
 				GameEngine.IDENTITY_MATRIX4F));
 
@@ -1424,7 +1410,7 @@ public class DeferredCompositor implements Cleanupable {
 		this.objectId.set(r, g, b, a);
 	}
 
-	public void addOutline(final SceneEntity e, final Vector4f color) {
+	public void addOutline(final SceneEntity e, final Vector4fc color) {
 		Objects.requireNonNull(e);
 		if (!(e instanceof final GameObject go)) {
 			throw new UnsupportedOperationException("Unsupported object: " + e + " (" + e.getClass().getName() + ")");

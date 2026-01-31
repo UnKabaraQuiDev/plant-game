@@ -1,11 +1,15 @@
 package lu.kbra.plant_game.engine.scene.world;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.joml.Quaternionf;
@@ -13,8 +17,6 @@ import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
-import org.joml.Vector3ic;
-import org.joml.Vector4f;
 
 import lu.pcy113.pclib.PCUtils;
 import lu.pcy113.pclib.datastructure.pair.Pair;
@@ -22,9 +24,9 @@ import lu.pcy113.pclib.datastructure.triplet.Triplet;
 import lu.pcy113.pclib.datastructure.triplet.Triplets;
 import lu.pcy113.pclib.impl.ThrowingConsumer;
 import lu.pcy113.pclib.impl.ThrowingFunction;
-import lu.pcy113.pclib.impl.ThrowingRunnable;
 import lu.pcy113.pclib.logger.GlobalLogger;
 
+import lu.kbra.plant_game.PGLogic;
 import lu.kbra.plant_game.engine.UpdateFrameState;
 import lu.kbra.plant_game.engine.entity.go.AnimatedMeshGameObject;
 import lu.kbra.plant_game.engine.entity.go.GameObject;
@@ -36,12 +38,11 @@ import lu.kbra.plant_game.engine.entity.go.mesh.pipe.PipeMesh;
 import lu.kbra.plant_game.engine.entity.go.mesh.terrain.TerrainEdgeMesh;
 import lu.kbra.plant_game.engine.entity.go.mesh.terrain.TerrainMesh;
 import lu.kbra.plant_game.engine.entity.go.obj.terrain.TerrainEdgeObject;
+import lu.kbra.plant_game.engine.entity.go.obj.terrain.TerrainGameObject;
 import lu.kbra.plant_game.engine.entity.go.obj.terrain.TerrainHighlightObject;
-import lu.kbra.plant_game.engine.entity.go.obj.terrain.TerrainObject;
 import lu.kbra.plant_game.engine.entity.impl.InstanceEmitterOwner;
 import lu.kbra.plant_game.engine.entity.impl.MaterialIdOwner;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
-import lu.kbra.plant_game.engine.scene.world.data.LevelData;
 import lu.kbra.plant_game.engine.scene.world.generator.ImageWorldGenerator;
 import lu.kbra.plant_game.engine.scene.world.generator.WorldGenerator;
 import lu.kbra.plant_game.engine.scene.world.particle.ParticleManager;
@@ -78,14 +79,12 @@ import lu.kbra.standalone.gameengine.utils.consts.Direction;
 import lu.kbra.standalone.gameengine.utils.gl.consts.BufferType;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-public class WorldLevelScene extends Scene3D {
-
-	private LevelData levelData;
+public class WorldLevelScene extends Scene3D implements ActiveModalController {
 
 	private final CacheManager worldCache;
 
 	private GameObject waterLevel;
-	private TerrainObject terrain;
+	private TerrainGameObject terrain;
 
 	private Vector3f lightColor = new Vector3f(1);
 	private Vector3f lightDirection = new Vector3f(0.8f, 0.5f, 0.5f).normalize();
@@ -99,16 +98,16 @@ public class WorldLevelScene extends Scene3D {
 
 	private final ParticleManager particleManager;
 
-	private boolean movingObject = false;
-	private PlaceableObject attachedObject = null;
-	private Direction targetRotation = Direction.NONE;
-	private TaskFuture<?, Void>.TaskState<Void> moveObjectTaskState;
+	private final Map<Class<? extends Modal>, Modal> modals = Collections.synchronizedMap(new HashMap<>());
+	private Modal activeModal;
 
 	public WorldLevelScene(final String name, final CacheManager parentCache) {
 		super(name);
 		this.worldCache = new CacheManager(name, parentCache);
 
 		this.particleManager = new ParticleManager(parentCache, this);
+
+		this.registerModal(new MoveBuildingModal(this, PGLogic.INSTANCE.getCompositor()));
 
 		this.getCamera().setPosition(new Vector3f(-20, 25, 20).mul(1.5f));
 		this.getCamera().lookAt(this.getCamera().getPosition(), new Vector3f(0, 0, 0)).updateMatrix();
@@ -118,10 +117,6 @@ public class WorldLevelScene extends Scene3D {
 
 	public void init(final Dispatcher workers, final Dispatcher renderDispatcher) {
 		final CountDownLatch terrainLatch = new CountDownLatch(1);
-
-		this.moveObjectTaskState = new TaskFuture<Void, Void>(workers, (ThrowingRunnable<Throwable>) () -> {
-			terrainLatch.await();
-		}).push();
 
 		new TaskFuture<>(workers, (Supplier<WorldGenerator>) () -> {
 			final WorldGenerator worldGenerator = new ImageWorldGenerator("classpath:/maps/world_map.png", 4 / 255f);
@@ -145,7 +140,7 @@ public class WorldLevelScene extends Scene3D {
 				0).then(workers, (Consumer<Triplet<TerrainMesh, TerrainEdgeMesh, Mesh>>) meshes -> {
 					GlobalLogger.info("Creating entity...");
 					final long time = PCUtils.nanoTime((Runnable) () -> {
-						final TerrainObject terrainEntity = new TerrainObject("terrain", meshes.getFirst());
+						final TerrainGameObject terrainEntity = new TerrainGameObject("terrain", meshes.getFirst());
 
 						terrainEntity.setTerrainEdgeEntity(GameObjectFactory.createManual(TerrainEdgeObject.class, meshes.getSecond())
 								.set(i -> i.setTransform(new Transform3D(new Vector3f(0, 0, 0))))
@@ -403,6 +398,10 @@ public class WorldLevelScene extends Scene3D {
 		this.posAdd.zero();
 		this.rotation = 0;
 
+		if (this.activeModal != null) {
+			this.activeModal.input(inputHandler, frameState);
+		}
+
 		if (!frameState.uiSceneCaughtKeyboardInput) {
 			if (inputHandler.isKeyHeld(StandardKeyOption.FORWARD)) {
 				this.posAdd.z -= 1;
@@ -423,30 +422,10 @@ public class WorldLevelScene extends Scene3D {
 				this.rotation += 1;
 			}
 
-			if (inputHandler.isKeyPressedOrRepeat(StandardKeyOption.TURN_CW)) {
-				this.targetRotation = this.targetRotation.getClockwise();
-			}
-			if (inputHandler.isKeyPressedOrRepeat(StandardKeyOption.TURN_CCW)) {
-				this.targetRotation = this.targetRotation.getCounterClockwise();
-			}
 		}
 
 		if (!frameState.uiSceneCaughtMouseInput) {
 			this.fovDiff = (float) (inputHandler.getMouseScroll().y * 0.05f);
-
-			if (inputHandler.isMouseButtonPressedOnce(StandardKeyOption.PLACE)) {
-				if (this.attachedObject != null) {
-					if (!this.isPlaceable(this.attachedObject, this.pos, this.targetRotation)) {
-						// TODO: play error sound or smth
-//						PGLogic.INSTANCE.getCompositor().addOutline(this.attachedObject, new Vector4f(1f, 0.2f, 0.2f, 1));
-					} else {
-						this.movingObject = false;
-//						PGLogic.INSTANCE.getCompositor().addOutline(this.attachedObject, new Vector4f(0.2f, 0.8f, 0.2f, 1));
-					}
-				} else {
-					this.movingObject = true;
-				}
-			}
 		}
 	}
 
@@ -455,65 +434,17 @@ public class WorldLevelScene extends Scene3D {
 			final DeferredCompositor compositor,
 			final Dispatcher workers,
 			final Dispatcher renderDispatcher) {
-		if (this.moveObjectTaskState == null || this.moveObjectTaskState.isDone()) {
-			if (this.movingObject) {
-				if (this.attachedObject == null) {
-					this.moveObjectTaskState = new TaskFuture<Void, Void>(workers, (Runnable) () -> {
-						compositor.pollObjectId(true);
+		if (this.activeModal != null) {
+			this.activeModal.update(inputHandler, compositor, workers, renderDispatcher);
+		}
 
-						final Vector3ic ids = new Vector3i(compositor.getObjectId().y(),
-								compositor.getObjectId().z(),
-								compositor.getObjectId().w());
+		if (!this.hasActiveModal() && inputHandler.isMouseButtonPressedOnce(StandardKeyOption.PLACE)) {
+			final MoveBuildingModal modal = this.getModal(MoveBuildingModal.class);
 
-						this.attachedObject = (PlaceableObject) super.getEntities().values()
-								.parallelStream()
-								.filter(e -> e instanceof GameObject && e instanceof PlaceableObject
-										&& ((GameObject) e).getObjectIdLocation() == AttributeLocation.ENTITY)
-								.filter(e -> ids.equals(((GameObject) e).getObjectId()))
-								.findFirst()
-								.orElse(null);
-
-						this.terrain.getTerrainHighlightObject().setActive(true);
-
-						if (this.attachedObject == null) {
-							this.moveObjectTaskState = null;
-							this.movingObject = false;
-						} else {
-							compositor.addOutline(this.attachedObject, new Vector4f(0.2f, 0.8f, 0.2f, 1));
-							this.targetRotation = this.attachedObject.getRotation();
-						}
-					}).push();
-				} else {
-					final Vector2f mousePos = inputHandler.getMousePosition();
-					this.moveObjectTaskState = new TaskFuture<Void, Void>(renderDispatcher, (Runnable) () -> {
-						this.pos = this.getTerrain()
-								.pickTerrainCell(super.getCamera(),
-										mousePos,
-										compositor.getWindow().getWidth(),
-										compositor.getWindow().getHeight());
-						if (this.pos != null) {
-							this.terrain.getTerrainHighlightObject()
-									.getTransform()
-									.translationSet(this.getTerrain().getCellPosition(this.pos))
-									.translationSub(this.getTerrain().getTransform().getTranslation())
-									.updateMatrix();
-							this.attachedObject.placeDown(this.getTerrain(), this.pos, this.targetRotation);
-							if (this.isPlaceable(this.attachedObject, this.pos, this.targetRotation)) {
-								compositor.addOutline(this.attachedObject, new Vector4f(0.2f, 0.8f, 0.2f, 1));
-							} else {
-								compositor.addOutline(this.attachedObject, new Vector4f(1f, 0.2f, 0.2f, 1));
-							}
-						} else {
-							compositor.addOutline(this.attachedObject, new Vector4f(1f, 0.2f, 0.2f, 1));
-						}
-					}).push();
-				}
-			} else if (this.attachedObject != null) {
-				compositor.removeOutline(this.attachedObject);
-				this.terrain.getTerrainHighlightObject().setActive(false);
-				this.attachedObject = null;
-				this.moveObjectTaskState = null;
-			}
+			this.getClickedObject(workers, compositor).then(workers, (Consumer<Optional<PlaceableObject>>) obj -> obj.ifPresent(o -> {
+				modal.setAttachedObject(o);
+				this.startModal(modal);
+			})).push();
 		}
 
 		final float time = (float) inputHandler.getGameEngine().getTotalTime();
@@ -531,13 +462,32 @@ public class WorldLevelScene extends Scene3D {
 
 		final Camera3D camera = super.getCamera();
 		camera.getProjection().setFov(camera.getProjection().getFov() + this.fovDiff);
-//		System.err.println(camera.getProjection().getFov());
 		camera.getPosition().fma(dTime * 10, this.posAdd);
 		camera.getRotation().rotateY((float) Math.toRadians(this.rotation * 50 * dTime));
 		camera.updateMatrix();
 	}
 
-	private boolean isPlaceable(final PlaceableObject targetObject, final Vector2i targetPos, final Direction targetRotation) {
+	public TaskFuture<?, Optional<PlaceableObject>> getClickedObject(final Dispatcher workers, final DeferredCompositor compositor) {
+		return this.getClickedId(workers, compositor)
+				.then(workers,
+						(Function<Vector3i, Optional<PlaceableObject>>) ids -> super.getEntities().values()
+								.parallelStream()
+								.filter(e -> e instanceof GameObject && e instanceof PlaceableObject
+										&& ((GameObject) e).getObjectIdLocation() == AttributeLocation.ENTITY)
+								.filter(e -> ids.equals(((GameObject) e).getObjectId()))
+								.map(PlaceableObject.class::cast)
+								.findFirst());
+	}
+
+	public TaskFuture<?, Vector3i> getClickedId(final Dispatcher workers, final DeferredCompositor compositor) {
+		return new TaskFuture<>(workers, (Supplier<Vector3i>) () -> {
+			compositor.pollObjectId(true);
+
+			return new Vector3i(compositor.getObjectId().y(), compositor.getObjectId().z(), compositor.getObjectId().w());
+		});
+	}
+
+	public boolean isPlaceable(final PlaceableObject targetObject, final Vector2i targetPos, final Direction targetRotation) {
 		if (!targetObject.isPlaceable(this, targetPos, targetRotation)) {
 			return false;
 		}
@@ -554,7 +504,21 @@ public class WorldLevelScene extends Scene3D {
 	}
 
 	public void render(final float dTime) {
+		if (this.activeModal != null) {
+			this.activeModal.render(dTime);
+		}
+
 		this.particleManager.render(dTime);
+	}
+
+	@Override
+	public Modal getActiveModal() {
+		return this.activeModal;
+	}
+
+	@Override
+	public void setActiveModal(final Modal activeModal) {
+		this.activeModal = activeModal;
 	}
 
 	public GameObject getWaterLevel() {
@@ -567,11 +531,11 @@ public class WorldLevelScene extends Scene3D {
 		return waterLevel;
 	}
 
-	public TerrainObject getTerrain() {
+	public TerrainGameObject getTerrain() {
 		return this.terrain;
 	}
 
-	public void setTerrain(final TerrainObject terrain) {
+	public void setTerrain(final TerrainGameObject terrain) {
 		super.replace(this.terrain, terrain);
 		this.terrain = terrain;
 	}
@@ -620,6 +584,11 @@ public class WorldLevelScene extends Scene3D {
 
 	public ParticleManager getParticleManager() {
 		return this.particleManager;
+	}
+
+	@Override
+	public Map<Class<? extends Modal>, Modal> getModals() {
+		return this.modals;
 	}
 
 }

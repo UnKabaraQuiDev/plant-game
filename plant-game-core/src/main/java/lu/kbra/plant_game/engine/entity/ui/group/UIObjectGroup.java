@@ -98,7 +98,7 @@ public class UIObjectGroup extends UIObject implements ObjectGroup<UIObject>, No
 
 	@Override
 	public void doSort() {
-		ObjectGroup.super.sort(INDEX_COMPARATOR);
+		ObjectGroup.super.sort(UI_OBJECT_COMPARATOR);
 	}
 
 	@Override

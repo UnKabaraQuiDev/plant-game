@@ -52,8 +52,9 @@ public class BuildingInfoUIObjectGroup extends FixedBoundsUIObjectGroup implemen
 	protected Anchor objectAnchor = Anchor.BOTTOM_CENTER;
 	protected Anchor targetAnchor = Anchor.TOP_CENTER;
 	protected WeakReference<UIObject> target;
+	protected WeakReference<BuildingDefinition<?>> buildingDef;
 
-	protected float margin = 0.05f;
+	protected float margin = 0.1f;
 	protected float padding = 0.02f;
 
 	public BuildingInfoUIObjectGroup() {
@@ -66,8 +67,13 @@ public class BuildingInfoUIObjectGroup extends FixedBoundsUIObjectGroup implemen
 		this.add(this.content);
 	}
 
-	public void setBuildingDefinition(final BuildingDefinition<?> buildingDefinition) {
+	public boolean setBuildingDefinition(final BuildingDefinition<?> buildingDefinition) {
+		if (this.buildingDef != null && this.buildingDef.get() == buildingDefinition) {
+			return false;
+		}
+		this.buildingDef = new WeakReference<>(buildingDefinition);
 		buildingDefinition.accept(this);
+		return true;
 	}
 
 	public ObjectTriggerLatch<? extends BuildingInfoUIObjectGroup> init(final Dispatcher workers, final Dispatcher render) {
@@ -79,7 +85,7 @@ public class BuildingInfoUIObjectGroup extends FixedBoundsUIObjectGroup implemen
 		/* backdrop */
 		UIObjectFactory.create(IBAnchoredFlatQuadUIObject.class)
 				.set(i -> i.setTransform(new Transform3D(new Vector3f(0, -0.2f, 0), new Quaternionf(), new Vector3f(1f / this.size, 1, 1))))
-				.set(i -> i.setColor(new Vector4f(ColorMaterial.DARK_GRAY.getColor()).mul(1, 1, 1, 0.5f)))
+				.set(i -> i.setColor(new Vector4f(ColorMaterial.DARK_GRAY.getColor()).mul(1, 1, 1, 0.8f)))
 				.set(i -> i.setAnchors(Anchor.CENTER_CENTER, Anchor.CENTER_CENTER))
 				.add(this)
 				.get(this.backdrop)
@@ -105,7 +111,7 @@ public class BuildingInfoUIObjectGroup extends FixedBoundsUIObjectGroup implemen
 				rt,
 				(Consumer<ListTriggerLatch<UIObject>>) line -> UIObjectFactory
 						.createText(AnchoredProgrammaticTextUIObject.class, FONT_HEIGHT, key)
-						.set(i -> i.setTransform(new Transform3D()))
+						.set(i -> i.setTransform(new Transform3D(new Vector3f(0, 0.2f, 0))))
 						.set(i -> i.setAnchors(Anchor.CENTER_LEFT, Anchor.CENTER_LEFT))
 						.latch(line)
 						.push(),

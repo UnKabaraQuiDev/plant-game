@@ -19,7 +19,7 @@ import lu.kbra.standalone.gameengine.objs.entity.ParentAwareComponent;
 import lu.kbra.standalone.gameengine.scene.camera.Camera3D;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-public class TerrainObject extends MeshGameObject implements SynchronizedEntityContainer<GameObject> {
+public class TerrainGameObject extends MeshGameObject implements SynchronizedEntityContainer<GameObject> {
 
 	protected Object subEntitiesLock = new Object();
 	protected List<GameObject> subEntities = Collections.synchronizedList(new ArrayList<>());
@@ -30,7 +30,7 @@ public class TerrainObject extends MeshGameObject implements SynchronizedEntityC
 	protected TerrainHighlightObject terrainHighlightObject;
 	protected GameObject terrainWaterObject;
 
-	public TerrainObject(final String str, final TerrainMesh mesh) {
+	public TerrainGameObject(final String str, final TerrainMesh mesh) {
 		super(str, mesh);
 		this.setIsEntityMaterialId(false);
 		this.setObjectIdLocation(AttributeLocation.MESH);
@@ -135,7 +135,7 @@ public class TerrainObject extends MeshGameObject implements SynchronizedEntityC
 		return this.terrainEdgeObject;
 	}
 
-	public TerrainHighlightObject getTerrainHighlightObject() {
+	public TerrainHighlightObject getMoveHighlightObject() {
 		return this.terrainHighlightObject;
 	}
 

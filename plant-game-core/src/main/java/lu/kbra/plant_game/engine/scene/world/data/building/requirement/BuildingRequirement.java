@@ -3,7 +3,7 @@ package lu.kbra.plant_game.engine.scene.world.data.building.requirement;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
-import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
+import lu.kbra.plant_game.engine.scene.world.ActiveModalController;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type", visible = true)
 @JsonSubTypes(
@@ -13,6 +13,6 @@ import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 )
 public interface BuildingRequirement {
 
-	boolean isFulfilled(WorldLevelScene scene);
+	boolean isFulfilled(ActiveModalController scene);
 
 }

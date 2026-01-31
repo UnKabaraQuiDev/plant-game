@@ -46,7 +46,7 @@ import lu.kbra.plant_game.engine.entity.ui.icon.StarIconUIObject;
 import lu.kbra.plant_game.engine.entity.ui.icon.WaterIconUIObject;
 import lu.kbra.plant_game.engine.entity.ui.layout.SpacerUIObject;
 import lu.kbra.plant_game.engine.entity.ui.prim.AnchoredFlatQuadUIObject;
-import lu.kbra.plant_game.engine.entity.ui.prim.BuildingItemUIObject;
+import lu.kbra.plant_game.engine.entity.ui.prim.BuildingItemUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.prim.ExtAnchoredFlatQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.prim.IBAnchoredFlatQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.prim.IndexedFlatQuadUIObject;
@@ -83,7 +83,7 @@ import lu.kbra.plant_game.vanilla.scene.menu.main.OptionVolumeUIObjectGroup;
 import lu.kbra.plant_game.vanilla.scene.menu.main.OptionsUIObjectGroup;
 import lu.kbra.plant_game.vanilla.scene.overlay.group.building.AnchoredTexturedQuadMeshUIObject;
 import lu.kbra.plant_game.vanilla.scene.overlay.group.building.BuildingInfoUIObjectGroup;
-import lu.kbra.plant_game.vanilla.scene.overlay.group.building.BuildingPanelShowButtonUIObject;
+import lu.kbra.plant_game.vanilla.scene.overlay.group.building.BuildingPanelToggleButtonUIObject;
 import lu.kbra.plant_game.vanilla.scene.overlay.group.building.BuildingPanelUIObjectGroup;
 import lu.kbra.plant_game.vanilla.scene.overlay.group.building.BuildingTabButtonUIObjectGroup;
 import lu.kbra.plant_game.vanilla.scene.overlay.group.building.BuildingTabUIObjectGroup;
@@ -314,8 +314,8 @@ public class UIObjectRegistry {
 
 		/*                 BuildingItemUIObject                 */
 		final List<InternalConstructorFunction<UIObject>> listBuildingItemUIObject = new ArrayList<>();
-		listBuildingItemUIObject.add(new InternalConstructorFunction<>(new Class[] {BuildingDefinition.class}, (Object[] arr) -> (UIObject) new BuildingItemUIObject((BuildingDefinition) arr[0])));
-		UI_OBJECT_CONSTRUCTORS.put(BuildingItemUIObject.class, listBuildingItemUIObject);
+		listBuildingItemUIObject.add(new InternalConstructorFunction<>(new Class[] {BuildingDefinition.class}, (Object[] arr) -> (UIObject) new BuildingItemUIObjectGroup((BuildingDefinition) arr[0])));
+		UI_OBJECT_CONSTRUCTORS.put(BuildingItemUIObjectGroup.class, listBuildingItemUIObject);
 
 		/*                 ProgressBarUIObject                 */
 		final List<InternalConstructorFunction<UIObject>> listProgressBarUIObject = new ArrayList<>();
@@ -411,11 +411,11 @@ public class UIObjectRegistry {
 
 		/*                 BuildingPanelShowButtonUIObject                 */
 		final List<InternalConstructorFunction<UIObject>> listBuildingPanelShowButtonUIObject = new ArrayList<>();
-		listBuildingPanelShowButtonUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new BuildingPanelShowButtonUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
-		UI_OBJECT_CONSTRUCTORS.put(BuildingPanelShowButtonUIObject.class, listBuildingPanelShowButtonUIObject);
-		DATA_PATH.put(BuildingPanelShowButtonUIObject.class, "image:classpath:/icons/Arrow-128.png");
-		TEXTURE_FILTER.put(BuildingPanelShowButtonUIObject.class, TextureFilter.LINEAR);
-		TEXTURE_WRAP.put(BuildingPanelShowButtonUIObject.class, TextureWrap.REPEAT);
+		listBuildingPanelShowButtonUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new BuildingPanelToggleButtonUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
+		UI_OBJECT_CONSTRUCTORS.put(BuildingPanelToggleButtonUIObject.class, listBuildingPanelShowButtonUIObject);
+		DATA_PATH.put(BuildingPanelToggleButtonUIObject.class, "image:classpath:/icons/Arrow-128.png");
+		TEXTURE_FILTER.put(BuildingPanelToggleButtonUIObject.class, TextureFilter.LINEAR);
+		TEXTURE_WRAP.put(BuildingPanelToggleButtonUIObject.class, TextureWrap.REPEAT);
 
 		/*                 LayoutScrollDrivenUIObjectGroup                 */
 		final List<InternalConstructorFunction<UIObject>> listLayoutScrollDrivenUIObjectGroup = new ArrayList<>();

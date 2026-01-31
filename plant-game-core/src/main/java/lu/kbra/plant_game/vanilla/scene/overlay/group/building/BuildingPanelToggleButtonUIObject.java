@@ -13,10 +13,10 @@ import lu.kbra.standalone.gameengine.utils.gl.consts.TextureFilter;
 
 @DataPath("image:classpath:/icons/Arrow-128.png")
 @TextureOption(textureFilter = TextureFilter.LINEAR)
-public class BuildingPanelShowButtonUIObject extends ExtAnchoredTexturedQuadMeshUIObject
+public class BuildingPanelToggleButtonUIObject extends ExtAnchoredTexturedQuadMeshUIObject
 		implements NeedsClick, UISceneParentAware, MarginOwner {
 
-	public BuildingPanelShowButtonUIObject(final String str, final TexturedQuadMesh mesh) {
+	public BuildingPanelToggleButtonUIObject(final String str, final TexturedQuadMesh mesh) {
 		super(str, mesh);
 	}
 

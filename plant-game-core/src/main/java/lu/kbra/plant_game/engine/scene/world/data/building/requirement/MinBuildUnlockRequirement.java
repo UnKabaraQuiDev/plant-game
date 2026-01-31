@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import lu.kbra.plant_game.BuildingDefinitionRegistry;
 import lu.kbra.plant_game.engine.entity.go.GameObject;
-import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
+import lu.kbra.plant_game.engine.scene.world.ActiveModalController;
 
 @JsonTypeName("MIN_BUILD")
 public class MinBuildUnlockRequirement implements BuildingRequirement {
@@ -42,7 +42,7 @@ public class MinBuildUnlockRequirement implements BuildingRequirement {
 	}
 
 	@Override
-	public boolean isFulfilled(final WorldLevelScene scene) {
+	public boolean isFulfilled(final ActiveModalController scene) {
 		return false;
 	}
 

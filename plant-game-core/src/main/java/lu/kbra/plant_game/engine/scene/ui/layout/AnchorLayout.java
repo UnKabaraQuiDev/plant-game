@@ -16,7 +16,6 @@ import lu.kbra.plant_game.engine.entity.ui.impl.Margin2DOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.MarginOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.Padding2DOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.PaddingOwner;
-import lu.kbra.plant_game.vanilla.scene.overlay.group.building.BuildingPanelUIObjectGroup;
 import lu.kbra.standalone.gameengine.objs.entity.ParentAwareComponent;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
@@ -73,8 +72,6 @@ public class AnchorLayout implements Layout, BoundsOwnerParentAware {
 				marginX += mo.getPaddingX();
 				marginZ += mo.getPaddingZ();
 			}
-
-			System.err.println((obj instanceof BuildingPanelUIObjectGroup) + " " + marginX + " " + marginZ + " " + margin + " " + obj);
 
 			final Rectangle2D bounds = obj.getLocalTransformedBounds().getBounds2D();
 			alignAnchors(obj.getTransform(), bounds, screenBounds, objectAnchor, targetAnchor, marginX, marginZ);

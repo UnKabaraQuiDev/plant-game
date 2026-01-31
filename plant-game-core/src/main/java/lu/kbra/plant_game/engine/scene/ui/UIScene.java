@@ -76,8 +76,6 @@ public class UIScene extends Scene3D implements SceneBoundsOwner {
 	public void input(final WindowInputHandler inputHandler, final UpdateFrameState frameState) {
 		final Vector2f mouseWorld2D = this.getMouseCoords(inputHandler);
 
-		final Set<UIObject> newHovered = new HashSet<>();
-
 		if (this.focused != null && !this.focused.hasFocus()) {
 			this.focused = null;
 		}
@@ -88,6 +86,8 @@ public class UIScene extends Scene3D implements SceneBoundsOwner {
 		}
 
 		final Point2D.Float mouseWorld2DPoint = new Point2D.Float(mouseWorld2D.x, mouseWorld2D.y);
+
+		final Set<UIObject> newHovered = new HashSet<>();
 
 		synchronized (super.getEntitiesLock()) {
 			for (final SceneEntity e : this) {
@@ -177,7 +177,6 @@ public class UIScene extends Scene3D implements SceneBoundsOwner {
 
 				if (uiObj instanceof Focusable foc && foc != this.focused
 						&& inputHandler.isMouseButtonPressedOnce(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
-					System.err.println("focus clicked: " + uiObj);
 					if (this.focused != null) {
 						this.focused.removeFocus();
 					}

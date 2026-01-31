@@ -4,6 +4,6 @@ import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 
 public interface NeedsUpdate {
 
-	void update(final WindowInputHandler input);
+	void update(final WindowInputHandler inputHandler);
 
 }

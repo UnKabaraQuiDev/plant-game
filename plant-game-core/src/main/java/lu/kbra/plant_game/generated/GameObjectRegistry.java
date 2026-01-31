@@ -20,7 +20,7 @@ import lu.kbra.plant_game.engine.entity.go.SwayGameObject;
 import lu.kbra.plant_game.engine.entity.go.mesh.terrain.TerrainMesh;
 import lu.kbra.plant_game.engine.entity.go.obj.terrain.TerrainEdgeObject;
 import lu.kbra.plant_game.engine.entity.go.obj.terrain.TerrainHighlightObject;
-import lu.kbra.plant_game.engine.entity.go.obj.terrain.TerrainObject;
+import lu.kbra.plant_game.engine.entity.go.obj.terrain.TerrainGameObject;
 import lu.kbra.plant_game.engine.entity.go.obj_inst.particles.GravityParticleGameObject;
 import lu.kbra.plant_game.engine.entity.go.obj_inst.particles.ParticleGameObject;
 import lu.kbra.plant_game.engine.mesh.AnimatedMesh;
@@ -89,8 +89,8 @@ public class GameObjectRegistry {
 
 		/*                 TerrainObject                 */
 		final List<InternalConstructorFunction<GameObject>> listTerrainObject = new ArrayList<>();
-		listTerrainObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TerrainMesh.class}, (Object[] arr) -> (GameObject) new TerrainObject((String) arr[0], (TerrainMesh) arr[1])));
-		GAME_OBJECT_CONSTRUCTORS.put(TerrainObject.class, listTerrainObject);
+		listTerrainObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TerrainMesh.class}, (Object[] arr) -> (GameObject) new TerrainGameObject((String) arr[0], (TerrainMesh) arr[1])));
+		GAME_OBJECT_CONSTRUCTORS.put(TerrainGameObject.class, listTerrainObject);
 
 		/*                 TerrainEdgeObject                 */
 		final List<InternalConstructorFunction<GameObject>> listTerrainEdgeObject = new ArrayList<>();

@@ -5,6 +5,7 @@ import java.lang.ref.Cleaner.Cleanable;
 import org.joml.Vector3f;
 
 import lu.kbra.plant_game.engine.entity.go.MeshGameObject;
+import lu.kbra.plant_game.engine.scene.world.ActiveModalController;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.standalone.gameengine.GameEngine;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
@@ -130,7 +131,7 @@ public class DeferredIconRenderer extends DeferredCompositor {
 		return outputTxt.getStoredImage();
 	}
 
-	public WorldLevelScene getFakeWorld() {
+	public ActiveModalController getFakeWorld() {
 		return fakeWorld;
 	}
 

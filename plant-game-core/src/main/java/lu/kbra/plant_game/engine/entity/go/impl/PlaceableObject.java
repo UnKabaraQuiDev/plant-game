@@ -4,7 +4,7 @@ import org.joml.Vector2i;
 
 import lu.kbra.plant_game.engine.entity.go.data.Footprint;
 import lu.kbra.plant_game.engine.entity.go.mesh.terrain.TerrainMesh;
-import lu.kbra.plant_game.engine.entity.go.obj.terrain.TerrainObject;
+import lu.kbra.plant_game.engine.entity.go.obj.terrain.TerrainGameObject;
 import lu.kbra.plant_game.engine.entity.impl.FootprintOwner;
 import lu.kbra.plant_game.engine.entity.impl.Transform3DOwner;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
@@ -38,7 +38,7 @@ public interface PlaceableObject extends Transform3DOwner, UniqueID, SceneEntity
 		return this.getFootprint().allCellsMatch(tile, rotation, v -> mesh.getCellHeight(v) == cellHeight);
 	}
 
-	default void placeDown(final TerrainObject terrain, final Vector2i tile, final Direction rotation) {
+	default void placeDown(final TerrainGameObject terrain, final Vector2i tile, final Direction rotation) {
 		final Transform3D transform = this.getTransform();
 
 		rotation.rotation(transform.getRotation());

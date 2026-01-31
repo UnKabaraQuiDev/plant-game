@@ -1,16 +1,23 @@
 package lu.kbra.plant_game.engine.entity.ui.prim;
 
+import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
+import java.util.function.Consumer;
 
 import org.joml.Vector3f;
-import org.joml.Vector3fc;
+import org.joml.Vector4f;
 import org.joml.Vector4fc;
 
 import lu.pcy113.pclib.concurrency.ObjectTriggerLatch;
+import lu.pcy113.pclib.logger.GlobalLogger;
 import lu.pcy113.pclib.pointer.ObjectPointer;
 
 import lu.kbra.plant_game.BuildingDefinition;
+import lu.kbra.plant_game.PGLogic;
+import lu.kbra.plant_game.engine.entity.go.GameObject;
+import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory;
+import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
 import lu.kbra.plant_game.engine.entity.impl.TintOwner;
 import lu.kbra.plant_game.engine.entity.ui.FlatQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.ProgrammaticTexturedQuadMeshUIObject;
@@ -20,8 +27,10 @@ import lu.kbra.plant_game.engine.entity.ui.group.OffsetUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.impl.AbsoluteTransformedBoundsOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.AnimatedOnHover;
 import lu.kbra.plant_game.engine.entity.ui.impl.IndexOwner;
+import lu.kbra.plant_game.engine.entity.ui.impl.NeedsClick;
 import lu.kbra.plant_game.engine.entity.ui.impl.UISceneParentAware;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
+import lu.kbra.plant_game.engine.scene.world.MoveBuildingModal;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.plant_game.generated.ColorMaterial;
@@ -32,12 +41,11 @@ import lu.kbra.standalone.gameengine.utils.interpolation.Interpolator;
 import lu.kbra.standalone.gameengine.utils.interpolation.Interpolators;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-public class BuildingItemUIObject extends OffsetUIObjectGroup // ProgrammaticTexturedQuadMeshUIObject
-		implements AnimatedOnHover, AbsoluteTransformedBoundsOwner, UISceneParentAware, TintOwner, IndexOwner {
-
-	protected static final Vector3fc TARGET_SCALE = new Vector3f(1.05f);
+public class BuildingItemUIObjectGroup extends OffsetUIObjectGroup // ProgrammaticTexturedQuadMeshUIObject
+		implements AnimatedOnHover, AbsoluteTransformedBoundsOwner, UISceneParentAware, TintOwner, IndexOwner, NeedsClick {
 
 	protected static final float Y_RANGE = 0.1f;
+	protected static final float ALPHA = 0.8f;
 
 	protected boolean growing;
 	protected float progress = 0f;
@@ -47,13 +55,13 @@ public class BuildingItemUIObject extends OffsetUIObjectGroup // ProgrammaticTex
 
 	protected ObjectPointer<FlatQuadUIObject> background = new ObjectPointer<>();
 
-	public BuildingItemUIObject(final BuildingDefinition<?> buildingInfo) {
+	public BuildingItemUIObjectGroup(final BuildingDefinition<?> buildingInfo) {
 		super("building-item-" + buildingInfo.getInternalName());
 		this.buildingDefinition = buildingInfo;
 	}
 
-	public ObjectTriggerLatch<? extends BuildingItemUIObject> init() {
-		final ObjectTriggerLatch<? extends BuildingItemUIObject> latch = new ObjectTriggerLatch<>(2, this);
+	public ObjectTriggerLatch<? extends BuildingItemUIObjectGroup> init() {
+		final ObjectTriggerLatch<? extends BuildingItemUIObjectGroup> latch = new ObjectTriggerLatch<>(2, this);
 
 		UIObjectFactory
 				.createManual(ProgrammaticTexturedQuadMeshUIObject.class,
@@ -65,7 +73,7 @@ public class BuildingItemUIObject extends OffsetUIObjectGroup // ProgrammaticTex
 				.push();
 
 		UIObjectFactory.create(FlatQuadUIObject.class)
-				.set(i -> i.setColorMaterial(ColorMaterial.BLACK))
+				.set(i -> i.setColor(new Vector4f(ColorMaterial.BLACK.getColor()).mul(1, 1, 1, ALPHA)))
 				.set(i -> i.setTransform(new Transform3D(new Vector3f(0, 0.1f, 0))))
 				.get(this.background)
 				.add(this)
@@ -75,6 +83,52 @@ public class BuildingItemUIObject extends OffsetUIObjectGroup // ProgrammaticTex
 		return latch;
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	public void click(final WindowInputHandler input) {
+		if (this.buildingDefinition == null) {
+			GlobalLogger.warning(this.getClass().getSimpleName() + " (" + this.getId() + ") has no building definition.");
+			return;
+		}
+
+		final WorldLevelScene worldScene = PGLogic.INSTANCE.getWorldScene();
+
+		if (!this.buildingDefinition.isUnlocked(worldScene)) {
+			GlobalLogger.warning(this.buildingDefinition.getInternalName() + " not unlocked.");
+			return;
+		}
+
+		if (!this.buildingDefinition.canBuild(worldScene)) {
+			GlobalLogger.warning(this.buildingDefinition.getInternalName() + " unable to build.");
+			return;
+		}
+
+//		if (PGLogic.INSTANCE.getGameData().getResources().get(DefaultResourceType.MONEY) < this.buildingDefinition.getPrice()) {
+//			GlobalLogger.warning(this.buildingDefinition.getInternalName() + " not enough money to build.");
+//			return;
+//		}
+
+		final MoveBuildingModal modal = worldScene.getModal(MoveBuildingModal.class);
+		if (worldScene.hasActiveModal()) {
+			return;
+		}
+
+		GameObjectFactory.create(this.buildingDefinition.getClazz())
+				.set(i -> i.setTransform(new Transform3D()))
+				.add(worldScene)
+				.then(PGLogic.INSTANCE.WORKERS, (Consumer) (final Object c) -> {
+					if (!(c instanceof GameObject && c instanceof PlaceableObject)) {
+						return;
+					}
+					modal.setAttachedObject((PlaceableObject) c);
+					modal.setPlaceHook(() -> {
+						PGLogic.INSTANCE.getGameData().buyBuilding(this.buildingDefinition);
+					});
+					worldScene.startModal(modal);
+				})
+				.push();
+	}
+
 	@Override
 	public boolean hover(final WindowInputHandler input, final HoverState hoverState) {
 		if (!this.hasTransform()) {
@@ -82,22 +136,23 @@ public class BuildingItemUIObject extends OffsetUIObjectGroup // ProgrammaticTex
 		}
 		final boolean grow = (hoverState == HoverState.ENTER || hoverState == HoverState.STAY);
 
-		if (hoverState == HoverState.ENTER) {
+		if (hoverState == HoverState.ENTER || hoverState == HoverState.STAY) {
 			this.getUISceneParent().filter(OverlayUIScene.class::isInstance).map(OverlayUIScene.class::cast).ifPresent(scene -> {
 				final BuildingInfoUIObjectGroup buildingInfo = scene.getBuildingInfo();
 				buildingInfo.setActive(true);
 				buildingInfo.setTarget(this);
-				buildingInfo.setBuildingDefinition(this.getBuildingDefinition());
 
-				final Rectangle2D infoBounds = buildingInfo.getLocalTransformedBounds().getBounds2D();
-				final Rectangle2D selfBounds = this.getAbsoluteTransformedBounds().getBounds2D();
+				if (buildingInfo.setBuildingDefinition(this.getBuildingDefinition())) {
+					final Rectangle2D infoBounds = buildingInfo.getLocalTransformedBounds().getBounds2D();
+					final Rectangle2D selfBounds = this.getAbsoluteTransformedBounds().getBounds2D();
 
-				if (selfBounds.getCenterX() + infoBounds.getMaxX() > scene.getBounds().getMaxX()) {
-					buildingInfo.setObjectAnchor(Anchor.BOTTOM_RIGHT);
-				} else if (selfBounds.getCenterX() + infoBounds.getMinX() < scene.getBounds().getMinX()) {
-					buildingInfo.setObjectAnchor(Anchor.BOTTOM_LEFT);
-				} else {
-					buildingInfo.setObjectAnchor(Anchor.BOTTOM_CENTER);
+					if (selfBounds.getCenterX() + infoBounds.getMaxX() > scene.getBounds().getMaxX()) {
+						buildingInfo.setObjectAnchor(Anchor.BOTTOM_RIGHT);
+					} else if (selfBounds.getCenterX() + infoBounds.getMinX() < scene.getBounds().getMinX()) {
+						buildingInfo.setObjectAnchor(Anchor.BOTTOM_LEFT);
+					} else {
+						buildingInfo.setObjectAnchor(Anchor.BOTTOM_CENTER);
+					}
 				}
 			});
 		} else if (hoverState == HoverState.LEAVE) {
@@ -105,7 +160,7 @@ public class BuildingItemUIObject extends OffsetUIObjectGroup // ProgrammaticTex
 					.filter(OverlayUIScene.class::isInstance)
 					.map(OverlayUIScene.class::cast)
 					.map(OverlayUIScene::getBuildingInfo)
-					.filter(buildingInfo -> buildingInfo.getTarget() == BuildingItemUIObject.this)
+					.filter(buildingInfo -> buildingInfo.getTarget() == BuildingItemUIObjectGroup.this)
 					.ifPresent(buildingInfo -> {
 						buildingInfo.setActive(false);
 						buildingInfo.setTarget(null);
@@ -118,7 +173,6 @@ public class BuildingItemUIObject extends OffsetUIObjectGroup // ProgrammaticTex
 			this.progress = interpol.inverse(this.progress);
 		} else if (grow ^ this.growing && !interpol.hasInverse()) {
 			this.progress = Interpolator.inverse(this.progress, interpol, 0.02f, 0.02f, this.progress);
-//			GlobalLogger.warning("Interpolator: " + interpol + " has no inverse.");
 		}
 		this.growing = grow;
 
@@ -127,6 +181,18 @@ public class BuildingItemUIObject extends OffsetUIObjectGroup // ProgrammaticTex
 		this.getTransform().updateMatrix();
 
 		return this.progress == 0;
+	}
+
+	@Override
+	public Shape getBounds() {
+		if (this.progress > 0 && this.hasTransform()) {
+			final Rectangle2D comp = super.getBounds().getBounds2D();
+			return new Rectangle2D.Float((float) comp.getX(),
+					(float) comp.getY(),
+					(float) comp.getWidth(),
+					(float) comp.getHeight() - this.getTransform().getTranslation().z() / this.getTransform().getScale().z());
+		}
+		return super.getBounds();
 	}
 
 	public void updateTintStatus(final WorldLevelScene world) {
@@ -138,18 +204,6 @@ public class BuildingItemUIObject extends OffsetUIObjectGroup // ProgrammaticTex
 			this.setColorMaterial(ColorMaterial.GRAY);
 		}
 	}
-
-//	@Override
-//	public Rectangle2D.Float getBounds() {
-//		if (this.progress > 0 && this.hasTransform()) {
-//			final Rectangle2D comp = super.getBounds().getBounds2D();
-//			return new Rectangle2D.Float((float) comp.getX(),
-//					(float) comp.getY(),
-//					(float) comp.getWidth(),
-//					(float) comp.getHeight() - this.getTransform().getTranslation().z() / this.getTransform().getScale().z());
-//		}
-//		return super.getBounds();
-//	}
 
 	@Override
 	public float getGrowthRate(final boolean grow) {
@@ -200,6 +254,11 @@ public class BuildingItemUIObject extends OffsetUIObjectGroup // ProgrammaticTex
 	@Override
 	public void setTint(final Vector4fc tint) {
 		this.background.ifSet(o -> o.setTint(tint));
+	}
+
+	@Override
+	public void setColorMaterial(final ColorMaterial cm) {
+		this.background.ifSet(o -> o.setTint(new Vector4f(cm.getColor()).mul(1, 1, 1, ALPHA)));
 	}
 
 	@Override

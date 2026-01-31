@@ -10,6 +10,7 @@ public interface TintOwner extends ColorMaterialOwner {
 
 	void setTint(Vector4fc tint);
 
+	@Override
 	default void setColorMaterial(final ColorMaterial tint) {
 		if (tint == null) {
 			this.setTint(ColorMaterial.BLACK.getColor());

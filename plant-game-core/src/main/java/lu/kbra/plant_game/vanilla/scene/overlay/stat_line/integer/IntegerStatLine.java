@@ -42,6 +42,11 @@ public class IntegerStatLine extends LayoutOffsetUIObjectGroup implements Limite
 	protected float progress = 100;
 	protected Interpolator popupSpawnInterpolator = Interpolators.CUBIC_IN;
 
+	protected int targetValue;
+	protected int lastTargetValue;
+	protected float ratePerSecond;
+	protected long lastTargetTimeNs = -1;
+
 	protected Comparator<UIObject> comparator = (o1, o2) -> {
 		if (o1 == o2) {
 			return 0;
@@ -112,7 +117,7 @@ public class IntegerStatLine extends LayoutOffsetUIObjectGroup implements Limite
 				.set(i -> i.setPadding(true))
 				.set(i -> i.setPaddingZero(false))
 				.set(i -> i.setPaddingLength(valueLength))
-				.set(i -> i.setValue(0))
+				.set(i -> i.setValue(-1))
 				.set(i -> i.setColorMaterial(DEFAULT_TEXT_COLOR))
 				.set(i -> i.setTransform(new Transform3D().scaleMul(textHeightRatio)))
 				.postInit(i -> this.value = i)
@@ -149,20 +154,31 @@ public class IntegerStatLine extends LayoutOffsetUIObjectGroup implements Limite
 		return this.init(workers, render, height, VALUE_LENGTH, POPUP_LENGTH, iconClazz, valueClazz, popupClazz);
 	}
 
-	public TexturedQuadMeshUIObject getIcon() {
-		return this.icon;
-	}
+	public void setTarget(final int value) {
+		if (value == this.targetValue) {
+			return;
+		}
 
-	public boolean hasIcon() {
-		return this.icon != null;
-	}
+		final long now = System.nanoTime();
 
-	public IntegerTextUIObject getValue() {
-		return this.value;
-	}
+		if (this.lastTargetTimeNs != -1) {
+			final float dt = (now - this.lastTargetTimeNs) / 1e9f;
 
-	public SignedIntegerTextUIObject getPopup() {
-		return this.popup;
+			if (dt > 0) {
+				final float newRate = (value - this.lastTargetValue) / dt;
+				this.ratePerSecond = this.ratePerSecond * 0.85f + newRate * 0.15f;
+			}
+		}
+
+		this.lastTargetValue = value;
+		this.lastTargetTimeNs = now;
+		this.targetValue = value;
+
+		this.progress = this.progress < this.popupSpawnDuration ? this.progress
+				: this.progress > this.popupSpawnDuration && this.progress < this.popupSpawnDuration + this.popupStayDuration
+						? this.popupSpawnDuration
+				: this.progress > 2 * this.popupSpawnDuration + this.popupStayDuration ? 0
+				: this.progress;
 	}
 
 	public IntegerStatLine add(final int value) {
@@ -193,26 +209,47 @@ public class IntegerStatLine extends LayoutOffsetUIObjectGroup implements Limite
 
 	@Override
 	public void update(final WindowInputHandler input) {
-		final SignedIntegerTextUIObject popup = this.getPopup();
-		if (popup == null) {
+		if (this.popup == null || this.value == null) {
 			return;
 		}
 
-		if (!popup.getTextEmitter().getText().contains("%")) {
+		if (this.popup.getTextEmitter().getText().contains("%")) {
 			return;
+		}
+
+		if ((System.nanoTime() - this.lastTargetTimeNs) * 1e9f > this.popupSpawnDuration * 2 + this.popupStayDuration) {
+			this.progress = 0;
+		}
+
+		final int current = this.value.getValue();
+
+		if (current != this.targetValue) {
+			final double speed = Math.max(20, Math.abs(this.ratePerSecond));
+			final double delta = speed * input.dTime();
+
+			final int step = (int) Math.signum(this.targetValue - current) * (int) Math.ceil(delta);
+
+			int next = current + step;
+
+			if ((this.targetValue - current) * (this.targetValue - next) <= 0) {
+				next = this.targetValue;
+			}
+
+			this.value.setValue(next);
+			this.value.flushValue();
+			this.popup.setValue(step);
+			this.popup.flushValue();
 		}
 
 		final float dTime = input.dTime();
 
-//		final float dst = 0.25f;
-//		final Transform3D transform = popup.getTransform();
+//		System.err.println("prog: " + this.progress + " " + this.popupSpawnDuration + " " + this.popupStayDuration);
+
 		if (this.progress < this.popupSpawnDuration) {
 			final float interpol = this.popupSpawnInterpolator.evaluate(this.progress / this.popupSpawnDuration);
-			final TextEmitter text = popup.getTextEmitter();
+			final TextEmitter text = this.popup.getTextEmitter();
 
-//			transform.getTranslation().z = interpol * dst;
 			text.setOpacity(interpol);
-//			transform.updateMatrix();
 
 			this.progress += dTime;
 
@@ -225,11 +262,9 @@ public class IntegerStatLine extends LayoutOffsetUIObjectGroup implements Limite
 				&& this.progress < 2 * this.popupSpawnDuration + this.popupStayDuration) {
 			final float interpol = this.popupSpawnInterpolator
 					.evaluate((this.progress - (this.popupSpawnDuration + this.popupStayDuration)) / this.popupSpawnDuration);
-			final TextEmitter text = popup.getTextEmitter();
+			final TextEmitter text = this.popup.getTextEmitter();
 
-//			transform.getTranslation().z = -interpol * dst;
 			text.setOpacity(1f - interpol);
-//			transform.updateMatrix();
 			this.progress += dTime;
 
 			if (this.progress >= 2 * this.popupSpawnDuration + this.popupStayDuration) {
@@ -248,6 +283,22 @@ public class IntegerStatLine extends LayoutOffsetUIObjectGroup implements Limite
 	@Override
 	public int getMaxItems() {
 		return 3;
+	}
+
+	public TexturedQuadMeshUIObject getIcon() {
+		return this.icon;
+	}
+
+	public boolean hasIcon() {
+		return this.icon != null;
+	}
+
+	public IntegerTextUIObject getValue() {
+		return this.value;
+	}
+
+	public SignedIntegerTextUIObject getPopup() {
+		return this.popup;
 	}
 
 	@Override

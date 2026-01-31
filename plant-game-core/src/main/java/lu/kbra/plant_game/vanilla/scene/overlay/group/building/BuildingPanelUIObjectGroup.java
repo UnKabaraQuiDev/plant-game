@@ -22,7 +22,7 @@ import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwnerParentAware;
 import lu.kbra.plant_game.engine.entity.ui.impl.MarginOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsBoundsInput;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsUpdate;
-import lu.kbra.plant_game.engine.entity.ui.prim.BuildingItemUIObject;
+import lu.kbra.plant_game.engine.entity.ui.prim.BuildingItemUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.prim.IBAnchoredFlatQuadUIObject;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
 import lu.kbra.plant_game.engine.scene.ui.layout.AnchorLayout;
@@ -101,8 +101,8 @@ public class BuildingPanelUIObjectGroup extends AnchoredLayoutUIObjectGroup
 
 		buildingTab.getContent()
 				.parallelStream()
-				.filter(BuildingItemUIObject.class::isInstance)
-				.map(BuildingItemUIObject.class::cast)
+				.filter(BuildingItemUIObjectGroup.class::isInstance)
+				.map(BuildingItemUIObjectGroup.class::cast)
 				.forEach(c -> c.updateTintStatus(world));
 	}
 

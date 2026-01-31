@@ -34,7 +34,8 @@ public class BuildingDefinition<T extends GameObject & PlaceableObject> implemen
 	}
 
 	public boolean canBuild(final WorldLevelScene world) {
-		return this.buildingRequirements.stream().allMatch(c -> c.isFulfilled(world));
+		return PGLogic.INSTANCE.getGameData().getResources().get(DefaultResourceType.MONEY) > this.getPrice()
+				&& this.buildingRequirements.stream().allMatch(c -> c.isFulfilled(world));
 	}
 
 	@Override
