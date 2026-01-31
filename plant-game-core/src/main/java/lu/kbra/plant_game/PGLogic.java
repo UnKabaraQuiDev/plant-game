@@ -71,9 +71,9 @@ public class PGLogic extends GameLogic {
 		this.inputHandler.loadMappings(new File(Consts.CONFIG_DIR, "mappings.json"));
 		// this.inputHandler.saveMappings(new File(Consts.CONFIG_DIR, "mappings.json"));
 
-		VanillaBuildingDefinitionRegistry.init();
+		new VanillaBuildingDefinitionRegistry().init();
 
-		this.pluginJarLoader.loadAll(Paths.get("plugins"));
+//		this.pluginJarLoader.loadAll(Paths.get("plugins"));
 
 		this.compositor = new DeferredCompositor(this.engine, this.engine.getRenderThread());
 		this.compositor.getBackgroundColor().set(1, 1, 0, 1);
@@ -84,8 +84,10 @@ public class PGLogic extends GameLogic {
 		this.overlayUIScene = new OverlayUIScene(this.cache);
 		this.uiScene = this.mainMenuUIScene;
 
-		UIObjectFactory.INSTANCE = new UIObjectFactory(this.mainMenuUIScene.getCache(), this.WORKERS, this.RENDER_DISPATCHER);
-		GameObjectFactory.INSTANCE = new GameObjectFactory(this.worldScene.getCache(), this.WORKERS, this.RENDER_DISPATCHER);
+		UIObjectFactory.INSTANCE = new UIObjectFactory(this.mainMenuUIScene.getCache(), this.WORKERS,
+				this.RENDER_DISPATCHER);
+		GameObjectFactory.INSTANCE = new GameObjectFactory(this.worldScene.getCache(), this.WORKERS,
+				this.RENDER_DISPATCHER);
 		LocalizationService.INSTANCE = new LocalizationService(Locale.US);
 
 		this.uiScene.init(this.WORKERS, this.RENDER_DISPATCHER);
@@ -116,38 +118,23 @@ public class PGLogic extends GameLogic {
 //				.push();
 
 		ParticleGameObject
-				.createGravity(this.WORKERS,
-						this.worldScene,
-						100,
-						ColorMaterial.RED,
-						new Transform3D(new Vector3f(0, 3, 0)),
-						true,
-						0,
-						GravityParticleGameObject.IRON_DENSITY,
-						i -> new Vector3f(1, 0, 0).rotateY((float) (Math.random() * Math.PI * 2))
-								.normalize()
+				.createGravity(this.WORKERS, this.worldScene, 100, ColorMaterial.RED,
+						new Transform3D(new Vector3f(0, 3, 0)), true, 0, GravityParticleGameObject.IRON_DENSITY,
+						i -> new Vector3f(1, 0, 0).rotateY((float) (Math.random() * Math.PI * 2)).normalize()
 								.mul(PCUtils.randomFloatRange(0.8f, 1.5f)),
-						null,
-						i -> new Vector3f(0, 2, 0),
-						i -> GameEngineUtils.randomQuaterionf(),
+						null, i -> new Vector3f(0, 2, 0), i -> GameEngineUtils.randomQuaterionf(),
 						i -> PCUtils.randomFloatRange(0.08f, 0.1f))
-				.then(this.WORKERS,
-						(Consumer<GravityParticleGameObject>) parts -> this.worldScene.getParticleManager().getActiveObjects().add(parts))
+				.then(this.WORKERS, (Consumer<GravityParticleGameObject>) parts -> this.worldScene.getParticleManager()
+						.getActiveObjects().add(parts))
 				.push();
 
 		ParticleGameObject
-				.createFloating(this.WORKERS,
-						this.worldScene,
-						100,
-						ColorMaterial.DARK_BROWN,
-						new Transform3D(new Vector3f(0, 3, 0)),
-						GravityParticleGameObject.IRON_DENSITY,
-						i -> PCUtils.randomFloatRange(0.8f, 1.5f),
-						null,
-						i -> GameEngineUtils.randomQuaterionf(),
+				.createFloating(this.WORKERS, this.worldScene, 100, ColorMaterial.DARK_BROWN,
+						new Transform3D(new Vector3f(0, 3, 0)), GravityParticleGameObject.IRON_DENSITY,
+						i -> PCUtils.randomFloatRange(0.8f, 1.5f), null, i -> GameEngineUtils.randomQuaterionf(),
 						i -> PCUtils.randomFloatRange(0.08f, 0.1f))
-				.then(this.WORKERS,
-						(Consumer<GravityParticleGameObject>) parts -> this.worldScene.getParticleManager().getActiveObjects().add(parts))
+				.then(this.WORKERS, (Consumer<GravityParticleGameObject>) parts -> this.worldScene.getParticleManager()
+						.getActiveObjects().add(parts))
 				.push();
 	}
 
@@ -182,7 +169,8 @@ public class PGLogic extends GameLogic {
 	@Override
 	public void render(final float dTime) {
 		this.worldScene.getCamera().getProjection().update(this.window.getWidth(), this.window.getHeight());
-		// uiScene.getCamera().getProjection().update(window.getWidth(), window.getHeight());
+		// uiScene.getCamera().getProjection().update(window.getWidth(),
+		// window.getHeight());
 
 		this.worldScene.render(dTime);
 

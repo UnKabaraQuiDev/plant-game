@@ -1,0 +1,16 @@
+{
+    "collection_name": "cube",
+    "animated": false,
+    "meshes": {
+        "static": {
+            "file": "models/cube_static.obj",
+            "offset_from_origin": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "texture_material": false,
+            "texture_path": null
+        }
+    }
+}
