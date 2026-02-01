@@ -2,6 +2,8 @@ package lu.kbra.plant_game.plugin;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lu.kbra.plant_game.VersionMatcher;
 
 public final class PluginDescriptor {
@@ -59,6 +61,8 @@ public final class PluginDescriptor {
 	protected String displayName;
 	protected String internalName;
 	protected String version;
+	@JsonProperty("package")
+	protected String package_;
 	protected String mainClass;
 	protected Registries registries;
 	protected Dependencies dependencies;
@@ -73,6 +77,10 @@ public final class PluginDescriptor {
 
 	public String getVersion() {
 		return this.version;
+	}
+
+	public String getPackage() {
+		return this.package_;
 	}
 
 	public String getMainClass() {
@@ -90,6 +98,10 @@ public final class PluginDescriptor {
 	@Override
 	public String toString() {
 		return this.displayName + " (" + this.internalName + ":" + this.version + ")";
+	}
+
+	public String relativePath(final String buildingReg) {
+		return buildingReg == null || buildingReg.isBlank() ? null : this.package_ + "." + buildingReg;
 	}
 
 }

@@ -73,7 +73,7 @@ public class PluginJarLoader {
 
 		for (PluginDescriptor desc : existingPlugins) {
 			final ClassLoader loader = desc.getClass().getClassLoader();
-			final Class<? extends PluginMain> main = (Class<? extends PluginMain>) loader.loadClass(desc.getMainClass());
+			final Class<? extends PluginMain> main = (Class<? extends PluginMain>) loader.loadClass(desc.relativePath(desc.getMainClass()));
 			final PluginMain mainInst = main.getDeclaredConstructor(PluginDescriptor.class).newInstance(desc);
 
 			result.add(new LoadedPlugin(null, desc, loader, mainInst));
@@ -86,7 +86,7 @@ public class PluginJarLoader {
 			loaders.put(name, loader);
 
 			final PluginDescriptor desc = descriptors.get(name);
-			final Class<? extends PluginMain> main = (Class<? extends PluginMain>) loader.loadClass(desc.getMainClass());
+			final Class<? extends PluginMain> main = (Class<? extends PluginMain>) loader.loadClass(desc.relativePath(desc.getMainClass()));
 			final PluginMain mainInst = main.getDeclaredConstructor(PluginDescriptor.class).newInstance(desc);
 
 			result.add(new LoadedPlugin(jar, desc, loader, mainInst));

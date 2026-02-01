@@ -12,6 +12,7 @@ import org.lwjgl.glfw.GLFW;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lu.pcy113.pclib.PCUtils;
+import lu.pcy113.pclib.logger.GlobalLogger;
 
 import lu.kbra.plant_game.base.scene.menu.main.MainMenuUIScene;
 import lu.kbra.plant_game.base.scene.overlay.OverlayUIScene;
@@ -86,13 +87,33 @@ public class PGLogic extends GameLogic {
 				.forEach(lp -> this.plugins.put(lp.main().getClass(), lp));
 		this.plugins.values().forEach(c -> c.main().onLoad());
 		for (LoadedPlugin c : this.plugins.values()) {
+			try {
+				final String buildingReg = "autogen.GenGORegistry";
+				final Class<? extends GameObjectRegistry> buildingDefClazz = (Class<? extends GameObjectRegistry>) c.classLoader()
+						.loadClass(c.descriptor().relativePath(buildingReg));
+				final GameObjectRegistry reg = buildingDefClazz.getDeclaredConstructor(PluginDescriptor.class).newInstance(c.descriptor());
+				reg.init();
+			} catch (ClassNotFoundException e) {
+				GlobalLogger.info(c.toString() + " doesn't define a GameObject Registry.");
+			}
+
+			try {
+				final String buildingReg = "autogen.GenUIRegistry";
+				final Class<? extends UIObjectRegistry> buildingDefClazz = (Class<? extends UIObjectRegistry>) c.classLoader()
+						.loadClass(c.descriptor().relativePath(buildingReg));
+				final UIObjectRegistry reg = buildingDefClazz.getDeclaredConstructor(PluginDescriptor.class).newInstance(c.descriptor());
+				reg.init();
+			} catch (ClassNotFoundException e) {
+				GlobalLogger.info(c.toString() + " doesn't define a UIObject Registry.");
+			}
+
 			{
 				final String resourceReg = c.descriptor().getRegistries().getResource();
 				if (resourceReg == null || resourceReg.isBlank()) {
 					return;
 				}
 				final Class<? extends ResourceRegistry> resourceDefClazz = (Class<? extends ResourceRegistry>) c.classLoader()
-						.loadClass(resourceReg);
+						.loadClass(c.descriptor().relativePath(resourceReg));
 				final ResourceRegistry reg = resourceDefClazz.getDeclaredConstructor(PluginDescriptor.class).newInstance(c.descriptor());
 				reg.init();
 			}
@@ -103,7 +124,7 @@ public class PGLogic extends GameLogic {
 					return;
 				}
 				final Class<? extends BuildingRegistry> buildingDefClazz = (Class<? extends BuildingRegistry>) c.classLoader()
-						.loadClass(buildingReg);
+						.loadClass(c.descriptor().relativePath(buildingReg));
 				final BuildingRegistry reg = buildingDefClazz.getDeclaredConstructor(PluginDescriptor.class).newInstance(c.descriptor());
 				reg.init();
 			}

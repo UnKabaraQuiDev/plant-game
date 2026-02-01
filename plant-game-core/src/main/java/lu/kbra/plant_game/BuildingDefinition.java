@@ -68,6 +68,10 @@ public class BuildingDefinition<T extends GameObject & PlaceableObject> implemen
 		return this.internalName;
 	}
 
+	public String getInternalPath() {
+		return this.internalName.replaceAll("[.:]", "/");
+	}
+
 	public Class<T> getClazz() {
 		return this.clazz;
 	}

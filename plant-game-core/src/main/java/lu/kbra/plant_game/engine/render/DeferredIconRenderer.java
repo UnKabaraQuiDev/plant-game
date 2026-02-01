@@ -68,8 +68,6 @@ public class DeferredIconRenderer extends DeferredCompositor {
 		}
 		this.fakeWorld.add(obj);
 
-		// super.render(engine, fakeWorld, null);
-
 		this.renderResolution.set(size);
 		this.outputResolution.set(size);
 		this.outputTxt.setSize(size);
@@ -90,41 +88,6 @@ public class DeferredIconRenderer extends DeferredCompositor {
 		this.renderOutlines(cache, this.renderResolution, true);
 
 		this.blitToScreen(cache, engine.getWindow().getSize(), true);
-
-//		final SingleTexture texture = new SingleTexture(obj.getId(), this.renderResolution);
-//		cache.addTexture(texture);
-//		texture.setDataType(DataType.UBYTE);
-//		texture.setFormat(TexelFormat.RGBA);
-//		texture.setInternalFormat(TexelInternalFormat.RGBA8);
-//		texture.setFilters(TextureFilter.NEAREST);
-//		texture.setGenerateMipmaps(false);
-//		texture.setup();
-
-//		ByteBuffer buffer = BufferUtils.createByteBuffer(size * size* 4);
-//
-//		GL_W.glReadBuffer(GL_W.GL_FRONT);
-//		GL_W.glReadPixels(0, 0, size, size, GL_W.GL_RGBA, GL_W.GL_UNSIGNED_BYTE, buffer);
-
-//		GL_W
-//				.glCopyImageSubData(this.outputTxt.getGlId(),
-//						this.outputTxt.getTextureType().getGlId(),
-//						0,
-//						0,
-//						0,
-//						0,
-//						texture.getGlId(),
-//						texture.getTextureType().getGlId(),
-//						0,
-//						0,
-//						0,
-//						0,
-//						texture.getWidth(),
-//						texture.getHeight(),
-//						1);
-
-//		cache.cleanup();
-
-//		return buffer;
 
 		return this.outputTxt.getStoredImage();
 	}

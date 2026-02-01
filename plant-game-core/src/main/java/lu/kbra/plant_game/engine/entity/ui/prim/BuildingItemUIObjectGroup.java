@@ -66,8 +66,7 @@ public class BuildingItemUIObjectGroup extends OffsetUIObjectGroup // Programmat
 
 		UIObjectFactory
 				.createManual(ProgrammaticTexturedQuadMeshUIObject.class,
-						"image:" + new File(Consts.ICONS_BAKES_RES_DIR,
-								this.buildingDefinition.getInternalName().replace('.', '/') + ".png").getPath())
+						"image:" + new File(Consts.ICONS_BAKES_RES_DIR, this.buildingDefinition.getInternalPath() + ".png").getPath())
 				.set(i -> i.setTransform(new Transform3D(new Vector3f(0, 0.2f, 0))))
 				.add(this)
 				.latch(latch)
