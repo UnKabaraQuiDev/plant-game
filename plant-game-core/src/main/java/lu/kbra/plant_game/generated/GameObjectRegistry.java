@@ -19,16 +19,18 @@ import lu.kbra.plant_game.engine.entity.go.MeshGameObject;
 import lu.kbra.plant_game.engine.entity.go.SwayGameObject;
 import lu.kbra.plant_game.engine.entity.go.mesh.terrain.TerrainMesh;
 import lu.kbra.plant_game.engine.entity.go.obj.terrain.TerrainEdgeObject;
-import lu.kbra.plant_game.engine.entity.go.obj.terrain.TerrainHighlightObject;
 import lu.kbra.plant_game.engine.entity.go.obj.terrain.TerrainGameObject;
+import lu.kbra.plant_game.engine.entity.go.obj.terrain.TerrainHighlightObject;
 import lu.kbra.plant_game.engine.entity.go.obj_inst.particles.GravityParticleGameObject;
 import lu.kbra.plant_game.engine.entity.go.obj_inst.particles.ParticleGameObject;
 import lu.kbra.plant_game.engine.mesh.AnimatedMesh;
 import lu.kbra.plant_game.engine.util.InternalConstructorFunction;
 import lu.kbra.plant_game.engine.util.exceptions.GameObjectConstructorNotFound;
 import lu.kbra.plant_game.engine.util.exceptions.GameObjectNotFound;
-import lu.kbra.plant_game.vanilla.entity.go.obj.energy.SolarPanelObject;
+import lu.kbra.plant_game.vanilla.entity.go.obj.energy.SolarPanelMediumObject;
+import lu.kbra.plant_game.vanilla.entity.go.obj.energy.SolarPanelSmallObject;
 import lu.kbra.plant_game.vanilla.entity.go.obj.energy.WaterWheelObject;
+import lu.kbra.plant_game.vanilla.entity.go.obj.energy.WindTurbineMediumObject;
 import lu.kbra.plant_game.vanilla.entity.go.obj.flower.champi.LargeChampiFlowerObject;
 import lu.kbra.plant_game.vanilla.entity.go.obj.flower.champi.MediumChampiFlowerObject;
 import lu.kbra.plant_game.vanilla.entity.go.obj.flower.champi.SmallChampiFlowerObject;
@@ -87,10 +89,10 @@ public class GameObjectRegistry {
 		listInstanceGameObject.add(new InternalConstructorFunction<>(new Class[] {String.class, InstanceEmitter.class}, (Object[] arr) -> (GameObject) new InstanceGameObject((String) arr[0], (InstanceEmitter) arr[1])));
 		GAME_OBJECT_CONSTRUCTORS.put(InstanceGameObject.class, listInstanceGameObject);
 
-		/*                 TerrainObject                 */
-		final List<InternalConstructorFunction<GameObject>> listTerrainObject = new ArrayList<>();
-		listTerrainObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TerrainMesh.class}, (Object[] arr) -> (GameObject) new TerrainGameObject((String) arr[0], (TerrainMesh) arr[1])));
-		GAME_OBJECT_CONSTRUCTORS.put(TerrainGameObject.class, listTerrainObject);
+		/*                 TerrainGameObject                 */
+		final List<InternalConstructorFunction<GameObject>> listTerrainGameObject = new ArrayList<>();
+		listTerrainGameObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TerrainMesh.class}, (Object[] arr) -> (GameObject) new TerrainGameObject((String) arr[0], (TerrainMesh) arr[1])));
+		GAME_OBJECT_CONSTRUCTORS.put(TerrainGameObject.class, listTerrainGameObject);
 
 		/*                 TerrainEdgeObject                 */
 		final List<InternalConstructorFunction<GameObject>> listTerrainEdgeObject = new ArrayList<>();
@@ -123,17 +125,29 @@ public class GameObjectRegistry {
 		GAME_OBJECT_CONSTRUCTORS.put(ParticleGameObject.class, listParticleGameObject);
 		DATA_PATH.put(ParticleGameObject.class, "classpath:/models/cube.json");
 
-		/*                 SolarPanelObject                 */
-		final List<InternalConstructorFunction<GameObject>> listSolarPanelObject = new ArrayList<>();
-		listSolarPanelObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class}, (Object[] arr) -> (GameObject) new SolarPanelObject((String) arr[0], (Mesh) arr[1])));
-		GAME_OBJECT_CONSTRUCTORS.put(SolarPanelObject.class, listSolarPanelObject);
-		DATA_PATH.put(SolarPanelObject.class, "classpath:/models/solar-panel-medium.json");
+		/*                 WindTurbineMediumObject                 */
+		final List<InternalConstructorFunction<GameObject>> listWindTurbineMediumObject = new ArrayList<>();
+		listWindTurbineMediumObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class}, (Object[] arr) -> (GameObject) new WindTurbineMediumObject((String) arr[0], (Mesh) arr[1])));
+		GAME_OBJECT_CONSTRUCTORS.put(WindTurbineMediumObject.class, listWindTurbineMediumObject);
+		DATA_PATH.put(WindTurbineMediumObject.class, "classpath:/models/wind-turbine-medium.json");
+
+		/*                 SolarPanelMediumObject                 */
+		final List<InternalConstructorFunction<GameObject>> listSolarPanelMediumObject = new ArrayList<>();
+		listSolarPanelMediumObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class}, (Object[] arr) -> (GameObject) new SolarPanelMediumObject((String) arr[0], (Mesh) arr[1])));
+		GAME_OBJECT_CONSTRUCTORS.put(SolarPanelMediumObject.class, listSolarPanelMediumObject);
+		DATA_PATH.put(SolarPanelMediumObject.class, "classpath:/models/solar-panel-medium.json");
 
 		/*                 WaterTowerObject                 */
 		final List<InternalConstructorFunction<GameObject>> listWaterTowerObject = new ArrayList<>();
 		listWaterTowerObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class}, (Object[] arr) -> (GameObject) new WaterTowerObject((String) arr[0], (Mesh) arr[1])));
 		GAME_OBJECT_CONSTRUCTORS.put(WaterTowerObject.class, listWaterTowerObject);
 		DATA_PATH.put(WaterTowerObject.class, "classpath:/models/water-tower-medium.json");
+
+		/*                 SolarPanelSmallObject                 */
+		final List<InternalConstructorFunction<GameObject>> listSolarPanelSmallObject = new ArrayList<>();
+		listSolarPanelSmallObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class}, (Object[] arr) -> (GameObject) new SolarPanelSmallObject((String) arr[0], (Mesh) arr[1])));
+		GAME_OBJECT_CONSTRUCTORS.put(SolarPanelSmallObject.class, listSolarPanelSmallObject);
+		DATA_PATH.put(SolarPanelSmallObject.class, "classpath:/models/solar-panel-small.json");
 
 		/*                 SmallRoundFlowerObject                 */
 		final List<InternalConstructorFunction<GameObject>> listSmallRoundFlowerObject = new ArrayList<>();

@@ -49,7 +49,7 @@ import lu.kbra.plant_game.engine.scene.world.particle.ParticleManager;
 import lu.kbra.plant_game.engine.window.input.StandardKeyOption;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.plant_game.generated.ColorMaterial;
-import lu.kbra.plant_game.vanilla.entity.go.obj.energy.SolarPanelObject;
+import lu.kbra.plant_game.vanilla.entity.go.obj.energy.SolarPanelMediumObject;
 import lu.kbra.plant_game.vanilla.entity.go.obj.energy.WaterWheelObject;
 import lu.kbra.plant_game.vanilla.entity.go.obj.water.WaterSprinklerObject3x3;
 import lu.kbra.plant_game.vanilla.entity.go.obj.water.WaterSprinklerObject5x5;
@@ -275,11 +275,11 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController {
 											.placeDown(this.getTerrain(), new Vector2i(11, 15), Direction.NONE))
 							.push();
 
-					GameObjectFactory.create(SolarPanelObject.class)
+					GameObjectFactory.create(SolarPanelMediumObject.class)
 							.set(i -> i.setTransform(new Transform3D()))
 							.add(this)
 							.then(workers,
-									(ThrowingConsumer<SolarPanelObject, Throwable>) obj -> obj
+									(ThrowingConsumer<SolarPanelMediumObject, Throwable>) obj -> obj
 											.placeDown(this.getTerrain(), new Vector2i(15, 5), Direction.NONE))
 							.push();
 

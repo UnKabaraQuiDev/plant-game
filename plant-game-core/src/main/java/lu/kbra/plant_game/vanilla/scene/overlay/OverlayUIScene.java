@@ -97,6 +97,7 @@ public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner
 						.then(tab -> BuildingDefinitionRegistry.BUILDING_DEFS.get(p)
 								.forEach(f -> new BuildingItemUIObjectGroup(f).init().then(obj -> {
 									obj.setTransform(new Transform3D(0.3f));
+									obj.setIndex(f.getIndex());
 									tab.getContent().add(obj);
 								}))));
 
