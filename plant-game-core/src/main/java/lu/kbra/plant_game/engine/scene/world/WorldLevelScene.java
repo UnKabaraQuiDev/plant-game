@@ -107,8 +107,6 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController {
 
 		this.particleManager = new ParticleManager(parentCache, this);
 
-		this.registerModal(new MoveBuildingModal(this, PGLogic.INSTANCE.getCompositor()));
-
 		this.getCamera().setPosition(new Vector3f(-20, 25, 20).mul(1.5f));
 		this.getCamera().lookAt(this.getCamera().getPosition(), new Vector3f(0, 0, 0)).updateMatrix();
 		this.getCamera().getProjection().setFov((float) Math.toRadians(40));
@@ -116,6 +114,8 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController {
 	}
 
 	public void init(final Dispatcher workers, final Dispatcher renderDispatcher) {
+		this.registerModal(new MoveBuildingModal(this, PGLogic.INSTANCE.getCompositor()));
+
 		final CountDownLatch terrainLatch = new CountDownLatch(1);
 
 		new TaskFuture<>(workers, (Supplier<WorldGenerator>) () -> {

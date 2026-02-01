@@ -3,7 +3,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringReader;
-import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Properties;
 import java.util.Queue;
@@ -11,6 +10,9 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.joml.Vector3f;
 import org.junit.Test;
+
+import lu.pcy113.pclib.PCUtils;
+import lu.pcy113.pclib.logger.GlobalLogger;
 
 import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.entity.go.MeshGameObject;
@@ -29,10 +31,7 @@ import lu.kbra.standalone.gameengine.impl.future.WorkerDispatcher;
 import lu.kbra.standalone.gameengine.utils.file.FileUtils;
 import lu.kbra.standalone.gameengine.utils.gl.consts.Consts;
 import lu.kbra.standalone.gameengine.utils.mem.img.MemImage;
-import lu.kbra.standalone.gameengine.utils.mem.img.MemImageOrigin;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
-import lu.pcy113.pclib.PCUtils;
-import lu.pcy113.pclib.logger.GlobalLogger;
 
 public class IconRendererTestLogic extends GameLogic {
 
@@ -59,12 +58,11 @@ public class IconRendererTestLogic extends GameLogic {
 			if (!MeshGameObject.class.isAssignableFrom(goClazz) || !PlaceableObject.class.isAssignableFrom(goClazz)) {
 				continue;
 			}
-			final TaskFuture<List<Object>, ? extends GameObject>.TaskState<? extends GameObject> state = GameObjectFactory
-					.create(goClazz)
+			final TaskFuture<List<Object>, ? extends GameObject>.TaskState<? extends GameObject> state = GameObjectFactory.create(goClazz)
 					.set(t -> t.setTransform(new Transform3D()))
-					.set(t -> objs.offer((MeshGameObject) t))
+					.set(t -> this.objs.offer((MeshGameObject) t))
 					.push();
-			awaitingCount++;
+			this.awaitingCount++;
 		}
 	}
 
@@ -80,15 +78,15 @@ public class IconRendererTestLogic extends GameLogic {
 
 	@Override
 	public void render(final float dTime) {
-		if (renderedCount == awaitingCount) {
+		if (this.renderedCount == this.awaitingCount) {
 			super.stop();
 			return;
 		}
-		if (objs.isEmpty()) {
+		if (this.objs.isEmpty()) {
 			return;
 		}
 
-		final MeshGameObject obj = objs.poll();
+		final MeshGameObject obj = this.objs.poll();
 		final int size = 1024;
 
 		GlobalLogger.info("Starting rendering.");
@@ -110,7 +108,7 @@ public class IconRendererTestLogic extends GameLogic {
 //			iconRenderer.getFakeWorld().getEntities().clear();
 //		}
 
-		renderedCount++;
+		this.renderedCount++;
 	}
 
 	@Override

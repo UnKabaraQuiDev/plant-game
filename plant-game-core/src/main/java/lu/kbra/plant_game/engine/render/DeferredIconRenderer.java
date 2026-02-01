@@ -42,10 +42,8 @@ public class DeferredIconRenderer extends DeferredCompositor {
 		final Mesh mesh = obj.getMesh();
 		final BoundingBox bb = mesh.getBoundingBox();
 
-		final float radius = 0.5f * new Vector3f(bb.getMax()).sub(bb.getMin()).length();
-
-		final float fovY = this.fakeWorld.getCamera().getProjection().getFov();
-		final float distance = radius / (float) Math.sin(fovY / 2f);
+		final float radius = new Vector3f(bb.getMax()).sub(bb.getMin()).length() / 2;
+		final float distance = radius * 2;
 
 		final Vector3f forwardVector = new Vector3f(1).normalize().negate();
 		final Vector3f cameraPos = new Vector3f(bb.getCenter()).sub(forwardVector.mul(distance, new Vector3f()));
@@ -53,11 +51,11 @@ public class DeferredIconRenderer extends DeferredCompositor {
 		this.fakeWorld.getCamera().updateMatrix();
 
 		if (!this.fakeWorld.getCamera().getProjection().isPerspective()) {
-			this.fakeWorld.getCamera().getProjection().setSize(0.3f);
+			this.fakeWorld.getCamera().getProjection().setSize(1f / radius);
 			this.fakeWorld.getCamera().getProjection().update();
 		}
 
-		synchronized (fakeWorld.getEntitiesLock()) {
+		synchronized (this.fakeWorld.getEntitiesLock()) {
 			this.fakeWorld.getEntities().values().forEach(c -> {
 				if (c instanceof ParentAwareNode pa) {
 					pa.setParent(null);
@@ -128,11 +126,11 @@ public class DeferredIconRenderer extends DeferredCompositor {
 
 //		return buffer;
 
-		return outputTxt.getStoredImage();
+		return this.outputTxt.getStoredImage();
 	}
 
 	public ActiveModalController getFakeWorld() {
-		return fakeWorld;
+		return this.fakeWorld;
 	}
 
 }

@@ -30,8 +30,11 @@ public class MoveBuildingModal implements Modal {
 	protected Runnable cancelHook;
 	protected Runnable errorHook;
 
-	protected Vector2i source;
 	protected PlaceableObject attachedObject;
+
+	protected Vector2i source;
+	protected Direction sourceRotation;
+
 	protected Direction targetRotation;
 	protected Vector2i currentPos;
 
@@ -53,7 +56,7 @@ public class MoveBuildingModal implements Modal {
 			if (terrain.getMesh().isInBounds(candidateSource)) {
 				this.source = candidateSource;
 			}
-			this.targetRotation = this.attachedObject.getRotation();
+			this.sourceRotation = this.targetRotation = this.attachedObject.getRotation();
 		}
 
 		this.worldScene.getTerrain().getMoveHighlightObject().setActive(true);
@@ -75,12 +78,30 @@ public class MoveBuildingModal implements Modal {
 					this.placeDown = true;
 				} else {
 					this.placeDown = false;
-					this.errorHook.run();
+					this.runErrorHook();
 				}
 			} else if (inputHandler.isMouseButtonPressedOnce(StandardKeyOption.CANCEL)) {
-				this.cancelHook.run();
+				this.runCancelHook();
 				this.parent.cancelModal();
 			}
+		}
+	}
+
+	private void runCancelHook() {
+		if (this.cancelHook != null) {
+			this.cancelHook.run();
+		}
+	}
+
+	private void runPlaceHook() {
+		if (this.placeHook != null) {
+			this.placeHook.run();
+		}
+	}
+
+	private void runErrorHook() {
+		if (this.errorHook != null) {
+			this.errorHook.run();
 		}
 	}
 
@@ -114,8 +135,7 @@ public class MoveBuildingModal implements Modal {
 				this.compositor.addOutline(this.attachedObject, RED);
 			}
 			if (this.placeDown) {
-				this.compositor.removeOutline(this.attachedObject);
-				this.placeHook.run();
+				this.runPlaceHook();
 				this.parent.stopModal();
 			}
 		} else {
@@ -138,14 +158,18 @@ public class MoveBuildingModal implements Modal {
 			// ref. lost, memory will cleanup the mesh if needed
 			this.attachedObject.setActive(false);
 		} else {
-			this.attachedObject.placeDown(this.worldScene.getTerrain(), this.currentPos, this.targetRotation);
+			this.attachedObject.placeDown(this.worldScene.getTerrain(), this.source, this.sourceRotation);
 		}
 	}
 
 	@Override
 	public void stop() {
+		if (this.hasAttachedObject()) {
+			this.compositor.removeOutline(this.attachedObject);
+		}
 		this.attachedObject = null;
 		this.source = null;
+		this.sourceRotation = null;
 		this.targetRotation = null;
 		this.currentPos = null;
 		this.errorHook = null;
