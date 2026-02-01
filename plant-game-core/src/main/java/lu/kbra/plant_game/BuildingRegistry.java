@@ -14,7 +14,6 @@ import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
 import lu.kbra.plant_game.engine.scene.world.data.building.requirement.BuildingRequirement;
 import lu.kbra.plant_game.engine.scene.world.data.resource.DefaultResourceType;
 import lu.kbra.plant_game.engine.scene.world.data.resource.ResourceType;
-import lu.kbra.plant_game.generated.GenGORegistry;
 import lu.kbra.plant_game.plugin.PluginDescriptor;
 
 public abstract class BuildingRegistry extends PluginRegistry {
@@ -42,7 +41,7 @@ public abstract class BuildingRegistry extends PluginRegistry {
 	}
 
 	protected <T extends GameObject & PlaceableObject> String getInternalName(final Class<T> clazz) {
-		return this.pluginDescriptor.getInternalName() + ":" + PCUtils.getFileName(GenGORegistry.DATA_PATH.get(clazz));
+		return this.pluginDescriptor.getInternalName() + ":" + PCUtils.getFileName(GameObjectRegistry.DATA_PATH.get(clazz));
 	}
 
 	protected <T extends GameObject & PlaceableObject> void register(

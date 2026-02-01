@@ -14,6 +14,7 @@
   <mojos>
     <mojo>
       <goal>gen-go-registry</goal>
+      <requiresDependencyResolution>compile</requiresDependencyResolution>
       <requiresDirectInvocation>false</requiresDirectInvocation>
       <requiresProject>true</requiresProject>
       <requiresReports>false</requiresReports>
@@ -21,7 +22,7 @@
       <requiresOnline>false</requiresOnline>
       <inheritedByDefault>true</inheritedByDefault>
       <phase>process-classes</phase>
-      <implementation>lu.kbra.plant_game.maven.GenerateSourcesMojo</implementation>
+      <implementation>lu.kbra.plant_game.maven.GOAutogenMojo</implementation>
       <language>java</language>
       <instantiationStrategy>per-lookup</instantiationStrategy>
       <executionStrategy>once-per-session</executionStrategy>
@@ -40,55 +41,31 @@
       </configuration>
     </mojo>
     <mojo>
-      <goal>help</goal>
-      <description>Display help information on plant-game-autogen.&lt;br&gt;
-Call &lt;code&gt;mvn plant-game-autogen:help -Ddetail=true -Dgoal=&amp;lt;goal-name&amp;gt;&lt;/code&gt; to display parameter details.</description>
+      <goal>gen-ui-registry</goal>
+      <requiresDependencyResolution>compile</requiresDependencyResolution>
       <requiresDirectInvocation>false</requiresDirectInvocation>
-      <requiresProject>false</requiresProject>
+      <requiresProject>true</requiresProject>
       <requiresReports>false</requiresReports>
       <aggregator>false</aggregator>
       <requiresOnline>false</requiresOnline>
       <inheritedByDefault>true</inheritedByDefault>
-      <implementation>lu.kbra.plant_game.maven.HelpMojo</implementation>
+      <phase>process-classes</phase>
+      <implementation>lu.kbra.plant_game.maven.UIAutogenMojo</implementation>
       <language>java</language>
       <instantiationStrategy>per-lookup</instantiationStrategy>
       <executionStrategy>once-per-session</executionStrategy>
-      <threadSafe>true</threadSafe>
+      <threadSafe>false</threadSafe>
       <parameters>
         <parameter>
-          <name>detail</name>
-          <type>boolean</type>
-          <required>false</required>
-          <editable>true</editable>
-          <description>If &lt;code&gt;true&lt;/code&gt;, display all settable properties for each goal.</description>
-        </parameter>
-        <parameter>
-          <name>goal</name>
-          <type>java.lang.String</type>
-          <required>false</required>
-          <editable>true</editable>
-          <description>The name of the goal for which to show help. If unspecified, all goals will be displayed.</description>
-        </parameter>
-        <parameter>
-          <name>indentSize</name>
-          <type>int</type>
-          <required>false</required>
-          <editable>true</editable>
-          <description>The number of spaces per indentation level, should be positive.</description>
-        </parameter>
-        <parameter>
-          <name>lineLength</name>
-          <type>int</type>
-          <required>false</required>
-          <editable>true</editable>
-          <description>The maximum length of a display line, should be positive.</description>
+          <name>project</name>
+          <type>org.apache.maven.project.MavenProject</type>
+          <required>true</required>
+          <editable>false</editable>
+          <description></description>
         </parameter>
       </parameters>
       <configuration>
-        <detail implementation="boolean" default-value="false">${detail}</detail>
-        <goal implementation="java.lang.String">${goal}</goal>
-        <indentSize implementation="int" default-value="2">${indentSize}</indentSize>
-        <lineLength implementation="int" default-value="80">${lineLength}</lineLength>
+        <project implementation="org.apache.maven.project.MavenProject" default-value="${project}"/>
       </configuration>
     </mojo>
   </mojos>
@@ -112,12 +89,6 @@ Call &lt;code&gt;mvn plant-game-autogen:help -Ddetail=true -Dgoal=&amp;lt;goal-n
       <version>3.6.3</version>
     </dependency>
     <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-lang3</artifactId>
-      <type>jar</type>
-      <version>3.8.1</version>
-    </dependency>
-    <dependency>
       <groupId>org.eclipse.sisu</groupId>
       <artifactId>org.eclipse.sisu.plexus</artifactId>
       <type>jar</type>
@@ -134,24 +105,6 @@ Call &lt;code&gt;mvn plant-game-autogen:help -Ddetail=true -Dgoal=&amp;lt;goal-n
       <artifactId>jsr250-api</artifactId>
       <type>jar</type>
       <version>1.0</version>
-    </dependency>
-    <dependency>
-      <groupId>javax.inject</groupId>
-      <artifactId>javax.inject</artifactId>
-      <type>jar</type>
-      <version>1</version>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.sisu</groupId>
-      <artifactId>org.eclipse.sisu.inject</artifactId>
-      <type>jar</type>
-      <version>0.3.4</version>
-    </dependency>
-    <dependency>
-      <groupId>org.codehaus.plexus</groupId>
-      <artifactId>plexus-component-annotations</artifactId>
-      <type>jar</type>
-      <version>1.5.5</version>
     </dependency>
     <dependency>
       <groupId>org.codehaus.plexus</groupId>
@@ -186,12 +139,6 @@ Call &lt;code&gt;mvn plant-game-autogen:help -Ddetail=true -Dgoal=&amp;lt;goal-n
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-artifact-manager</artifactId>
-      <type>jar</type>
-      <version>2.2.1</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-repository-metadata</artifactId>
       <type>jar</type>
       <version>2.2.1</version>
     </dependency>
@@ -284,6 +231,138 @@ Call &lt;code&gt;mvn plant-game-autogen:help -Ddetail=true -Dgoal=&amp;lt;goal-n
       <artifactId>protobuf-java</artifactId>
       <type>jar</type>
       <version>4.26.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-core</artifactId>
+      <type>jar</type>
+      <version>3.9.6</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-settings-builder</artifactId>
+      <type>jar</type>
+      <version>3.9.6</version>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.plexus</groupId>
+      <artifactId>plexus-sec-dispatcher</artifactId>
+      <type>jar</type>
+      <version>2.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.plexus</groupId>
+      <artifactId>plexus-cipher</artifactId>
+      <type>jar</type>
+      <version>2.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-builder-support</artifactId>
+      <type>jar</type>
+      <version>3.9.6</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-repository-metadata</artifactId>
+      <type>jar</type>
+      <version>3.9.6</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-model-builder</artifactId>
+      <type>jar</type>
+      <version>3.9.6</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-resolver-provider</artifactId>
+      <type>jar</type>
+      <version>3.9.6</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven.resolver</groupId>
+      <artifactId>maven-resolver-impl</artifactId>
+      <type>jar</type>
+      <version>1.9.18</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven.resolver</groupId>
+      <artifactId>maven-resolver-named-locks</artifactId>
+      <type>jar</type>
+      <version>1.9.18</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven.resolver</groupId>
+      <artifactId>maven-resolver-api</artifactId>
+      <type>jar</type>
+      <version>1.9.18</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven.resolver</groupId>
+      <artifactId>maven-resolver-spi</artifactId>
+      <type>jar</type>
+      <version>1.9.18</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven.resolver</groupId>
+      <artifactId>maven-resolver-util</artifactId>
+      <type>jar</type>
+      <version>1.9.18</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven.shared</groupId>
+      <artifactId>maven-shared-utils</artifactId>
+      <type>jar</type>
+      <version>3.3.4</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.sisu</groupId>
+      <artifactId>org.eclipse.sisu.inject</artifactId>
+      <type>jar</type>
+      <version>0.9.0.M2</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.inject</groupId>
+      <artifactId>guice</artifactId>
+      <type>jar</type>
+      <version>5.1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>aopalliance</groupId>
+      <artifactId>aopalliance</artifactId>
+      <type>jar</type>
+      <version>1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <type>jar</type>
+      <version>32.0.1-jre</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>failureaccess</artifactId>
+      <type>jar</type>
+      <version>1.0.1</version>
+    </dependency>
+    <dependency>
+      <groupId>javax.inject</groupId>
+      <artifactId>javax.inject</artifactId>
+      <type>jar</type>
+      <version>1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.plexus</groupId>
+      <artifactId>plexus-component-annotations</artifactId>
+      <type>jar</type>
+      <version>2.1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <type>jar</type>
+      <version>3.12.0</version>
     </dependency>
   </dependencies>
 </plugin>

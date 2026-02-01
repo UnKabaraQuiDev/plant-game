@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Java-Version: 8
+Build-Jdk-Spec: 21
+Specification-Title: plant-game-autogen
+Specification-Version: 0.1
+Implementation-Title: plant-game-autogen
+Implementation-Version: 0.1
+Created-By: Maven Integration for Eclipse
+

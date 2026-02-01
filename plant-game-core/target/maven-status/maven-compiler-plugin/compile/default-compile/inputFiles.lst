@@ -15,7 +15,6 @@
 /ssd2/workspaces/java2/plant-game/plant-game-core/src/main/java/lu/kbra/plant_game/engine/mesh/TintedMesh.java
 /ssd2/workspaces/java2/plant-game/plant-game-core/src/main/java/lu/kbra/plant_game/engine/entity/go/impl/WaterContainer.java
 /ssd2/workspaces/java2/plant-game/plant-game-core/src/main/java/lu/kbra/plant_game/engine/entity/ui/impl/NeedsClick.java
-/ssd2/workspaces/java2/plant-game/plant-game-core/src/main/java/lu/kbra/plant_game/generated/UIObjectRegistry.java
 /ssd2/workspaces/java2/plant-game/plant-game-core/src/main/java/lu/kbra/plant_game/base/BaseMain.java
 /ssd2/workspaces/java2/plant-game/plant-game-core/src/main/java/lu/kbra/plant_game/engine/entity/ui/text/AnchoredTextUIObject.java
 /ssd2/workspaces/java2/plant-game/plant-game-core/src/main/java/lu/kbra/plant_game/base/scene/overlay/group/impl/ParentUIObjectGroup.java
@@ -117,6 +116,7 @@
 /ssd2/workspaces/java2/plant-game/plant-game-core/src/main/java/lu/kbra/plant_game/engine/entity/ui/scroller/ScrollBarUIObject.java
 /ssd2/workspaces/java2/plant-game/plant-game-core/src/main/java/lu/kbra/plant_game/base/entity/go/obj/water/WaterSprinklerObject5x5.java
 /ssd2/workspaces/java2/plant-game/plant-game-core/src/main/java/lu/kbra/plant_game/engine/entity/go/factory/GameObjectFactory.java
+/ssd2/workspaces/java2/plant-game/plant-game-core/src/main/java/lu/kbra/plant_game/UIObjectRegistry.java
 /ssd2/workspaces/java2/plant-game/plant-game-core/src/main/java/lu/kbra/plant_game/engine/entity/ui/impl/TransparentEntity.java
 /ssd2/workspaces/java2/plant-game/plant-game-core/src/main/java/lu/kbra/plant_game/base/scene/overlay/group/impl/MarginAnchoredUIObjectGroup.java
 /ssd2/workspaces/java2/plant-game/plant-game-core/src/main/java/lu/kbra/plant_game/engine/entity/ui/gradient/AnchoredGradientQuadUIObject.java
@@ -156,7 +156,6 @@
 /ssd2/workspaces/java2/plant-game/plant-game-core/src/main/java/lu/kbra/plant_game/base/entity/go/obj/flower/round/MediumRoundFlowerObject.java
 /ssd2/workspaces/java2/plant-game/plant-game-core/src/main/java/lu/kbra/plant_game/base/scene/overlay/group/building/BuildingTabUIObjectGroup.java
 /ssd2/workspaces/java2/plant-game/plant-game-core/src/main/java/lu/kbra/plant_game/engine/entity/go/obj_inst/particles/GravityParticleGameObject.java
-/ssd2/workspaces/java2/plant-game/plant-game-core/src/main/java/lu/kbra/plant_game/generated/GenGORegistry.java
 /ssd2/workspaces/java2/plant-game/plant-game-core/src/main/java/lu/kbra/plant_game/base/entity/go/obj/grass/LargeGrassObject.java
 /ssd2/workspaces/java2/plant-game/plant-game-core/src/main/java/lu/kbra/plant_game/base/scene/overlay/group/impl/PaddingParentUIObject.java
 /ssd2/workspaces/java2/plant-game/plant-game-core/src/main/java/lu/kbra/plant_game/engine/entity/ui/textinput/TextBoxUIObject.java

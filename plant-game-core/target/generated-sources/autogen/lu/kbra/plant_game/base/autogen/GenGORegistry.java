@@ -3,11 +3,10 @@ package lu.kbra.plant_game.base.autogen;
 
 import java.lang.Class;
 import java.lang.Object;
+import java.lang.Override;
 import java.lang.String;
-import java.lang.SuppressWarnings;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import lu.kbra.plant_game.GameObjectRegistry;
 import lu.kbra.plant_game.base.entity.go.obj.energy.SolarPanelMediumObject;
 import lu.kbra.plant_game.base.entity.go.obj.energy.SolarPanelSmallObject;
@@ -49,13 +48,17 @@ import lu.kbra.plant_game.engine.entity.go.obj_inst.particles.GravityParticleGam
 import lu.kbra.plant_game.engine.entity.go.obj_inst.particles.ParticleGameObject;
 import lu.kbra.plant_game.engine.mesh.AnimatedMesh;
 import lu.kbra.plant_game.engine.util.InternalConstructorFunction;
-import lu.kbra.plant_game.engine.util.exceptions.GameObjectConstructorNotFound;
-import lu.kbra.plant_game.engine.util.exceptions.GameObjectNotFound;
+import lu.kbra.plant_game.plugin.PluginDescriptor;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.geom.instance.InstanceEmitter;
 
 public class GenGORegistry extends GameObjectRegistry {
-	static {
+	public GenGORegistry(PluginDescriptor pd) {
+		super(pd);
+	}
+
+	@Override
+	public void init() {
 		/*                 MeshGameObject                 */
 		final List<InternalConstructorFunction<GameObject>> listMeshGameObject = new ArrayList<>();
 		listMeshGameObject.add(new InternalConstructorFunction<>(new Class[] {String.class, Mesh.class}, (Object[] arr) -> (GameObject) new MeshGameObject((String) arr[0], (Mesh) arr[1])));
@@ -264,24 +267,5 @@ public class GenGORegistry extends GameObjectRegistry {
 		GAME_OBJECT_CONSTRUCTORS.put(WaterSprinklerObject5x5.class, listWaterSprinklerObject5x5);
 		DATA_PATH.put(WaterSprinklerObject5x5.class, "classpath:/models/water-sprinkler-5x5.json");
 
-	}
-
-	@SuppressWarnings("unchecked")
-	public static <T extends GameObject> T create(final Class<T> clazz, final Object... args) {
-		return (T) get(clazz, args).apply(args);
-	}
-
-	public static <T extends GameObject> InternalConstructorFunction<GameObject> get(
-			final Class<T> clazz, final Object... args) {
-		if (GAME_OBJECT_CONSTRUCTORS.containsKey(clazz)) {
-			final Optional<InternalConstructorFunction<GameObject>> bestConstructor = class lu.kbra.plant_game.engine.util.exceptions.GameObjectConstructorNotFound.get(clazz).parallelStream().filter((v) -> v.matches(args)).findFirst();
-			if (bestConstructor.isPresent()) {
-				return bestConstructor.get();
-			} else {
-				throw new GameObjectConstructorNotFound(clazz, args);
-			}
-		} else {
-			throw new GameObjectNotFound(clazz, args);
-		}
 	}
 }

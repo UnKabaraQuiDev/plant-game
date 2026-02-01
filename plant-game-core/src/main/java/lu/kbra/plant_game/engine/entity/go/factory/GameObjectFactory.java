@@ -1,6 +1,7 @@
 package lu.kbra.plant_game.engine.entity.go.factory;
 
-import static lu.kbra.plant_game.generated.GenGORegistry.*;
+import static lu.kbra.plant_game.GameObjectRegistry.BUFFER_SIZE;
+import static lu.kbra.plant_game.GameObjectRegistry.DATA_PATH;
 
 import java.util.Arrays;
 import java.util.List;

@@ -135,7 +135,6 @@ lu/kbra/plant_game/engine/mesh/TexturedMesh.class
 lu/kbra/plant_game/engine/entity/ui/textinput/TextBoxUIObject.class
 lu/kbra/plant_game/base/scene/overlay/group/impl/AnchoredLayoutUIObjectGroup.class
 lu/kbra/plant_game/engine/scene/world/ModalsOwner.class
-lu/kbra/plant_game/generated/UIObjectRegistry.class
 lu/kbra/plant_game/engine/entity/ui/text/GrowOnHoverTextUIObject.class
 lu/kbra/plant_game/engine/scene/world/generator/WorldGenerator$Edge.class
 lu/kbra/plant_game/engine/entity/go/SwayGameObject.class
@@ -359,6 +358,7 @@ lu/kbra/plant_game/base/entity/go/obj/energy/SolarPanelSmallObject.class
 lu/kbra/plant_game/base/scene/overlay/stat_line/integer/FixedIntegerStatLine.class
 lu/kbra/plant_game/engine/data/json/OrgJOMLModule$Matrix3fDeserializer.class
 lu/kbra/plant_game/engine/entity/ui/group/BuildingTabListUIObjectGroup.class
+lu/kbra/plant_game/UIObjectRegistry.class
 lu/kbra/plant_game/engine/entity/ui/text/SignedIntegerTextUIObject.class
 lu/kbra/plant_game/engine/entity/ui/ProgrammaticTexturedQuadMeshUIObject.class
 lu/kbra/plant_game/BuildingDefinition.class
@@ -384,4 +384,3 @@ lu/kbra/plant_game/VersionMatcher.class
 lu/kbra/plant_game/engine/entity/impl/SceneBoundsOwner.class
 lu/kbra/plant_game/engine/entity/ui/impl/BoundsOwnerParentAware.class
 lu/kbra/plant_game/engine/entity/ui/impl/BoundsOwner.class
-lu/kbra/plant_game/generated/GenGORegistry.class

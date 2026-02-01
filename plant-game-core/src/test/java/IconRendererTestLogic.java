@@ -14,6 +14,7 @@ import org.junit.Test;
 import lu.pcy113.pclib.PCUtils;
 import lu.pcy113.pclib.logger.GlobalLogger;
 
+import lu.kbra.plant_game.GameObjectRegistry;
 import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.entity.go.MeshGameObject;
 import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory;
@@ -21,7 +22,6 @@ import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.render.DeferredIconRenderer;
-import lu.kbra.plant_game.generated.GenGORegistry;
 import lu.kbra.standalone.gameengine.GameEngine;
 import lu.kbra.standalone.gameengine.graph.window.WindowOptions;
 import lu.kbra.standalone.gameengine.impl.GameLogic;
@@ -54,7 +54,7 @@ public class IconRendererTestLogic extends GameLogic {
 
 //		this.world = new WorldLevelScene("world", this.cache);
 
-		for (Class<? extends GameObject> goClazz : GenGORegistry.GAME_OBJECT_CONSTRUCTORS.keySet()) {
+		for (Class<? extends GameObject> goClazz : GameObjectRegistry.GAME_OBJECT_CONSTRUCTORS.keySet()) {
 			if (!MeshGameObject.class.isAssignableFrom(goClazz) || !PlaceableObject.class.isAssignableFrom(goClazz)) {
 				continue;
 			}

@@ -24,14 +24,17 @@ import java.util.stream.Stream;
 
 import javax.lang.model.element.Modifier;
 
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.json.JSONObject;
 import org.reflections.Reflections;
+import org.reflections.util.ConfigurationBuilder;
 
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ArrayTypeName;
@@ -39,6 +42,7 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.MethodSpec.Builder;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
@@ -48,8 +52,8 @@ import com.squareup.javapoet.WildcardTypeName;
 import lu.pcy113.pclib.PCUtils;
 import lu.pcy113.pclib.datastructure.pair.Pairs;
 
-@Mojo(name = "gen-go-registry", defaultPhase = LifecyclePhase.PROCESS_CLASSES)
-public class GenerateSourcesMojo extends AbstractMojo {
+@Mojo(name = "gen-go-registry", defaultPhase = LifecyclePhase.PROCESS_CLASSES, requiresDependencyResolution = ResolutionScope.COMPILE)
+public class GOAutogenMojo extends AbstractMojo implements AutojenDefaults {
 
 	@Parameter(defaultValue = "${project}", required = true, readonly = true)
 	MavenProject project;
@@ -88,20 +92,32 @@ public class GenerateSourcesMojo extends AbstractMojo {
 		}
 
 		final ClassLoader cl;
+		final URL[] urls;
 
 		try {
 			File outputDirectory = new File(project.getBuild().getOutputDirectory());
 
 			URL url = outputDirectory.toURI().toURL();
-			URL[] urls = new URL[] { url };
 
+			List<URL> urlList = new ArrayList<>();
+
+			urlList.add(url);
+
+			for (Artifact artifact : (Set<Artifact>) project.getArtifacts()) {
+				if (artifact.getScope().equals(Artifact.SCOPE_COMPILE)
+						|| artifact.getScope().equals(Artifact.SCOPE_RUNTIME)) {
+					urlList.add(artifact.getFile().toURI().toURL());
+				}
+			}
+
+			urls = urlList.toArray(new URL[0]);
 			cl = new URLClassLoader(urls, getClass().getClassLoader());
 		} catch (Exception e) {
 			throw new MojoExecutionException("Error loading compiled class", e);
 		}
 
 		try {
-			genRegistry(cl, packageIn, packageOut, new File(generatedSourcesDir));
+			genRegistry(cl, urls, packageIn, packageOut, new File(generatedSourcesDir));
 		} catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException
 				| IOException | RuntimeException e) {
 			e.printStackTrace();
@@ -109,23 +125,28 @@ public class GenerateSourcesMojo extends AbstractMojo {
 		}
 	}
 
-	public void genRegistry(final ClassLoader scanClassLoader, String scanPackage, String outputPackage,
-			final File outputDir) throws IOException, ClassNotFoundException, NoSuchMethodException,
-			IllegalAccessException, InvocationTargetException {
-		final Class<?> gameObjectClass = Class.forName("lu.kbra.plant_game.engine.entity.go.GameObject");
-		final Class<?> internalConstructorFunctionClass = Class
-				.forName("lu.kbra.plant_game.engine.util.InternalConstructorFunction");
-		final Class<? extends Annotation> dataPathClass = (Class<? extends Annotation>) Class
-				.forName("lu.kbra.plant_game.engine.util.annotation.DataPath");
-		final Class<?> gameObjectRegistryClass = Class.forName("lu.kbra.plant_game.GameObjectRegistry");
-		final Class<? extends Annotation> bufferSizeClass = (Class<? extends Annotation>) Class
-				.forName("lu.kbra.plant_game.engine.util.annotation.BufferSize");
-		final Class<? extends Annotation> textureOptionClass = (Class<? extends Annotation>) Class
-				.forName("lu.kbra.plant_game.engine.util.annotation.TextureOption");
-		final Class<? extends Exception> gameObjectNotFoundClass = (Class<? extends Exception>) Class
-				.forName("lu.kbra.plant_game.engine.util.exceptions.GameObjectNotFound");
-		final Class<? extends Exception> gameObjectConstructorNotFoundClass = (Class<? extends Exception>) Class
-				.forName("lu.kbra.plant_game.engine.util.exceptions.GameObjectConstructorNotFound");
+	public void genRegistry(final ClassLoader scanClassLoader, final URL[] urls, String scanPackage,
+			String outputPackage, final File outputDir) throws IOException, ClassNotFoundException,
+			NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+		final Class<?> gameObjectClass = scanClassLoader.loadClass("lu.kbra.plant_game.engine.entity.go.GameObject");
+		final Class<?> internalConstructorFunctionClass = scanClassLoader
+				.loadClass("lu.kbra.plant_game.engine.util.InternalConstructorFunction");
+		final Class<? extends Annotation> dataPathClass = (Class<? extends Annotation>) scanClassLoader
+				.loadClass("lu.kbra.plant_game.engine.util.annotation.DataPath");
+		final Class<?> gameObjectRegistryClass = scanClassLoader.loadClass("lu.kbra.plant_game.GameObjectRegistry");
+		final Class<? extends Annotation> bufferSizeClass = (Class<? extends Annotation>) scanClassLoader
+				.loadClass("lu.kbra.plant_game.engine.util.annotation.BufferSize");
+		final Class<? extends Annotation> textureOptionClass = (Class<? extends Annotation>) scanClassLoader
+				.loadClass("lu.kbra.plant_game.engine.util.annotation.TextureOption");
+		final Class<? extends Exception> gameObjectNotFoundClass = (Class<? extends Exception>) scanClassLoader
+				.loadClass("lu.kbra.plant_game.engine.util.exceptions.GameObjectNotFound");
+		final Class<? extends Exception> gameObjectConstructorNotFoundClass = (Class<? extends Exception>) scanClassLoader
+				.loadClass("lu.kbra.plant_game.engine.util.exceptions.GameObjectConstructorNotFound");
+		final Class<?> pluginDescriptorClass = scanClassLoader.loadClass("lu.kbra.plant_game.plugin.PluginDescriptor");
+		final Class<?> textureFilterClass = scanClassLoader
+				.loadClass("lu.kbra.standalone.gameengine.utils.gl.consts.TextureFilter");
+		final Class<?> textureWrapClass = scanClassLoader
+				.loadClass("lu.kbra.standalone.gameengine.utils.gl.consts.TextureWrap");
 
 		final TypeName functionType = ParameterizedTypeName.get(ClassName.get(internalConstructorFunctionClass),
 				ClassName.get(gameObjectClass));
@@ -142,16 +163,23 @@ public class GenerateSourcesMojo extends AbstractMojo {
 		final String bufferSizeMap = PCUtils.camelCaseToConstant("bufferSize");
 		final String textureFilterMap = PCUtils.camelCaseToConstant("textureFilter");
 		final String textureWrapMap = PCUtils.camelCaseToConstant("textureWrap");
-		final String defaultPriceMap = PCUtils.camelCaseToConstant("defaultPrice");
+//		final String defaultPriceMap = PCUtils.camelCaseToConstant("defaultPrice");
 
 		final TypeSpec.Builder registry = TypeSpec.classBuilder("GenGORegistry").superclass(gameObjectRegistryClass)
 				.addModifiers(Modifier.PUBLIC);
 
-		final Reflections reflections = new Reflections(scanPackage);
+		registry.addMethod(MethodSpec.constructorBuilder().addModifiers(Modifier.PUBLIC)
+				.addParameter(pluginDescriptorClass, "pd").addStatement("super($N)", "pd").build());
+
+		final ConfigurationBuilder builder = new ConfigurationBuilder();
+		builder.addClassLoaders(scanClassLoader);
+		builder.forPackage(scanPackage, scanClassLoader);
+		final Reflections reflections = new Reflections(builder);
 		final Set<? extends Class<?>> classes = reflections.getSubTypesOf(gameObjectClass);
 //		classes.add(gameObjectClass);
 
-		final CodeBlock.Builder staticCodeBlock = CodeBlock.builder();
+		final Builder initMethod = MethodSpec.methodBuilder("init").returns(TypeName.VOID).addModifiers(Modifier.PUBLIC)
+				.addAnnotation(Override.class);
 
 		final String spacer = PCUtils.repeatString(" ", 15);
 
@@ -167,8 +195,8 @@ public class GenerateSourcesMojo extends AbstractMojo {
 			final Optional<String> dataPath = c.isAnnotationPresent(dataPathClass)
 					? Optional.of(getStringValue(c.getAnnotation(dataPathClass)))
 					: Optional.empty();
-			final OptionalInt bufferSize = c.isAnnotationPresent(textureOptionClass)
-					? OptionalInt.of(getIntValue(c.getAnnotation(textureOptionClass)))
+			final OptionalInt bufferSize = c.isAnnotationPresent(bufferSizeClass)
+					? OptionalInt.of(getIntValue(c.getAnnotation(bufferSizeClass)))
 					: OptionalInt.empty();
 			final Optional<Annotation> textureOption = Optional.ofNullable(c.getAnnotation(textureOptionClass));
 			final String listName = "list" + c.getSimpleName();
@@ -177,13 +205,13 @@ public class GenerateSourcesMojo extends AbstractMojo {
 					ParameterizedTypeName.get(ClassName.get(internalConstructorFunctionClass),
 							ClassName.get(gameObjectClass)));
 
-			staticCodeBlock.add("/* $L $T $L */\n", spacer, TypeName.get(c), spacer);
-			staticCodeBlock.addStatement("final $T $L = new $T<>()", specificSubListType, listName, ArrayList.class);
+			initMethod.addCode("/* $L $T $L */\n", spacer, TypeName.get(c), spacer);
+			initMethod.addStatement("final $T $L = new $T<>()", specificSubListType, listName, ArrayList.class);
 
 			for (final Constructor<?> con : Arrays.stream(c.getConstructors())
 					.sorted(Comparator.comparing(Constructor<?>::getParameterCount)).collect(Collectors.toList())) {
 
-				staticCodeBlock.addStatement(
+				initMethod.addStatement(
 						"$L.add(new $T<>(new $T {" + IntStream.range(0, con.getParameterCount())
 								.mapToObj(i -> "$T.class").collect(Collectors.joining(", "))
 								+ "}, ($T[] arr) -> ($T) new $T("
@@ -202,74 +230,23 @@ public class GenerateSourcesMojo extends AbstractMojo {
 
 			}
 
-			staticCodeBlock.addStatement(gameObjectConstructorNotFoundClass + ".put($T.class, $L)", c, listName);
-			bufferSize.ifPresent(i -> staticCodeBlock.addStatement(bufferSizeMap + ".put($T.class, $L)", c, i));
-			dataPath.ifPresent(t -> staticCodeBlock.addStatement(dataPathMap + ".put($T.class, $S)", c, t));
+			initMethod.addStatement(gameObjectConstructorsMap + ".put($T.class, $L)", c, listName);
+			bufferSize.ifPresent(i -> initMethod.addStatement(bufferSizeMap + ".put($T.class, $L)", c, i));
+			dataPath.ifPresent(t -> initMethod.addStatement(dataPathMap + ".put($T.class, $S)", c, t));
 			textureOption.ifPresent(t -> {
-				staticCodeBlock.addStatement(textureFilterMap + ".put($T.class, $L)", c, getEnumValue(t));
-				staticCodeBlock.addStatement(textureWrapMap + ".put($T.class, $L)", c, getEnumValue(t));
+				initMethod.addStatement(textureFilterMap + ".put($T.class, $T.$L)", c, textureFilterClass,
+						getEnumValue(t, "textureFilter"));
+				initMethod.addStatement(textureWrapMap + ".put($T.class, $T.$L)", c, textureWrapClass,
+						getEnumValue(t, "textureWrap"));
 			});
 //			price.ifPresent(p -> staticCodeBlock.addStatement("$N.put($T.class, $L)", defaultPriceHashMap, c, p));
-			staticCodeBlock.add("\n");
+			initMethod.addCode("\n");
 		}
 
-		registry.addStaticBlock(staticCodeBlock.build());
-
-		final ClassName exceptionType = ClassName.get(gameObjectNotFoundClass);
-		final ClassName exceptionConstructorType = ClassName.get(gameObjectConstructorNotFoundClass);
-		final TypeVariableName gameObjectTypeVar = TypeVariableName.get("T", ClassName.get(gameObjectClass));
-
-		registry.addMethod(MethodSpec.methodBuilder("create").addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-				.addParameter(ParameterizedTypeName.get(ClassName.get(Class.class), gameObjectTypeVar), "clazz",
-						Modifier.FINAL)
-				.addParameter(ArrayTypeName.of(ClassName.get(Object.class)), "args", Modifier.FINAL).varargs()
-				.addAnnotation(
-						AnnotationSpec.builder(SuppressWarnings.class).addMember("value", "$S", "unchecked").build())
-				.returns(gameObjectTypeVar).addTypeVariable(gameObjectTypeVar)
-				.addStatement("return ($T) get(clazz, args).apply(args)", gameObjectTypeVar).build());
-
-		registry.addMethod(MethodSpec.methodBuilder("get").addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-				.addParameter(ParameterizedTypeName.get(ClassName.get(Class.class), gameObjectTypeVar), "clazz",
-						Modifier.FINAL)
-				.addParameter(ArrayTypeName.of(ClassName.get(Object.class)), "args", Modifier.FINAL).varargs()
-				.returns(functionType).addTypeVariable(gameObjectTypeVar)
-				.beginControlFlow("if ($N.containsKey(clazz))", gameObjectConstructorsMap)
-				.addStatement(
-						"final $T<$T> bestConstructor = " + gameObjectConstructorNotFoundClass
-								+ ".get(clazz).parallelStream().filter((v) -> v.matches(args)).findFirst()",
-						Optional.class, functionType)
-				.beginControlFlow("if (bestConstructor.isPresent())").addStatement("return bestConstructor.get()")
-				.nextControlFlow("else").addStatement("throw new $T(clazz, args)", exceptionConstructorType)
-				.endControlFlow().nextControlFlow("else").addStatement("throw new $T(clazz, args)", exceptionType)
-				.endControlFlow().build());
+		registry.addMethod(initMethod.build());
 
 		JavaFile.builder(outputPackage, registry.build()).addFileComment("@formatter:off").indent("\t").build()
 				.writeTo(outputDir);
-	}
-
-	private Enum<?> getEnumValue(Annotation annotation) {
-		try {
-			final Class<?> clazz = annotation.getClass();
-			final Method meth = clazz.getMethod("value");
-			return (Enum<?>) meth.invoke(annotation);
-		} catch (IllegalAccessException | NoSuchMethodException | IllegalArgumentException
-				| InvocationTargetException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	private int getIntValue(Annotation annotation)
-			throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-		final Class<?> clazz = annotation.getClass();
-		final Method meth = clazz.getMethod("value");
-		return (int) meth.invoke(annotation);
-	}
-
-	private String getStringValue(Annotation annotation)
-			throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-		final Class<?> clazz = annotation.getClass();
-		final Method meth = clazz.getMethod("value");
-		return (String) meth.invoke(annotation);
 	}
 
 }

@@ -1,9 +1,9 @@
 package lu.kbra.plant_game.engine.entity.ui.factory;
 
-import static lu.kbra.plant_game.generated.UIObjectRegistry.BUFFER_SIZE;
-import static lu.kbra.plant_game.generated.UIObjectRegistry.DATA_PATH;
-import static lu.kbra.plant_game.generated.UIObjectRegistry.TEXTURE_FILTER;
-import static lu.kbra.plant_game.generated.UIObjectRegistry.TEXTURE_WRAP;
+import static lu.kbra.plant_game.UIObjectRegistry.BUFFER_SIZE;
+import static lu.kbra.plant_game.UIObjectRegistry.DATA_PATH;
+import static lu.kbra.plant_game.UIObjectRegistry.TEXTURE_FILTER;
+import static lu.kbra.plant_game.UIObjectRegistry.TEXTURE_WRAP;
 
 import java.util.Arrays;
 import java.util.HashMap;

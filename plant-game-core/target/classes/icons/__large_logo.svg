@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="375"
+   height="64"
+   viewBox="0 0 375 64"
+   version="1.1"
+   id="SVGRoot"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs429">
+    <rect
+       x="285.34561"
+       y="97.327187"
+       width="1174.5623"
+       height="267.64978"
+       id="rect2" />
+    <rect
+       x="816.46393"
+       y="417.61661"
+       width="519.28357"
+       height="155.22964"
+       id="rect3" />
+  </defs>
+  <g
+     id="layer9"
+     transform="translate(0,-76.610329)">
+    <g
+       id="g1"
+       transform="matrix(0.38487166,0,0,0.39069041,-227.75222,34.353941)">
+      <path
+         id="rect7"
+         style="fill:#ffffff;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.7;paint-order:markers fill stroke"
+         d="m 1528.0352,109.56445 c -300.0443,0.007 -600.08864,0.008 -900.13286,0.0176 -13.88625,0.22467 -27.27159,9.0516 -32.80436,21.81417 -2.75966,6.02705 -3.57858,12.7664 -3.27774,19.33974 0.0109,28.39197 -0.0612,56.78514 0.0912,85.1763 0.77181,13.97361 10.27794,27.07193 23.38608,32.02417 5.72985,2.28586 11.98945,2.83242 18.10676,2.57725 298.87499,-0.007 597.75012,-0.008 896.62502,-0.0176 13.9984,-0.22273 27.4727,-9.20459 32.9353,-22.11664 2.6687,-5.98527 3.4373,-12.64445 3.1409,-19.14312 -0.01,-28.35215 0.048,-56.7054 -0.087,-85.05678 -0.7704,-13.90257 -10.1726,-26.95518 -23.1919,-31.95153 -4.6858,-1.86834 -9.7504,-2.75694 -14.7911,-2.66357 z" />
+      <rect
+         style="fill:#000000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.7;paint-order:markers fill stroke"
+         id="rect4"
+         width="946.28485"
+         height="132.94911"
+         x="605.8205"
+         y="123.56446"
+         ry="23.070581" />
+      <text
+         xml:space="preserve"
+         id="text1"
+         style="font-weight:bold;font-size:100px;font-family:'Inria Sans';-inkscape-font-specification:'Inria Sans Bold';text-align:center;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect2);display:inline;fill:#ffffff;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.7;paint-order:markers fill stroke"
+         transform="translate(204.21557,29.311549)"><tspan
+           x="428.19336"
+           y="191.22929"
+           id="tspan2"><tspan
+             style="font-weight:normal;font-family:'Days One';-inkscape-font-specification:'Days One'"
+             id="tspan1">SATISFACTORY</tspan></tspan></text>
+      <rect
+         style="fill:#000000;stroke-width:4.23273;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.7;paint-order:markers fill stroke"
+         id="rect5"
+         width="302.11783"
+         height="96.192589"
+         x="982.77032"
+         y="142.33376" />
+      <text
+         xml:space="preserve"
+         id="text2"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:100px;font-family:'Days One';-inkscape-font-specification:'Days One';text-align:center;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect3);display:inline;fill:#ffffff;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.7;paint-order:markers fill stroke"
+         transform="matrix(0.71304789,-0.09672292,0.09672292,0.71304789,325.84954,-42.947042)"><tspan
+           x="873.9067"
+           y="508.33805"
+           id="tspan4"><tspan
+             style="font-weight:bold;font-family:Purisa;-inkscape-font-specification:'Purisa Bold'"
+             id="tspan3">PLANT</tspan></tspan></text>
+    </g>
+  </g>
+</svg>
