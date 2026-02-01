@@ -65,6 +65,7 @@
 						<phase>process-test-classes</phase>
 						<goals>
 							<goal>gen-go-registry</goal>
+							<goal>gen-uo-registry</goal>
 						</goals>
 					</execution>
 				</executions>
