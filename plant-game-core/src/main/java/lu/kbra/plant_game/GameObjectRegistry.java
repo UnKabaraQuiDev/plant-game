@@ -20,7 +20,7 @@ public abstract class GameObjectRegistry {
 	public static final Map<Class<? extends GameObject>, Integer> BUFFER_SIZE;
 	public static final Map<Class<? extends GameObject>, TextureFilter> TEXTURE_FILTER;
 	public static final Map<Class<? extends GameObject>, TextureWrap> TEXTURE_WRAP;
-	public static final Map<Class<? extends GameObject>, Integer> DEFAULT_PRICE;
+//	public static final Map<Class<? extends GameObject>, Integer> DEFAULT_PRICE;
 
 	static {
 		GAME_OBJECT_CONSTRUCTORS = new HashMap<>();
@@ -28,7 +28,7 @@ public abstract class GameObjectRegistry {
 		BUFFER_SIZE = new HashMap<>();
 		TEXTURE_FILTER = new HashMap<>();
 		TEXTURE_WRAP = new HashMap<>();
-		DEFAULT_PRICE = new HashMap<>();
+//		DEFAULT_PRICE = new HashMap<>();
 	}
 
 	protected PluginDescriptor pluginDescriptor;

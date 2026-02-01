@@ -43,7 +43,7 @@ import lu.kbra.plant_game.engine.util.exceptions.GameObjectNotFound;
 
 public class GameObjectRegistryGenMain extends GenMainConsts {
 
-	public void genRegistry(String ) throws IOException {
+	public void genRegistry() throws IOException {
 		final TypeName functionType = ParameterizedTypeName.get(ClassName.get(InternalConstructorFunction.class),
 				ClassName.get(GameObject.class));
 

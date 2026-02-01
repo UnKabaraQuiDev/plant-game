@@ -2,10 +2,11 @@
 	"displayName": "Satisplantory Base",
 	"internalName": "base",
 	"version": "${project.version}",
-	"mainClass": "lu.kbra.plant_game.base.BaseMain",
+	"package": "${package.base}",
+	"mainClass": "BaseMain",
 	"registries": {
-		"building": "lu.kbra.plant_game.base.reg.BaseBuildingRegistry",
-		"resources": "lu.kbra.plant_game.base.reg.BaseResourceRegistry"
+		"building": "reg.BaseBuildingRegistry",
+		"resources": "reg.BaseResourceRegistry"
 	},
 	"dependencies": {}
 }

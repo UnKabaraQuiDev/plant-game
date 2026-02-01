@@ -11,6 +11,10 @@
 	<artifactId>plant-game-core</artifactId>
 	<name>Plant Game (Core)</name>
 	<description>The core of a game about plants</description>
+	<properties>
+		<package.base>lu.kbra.plant_game.base</package.base>
+		<package.registries>${package.base}.reg</package.registries>
+	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>lu.kbra</groupId>
@@ -46,12 +50,26 @@
 							<includes>
 								<include>**/*GenMain.java</include>
 							</includes>
-							<outputDirectory>${project.build.directory}/generated-classes</outputDirectory>
+							<outputDirectory>
+								${project.build.directory}/generated-classes</outputDirectory>
 						</configuration>
 					</execution>
 				</executions>
 			</plugin>
 			<plugin>
+				<groupId>lu.kbra</groupId>
+				<artifactId>plant-game-autogen</artifactId>
+				<version>${project.version}</version>
+				<executions>
+					<execution>
+						<phase>process-test-classes</phase>
+						<goals>
+							<goal>gen-go-registry</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<!--<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>3.1.2</version>
@@ -64,7 +82,7 @@
 							${project.build.directory}/generated-classes</additionalClasspathElement>
 					</additionalClasspathElements>
 				</configuration>
-			</plugin>
+			</plugin>-->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>

@@ -27,6 +27,7 @@ import lu.kbra.plant_game.engine.entity.ui.prim.BuildingItemUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.prim.IBAnchoredFlatQuadUIObject;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
 import lu.kbra.plant_game.engine.scene.ui.layout.AnchorLayout;
+import lu.kbra.plant_game.engine.scene.world.GameData;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.plant_game.generated.ColorMaterial;
@@ -91,6 +92,7 @@ public class BuildingPanelUIObjectGroup extends AnchoredLayoutUIObjectGroup
 	@Override
 	public void update(final WindowInputHandler input) {
 		final WorldLevelScene world = PGLogic.INSTANCE.getWorldScene();
+		final GameData gameData = PGLogic.INSTANCE.getGameData();
 
 		final BuildingTabUIObjectGroup buildingTab = this.buildingTabs.get(this.activeBuildingTabKey);
 		if (buildingTab == null) {
@@ -103,7 +105,7 @@ public class BuildingPanelUIObjectGroup extends AnchoredLayoutUIObjectGroup
 				.parallelStream()
 				.filter(BuildingItemUIObjectGroup.class::isInstance)
 				.map(BuildingItemUIObjectGroup.class::cast)
-				.forEach(c -> c.updateTintStatus(world));
+				.forEach(c -> c.updateTintStatus(gameData, world));
 	}
 
 	public <T extends BuildingTabUIObjectGroup> ObjectTriggerLatch<T> addTab(final T tab) {
