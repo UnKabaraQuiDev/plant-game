@@ -11,21 +11,21 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
-import lu.kbra.plant_game.PluginDescriptor.Dependencies.VersionnedPluginDescriptor;
 import lu.kbra.plant_game.VersionMatcher;
 import lu.kbra.plant_game.VersionMatcher.BoundsVersionMatcher;
 import lu.kbra.plant_game.VersionMatcher.BoundsVersionMatcher.BoundsDirection;
+import lu.kbra.plant_game.plugin.PluginDescriptor.Dependencies.VersionnedPluginDescriptor;
 import lu.kbra.plant_game.VersionMatcher.RangeVersionMatcher;
 import lu.kbra.plant_game.VersionMatcher.StrictVersionMatcher;
 
 public final class VersionMatcherModule extends SimpleModule {
 
 	public VersionMatcherModule() {
-		this.addSerializer(VersionnedPluginDescriptor.class, new Serializer());
-		this.addDeserializer(VersionnedPluginDescriptor.class, new Deserializer());
+		this.addSerializer(VersionnedPluginDescriptor.class, new VersionnedPluginDescriptorSerializer());
+		this.addDeserializer(VersionnedPluginDescriptor.class, new VersionnedPluginDescriptorDeserializer());
 	}
 
-	static final class Serializer extends JsonSerializer<VersionnedPluginDescriptor> {
+	static final class VersionnedPluginDescriptorSerializer extends JsonSerializer<VersionnedPluginDescriptor> {
 
 		@Override
 		public void serialize(final VersionnedPluginDescriptor value, final JsonGenerator gen, final SerializerProvider serializers)
@@ -45,7 +45,7 @@ public final class VersionMatcherModule extends SimpleModule {
 		}
 	}
 
-	static final class Deserializer extends JsonDeserializer<VersionnedPluginDescriptor> {
+	static final class VersionnedPluginDescriptorDeserializer extends JsonDeserializer<VersionnedPluginDescriptor> {
 
 		@Override
 		public VersionnedPluginDescriptor deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException {

@@ -46,8 +46,7 @@
 							<includes>
 								<include>**/*GenMain.java</include>
 							</includes>
-							<outputDirectory>
-								${project.build.directory}/generated-classes</outputDirectory>
+							<outputDirectory>${project.build.directory}/generated-classes</outputDirectory>
 						</configuration>
 					</execution>
 				</executions>

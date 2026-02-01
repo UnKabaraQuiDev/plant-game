@@ -24,9 +24,9 @@
 	},
 	"game": {
 		"startResources": {
-			"water": 200,
-			"energy": 100,
-			"money": 100
+			"base:water": 200,
+			"base:energy": 100,
+			"base:money": 100
 		},
 		"lockedBuildings": [
 			"base:water-tower-large"
@@ -38,14 +38,14 @@
 					{
 						"type": "MIN_BUILD",
 						"count": 2,
-						"building": "water-tower-small"
+						"building": "base:water-tower-small"
 					}
 				],
 				"buildRequirements": [
 					{
 						"type": "MIN_RESOURCE",
 						"count": 2000,
-						"resource": "water"
+						"resource": "base:water"
 					}
 				]
 			}

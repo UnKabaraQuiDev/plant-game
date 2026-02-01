@@ -1,15 +1,24 @@
 package lu.kbra.plant_game;
 
 import java.io.File;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import org.lwjgl.glfw.GLFW;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import lu.pcy113.pclib.PCUtils;
+
+import lu.kbra.plant_game.base.scene.menu.main.MainMenuUIScene;
+import lu.kbra.plant_game.base.scene.overlay.OverlayUIScene;
 import lu.kbra.plant_game.engine.UpdateFrameState;
 import lu.kbra.plant_game.engine.data.json.OrgJOMLModule;
 import lu.kbra.plant_game.engine.data.json.OrgJSONModule;
+import lu.kbra.plant_game.engine.data.json.ResourceTypeModule;
 import lu.kbra.plant_game.engine.data.json.VersionMatcherModule;
 import lu.kbra.plant_game.engine.data.locale.LocalizationService;
 import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory;
@@ -21,8 +30,10 @@ import lu.kbra.plant_game.engine.scene.world.GameData;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.plant_game.engine.scene.world.data.LevelData;
 import lu.kbra.plant_game.engine.window.input.MappingInputHandler;
-import lu.kbra.plant_game.vanilla.scene.menu.main.MainMenuUIScene;
-import lu.kbra.plant_game.vanilla.scene.overlay.OverlayUIScene;
+import lu.kbra.plant_game.plugin.PluginDescriptor;
+import lu.kbra.plant_game.plugin.PluginJarLoader;
+import lu.kbra.plant_game.plugin.PluginJarLoader.LoadedPlugin;
+import lu.kbra.plant_game.plugin.PluginMain;
 import lu.kbra.standalone.gameengine.impl.GameLogic;
 import lu.kbra.standalone.gameengine.impl.future.WorkerDispatcher;
 import lu.kbra.standalone.gameengine.utils.gl.consts.Consts;
@@ -37,6 +48,7 @@ public class PGLogic extends GameLogic {
 		OBJECT_MAPPER.registerModule(new OrgJSONModule());
 		OBJECT_MAPPER.registerModule(new OrgJOMLModule());
 		OBJECT_MAPPER.registerModule(new VersionMatcherModule());
+		OBJECT_MAPPER.registerModule(new ResourceTypeModule());
 	}
 
 	public final WorkerDispatcher WORKERS = new WorkerDispatcher("WORKERS", 8);
@@ -49,10 +61,11 @@ public class PGLogic extends GameLogic {
 
 	private MappingInputHandler inputHandler;
 
-	private LevelData levelData;
-	private GameData gameData = new GameData();
+//	private LevelData levelData;
+	private GameData gameData;
 
 	private final PluginJarLoader pluginJarLoader = new PluginJarLoader();
+	private final Map<Class<? extends PluginMain>, LoadedPlugin> plugins = new HashMap<>();
 
 	public PGLogic() {
 		INSTANCE = this;
@@ -67,9 +80,34 @@ public class PGLogic extends GameLogic {
 		this.inputHandler.loadMappings(new File(Consts.CONFIG_DIR, "mappings.json"));
 		// this.inputHandler.saveMappings(new File(Consts.CONFIG_DIR, "mappings.json"));
 
-		new VanillaBuildingDefinitionRegistry().init();
+		this.pluginJarLoader
+				.loadAll(List.of(Paths.get("plugins")),
+						List.of(OBJECT_MAPPER.readValue(PCUtils.readStringSource("classpath:/plugin.json"), PluginDescriptor.class)))
+				.forEach(lp -> this.plugins.put(lp.main().getClass(), lp));
+		this.plugins.values().forEach(c -> c.main().onLoad());
+		for (LoadedPlugin c : this.plugins.values()) {
+			{
+				final String resourceReg = c.descriptor().getRegistries().getResource();
+				if (resourceReg == null || resourceReg.isBlank()) {
+					return;
+				}
+				final Class<? extends ResourceRegistry> resourceDefClazz = (Class<? extends ResourceRegistry>) c.classLoader()
+						.loadClass(resourceReg);
+				final ResourceRegistry reg = resourceDefClazz.getDeclaredConstructor(PluginDescriptor.class).newInstance(c.descriptor());
+				reg.init();
+			}
 
-//		this.pluginJarLoader.loadAll(Paths.get("plugins"));
+			{
+				final String buildingReg = c.descriptor().getRegistries().getBuilding();
+				if (buildingReg == null || buildingReg.isBlank()) {
+					return;
+				}
+				final Class<? extends BuildingRegistry> buildingDefClazz = (Class<? extends BuildingRegistry>) c.classLoader()
+						.loadClass(buildingReg);
+				final BuildingRegistry reg = buildingDefClazz.getDeclaredConstructor(PluginDescriptor.class).newInstance(c.descriptor());
+				reg.init();
+			}
+		}
 
 		this.compositor = new DeferredCompositor(this.engine, this.engine.getRenderThread());
 		this.compositor.getBackgroundColor().set(1, 1, 0, 1);
@@ -84,12 +122,17 @@ public class PGLogic extends GameLogic {
 		GameObjectFactory.INSTANCE = new GameObjectFactory(this.worldScene.getCache(), this.WORKERS, this.RENDER_DISPATCHER);
 		LocalizationService.INSTANCE = new LocalizationService(Locale.US);
 
+		final LevelData levelData = OBJECT_MAPPER.readValue(PCUtils.readStringSource("classpath:/levels/level0.json"), LevelData.class);
+		this.gameData = GameData.fromBlankLevel(levelData);
+
 		this.uiScene.init(this.WORKERS, this.RENDER_DISPATCHER);
 		this.overlayUIScene.init(this.WORKERS, this.RENDER_DISPATCHER);
-		this.worldScene.init(this.WORKERS, this.RENDER_DISPATCHER);
+		this.worldScene.init(this.WORKERS, this.RENDER_DISPATCHER, this.gameData);
 
 		this.uiScene = null;
 		this.uiScene = this.overlayUIScene;
+
+		this.plugins.values().forEach(c -> c.main().onEnable());
 	}
 
 	private final UpdateFrameState frameState = new UpdateFrameState();
@@ -133,6 +176,7 @@ public class PGLogic extends GameLogic {
 
 	@Override
 	public void cleanup() {
+		PCUtils.reversedStream(this.plugins.values()).forEachOrdered(c -> c.main().onDisable());
 		if (this.compositor != null) {
 			this.compositor.cleanup();
 		}
@@ -165,10 +209,6 @@ public class PGLogic extends GameLogic {
 
 	public static double TOTAL_TIME() {
 		return INSTANCE.engine.getTotalTime();
-	}
-
-	public LevelData getLevelData() {
-		return this.levelData;
 	}
 
 	public GameData getGameData() {

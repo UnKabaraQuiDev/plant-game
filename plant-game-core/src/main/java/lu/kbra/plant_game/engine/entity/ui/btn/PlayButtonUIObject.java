@@ -1,5 +1,6 @@
 package lu.kbra.plant_game.engine.entity.ui.btn;
 
+import lu.kbra.plant_game.base.scene.menu.main.MainMenuUIScene;
 import lu.kbra.plant_game.engine.entity.ui.data.Scale2dDir;
 import lu.kbra.plant_game.engine.entity.ui.impl.IndexOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsClick;
@@ -7,7 +8,6 @@ import lu.kbra.plant_game.engine.entity.ui.impl.UISceneParentAware;
 import lu.kbra.plant_game.engine.entity.ui.text.GrowOnHoverTextUIObject;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
-import lu.kbra.plant_game.vanilla.scene.menu.main.MainMenuUIScene;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
 
 @DataPath("localization:btn.play")

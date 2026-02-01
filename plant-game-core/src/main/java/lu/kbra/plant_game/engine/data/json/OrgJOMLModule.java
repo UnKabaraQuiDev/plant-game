@@ -23,6 +23,7 @@ import org.joml.Vector4i;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonSerializer;
@@ -30,6 +31,13 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
 public final class OrgJOMLModule extends SimpleModule {
+
+	private static final TypeReference<List<Double>> DOUBLE_LIST_TYPE_REF = new TypeReference<>() {
+	};
+	private static final TypeReference<List<Integer>> INTEGER_LIST_TYPE_REF = new TypeReference<>() {
+	};
+	private static final TypeReference<List<Float>> FLOAT_LIST_TYPE_REF = new TypeReference<>() {
+	};
 
 	public OrgJOMLModule() {
 		super("OrgJOMLModule");
@@ -295,7 +303,7 @@ public final class OrgJOMLModule extends SimpleModule {
 	public class Vector2iDeserializer extends JsonDeserializer<Vector2i> {
 		@Override
 		public Vector2i deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException {
-			final List<Integer> arr = p.readValueAs(List.class);
+			final List<Integer> arr = p.readValueAs(INTEGER_LIST_TYPE_REF);
 			return new Vector2i(arr.get(0), arr.get(1));
 		}
 	}
@@ -303,7 +311,7 @@ public final class OrgJOMLModule extends SimpleModule {
 	public class Vector3iDeserializer extends JsonDeserializer<Vector3i> {
 		@Override
 		public Vector3i deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException {
-			final List<Integer> arr = p.readValueAs(List.class);
+			final List<Integer> arr = p.readValueAs(INTEGER_LIST_TYPE_REF);
 			return new Vector3i(arr.get(0), arr.get(1), arr.get(2));
 		}
 	}
@@ -311,7 +319,7 @@ public final class OrgJOMLModule extends SimpleModule {
 	public class Vector4iDeserializer extends JsonDeserializer<Vector4i> {
 		@Override
 		public Vector4i deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException {
-			final List<Integer> arr = p.readValueAs(List.class);
+			final List<Integer> arr = p.readValueAs(INTEGER_LIST_TYPE_REF);
 			return new Vector4i(arr.get(0), arr.get(1), arr.get(2), arr.get(3));
 		}
 	}
@@ -320,7 +328,7 @@ public final class OrgJOMLModule extends SimpleModule {
 	public class Vector2fDeserializer extends JsonDeserializer<Vector2f> {
 		@Override
 		public Vector2f deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException {
-			final List<Double> arr = p.readValueAs(List.class);
+			final List<Double> arr = p.readValueAs(DOUBLE_LIST_TYPE_REF);
 			return new Vector2f(arr.get(0).floatValue(), arr.get(1).floatValue());
 		}
 	}
@@ -328,15 +336,16 @@ public final class OrgJOMLModule extends SimpleModule {
 	public class Vector3fDeserializer extends JsonDeserializer<Vector3f> {
 		@Override
 		public Vector3f deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException {
-			final List<Double> arr = p.readValueAs(List.class);
+			final List<Double> arr = p.readValueAs(DOUBLE_LIST_TYPE_REF);
 			return new Vector3f(arr.get(0).floatValue(), arr.get(1).floatValue(), arr.get(2).floatValue());
 		}
 	}
 
 	public class Vector4fDeserializer extends JsonDeserializer<Vector4f> {
+
 		@Override
 		public Vector4f deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException {
-			final List<Double> arr = p.readValueAs(List.class);
+			final List<Double> arr = p.readValueAs(DOUBLE_LIST_TYPE_REF);
 			return new Vector4f(arr.get(0).floatValue(), arr.get(1).floatValue(), arr.get(2).floatValue(), arr.get(3).floatValue());
 		}
 	}
@@ -345,7 +354,7 @@ public final class OrgJOMLModule extends SimpleModule {
 	public class Vector2dDeserializer extends JsonDeserializer<Vector2d> {
 		@Override
 		public Vector2d deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException {
-			final List<Double> arr = p.readValueAs(List.class);
+			final List<Double> arr = p.readValueAs(DOUBLE_LIST_TYPE_REF);
 			return new Vector2d(arr.get(0), arr.get(1));
 		}
 	}
@@ -353,7 +362,7 @@ public final class OrgJOMLModule extends SimpleModule {
 	public class Vector3dDeserializer extends JsonDeserializer<Vector3d> {
 		@Override
 		public Vector3d deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException {
-			final List<Double> arr = p.readValueAs(List.class);
+			final List<Double> arr = p.readValueAs(DOUBLE_LIST_TYPE_REF);
 			return new Vector3d(arr.get(0), arr.get(1), arr.get(2));
 		}
 	}
@@ -361,7 +370,7 @@ public final class OrgJOMLModule extends SimpleModule {
 	public class Vector4dDeserializer extends JsonDeserializer<Vector4d> {
 		@Override
 		public Vector4d deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException {
-			final List<Double> arr = p.readValueAs(List.class);
+			final List<Double> arr = p.readValueAs(DOUBLE_LIST_TYPE_REF);
 			return new Vector4d(arr.get(0), arr.get(1), arr.get(2), arr.get(3));
 		}
 	}
@@ -370,7 +379,7 @@ public final class OrgJOMLModule extends SimpleModule {
 	public class QuaternionfDeserializer extends JsonDeserializer<Quaternionf> {
 		@Override
 		public Quaternionf deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException {
-			final List<Double> arr = p.readValueAs(List.class);
+			final List<Double> arr = p.readValueAs(DOUBLE_LIST_TYPE_REF);
 			return new Quaternionf(arr.get(0).floatValue(), arr.get(1).floatValue(), arr.get(2).floatValue(), arr.get(3).floatValue());
 		}
 	}
@@ -378,7 +387,7 @@ public final class OrgJOMLModule extends SimpleModule {
 	public class QuaterniondDeserializer extends JsonDeserializer<Quaterniond> {
 		@Override
 		public Quaterniond deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException {
-			final List<Double> arr = p.readValueAs(List.class);
+			final List<Double> arr = p.readValueAs(DOUBLE_LIST_TYPE_REF);
 			return new Quaterniond(arr.get(0), arr.get(1), arr.get(2), arr.get(3));
 		}
 	}
@@ -387,7 +396,7 @@ public final class OrgJOMLModule extends SimpleModule {
 	public class Matrix3fDeserializer extends JsonDeserializer<Matrix3f> {
 		@Override
 		public Matrix3f deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException {
-			final List<Double> arr = p.readValueAs(List.class);
+			final List<Double> arr = p.readValueAs(DOUBLE_LIST_TYPE_REF);
 			final float[] tmp = new float[9];
 			for (int i = 0; i < 9; i++) {
 				tmp[i] = arr.get(i).floatValue();
@@ -401,7 +410,7 @@ public final class OrgJOMLModule extends SimpleModule {
 	public class Matrix3dDeserializer extends JsonDeserializer<Matrix3d> {
 		@Override
 		public Matrix3d deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException {
-			final List<Double> arr = p.readValueAs(List.class);
+			final List<Double> arr = p.readValueAs(DOUBLE_LIST_TYPE_REF);
 			final double[] tmp = new double[9];
 			for (int i = 0; i < 9; i++) {
 				tmp[i] = arr.get(i);
@@ -415,7 +424,7 @@ public final class OrgJOMLModule extends SimpleModule {
 	public class Matrix4fDeserializer extends JsonDeserializer<Matrix4f> {
 		@Override
 		public Matrix4f deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException {
-			final List<Double> arr = p.readValueAs(List.class);
+			final List<Double> arr = p.readValueAs(DOUBLE_LIST_TYPE_REF);
 			final float[] tmp = new float[16];
 			for (int i = 0; i < 16; i++) {
 				tmp[i] = arr.get(i).floatValue();
@@ -429,7 +438,7 @@ public final class OrgJOMLModule extends SimpleModule {
 	public class Matrix4dDeserializer extends JsonDeserializer<Matrix4d> {
 		@Override
 		public Matrix4d deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException {
-			final List<Double> arr = p.readValueAs(List.class);
+			final List<Double> arr = p.readValueAs(DOUBLE_LIST_TYPE_REF);
 			final double[] tmp = new double[16];
 			for (int i = 0; i < 16; i++) {
 				tmp[i] = arr.get(i);
@@ -443,7 +452,7 @@ public final class OrgJOMLModule extends SimpleModule {
 	public class Matrix4x3fDeserializer extends JsonDeserializer<Matrix4x3f> {
 		@Override
 		public Matrix4x3f deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException {
-			final List<Double> arr = p.readValueAs(List.class);
+			final List<Double> arr = p.readValueAs(DOUBLE_LIST_TYPE_REF);
 			final float[] tmp = new float[12];
 			for (int i = 0; i < 12; i++) {
 				tmp[i] = arr.get(i).floatValue();
@@ -457,7 +466,7 @@ public final class OrgJOMLModule extends SimpleModule {
 	public class Matrix4x3dDeserializer extends JsonDeserializer<Matrix4x3d> {
 		@Override
 		public Matrix4x3d deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException {
-			final List<Double> arr = p.readValueAs(List.class);
+			final List<Double> arr = p.readValueAs(DOUBLE_LIST_TYPE_REF);
 			final double[] tmp = new double[12];
 			for (int i = 0; i < 12; i++) {
 				tmp[i] = arr.get(i);

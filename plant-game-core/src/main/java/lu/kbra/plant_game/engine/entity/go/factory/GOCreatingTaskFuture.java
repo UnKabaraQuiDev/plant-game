@@ -12,7 +12,7 @@ import lu.pcy113.pclib.pointer.ObjectPointer;
 
 import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.entity.impl.NeedsPostConstruct;
-import lu.kbra.plant_game.generated.GameObjectRegistry;
+import lu.kbra.plant_game.generated.GenGORegistry;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
 import lu.kbra.standalone.gameengine.scene.EntityContainer;
@@ -28,7 +28,7 @@ public class GOCreatingTaskFuture<T extends GameObject> extends TaskFuture<List<
 		super(dispatcher);
 		this.clazz = clazz;
 		super.task = list -> {
-			final T instance = GameObjectRegistry.create(clazz,
+			final T instance = GenGORegistry.create(clazz,
 					PCUtils.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime() },
 							list == null ? new Object[0] : list.toArray()));
 			this.postCreateHooks.forEach(pch -> pch.accept(instance));

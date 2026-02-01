@@ -5,9 +5,7 @@ import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
@@ -17,14 +15,12 @@ import java.util.stream.Stream;
 
 import javax.lang.model.element.Modifier;
 
-import org.junit.Test;
 import org.reflections.Reflections;
 
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
@@ -44,13 +40,10 @@ import lu.kbra.plant_game.engine.util.annotation.DefaultPrice;
 import lu.kbra.plant_game.engine.util.annotation.TextureOption;
 import lu.kbra.plant_game.engine.util.exceptions.GameObjectConstructorNotFound;
 import lu.kbra.plant_game.engine.util.exceptions.GameObjectNotFound;
-import lu.kbra.standalone.gameengine.utils.gl.consts.TextureFilter;
-import lu.kbra.standalone.gameengine.utils.gl.consts.TextureWrap;
 
 public class GameObjectRegistryGenMain extends GenMainConsts {
 
-	@Test
-	public void genRegistry() throws IOException {
+	public void genRegistry(String ) throws IOException {
 		final TypeName functionType = ParameterizedTypeName.get(ClassName.get(InternalConstructorFunction.class),
 				ClassName.get(GameObject.class));
 
@@ -61,63 +54,16 @@ public class GameObjectRegistryGenMain extends GenMainConsts {
 		final TypeName gameObjectClassType = ParameterizedTypeName.get(ClassName.get(Class.class),
 				WildcardTypeName.subtypeOf(GameObject.class));
 
-		// Map<Class<? extends GameObject>, Map<ClassListKey, Function<Object[], GameObject>>>
-		final FieldSpec constructorHashMap = FieldSpec
-				.builder(ParameterizedTypeName.get(ClassName.get(Map.class), gameObjectClassType, subListType),
-						PCUtils.camelCaseToConstant("gameObjectConstructors"),
-						Modifier.PUBLIC,
-						Modifier.STATIC,
-						Modifier.FINAL)
-				.build();
+		final String gameObjectConstructors = PCUtils.camelCaseToConstant("gameObjectConstructors");
+		final String dataPath = PCUtils.camelCaseToConstant("dataPath");
+		final String bufferSize = PCUtils.camelCaseToConstant("bufferSize");
+		final String textureFilter = PCUtils.camelCaseToConstant("textureFilter");
+		final String textureWrap = PCUtils.camelCaseToConstant("textureWrap");
+		final String defaultPrice = PCUtils.camelCaseToConstant("defaultPrice");
 
-		final FieldSpec dataPathHashMap = FieldSpec
-				.builder(ParameterizedTypeName.get(ClassName.get(Map.class), gameObjectClassType, ClassName.get(String.class)),
-						PCUtils.camelCaseToConstant("dataPath"),
-						Modifier.PUBLIC,
-						Modifier.STATIC,
-						Modifier.FINAL)
-				.build();
-
-		final FieldSpec bufferSizeHashMap = FieldSpec
-				.builder(ParameterizedTypeName.get(ClassName.get(Map.class), gameObjectClassType, ClassName.get(Integer.class)),
-						PCUtils.camelCaseToConstant("bufferSize"),
-						Modifier.PUBLIC,
-						Modifier.STATIC,
-						Modifier.FINAL)
-				.build();
-
-		final FieldSpec textureFilterHashMap = FieldSpec
-				.builder(ParameterizedTypeName.get(ClassName.get(Map.class), gameObjectClassType, ClassName.get(TextureFilter.class)),
-						PCUtils.camelCaseToConstant("textureFilter"),
-						Modifier.PUBLIC,
-						Modifier.STATIC,
-						Modifier.FINAL)
-				.build();
-
-		final FieldSpec textureWrapHashMap = FieldSpec
-				.builder(ParameterizedTypeName.get(ClassName.get(Map.class), gameObjectClassType, ClassName.get(TextureWrap.class)),
-						PCUtils.camelCaseToConstant("textureWrap"),
-						Modifier.PUBLIC,
-						Modifier.STATIC,
-						Modifier.FINAL)
-				.build();
-
-		final FieldSpec defaultPriceHashMap = FieldSpec
-				.builder(ParameterizedTypeName.get(ClassName.get(Map.class), gameObjectClassType, ClassName.get(Integer.class)),
-						PCUtils.camelCaseToConstant("defaultPrice"),
-						Modifier.PUBLIC,
-						Modifier.STATIC,
-						Modifier.FINAL)
-				.build();
-
-		final TypeSpec.Builder registry = TypeSpec.classBuilder("GameObjectRegistry")
-				.addModifiers(Modifier.PUBLIC)
-				.addField(constructorHashMap)
-				.addField(dataPathHashMap)
-				.addField(bufferSizeHashMap)
-				.addField(textureFilterHashMap)
-				.addField(textureWrapHashMap)
-				.addField(defaultPriceHashMap);
+		final TypeSpec.Builder registry = TypeSpec.classBuilder("GenGORegistry")
+				.superclass(GameObjectRegistry.class)
+				.addModifiers(Modifier.PUBLIC);
 
 		final Reflections reflections = new Reflections(MAIN_PACKAGE);
 		final Set<Class<? extends GameObject>> classes = reflections.getSubTypesOf(GameObject.class);
@@ -126,14 +72,6 @@ public class GameObjectRegistryGenMain extends GenMainConsts {
 		final CodeBlock.Builder staticCodeBlock = CodeBlock.builder();
 
 		final String spacer = PCUtils.repeatString(" ", 15);
-
-		staticCodeBlock.addStatement("$N = new $T<>()", constructorHashMap, HashMap.class);
-		staticCodeBlock.addStatement("$N = new $T<>()", dataPathHashMap, HashMap.class);
-		staticCodeBlock.addStatement("$N = new $T<>()", bufferSizeHashMap, HashMap.class);
-		staticCodeBlock.addStatement("$N = new $T<>()", textureFilterHashMap, HashMap.class);
-		staticCodeBlock.addStatement("$N = new $T<>()", textureWrapHashMap, HashMap.class);
-		staticCodeBlock.addStatement("$N = new $T<>()", defaultPriceHashMap, HashMap.class);
-		staticCodeBlock.add("\n");
 
 		for (final Class<? extends GameObject> c : classes) {
 			if (!c.isAnnotationPresent(DataPath.class)) {

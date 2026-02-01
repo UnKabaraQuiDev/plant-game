@@ -27,6 +27,21 @@ import lu.pcy113.pclib.impl.ThrowingFunction;
 import lu.pcy113.pclib.logger.GlobalLogger;
 
 import lu.kbra.plant_game.PGLogic;
+import lu.kbra.plant_game.base.entity.go.obj.energy.SolarPanelMediumObject;
+import lu.kbra.plant_game.base.entity.go.obj.energy.WaterWheelObject;
+import lu.kbra.plant_game.base.entity.go.obj.water.WaterSprinklerObject3x3;
+import lu.kbra.plant_game.base.entity.go.obj.water.WaterSprinklerObject5x5;
+import lu.kbra.plant_game.base.entity.go.obj.water.WaterSprinklerObject7x7;
+import lu.kbra.plant_game.base.entity.go.obj.water.WaterTowerObject;
+import lu.kbra.plant_game.base.entity.go.obj_inst.grass.InstanceLargeGrassObject;
+import lu.kbra.plant_game.base.entity.go.obj_inst.grass.InstanceMediumGrassObject;
+import lu.kbra.plant_game.base.entity.go.obj_inst.grass.InstanceSmallGrassObject;
+import lu.kbra.plant_game.base.entity.go.obj_inst.round.InstanceLargeRoundFlowerObject;
+import lu.kbra.plant_game.base.entity.go.obj_inst.round.InstanceMediumRoundFlowerObject;
+import lu.kbra.plant_game.base.entity.go.obj_inst.round.InstanceSmallRoundFlowerObject;
+import lu.kbra.plant_game.base.entity.go_inst.champi.InstanceLargeChampiFlowerObject;
+import lu.kbra.plant_game.base.entity.go_inst.champi.InstanceMediumChampiFlowerObject;
+import lu.kbra.plant_game.base.entity.go_inst.champi.InstanceSmallChampiFlowerObject;
 import lu.kbra.plant_game.engine.UpdateFrameState;
 import lu.kbra.plant_game.engine.entity.go.AnimatedMeshGameObject;
 import lu.kbra.plant_game.engine.entity.go.GameObject;
@@ -49,21 +64,6 @@ import lu.kbra.plant_game.engine.scene.world.particle.ParticleManager;
 import lu.kbra.plant_game.engine.window.input.StandardKeyOption;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.plant_game.generated.ColorMaterial;
-import lu.kbra.plant_game.vanilla.entity.go.obj.energy.SolarPanelMediumObject;
-import lu.kbra.plant_game.vanilla.entity.go.obj.energy.WaterWheelObject;
-import lu.kbra.plant_game.vanilla.entity.go.obj.water.WaterSprinklerObject3x3;
-import lu.kbra.plant_game.vanilla.entity.go.obj.water.WaterSprinklerObject5x5;
-import lu.kbra.plant_game.vanilla.entity.go.obj.water.WaterSprinklerObject7x7;
-import lu.kbra.plant_game.vanilla.entity.go.obj.water.WaterTowerObject;
-import lu.kbra.plant_game.vanilla.entity.go.obj_inst.grass.InstanceLargeGrassObject;
-import lu.kbra.plant_game.vanilla.entity.go.obj_inst.grass.InstanceMediumGrassObject;
-import lu.kbra.plant_game.vanilla.entity.go.obj_inst.grass.InstanceSmallGrassObject;
-import lu.kbra.plant_game.vanilla.entity.go.obj_inst.round.InstanceLargeRoundFlowerObject;
-import lu.kbra.plant_game.vanilla.entity.go.obj_inst.round.InstanceMediumRoundFlowerObject;
-import lu.kbra.plant_game.vanilla.entity.go.obj_inst.round.InstanceSmallRoundFlowerObject;
-import lu.kbra.plant_game.vanilla.entity.go_inst.champi.InstanceLargeChampiFlowerObject;
-import lu.kbra.plant_game.vanilla.entity.go_inst.champi.InstanceMediumChampiFlowerObject;
-import lu.kbra.plant_game.vanilla.entity.go_inst.champi.InstanceSmallChampiFlowerObject;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.cache.attrib.UIntAttribArray;
 import lu.kbra.standalone.gameengine.cache.attrib.Vec3fAttribArray;
@@ -113,7 +113,7 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController {
 		this.getLightDirection().set(new Vector3f(0.5f, 0.5f, 0.5f).normalize());
 	}
 
-	public void init(final Dispatcher workers, final Dispatcher renderDispatcher) {
+	public void init(final Dispatcher workers, final Dispatcher renderDispatcher, final GameData gameData) {
 		this.registerModal(new MoveBuildingModal(this, PGLogic.INSTANCE.getCompositor()));
 
 		final CountDownLatch terrainLatch = new CountDownLatch(1);

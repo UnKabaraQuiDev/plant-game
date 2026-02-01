@@ -16,6 +16,7 @@ import org.lwjgl.glfw.GLFW;
 
 import lu.pcy113.pclib.logger.GlobalLogger;
 
+import lu.kbra.plant_game.base.scene.menu.main.NeedsFocusInput;
 import lu.kbra.plant_game.engine.UpdateFrameState;
 import lu.kbra.plant_game.engine.entity.impl.SceneBoundsOwner;
 import lu.kbra.plant_game.engine.entity.impl.Transform3DOwner;
@@ -31,7 +32,6 @@ import lu.kbra.plant_game.engine.entity.ui.impl.NeedsUpdate;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.scene.ui.layout.LayoutOwner;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
-import lu.kbra.plant_game.vanilla.scene.menu.main.NeedsFocusInput;
 import lu.kbra.standalone.gameengine.GameEngine;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;

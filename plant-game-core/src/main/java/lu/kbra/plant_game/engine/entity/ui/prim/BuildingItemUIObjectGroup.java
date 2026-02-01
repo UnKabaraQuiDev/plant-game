@@ -15,6 +15,8 @@ import lu.pcy113.pclib.pointer.ObjectPointer;
 
 import lu.kbra.plant_game.BuildingDefinition;
 import lu.kbra.plant_game.PGLogic;
+import lu.kbra.plant_game.base.scene.overlay.OverlayUIScene;
+import lu.kbra.plant_game.base.scene.overlay.group.building.BuildingInfoUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory;
 import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
@@ -30,12 +32,11 @@ import lu.kbra.plant_game.engine.entity.ui.impl.IndexOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsClick;
 import lu.kbra.plant_game.engine.entity.ui.impl.UISceneParentAware;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
+import lu.kbra.plant_game.engine.scene.world.GameData;
 import lu.kbra.plant_game.engine.scene.world.MoveBuildingModal;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.plant_game.generated.ColorMaterial;
-import lu.kbra.plant_game.vanilla.scene.overlay.OverlayUIScene;
-import lu.kbra.plant_game.vanilla.scene.overlay.group.building.BuildingInfoUIObjectGroup;
 import lu.kbra.standalone.gameengine.utils.gl.consts.Consts;
 import lu.kbra.standalone.gameengine.utils.interpolation.Interpolator;
 import lu.kbra.standalone.gameengine.utils.interpolation.Interpolators;
@@ -91,14 +92,16 @@ public class BuildingItemUIObjectGroup extends OffsetUIObjectGroup // Programmat
 			return;
 		}
 
+		final GameData gameData = PGLogic.INSTANCE.getGameData();
+//		final LevelData levelData = gameData.getLevelData();
 		final WorldLevelScene worldScene = PGLogic.INSTANCE.getWorldScene();
 
-		if (!this.buildingDefinition.isUnlocked(worldScene)) {
+		if (!this.buildingDefinition.isUnlocked(gameData, worldScene)) {
 			GlobalLogger.warning(this.buildingDefinition.getInternalName() + " not unlocked.");
 			return;
 		}
 
-		if (!this.buildingDefinition.canBuild(worldScene)) {
+		if (!this.buildingDefinition.canBuild(gameData, worldScene)) {
 			GlobalLogger.warning(this.buildingDefinition.getInternalName() + " unable to build.");
 			return;
 		}
@@ -195,10 +198,10 @@ public class BuildingItemUIObjectGroup extends OffsetUIObjectGroup // Programmat
 		return super.getBounds();
 	}
 
-	public void updateTintStatus(final WorldLevelScene world) {
-		if (this.buildingDefinition.canBuild(world)) {
+	public void updateTintStatus(final GameData gameData, final WorldLevelScene world) {
+		if (this.buildingDefinition.canBuild(gameData, world)) {
 			this.setColorMaterial(ColorMaterial.GREEN);
-		} else if (this.buildingDefinition.isUnlocked(world)) {
+		} else if (this.buildingDefinition.isUnlocked(gameData, world)) {
 			this.setColorMaterial(ColorMaterial.ORANGE);
 		} else {
 			this.setColorMaterial(ColorMaterial.GRAY);

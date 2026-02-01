@@ -13,6 +13,32 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 import lu.kbra.plant_game.BuildingDefinition;
+import lu.kbra.plant_game.base.scene.menu.main.OptionKeyUIObjectGroup;
+import lu.kbra.plant_game.base.scene.menu.main.OptionVolumeUIObjectGroup;
+import lu.kbra.plant_game.base.scene.menu.main.OptionsUIObjectGroup;
+import lu.kbra.plant_game.base.scene.overlay.group.building.AnchoredTexturedQuadMeshUIObject;
+import lu.kbra.plant_game.base.scene.overlay.group.building.BuildingInfoUIObjectGroup;
+import lu.kbra.plant_game.base.scene.overlay.group.building.BuildingPanelToggleButtonUIObject;
+import lu.kbra.plant_game.base.scene.overlay.group.building.BuildingPanelUIObjectGroup;
+import lu.kbra.plant_game.base.scene.overlay.group.building.BuildingTabButtonUIObjectGroup;
+import lu.kbra.plant_game.base.scene.overlay.group.building.BuildingTabUIObjectGroup;
+import lu.kbra.plant_game.base.scene.overlay.group.building.ExtAnchoredTexturedQuadMeshUIObject;
+import lu.kbra.plant_game.base.scene.overlay.group.building.ResourceLineUIObjectGroup;
+import lu.kbra.plant_game.base.scene.overlay.group.impl.AnchoredFixedPBUIObjectGroup;
+import lu.kbra.plant_game.base.scene.overlay.group.impl.AnchoredLayoutUIObjectGroup;
+import lu.kbra.plant_game.base.scene.overlay.group.impl.AnchoredPBUIObjectGroup;
+import lu.kbra.plant_game.base.scene.overlay.group.impl.AnchoredParentUIObjectGroup;
+import lu.kbra.plant_game.base.scene.overlay.group.impl.BoundedUIObjectGroup;
+import lu.kbra.plant_game.base.scene.overlay.group.impl.FixedBoundsUIObjectGroup;
+import lu.kbra.plant_game.base.scene.overlay.group.impl.FixedPBUIObjectGroup;
+import lu.kbra.plant_game.base.scene.overlay.group.impl.MarginAnchoredUIObjectGroup;
+import lu.kbra.plant_game.base.scene.overlay.group.impl.PaddingParentUIObject;
+import lu.kbra.plant_game.base.scene.overlay.group.impl.ParentUIObjectGroup;
+import lu.kbra.plant_game.base.scene.overlay.stat_line.integer.AnchoredFixedIntegerStatLine;
+import lu.kbra.plant_game.base.scene.overlay.stat_line.integer.ExtAnchoredFixedIntegerStatLine;
+import lu.kbra.plant_game.base.scene.overlay.stat_line.integer.ExtAnchoredIntegerStatLine;
+import lu.kbra.plant_game.base.scene.overlay.stat_line.integer.FixedIntegerStatLine;
+import lu.kbra.plant_game.base.scene.overlay.stat_line.integer.IntegerStatLine;
 import lu.kbra.plant_game.engine.entity.ui.FlatQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.MeshUIObject;
 import lu.kbra.plant_game.engine.entity.ui.ProgrammaticTexturedQuadMeshUIObject;
@@ -78,32 +104,6 @@ import lu.kbra.plant_game.engine.util.InternalConstructorFunction;
 import lu.kbra.plant_game.engine.util.exceptions.UIObjectConstructorNotFound;
 import lu.kbra.plant_game.engine.util.exceptions.UIObjectNotFound;
 import lu.kbra.plant_game.engine.window.input.KeyOption;
-import lu.kbra.plant_game.vanilla.scene.menu.main.OptionKeyUIObjectGroup;
-import lu.kbra.plant_game.vanilla.scene.menu.main.OptionVolumeUIObjectGroup;
-import lu.kbra.plant_game.vanilla.scene.menu.main.OptionsUIObjectGroup;
-import lu.kbra.plant_game.vanilla.scene.overlay.group.building.AnchoredTexturedQuadMeshUIObject;
-import lu.kbra.plant_game.vanilla.scene.overlay.group.building.BuildingInfoUIObjectGroup;
-import lu.kbra.plant_game.vanilla.scene.overlay.group.building.BuildingPanelToggleButtonUIObject;
-import lu.kbra.plant_game.vanilla.scene.overlay.group.building.BuildingPanelUIObjectGroup;
-import lu.kbra.plant_game.vanilla.scene.overlay.group.building.BuildingTabButtonUIObjectGroup;
-import lu.kbra.plant_game.vanilla.scene.overlay.group.building.BuildingTabUIObjectGroup;
-import lu.kbra.plant_game.vanilla.scene.overlay.group.building.ExtAnchoredTexturedQuadMeshUIObject;
-import lu.kbra.plant_game.vanilla.scene.overlay.group.building.ResourceLineUIObjectGroup;
-import lu.kbra.plant_game.vanilla.scene.overlay.group.impl.AnchoredFixedPBUIObjectGroup;
-import lu.kbra.plant_game.vanilla.scene.overlay.group.impl.AnchoredLayoutUIObjectGroup;
-import lu.kbra.plant_game.vanilla.scene.overlay.group.impl.AnchoredPBUIObjectGroup;
-import lu.kbra.plant_game.vanilla.scene.overlay.group.impl.AnchoredParentUIObjectGroup;
-import lu.kbra.plant_game.vanilla.scene.overlay.group.impl.BoundedUIObjectGroup;
-import lu.kbra.plant_game.vanilla.scene.overlay.group.impl.FixedBoundsUIObjectGroup;
-import lu.kbra.plant_game.vanilla.scene.overlay.group.impl.FixedPBUIObjectGroup;
-import lu.kbra.plant_game.vanilla.scene.overlay.group.impl.MarginAnchoredUIObjectGroup;
-import lu.kbra.plant_game.vanilla.scene.overlay.group.impl.PaddingParentUIObject;
-import lu.kbra.plant_game.vanilla.scene.overlay.group.impl.ParentUIObjectGroup;
-import lu.kbra.plant_game.vanilla.scene.overlay.stat_line.integer.AnchoredFixedIntegerStatLine;
-import lu.kbra.plant_game.vanilla.scene.overlay.stat_line.integer.ExtAnchoredFixedIntegerStatLine;
-import lu.kbra.plant_game.vanilla.scene.overlay.stat_line.integer.ExtAnchoredIntegerStatLine;
-import lu.kbra.plant_game.vanilla.scene.overlay.stat_line.integer.FixedIntegerStatLine;
-import lu.kbra.plant_game.vanilla.scene.overlay.stat_line.integer.IntegerStatLine;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.geom.QuadMesh;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
@@ -214,6 +214,11 @@ public class UIObjectRegistry {
 		UI_OBJECT_CONSTRUCTORS.put(LeafIconUIObject.class, listLeafIconUIObject);
 		DATA_PATH.put(LeafIconUIObject.class, "image:classpath:/icons/star-128.png");
 
+		/*                 AnchoredTexturedQuadMeshUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listAnchoredTexturedQuadMeshUIObject = new ArrayList<>();
+		listAnchoredTexturedQuadMeshUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new AnchoredTexturedQuadMeshUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
+		UI_OBJECT_CONSTRUCTORS.put(AnchoredTexturedQuadMeshUIObject.class, listAnchoredTexturedQuadMeshUIObject);
+
 		/*                 FlatQuadUIObject                 */
 		final List<InternalConstructorFunction<UIObject>> listFlatQuadUIObject = new ArrayList<>();
 		listFlatQuadUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new FlatQuadUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
@@ -224,11 +229,6 @@ public class UIObjectRegistry {
 		listCursorUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new CursorUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
 		UI_OBJECT_CONSTRUCTORS.put(CursorUIObject.class, listCursorUIObject);
 		DATA_PATH.put(CursorUIObject.class, "image:classpath:/icons/cursor-128.png");
-
-		/*                 AnchoredTexturedQuadMeshUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listAnchoredTexturedQuadMeshUIObject = new ArrayList<>();
-		listAnchoredTexturedQuadMeshUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new AnchoredTexturedQuadMeshUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
-		UI_OBJECT_CONSTRUCTORS.put(AnchoredTexturedQuadMeshUIObject.class, listAnchoredTexturedQuadMeshUIObject);
 
 		/*                 StarIconUIObject                 */
 		final List<InternalConstructorFunction<UIObject>> listStarIconUIObject = new ArrayList<>();
@@ -253,6 +253,11 @@ public class UIObjectRegistry {
 		listProgrammaticTexturedQuadMeshUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new ProgrammaticTexturedQuadMeshUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
 		UI_OBJECT_CONSTRUCTORS.put(ProgrammaticTexturedQuadMeshUIObject.class, listProgrammaticTexturedQuadMeshUIObject);
 
+		/*                 ExtAnchoredTexturedQuadMeshUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listExtAnchoredTexturedQuadMeshUIObject = new ArrayList<>();
+		listExtAnchoredTexturedQuadMeshUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new ExtAnchoredTexturedQuadMeshUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
+		UI_OBJECT_CONSTRUCTORS.put(ExtAnchoredTexturedQuadMeshUIObject.class, listExtAnchoredTexturedQuadMeshUIObject);
+
 		/*                 WaterIconUIObject                 */
 		final List<InternalConstructorFunction<UIObject>> listWaterIconUIObject = new ArrayList<>();
 		listWaterIconUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new WaterIconUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
@@ -275,11 +280,6 @@ public class UIObjectRegistry {
 		TEXTURE_FILTER.put(LevelButtonUIObject.class, TextureFilter.NEAREST);
 		TEXTURE_WRAP.put(LevelButtonUIObject.class, TextureWrap.REPEAT);
 
-		/*                 ExtAnchoredTexturedQuadMeshUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listExtAnchoredTexturedQuadMeshUIObject = new ArrayList<>();
-		listExtAnchoredTexturedQuadMeshUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new ExtAnchoredTexturedQuadMeshUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
-		UI_OBJECT_CONSTRUCTORS.put(ExtAnchoredTexturedQuadMeshUIObject.class, listExtAnchoredTexturedQuadMeshUIObject);
-
 		/*                 BuildingTabButtonUIObjectGroup                 */
 		final List<InternalConstructorFunction<UIObject>> listBuildingTabButtonUIObjectGroup = new ArrayList<>();
 		listBuildingTabButtonUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {Transform3D.class, BuildingTabUIObjectGroup.class}, (Object[] arr) -> (UIObject) new BuildingTabButtonUIObjectGroup((Transform3D) arr[0], (BuildingTabUIObjectGroup) arr[1])));
@@ -292,6 +292,11 @@ public class UIObjectRegistry {
 		listScrollDrivenUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObjectGroup.class, Supplier.class, Direction.class, float.class, UIObject[].class}, (Object[] arr) -> (UIObject) new ScrollDrivenUIObjectGroup((String) arr[0], (UIObjectGroup) arr[1], (Supplier) arr[2], (Direction) arr[3], (float) arr[4], (UIObject[]) arr[5])));
 		listScrollDrivenUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Transform3D.class, Supplier.class, Direction.class, float.class, UIObject[].class}, (Object[] arr) -> (UIObject) new ScrollDrivenUIObjectGroup((String) arr[0], (Transform3D) arr[1], (Supplier) arr[2], (Direction) arr[3], (float) arr[4], (UIObject[]) arr[5])));
 		UI_OBJECT_CONSTRUCTORS.put(ScrollDrivenUIObjectGroup.class, listScrollDrivenUIObjectGroup);
+
+		/*                 BuildingItemUIObjectGroup                 */
+		final List<InternalConstructorFunction<UIObject>> listBuildingItemUIObjectGroup = new ArrayList<>();
+		listBuildingItemUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {BuildingDefinition.class}, (Object[] arr) -> (UIObject) new BuildingItemUIObjectGroup((BuildingDefinition) arr[0])));
+		UI_OBJECT_CONSTRUCTORS.put(BuildingItemUIObjectGroup.class, listBuildingItemUIObjectGroup);
 
 		/*                 LayoutOffsetUIObjectGroup                 */
 		final List<InternalConstructorFunction<UIObject>> listLayoutOffsetUIObjectGroup = new ArrayList<>();
@@ -311,11 +316,6 @@ public class UIObjectRegistry {
 		listScrollContainerUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Vector3fc.class, Direction.class, float.class, Layout.class, UIObject[].class}, (Object[] arr) -> (UIObject) new ScrollContainerUIObjectGroup((String) arr[0], (Vector3fc) arr[1], (Direction) arr[2], (float) arr[3], (Layout) arr[4], (UIObject[]) arr[5])));
 		listScrollContainerUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObjectGroup.class, Direction.class, float.class, Layout.class, UIObject[].class}, (Object[] arr) -> (UIObject) new ScrollContainerUIObjectGroup((String) arr[0], (UIObjectGroup) arr[1], (Direction) arr[2], (float) arr[3], (Layout) arr[4], (UIObject[]) arr[5])));
 		UI_OBJECT_CONSTRUCTORS.put(ScrollContainerUIObjectGroup.class, listScrollContainerUIObjectGroup);
-
-		/*                 BuildingItemUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listBuildingItemUIObject = new ArrayList<>();
-		listBuildingItemUIObject.add(new InternalConstructorFunction<>(new Class[] {BuildingDefinition.class}, (Object[] arr) -> (UIObject) new BuildingItemUIObjectGroup((BuildingDefinition) arr[0])));
-		UI_OBJECT_CONSTRUCTORS.put(BuildingItemUIObjectGroup.class, listBuildingItemUIObject);
 
 		/*                 ProgressBarUIObject                 */
 		final List<InternalConstructorFunction<UIObject>> listProgressBarUIObject = new ArrayList<>();
@@ -409,10 +409,10 @@ public class UIObjectRegistry {
 		listAnchoredFlatQuadUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new AnchoredFlatQuadUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
 		UI_OBJECT_CONSTRUCTORS.put(AnchoredFlatQuadUIObject.class, listAnchoredFlatQuadUIObject);
 
-		/*                 BuildingPanelShowButtonUIObject                 */
-		final List<InternalConstructorFunction<UIObject>> listBuildingPanelShowButtonUIObject = new ArrayList<>();
-		listBuildingPanelShowButtonUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new BuildingPanelToggleButtonUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
-		UI_OBJECT_CONSTRUCTORS.put(BuildingPanelToggleButtonUIObject.class, listBuildingPanelShowButtonUIObject);
+		/*                 BuildingPanelToggleButtonUIObject                 */
+		final List<InternalConstructorFunction<UIObject>> listBuildingPanelToggleButtonUIObject = new ArrayList<>();
+		listBuildingPanelToggleButtonUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new BuildingPanelToggleButtonUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
+		UI_OBJECT_CONSTRUCTORS.put(BuildingPanelToggleButtonUIObject.class, listBuildingPanelToggleButtonUIObject);
 		DATA_PATH.put(BuildingPanelToggleButtonUIObject.class, "image:classpath:/icons/Arrow-128.png");
 		TEXTURE_FILTER.put(BuildingPanelToggleButtonUIObject.class, TextureFilter.LINEAR);
 		TEXTURE_WRAP.put(BuildingPanelToggleButtonUIObject.class, TextureWrap.REPEAT);
@@ -424,12 +424,12 @@ public class UIObjectRegistry {
 		listLayoutScrollDrivenUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Transform3D.class, Supplier.class, Direction.class, float.class, Layout.class, UIObject[].class}, (Object[] arr) -> (UIObject) new LayoutScrollDrivenUIObjectGroup((String) arr[0], (Transform3D) arr[1], (Supplier) arr[2], (Direction) arr[3], (float) arr[4], (Layout) arr[5], (UIObject[]) arr[6])));
 		UI_OBJECT_CONSTRUCTORS.put(LayoutScrollDrivenUIObjectGroup.class, listLayoutScrollDrivenUIObjectGroup);
 
-		/*                 BoundedUIObjectGroup                 */
-		final List<InternalConstructorFunction<UIObject>> listBoundedUIObjectGroup = new ArrayList<>();
-		listBoundedUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Layout.class, Direction2d.class, UIObject[].class}, (Object[] arr) -> (UIObject) new BoundedUIObjectGroup((String) arr[0], (Layout) arr[1], (Direction2d) arr[2], (UIObject[]) arr[3])));
-		listBoundedUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Layout.class, UIObjectGroup.class, Direction2d.class, UIObject[].class}, (Object[] arr) -> (UIObject) new BoundedUIObjectGroup((String) arr[0], (Layout) arr[1], (UIObjectGroup) arr[2], (Direction2d) arr[3], (UIObject[]) arr[4])));
-		listBoundedUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Layout.class, Transform3D.class, Direction2d.class, UIObject[].class}, (Object[] arr) -> (UIObject) new BoundedUIObjectGroup((String) arr[0], (Layout) arr[1], (Transform3D) arr[2], (Direction2d) arr[3], (UIObject[]) arr[4])));
-		UI_OBJECT_CONSTRUCTORS.put(BoundedUIObjectGroup.class, listBoundedUIObjectGroup);
+		/*                 IntegerStatLine                 */
+		final List<InternalConstructorFunction<UIObject>> listIntegerStatLine = new ArrayList<>();
+		listIntegerStatLine.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObject[].class}, (Object[] arr) -> (UIObject) new IntegerStatLine((String) arr[0], (UIObject[]) arr[1])));
+		listIntegerStatLine.add(new InternalConstructorFunction<>(new Class[] {String.class, Transform3D.class, UIObject[].class}, (Object[] arr) -> (UIObject) new IntegerStatLine((String) arr[0], (Transform3D) arr[1], (UIObject[]) arr[2])));
+		listIntegerStatLine.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObjectGroup.class, UIObject[].class}, (Object[] arr) -> (UIObject) new IntegerStatLine((String) arr[0], (UIObjectGroup) arr[1], (UIObject[]) arr[2])));
+		UI_OBJECT_CONSTRUCTORS.put(IntegerStatLine.class, listIntegerStatLine);
 
 		/*                 ParentUIObjectGroup                 */
 		final List<InternalConstructorFunction<UIObject>> listParentUIObjectGroup = new ArrayList<>();
@@ -444,6 +444,13 @@ public class UIObjectRegistry {
 		listFixedBoundsUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Layout.class, Transform3D.class, Direction2d.class, float.class, UIObject[].class}, (Object[] arr) -> (UIObject) new FixedBoundsUIObjectGroup((String) arr[0], (Layout) arr[1], (Transform3D) arr[2], (Direction2d) arr[3], (float) arr[4], (UIObject[]) arr[5])));
 		listFixedBoundsUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Layout.class, UIObjectGroup.class, Direction2d.class, float.class, UIObject[].class}, (Object[] arr) -> (UIObject) new FixedBoundsUIObjectGroup((String) arr[0], (Layout) arr[1], (UIObjectGroup) arr[2], (Direction2d) arr[3], (float) arr[4], (UIObject[]) arr[5])));
 		UI_OBJECT_CONSTRUCTORS.put(FixedBoundsUIObjectGroup.class, listFixedBoundsUIObjectGroup);
+
+		/*                 BoundedUIObjectGroup                 */
+		final List<InternalConstructorFunction<UIObject>> listBoundedUIObjectGroup = new ArrayList<>();
+		listBoundedUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Layout.class, Direction2d.class, UIObject[].class}, (Object[] arr) -> (UIObject) new BoundedUIObjectGroup((String) arr[0], (Layout) arr[1], (Direction2d) arr[2], (UIObject[]) arr[3])));
+		listBoundedUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Layout.class, UIObjectGroup.class, Direction2d.class, UIObject[].class}, (Object[] arr) -> (UIObject) new BoundedUIObjectGroup((String) arr[0], (Layout) arr[1], (UIObjectGroup) arr[2], (Direction2d) arr[3], (UIObject[]) arr[4])));
+		listBoundedUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Layout.class, Transform3D.class, Direction2d.class, UIObject[].class}, (Object[] arr) -> (UIObject) new BoundedUIObjectGroup((String) arr[0], (Layout) arr[1], (Transform3D) arr[2], (Direction2d) arr[3], (UIObject[]) arr[4])));
+		UI_OBJECT_CONSTRUCTORS.put(BoundedUIObjectGroup.class, listBoundedUIObjectGroup);
 
 		/*                 AnchoredLayoutUIObjectGroup                 */
 		final List<InternalConstructorFunction<UIObject>> listAnchoredLayoutUIObjectGroup = new ArrayList<>();
@@ -460,13 +467,6 @@ public class UIObjectRegistry {
 		listFixedIntegerStatLine.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObjectGroup.class, UIObject[].class}, (Object[] arr) -> (UIObject) new FixedIntegerStatLine((String) arr[0], (UIObjectGroup) arr[1], (UIObject[]) arr[2])));
 		listFixedIntegerStatLine.add(new InternalConstructorFunction<>(new Class[] {String.class, Transform3D.class, UIObject[].class}, (Object[] arr) -> (UIObject) new FixedIntegerStatLine((String) arr[0], (Transform3D) arr[1], (UIObject[]) arr[2])));
 		UI_OBJECT_CONSTRUCTORS.put(FixedIntegerStatLine.class, listFixedIntegerStatLine);
-
-		/*                 IntegerStatLine                 */
-		final List<InternalConstructorFunction<UIObject>> listIntegerStatLine = new ArrayList<>();
-		listIntegerStatLine.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObject[].class}, (Object[] arr) -> (UIObject) new IntegerStatLine((String) arr[0], (UIObject[]) arr[1])));
-		listIntegerStatLine.add(new InternalConstructorFunction<>(new Class[] {String.class, Transform3D.class, UIObject[].class}, (Object[] arr) -> (UIObject) new IntegerStatLine((String) arr[0], (Transform3D) arr[1], (UIObject[]) arr[2])));
-		listIntegerStatLine.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObjectGroup.class, UIObject[].class}, (Object[] arr) -> (UIObject) new IntegerStatLine((String) arr[0], (UIObjectGroup) arr[1], (UIObject[]) arr[2])));
-		UI_OBJECT_CONSTRUCTORS.put(IntegerStatLine.class, listIntegerStatLine);
 
 		/*                 AnchoredProgressBarUIObject                 */
 		final List<InternalConstructorFunction<UIObject>> listAnchoredProgressBarUIObject = new ArrayList<>();
@@ -528,21 +528,13 @@ public class UIObjectRegistry {
 		listIBAnchoredFlatQuadUIObject.add(new InternalConstructorFunction<>(new Class[] {String.class, TexturedQuadMesh.class}, (Object[] arr) -> (UIObject) new IBAnchoredFlatQuadUIObject((String) arr[0], (TexturedQuadMesh) arr[1])));
 		UI_OBJECT_CONSTRUCTORS.put(IBAnchoredFlatQuadUIObject.class, listIBAnchoredFlatQuadUIObject);
 
-		/*                 ResourceLineUIObjectGroup                 */
-		final List<InternalConstructorFunction<UIObject>> listResourceLineUIObjectGroup = new ArrayList<>();
-		listResourceLineUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Layout.class, Direction2d.class, ResourceType.class}, (Object[] arr) -> (UIObject) new ResourceLineUIObjectGroup((String) arr[0], (Layout) arr[1], (Direction2d) arr[2], (ResourceType) arr[3])));
-		UI_OBJECT_CONSTRUCTORS.put(ResourceLineUIObjectGroup.class, listResourceLineUIObjectGroup);
-
-		/*                 OptionVolumeUIObjectGroup                 */
-		final List<InternalConstructorFunction<UIObject>> listOptionVolumeUIObjectGroup = new ArrayList<>();
-		listOptionVolumeUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {}, (Object[] arr) -> (UIObject) new OptionVolumeUIObjectGroup()));
-		listOptionVolumeUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {UIObjectGroup.class}, (Object[] arr) -> (UIObject) new OptionVolumeUIObjectGroup((UIObjectGroup) arr[0])));
-		UI_OBJECT_CONSTRUCTORS.put(OptionVolumeUIObjectGroup.class, listOptionVolumeUIObjectGroup);
-
-		/*                 OptionKeyUIObjectGroup                 */
-		final List<InternalConstructorFunction<UIObject>> listOptionKeyUIObjectGroup = new ArrayList<>();
-		listOptionKeyUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {KeyOption.class, UIObjectGroup.class}, (Object[] arr) -> (UIObject) new OptionKeyUIObjectGroup((KeyOption) arr[0], (UIObjectGroup) arr[1])));
-		UI_OBJECT_CONSTRUCTORS.put(OptionKeyUIObjectGroup.class, listOptionKeyUIObjectGroup);
+		/*                 ExtAnchoredIntegerStatLine                 */
+		final List<InternalConstructorFunction<UIObject>> listExtAnchoredIntegerStatLine = new ArrayList<>();
+		listExtAnchoredIntegerStatLine.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObject[].class}, (Object[] arr) -> (UIObject) new ExtAnchoredIntegerStatLine((String) arr[0], (UIObject[]) arr[1])));
+		listExtAnchoredIntegerStatLine.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObjectGroup.class, UIObject[].class}, (Object[] arr) -> (UIObject) new ExtAnchoredIntegerStatLine((String) arr[0], (UIObjectGroup) arr[1], (UIObject[]) arr[2])));
+		listExtAnchoredIntegerStatLine.add(new InternalConstructorFunction<>(new Class[] {String.class, Transform3D.class, UIObject[].class}, (Object[] arr) -> (UIObject) new ExtAnchoredIntegerStatLine((String) arr[0], (Transform3D) arr[1], (UIObject[]) arr[2])));
+		listExtAnchoredIntegerStatLine.add(new InternalConstructorFunction<>(new Class[] {String.class, Anchor.class, Anchor.class, UIObject.class}, (Object[] arr) -> (UIObject) new ExtAnchoredIntegerStatLine((String) arr[0], (Anchor) arr[1], (Anchor) arr[2], (UIObject) arr[3])));
+		UI_OBJECT_CONSTRUCTORS.put(ExtAnchoredIntegerStatLine.class, listExtAnchoredIntegerStatLine);
 
 		/*                 PaddingParentUIObject                 */
 		final List<InternalConstructorFunction<UIObject>> listPaddingParentUIObject = new ArrayList<>();
@@ -565,6 +557,22 @@ public class UIObjectRegistry {
 		listFixedPBUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Layout.class, Transform3D.class, Direction2d.class, float.class, UIObject[].class}, (Object[] arr) -> (UIObject) new FixedPBUIObjectGroup((String) arr[0], (Layout) arr[1], (Transform3D) arr[2], (Direction2d) arr[3], (float) arr[4], (UIObject[]) arr[5])));
 		UI_OBJECT_CONSTRUCTORS.put(FixedPBUIObjectGroup.class, listFixedPBUIObjectGroup);
 
+		/*                 OptionVolumeUIObjectGroup                 */
+		final List<InternalConstructorFunction<UIObject>> listOptionVolumeUIObjectGroup = new ArrayList<>();
+		listOptionVolumeUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {}, (Object[] arr) -> (UIObject) new OptionVolumeUIObjectGroup()));
+		listOptionVolumeUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {UIObjectGroup.class}, (Object[] arr) -> (UIObject) new OptionVolumeUIObjectGroup((UIObjectGroup) arr[0])));
+		UI_OBJECT_CONSTRUCTORS.put(OptionVolumeUIObjectGroup.class, listOptionVolumeUIObjectGroup);
+
+		/*                 OptionKeyUIObjectGroup                 */
+		final List<InternalConstructorFunction<UIObject>> listOptionKeyUIObjectGroup = new ArrayList<>();
+		listOptionKeyUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {KeyOption.class, UIObjectGroup.class}, (Object[] arr) -> (UIObject) new OptionKeyUIObjectGroup((KeyOption) arr[0], (UIObjectGroup) arr[1])));
+		UI_OBJECT_CONSTRUCTORS.put(OptionKeyUIObjectGroup.class, listOptionKeyUIObjectGroup);
+
+		/*                 ResourceLineUIObjectGroup                 */
+		final List<InternalConstructorFunction<UIObject>> listResourceLineUIObjectGroup = new ArrayList<>();
+		listResourceLineUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Layout.class, Direction2d.class, ResourceType.class}, (Object[] arr) -> (UIObject) new ResourceLineUIObjectGroup((String) arr[0], (Layout) arr[1], (Direction2d) arr[2], (ResourceType) arr[3])));
+		UI_OBJECT_CONSTRUCTORS.put(ResourceLineUIObjectGroup.class, listResourceLineUIObjectGroup);
+
 		/*                 BuildingTabListUIObjectGroup                 */
 		final List<InternalConstructorFunction<UIObject>> listBuildingTabListUIObjectGroup = new ArrayList<>();
 		listBuildingTabListUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {}, (Object[] arr) -> (UIObject) new BuildingTabListUIObjectGroup()));
@@ -583,17 +591,17 @@ public class UIObjectRegistry {
 		listBuildingTabUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, int.class, ColorMaterial.class}, (Object[] arr) -> (UIObject) new BuildingTabUIObjectGroup((String) arr[0], (int) arr[1], (ColorMaterial) arr[2])));
 		UI_OBJECT_CONSTRUCTORS.put(BuildingTabUIObjectGroup.class, listBuildingTabUIObjectGroup);
 
+		/*                 BuildingPanelUIObjectGroup                 */
+		final List<InternalConstructorFunction<UIObject>> listBuildingPanelUIObjectGroup = new ArrayList<>();
+		listBuildingPanelUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {}, (Object[] arr) -> (UIObject) new BuildingPanelUIObjectGroup()));
+		UI_OBJECT_CONSTRUCTORS.put(BuildingPanelUIObjectGroup.class, listBuildingPanelUIObjectGroup);
+
 		/*                 AnchoredParentUIObjectGroup                 */
 		final List<InternalConstructorFunction<UIObject>> listAnchoredParentUIObjectGroup = new ArrayList<>();
 		listAnchoredParentUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Layout.class, UIObjectGroup.class, UIObject[].class}, (Object[] arr) -> (UIObject) new AnchoredParentUIObjectGroup((String) arr[0], (Layout) arr[1], (UIObjectGroup) arr[2], (UIObject[]) arr[3])));
 		listAnchoredParentUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Layout.class, Transform3D.class, UIObject[].class}, (Object[] arr) -> (UIObject) new AnchoredParentUIObjectGroup((String) arr[0], (Layout) arr[1], (Transform3D) arr[2], (UIObject[]) arr[3])));
 		listAnchoredParentUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Layout.class, Anchor.class, Anchor.class, UIObject[].class}, (Object[] arr) -> (UIObject) new AnchoredParentUIObjectGroup((String) arr[0], (Layout) arr[1], (Anchor) arr[2], (Anchor) arr[3], (UIObject[]) arr[4])));
 		UI_OBJECT_CONSTRUCTORS.put(AnchoredParentUIObjectGroup.class, listAnchoredParentUIObjectGroup);
-
-		/*                 BuildingPanelUIObjectGroup                 */
-		final List<InternalConstructorFunction<UIObject>> listBuildingPanelUIObjectGroup = new ArrayList<>();
-		listBuildingPanelUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {}, (Object[] arr) -> (UIObject) new BuildingPanelUIObjectGroup()));
-		UI_OBJECT_CONSTRUCTORS.put(BuildingPanelUIObjectGroup.class, listBuildingPanelUIObjectGroup);
 
 		/*                 MarginAnchoredUIObjectGroup                 */
 		final List<InternalConstructorFunction<UIObject>> listMarginAnchoredUIObjectGroup = new ArrayList<>();
@@ -605,15 +613,6 @@ public class UIObjectRegistry {
 		listMarginAnchoredUIObjectGroup.add(new InternalConstructorFunction<>(new Class[] {String.class, Layout.class, UIObjectGroup.class, Anchor.class, Anchor.class, UIObject[].class}, (Object[] arr) -> (UIObject) new MarginAnchoredUIObjectGroup((String) arr[0], (Layout) arr[1], (UIObjectGroup) arr[2], (Anchor) arr[3], (Anchor) arr[4], (UIObject[]) arr[5])));
 		UI_OBJECT_CONSTRUCTORS.put(MarginAnchoredUIObjectGroup.class, listMarginAnchoredUIObjectGroup);
 
-		/*                 AnchoredFixedIntegerStatLine                 */
-		final List<InternalConstructorFunction<UIObject>> listAnchoredFixedIntegerStatLine = new ArrayList<>();
-		listAnchoredFixedIntegerStatLine.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObject[].class}, (Object[] arr) -> (UIObject) new AnchoredFixedIntegerStatLine((String) arr[0], (UIObject[]) arr[1])));
-		listAnchoredFixedIntegerStatLine.add(new InternalConstructorFunction<>(new Class[] {String.class, Anchor.class, Anchor.class}, (Object[] arr) -> (UIObject) new AnchoredFixedIntegerStatLine((String) arr[0], (Anchor) arr[1], (Anchor) arr[2])));
-		listAnchoredFixedIntegerStatLine.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObjectGroup.class, UIObject[].class}, (Object[] arr) -> (UIObject) new AnchoredFixedIntegerStatLine((String) arr[0], (UIObjectGroup) arr[1], (UIObject[]) arr[2])));
-		listAnchoredFixedIntegerStatLine.add(new InternalConstructorFunction<>(new Class[] {String.class, Transform3D.class, UIObject[].class}, (Object[] arr) -> (UIObject) new AnchoredFixedIntegerStatLine((String) arr[0], (Transform3D) arr[1], (UIObject[]) arr[2])));
-		listAnchoredFixedIntegerStatLine.add(new InternalConstructorFunction<>(new Class[] {String.class, float.class, Anchor.class, Anchor.class}, (Object[] arr) -> (UIObject) new AnchoredFixedIntegerStatLine((String) arr[0], (float) arr[1], (Anchor) arr[2], (Anchor) arr[3])));
-		UI_OBJECT_CONSTRUCTORS.put(AnchoredFixedIntegerStatLine.class, listAnchoredFixedIntegerStatLine);
-
 		/*                 ExtAnchoredFixedIntegerStatLine                 */
 		final List<InternalConstructorFunction<UIObject>> listExtAnchoredFixedIntegerStatLine = new ArrayList<>();
 		listExtAnchoredFixedIntegerStatLine.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObject[].class}, (Object[] arr) -> (UIObject) new ExtAnchoredFixedIntegerStatLine((String) arr[0], (UIObject[]) arr[1])));
@@ -622,13 +621,14 @@ public class UIObjectRegistry {
 		listExtAnchoredFixedIntegerStatLine.add(new InternalConstructorFunction<>(new Class[] {String.class, Anchor.class, Anchor.class, UIObject.class}, (Object[] arr) -> (UIObject) new ExtAnchoredFixedIntegerStatLine((String) arr[0], (Anchor) arr[1], (Anchor) arr[2], (UIObject) arr[3])));
 		UI_OBJECT_CONSTRUCTORS.put(ExtAnchoredFixedIntegerStatLine.class, listExtAnchoredFixedIntegerStatLine);
 
-		/*                 ExtAnchoredIntegerStatLine                 */
-		final List<InternalConstructorFunction<UIObject>> listExtAnchoredIntegerStatLine = new ArrayList<>();
-		listExtAnchoredIntegerStatLine.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObject[].class}, (Object[] arr) -> (UIObject) new ExtAnchoredIntegerStatLine((String) arr[0], (UIObject[]) arr[1])));
-		listExtAnchoredIntegerStatLine.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObjectGroup.class, UIObject[].class}, (Object[] arr) -> (UIObject) new ExtAnchoredIntegerStatLine((String) arr[0], (UIObjectGroup) arr[1], (UIObject[]) arr[2])));
-		listExtAnchoredIntegerStatLine.add(new InternalConstructorFunction<>(new Class[] {String.class, Transform3D.class, UIObject[].class}, (Object[] arr) -> (UIObject) new ExtAnchoredIntegerStatLine((String) arr[0], (Transform3D) arr[1], (UIObject[]) arr[2])));
-		listExtAnchoredIntegerStatLine.add(new InternalConstructorFunction<>(new Class[] {String.class, Anchor.class, Anchor.class, UIObject.class}, (Object[] arr) -> (UIObject) new ExtAnchoredIntegerStatLine((String) arr[0], (Anchor) arr[1], (Anchor) arr[2], (UIObject) arr[3])));
-		UI_OBJECT_CONSTRUCTORS.put(ExtAnchoredIntegerStatLine.class, listExtAnchoredIntegerStatLine);
+		/*                 AnchoredFixedIntegerStatLine                 */
+		final List<InternalConstructorFunction<UIObject>> listAnchoredFixedIntegerStatLine = new ArrayList<>();
+		listAnchoredFixedIntegerStatLine.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObject[].class}, (Object[] arr) -> (UIObject) new AnchoredFixedIntegerStatLine((String) arr[0], (UIObject[]) arr[1])));
+		listAnchoredFixedIntegerStatLine.add(new InternalConstructorFunction<>(new Class[] {String.class, Anchor.class, Anchor.class}, (Object[] arr) -> (UIObject) new AnchoredFixedIntegerStatLine((String) arr[0], (Anchor) arr[1], (Anchor) arr[2])));
+		listAnchoredFixedIntegerStatLine.add(new InternalConstructorFunction<>(new Class[] {String.class, UIObjectGroup.class, UIObject[].class}, (Object[] arr) -> (UIObject) new AnchoredFixedIntegerStatLine((String) arr[0], (UIObjectGroup) arr[1], (UIObject[]) arr[2])));
+		listAnchoredFixedIntegerStatLine.add(new InternalConstructorFunction<>(new Class[] {String.class, Transform3D.class, UIObject[].class}, (Object[] arr) -> (UIObject) new AnchoredFixedIntegerStatLine((String) arr[0], (Transform3D) arr[1], (UIObject[]) arr[2])));
+		listAnchoredFixedIntegerStatLine.add(new InternalConstructorFunction<>(new Class[] {String.class, float.class, Anchor.class, Anchor.class}, (Object[] arr) -> (UIObject) new AnchoredFixedIntegerStatLine((String) arr[0], (float) arr[1], (Anchor) arr[2], (Anchor) arr[3])));
+		UI_OBJECT_CONSTRUCTORS.put(AnchoredFixedIntegerStatLine.class, listAnchoredFixedIntegerStatLine);
 
 		/*                 PercentageSignedIntTextUIObject                 */
 		final List<InternalConstructorFunction<UIObject>> listPercentageSignedIntTextUIObject = new ArrayList<>();

@@ -2,7 +2,7 @@ package lu.kbra.plant_game.engine.scene.world.data.building.requirement;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
-import lu.kbra.plant_game.BuildingDefinitionRegistry;
+import lu.kbra.plant_game.BuildingRegistry;
 import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.scene.world.ActiveModalController;
 
@@ -22,7 +22,7 @@ public class MinBuildUnlockRequirement implements BuildingRequirement {
 
 	public MinBuildUnlockRequirement(final int count, final Class<? extends GameObject> building) {
 		this.count = count;
-		this.building = BuildingDefinitionRegistry.getInternalObjectName(building);
+		this.building = BuildingRegistry.getInternalObjectName(building);
 	}
 
 	public int getCount() {
