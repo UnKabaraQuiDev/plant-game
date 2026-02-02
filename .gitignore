@@ -99,8 +99,9 @@ buildNumber.properties
 # https://maven.apache.org/wrapper/#usage-without-binary-jar
 .mvn/wrapper/maven-wrapper.jar
 
-/bin/*
-/logs/*
+bin/*
+logs/*
+plugins/
 
 #/config/*
 #!config/main.properties
