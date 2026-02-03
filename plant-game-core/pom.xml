@@ -32,6 +32,11 @@
 			<groupId>org.reflections</groupId>
 			<artifactId>reflections</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>lu.kbra</groupId>
+			<artifactId>plant-game-autogen</artifactId>
+			<version>0.1</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>

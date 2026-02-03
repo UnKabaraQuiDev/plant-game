@@ -13,7 +13,7 @@ import lu.kbra.plant_game.plugin.PluginDescriptor;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextureFilter;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextureWrap;
 
-public abstract class UIObjectRegistry {
+public abstract class UIObjectRegistry extends PluginRegistry {
 
 	public static final Map<Class<? extends UIObject>, List<InternalConstructorFunction<UIObject>>> UI_OBJECT_CONSTRUCTORS;
 	public static final Map<Class<? extends UIObject>, String> DATA_PATH;
@@ -28,13 +28,10 @@ public abstract class UIObjectRegistry {
 		TEXTURE_FILTER = new HashMap<>();
 		TEXTURE_WRAP = new HashMap<>();
 	}
-	protected PluginDescriptor pluginDescriptor;
 
 	public UIObjectRegistry(final PluginDescriptor pluginDescriptor) {
-		this.pluginDescriptor = pluginDescriptor;
+		super(pluginDescriptor);
 	}
-
-	public abstract void init();
 
 	@SuppressWarnings("unchecked")
 	public static <T extends UIObject> T create(final Class<T> clazz, final Object... args) {

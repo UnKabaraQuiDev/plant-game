@@ -19,8 +19,6 @@ public abstract class ResourceRegistry extends PluginRegistry {
 		super(pluginDescriptor);
 	}
 
-	public abstract void init();
-
 	protected void register(final Enum<? extends ResourceType> resourceType) {
 		final String name = this.pluginDescriptor.getInternalName() + ":" + resourceType.name().toLowerCase();
 		if (DEBUG) {

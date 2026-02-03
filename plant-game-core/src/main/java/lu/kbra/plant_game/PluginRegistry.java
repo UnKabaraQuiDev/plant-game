@@ -2,7 +2,7 @@ package lu.kbra.plant_game;
 
 import lu.kbra.plant_game.plugin.PluginDescriptor;
 
-public class PluginRegistry {
+public abstract class PluginRegistry implements lu.kbra.plant_game.plugin.Registry {
 
 	protected final PluginDescriptor pluginDescriptor;
 
@@ -10,6 +10,7 @@ public class PluginRegistry {
 		this.pluginDescriptor = pluginDescriptor;
 	}
 
+	@Override
 	public PluginDescriptor getPluginDescriptor() {
 		return this.pluginDescriptor;
 	}

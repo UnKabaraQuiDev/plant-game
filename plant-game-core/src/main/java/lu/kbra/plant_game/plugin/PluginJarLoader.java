@@ -222,4 +222,9 @@ public class PluginJarLoader {
 		return new URLClassLoader(new URL[] { jarPath.toUri().toURL() }, this.pluginClassLoader);
 	}
 
+	@Override
+	public String toString() {
+		return "PluginJarLoader@" + System.identityHashCode(this) + " [pluginClassLoader=" + this.pluginClassLoader + "]";
+	}
+
 }

@@ -13,14 +13,13 @@ import lu.kbra.plant_game.plugin.PluginDescriptor;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextureFilter;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextureWrap;
 
-public abstract class GameObjectRegistry {
+public abstract class GameObjectRegistry extends PluginRegistry {
 
 	public static final Map<Class<? extends GameObject>, List<InternalConstructorFunction<GameObject>>> GAME_OBJECT_CONSTRUCTORS;
 	public static final Map<Class<? extends GameObject>, String> DATA_PATH;
 	public static final Map<Class<? extends GameObject>, Integer> BUFFER_SIZE;
 	public static final Map<Class<? extends GameObject>, TextureFilter> TEXTURE_FILTER;
 	public static final Map<Class<? extends GameObject>, TextureWrap> TEXTURE_WRAP;
-//	public static final Map<Class<? extends GameObject>, Integer> DEFAULT_PRICE;
 
 	static {
 		GAME_OBJECT_CONSTRUCTORS = new HashMap<>();
@@ -28,19 +27,10 @@ public abstract class GameObjectRegistry {
 		BUFFER_SIZE = new HashMap<>();
 		TEXTURE_FILTER = new HashMap<>();
 		TEXTURE_WRAP = new HashMap<>();
-//		DEFAULT_PRICE = new HashMap<>();
 	}
-
-	protected PluginDescriptor pluginDescriptor;
 
 	public GameObjectRegistry(final PluginDescriptor pluginDescriptor) {
-		this.pluginDescriptor = pluginDescriptor;
-	}
-
-	public abstract void init();
-
-	public PluginDescriptor getPluginDescriptor() {
-		return this.pluginDescriptor;
+		super(pluginDescriptor);
 	}
 
 	@SuppressWarnings("unchecked")

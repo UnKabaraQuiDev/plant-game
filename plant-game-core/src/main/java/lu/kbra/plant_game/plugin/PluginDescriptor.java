@@ -8,21 +8,6 @@ import lu.kbra.plant_game.VersionMatcher;
 
 public final class PluginDescriptor {
 
-	public static class Registries {
-
-		protected String building;
-		protected String resource;
-
-		public String getBuilding() {
-			return this.building;
-		}
-
-		public String getResource() {
-			return this.resource;
-		}
-
-	}
-
 	public static class Dependencies {
 
 		public static class VersionnedPluginDescriptor {
@@ -64,7 +49,7 @@ public final class PluginDescriptor {
 	@JsonProperty("package")
 	protected String package_;
 	protected String mainClass;
-	protected Registries registries;
+	protected List<String> registries;
 	protected Dependencies dependencies;
 
 	public String getDisplayName() {
@@ -87,7 +72,7 @@ public final class PluginDescriptor {
 		return this.mainClass;
 	}
 
-	public Registries getRegistries() {
+	public List<String> getRegistries() {
 		return this.registries;
 	}
 

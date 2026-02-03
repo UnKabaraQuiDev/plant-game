@@ -24,8 +24,6 @@ public abstract class BuildingRegistry extends PluginRegistry {
 		super(pluginDescriptor);
 	}
 
-	public abstract void init();
-
 	protected <T extends GameObject & PlaceableObject> void register(
 			final BuildingCategory cate,
 			final Class<T> clazz,
@@ -44,7 +42,6 @@ public abstract class BuildingRegistry extends PluginRegistry {
 		if (!GameObjectRegistry.DATA_PATH.containsKey(clazz)) {
 			throw new IllegalArgumentException("Class: " + clazz + " not registered in " + GameObjectRegistry.class.getSimpleName());
 		}
-		System.err.println(GameObjectRegistry.DATA_PATH.get(clazz));
 		return this.pluginDescriptor.getInternalName() + ":" + PCUtils.getFileName(GameObjectRegistry.DATA_PATH.get(clazz));
 	}
 
