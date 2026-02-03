@@ -2,11 +2,12 @@ package lu.kbra.plant_game.base;
 
 import lu.kbra.plant_game.plugin.PluginDescriptor;
 import lu.kbra.plant_game.plugin.PluginMain;
+import lu.kbra.plant_game.plugin.PluginManager;
 
 public class BaseMain extends PluginMain {
 
-	public BaseMain(final PluginDescriptor pluginDescriptor) {
-		super(pluginDescriptor);
+	public BaseMain(final PluginManager pluginManager, final PluginDescriptor pluginDescriptor) {
+		super(pluginManager, pluginDescriptor);
 	}
 
 	@Override

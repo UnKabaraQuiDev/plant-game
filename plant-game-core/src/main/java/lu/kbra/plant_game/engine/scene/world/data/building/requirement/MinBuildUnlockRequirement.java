@@ -2,9 +2,9 @@ package lu.kbra.plant_game.engine.scene.world.data.building.requirement;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
-import lu.kbra.plant_game.BuildingRegistry;
 import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.scene.world.ActiveModalController;
+import lu.kbra.plant_game.plugin.registry.BuildingRegistry;
 
 @JsonTypeName("MIN_BUILD")
 public class MinBuildUnlockRequirement implements BuildingRequirement {

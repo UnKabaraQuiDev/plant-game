@@ -66,7 +66,6 @@ public class PGLogic extends GameLogic {
 		this.inputHandler = new MappingInputHandler(this.engine);
 		this.inputHandler.setOwner(this.engine.getUpdateThread());
 		this.inputHandler.loadMappings(new File(Consts.CONFIG_DIR, "mappings.json"));
-		// this.inputHandler.saveMappings(new File(Consts.CONFIG_DIR, "mappings.json"));
 
 		this.pluginManager.load();
 

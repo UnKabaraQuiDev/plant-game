@@ -2,6 +2,7 @@ package lu.kbra.plant_game.engine.window.input;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,6 +13,8 @@ import lu.kbra.standalone.gameengine.graph.window.KeyState;
 import lu.kbra.standalone.gameengine.utils.gl.consts.Consts;
 
 public class MappingInputHandler extends DefaultInputHandler {
+
+	protected File source;
 
 	private final int[] keyMap;
 	private final int[] mouseMap;
@@ -152,6 +155,8 @@ public class MappingInputHandler extends DefaultInputHandler {
 			return;
 		}
 
+		this.source = file;
+
 		final InputMappingConfig config = Consts.OBJECT_MAPPER.readValue(file, InputMappingConfig.class);
 
 		this.resetKeyMappings();
@@ -168,6 +173,10 @@ public class MappingInputHandler extends DefaultInputHandler {
 				this.remapMouseButton(e.getKey(), e.getValue());
 			}
 		}
+	}
+
+	public void saveMappings() throws IOException {
+		this.saveMappings(this.source);
 	}
 
 	public void saveMappings(final File file) throws IOException {
@@ -195,6 +204,21 @@ public class MappingInputHandler extends DefaultInputHandler {
 		}
 
 		Consts.OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValue(file, cfg);
+	}
+
+	public File getSource() {
+		return this.source;
+	}
+
+	@Override
+	public String toString() {
+		return "MappingInputHandler@" + System.identityHashCode(this) + " [source=" + this.source + ", keyMap="
+				+ Arrays.toString(this.keyMap) + ", mouseMap=" + Arrays.toString(this.mouseMap) + ", engine=" + this.engine + ", window="
+				+ this.window + ", prevKeys=" + Arrays.toString(this.prevKeys) + ", currKeys=" + Arrays.toString(this.currKeys)
+				+ ", prevMouse=" + Arrays.toString(this.prevMouse) + ", currMouse=" + Arrays.toString(this.currMouse) + ", owner="
+				+ this.owner + ", mousePosition=" + this.mousePosition + ", normalizedMousePosition=" + this.normalizedMousePosition
+				+ ", mouseScroll=" + this.mouseScroll + ", oldSize=" + this.oldSize + ", resized=" + this.resized + ", pressedChar="
+				+ this.pressedChar + ", dTime=" + this.dTime + "]";
 	}
 
 }

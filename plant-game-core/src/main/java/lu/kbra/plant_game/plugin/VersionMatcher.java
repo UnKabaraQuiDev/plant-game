@@ -1,12 +1,12 @@
-package lu.kbra.plant_game;
+package lu.kbra.plant_game.plugin;
 
 import java.util.Objects;
 
 import lu.pcy113.pclib.PCUtils;
 
-import lu.kbra.plant_game.VersionMatcher.BoundsVersionMatcher;
-import lu.kbra.plant_game.VersionMatcher.RangeVersionMatcher;
-import lu.kbra.plant_game.VersionMatcher.StrictVersionMatcher;
+import lu.kbra.plant_game.plugin.VersionMatcher.BoundsVersionMatcher;
+import lu.kbra.plant_game.plugin.VersionMatcher.RangeVersionMatcher;
+import lu.kbra.plant_game.plugin.VersionMatcher.StrictVersionMatcher;
 
 sealed public interface VersionMatcher permits StrictVersionMatcher, RangeVersionMatcher, BoundsVersionMatcher {
 

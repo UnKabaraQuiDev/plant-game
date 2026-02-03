@@ -1,4 +1,4 @@
-package lu.kbra.plant_game;
+package lu.kbra.plant_game.plugin.registry;
 
 import java.util.HashMap;
 import java.util.List;

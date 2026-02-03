@@ -1,4 +1,4 @@
-package lu.kbra.plant_game;
+package lu.kbra.plant_game.plugin.registry;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,6 +9,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import lu.pcy113.pclib.PCUtils;
 
+import lu.kbra.plant_game.BuildingCategory;
+import lu.kbra.plant_game.BuildingDefinition;
 import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
 import lu.kbra.plant_game.engine.scene.world.data.building.requirement.BuildingRequirement;

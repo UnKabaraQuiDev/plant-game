@@ -3,7 +3,6 @@ package lu.kbra.plant_game.base.reg;
 import java.util.List;
 
 import lu.kbra.plant_game.BuildingCategory;
-import lu.kbra.plant_game.BuildingRegistry;
 import lu.kbra.plant_game.base.entity.go.obj.energy.SolarPanelSmallObject;
 import lu.kbra.plant_game.base.entity.go.obj.energy.WaterWheelObject;
 import lu.kbra.plant_game.base.entity.go.obj.energy.WindTurbineMediumObject;
@@ -14,6 +13,7 @@ import lu.kbra.plant_game.base.entity.go.obj.water.WaterTowerObject;
 import lu.kbra.plant_game.engine.scene.world.data.building.requirement.MinBuildUnlockRequirement;
 import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.plant_game.plugin.PluginDescriptor;
+import lu.kbra.plant_game.plugin.registry.BuildingRegistry;
 
 public class BaseBuildingRegistry extends BuildingRegistry {
 

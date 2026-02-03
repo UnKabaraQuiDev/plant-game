@@ -1,8 +1,8 @@
 package lu.kbra.plant_game.base.reg;
 
-import lu.kbra.plant_game.ResourceRegistry;
 import lu.kbra.plant_game.engine.scene.world.data.resource.DefaultResourceType;
 import lu.kbra.plant_game.plugin.PluginDescriptor;
+import lu.kbra.plant_game.plugin.registry.ResourceRegistry;
 
 public class BaseResourceRegistry extends ResourceRegistry {
 

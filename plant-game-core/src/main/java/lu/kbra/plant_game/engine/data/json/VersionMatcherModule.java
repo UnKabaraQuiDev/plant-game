@@ -11,12 +11,12 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
-import lu.kbra.plant_game.VersionMatcher;
-import lu.kbra.plant_game.VersionMatcher.BoundsVersionMatcher;
-import lu.kbra.plant_game.VersionMatcher.BoundsVersionMatcher.BoundsDirection;
+import lu.kbra.plant_game.plugin.VersionMatcher;
 import lu.kbra.plant_game.plugin.PluginDescriptor.Dependencies.VersionnedPluginDescriptor;
-import lu.kbra.plant_game.VersionMatcher.RangeVersionMatcher;
-import lu.kbra.plant_game.VersionMatcher.StrictVersionMatcher;
+import lu.kbra.plant_game.plugin.VersionMatcher.BoundsVersionMatcher;
+import lu.kbra.plant_game.plugin.VersionMatcher.RangeVersionMatcher;
+import lu.kbra.plant_game.plugin.VersionMatcher.StrictVersionMatcher;
+import lu.kbra.plant_game.plugin.VersionMatcher.BoundsVersionMatcher.BoundsDirection;
 
 public final class VersionMatcherModule extends SimpleModule {
 

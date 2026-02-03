@@ -1,4 +1,6 @@
-package lu.kbra.plant_game.plugin;
+package lu.kbra.plant_game.plugin.exception;
+
+import lu.kbra.plant_game.plugin.PluginDescriptor;
 
 public class RegistryFailedException extends PluginLoadException {
 

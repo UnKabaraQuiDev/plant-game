@@ -1,6 +1,8 @@
-package lu.kbra.plant_game.plugin;
+package lu.kbra.plant_game.plugin.exception;
 
 import java.util.Objects;
+
+import lu.kbra.plant_game.plugin.PluginDescriptor;
 
 public class PluginLoadException extends Exception {
 

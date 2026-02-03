@@ -10,9 +10,9 @@ import lu.pcy113.pclib.concurrency.DeferredTriggerLatch;
 import lu.pcy113.pclib.concurrency.GenericTriggerLatch;
 import lu.pcy113.pclib.pointer.ObjectPointer;
 
-import lu.kbra.plant_game.UIObjectRegistry;
 import lu.kbra.plant_game.engine.entity.impl.NeedsPostConstruct;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
+import lu.kbra.plant_game.plugin.registry.UIObjectRegistry;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
 import lu.kbra.standalone.gameengine.scene.EntityContainer;

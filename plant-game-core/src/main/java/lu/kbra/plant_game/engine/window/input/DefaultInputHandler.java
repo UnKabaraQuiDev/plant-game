@@ -25,27 +25,27 @@ public class DefaultInputHandler implements WindowInputHandler {
 			"Button 6",
 			"Button 7" };
 
-	private final GameEngine engine;
-	private final Window window;
+	protected final GameEngine engine;
+	protected final Window window;
 
-	private final boolean[] prevKeys;
-	private final boolean[] currKeys;
+	protected final boolean[] prevKeys;
+	protected final boolean[] currKeys;
 
-	private final boolean[] prevMouse;
-	private final boolean[] currMouse;
+	protected final boolean[] prevMouse;
+	protected final boolean[] currMouse;
 
-	private Thread owner;
+	protected Thread owner;
 
-	private final Vector2f mousePosition = new Vector2f();
-	private final Vector2f normalizedMousePosition = new Vector2f();
-	private final Vector2d mouseScroll = new Vector2d();
+	protected final Vector2f mousePosition = new Vector2f();
+	protected final Vector2f normalizedMousePosition = new Vector2f();
+	protected final Vector2d mouseScroll = new Vector2d();
 
-	private final Vector2i oldSize = new Vector2i();
-	private boolean resized;
+	protected final Vector2i oldSize = new Vector2i();
+	protected boolean resized;
 
-	private Character pressedChar;
+	protected Character pressedChar;
 
-	private float dTime;
+	protected float dTime;
 
 	public DefaultInputHandler(final GameEngine engine) {
 		this.engine = engine;
@@ -298,11 +298,12 @@ public class DefaultInputHandler implements WindowInputHandler {
 
 	@Override
 	public String toString() {
-		return "DefaultInputHandler [engine=" + this.engine + ", window=" + this.window + ", prevKeys=" + Arrays.toString(this.prevKeys)
-				+ ", currKeys=" + Arrays.toString(this.currKeys) + ", prevMouse=" + Arrays.toString(this.prevMouse) + ", currMouse="
-				+ Arrays.toString(this.currMouse) + ", owner=" + this.owner + ", mousePosition=" + this.mousePosition
-				+ ", normalizedMousePosition=" + this.normalizedMousePosition + ", mouseScroll=" + this.mouseScroll + ", oldSize="
-				+ this.oldSize + ", resized=" + this.resized + ", pressedChar=" + this.pressedChar + ", dTime=" + this.dTime + "]";
+		return "DefaultInputHandler@" + System.identityHashCode(this) + " [engine=" + this.engine + ", window=" + this.window
+				+ ", prevKeys=" + Arrays.toString(this.prevKeys) + ", currKeys=" + Arrays.toString(this.currKeys) + ", prevMouse="
+				+ Arrays.toString(this.prevMouse) + ", currMouse=" + Arrays.toString(this.currMouse) + ", owner=" + this.owner
+				+ ", mousePosition=" + this.mousePosition + ", normalizedMousePosition=" + this.normalizedMousePosition + ", mouseScroll="
+				+ this.mouseScroll + ", oldSize=" + this.oldSize + ", resized=" + this.resized + ", pressedChar=" + this.pressedChar
+				+ ", dTime=" + this.dTime + "]";
 	}
 
 }

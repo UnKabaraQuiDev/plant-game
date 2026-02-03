@@ -11,9 +11,12 @@ import java.util.Optional;
 import lu.pcy113.pclib.PCUtils;
 import lu.pcy113.pclib.logger.GlobalLogger;
 
-import lu.kbra.plant_game.GameObjectRegistry;
-import lu.kbra.plant_game.UIObjectRegistry;
 import lu.kbra.plant_game.plugin.PluginJarLoader.LoadedPlugin;
+import lu.kbra.plant_game.plugin.exception.PluginLoadException;
+import lu.kbra.plant_game.plugin.exception.RegistryFailedException;
+import lu.kbra.plant_game.plugin.registry.GameObjectRegistry;
+import lu.kbra.plant_game.plugin.registry.Registry;
+import lu.kbra.plant_game.plugin.registry.UIObjectRegistry;
 
 public final class PluginManager {
 
@@ -29,7 +32,8 @@ public final class PluginManager {
 	public void load() {
 		try {
 			this.pluginJarLoader
-					.loadAll(List.of(Paths.get("plugins")),
+					.loadAll(this,
+							List.of(Paths.get("plugins")),
 							List.of(OBJECT_MAPPER.readValue(PCUtils.readStringSource("classpath:/plugin.json"), PluginDescriptor.class)))
 					.forEach(lp -> this.plugins.put(lp.main().getClass(), lp));
 		} catch (Exception e) {

@@ -41,7 +41,10 @@ public class PluginJarLoader {
 
 	private final ClassLoader pluginClassLoader = PluginJarLoader.class.getClassLoader();
 
-	public List<LoadedPlugin> loadAll(final List<Path> pluginsDirs, final List<PluginDescriptor> existingPlugins) throws Exception {
+	public List<LoadedPlugin> loadAll(
+			final PluginManager parent,
+			final List<Path> pluginsDirs,
+			final List<PluginDescriptor> existingPlugins) throws Exception {
 		final Map<String, Path> pluginJars = new HashMap<>();
 		final Map<String, PluginDescriptor> descriptors = new HashMap<>();
 
@@ -74,7 +77,7 @@ public class PluginJarLoader {
 		for (PluginDescriptor desc : existingPlugins) {
 			final ClassLoader loader = desc.getClass().getClassLoader();
 			final Class<? extends PluginMain> main = (Class<? extends PluginMain>) loader.loadClass(desc.relativePath(desc.getMainClass()));
-			final PluginMain mainInst = main.getDeclaredConstructor(PluginDescriptor.class).newInstance(desc);
+			final PluginMain mainInst = main.getDeclaredConstructor(PluginManager.class, PluginDescriptor.class).newInstance(parent, desc);
 
 			result.add(new LoadedPlugin(null, desc, loader, mainInst));
 		}
@@ -87,7 +90,7 @@ public class PluginJarLoader {
 
 			final PluginDescriptor desc = descriptors.get(name);
 			final Class<? extends PluginMain> main = (Class<? extends PluginMain>) loader.loadClass(desc.relativePath(desc.getMainClass()));
-			final PluginMain mainInst = main.getDeclaredConstructor(PluginDescriptor.class).newInstance(desc);
+			final PluginMain mainInst = main.getDeclaredConstructor(PluginManager.class, PluginDescriptor.class).newInstance(parent, desc);
 
 			result.add(new LoadedPlugin(jar, desc, loader, mainInst));
 		}

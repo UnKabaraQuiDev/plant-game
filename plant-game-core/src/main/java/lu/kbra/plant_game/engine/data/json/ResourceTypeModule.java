@@ -13,8 +13,8 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.std.StdKeyDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
-import lu.kbra.plant_game.ResourceRegistry;
 import lu.kbra.plant_game.engine.scene.world.data.resource.ResourceType;
+import lu.kbra.plant_game.plugin.registry.ResourceRegistry;
 
 public class ResourceTypeModule extends SimpleModule {
 

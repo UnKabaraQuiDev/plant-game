@@ -4,8 +4,6 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import lu.kbra.plant_game.VersionMatcher;
-
 public final class PluginDescriptor {
 
 	public static class Dependencies {
