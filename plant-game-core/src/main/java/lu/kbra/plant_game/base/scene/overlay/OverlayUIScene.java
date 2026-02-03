@@ -3,6 +3,7 @@ package lu.kbra.plant_game.base.scene.overlay;
 import java.util.stream.Collectors;
 
 import lu.kbra.plant_game.PGLogic;
+import lu.kbra.plant_game.base.data.DefaultResourceType;
 import lu.kbra.plant_game.base.scene.overlay.group.building.BuildingInfoUIObjectGroup;
 import lu.kbra.plant_game.base.scene.overlay.group.building.BuildingPanelToggleButtonUIObject;
 import lu.kbra.plant_game.base.scene.overlay.group.building.BuildingPanelUIObjectGroup;
@@ -31,7 +32,6 @@ import lu.kbra.plant_game.engine.scene.ui.layout.AnchorLayout;
 import lu.kbra.plant_game.engine.scene.ui.layout.FlowLayout;
 import lu.kbra.plant_game.engine.scene.ui.layout.Layout;
 import lu.kbra.plant_game.engine.scene.ui.layout.LayoutOwner;
-import lu.kbra.plant_game.engine.scene.world.data.resource.DefaultResourceType;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.plant_game.plugin.registry.BuildingRegistry;
 import lu.kbra.standalone.gameengine.cache.CacheManager;

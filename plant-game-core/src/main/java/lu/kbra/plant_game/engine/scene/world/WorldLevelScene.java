@@ -27,6 +27,7 @@ import lu.pcy113.pclib.impl.ThrowingFunction;
 import lu.pcy113.pclib.logger.GlobalLogger;
 
 import lu.kbra.plant_game.PGLogic;
+import lu.kbra.plant_game.base.data.DefaultKeyOption;
 import lu.kbra.plant_game.base.entity.go.obj.energy.SolarPanelMediumObject;
 import lu.kbra.plant_game.base.entity.go.obj.energy.WaterWheelObject;
 import lu.kbra.plant_game.base.entity.go.obj.water.WaterSprinklerObject3x3;
@@ -61,7 +62,6 @@ import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.scene.world.generator.ImageWorldGenerator;
 import lu.kbra.plant_game.engine.scene.world.generator.WorldGenerator;
 import lu.kbra.plant_game.engine.scene.world.particle.ParticleManager;
-import lu.kbra.plant_game.engine.window.input.StandardKeyOption;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
@@ -403,22 +403,22 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController {
 		}
 
 		if (!frameState.uiSceneCaughtKeyboardInput) {
-			if (inputHandler.isKeyHeld(StandardKeyOption.FORWARD)) {
+			if (inputHandler.isKeyHeld(DefaultKeyOption.FORWARD)) {
 				this.posAdd.z -= 1;
 			}
-			if (inputHandler.isKeyHeld(StandardKeyOption.BACKWARD)) {
+			if (inputHandler.isKeyHeld(DefaultKeyOption.BACKWARD)) {
 				this.posAdd.z += 1;
 			}
-			if (inputHandler.isKeyHeld(StandardKeyOption.LEFT)) {
+			if (inputHandler.isKeyHeld(DefaultKeyOption.LEFT)) {
 				this.posAdd.x -= 1;
 			}
-			if (inputHandler.isKeyHeld(StandardKeyOption.RIGHT)) {
+			if (inputHandler.isKeyHeld(DefaultKeyOption.RIGHT)) {
 				this.posAdd.x += 1;
 			}
-			if (inputHandler.isKeyHeld(StandardKeyOption.ROTATE_LEFT)) {
+			if (inputHandler.isKeyHeld(DefaultKeyOption.ROTATE_LEFT)) {
 				this.rotation -= 1;
 			}
-			if (inputHandler.isKeyHeld(StandardKeyOption.ROTATE_RIGHT)) {
+			if (inputHandler.isKeyHeld(DefaultKeyOption.ROTATE_RIGHT)) {
 				this.rotation += 1;
 			}
 
@@ -438,7 +438,7 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController {
 			this.activeModal.update(inputHandler, compositor, workers, renderDispatcher);
 		}
 
-		if (!this.hasActiveModal() && inputHandler.isMouseButtonPressedOnce(StandardKeyOption.PLACE)) {
+		if (!this.hasActiveModal() && inputHandler.isMouseButtonPressedOnce(DefaultKeyOption.PLACE)) {
 			final MoveBuildingModal modal = this.getModal(MoveBuildingModal.class);
 
 			this.getClickedObject(workers, compositor).then(workers, (Consumer<Optional<PlaceableObject>>) obj -> obj.ifPresent(o -> {

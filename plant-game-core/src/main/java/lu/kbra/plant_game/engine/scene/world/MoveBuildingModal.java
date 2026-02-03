@@ -5,11 +5,11 @@ import org.joml.Vector2i;
 import org.joml.Vector4f;
 import org.joml.Vector4fc;
 
+import lu.kbra.plant_game.base.data.DefaultKeyOption;
 import lu.kbra.plant_game.engine.UpdateFrameState;
 import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
 import lu.kbra.plant_game.engine.entity.go.obj.terrain.TerrainGameObject;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
-import lu.kbra.plant_game.engine.window.input.StandardKeyOption;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.objs.entity.ParentAwareComponent;
@@ -65,22 +65,22 @@ public class MoveBuildingModal implements Modal {
 	@Override
 	public void input(final WindowInputHandler inputHandler, final UpdateFrameState frameState) {
 		if (this.hasAttachedObject() && !frameState.uiSceneCaughtKeyboardInput) {
-			if (inputHandler.isKeyPressedOrRepeat(StandardKeyOption.TURN_CW)) {
+			if (inputHandler.isKeyPressedOrRepeat(DefaultKeyOption.TURN_CW)) {
 				this.targetRotation = this.targetRotation.getClockwise();
 			}
-			if (inputHandler.isKeyPressedOrRepeat(StandardKeyOption.TURN_CCW)) {
+			if (inputHandler.isKeyPressedOrRepeat(DefaultKeyOption.TURN_CCW)) {
 				this.targetRotation = this.targetRotation.getCounterClockwise();
 			}
 		}
 		if (!frameState.uiSceneCaughtMouseInput) {
-			if (inputHandler.isMouseButtonPressedOnce(StandardKeyOption.PLACE)) {
+			if (inputHandler.isMouseButtonPressedOnce(DefaultKeyOption.PLACE)) {
 				if (this.worldScene.isPlaceable(this.attachedObject, this.currentPos, this.targetRotation)) {
 					this.placeDown = true;
 				} else {
 					this.placeDown = false;
 					this.runErrorHook();
 				}
-			} else if (inputHandler.isMouseButtonPressedOnce(StandardKeyOption.CANCEL)) {
+			} else if (inputHandler.isMouseButtonPressedOnce(DefaultKeyOption.CANCEL)) {
 				this.runCancelHook();
 				this.parent.cancelModal();
 			}

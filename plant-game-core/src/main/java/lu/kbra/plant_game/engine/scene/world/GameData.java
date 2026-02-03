@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import lu.kbra.plant_game.BuildingDefinition;
+import lu.kbra.plant_game.base.data.DefaultResourceType;
 import lu.kbra.plant_game.engine.scene.world.data.LevelData;
-import lu.kbra.plant_game.engine.scene.world.data.resource.DefaultResourceType;
 import lu.kbra.plant_game.engine.scene.world.data.resource.ResourceType;
 
 public class GameData {

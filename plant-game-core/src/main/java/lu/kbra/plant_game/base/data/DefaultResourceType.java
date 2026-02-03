@@ -1,9 +1,10 @@
-package lu.kbra.plant_game.engine.scene.world.data.resource;
+package lu.kbra.plant_game.base.data;
 
 import lu.kbra.plant_game.engine.entity.ui.TexturedQuadMeshUIObject;
 import lu.kbra.plant_game.engine.entity.ui.icon.EnergyIconUIObject;
 import lu.kbra.plant_game.engine.entity.ui.icon.MoneyIconUIObject;
 import lu.kbra.plant_game.engine.entity.ui.icon.WaterIconUIObject;
+import lu.kbra.plant_game.engine.scene.world.data.resource.ResourceType;
 
 public enum DefaultResourceType implements ResourceType {
 
@@ -13,7 +14,7 @@ public enum DefaultResourceType implements ResourceType {
 		return valueOf(name.toUpperCase());
 	}
 
-	private Class<? extends TexturedQuadMeshUIObject> iconClass;
+	protected final Class<? extends TexturedQuadMeshUIObject> iconClass;
 
 	private DefaultResourceType(final Class<? extends TexturedQuadMeshUIObject> iconClass) {
 		this.iconClass = iconClass;
@@ -27,6 +28,11 @@ public enum DefaultResourceType implements ResourceType {
 	@Override
 	public String getName() {
 		return this.name().toLowerCase();
+	}
+
+	@Override
+	public String getLocalizationKey() {
+		return LOCALIZATION_KEY + "base." + this.name().toLowerCase();
 	}
 
 }

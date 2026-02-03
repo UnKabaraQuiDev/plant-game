@@ -15,6 +15,7 @@ import lu.pcy113.pclib.concurrency.ObjectTriggerLatch;
 import lu.pcy113.pclib.pointer.ObjectPointer;
 
 import lu.kbra.plant_game.BuildingDefinition;
+import lu.kbra.plant_game.base.data.DefaultResourceType;
 import lu.kbra.plant_game.base.scene.overlay.group.impl.AnchoredLayoutUIObjectGroup;
 import lu.kbra.plant_game.base.scene.overlay.group.impl.BoundedUIObjectGroup;
 import lu.kbra.plant_game.base.scene.overlay.group.impl.FixedBoundsUIObjectGroup;
@@ -34,7 +35,6 @@ import lu.kbra.plant_game.engine.entity.ui.text.IntegerTextUIObject;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
 import lu.kbra.plant_game.engine.scene.ui.layout.AnchorLayout;
 import lu.kbra.plant_game.engine.scene.ui.layout.FlowLayout;
-import lu.kbra.plant_game.engine.scene.world.data.resource.DefaultResourceType;
 import lu.kbra.plant_game.engine.scene.world.data.resource.ResourceType;
 import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;

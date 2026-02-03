@@ -15,6 +15,8 @@ import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 public interface PlaceableObject extends Transform3DOwner, UniqueID, SceneEntity, FootprintOwner {
 
+	String LOCALIZATION_KEY = "placeable.";
+
 	Footprint getStaticMeshFootprint();
 
 	@Override
@@ -49,8 +51,7 @@ public interface PlaceableObject extends Transform3DOwner, UniqueID, SceneEntity
 	}
 
 	default boolean intersects(final Vector2i thisPos, final Vector2i otherPos, final PlaceableObject other) {
-		return this
-				.getStaticMeshFootprint()
+		return this.getStaticMeshFootprint()
 				.intersects(this.getRotation(), other.getRotation(), other.getStaticMeshFootprint(), otherPos.sub(thisPos, new Vector2i()));
 	}
 

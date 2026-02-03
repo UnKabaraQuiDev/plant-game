@@ -11,10 +11,10 @@ import lu.pcy113.pclib.PCUtils;
 
 import lu.kbra.plant_game.BuildingCategory;
 import lu.kbra.plant_game.BuildingDefinition;
+import lu.kbra.plant_game.base.data.DefaultResourceType;
 import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
 import lu.kbra.plant_game.engine.scene.world.data.building.requirement.BuildingRequirement;
-import lu.kbra.plant_game.engine.scene.world.data.resource.DefaultResourceType;
 import lu.kbra.plant_game.engine.scene.world.data.resource.ResourceType;
 import lu.kbra.plant_game.plugin.PluginDescriptor;
 

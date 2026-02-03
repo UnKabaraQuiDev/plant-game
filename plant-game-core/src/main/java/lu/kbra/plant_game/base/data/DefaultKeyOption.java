@@ -1,8 +1,10 @@
-package lu.kbra.plant_game.engine.window.input;
+package lu.kbra.plant_game.base.data;
 
 import org.lwjgl.glfw.GLFW;
 
-public enum StandardKeyOption implements KeyOption {
+import lu.kbra.plant_game.engine.window.input.KeyOption;
+
+public enum DefaultKeyOption implements KeyOption {
 
 	FORWARD(GLFW.GLFW_KEY_W),
 	BACKWARD(GLFW.GLFW_KEY_S),
@@ -17,7 +19,7 @@ public enum StandardKeyOption implements KeyOption {
 
 	private final int physicalKey;
 
-	private StandardKeyOption(int physicalKey) {
+	private DefaultKeyOption(int physicalKey) {
 		this.physicalKey = physicalKey;
 	}
 

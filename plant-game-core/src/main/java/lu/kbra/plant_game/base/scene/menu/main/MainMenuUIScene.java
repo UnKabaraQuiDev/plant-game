@@ -20,6 +20,7 @@ import lu.pcy113.pclib.datastructure.pair.Pairs;
 import lu.pcy113.pclib.datastructure.pair.ReadOnlyPair;
 
 import lu.kbra.plant_game.PGLogic;
+import lu.kbra.plant_game.base.data.DefaultKeyOption;
 import lu.kbra.plant_game.base.scene.overlay.group.impl.MarginAnchoredUIObjectGroup;
 import lu.kbra.plant_game.base.scene.overlay.group.impl.ParentUIObjectGroup;
 import lu.kbra.plant_game.engine.UpdateFrameState;
@@ -53,7 +54,6 @@ import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
 import lu.kbra.plant_game.engine.scene.ui.layout.AnchorLayout;
 import lu.kbra.plant_game.engine.scene.ui.layout.FlowLayout;
 import lu.kbra.plant_game.engine.scene.ui.layout.Layout;
-import lu.kbra.plant_game.engine.window.input.StandardKeyOption;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.cache.attrib.UIntAttribArray;
@@ -223,7 +223,7 @@ public class MainMenuUIScene extends UIScene {
 
 		this.optionsEntriesGroup.add(SpacerUIObject.getVerticalSpacer(0.1f));
 
-		for (final StandardKeyOption key : StandardKeyOption.values()) {
+		for (final DefaultKeyOption key : DefaultKeyOption.values()) {
 			new OptionKeyUIObjectGroup(key, this.optionsEntriesGroup).init(PGLogic.INSTANCE.getInputHandler(), charSize);
 		}
 	}

@@ -4,6 +4,7 @@ import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
 
 import lu.kbra.plant_game.PGLogic;
+import lu.kbra.plant_game.base.data.DefaultKeyOption;
 import lu.kbra.plant_game.engine.data.locale.LocalizationService;
 import lu.kbra.plant_game.engine.entity.impl.NeedsPostConstruct;
 import lu.kbra.plant_game.engine.entity.ui.impl.Focusable;
@@ -12,7 +13,6 @@ import lu.kbra.plant_game.engine.entity.ui.impl.NeedsClick;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsInput;
 import lu.kbra.plant_game.engine.window.input.KeyOption;
 import lu.kbra.plant_game.engine.window.input.MappingInputHandler;
-import lu.kbra.plant_game.engine.window.input.StandardKeyOption;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3DPivot;
@@ -101,7 +101,7 @@ public class OptionKeyUIObject extends ProgrammaticGrowOnHoverTextUIObject
 	}
 
 	public KeyOption getKeyOption() {
-		return StandardKeyOption.valueOf(super.key.toUpperCase());
+		return DefaultKeyOption.valueOf(super.key.toUpperCase());
 	}
 
 	@Override
@@ -121,7 +121,7 @@ public class OptionKeyUIObject extends ProgrammaticGrowOnHoverTextUIObject
 
 	@Override
 	public int getIndex() {
-		return StandardKeyOption.valueOf(super.key.toUpperCase()).ordinal();
+		return DefaultKeyOption.valueOf(super.key.toUpperCase()).ordinal();
 	}
 
 	@Override

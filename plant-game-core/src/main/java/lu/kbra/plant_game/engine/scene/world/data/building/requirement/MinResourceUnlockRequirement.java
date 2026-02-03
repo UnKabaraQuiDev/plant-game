@@ -1,8 +1,11 @@
 package lu.kbra.plant_game.engine.scene.world.data.building.requirement;
 
+import java.text.MessageFormat;
+
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
-import lu.kbra.plant_game.engine.scene.world.ActiveModalController;
+import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
+import lu.kbra.plant_game.plugin.registry.ResourceRegistry;
 
 @JsonTypeName("MIN_RESOURCE")
 public class MinResourceUnlockRequirement implements BuildingRequirement {
@@ -30,8 +33,20 @@ public class MinResourceUnlockRequirement implements BuildingRequirement {
 	}
 
 	@Override
-	public boolean isFulfilled(final ActiveModalController scene) {
+	public boolean isFulfilled(final WorldLevelScene scene) {
 		return false;
+	}
+
+	@Override
+	public String getLocalizationKey() {
+		return "req.unlock.min.resource";
+	}
+
+	@Override
+	public String getLocalizationValue() {
+		return MessageFormat.format(BuildingRequirement.super.getLocalizationValue(),
+				this.count,
+				ResourceRegistry.RESOURCE_TYPE_DEFS.get(this.resource).getLocalizationValue());
 	}
 
 }

@@ -36,8 +36,4 @@ public abstract class ResourceRegistry extends PluginRegistry {
 		RESOURCE_TYPE_DEFS.put(iname, resourceType);
 	}
 
-	public static String getInternalObjectName(final ResourceType clazz) {
-		return clazz.getName();
-	}
-
 }
