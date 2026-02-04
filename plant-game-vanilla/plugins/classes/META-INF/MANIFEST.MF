@@ -1,9 +1,0 @@
-Manifest-Version: 1.0
-Java-Version: 21
-Build-Jdk-Spec: 21
-Specification-Title: Plant Game (Vanilla plugin)
-Specification-Version: 0.1
-Implementation-Title: Plant Game (Vanilla plugin)
-Implementation-Version: 0.1
-Created-By: Maven Integration for Eclipse
-
