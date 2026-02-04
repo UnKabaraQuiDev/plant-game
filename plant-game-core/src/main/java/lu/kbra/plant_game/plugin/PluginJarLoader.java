@@ -49,6 +49,8 @@ public class PluginJarLoader {
 		final Map<String, PluginDescriptor> descriptors = new HashMap<>();
 
 		for (Path pluginsDir : pluginsDirs) {
+			Files.createDirectories(pluginsDir);
+
 			try (DirectoryStream<Path> stream = Files.newDirectoryStream(pluginsDir, "*.jar")) {
 				for (final Path jarPath : stream) {
 					final PluginDescriptor desc = this.loadDescriptor(jarPath);

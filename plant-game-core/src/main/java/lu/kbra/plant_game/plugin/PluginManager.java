@@ -8,15 +8,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import lu.pcy113.pclib.PCUtils;
-import lu.pcy113.pclib.logger.GlobalLogger;
-
 import lu.kbra.plant_game.plugin.PluginJarLoader.LoadedPlugin;
 import lu.kbra.plant_game.plugin.exception.PluginLoadException;
 import lu.kbra.plant_game.plugin.exception.RegistryFailedException;
 import lu.kbra.plant_game.plugin.registry.GameObjectRegistry;
 import lu.kbra.plant_game.plugin.registry.Registry;
 import lu.kbra.plant_game.plugin.registry.UIObjectRegistry;
+import lu.pcy113.pclib.PCUtils;
+import lu.pcy113.pclib.logger.GlobalLogger;
 
 public final class PluginManager {
 
@@ -50,24 +49,30 @@ public final class PluginManager {
 		for (LoadedPlugin c : this.plugins.values()) {
 			try {
 				try {
-					final Class<? extends GameObjectRegistry> goDefClazz = (Class<? extends GameObjectRegistry>) c.classLoader()
+					final Class<? extends GameObjectRegistry> goDefClazz = (Class<? extends GameObjectRegistry>) c
+							.classLoader()
 							.loadClass(c.descriptor().relativePath(goReg));
 					final GameObjectRegistry reg = goDefClazz.getDeclaredConstructor(PluginDescriptor.class).newInstance(c.descriptor());
 					reg.init();
 				} catch (ClassNotFoundException e) {
-					GlobalLogger.info(c.descriptor().toString() + " doesn't define a GameObject Registry.");
+					GlobalLogger
+							.info(c.descriptor().toString() + " doesn't define a GameObject Registry (" + c.descriptor().relativePath(goReg)
+									+ ")");
 					if (FAIL_ON_REGISTRY_NOT_FOUND) {
 						throw new PluginLoadException(c.descriptor(), c.descriptor().relativePath(goReg), e);
 					}
 				}
 
 				try {
-					final Class<? extends UIObjectRegistry> uiDefClazz = (Class<? extends UIObjectRegistry>) c.classLoader()
+					final Class<? extends UIObjectRegistry> uiDefClazz = (Class<? extends UIObjectRegistry>) c
+							.classLoader()
 							.loadClass(c.descriptor().relativePath(uiReg));
 					final UIObjectRegistry reg = uiDefClazz.getDeclaredConstructor(PluginDescriptor.class).newInstance(c.descriptor());
 					reg.init();
 				} catch (ClassNotFoundException e) {
-					GlobalLogger.info(c.descriptor().toString() + " doesn't define a UIObject Registry.");
+					GlobalLogger
+							.info(c.descriptor().toString() + " doesn't define a UIObject Registry (" + c.descriptor().relativePath(uiReg)
+									+ ")");
 					if (FAIL_ON_REGISTRY_NOT_FOUND) {
 						throw new PluginLoadException(c.descriptor(), c.descriptor().relativePath(uiReg), e);
 					}
@@ -79,7 +84,8 @@ public final class PluginManager {
 							GlobalLogger.warning("Invalid registry found in: " + c.descriptor().toString() + ": '" + regName + "'");
 							return;
 						}
-						final Class<? extends Registry> resourceDefClazz = (Class<? extends Registry>) c.classLoader()
+						final Class<? extends Registry> resourceDefClazz = (Class<? extends Registry>) c
+								.classLoader()
 								.loadClass(c.descriptor().relativePath(regName));
 						final Registry reg = resourceDefClazz.getDeclaredConstructor(PluginDescriptor.class).newInstance(c.descriptor());
 						reg.init();

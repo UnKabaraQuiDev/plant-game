@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
@@ -36,17 +35,14 @@ import org.json.JSONObject;
 import org.reflections.Reflections;
 import org.reflections.util.ConfigurationBuilder;
 
-import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.MethodSpec.Builder;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import com.squareup.javapoet.TypeVariableName;
 import com.squareup.javapoet.WildcardTypeName;
 
 import lu.pcy113.pclib.PCUtils;
@@ -123,6 +119,9 @@ public class GOAutogenMojo extends AbstractMojo implements AutojenDefaults {
 			e.printStackTrace();
 			throw new MojoExecutionException("Error generating GO registry: ", e);
 		}
+		
+		project.addCompileSourceRoot(generatedSourcesDir);
+//		project.getCompileSourceRoots().add(generatedSourcesDir);
 	}
 
 	public void genRegistry(final ClassLoader scanClassLoader, final URL[] urls, String scanPackage,
@@ -133,7 +132,7 @@ public class GOAutogenMojo extends AbstractMojo implements AutojenDefaults {
 				.loadClass("lu.kbra.plant_game.engine.util.InternalConstructorFunction");
 		final Class<? extends Annotation> dataPathClass = (Class<? extends Annotation>) scanClassLoader
 				.loadClass("lu.kbra.plant_game.engine.util.annotation.DataPath");
-		final Class<?> gameObjectRegistryClass = scanClassLoader.loadClass("lu.kbra.plant_game.GameObjectRegistry");
+		final Class<?> gameObjectRegistryClass = scanClassLoader.loadClass("lu.kbra.plant_game.plugin.registry.GameObjectRegistry");
 		final Class<? extends Annotation> bufferSizeClass = (Class<? extends Annotation>) scanClassLoader
 				.loadClass("lu.kbra.plant_game.engine.util.annotation.BufferSize");
 		final Class<? extends Annotation> textureOptionClass = (Class<? extends Annotation>) scanClassLoader

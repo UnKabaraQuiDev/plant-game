@@ -18,9 +18,4 @@ public class PluginLoadException extends Exception {
 		this.plugin = plugin;
 	}
 
-	@Override
-	public String toString() {
-		return "PluginLoadException@" + System.identityHashCode(this) + " [plugin=" + this.plugin + "]";
-	}
-
 }

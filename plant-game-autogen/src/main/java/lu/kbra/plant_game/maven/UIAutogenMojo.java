@@ -133,7 +133,7 @@ public class UIAutogenMojo extends AbstractMojo implements AutojenDefaults {
 				.loadClass("lu.kbra.plant_game.engine.util.InternalConstructorFunction");
 		final Class<? extends Annotation> dataPathClass = (Class<? extends Annotation>) scanClassLoader
 				.loadClass("lu.kbra.plant_game.engine.util.annotation.DataPath");
-		final Class<?> gameObjectRegistryClass = scanClassLoader.loadClass("lu.kbra.plant_game.UIObjectRegistry");
+		final Class<?> gameObjectRegistryClass = scanClassLoader.loadClass("lu.kbra.plant_game.plugin.registry.UIObjectRegistry");
 		final Class<? extends Annotation> bufferSizeClass = (Class<? extends Annotation>) scanClassLoader
 				.loadClass("lu.kbra.plant_game.engine.util.annotation.BufferSize");
 		final Class<? extends Annotation> textureOptionClass = (Class<? extends Annotation>) scanClassLoader

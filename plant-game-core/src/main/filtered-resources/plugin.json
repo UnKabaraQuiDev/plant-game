@@ -4,9 +4,9 @@
 	"version": "${project.version}",
 	"package": "${package.base}",
 	"mainClass": "BaseMain",
-	"registries": {
-		"building": "reg.BaseBuildingRegistry",
-		"resource": "reg.BaseResourceRegistry"
-	},
+	"registries": [
+		"reg.BaseBuildingRegistry",
+		"reg.BaseResourceRegistry"
+	],
 	"dependencies": {}
 }

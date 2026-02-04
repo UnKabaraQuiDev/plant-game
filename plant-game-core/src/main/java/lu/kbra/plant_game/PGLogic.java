@@ -91,8 +91,8 @@ public class PGLogic extends GameLogic {
 		this.overlayUIScene.init(this.WORKERS, this.RENDER_DISPATCHER);
 		this.worldScene.init(this.WORKERS, this.RENDER_DISPATCHER, this.gameData);
 
-		this.uiScene = null;
-		this.uiScene = this.overlayUIScene;
+//		this.uiScene = null;
+//		this.uiScene = this.overlayUIScene;
 
 		this.pluginManager.onEnable();
 	}
