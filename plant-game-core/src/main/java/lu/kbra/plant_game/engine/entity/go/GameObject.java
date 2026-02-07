@@ -60,6 +60,11 @@ public class GameObject extends Entity implements Transform3DOwner, ObjectIdOwne
 	}
 
 	@Override
+	public GameObject clone() {
+		return (GameObject) super.clone();
+	}
+
+	@Override
 	public String toString() {
 		return this.getClass().getSimpleName() + " [objectId=" + this.objectId + ", objectIdLocation=" + this.objectIdLocation
 				+ ", getTransform()=" + this.getTransform() + ", isActive()=" + this.isActive() + "]";
