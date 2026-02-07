@@ -8,14 +8,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import lu.kbra.pclib.PCUtils;
+import lu.kbra.pclib.logger.GlobalLogger;
 import lu.kbra.plant_game.plugin.PluginJarLoader.LoadedPlugin;
 import lu.kbra.plant_game.plugin.exception.PluginLoadException;
 import lu.kbra.plant_game.plugin.exception.RegistryFailedException;
 import lu.kbra.plant_game.plugin.registry.GameObjectRegistry;
 import lu.kbra.plant_game.plugin.registry.Registry;
 import lu.kbra.plant_game.plugin.registry.UIObjectRegistry;
-import lu.pcy113.pclib.PCUtils;
-import lu.pcy113.pclib.logger.GlobalLogger;
 
 public final class PluginManager {
 

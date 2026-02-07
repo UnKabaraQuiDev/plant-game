@@ -1,7 +1,6 @@
 package lu.kbra.plant_game.base.scene.menu.main;
 
-import lu.pcy113.pclib.concurrency.ListTriggerLatch;
-
+import lu.kbra.pclib.concurrency.ListTriggerLatch;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.ObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.text.TextUIObject;

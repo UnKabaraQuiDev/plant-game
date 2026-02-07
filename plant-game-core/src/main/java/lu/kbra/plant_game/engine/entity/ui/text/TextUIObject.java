@@ -4,8 +4,7 @@ import java.awt.geom.Rectangle2D;
 
 import javax.swing.GroupLayout.Alignment;
 
-import lu.pcy113.pclib.impl.ThrowingRunnable;
-
+import lu.kbra.pclib.impl.ThrowingRunnable;
 import lu.kbra.plant_game.PGLogic;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.TransparentEntity;

@@ -45,11 +45,11 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.WildcardTypeName;
 
-import lu.pcy113.pclib.PCUtils;
-import lu.pcy113.pclib.datastructure.pair.Pairs;
+import lu.kbra.pclib.PCUtils;
+import lu.kbra.pclib.datastructure.pair.Pairs;
 
 @Mojo(name = "gen-go-registry", defaultPhase = LifecyclePhase.PROCESS_CLASSES, requiresDependencyResolution = ResolutionScope.COMPILE)
-public class GOAutogenMojo extends AbstractMojo implements AutojenDefaults {
+public class GOAutogenMojo extends AbstractMojo implements AutogenDefaults {
 
 	@Parameter(defaultValue = "${project}", required = true, readonly = true)
 	MavenProject project;

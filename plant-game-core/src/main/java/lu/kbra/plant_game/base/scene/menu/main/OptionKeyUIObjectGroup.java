@@ -7,9 +7,8 @@ import org.joml.Vector2f;
 import org.joml.Vector3fc;
 import org.lwjgl.glfw.GLFW;
 
-import lu.pcy113.pclib.concurrency.ObjectTriggerLatch;
-import lu.pcy113.pclib.pointer.ObjectPointer;
-
+import lu.kbra.pclib.concurrency.ObjectTriggerLatch;
+import lu.kbra.pclib.pointer.ObjectPointer;
 import lu.kbra.plant_game.PGLogic;
 import lu.kbra.plant_game.base.scene.overlay.group.impl.BoundedUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.data.Direction2d;

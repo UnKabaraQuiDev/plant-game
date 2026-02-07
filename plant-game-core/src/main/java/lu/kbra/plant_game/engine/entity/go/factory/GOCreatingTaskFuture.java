@@ -5,11 +5,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-import lu.pcy113.pclib.PCUtils;
-import lu.pcy113.pclib.concurrency.DeferredTriggerLatch;
-import lu.pcy113.pclib.concurrency.GenericTriggerLatch;
-import lu.pcy113.pclib.pointer.ObjectPointer;
-
+import lu.kbra.pclib.PCUtils;
+import lu.kbra.pclib.concurrency.DeferredTriggerLatch;
+import lu.kbra.pclib.concurrency.GenericTriggerLatch;
+import lu.kbra.pclib.pointer.ObjectPointer;
 import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.entity.impl.NeedsPostConstruct;
 import lu.kbra.plant_game.plugin.registry.GameObjectRegistry;

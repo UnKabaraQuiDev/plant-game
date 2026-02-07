@@ -33,8 +33,8 @@ import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.TypeVariableName;
 import com.squareup.javapoet.WildcardTypeName;
 
-import lu.pcy113.pclib.PCUtils;
-import lu.pcy113.pclib.datastructure.pair.Pairs;
+import lu.kbra.pclib.PCUtils;
+import lu.kbra.pclib.datastructure.pair.Pairs;
 
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.util.InternalConstructorFunction;

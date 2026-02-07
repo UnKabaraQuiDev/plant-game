@@ -22,7 +22,7 @@ import javax.imageio.ImageIO;
 import org.junit.Test;
 import org.lwjgl.BufferUtils;
 
-import lu.pcy113.pclib.logger.GlobalLogger;
+import lu.kbra.pclib.logger.GlobalLogger;
 
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
 

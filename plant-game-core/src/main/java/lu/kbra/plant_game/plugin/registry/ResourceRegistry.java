@@ -3,8 +3,7 @@ package lu.kbra.plant_game.plugin.registry;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import lu.pcy113.pclib.logger.GlobalLogger;
-
+import lu.kbra.pclib.logger.GlobalLogger;
 import lu.kbra.plant_game.engine.scene.world.data.resource.ResourceType;
 import lu.kbra.plant_game.plugin.PluginDescriptor;
 

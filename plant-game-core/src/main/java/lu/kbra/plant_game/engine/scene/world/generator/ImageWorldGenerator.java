@@ -6,7 +6,7 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-import lu.pcy113.pclib.PCUtils;
+import lu.kbra.pclib.PCUtils;
 
 public class ImageWorldGenerator extends WorldGenerator {
 

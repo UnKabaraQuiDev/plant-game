@@ -4,7 +4,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-public interface AutojenDefaults {
+public interface AutogenDefaults {
 
 	default Enum<?> getEnumValue(Annotation annotation, String method) {
 		try {

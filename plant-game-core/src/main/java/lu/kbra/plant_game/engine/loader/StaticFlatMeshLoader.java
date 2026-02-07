@@ -3,9 +3,8 @@ package lu.kbra.plant_game.engine.loader;
 import static lu.kbra.plant_game.engine.loader.MeshLoaderLocks.releaseLock;
 import static lu.kbra.plant_game.engine.loader.MeshLoaderLocks.waitOrCreateLock;
 
-import lu.pcy113.pclib.impl.ThrowingFunction;
-import lu.pcy113.pclib.impl.ThrowingSupplier;
-
+import lu.kbra.pclib.impl.ThrowingFunction;
+import lu.kbra.pclib.impl.ThrowingSupplier;
 import lu.kbra.plant_game.engine.entity.ui.QuadMeshUIObject;
 import lu.kbra.plant_game.engine.mesh.LoadedTexturedQuadMesh;
 import lu.kbra.plant_game.engine.mesh.TexturedQuadMesh;

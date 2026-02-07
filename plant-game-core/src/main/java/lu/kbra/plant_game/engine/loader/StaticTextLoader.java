@@ -10,10 +10,9 @@ import java.util.function.Supplier;
 
 import org.joml.Vector2fc;
 
-import lu.pcy113.pclib.PCUtils;
-import lu.pcy113.pclib.impl.ThrowingFunction;
-import lu.pcy113.pclib.impl.ThrowingSupplier;
-
+import lu.kbra.pclib.PCUtils;
+import lu.kbra.pclib.impl.ThrowingFunction;
+import lu.kbra.pclib.impl.ThrowingSupplier;
 import lu.kbra.plant_game.engine.data.locale.LocalizationService;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.cache.attrib.impl.AttribArray;

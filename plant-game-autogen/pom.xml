@@ -9,9 +9,7 @@
 		<version>0.1</version>
 	</parent>
 
-	<groupId>lu.kbra</groupId>
 	<artifactId>plant-game-autogen</artifactId>
-	<version>0.1</version>
 	<packaging>maven-plugin</packaging>
 
 	<dependencies>
@@ -47,15 +45,13 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-			<groupId>lu.pcy113</groupId>
-			<artifactId>PCLib</artifactId>
-			<version>0.9.7</version>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.apache.maven</groupId>
 			<artifactId>maven-core</artifactId>
 			<version>3.9.6</version>
+		</dependency>
+		<dependency>
+			<groupId>lu.kbra</groupId>
+			<artifactId>pclib-common</artifactId>
 		</dependency>
 	</dependencies>
 

@@ -6,8 +6,7 @@ import java.util.Optional;
 import org.joml.Vector2f;
 import org.joml.Vector3fc;
 
-import lu.pcy113.pclib.concurrency.ObjectTriggerLatch;
-
+import lu.kbra.pclib.concurrency.ObjectTriggerLatch;
 import lu.kbra.plant_game.engine.entity.impl.SceneBoundsOwner;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;

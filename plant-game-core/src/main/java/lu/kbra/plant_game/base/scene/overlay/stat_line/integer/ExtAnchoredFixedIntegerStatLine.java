@@ -2,8 +2,7 @@ package lu.kbra.plant_game.base.scene.overlay.stat_line.integer;
 
 import java.awt.Shape;
 
-import lu.pcy113.pclib.concurrency.ObjectTriggerLatch;
-
+import lu.kbra.pclib.concurrency.ObjectTriggerLatch;
 import lu.kbra.plant_game.engine.entity.ui.TexturedQuadMeshUIObject;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.group.UIObjectGroup;

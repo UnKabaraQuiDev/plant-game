@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
@@ -36,24 +35,21 @@ import org.json.JSONObject;
 import org.reflections.Reflections;
 import org.reflections.util.ConfigurationBuilder;
 
-import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.MethodSpec.Builder;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import com.squareup.javapoet.TypeVariableName;
 import com.squareup.javapoet.WildcardTypeName;
 
-import lu.pcy113.pclib.PCUtils;
-import lu.pcy113.pclib.datastructure.pair.Pairs;
+import lu.kbra.pclib.PCUtils;
+import lu.kbra.pclib.datastructure.pair.Pairs;
 
 @Mojo(name = "gen-ui-registry", defaultPhase = LifecyclePhase.PROCESS_CLASSES, requiresDependencyResolution = ResolutionScope.COMPILE)
-public class UIAutogenMojo extends AbstractMojo implements AutojenDefaults {
+public class UIAutogenMojo extends AbstractMojo implements AutogenDefaults {
 
 	@Parameter(defaultValue = "${project}", required = true, readonly = true)
 	MavenProject project;

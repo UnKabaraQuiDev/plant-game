@@ -20,7 +20,7 @@ import java.util.Set;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 
-import lu.pcy113.pclib.PCUtils;
+import lu.kbra.pclib.PCUtils;
 
 public class PluginJarLoader {
 

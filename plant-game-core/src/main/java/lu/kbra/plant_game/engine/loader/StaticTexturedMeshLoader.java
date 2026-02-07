@@ -5,6 +5,10 @@ import static lu.kbra.plant_game.engine.loader.MeshLoaderLocks.waitOrCreateLock;
 
 import java.util.function.Function;
 
+import lu.kbra.pclib.datastructure.pair.Pair;
+import lu.kbra.pclib.datastructure.pair.Pairs;
+import lu.kbra.pclib.impl.ThrowingFunction;
+import lu.kbra.pclib.impl.ThrowingSupplier;
 import lu.kbra.plant_game.engine.mesh.TexturedQuadLoadedMesh;
 import lu.kbra.plant_game.engine.mesh.TexturedQuadMesh;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
@@ -18,10 +22,6 @@ import lu.kbra.standalone.gameengine.utils.file.FileUtils;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextureFilter;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextureWrap;
 import lu.kbra.standalone.gameengine.utils.mem.img.MemImage;
-import lu.pcy113.pclib.datastructure.pair.Pair;
-import lu.pcy113.pclib.datastructure.pair.Pairs;
-import lu.pcy113.pclib.impl.ThrowingFunction;
-import lu.pcy113.pclib.impl.ThrowingSupplier;
 
 public class StaticTexturedMeshLoader {
 

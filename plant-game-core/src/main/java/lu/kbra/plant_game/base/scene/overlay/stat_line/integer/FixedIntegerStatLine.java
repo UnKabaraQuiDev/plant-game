@@ -7,8 +7,7 @@ import java.util.OptionalInt;
 import org.joml.Vector2f;
 import org.joml.Vector2fc;
 
-import lu.pcy113.pclib.concurrency.ObjectTriggerLatch;
-
+import lu.kbra.pclib.concurrency.ObjectTriggerLatch;
 import lu.kbra.plant_game.engine.entity.ui.TexturedQuadMeshUIObject;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.bar.LimitedObjectGroup;
