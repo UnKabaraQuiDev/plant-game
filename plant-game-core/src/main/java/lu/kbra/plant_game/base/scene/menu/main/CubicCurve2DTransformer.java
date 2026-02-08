@@ -1,34 +1,41 @@
 package lu.kbra.plant_game.base.scene.menu.main;
 
+import static lu.kbra.pclib.PCUtils.clamp;
+
 import java.awt.geom.CubicCurve2D;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 
 import lu.kbra.standalone.gameengine.utils.geo.GeoPlane;
 
-public final class BezierStripGenerator {
+public final class CubicCurve2DTransformer {
 
-	private BezierStripGenerator() {
+	public record GeneratedMeshData(Vector3f[] vertices, int[] indices) {
 	}
 
-	public static Vector3f[] generateTriangleStrip(
+	private CubicCurve2DTransformer() {
+	}
+
+	public static GeneratedMeshData generateTriangleMesh(
 			final CubicCurve2D.Float curve,
 			final float width,
 			final int resolution,
 			float factor,
 			final GeoPlane plane) {
+
 		factor = clamp(factor, -1f, 1f);
 
 		final float left = width * (1f - factor) * 0.5f;
 		final float right = width * (1f + factor) * 0.5f;
 
-		final List<Vector3f> vertices = new ArrayList<>((resolution + 1) * 2);
+		final int vertexCount = (resolution + 1) * 2;
+		final Vector3f[] vertices = new Vector3f[vertexCount];
 
 		float lastX = 0;
 		float lastY = 0;
+
+		int v = 0;
 
 		for (int i = 0; i <= resolution; i++) {
 			final float t = i / (float) resolution;
@@ -67,23 +74,43 @@ public final class BezierStripGenerator {
 			final float rx = x - nx * right;
 			final float ry = y - ny * right;
 
-			vertices.add(plane.project(new Vector2f(lx, ly)));
-			vertices.add(plane.project(new Vector2f(rx, ry)));
+			vertices[v++] = plane.project(new Vector2f(lx, ly));
+			vertices[v++] = plane.project(new Vector2f(rx, ry));
 
 			lastX = x;
 			lastY = y;
 		}
 
-		return vertices.toArray(Vector3f[]::new);
+		final int quadCount = resolution;
+		final int indexCount = quadCount * 6;
+		final int[] indices = new int[indexCount];
+
+		int idx = 0;
+		for (int i = 0; i < resolution; i++) {
+			int base = i * 2;
+
+			int l0 = base;
+			int r0 = base + 1;
+			int l1 = base + 2;
+			int r1 = base + 3;
+
+			// triangle 1
+			indices[idx++] = l0;
+			indices[idx++] = l1;
+			indices[idx++] = r0;
+
+			// triangle 2
+			indices[idx++] = r0;
+			indices[idx++] = l1;
+			indices[idx++] = r1;
+		}
+
+		return new GeneratedMeshData(vertices, indices);
 	}
 
-	private static float cubic(final float p0, final float p1, final float p2, final float p3, final float t) {
+	public static float cubic(final float p0, final float p1, final float p2, final float p3, final float t) {
 		final float it = 1f - t;
 		return it * it * it * p0 + 3f * it * it * t * p1 + 3f * it * t * t * p2 + t * t * t * p3;
-	}
-
-	private static float clamp(final float v, final float min, final float max) {
-		return Math.max(min, Math.min(max, v));
 	}
 
 }

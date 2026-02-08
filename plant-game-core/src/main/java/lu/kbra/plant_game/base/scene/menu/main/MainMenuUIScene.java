@@ -1,6 +1,6 @@
 package lu.kbra.plant_game.base.scene.menu.main;
 
-import java.awt.geom.CubicCurve2D;
+import java.awt.geom.Path2D;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Optional;
@@ -21,6 +21,7 @@ import lu.kbra.pclib.PCUtils;
 import lu.kbra.pclib.concurrency.ListTriggerLatch;
 import lu.kbra.plant_game.PGLogic;
 import lu.kbra.plant_game.base.data.DefaultKeyOption;
+import lu.kbra.plant_game.base.scene.menu.main.CubicCurve2DTransformer.GeneratedMeshData;
 import lu.kbra.plant_game.base.scene.overlay.group.impl.MarginAnchoredUIObjectGroup;
 import lu.kbra.plant_game.base.scene.overlay.group.impl.ParentUIObjectGroup;
 import lu.kbra.plant_game.engine.UpdateFrameState;
@@ -40,7 +41,6 @@ import lu.kbra.plant_game.engine.entity.ui.icon.LargeLogoUIObject;
 import lu.kbra.plant_game.engine.entity.ui.layout.SpacerUIObject;
 import lu.kbra.plant_game.engine.entity.ui.slider.VolumeSliderUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.VolumeTextUIObject;
-import lu.kbra.plant_game.engine.loader.StaticFlatMeshLoader;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
@@ -50,9 +50,10 @@ import lu.kbra.plant_game.engine.scene.ui.layout.Layout;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
+import lu.kbra.standalone.gameengine.cache.attrib.UIntAttribArray;
 import lu.kbra.standalone.gameengine.cache.attrib.Vec3fAttribArray;
+import lu.kbra.standalone.gameengine.geom.LoadedMesh;
 import lu.kbra.standalone.gameengine.geom.Mesh;
-import lu.kbra.standalone.gameengine.graph.texture.SingleTexture;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
 import lu.kbra.standalone.gameengine.impl.future.WorkerDispatcher;
@@ -142,25 +143,63 @@ public class MainMenuUIScene extends UIScene {
 			Collections.sort(list);
 			this.playContentMenuGroup.addAll(list);
 
-			new TaskFuture<>(workers, (Supplier<Vector3f[]>) () -> {
-				final CubicCurve2D.Float curve = new CubicCurve2D.Float(0, 0, 0.5f, 1, 2, 2.8f, 3, 3);
-				return BezierStripGenerator.generateTriangleStrip(curve, 0.25f, 10, 0, GeoPlane.XZ);
-			}).then(renderDispatcher, (Function<Vector3f[], Mesh>) arr -> {
+//			new TaskFuture<>(workers, (Supplier<BezierStripMeshData>) () -> {
+//				final CubicCurve2D.Float curve = new CubicCurve2D.Float(0, 0, 0.5f, 1, 2, 2.8f, 3, 3);
+//				return BezierStripGenerator.generateTriangleMesh(curve, 0.25f, 10, 0, GeoPlane.XZ);
+//			}).then(renderDispatcher, (Function<BezierStripMeshData, Mesh>) arr -> {
+//				final Vec3fAttribArray pos = new Vec3fAttribArray(Mesh.ATTRIB_VERTICES_NAME,
+//						Mesh.ATTRIB_VERTICES_ID,
+//						arr.vertices(),
+//						BufferType.ARRAY,
+//						false);
+//				final UIntAttribArray ind = new UIntAttribArray(Mesh.ATTRIB_INDICES_NAME,
+//						Mesh.ATTRIB_INDICES_ID,
+//						arr.indices(),
+//						BufferType.ELEMENT_ARRAY,
+//						false);
+//				System.err.println(Arrays.stream(arr.vertices()).map(c -> c.x + ", " + c.y + ", " + c.z).collect(Collectors.joining("\n")));
+//				System.err.println(Arrays.stream(arr.indices()).mapToObj(Integer::toString).collect(Collectors.joining("\n")));
+//				return new LoadedMesh("meshTest", null, pos, ind);
+//			}).then(workers, (Consumer<Mesh>) m -> {
+//				System.err.println(m);
+//				TintedMeshUIObject go = new TintedMeshUIObject("meshTestObject", m);
+//				go.setTransform(new Transform3D(new Vector3f(), new Quaternionf().rotateXYZ(0.1f, 0.2f, 0.3f), new Vector3f(0.4f)));
+//				go.setColorMaterial(ColorMaterial.GREEN);
+//				this.playMenuGroup.add(go);
+//				System.err.println(go);
+//			}).push();
+
+			new TaskFuture<>(workers, (Supplier<GeneratedMeshData>) () -> {
+				final Path2D.Float curve = new Path2D.Float();
+				curve.moveTo(list.get(0).getTransform().getTranslation().x(), list.get(0).getTransform().getTranslation().z());
+				final float handleDist = 0.5f;
+				list.subList(1, list.size())
+						.forEach(c -> curve.curveTo(curve.getCurrentPoint().getX() + handleDist,
+								curve.getCurrentPoint().getY(),
+								c.getTransform().getTranslation().x() - handleDist,
+								c.getTransform().getTranslation().z(),
+								c.getTransform().getTranslation().x(),
+								c.getTransform().getTranslation().z()));
+
+				return Path2DTransformer.generateTriangleMesh(curve, 0.05f, 50, 0, GeoPlane.XZ);
+			}).then(renderDispatcher, (Function<GeneratedMeshData, Mesh>) arr -> {
 				final Vec3fAttribArray pos = new Vec3fAttribArray(Mesh.ATTRIB_VERTICES_NAME,
 						Mesh.ATTRIB_VERTICES_ID,
-						arr,
+						arr.vertices(),
 						BufferType.ARRAY,
 						false);
-//pos.genInit();
-				System.err.println(Arrays.stream(arr).map(c -> c.x + ", " + c.y + ", " + c.z).collect(Collectors.joining("\n")));
-				return new TexturedLoadedTriangleStripMesh("meshTest",
-						null,
-						(SingleTexture) this.uiCache.getTexture(StaticFlatMeshLoader.TEXTURE_NAME),
-						pos);
+				final UIntAttribArray ind = new UIntAttribArray(Mesh.ATTRIB_INDICES_NAME,
+						Mesh.ATTRIB_INDICES_ID,
+						arr.indices(),
+						BufferType.ELEMENT_ARRAY,
+						false);
+				System.err.println(Arrays.stream(arr.vertices()).map(c -> c.x + ", " + c.y + ", " + c.z).collect(Collectors.joining("\n")));
+				System.err.println(Arrays.stream(arr.indices()).mapToObj(Integer::toString).collect(Collectors.joining("\n")));
+				return new LoadedMesh("meshTest", null, pos, ind);
 			}).then(workers, (Consumer<Mesh>) m -> {
 				System.err.println(m);
 				TintedMeshUIObject go = new TintedMeshUIObject("meshTestObject", m);
-				go.setTransform(new Transform3D(new Vector3f(), new Quaternionf().rotateXYZ(0.1f, 0.2f, 0.3f), new Vector3f(0.4f)));
+				go.setTransform(new Transform3D(new Vector3f(), new Quaternionf().rotateXYZ(0.1f, 0.2f, 0.3f), new Vector3f(0.6f)));
 				go.setColorMaterial(ColorMaterial.GREEN);
 				this.mainMenuGroup.add(go);
 				System.err.println(go);

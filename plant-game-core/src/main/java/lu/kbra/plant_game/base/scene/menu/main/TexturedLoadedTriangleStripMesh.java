@@ -6,26 +6,32 @@ import lu.kbra.standalone.gameengine.cache.attrib.impl.AttribArray;
 import lu.kbra.standalone.gameengine.graph.material.Material;
 import lu.kbra.standalone.gameengine.graph.texture.SingleTexture;
 
+@Deprecated
 public class TexturedLoadedTriangleStripMesh extends LoadedTriangleStripMesh implements TexturedMesh {
 
+	@Deprecated
 	protected SingleTexture texture;
 
+	@Deprecated
 	public TexturedLoadedTriangleStripMesh(final String name, final Material material, final SingleTexture texture,
 			final Vec3fAttribArray vertices, final AttribArray... attribs) {
 		super(name, material, vertices, attribs);
 		this.texture = texture;
 	}
 
+	@Deprecated
 	@Override
 	public SingleTexture getTexture() {
 		return this.texture;
 	}
 
+	@Deprecated
 	@Override
 	public void setTexture(final SingleTexture texture) {
 		this.texture = texture;
 	}
 
+	@Deprecated
 	@Override
 	public String toString() {
 		return "TexturedLoadedTriangleStripMesh@" + System.identityHashCode(this) + " [texture=" + this.texture + ", name=" + this.name

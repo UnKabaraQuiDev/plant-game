@@ -17,19 +17,29 @@ import lu.kbra.standalone.gameengine.graph.material.Material;
 import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
 import lu.kbra.standalone.gameengine.utils.gl.consts.BeginMode;
 
+@Deprecated
 public class LoadedTriangleStripMesh implements Mesh {
 
+	@Deprecated
 	protected String name;
+	@Deprecated
 	protected int vao = -1;
+	@Deprecated
 	protected HashMap<Integer, Integer> vbo = new HashMap<>();
+	@Deprecated
 	protected Material material;
 
+	@Deprecated
 	protected Vec3fAttribArray vertices;
+	@Deprecated
 	protected List<AttribArray> attribs;
 
+	@Deprecated
 	protected int vertexCount;
+	@Deprecated
 	protected final BoundingBox boundingBox;
 
+	@Deprecated
 	public LoadedTriangleStripMesh(final String name, final Material material, final Vec3fAttribArray vertices,
 			final AttribArray... attribs) {
 		this.name = name;
@@ -59,21 +69,25 @@ public class LoadedTriangleStripMesh implements Mesh {
 		GlobalLogger.log(Level.INFO, "Mesh " + name + ": " + this.vao + " & " + this.vbo + "; v:" + this.vertexCount + " ");
 	}
 
+	@Deprecated
 	@Override
 	public BeginMode getBeginMode() {
 		return BeginMode.TRIANGLE_STRIP;
 	}
 
+	@Deprecated
 	@Override
 	public List<AttribArray> getAttribs() {
 		return this.attribs;
 	}
 
+	@Deprecated
 	@Override
 	public String getId() {
 		return this.name;
 	}
 
+	@Deprecated
 	@Override
 	public void cleanup() {
 		GlobalLogger.log("Cleaning up: " + this.name + " (" + this.vao + ")");
@@ -89,46 +103,55 @@ public class LoadedTriangleStripMesh implements Mesh {
 		this.vao = -1;
 	}
 
+	@Deprecated
 	@Override
 	public int getGlId() {
 		return this.vao;
 	}
 
+	@Deprecated
 	@Override
 	public boolean isValid() {
 		return this.vao != -1;
 	}
 
+	@Deprecated
 	@Override
 	public int getVertexCount() {
 		return this.vertexCount;
 	}
 
+	@Deprecated
 	@Override
 	public Map<Integer, Integer> getVbo() {
 		return this.vbo;
 	}
 
+	@Deprecated
 	@Override
 	public int getIndicesCount() {
 		return this.vertexCount;
 	}
 
+	@Deprecated
 	@Override
 	public Material getMaterial() {
 		return this.material;
 	}
 
+	@Deprecated
 	@Override
 	public BoundingBox getBoundingBox() {
 		return this.boundingBox;
 	}
 
+	@Deprecated
 	@Override
 	public boolean usesEBO() {
 		return false;
 	}
 
+	@Deprecated
 	@Override
 	public String toString() {
 		return "LoadedTriangleStripMesh@" + System.identityHashCode(this) + " [name=" + this.name + ", vao=" + this.vao + ", vbo="
