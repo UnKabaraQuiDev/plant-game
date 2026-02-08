@@ -24,7 +24,6 @@ import lu.kbra.plant_game.base.scene.overlay.group.impl.MarginAnchoredUIObjectGr
 import lu.kbra.plant_game.base.scene.overlay.group.impl.ParentUIObjectGroup;
 import lu.kbra.plant_game.engine.UpdateFrameState;
 import lu.kbra.plant_game.engine.entity.ui.MeshUIObject;
-import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.btn.BackButtonUIObject;
 import lu.kbra.plant_game.engine.entity.ui.btn.LevelButtonUIObject;
 import lu.kbra.plant_game.engine.entity.ui.btn.OptionsButtonUIObject;
@@ -37,15 +36,11 @@ import lu.kbra.plant_game.engine.entity.ui.group.OffsetUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.group.ScrollContainerUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.group.ScrollDrivenUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.group.UIObjectGroup;
-import lu.kbra.plant_game.engine.entity.ui.icon.CursorUIObject;
 import lu.kbra.plant_game.engine.entity.ui.icon.LargeLogoUIObject;
-import lu.kbra.plant_game.engine.entity.ui.impl.AbsoluteTransform3DOwner;
 import lu.kbra.plant_game.engine.entity.ui.layout.SpacerUIObject;
 import lu.kbra.plant_game.engine.entity.ui.mesh.line.TimelineMesh;
 import lu.kbra.plant_game.engine.entity.ui.slider.VolumeSliderUIObject;
-import lu.kbra.plant_game.engine.entity.ui.text.TextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.VolumeTextUIObject;
-import lu.kbra.plant_game.engine.entity.ui.textinput.TextFieldUIObject;
 import lu.kbra.plant_game.engine.loader.StaticFlatMeshLoader;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
@@ -93,7 +88,7 @@ public class MainMenuUIScene extends UIScene {
 			new Transform3D(new Vector3f(this.restPositions[MAIN])));
 
 	protected MarginAnchoredUIObjectGroup mainButtonsMenuGroup = new MarginAnchoredUIObjectGroup("main.buttons",
-			new FlowLayout(true, 0.02f),
+			new FlowLayout(true, 0.06f),
 			this.mainMenuGroup,
 			Anchor.CENTER_LEFT,
 			Anchor.CENTER_LEFT,
@@ -119,7 +114,7 @@ public class MainMenuUIScene extends UIScene {
 
 	protected Layout layout;
 
-	protected CursorUIObject cursor;
+//	protected CursorUIObject cursor;
 
 	public MainMenuUIScene(final CacheManager parent) {
 		super("main-menu", parent);
@@ -139,14 +134,14 @@ public class MainMenuUIScene extends UIScene {
 		this.buildPlayMenu(workers, renderDispatcher);
 
 		/* common */
-		UIObjectFactory.create(CursorUIObject.class)
-				.set(i -> i.setTransform(new Transform3D(new Vector3f(0, 0.01f, 0.25f), new Quaternionf(), new Vector3f(0.15f))))
-				.add(this)
-				.then(workers, (Consumer<CursorUIObject>) btn -> {
-					btn.forceCirclingMouse();
-					this.cursor = btn;
-				})
-				.push();
+//		UIObjectFactory.create(CursorUIObject.class)
+//				.set(i -> i.setTransform(new Transform3D(new Vector3f(0, 0.01f, 0.25f), new Quaternionf(), new Vector3f(0.15f))))
+//				.add(this)
+//				.then(workers, (Consumer<CursorUIObject>) btn -> {
+//					btn.forceCirclingMouse();
+//					this.cursor = btn;
+//				})
+//				.push();
 	}
 
 	private void buildPlayMenu(final Dispatcher workers, final Dispatcher renderDispatcher) {
@@ -275,7 +270,6 @@ public class MainMenuUIScene extends UIScene {
 						SMALL_TEXT_TEXT_ALIGNMENT,
 						Optional.empty(),
 						Optional.empty())
-				.set(i -> i.setTransform(new Transform3D()))
 				.add(this.mainButtonsMenuGroup)
 				.push();
 		UIObjectFactory
@@ -285,7 +279,6 @@ public class MainMenuUIScene extends UIScene {
 						SMALL_TEXT_TEXT_ALIGNMENT,
 						Optional.empty(),
 						Optional.empty())
-				.set(i -> i.setTransform(new Transform3D()))
 				.add(this.mainButtonsMenuGroup)
 				.push();
 		UIObjectFactory
@@ -295,7 +288,6 @@ public class MainMenuUIScene extends UIScene {
 						SMALL_TEXT_TEXT_ALIGNMENT,
 						Optional.empty(),
 						Optional.empty())
-				.set(i -> i.setTransform(new Transform3D()))
 				.add(this.mainButtonsMenuGroup)
 				.push();
 
@@ -355,19 +347,19 @@ public class MainMenuUIScene extends UIScene {
 
 		frameState.uiSceneCaughtMouseInput = true;
 
-		if (this.cursor != null) {
-			final Optional<UIObject> focusCandidate = this.hovering.stream()
-					.filter(c -> c instanceof TextUIObject && !(c instanceof TextFieldUIObject))
-					.findFirst();
-			if (this.cursor.isCirclingMouse() && focusCandidate.isEmpty()) {
-				this.cursor.setCirclingMouse(this.getMouseCoords(inputHandler));
-			} else {
-				if (this.currentGroup == OPTIONS) {
-					this.cursor.setOffsetX(-0.1f);
-				}
-				focusCandidate.ifPresent(this.cursor::setTargetedObject);
-			}
-		}
+//		if (this.cursor != null) {
+//			final Optional<UIObject> focusCandidate = this.hovering.stream()
+//					.filter(c -> c instanceof TextUIObject && !(c instanceof TextFieldUIObject))
+//					.findFirst();
+//			if (this.cursor.isCirclingMouse() && focusCandidate.isEmpty()) {
+//				this.cursor.setCirclingMouse(this.getMouseCoords(inputHandler));
+//			} else {
+//				if (this.currentGroup == OPTIONS) {
+//					this.cursor.setOffsetX(-0.1f);
+//				}
+//				focusCandidate.ifPresent(this.cursor::setTargetedObject);
+//			}
+//		}
 	}
 
 	@Override
@@ -378,42 +370,20 @@ public class MainMenuUIScene extends UIScene {
 			final Dispatcher render) {
 		super.update(inputHandler, compositor, workers, render);
 
-		if (this.cursor != null && this.currentGroup == MAIN && this.mainButtonsMenuGroup.size() > 1) {
-			this.cursor.setActive(true);
-
-			final float z1 = AbsoluteTransform3DOwner.getAbsoluteTransform(this.mainButtonsMenuGroup.get(0))
-					.getTranslation(new Vector3f()).z;
-			final float z2 = AbsoluteTransform3DOwner.getAbsoluteTransform(this.mainButtonsMenuGroup.get(1))
-					.getTranslation(new Vector3f()).z;
-
-			this.cursor.setSnapPhase(Math.max(z1, z2));
-			this.cursor.setSnapAngle(Math.abs(Math.min(z1, z2) - Math.max(z1, z2)));
-		}
-
-//		// TODO: This should be managed by layout or self-managed
-//		if (this.greenGradient != null) {
-//			this.greenGradient.getTransform().getTranslation().x = -this.camera.getProjection().getAspectRatio()
-//					+ (this.greenGradient.getTransform().getScale().x * (float) (this.greenGradient.getBounds().getWidth() / 2));
-//			this.greenGradient.getTransform().updateMatrix();
-//		}
+//		if (this.cursor != null && this.currentGroup == MAIN && this.mainButtonsMenuGroup.size() > 1) {
+//			this.cursor.setActive(true);
 //
-//		if (this.blueGradient != null) {
-//			this.blueGradient.getTransform().getTranslation().x = this.camera.getProjection().getAspectRatio()
-//					- (this.blueGradient.getTransform().getScale().x * (float) (this.blueGradient.getBounds().getWidth() / 2));
-//			this.blueGradient.getTransform().updateMatrix();
-//		}
-
-//		if (this.optionsBackBtn != null) {
-//			this.optionsBackBtn.getTransform().getTranslation().x = -this.camera.getProjection().getAspectRatio()
-//					+ (this.optionsBackBtn.getTransform().getScale().x
-//							* (float) (this.optionsBackBtn.getBounds().getBounds2D().getWidth() / 2));
-//			this.optionsBackBtn.getTransform().getTranslation().z = -1
-//					+ (float) (this.optionsBackBtn.getBounds().getBounds2D().getHeight() / 2);
-//			this.optionsBackBtn.getTransform().updateMatrix();
+//			final float z1 = AbsoluteTransform3DOwner.getAbsoluteTransform(this.mainButtonsMenuGroup.get(0))
+//					.getTranslation(new Vector3f()).z;
+//			final float z2 = AbsoluteTransform3DOwner.getAbsoluteTransform(this.mainButtonsMenuGroup.get(1))
+//					.getTranslation(new Vector3f()).z;
+//
+//			this.cursor.setSnapPhase(Math.max(z1, z2));
+//			this.cursor.setSnapAngle(Math.abs(Math.min(z1, z2) - Math.max(z1, z2)));
 //		}
 
 		if (this.targetGroup != this.currentGroup) {
-			this.cursor.setActive(this.targetGroup == MAIN);
+//			this.cursor.setActive(this.targetGroup == MAIN);
 
 			final OffsetUIObjectGroup target = this.groups[this.targetGroup];
 			final OffsetUIObjectGroup current = this.groups[this.currentGroup];
@@ -443,7 +413,7 @@ public class MainMenuUIScene extends UIScene {
 				current.getTransform().setTranslation(currentOffset).updateMatrix();
 			}
 
-			this.cursor.setCirclingMouse(super.getMouseCoords(inputHandler));
+//			this.cursor.setCirclingMouse(super.getMouseCoords(inputHandler));
 		}
 	}
 

@@ -41,7 +41,7 @@ import lu.kbra.standalone.gameengine.utils.interpolation.Interpolator;
 import lu.kbra.standalone.gameengine.utils.interpolation.Interpolators;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-public class BuildingItemUIObjectGroup extends OffsetUIObjectGroup // ProgrammaticTexturedQuadMeshUIObject
+public class BuildingItemUIObjectGroup extends OffsetUIObjectGroup
 		implements AnimatedOnHover, AbsoluteTransformedBoundsOwner, UISceneParentAware, TintOwner, IndexOwner, NeedsClick {
 
 	protected static final float Y_RANGE = 0.1f;
@@ -131,10 +131,18 @@ public class BuildingItemUIObjectGroup extends OffsetUIObjectGroup // Programmat
 	}
 
 	@Override
+	public boolean isAnimated() {
+		return this.hasTransform();
+	}
+
+	@Override
+	public void animate(final float t, final boolean isHovered) {
+		this.getTransform().translationSetZ(-t * Y_RANGE).update();
+		this.getTransform().updateMatrix();
+	}
+
+	@Override
 	public boolean hover(final WindowInputHandler input, final HoverState hoverState) {
-		if (!this.hasTransform()) {
-			return false;
-		}
 		final boolean grow = (hoverState == HoverState.ENTER || hoverState == HoverState.STAY);
 
 		if (hoverState == HoverState.ENTER || hoverState == HoverState.STAY) {
@@ -177,11 +185,9 @@ public class BuildingItemUIObjectGroup extends OffsetUIObjectGroup // Programmat
 		}
 		this.growing = grow;
 
-		this.compute(input.dTime(), grow);
-		this.getTransform().translationSetZ(-interpol.evaluate(this.getGrowthProgress()) * Y_RANGE).update();
-		this.getTransform().updateMatrix();
+		final boolean ret = AnimatedOnHover.super.hover(input, hoverState);
 
-		return this.progress == 0;
+		return ret;
 	}
 
 	@Override

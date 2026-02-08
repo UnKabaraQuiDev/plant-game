@@ -1,21 +1,19 @@
 package lu.kbra.plant_game.engine.entity.ui.btn;
 
 import lu.kbra.plant_game.base.scene.menu.main.MainMenuUIScene;
-import lu.kbra.plant_game.engine.entity.ui.data.Scale2dDir;
+import lu.kbra.plant_game.engine.entity.ui.impl.AnimatedOnHover;
 import lu.kbra.plant_game.engine.entity.ui.impl.IndexOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsClick;
 import lu.kbra.plant_game.engine.entity.ui.impl.UISceneParentAware;
-import lu.kbra.plant_game.engine.entity.ui.text.GrowOnHoverTextUIObject;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
 
 @DataPath("localization:btn.play")
-public class PlayButtonUIObject extends GrowOnHoverTextUIObject implements NeedsClick, IndexOwner, UISceneParentAware {
+public class PlayButtonUIObject extends MainMenuItemTextUIObject implements NeedsClick, IndexOwner, UISceneParentAware, AnimatedOnHover {
 
 	public PlayButtonUIObject(final String str, final TextEmitter text) {
 		super(str, text);
-		this.setDir(Scale2dDir.HORIZONTAL);
 	}
 
 	@Override
@@ -33,7 +31,8 @@ public class PlayButtonUIObject extends GrowOnHoverTextUIObject implements Needs
 
 	@Override
 	public String toString() {
-		return "PlayButtonUIObject [transform=" + this.transform + ", active=" + this.active + ", name=" + this.name + "]";
+		return "PlayButtonUIObject@" + System.identityHashCode(this) + " [growthProgress=" + this.growthProgress + ", transform="
+				+ this.transform + ", active=" + this.active + ", name=" + this.name + "]";
 	}
 
 }

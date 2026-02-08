@@ -4,25 +4,23 @@ import org.joml.Vector4f;
 import org.joml.Vector4fc;
 
 import lu.kbra.plant_game.PGLogic;
-import lu.kbra.plant_game.engine.entity.ui.data.HoverState;
-import lu.kbra.plant_game.engine.entity.ui.data.Scale2dDir;
 import lu.kbra.plant_game.engine.entity.ui.impl.IndexOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsClick;
-import lu.kbra.plant_game.engine.entity.ui.text.GrowOnHoverTextUIObject;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.objs.entity.SceneParentAware;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
+import lu.kbra.standalone.gameengine.utils.transform.Transform3DShear;
 
 @DataPath("localization:btn.quit")
-public class QuitButtonUIObject extends GrowOnHoverTextUIObject implements NeedsClick, IndexOwner, SceneParentAware {
+public class QuitButtonUIObject extends MainMenuItemTextUIObject implements NeedsClick, IndexOwner, SceneParentAware {
 
 	public static final Vector4fc TARGET_RED = new Vector4f(1, 0.25f, 0.25f, 1);
 
 	public QuitButtonUIObject(final String str, final TextEmitter text) {
 		super(str, text);
-		this.setDir(Scale2dDir.HORIZONTAL);
 		super.getTextEmitter().setForegroundColor(new Vector4f(TextEmitter.DEFAULT_FG_COLOR));
+		super.setTransform(new Transform3DShear());
 	}
 
 	@Override
@@ -31,10 +29,9 @@ public class QuitButtonUIObject extends GrowOnHoverTextUIObject implements Needs
 	}
 
 	@Override
-	public boolean hover(final WindowInputHandler input, final HoverState hoverState) {
-		final boolean b = super.hover(input, hoverState);
-		TextEmitter.DEFAULT_FG_COLOR.lerp(TARGET_RED, this.progress, this.getTextEmitter().getForegroundColor());
-		return b;
+	public void animate(final float t, final boolean isHovered) {
+		super.animate(t, isHovered);
+		TextEmitter.DEFAULT_FG_COLOR.lerp(TARGET_RED, t, this.getTextEmitter().getForegroundColor());
 	}
 
 	@Override

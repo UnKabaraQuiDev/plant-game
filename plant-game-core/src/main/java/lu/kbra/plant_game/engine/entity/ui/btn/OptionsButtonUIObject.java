@@ -1,21 +1,17 @@
 package lu.kbra.plant_game.engine.entity.ui.btn;
 
 import lu.kbra.plant_game.base.scene.menu.main.MainMenuUIScene;
-import lu.kbra.plant_game.engine.entity.ui.data.Scale2dDir;
-import lu.kbra.plant_game.engine.entity.ui.impl.IndexOwner;
-import lu.kbra.plant_game.engine.entity.ui.impl.NeedsClick;
-import lu.kbra.plant_game.engine.entity.ui.impl.UISceneParentAware;
-import lu.kbra.plant_game.engine.entity.ui.text.GrowOnHoverTextUIObject;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
+import lu.kbra.standalone.gameengine.utils.transform.Transform3DShear;
 
 @DataPath("localization:btn.options")
-public class OptionsButtonUIObject extends GrowOnHoverTextUIObject implements NeedsClick, IndexOwner, UISceneParentAware {
+public class OptionsButtonUIObject extends MainMenuItemTextUIObject {
 
 	public OptionsButtonUIObject(final String str, final TextEmitter text) {
 		super(str, text);
-		this.setDir(Scale2dDir.HORIZONTAL);
+		super.setTransform(new Transform3DShear());
 	}
 
 	@Override

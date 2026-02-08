@@ -4,9 +4,7 @@ import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
 import lu.kbra.plant_game.engine.entity.impl.Transform3DOwner;
-import lu.kbra.plant_game.engine.entity.ui.data.HoverState;
 import lu.kbra.plant_game.engine.scene.ui.layout.LayoutOwner;
-import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.objs.entity.ParentAwareNode;
 
 public interface GrowOnHover extends Transform3DOwner, AnimatedOnHover, ParentAwareNode {
@@ -28,25 +26,23 @@ public interface GrowOnHover extends Transform3DOwner, AnimatedOnHover, ParentAw
 	}
 
 	@Override
-	default boolean hover(final WindowInputHandler input, final HoverState hoverState) {
-		if (!this.hasTransform()) {
-			return false;
-		}
-		final boolean hovered = (hoverState == HoverState.ENTER || hoverState == HoverState.STAY);
-		this.grow(input.dTime(), hovered);
-		return this.getGrowthProgress() == 0;
+	default boolean isAnimated() {
+		return this.hasTransform();
 	}
 
-	default void grow(final float dTime, final boolean grow) {
+	@Override
+	default void animate(final float t, final boolean isHovered) {
+		this.grow(t, isHovered);
+	}
+
+	default void grow(final float t, final boolean grow) {
 		final Vector3f scale = this.getTransform().getScale();
 		final Vector3fc start = this.getTargetScale(false);
 		final Vector3fc end = this.getTargetScale(true);
 
-		this.compute(dTime, grow);
+//		final float interpT = this.getInterpolator(grow).evaluate(this.getGrowthProgress());
 
-		final float interpT = this.getInterpolator(grow).evaluate(this.getGrowthProgress());
-
-		start.lerp(end, interpT, scale);
+		start.lerp(end, t, scale);
 
 		this.getTransform().update();
 
