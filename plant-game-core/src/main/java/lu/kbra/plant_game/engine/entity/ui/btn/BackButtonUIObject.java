@@ -1,7 +1,10 @@
 package lu.kbra.plant_game.engine.entity.ui.btn;
 
+import org.joml.Vector3f;
+import org.joml.Vector3fc;
+
+import lu.kbra.pclib.logger.GlobalLogger;
 import lu.kbra.plant_game.base.scene.menu.main.MainMenuUIScene;
-import lu.kbra.plant_game.engine.entity.ui.data.Scale2dDir;
 import lu.kbra.plant_game.engine.entity.ui.impl.AnchorOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.MarginOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsClick;
@@ -10,17 +13,26 @@ import lu.kbra.plant_game.engine.entity.ui.text.GrowOnHoverTextUIObject;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
+import lu.kbra.standalone.gameengine.GameEngine;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
 
 @DataPath("localization:btn.back")
 public class BackButtonUIObject extends GrowOnHoverTextUIObject implements NeedsClick, UISceneParentAware, AnchorOwner, MarginOwner {
 
-	protected Anchor objectAnchor, targetAnchor;
+	private static final Vector3fc TARGET_SCALE = new Vector3f(1.2f, 1, 0.8f);
+
+	protected Anchor objectAnchor;
+	protected Anchor targetAnchor;
 	protected float margin;
 
 	public BackButtonUIObject(final String str, final TextEmitter text) {
 		super(str, text);
-		this.setDir(Scale2dDir.HORIZONTAL);
+//		this.setDir(Scale2dDir.HORIZONTAL);
+	}
+
+	@Override
+	public Vector3fc getTargetScale(final boolean grow) {
+		return grow ? TARGET_SCALE : GameEngine.IDENTITY_VECTOR3F;
 	}
 
 	@Override
@@ -28,7 +40,8 @@ public class BackButtonUIObject extends GrowOnHoverTextUIObject implements Needs
 		this.getUISceneParent()
 				.filter(MainMenuUIScene.class::isInstance)
 				.map(MainMenuUIScene.class::cast)
-				.ifPresent(c -> c.startTransition(MainMenuUIScene.MAIN));
+				.ifPresentOrElse(c -> c.startTransition(MainMenuUIScene.MAIN),
+						() -> GlobalLogger.severe("No " + MainMenuUIScene.class.getSimpleName() + " found in hierarchy."));
 	}
 
 	@Override

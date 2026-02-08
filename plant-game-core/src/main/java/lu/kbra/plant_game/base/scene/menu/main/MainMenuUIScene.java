@@ -216,6 +216,9 @@ public class MainMenuUIScene extends UIScene {
 	}
 
 	private void buildOptionsMenu() {
+		final Optional<Vector2fc> SMALL_TEXT_CHAR_SIZE = Optional.of(new Vector2f(0.2f));
+		final Optional<TextAlignment> SMALL_TEXT_TEXT_ALIGNMENT = Optional.of(TextAlignment.TEXT_LEFT);
+
 		final float charSize = 0.1f;
 
 		new OptionVolumeUIObjectGroup(this.optionsEntriesGroup).init(VolumeTextUIObject.class, VolumeSliderUIObject.class, charSize);
@@ -225,6 +228,40 @@ public class MainMenuUIScene extends UIScene {
 		for (final DefaultKeyOption key : DefaultKeyOption.values()) {
 			new OptionKeyUIObjectGroup(key, this.optionsEntriesGroup).init(PGLogic.INSTANCE.getInputHandler(), charSize);
 		}
+
+		UIObjectFactory.create(AnchoredGradientQuadUIObject.class)
+				.set(i -> i.setTransform(new Transform3D(new Vector3f(0, GRADIENT_DEPTH, 0),
+						new Quaternionf().rotateY((float) Math.PI),
+						new Vector3f(2.5f, 1, 2))))
+				.set(i -> i.setDirection(GradientDirection.UV_X))
+				.set(i -> i.setTint(GameEngineUtils.hexToColorToVec4f("317dac8c")))
+				.set(i -> i.setAnchors(Anchor.CENTER_RIGHT, Anchor.CENTER_RIGHT))
+				.add(this.optionsMenuGroup)
+				.push();
+
+		UIObjectFactory.create(AnchoredGradientQuadUIObject.class)
+				.set(i -> i.setTransform(new Transform3D(new Vector3f(0, GRADIENT_DEPTH - 0.1f, 0),
+						new Quaternionf().rotateY((float) Math.PI),
+						new Vector3f(5f, 1, 2))))
+				.set(i -> i.setDirection(GradientDirection.UV_Y))
+				.set(i -> i.setTint(GameEngineUtils.hexToColorToVec4f("000000ff")))
+				.set(i -> i.setAnchors(Anchor.TOP_LEFT, Anchor.TOP_LEFT))
+				.add(this.optionsMenuGroup)
+				.push();
+
+		UIObjectFactory
+				.createText(BackButtonUIObject.class,
+						OptionalInt.empty(),
+						SMALL_TEXT_CHAR_SIZE,
+						SMALL_TEXT_TEXT_ALIGNMENT,
+						Optional.empty(),
+						Optional.empty())
+				.set(i -> i.setTransform(new Transform3D()))
+				.add(this.optionsMenuGroup)
+				.set(i -> i.setAnchors(Anchor.TOP_LEFT, Anchor.TOP_LEFT))
+				.set(i -> i.setMargin(0.05f))
+//		.postInit(i -> this.optionsBackBtn = i)
+				.push();
 	}
 
 	private void buildMainMenu() {
@@ -275,32 +312,6 @@ public class MainMenuUIScene extends UIScene {
 				.set(i -> i.setTint(GameEngineUtils.hexToColorToVec4f("3b784a")))
 				.set(i -> i.setAnchors(Anchor.CENTER_LEFT, Anchor.CENTER_LEFT))
 				.add(this.mainMenuGroup)
-				.push();
-
-		/** options */
-
-		UIObjectFactory.create(AnchoredGradientQuadUIObject.class)
-				.set(i -> i.setTransform(new Transform3D(new Vector3f(0, GRADIENT_DEPTH, 0),
-						new Quaternionf().rotateY((float) Math.PI),
-						new Vector3f(2.5f, 1, 2))))
-				.set(i -> i.setDirection(GradientDirection.UV_X))
-				.set(i -> i.setTint(GameEngineUtils.hexToColorToVec4f("317dac8c")))
-				.set(i -> i.setAnchors(Anchor.CENTER_RIGHT, Anchor.CENTER_RIGHT))
-				.add(this.optionsMenuGroup)
-				.push();
-
-		UIObjectFactory
-				.createText(BackButtonUIObject.class,
-						OptionalInt.empty(),
-						SMALL_TEXT_CHAR_SIZE,
-						SMALL_TEXT_TEXT_ALIGNMENT,
-						Optional.empty(),
-						Optional.empty())
-				.set(i -> i.setTransform(new Transform3D(new Vector3f(-0.5f, 0, -0.5f), new Quaternionf(), new Vector3f(0.5f))))
-				.add(this.optionsMenuGroup)
-				.set(i -> i.setAnchors(Anchor.TOP_LEFT, Anchor.TOP_LEFT))
-				.set(i -> i.setMargin(0.1f))
-//				.postInit(i -> this.optionsBackBtn = i)
 				.push();
 	}
 

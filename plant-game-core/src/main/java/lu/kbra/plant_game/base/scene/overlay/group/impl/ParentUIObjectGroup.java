@@ -8,10 +8,13 @@ import lu.kbra.plant_game.engine.entity.ui.group.LayoutOffsetUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.group.UIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwnerParentAware;
+import lu.kbra.plant_game.engine.entity.ui.impl.PaddingOwner;
 import lu.kbra.plant_game.engine.scene.ui.layout.Layout;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-public class ParentUIObjectGroup extends LayoutOffsetUIObjectGroup implements BoundsOwnerParentAware {
+public class ParentUIObjectGroup extends LayoutOffsetUIObjectGroup implements BoundsOwnerParentAware, PaddingOwner {
+
+	protected float padding;
 
 	public ParentUIObjectGroup(final String str, final Layout layout, final Transform3D transform, final UIObject... values) {
 		super(str, layout, transform, values);
@@ -28,6 +31,23 @@ public class ParentUIObjectGroup extends LayoutOffsetUIObjectGroup implements Bo
 	@Override
 	public Shape getBounds() {
 		return this.getBoundsOwnerParent().map(BoundsOwner::getBounds).orElse(new Rectangle2D.Float(0, 0, 0, 0));
+	}
+
+	@Override
+	public float getPadding() {
+		return this.padding;
+	}
+
+	@Override
+	public void setPadding(final float padding) {
+		this.padding = padding;
+	}
+
+	@Override
+	public String toString() {
+		return "ParentUIObjectGroup@" + System.identityHashCode(this) + " [padding=" + this.padding + ", layout=" + this.layout
+				+ ", subEntitiesLock=" + this.subEntitiesLock + ", subEntities=" + this.subEntities + ", computedBounds="
+				+ this.computedBounds + ", transform=" + this.transform + ", active=" + this.active + ", name=" + this.name + "]";
 	}
 
 }

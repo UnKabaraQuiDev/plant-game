@@ -30,6 +30,12 @@ public class LayoutOffsetUIObjectGroup extends OffsetUIObjectGroup implements La
 		this.setLayout(layout);
 	}
 
+	public LayoutOffsetUIObjectGroup(final String str, final Layout layout, final UIObjectGroup parent, final Transform3D transform,
+			final UIObject... values) {
+		super(str, parent, transform, values);
+		this.setLayout(layout);
+	}
+
 	@Override
 	public <V extends UIObject> V add(final V e) {
 		final V v = super.add(e);

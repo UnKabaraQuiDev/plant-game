@@ -4,6 +4,7 @@ import java.util.Optional;
 import java.util.OptionalInt;
 
 import org.joml.Vector2f;
+import org.joml.Vector3f;
 import org.joml.Vector3fc;
 import org.lwjgl.glfw.GLFW;
 
@@ -30,6 +31,8 @@ import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 public class OptionKeyUIObjectGroup extends BoundedUIObjectGroup implements GrowOnHover, NeedsFocusInput {
 
+	protected static final Vector3fc TARGET_SCALE = new Vector3f(1.1f, 1, 1);
+
 	protected float progress = 0f;
 
 	protected KeyOption keyOption;
@@ -41,9 +44,19 @@ public class OptionKeyUIObjectGroup extends BoundedUIObjectGroup implements Grow
 //	protected ScheduledTask updateTask;
 
 	public OptionKeyUIObjectGroup(final KeyOption keyOption, final UIObjectGroup parent) {
-		super("option" + keyOption.toString(), new AnchorLayout(), parent, Direction2d.VERTICAL);
+		super("option" + keyOption.toString(), new AnchorLayout(), parent, new Transform3D(), Direction2d.VERTICAL);
 		this.keyOption = keyOption;
 	}
+
+//	@Override
+//	public boolean recomputeBounds() {
+//		final boolean changed = super.recomputeBounds();
+////		if (changed) {
+////			System.err.println(super.getBounds().getBounds2D().getMinX());
+////			((Transform3DPivot) this.getTransform()).scalePivotSetX(0).updateMatrix();
+////		}
+//		return changed;
+//	}
 
 	@Override
 	public boolean focusInput(final WindowInputHandler inputHandler) {
@@ -122,6 +135,23 @@ public class OptionKeyUIObjectGroup extends BoundedUIObjectGroup implements Grow
 		return latch;
 	}
 
+//	@Override
+//	public void grow(final float dTime, final boolean grow) {
+//		final Vector3f scale = this.getTransform().getScale();
+//		final Vector3fc start = this.getTargetScale(false);
+//		final Vector3fc end = this.getTargetScale(true);
+//
+//		this.compute(dTime, grow);
+//
+//		final float interpT = this.getInterpolator(grow).evaluate(this.getGrowthProgress());
+//
+//		start.lerp(end, interpT, scale);
+//
+//		this.getTransform().update();
+//
+//		this.recomputeLayout();
+//	}
+
 	@Override
 	public float getGrowthRate(final boolean grow) {
 		return 2f;
@@ -138,13 +168,13 @@ public class OptionKeyUIObjectGroup extends BoundedUIObjectGroup implements Grow
 	}
 
 	@Override
-	public Interpolator getInterpolator(final boolean grow) {
-		return grow ? Interpolators.CUBIC_OUT : Interpolators.CIRC_OUT;
+	public Vector3fc getTargetScale(final boolean grow) {
+		return grow ? TARGET_SCALE : GameEngine.IDENTITY_VECTOR3F;
 	}
 
 	@Override
-	public Vector3fc getTargetScale(final boolean grow) {
-		return grow ? BOTH_GROWTH_SCALE : GameEngine.IDENTITY_VECTOR3F;
+	public Interpolator getInterpolator(final boolean grow) {
+		return grow ? Interpolators.CUBIC_OUT : Interpolators.CIRC_OUT;
 	}
 
 	@Override

@@ -37,6 +37,13 @@ public class FlowLayout implements Layout, BoundsOwnerParentAware {
 		this.gap = gap;
 	}
 
+	public FlowLayout(final boolean vertical, final boolean center, final float gap, final boolean fixed) {
+		this.vertical = vertical;
+		this.center = center;
+		this.gap = gap;
+		this.fixed = fixed;
+	}
+
 	@Override
 	public void doLayout(final List<UIObject> children) {
 		float offsetX = 0;

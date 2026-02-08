@@ -37,18 +37,20 @@ public class FixedPBUIObjectGroup extends FixedBoundsUIObjectGroup {
 		super.recomputeBounds();
 //		final Rectangle2D compBounds = super.computedBounds.getBounds2D();
 
-		final float paddingX = (float) (this.parallelStream().mapToDouble(marginSumX).sum() + paddingSumX.applyAsDouble(this));
-		final float paddingZ = (float) (this.parallelStream().mapToDouble(marginSumZ).sum() + paddingSumZ.applyAsDouble(this));
+		final float outerMarginX = (float) // (this.parallelStream().mapToDouble(marginSumX).sum() // + paddingSumX.applyAsDouble(this)
+		+marginSumX.applyAsDouble(this);// );
+		final float outerMarginZ = (float) // (this.parallelStream().mapToDouble(marginSumZ).sum() // + paddingSumZ.applyAsDouble(this)
+		+marginSumZ.applyAsDouble(this);// );
 
 		this.bounds.setFrame(switch (this.dir) {
-		case VERTICAL -> new Rectangle2D.Float(-this.size / 2 + paddingX,
-				(float) parentBounds.getY() + paddingZ,
-				this.size - 2 * paddingX,
-				(float) parentBounds.getHeight() - 2 * paddingZ);
-		case HORIZONTAL -> new Rectangle2D.Float((float) parentBounds.getX() + paddingX,
-				-this.size / 2 + paddingZ,
-				(float) parentBounds.getWidth() - 2 * paddingX,
-				this.size + 2 * paddingZ);
+		case VERTICAL -> new Rectangle2D.Float(-this.size / 2 + outerMarginX,
+				(float) parentBounds.getY() + outerMarginZ,
+				this.size - 2 * outerMarginX,
+				(float) parentBounds.getHeight() - 2 * outerMarginZ);
+		case HORIZONTAL -> new Rectangle2D.Float((float) parentBounds.getX() + outerMarginX,
+				-this.size / 2 + outerMarginZ,
+				(float) parentBounds.getWidth() - 2 * outerMarginX,
+				this.size + 2 * outerMarginZ);
 		});
 
 		return true;

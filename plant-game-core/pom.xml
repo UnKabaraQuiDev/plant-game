@@ -2,19 +2,24 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+
 	<parent>
 		<groupId>lu.kbra</groupId>
 		<artifactId>plant-game</artifactId>
-		<version>0.1</version>
+		<version>${revision}</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
+
 	<artifactId>plant-game-core</artifactId>
+
 	<name>Plant Game (Core)</name>
 	<description>The core of a game about plants</description>
+
 	<properties>
 		<package.base>lu.kbra.plant_game.base</package.base>
 		<package.registries>${package.base}.reg</package.registries>
 	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>lu.kbra</groupId>
@@ -64,7 +69,7 @@
 			<plugin>
 				<groupId>lu.kbra</groupId>
 				<artifactId>plant-game-autogen</artifactId>
-				<version>0.1</version>
+				<version>${project.version}</version>
 				<executions>
 					<execution>
 						<phase>process-classes</phase>

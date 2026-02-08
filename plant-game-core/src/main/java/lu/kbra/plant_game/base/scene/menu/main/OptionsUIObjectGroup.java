@@ -14,23 +14,29 @@ import lu.kbra.plant_game.engine.entity.ui.data.Direction2d;
 import lu.kbra.plant_game.engine.entity.ui.group.UIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.DebugBoundsColor;
+import lu.kbra.plant_game.engine.entity.ui.impl.MarginOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsBoundsInput;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
+import lu.kbra.plant_game.engine.scene.ui.layout.Anchor2D;
 import lu.kbra.plant_game.engine.scene.ui.layout.FlowLayout;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.plant_game.generated.ColorMaterial;
 
 public class OptionsUIObjectGroup extends AnchoredFixedPBUIObjectGroup
-		implements NeedsBoundsInput, LimitedObjectGroup<UIObject>, DebugBoundsColor {
+		implements NeedsBoundsInput, LimitedObjectGroup<UIObject>, DebugBoundsColor, MarginOwner {
 
 	protected float scrollSpeed = 0.8f;
 
 	protected float scrollY;
 	protected Vector2f scrollYRange = new Vector2f();
 
+	protected float margin;
+	protected Anchor2D contentAnchor = Anchor2D.TRAILING;
+
 	public OptionsUIObjectGroup(final UIObjectGroup parent) {
-		super("options.vert", null, parent, Direction2d.VERTICAL, 3f, Anchor.CENTER_CENTER, Anchor.CENTER_CENTER);
+		super("options.vert", null, parent, Direction2d.VERTICAL, 3f, Anchor.BOTTOM_LEFT, Anchor.BOTTOM_LEFT);
 		super.add(new BoundedUIObjectGroup(this.getId() + "-content", new FlowLayout(true, 0.04f, true), Direction2d.VERTICAL));
+		this.setMargin(0.05f);
 	}
 
 	public UIObjectGroup getContent() {
@@ -62,9 +68,15 @@ public class OptionsUIObjectGroup extends AnchoredFixedPBUIObjectGroup
 		}
 		final Rectangle2D contentBounds = this.getContent().getLocalTransformedBounds().getBounds2D();
 		final Rectangle2D parentBounds = obo.get().getBounds().getBounds2D();
-		if (parentBounds.getWidth() > contentBounds.getWidth()) {
-			this.scrollYRange.set(parentBounds.getCenterY() - contentBounds.getCenterY(),
+		if (parentBounds.getWidth() > contentBounds.getWidth()) { // should probably include margin in calculations
+			switch (this.contentAnchor) {
+			case LEADING -> this.scrollYRange.set(parentBounds.getMinY() - contentBounds.getMinY() + this.getMargin(),
+					parentBounds.getMinY() - contentBounds.getMinY() + this.getMargin()); // untested
+			case CENTER -> this.scrollYRange.set(parentBounds.getCenterY() - contentBounds.getCenterY(),
 					parentBounds.getCenterY() - contentBounds.getCenterY());
+			case TRAILING -> this.scrollYRange.set(parentBounds.getMaxY() - contentBounds.getMaxY() - this.getMargin(),
+					parentBounds.getMaxY() - contentBounds.getMaxY() - this.getMargin());
+			}
 		} else {
 			this.scrollYRange.set(parentBounds.getMinY() - contentBounds.getMinY(), parentBounds.getMaxY() - contentBounds.getMaxY());
 		}
@@ -94,6 +106,16 @@ public class OptionsUIObjectGroup extends AnchoredFixedPBUIObjectGroup
 	@Override
 	public ColorMaterial getBoundsColor() {
 		return ColorMaterial.YELLOW;
+	}
+
+	@Override
+	public float getMargin() {
+		return this.margin;
+	}
+
+	@Override
+	public void setMargin(final float margin) {
+		this.margin = margin;
 	}
 
 	@Override

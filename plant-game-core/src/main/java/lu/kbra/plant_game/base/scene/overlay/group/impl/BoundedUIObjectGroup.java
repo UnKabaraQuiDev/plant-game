@@ -35,6 +35,12 @@ public class BoundedUIObjectGroup extends LayoutOffsetUIObjectGroup implements B
 		this.dir = dir;
 	}
 
+	public BoundedUIObjectGroup(final String str, final Layout layout, final UIObjectGroup parent, final Transform3D transform,
+			final Direction2d dir, final UIObject... values) {
+		super(str, layout, parent, transform, values);
+		this.dir = dir;
+	}
+
 	@Override
 	public boolean recomputeBounds() {
 		final Optional<BoundsOwner> obo = this.getBoundsOwnerParent();
@@ -52,15 +58,17 @@ public class BoundedUIObjectGroup extends LayoutOffsetUIObjectGroup implements B
 		final Rectangle2D parentBounds = obo.get().getBounds().getBounds2D();
 		super.recomputeBounds();
 		final Rectangle2D compBounds = super.computedBounds.getBounds2D();
+		final float marginX = (float) marginSumX.applyAsDouble(this);
+		final float marginZ = (float) marginSumZ.applyAsDouble(this);
 
 		this.bounds.setFrame(switch (this.dir) {
 		case VERTICAL -> new Rectangle2D.Float((float) parentBounds.getX(),
-				(float) compBounds.getY(),
+				(float) compBounds.getY() + marginZ,
 				(float) parentBounds.getWidth(),
-				(float) compBounds.getHeight());
-		case HORIZONTAL -> new Rectangle2D.Float((float) compBounds.getX(),
+				(float) compBounds.getHeight() - 2 * marginZ);
+		case HORIZONTAL -> new Rectangle2D.Float((float) compBounds.getX() + marginX,
 				(float) parentBounds.getY(),
-				(float) compBounds.getWidth(),
+				(float) compBounds.getWidth() - 2 * marginX,
 				(float) parentBounds.getHeight());
 		});
 

@@ -7,13 +7,18 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.ToDoubleFunction;
 
 import lu.kbra.plant_game.engine.entity.impl.NoMeshObject;
 import lu.kbra.plant_game.engine.entity.impl.SynchronizedEntityContainer;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.IgnoreBounds;
 import lu.kbra.plant_game.engine.entity.ui.impl.IndexOwner;
+import lu.kbra.plant_game.engine.entity.ui.impl.Margin2DOwner;
+import lu.kbra.plant_game.engine.entity.ui.impl.MarginOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.ObjectGroup;
+import lu.kbra.plant_game.engine.entity.ui.impl.Padding2DOwner;
+import lu.kbra.plant_game.engine.entity.ui.impl.PaddingOwner;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
 
 public class UIObjectGroup extends UIObject implements ObjectGroup<UIObject>, NoMeshObject, SynchronizedEntityContainer<UIObject> {
@@ -26,6 +31,48 @@ public class UIObjectGroup extends UIObject implements ObjectGroup<UIObject>, No
 	});
 	public static final Comparator<UIObject> UI_OBJECT_COMPARATOR = INDEX_COMPARATOR
 			.thenComparingDouble(b -> b.hasTransform() ? b.getTransform().getTranslation().y() : 0);
+
+	protected static final ToDoubleFunction<? super UIObject> marginSumX = c -> {
+		float padding = 0;
+		if (c instanceof MarginOwner po) {
+			padding += po.getMargin();
+		}
+		if (c instanceof Margin2DOwner po) {
+			padding += po.getMarginX();
+		}
+		return padding;
+	};
+	protected static final ToDoubleFunction<? super UIObject> marginSumZ = c -> {
+		float padding = 0;
+		if (c instanceof MarginOwner po) {
+			padding += po.getMargin();
+		}
+		if (c instanceof Margin2DOwner po) {
+			padding += po.getMarginZ();
+		}
+		return padding;
+	};
+
+	protected static final ToDoubleFunction<? super UIObject> paddingSumX = c -> {
+		float padding = 0;
+		if (c instanceof PaddingOwner po) {
+			padding += po.getPadding();
+		}
+		if (c instanceof Padding2DOwner po) {
+			padding += po.getPaddingX();
+		}
+		return padding;
+	};
+	protected static final ToDoubleFunction<? super UIObject> paddingSumZ = c -> {
+		float padding = 0;
+		if (c instanceof PaddingOwner po) {
+			padding += po.getPadding();
+		}
+		if (c instanceof Padding2DOwner po) {
+			padding += po.getPaddingZ();
+		}
+		return padding;
+	};
 
 	protected final Object subEntitiesLock = new Object();
 	protected List<UIObject> subEntities = Collections.synchronizedList(new ArrayList<>());
