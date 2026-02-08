@@ -1,7 +1,5 @@
 package lu.kbra.plant_game.engine.mesh;
 
-import java.util.Arrays;
-
 import org.joml.Vector2fc;
 
 import lu.kbra.standalone.gameengine.geom.QuadLoadedMesh;
@@ -34,10 +32,10 @@ public class LoadedTexturedQuadMesh extends QuadLoadedMesh implements TexturedQu
 
 	@Override
 	public String toString() {
-		return "LoadedTexturedQuadMesh [texture=" + this.texture + ", name=" + this.name + ", vao=" + this.vao + ", vbo=" + this.vbo
-				+ ", material=" + this.material + ", vertices=" + this.vertices + ", indices=" + this.indices + ", attribs="
-				+ Arrays.toString(this.attribs) + ", vertexCount=" + this.vertexCount + ", indicesCount=" + this.indicesCount
-				+ ", isValid()=" + this.isValid() + "]";
+		return "LoadedTexturedQuadMesh@" + System.identityHashCode(this) + " [texture=" + this.texture + ", name=" + this.name + ", vao="
+				+ this.vao + ", vbo=" + this.vbo + ", material=" + this.material + ", vertices=" + this.vertices + ", indices="
+				+ this.indices + ", attribs=" + this.attribs + ", vertexCount=" + this.vertexCount + ", indicesCount=" + this.indicesCount
+				+ ", boundingBox=" + this.boundingBox + "]";
 	}
 
 }

@@ -1137,7 +1137,14 @@ public class DeferredCompositor implements Cleanupable {
 
 		GL_W.glPolygonMode(mesh.getPolygonMode().getGlId(), mesh.getPolygonDrawMode().getGlId());
 
-		GL_W.glDrawElements(mesh.getBeginMode().getGlId(), mesh.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
+		if (mesh.usesEBO()) {
+			GL_W.glDrawElements(mesh.getBeginMode().getGlId(), mesh.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
+		} else {
+//			GL_W.glFrontFace(GL_W.GL_CW)
+			GL_W.glDisable(GL_W.GL_CULL_FACE);
+			GL_W.glDrawArrays(GL_W.GL_TRIANGLE_STRIP, 0, mesh.getVertexCount());
+			GL_W.glEnable(GL_W.GL_CULL_FACE);
+		}
 
 		this.drawDebugTriangles(mesh, transformationMatrix);
 
@@ -1155,13 +1162,15 @@ public class DeferredCompositor implements Cleanupable {
 				GL_W.glEnable(GL_W.GL_LINE_SMOOTH);
 			}
 			GL_W.glLineWidth(DEBUG_TRIANGLES_LINE_WIDTH);
-//			GL_W.glDisable(GL_W.GL_DEPTH_TEST);
 
 			GL_W.glPolygonMode(PolygonMode.FRONT_AND_BACK.getGlId(), PolygonDrawMode.LINE.getGlId());
 
-			GL_W.glDrawElements(this.lineDirectShader.getBeginMode().getGlId(), mesh.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
+			if (mesh.usesEBO()) {
+				GL_W.glDrawElements(this.lineDirectShader.getBeginMode().getGlId(), mesh.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
+			} else {
+				GlobalLogger.warning("Unsupported: " + mesh);
+			}
 
-//			GL_W.glEnable(GL_W.GL_DEPTH_TEST);
 			GL_W.glPolygonMode(GL_W.GL_FRONT_AND_BACK, GL_W.GL_FILL);
 		} else if (this.deferredPass && DEBUG_TRIANGLES && this.deferredTransferShader != null) {
 			this.deferredTransferShader.bind();
@@ -1180,8 +1189,11 @@ public class DeferredCompositor implements Cleanupable {
 
 			GL_W.glPolygonMode(PolygonMode.FRONT_AND_BACK.getGlId(), PolygonDrawMode.LINE.getGlId());
 
-			GL_W.glDrawElements(mesh.getBeginMode().getGlId(), mesh.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
-//			GL_W.glDrawElements(this.transferShader.getBeginMode().getGlId(), mesh.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
+			if (mesh.usesEBO()) {
+				GL_W.glDrawElements(mesh.getBeginMode().getGlId(), mesh.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
+			} else {
+				GlobalLogger.warning("Unsupported: " + mesh);
+			}
 
 			GL_W.glEnable(GL_W.GL_DEPTH_TEST);
 			GL_W.glPolygonMode(GL_W.GL_FRONT_AND_BACK, GL_W.GL_FILL);

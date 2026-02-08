@@ -1,7 +1,5 @@
 package lu.kbra.plant_game.engine.entity.ui.mesh.line;
 
-import java.util.Arrays;
-
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4fc;
@@ -21,25 +19,14 @@ public class TimelineMesh extends LineLoadedMesh implements TexturedMesh, TintOw
 	private SingleTexture txt;
 	private float defaultYDepth = -0.1f;
 
-	public TimelineMesh(
-			final String name,
-			final int objectId,
-			final SingleTexture txt,
-			final Vec3fAttribArray vertices,
-			final UIntAttribArray indices,
-			final AttribArray... attribs) {
+	public TimelineMesh(final String name, final int objectId, final SingleTexture txt, final Vec3fAttribArray vertices,
+			final UIntAttribArray indices, final AttribArray... attribs) {
 		super(name, objectId, vertices, indices, attribs);
 		this.txt = txt;
 	}
 
-	public TimelineMesh(
-			final String name,
-			final int objectId,
-			final SingleTexture txt,
-			final Vec3fAttribArray vertices,
-			final UIntAttribArray indices,
-			final float defaultYDepth,
-			final AttribArray... attribs) {
+	public TimelineMesh(final String name, final int objectId, final SingleTexture txt, final Vec3fAttribArray vertices,
+			final UIntAttribArray indices, final float defaultYDepth, final AttribArray... attribs) {
 		super(name, objectId, vertices, indices, attribs);
 		this.defaultYDepth = defaultYDepth;
 		this.txt = txt;
@@ -87,10 +74,10 @@ public class TimelineMesh extends LineLoadedMesh implements TexturedMesh, TintOw
 
 	@Override
 	public String toString() {
-		return "TimelineMesh [txt=" + this.txt + ", color=" + this.color + ", defaultYDepth=" + this.defaultYDepth + ", name=" + this.name
-				+ ", vao=" + this.vao + ", vbo=" + this.vbo + ", material=" + this.material + ", vertices=" + this.vertices + ", indices="
-				+ this.indices + ", attribs=" + Arrays.toString(this.attribs) + ", vertexCount=" + this.vertexCount + ", indicesCount="
-				+ this.indicesCount + ", boundingBox=" + this.boundingBox + "]";
+		return "TimelineMesh@" + System.identityHashCode(this) + " [color=" + this.color + ", txt=" + this.txt + ", defaultYDepth="
+				+ this.defaultYDepth + ", name=" + this.name + ", vao=" + this.vao + ", vbo=" + this.vbo + ", material=" + this.material
+				+ ", vertices=" + this.vertices + ", indices=" + this.indices + ", attribs=" + this.attribs + ", vertexCount="
+				+ this.vertexCount + ", indicesCount=" + this.indicesCount + ", boundingBox=" + this.boundingBox + "]";
 	}
 
 }

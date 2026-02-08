@@ -1,7 +1,5 @@
 package lu.kbra.plant_game.engine.mesh;
 
-import java.util.Arrays;
-
 import org.joml.Vector3f;
 
 import lu.kbra.plant_game.engine.entity.impl.OffsetOwner;
@@ -15,13 +13,8 @@ public class OffsetLoadedMesh extends LoadedMesh implements OffsetOwner {
 
 	private Vector3f offset;
 
-	public OffsetLoadedMesh(
-			final String name,
-			final Material material,
-			final Vector3f offset,
-			final Vec3fAttribArray vertices,
-			final UIntAttribArray indices,
-			final AttribArray... attribs) {
+	public OffsetLoadedMesh(final String name, final Material material, final Vector3f offset, final Vec3fAttribArray vertices,
+			final UIntAttribArray indices, final AttribArray... attribs) {
 		super(name, material, vertices, indices, attribs);
 		this.offset = offset;
 	}
@@ -38,9 +31,10 @@ public class OffsetLoadedMesh extends LoadedMesh implements OffsetOwner {
 
 	@Override
 	public String toString() {
-		return "OffsetMesh [offset=" + this.offset + ", name=" + this.name + ", vao=" + this.vao + ", vbo=" + this.vbo + ", material="
-				+ this.material + ", vertices=" + this.vertices + ", indices=" + this.indices + ", attribs=" + Arrays.toString(this.attribs)
-				+ ", vertexCount=" + this.vertexCount + ", indicesCount=" + this.indicesCount + ", isValid()=" + this.isValid() + "]";
+		return "OffsetLoadedMesh@" + System.identityHashCode(this) + " [offset=" + this.offset + ", name=" + this.name + ", vao=" + this.vao
+				+ ", vbo=" + this.vbo + ", material=" + this.material + ", vertices=" + this.vertices + ", indices=" + this.indices
+				+ ", attribs=" + this.attribs + ", vertexCount=" + this.vertexCount + ", indicesCount=" + this.indicesCount
+				+ ", boundingBox=" + this.boundingBox + "]";
 	}
 
 }

@@ -37,4 +37,10 @@ public class MeshUIObject extends UIObject implements MeshOwner {
 		return this.bounds;
 	}
 
+	@Override
+	public String toString() {
+		return "MeshUIObject@" + System.identityHashCode(this) + " [bounds=" + this.bounds + ", mesh=" + this.mesh + ", transform="
+				+ this.transform + ", active=" + this.active + ", name=" + this.name + "]";
+	}
+
 }

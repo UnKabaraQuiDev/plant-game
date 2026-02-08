@@ -1,7 +1,5 @@
 package lu.kbra.plant_game.engine.mesh;
 
-import java.util.Arrays;
-
 import org.joml.Vector3f;
 
 import lu.kbra.plant_game.engine.loader.AnimatedMeshLoader.AnimationData;
@@ -16,15 +14,8 @@ public class AnimatedTexturedLoadedMesh extends OffsetLoadedMesh implements Text
 	protected SingleTexture texture;
 	protected AnimationData animation;
 
-	public AnimatedTexturedLoadedMesh(
-			String name,
-			Material mat,
-			Vector3f origin,
-			SingleTexture texture,
-			AnimationData data,
-			Vec3fAttribArray vertices,
-			UIntAttribArray indices,
-			AttribArray... attribs) {
+	public AnimatedTexturedLoadedMesh(final String name, final Material mat, final Vector3f origin, final SingleTexture texture, final AnimationData data,
+			final Vec3fAttribArray vertices, final UIntAttribArray indices, final AttribArray... attribs) {
 		super(name, mat, origin, vertices, indices, attribs);
 		this.texture = texture;
 		this.animation = data;
@@ -32,30 +23,30 @@ public class AnimatedTexturedLoadedMesh extends OffsetLoadedMesh implements Text
 
 	@Override
 	public AnimationData getAnimation() {
-		return animation;
+		return this.animation;
 	}
 
 	@Override
-	public void setAnimation(AnimationData a) {
+	public void setAnimation(final AnimationData a) {
 		this.animation = a;
 	}
 
 	@Override
 	public SingleTexture getTexture() {
-		return texture;
+		return this.texture;
 	}
 
 	@Override
-	public void setTexture(SingleTexture texture) {
+	public void setTexture(final SingleTexture texture) {
 		this.texture = texture;
 	}
 
 	@Override
 	public String toString() {
-		return "AnimatedTexturedLoadedMesh [texture=" + texture + ", animation=" + animation + ", name=" + name + ", vao=" + vao + ", vbo="
-				+ vbo + ", material=" + material + ", vertices=" + vertices + ", indices=" + indices + ", attribs="
-				+ Arrays.toString(attribs) + ", vertexCount=" + vertexCount + ", indicesCount=" + indicesCount + ", isValid()=" + isValid()
-				+ "]";
+		return "AnimatedTexturedLoadedMesh@" + System.identityHashCode(this) + " [texture=" + this.texture + ", animation=" + this.animation
+				+ ", name=" + this.name + ", vao=" + this.vao + ", vbo=" + this.vbo + ", material=" + this.material + ", vertices="
+				+ this.vertices + ", indices=" + this.indices + ", attribs=" + this.attribs + ", vertexCount=" + this.vertexCount
+				+ ", indicesCount=" + this.indicesCount + ", boundingBox=" + this.boundingBox + "]";
 	}
 
 }
