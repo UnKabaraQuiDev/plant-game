@@ -1138,6 +1138,7 @@ public class DeferredCompositor implements Cleanupable {
 		GL_W.glPolygonMode(mesh.getPolygonMode().getGlId(), mesh.getPolygonDrawMode().getGlId());
 
 		if (mesh.usesEBO()) {
+//			GL_W.glFrontFace(GL_W.GL_CW);
 			GL_W.glDrawElements(mesh.getBeginMode().getGlId(), mesh.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
 		} else {
 //			GL_W.glFrontFace(GL_W.GL_CW)

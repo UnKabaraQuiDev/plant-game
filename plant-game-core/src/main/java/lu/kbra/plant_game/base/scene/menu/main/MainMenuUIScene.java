@@ -1,14 +1,12 @@
 package lu.kbra.plant_game.base.scene.menu.main;
 
 import java.awt.geom.Path2D;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.joml.Quaternionf;
@@ -193,16 +191,16 @@ public class MainMenuUIScene extends UIScene {
 						arr.indices(),
 						BufferType.ELEMENT_ARRAY,
 						false);
-				System.err.println(Arrays.stream(arr.vertices()).map(c -> c.x + ", " + c.y + ", " + c.z).collect(Collectors.joining("\n")));
-				System.err.println(Arrays.stream(arr.indices()).mapToObj(Integer::toString).collect(Collectors.joining("\n")));
+//				System.err.println(Arrays.stream(arr.vertices()).map(c -> c.x + ", " + c.y + ", " + c.z).collect(Collectors.joining("\n")));
+//				System.err.println(Arrays.stream(arr.indices()).mapToObj(Integer::toString).collect(Collectors.joining("\n")));
 				return new LoadedMesh("meshTest", null, pos, ind);
 			}).then(workers, (Consumer<Mesh>) m -> {
-				System.err.println(m);
+//				System.err.println(m);
 				TintedMeshUIObject go = new TintedMeshUIObject("meshTestObject", m);
-				go.setTransform(new Transform3D(new Vector3f(), new Quaternionf().rotateXYZ(0.1f, 0.2f, 0.3f), new Vector3f(0.6f)));
+				go.setTransform(new Transform3D(new Vector3f(0, -0.1f, 0), new Quaternionf().rotateXYZ(0.1f, 0.2f, 0.3f), new Vector3f(1)));
 				go.setColorMaterial(ColorMaterial.GREEN);
-				this.mainMenuGroup.add(go);
-				System.err.println(go);
+				this.playMenuGroup.add(go);
+//				System.err.println(go);
 			}).push();
 
 //			new TaskFuture<>(workers, (Supplier<ReadOnlyPair<Vector3f[], int[]>>) () -> {

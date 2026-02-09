@@ -87,12 +87,12 @@ public final class CubicCurve2DTransformer {
 
 		int idx = 0;
 		for (int i = 0; i < resolution; i++) {
-			int base = i * 2;
+			final int base = i * 2;
 
-			int l0 = base;
-			int r0 = base + 1;
-			int l1 = base + 2;
-			int r1 = base + 3;
+			final int l0 = base;
+			final int r0 = base + 1;
+			final int l1 = base + 2;
+			final int r1 = base + 3;
 
 			// triangle 1
 			indices[idx++] = l0;
