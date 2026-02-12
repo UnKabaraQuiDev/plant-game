@@ -37,8 +37,9 @@ public class AnchoredProgrammaticTextUIObject extends ProgrammaticTextUIObject i
 
 	@Override
 	public String toString() {
-		return "AnchoredProgrammaticTextUIObject [objectAnchor=" + this.objectAnchor + ", targetAnchor=" + this.targetAnchor + ", key="
-				+ this.key + ", transform=" + this.transform + ", active=" + this.active + ", name=" + this.name + "]";
+		return "AnchoredProgrammaticTextUIObject@" + System.identityHashCode(this) + " [objectAnchor=" + this.objectAnchor
+				+ ", targetAnchor=" + this.targetAnchor + ", transform=" + this.transform + ", active=" + this.active + ", name="
+				+ this.name + "]";
 	}
 
 }

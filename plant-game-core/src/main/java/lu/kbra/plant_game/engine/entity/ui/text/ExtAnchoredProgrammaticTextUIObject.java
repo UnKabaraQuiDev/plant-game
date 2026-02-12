@@ -33,9 +33,9 @@ public class ExtAnchoredProgrammaticTextUIObject extends AnchoredProgrammaticTex
 
 	@Override
 	public String toString() {
-		return "ExtAnchoredProgrammaticTextUIObject [target=" + this.target + ", objectAnchor=" + this.objectAnchor + ", targetAnchor="
-				+ this.targetAnchor + ", key=" + this.key + ", transform=" + this.transform + ", active=" + this.active + ", name="
-				+ this.name + "]";
+		return "ExtAnchoredProgrammaticTextUIObject@" + System.identityHashCode(this) + " [target=" + this.target + ", objectAnchor="
+				+ this.objectAnchor + ", targetAnchor=" + this.targetAnchor + ", transform=" + this.transform + ", active=" + this.active
+				+ ", name=" + this.name + "]";
 	}
 
 }

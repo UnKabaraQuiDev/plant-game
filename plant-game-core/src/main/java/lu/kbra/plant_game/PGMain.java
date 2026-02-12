@@ -1,10 +1,12 @@
 package lu.kbra.plant_game;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Properties;
+
+import com.codedisaster.steamworks.SteamAPI;
+import com.codedisaster.steamworks.SteamException;
 
 import lu.kbra.pclib.PCUtils;
 import lu.kbra.pclib.logger.GlobalLogger;
@@ -14,6 +16,10 @@ import lu.kbra.standalone.gameengine.impl.GameLogic;
 
 public class PGMain {
 
+	public static final String SKIP_STEAM_PROPERTY = PGMain.class.getSimpleName() + ".skip_steam";
+	public static final boolean SKIP_STEAM = Boolean.getBoolean(SKIP_STEAM_PROPERTY);
+
+	public static boolean STEAM_LAUCHED = false;
 	public static File APP_DIR;
 
 	public static File getAppDataDir(final String appName) {
@@ -44,20 +50,41 @@ public class PGMain {
 		return dir;
 	}
 
-	public static void main(final String[] args) throws FileNotFoundException, IOException {
-		APP_DIR = getAppDataDir("satisplantory");
-
+	public static void main(final String[] args) throws IOException, SteamException {
 		final Properties props = new Properties();
 		props.load(new StringReader(PCUtils.readStringSource("classpath:/config/main.properties")));
 
+		if (!SKIP_STEAM) {
+			SteamAPI.loadLibraries();
+
+			if (SteamAPI.restartAppIfNecessary(Integer.parseInt((String) props.get("steam.appId")))) {
+//				STEAM_LAUCHED = false;
+//				APP_DIR = getAppDataDir("satisplantory");
+				System.err.println("Not started in steam app, exitting.");
+				return;
+			}
+			STEAM_LAUCHED = true;
+			APP_DIR = new File("./data/");
+			if (!SteamAPI.init()) {
+				throw new IllegalStateException("Failed to initialize Steam API.");
+			}
+		}
+
 		GlobalLogger.INIT_DEFAULT_IF_NOT_INITIALIZED = false;
-		GlobalLogger.init(PCUtils.readStringSource(props.getProperty("logs.config.file")));
-		GlobalLogger.info("Removed " + PCUtils.deleteOldFiles(new File("./logs/"), 20) + " entries from the logs directory.");
+		GlobalLogger.init(PCUtils.readStringSource(props.getProperty("logs.config.file")).replace("%APP_DIR%", APP_DIR.getPath()));
+
+		GlobalLogger.info("App dir: " + APP_DIR.getAbsolutePath());
+		GlobalLogger.info("Removed " + PCUtils.deleteOldFiles(GlobalLogger.getLogger().getLogFile().getParentFile(), 20)
+				+ " entries from the logs directory.");
 
 		final GameLogic gameLogic = new PGLogic();
 
 		final GameEngine engine = new GameEngine("plant-game", gameLogic, new WindowOptions(props, "windowOptions"));
 		engine.start();
+
+		if (STEAM_LAUCHED) {
+			SteamAPI.shutdown();
+		}
 	}
 
 }

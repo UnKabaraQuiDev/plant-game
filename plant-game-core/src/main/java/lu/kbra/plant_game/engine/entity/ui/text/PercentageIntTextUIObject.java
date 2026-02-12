@@ -21,9 +21,10 @@ public class PercentageIntTextUIObject extends IntegerTextUIObject {
 
 	@Override
 	public String toString() {
-		return "PercentageIntTextUIObject [key=" + this.key + ", value=" + this.value + ", forceSign=" + this.forceSign + ", padding="
-				+ this.padding + ", paddingZero=" + this.paddingZero + ", paddingLength=" + this.paddingLength + ", colorMaterial="
-				+ this.colorMaterial + ", transform=" + this.transform + ", active=" + this.active + ", name=" + this.name + "]";
+		return "PercentageIntTextUIObject@" + System.identityHashCode(this) + " [value=" + this.value + ", forceSign=" + this.forceSign
+				+ ", padding=" + this.padding + ", paddingZero=" + this.paddingZero + ", paddingLength=" + this.paddingLength
+				+ ", colorMaterial=" + this.colorMaterial + ", transform=" + this.transform + ", active=" + this.active + ", name="
+				+ this.name + "]";
 	}
 
 }

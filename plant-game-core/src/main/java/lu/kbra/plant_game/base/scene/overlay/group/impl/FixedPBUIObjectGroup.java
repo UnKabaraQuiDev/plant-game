@@ -34,7 +34,7 @@ public class FixedPBUIObjectGroup extends FixedBoundsUIObjectGroup {
 		}
 
 		final Rectangle2D parentBounds = opo.get().getBounds().getBounds2D();
-		super.recomputeBounds();
+//		super.recomputeBounds();
 //		final Rectangle2D compBounds = super.computedBounds.getBounds2D();
 
 		final float outerMarginX = (float) // (this.parallelStream().mapToDouble(marginSumX).sum() // + paddingSumX.applyAsDouble(this)
@@ -50,7 +50,7 @@ public class FixedPBUIObjectGroup extends FixedBoundsUIObjectGroup {
 		case HORIZONTAL -> new Rectangle2D.Float((float) parentBounds.getX() + outerMarginX,
 				-this.size / 2 + outerMarginZ,
 				(float) parentBounds.getWidth() - 2 * outerMarginX,
-				this.size + 2 * outerMarginZ);
+				this.size - 2 * outerMarginZ);
 		});
 
 		return true;

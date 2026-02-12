@@ -10,7 +10,6 @@ import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
 @BufferSize(10)
 public class IntegerTextUIObject extends ProgrammaticTextUIObject implements NeedsPostConstruct {
 
-	protected String key;
 	protected int value;
 	protected boolean forceSign = false;
 	protected boolean padding = false;
@@ -88,16 +87,6 @@ public class IntegerTextUIObject extends ProgrammaticTextUIObject implements Nee
 		this.colorMaterial = colorMaterial;
 	}
 
-	@Override
-	public String getKey() {
-		return this.key;
-	}
-
-	@Override
-	public void setKey(final String key) {
-		this.key = key;
-	}
-
 	public boolean isPaddingZero() {
 		return this.paddingZero;
 	}
@@ -108,9 +97,10 @@ public class IntegerTextUIObject extends ProgrammaticTextUIObject implements Nee
 
 	@Override
 	public String toString() {
-		return "IntegerTextUIObject [key=" + this.key + ", value=" + this.value + ", forceSign=" + this.forceSign + ", padding="
-				+ this.padding + ", paddingZero=" + this.paddingZero + ", paddingLength=" + this.paddingLength + ", colorMaterial="
-				+ this.colorMaterial + ", transform=" + this.transform + ", active=" + this.active + ", name=" + this.name + "]";
+		return "IntegerTextUIObject@" + System.identityHashCode(this) + " [value=" + this.value + ", forceSign=" + this.forceSign
+				+ ", padding=" + this.padding + ", paddingZero=" + this.paddingZero + ", paddingLength=" + this.paddingLength
+				+ ", colorMaterial=" + this.colorMaterial + ", transform=" + this.transform + ", active=" + this.active + ", name="
+				+ this.name + "]";
 	}
 
 }

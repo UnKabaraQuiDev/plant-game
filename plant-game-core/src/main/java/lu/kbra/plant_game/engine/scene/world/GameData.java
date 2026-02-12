@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lu.kbra.plant_game.BuildingDefinition;
 import lu.kbra.plant_game.base.data.DefaultResourceType;
 import lu.kbra.plant_game.engine.scene.world.data.LevelData;
@@ -11,8 +13,11 @@ import lu.kbra.plant_game.engine.scene.world.data.resource.ResourceType;
 
 public class GameData {
 
+	@JsonIgnore
 	protected LevelData levelData;
 	protected float currentWaterLevel;
+	protected byte progress = 0;
+	protected LevelState levelState = LevelState.NOT_STARTED;
 	protected Map<ResourceType, Integer> resources = Collections.synchronizedMap(new HashMap<>());
 
 	public GameData(final Map<ResourceType, Integer> resources) {
@@ -46,11 +51,34 @@ public class GameData {
 		return this.currentWaterLevel;
 	}
 
+	public byte getProgress() {
+		return this.progress;
+	}
+
+	public void setProgress(final byte progress) {
+		this.progress = progress;
+	}
+
+	public LevelState getLevelState() {
+		return this.levelState;
+	}
+
+	public void setLevelState(final LevelState levelState) {
+		this.levelState = levelState;
+	}
+
 	public static GameData fromBlankLevel(final LevelData levelData) {
 		final GameData gd = new GameData(levelData);
 		gd.setCurrentWaterLevel(levelData.getWorld().getWaterLevel().getMin());
 		levelData.getGame().getStartResources().forEach((k, v) -> gd.getResources().put(k, v));
 		return gd;
+	}
+
+	@Override
+	public String toString() {
+		return "GameData@" + System.identityHashCode(this) + " [levelData=" + this.levelData + ", currentWaterLevel="
+				+ this.currentWaterLevel + ", progress=" + this.progress + ", levelState=" + this.levelState + ", resources="
+				+ this.resources + "]";
 	}
 
 }

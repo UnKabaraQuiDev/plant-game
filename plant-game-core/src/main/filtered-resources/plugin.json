@@ -6,7 +6,8 @@
 	"mainClass": "BaseMain",
 	"registries": [
 		"reg.BaseBuildingRegistry",
-		"reg.BaseResourceRegistry"
+		"reg.BaseResourceRegistry"		,
+		"reg.BaseLevelRegistry"
 	],
 	"dependencies": {}
 }

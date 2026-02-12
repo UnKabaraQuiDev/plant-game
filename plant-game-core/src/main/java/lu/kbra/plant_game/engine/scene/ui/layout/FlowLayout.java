@@ -16,6 +16,7 @@ public class FlowLayout implements Layout, BoundsOwnerParentAware {
 	protected boolean center = true;
 	protected float gap = 0.0f;
 	protected boolean fixed = false;
+	protected Anchor2D fixedAnchor = Anchor2D.LEADING;
 
 	protected ParentAwareComponent parent;
 
@@ -24,10 +25,19 @@ public class FlowLayout implements Layout, BoundsOwnerParentAware {
 		this.gap = gap;
 	}
 
+	@Deprecated
 	public FlowLayout(final boolean vertical, final float gap, final boolean fixed) {
 		this.vertical = vertical;
 		this.gap = gap;
 		this.fixed = fixed;
+		this.center = false;
+	}
+
+	public FlowLayout(final boolean vertical, final float gap, final Anchor2D fixedAnchor) {
+		this.vertical = vertical;
+		this.gap = gap;
+		this.fixed = true;
+		this.fixedAnchor = fixedAnchor;
 		this.center = false;
 	}
 
@@ -56,12 +66,24 @@ public class FlowLayout implements Layout, BoundsOwnerParentAware {
 				return;
 			}
 			final Rectangle2D superBounds = obo.get().getBounds().getBounds2D();
-			offsetX = (float) superBounds.getMinX();
-			offsetY = (float) superBounds.getMinY();
+			switch (this.fixedAnchor) {
+			case LEADING -> {
+				offsetX = (float) superBounds.getMinX();
+				offsetY = (float) superBounds.getMinY();
+			}
+			case CENTER -> {
+				offsetX = (float) superBounds.getCenterX();
+				offsetY = (float) superBounds.getCenterY();
+			}
+			case TRAILING -> {
+				offsetX = (float) superBounds.getMaxX();
+				offsetY = (float) superBounds.getMaxY();
+			}
+			}
 		}
 
 		for (final UIObject child : children) {
-			if (!child.hasTransform()) {
+			if (!child.hasTransform() || child instanceof NoLayout) {
 				continue;
 			}
 
@@ -72,6 +94,25 @@ public class FlowLayout implements Layout, BoundsOwnerParentAware {
 					child.getTransform().translationSet(offsetX, 0, offsetY - (float) bounds.getMinY()).updateMatrix();
 				} else {
 					child.getTransform().translationSet(offsetX - (float) bounds.getMinX(), 0, offsetY).updateMatrix();
+				}
+			} else if (this.fixed) {
+				switch (this.fixedAnchor) {
+				case LEADING -> {
+					child.getTransform()
+							.translationSet(offsetX - (float) bounds.getMinX(), 0, offsetY - (float) bounds.getMinY())
+							.updateMatrix();
+
+				}
+				case CENTER -> {
+					child.getTransform()
+							.translationSet(offsetX - (float) bounds.getCenterX(), 0, offsetY - (float) bounds.getCenterY())
+							.updateMatrix();
+				}
+				case TRAILING -> {
+					child.getTransform()
+							.translationSet(offsetX - (float) bounds.getMaxX(), 0, offsetY - (float) bounds.getMaxY())
+							.updateMatrix();
+				}
 				}
 			} else {
 				child.getTransform()

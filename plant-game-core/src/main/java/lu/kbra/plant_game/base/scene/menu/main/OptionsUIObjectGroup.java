@@ -67,7 +67,7 @@ public class OptionsUIObjectGroup extends AnchoredFixedPBUIObjectGroup
 			return;
 		}
 		final Rectangle2D contentBounds = this.getContent().getLocalTransformedBounds().getBounds2D();
-		final Rectangle2D parentBounds = obo.get().getBounds().getBounds2D();
+		final Rectangle2D parentBounds = this.getBounds().getBounds2D();
 		if (parentBounds.getWidth() > contentBounds.getWidth()) { // should probably include margin in calculations
 			switch (this.contentAnchor) {
 			case LEADING -> this.scrollYRange.set(parentBounds.getMinY() - contentBounds.getMinY() + this.getMargin(),

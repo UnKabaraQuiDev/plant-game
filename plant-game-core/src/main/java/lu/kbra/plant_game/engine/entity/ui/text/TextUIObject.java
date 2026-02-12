@@ -46,6 +46,7 @@ public class TextUIObject extends UIObject implements TextEmitterOwner, Transpar
 
 	/** in gl thread only */
 	public void updateText() {
+		assert Thread.currentThread() == PGLogic.INSTANCE.getGameEngine().getRenderThread();
 		this.getTextEmitter().updateText();
 	}
 

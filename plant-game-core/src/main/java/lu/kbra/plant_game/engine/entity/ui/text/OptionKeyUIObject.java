@@ -24,6 +24,8 @@ public class OptionKeyUIObject extends ProgrammaticGrowOnHoverTextUIObject
 		IDLE, WAITING_RELEASE, WAITING_INPUT;
 	}
 
+	protected String key;
+
 	private State awaitInput = State.IDLE;
 	private boolean focused = false;
 
@@ -95,13 +97,13 @@ public class OptionKeyUIObject extends ProgrammaticGrowOnHoverTextUIObject
 
 	public void setKeyValue(String value) {
 		final int length = this.getTextEmitter().getBufferLength();
-		final String loc = LocalizationService.get("key." + super.getKey());
+		final String loc = LocalizationService.get("key." + this.getKey());
 		value = "[" + (value == null ? " " : value) + "]";
 		super.setText(loc + " ".repeat(Math.max(length - loc.length() - value.length(), 0)) + value);
 	}
 
 	public KeyOption getKeyOption() {
-		return DefaultKeyOption.valueOf(super.key.toUpperCase());
+		return DefaultKeyOption.valueOf(this.key.toUpperCase());
 	}
 
 	@Override
@@ -119,15 +121,25 @@ public class OptionKeyUIObject extends ProgrammaticGrowOnHoverTextUIObject
 		return this.focused;
 	}
 
+	public String getKey() {
+		return this.key;
+	}
+
+	public void setKey(final String key) {
+		this.key = key;
+	}
+
 	@Override
 	public int getIndex() {
-		return DefaultKeyOption.valueOf(super.key.toUpperCase()).ordinal();
+		// TODO: Replace with KeyRegistry
+		return DefaultKeyOption.valueOf(this.getKey().toUpperCase()).ordinal();
 	}
 
 	@Override
 	public String toString() {
-		return "OptionKeyUIObject [awaitInput=" + this.awaitInput + ", focused=" + this.focused + ", key=" + this.key + ", transform="
-				+ this.transform + ", active=" + this.active + ", name=" + this.name + "]";
+		return "OptionKeyUIObject@" + System.identityHashCode(this) + " [key=" + this.key + ", awaitInput=" + this.awaitInput + ", focused="
+				+ this.focused + ", dir=" + this.dir + ", progress=" + this.progress + ", transform=" + this.transform + ", active="
+				+ this.active + ", name=" + this.name + "]";
 	}
 
 }

@@ -42,7 +42,7 @@ import lu.kbra.standalone.gameengine.utils.gl.consts.TextureWrap;
 
 public class UIObjectFactory {
 
-	public static final Vector2f DEFAULT_CHAR_SIZE = new Vector2f(0.5f);
+	public static final Vector2fc DEFAULT_CHAR_SIZE = new Vector2f(0.5f);
 	public static final int DEFAULT_BUFFER_SIZE = 12;
 	public static final TextAlignment DEFAULT_TEXT_ALIGNMENT = TextAlignment.LEFT;
 
@@ -74,19 +74,17 @@ public class UIObjectFactory {
 			final Optional<String> key,
 			final Supplier<AttribArray>... attribs) {
 
-		return StaticTextLoader
-				.getFuture(this.cache,
-						name.orElse(ProgrammaticUIObject.class.isAssignableFrom(clazz) ? key.orElse(clazz.getSimpleName())
-								: clazz.getSimpleName()),
-						key.orElse(DATA_PATH.get(clazz)),
-						charSize.orElse(DEFAULT_CHAR_SIZE),
-						textAlignment.orElse(DEFAULT_TEXT_ALIGNMENT),
-						bufferSize.isEmpty()
-								? (BUFFER_SIZE.containsKey(clazz) ? OptionalInt.of(BUFFER_SIZE.get(clazz)) : OptionalInt.empty())
-								: bufferSize,
-						attribs,
-						this.loader,
-						this.render)
+		return StaticTextLoader.getFuture(this.cache,
+				name.orElse(ProgrammaticUIObject.class.isAssignableFrom(clazz) ? key.orElse(clazz.getSimpleName() + "#" + System.nanoTime())
+						: clazz.getSimpleName()),
+				key.orElse(DATA_PATH.get(clazz)),
+				charSize.orElse(DEFAULT_CHAR_SIZE),
+				textAlignment.orElse(DEFAULT_TEXT_ALIGNMENT),
+				bufferSize.isEmpty() ? (BUFFER_SIZE.containsKey(clazz) ? OptionalInt.of(BUFFER_SIZE.get(clazz)) : OptionalInt.empty())
+						: bufferSize,
+				attribs,
+				this.loader,
+				this.render)
 				.then(this.loader, (Function<TextEmitter, List<Object>>) Arrays::asList)
 				.then(new UOCreatingTaskFuture(this.loader, clazz));
 	}

@@ -3,25 +3,28 @@ package lu.kbra.plant_game.engine.entity.ui.btn;
 import org.joml.Vector4fc;
 
 import lu.kbra.pclib.PCUtils;
+import lu.kbra.plant_game.base.scene.menu.main.MainMenuUIScene;
 import lu.kbra.plant_game.engine.entity.impl.TintOwner;
 import lu.kbra.plant_game.engine.entity.ui.TexturedQuadMeshUIObject;
+import lu.kbra.plant_game.engine.entity.ui.data.HoverState;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsClick;
+import lu.kbra.plant_game.engine.entity.ui.impl.NeedsHover;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsUpdate;
+import lu.kbra.plant_game.engine.entity.ui.impl.UISceneParentAware;
 import lu.kbra.plant_game.engine.mesh.TexturedQuadMesh;
-import lu.kbra.plant_game.engine.scene.world.LevelState;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.plant_game.engine.util.annotation.TextureOption;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
+import lu.kbra.plant_game.plugin.registry.LevelRegistry.LevelDefinition;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextureFilter;
 
 @DataPath("image:classpath:/icons/star-32.png")
 @TextureOption(textureFilter = TextureFilter.NEAREST)
 public class LevelButtonUIObject extends TexturedQuadMeshUIObject
-		implements NeedsClick, NeedsUpdate, TintOwner, Comparable<LevelButtonUIObject> {
+		implements NeedsClick, NeedsHover, NeedsUpdate, TintOwner, Comparable<LevelButtonUIObject>, UISceneParentAware {
 
-	private LevelState state = LevelState.NOT_STARTED;
-	private String levelId;
-	private float angularSpeed = PCUtils.randomFloatRange(0.01f, 0.05f) / 50;
+	private LevelDefinition levelDefinition;
+	private float angularSpeed = PCUtils.randomFloatRange(-5, 5) / 200;
 
 	public LevelButtonUIObject(final String str, final TexturedQuadMesh mesh) {
 		super(str, mesh);
@@ -29,6 +32,17 @@ public class LevelButtonUIObject extends TexturedQuadMeshUIObject
 
 	@Override
 	public void click(final WindowInputHandler input) {
+	}
+
+	@Override
+	public boolean hover(final WindowInputHandler input, final HoverState hoverState) {
+		if (hoverState == HoverState.ENTER) {
+			this.getUISceneParent()
+					.filter(MainMenuUIScene.class::isInstance)
+					.map(MainMenuUIScene.class::cast)
+					.ifPresent(scene -> scene.getPlayInfoGroup().accept(this.levelDefinition));
+		}
+		return true;
 	}
 
 	@Override
@@ -40,22 +54,20 @@ public class LevelButtonUIObject extends TexturedQuadMeshUIObject
 		this.getTransform().updateMatrix();
 	}
 
+//	@Override
+//	public Shape getTransformedBounds() {
+//		return TransformedBoundsOwner.getTransformedBounds(this.getBounds(),
+//				new Matrix4f().translation(this.getTransform().getTranslation()));
+//	}
+
 	@Override
 	public Vector4fc getTint() {
-		return this.state.getColor();
+		return this.levelDefinition.getLevelState().getColor();
 	}
 
 	@Override
 	public void setTint(final Vector4fc tint) {
 		throw new UnsupportedOperationException();
-	}
-
-	public LevelState getState() {
-		return this.state;
-	}
-
-	public void setState(final LevelState state) {
-		this.state = state;
 	}
 
 	public float getAngularSpeed() {
@@ -66,27 +78,23 @@ public class LevelButtonUIObject extends TexturedQuadMeshUIObject
 		this.angularSpeed = angularSpeed;
 	}
 
-	public void setLevelId(final String levelId) {
-		this.levelId = levelId;
+	public void setLevelDefinition(final LevelDefinition levelDefinition) {
+		this.levelDefinition = levelDefinition;
+	}
+
+	public LevelDefinition getLevelDefinition() {
+		return this.levelDefinition;
 	}
 
 	@Override
 	public int compareTo(final LevelButtonUIObject o) {
-		if (this == o) {
-			return 0;
-		}
-		return this.levelId.compareTo(o.levelId);
-	}
-
-	public String getLevelId() {
-		return this.levelId;
+		return this.levelDefinition.compareTo(o.levelDefinition);
 	}
 
 	@Override
 	public String toString() {
-		return "LevelButtonUIObject [state=" + this.state + ", levelId=" + this.levelId + ", angularSpeed=" + this.angularSpeed
-				+ ", bounds=" + this.bounds + ", mesh=" + this.mesh + ", transform=" + this.transform + ", active=" + this.active
-				+ ", name=" + this.name + "]";
+		return "LevelButtonUIObject@" + System.identityHashCode(this) + " [levelDefinition=" + this.levelDefinition + ", angularSpeed="
+				+ this.angularSpeed + "]";
 	}
 
 }

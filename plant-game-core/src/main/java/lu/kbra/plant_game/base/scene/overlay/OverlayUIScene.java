@@ -135,7 +135,7 @@ public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner
 				Anchor.TOP_RIGHT,
 				0.01f,
 				0.5f);
-		this.progressBar.init(workers, renderDispatcher, FlatQuadUIObject.class, FlatQuadUIObject.class).then(pb -> {
+		this.progressBar.init(FlatQuadUIObject.class, FlatQuadUIObject.class).then(pb -> {
 			this.progressGroup = new ExtAnchoredIntegerStatLine("level-progress-counter");
 			this.progressGroup
 					.init(workers,

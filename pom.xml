@@ -23,8 +23,9 @@
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 		<plugins.dir>${project.basedir}/plugins</plugins.dir>
-		<pclib.version>1.0.1</pclib.version>
+		<pclib.version>1.0.2-SNAPSHOT</pclib.version>
 		<gameengine.version>0.1-SNAPSHOT</gameengine.version>
+		<steam.appId>4424580</steam.appId>
 	</properties>
 
 	<repositories>
@@ -62,6 +63,7 @@
 				<artifactId>gameengine</artifactId>
 				<version>${gameengine.version}</version>
 			</dependency>
+
 			<dependency>
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
@@ -84,15 +86,6 @@
 	</dependencyManagement>
 
 	<build>
-		<resources>
-			<resource>
-				<directory>src/main/filtered-resources</directory>
-				<filtering>true</filtering>
-			</resource>
-			<resource>
-				<directory>src/main/resources</directory>
-			</resource>
-		</resources>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

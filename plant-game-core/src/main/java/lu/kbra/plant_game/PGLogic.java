@@ -5,9 +5,9 @@ import java.util.Locale;
 
 import org.lwjgl.glfw.GLFW;
 
+import com.codedisaster.steamworks.SteamAPI;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import lu.kbra.pclib.PCUtils;
 import lu.kbra.plant_game.base.scene.menu.main.MainMenuUIScene;
 import lu.kbra.plant_game.base.scene.overlay.OverlayUIScene;
 import lu.kbra.plant_game.engine.UpdateFrameState;
@@ -25,6 +25,7 @@ import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.plant_game.engine.scene.world.data.LevelData;
 import lu.kbra.plant_game.engine.window.input.MappingInputHandler;
 import lu.kbra.plant_game.plugin.PluginManager;
+import lu.kbra.plant_game.plugin.registry.LevelRegistry;
 import lu.kbra.standalone.gameengine.impl.GameLogic;
 import lu.kbra.standalone.gameengine.impl.future.WorkerDispatcher;
 import lu.kbra.standalone.gameengine.utils.gl.consts.Consts;
@@ -83,7 +84,9 @@ public class PGLogic extends GameLogic {
 		GameObjectFactory.INSTANCE = new GameObjectFactory(this.worldScene.getCache(), this.WORKERS, this.RENDER_DISPATCHER);
 		LocalizationService.INSTANCE = new LocalizationService(Locale.US);
 
-		final LevelData levelData = OBJECT_MAPPER.readValue(PCUtils.readStringSource("classpath:/levels/level0.json"), LevelData.class);
+		final LevelData levelData = LevelRegistry.LEVELS.get(0).getLevelData();
+		// OBJECT_MAPPER.readValue(PCUtils.readStringSource("classpath:/levels/level0.json"),
+		// LevelData.class);
 		this.gameData = GameData.fromBlankLevel(levelData);
 
 		this.uiScene.init(this.WORKERS, this.RENDER_DISPATCHER);
@@ -133,6 +136,13 @@ public class PGLogic extends GameLogic {
 		this.worldScene.render(dTime);
 
 		this.compositor.render(this.engine, this.worldScene, this.uiScene);
+	}
+
+	@Override
+	public void main() {
+		if (PGMain.STEAM_LAUCHED && SteamAPI.isSteamRunning()) {
+			SteamAPI.runCallbacks();
+		}
 	}
 
 	@Override

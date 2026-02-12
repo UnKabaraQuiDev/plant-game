@@ -1,13 +1,9 @@
 package lu.kbra.plant_game.base.scene.menu.main;
 
-import java.awt.geom.Path2D;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.IntStream;
 
 import org.joml.Quaternionf;
 import org.joml.Vector2f;
@@ -17,9 +13,9 @@ import org.joml.Vector3fc;
 
 import lu.kbra.pclib.PCUtils;
 import lu.kbra.pclib.concurrency.ListTriggerLatch;
+import lu.kbra.pclib.pointer.prim.IntPointer;
 import lu.kbra.plant_game.PGLogic;
 import lu.kbra.plant_game.base.data.DefaultKeyOption;
-import lu.kbra.plant_game.base.scene.menu.main.CubicCurve2DTransformer.GeneratedMeshData;
 import lu.kbra.plant_game.base.scene.overlay.group.impl.MarginAnchoredUIObjectGroup;
 import lu.kbra.plant_game.base.scene.overlay.group.impl.ParentUIObjectGroup;
 import lu.kbra.plant_game.engine.UpdateFrameState;
@@ -33,7 +29,6 @@ import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
 import lu.kbra.plant_game.engine.entity.ui.gradient.AnchoredGradientQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.group.OffsetUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.group.ScrollContainerUIObjectGroup;
-import lu.kbra.plant_game.engine.entity.ui.group.ScrollDrivenUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.group.UIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.icon.LargeLogoUIObject;
 import lu.kbra.plant_game.engine.entity.ui.layout.SpacerUIObject;
@@ -46,19 +41,11 @@ import lu.kbra.plant_game.engine.scene.ui.layout.AnchorLayout;
 import lu.kbra.plant_game.engine.scene.ui.layout.FlowLayout;
 import lu.kbra.plant_game.engine.scene.ui.layout.Layout;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
-import lu.kbra.plant_game.generated.ColorMaterial;
+import lu.kbra.plant_game.plugin.registry.LevelRegistry;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
-import lu.kbra.standalone.gameengine.cache.attrib.UIntAttribArray;
-import lu.kbra.standalone.gameengine.cache.attrib.Vec3fAttribArray;
-import lu.kbra.standalone.gameengine.geom.LoadedMesh;
-import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
-import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
 import lu.kbra.standalone.gameengine.impl.future.WorkerDispatcher;
 import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
-import lu.kbra.standalone.gameengine.utils.consts.Direction;
-import lu.kbra.standalone.gameengine.utils.geo.GeoPlane;
-import lu.kbra.standalone.gameengine.utils.gl.consts.BufferType;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextAlignment;
 import lu.kbra.standalone.gameengine.utils.interpolation.Interpolators;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
@@ -99,11 +86,12 @@ public class MainMenuUIScene extends UIScene {
 	protected OptionsUIObjectGroup optionsVerticalGroup = new OptionsUIObjectGroup(this.optionsMenuGroup);
 	protected UIObjectGroup optionsEntriesGroup = this.optionsVerticalGroup.getContent();
 
-	protected ScrollContainerUIObjectGroup playMenuGroup = new ScrollContainerUIObjectGroup("play",
-			this.restPositions[PLAY],
-			Direction.EAST,
-			0.00f);
-	protected ScrollDrivenUIObjectGroup playContentMenuGroup = this.playMenuGroup.getScrollContent();
+	protected ParentUIObjectGroup playMenuGroup = new ParentUIObjectGroup("play",
+			new AnchorLayout(),
+			new Transform3D(this.restPositions[PLAY]));
+	protected PlayUIObjectGroup playHorizontalGroup = new PlayUIObjectGroup(this.playMenuGroup);
+	protected UIObjectGroup playContentGroup = this.playHorizontalGroup.getContent();
+	protected PlayInfoUIObjectGroup playInfoGroup = new PlayInfoUIObjectGroup(this.playMenuGroup);
 
 	protected OffsetUIObjectGroup[] groups = new OffsetUIObjectGroup[] {
 			this.mainMenuGroup,
@@ -113,7 +101,8 @@ public class MainMenuUIScene extends UIScene {
 
 	protected Layout layout;
 
-//	protected CursorUIObject cursor;
+	final Optional<Vector2fc> SMALL_TEXT_CHAR_SIZE = Optional.of(new Vector2f(0.2f));
+	final Optional<TextAlignment> SMALL_TEXT_TEXT_ALIGNMENT = Optional.of(TextAlignment.TEXT_LEFT);
 
 	public MainMenuUIScene(final CacheManager parent) {
 		super("main-menu", parent);
@@ -136,101 +125,79 @@ public class MainMenuUIScene extends UIScene {
 
 	private void buildPlayMenu(final Dispatcher workers, final Dispatcher renderDispatcher) {
 
-		final int count = 5;
+		final int count = LevelRegistry.LEVELS.size();
 		final ListTriggerLatch<LevelButtonUIObject> btns = new ListTriggerLatch<>(count, list -> {
 			Collections.sort(list);
-			this.playContentMenuGroup.addAll(list);
+			this.playContentGroup.addAll(list);
+//			((LayoutOwner) this.playContentMenuGroup).doLayout();
 
-			new TaskFuture<>(workers, (Supplier<GeneratedMeshData>) () -> {
-				final Path2D.Float curve = new Path2D.Float();
-				curve.moveTo(list.get(0).getTransformedBounds().getBounds2D().getCenterX(),
-						list.get(0).getTransformedBounds().getBounds2D().getCenterY());
-				final float handleDist = 0.5f;
-				list.subList(1, list.size())
-						.forEach(c -> curve.curveTo(curve.getCurrentPoint().getX() + handleDist,
-								curve.getCurrentPoint().getY(),
-								c.getTransformedBounds().getBounds2D().getCenterX() - handleDist,
-								c.getTransformedBounds().getBounds2D().getCenterY(),
-								c.getTransformedBounds().getBounds2D().getCenterX(),
-								c.getTransformedBounds().getBounds2D().getCenterY()));
-
-				return Path2DTransformer.generateTriangleMesh(curve, 0.05f, 50, 0, GeoPlane.XZ);
-			}).then(renderDispatcher, (Function<GeneratedMeshData, Mesh>) arr -> {
-				final Vec3fAttribArray pos = new Vec3fAttribArray(Mesh.ATTRIB_VERTICES_NAME,
-						Mesh.ATTRIB_VERTICES_ID,
-						arr.vertices(),
-						BufferType.ARRAY,
-						false);
-				final UIntAttribArray ind = new UIntAttribArray(Mesh.ATTRIB_INDICES_NAME,
-						Mesh.ATTRIB_INDICES_ID,
-						arr.indices(),
-						BufferType.ELEMENT_ARRAY,
-						false);
-//				System.err.println(Arrays.stream(arr.vertices()).map(c -> c.x + ", " + c.y + ", " + c.z).collect(Collectors.joining("\n")));
-//				System.err.println(Arrays.stream(arr.indices()).mapToObj(Integer::toString).collect(Collectors.joining("\n")));
-				return new LoadedMesh("meshTest", null, pos, ind);
-			}).then(workers, (Consumer<Mesh>) m -> {
-//				System.err.println(m);
-				TintedMeshUIObject go = new TintedMeshUIObject("meshTestObject", m);
-				go.setTransform(new Transform3D(new Vector3f(0, -0.1f, 0), new Quaternionf().rotateXYZ(0.1f, 0.2f, 0.3f), new Vector3f(1)));
-				go.setColorMaterial(ColorMaterial.GREEN);
-				this.playMenuGroup.add(go);
-//				System.err.println(go);
-			}).push();
-
-//			new TaskFuture<>(workers, (Supplier<ReadOnlyPair<Vector3f[], int[]>>) () -> {
-//				final Vector3f[] pos = new Vector3f[12];
-//				for (int i = 0; i < list.size(); i++) {
-////					final Rectangle2D bounds = list.get(i).getTransformedBounds().getBounds2D();
-//					pos[i] = list.get(i).getTransform().getTranslation();
-//				}
-//				final int[] indices = new int[pos.length * 2 + 2];
-//				for (int i = 0; i < pos.length - 1; i++) {
-//					indices[i * 2 + 0] = i;
-//					indices[i * 2 + 1] = i + 1;
-//				}
+//			new TaskFuture<>(workers, (Supplier<GeneratedMeshData>) () -> {
+//				final Path2D.Float curve = new Path2D.Float();
+//				curve.moveTo(list.get(0).getBounds().getBounds2D().getCenterX(), list.get(0).getBounds().getBounds2D().getCenterY());
+//				final float handleDist = 0.5f;
+//				list.subList(1, list.size())
+//						.forEach(c -> curve.curveTo(curve.getCurrentPoint().getX() + handleDist,
+//								curve.getCurrentPoint().getY(),
+//								c.getBounds().getBounds2D().getCenterX() - handleDist,
+//								c.getBounds().getBounds2D().getCenterY(),
+//								c.getBounds().getBounds2D().getCenterX(),
+//								c.getBounds().getBounds2D().getCenterY()));
 //
-//				return Pairs.readOnly(pos, indices);
-//			}).then(renderDispatcher, (Function<ReadOnlyPair<Vector3f[], int[]>, TimelineMesh>) pair -> {
-//				final Vector3f[] pos = pair.getKey();
-//				final int[] indices = pair.getValue();
-//
-//				final TimelineMesh mesh = new TimelineMesh("timeline@" + System.identityHashCode(this),
-//						13,
-//						(SingleTexture) this.uiCache.getTexture(StaticFlatMeshLoader.TEXTURE_NAME),
-//						new Vec3fAttribArray(Mesh.ATTRIB_VERTICES_NAME, Mesh.ATTRIB_VERTICES_ID, pos),
-//						new UIntAttribArray(Mesh.ATTRIB_INDICES_NAME, Mesh.ATTRIB_INDICES_ID, indices, BufferType.ELEMENT_ARRAY));
-//				mesh.setLineWidth(100);
-//				mesh.setEffectiveLength(list.size() * 2 - 2);
-//				this.uiCache.addMesh(mesh);
-//				// TODO: replace this with a triangle-based mesh
-//
-//				return mesh;
-//			}).then(workers, (Consumer<TimelineMesh>) (final TimelineMesh mesh) -> {
-//				UIObjectFactory.createManual(MeshUIObject.class, mesh)
-//						.set(i -> i.setTransform(new Transform3D(new Vector3f(0, -0.1f, 0))))
-//						.add(this.playContentMenuGroup);
-//				this.playContentMenuGroup.getTransform()
-//						.getTranslation().z = (float) -this.playContentMenuGroup.getBounds().getBounds2D().getCenterY();
-//				this.playContentMenuGroup.getTransform().updateMatrix();
+//				return Path2DTransformer.generateTriangleMesh(curve, 0.05f, 50, 0, GeoPlane.XZ);
+//			}).then(renderDispatcher, (Function<GeneratedMeshData, Mesh>) arr -> {
+//				final Vec3fAttribArray pos = new Vec3fAttribArray(Mesh.ATTRIB_VERTICES_NAME,
+//						Mesh.ATTRIB_VERTICES_ID,
+//						arr.vertices(),
+//						BufferType.ARRAY,
+//						false);
+//				final UIntAttribArray ind = new UIntAttribArray(Mesh.ATTRIB_INDICES_NAME,
+//						Mesh.ATTRIB_INDICES_ID,
+//						arr.indices(),
+//						BufferType.ELEMENT_ARRAY,
+//						false);
+////				System.err.println(Arrays.stream(arr.vertices()).map(c -> c.x + ", " + c.y + ", " + c.z).collect(Collectors.joining("\n")));
+////				System.err.println(Arrays.stream(arr.indices()).mapToObj(Integer::toString).collect(Collectors.joining("\n")));
+//				return new LoadedMesh("meshTest", null, pos, ind);
+//			}).then(workers, (Consumer<Mesh>) m -> {
+////				System.err.println(m);
+//				final NLTintedMeshUIObject go = new NLTintedMeshUIObject("meshTestObject", m);
+//				go.setTransform(new Transform3D(new Vector3f(0, -0.1f, 0)));
+//				go.setColorMaterial(ColorMaterial.GREEN);
+//				this.playContentMenuGroup.add(go);
+////				System.err.println(go);
 //			}).push();
 		});
 
 		final float startPosX = -1;
-		IntStream.range(0, count)
-				.forEach(j -> UIObjectFactory.create(LevelButtonUIObject.class)
-						.set(i -> i.setTransform(new Transform3D(new Vector3f(startPosX + 0.6f * j, 0, (0.6f * j) % (2 - 0.5f) - 1),
-								new Quaternionf().rotateY((float) Math.random()),
-								new Vector3f(0.5f))))
-						.set(i -> i.setLevelId("lvl" + j))
-						.latch(btns)
-						.push());
+		final IntPointer ip = new IntPointer(0);
+		LevelRegistry.LEVELS.forEach(ld -> {
+			final int j = ip.increment();
+			UIObjectFactory.create(LevelButtonUIObject.class)
+					.set(i -> i.setTransform(new Transform3D(new Vector3f(startPosX + 0.8f * j, 0, (0.6f * j) % (2 - 0.5f) - 1),
+							new Quaternionf().rotateY((float) Math.random()),
+							new Vector3f(0.5f))))
+					.set(i -> i.setLevelDefinition(ld))
+					.latch(btns)
+					.push();
+		});
+
+		UIObjectFactory
+				.createText(BackButtonUIObject.class,
+						OptionalInt.empty(),
+						this.SMALL_TEXT_CHAR_SIZE,
+						this.SMALL_TEXT_TEXT_ALIGNMENT,
+						Optional.empty(),
+						Optional.empty())
+				.set(i -> i.setTransform(new Transform3D()))
+				.add(this.playMenuGroup)
+				.set(i -> i.setAnchors(Anchor.TOP_LEFT, Anchor.TOP_LEFT))
+				.set(i -> i.setMargin(0.05f))
+				.push();
+
+		this.playInfoGroup.init();
 	}
 
 	private void buildOptionsMenu() {
-		final Optional<Vector2fc> SMALL_TEXT_CHAR_SIZE = Optional.of(new Vector2f(0.2f));
-		final Optional<TextAlignment> SMALL_TEXT_TEXT_ALIGNMENT = Optional.of(TextAlignment.TEXT_LEFT);
-
 		final float charSize = 0.1f;
 
 		new OptionVolumeUIObjectGroup(this.optionsEntriesGroup).init(VolumeTextUIObject.class, VolumeSliderUIObject.class, charSize);
@@ -264,15 +231,14 @@ public class MainMenuUIScene extends UIScene {
 		UIObjectFactory
 				.createText(BackButtonUIObject.class,
 						OptionalInt.empty(),
-						SMALL_TEXT_CHAR_SIZE,
-						SMALL_TEXT_TEXT_ALIGNMENT,
+						this.SMALL_TEXT_CHAR_SIZE,
+						this.SMALL_TEXT_TEXT_ALIGNMENT,
 						Optional.empty(),
 						Optional.empty())
 				.set(i -> i.setTransform(new Transform3D()))
 				.add(this.optionsMenuGroup)
 				.set(i -> i.setAnchors(Anchor.TOP_LEFT, Anchor.TOP_LEFT))
 				.set(i -> i.setMargin(0.05f))
-//		.postInit(i -> this.optionsBackBtn = i)
 				.push();
 	}
 
@@ -386,6 +352,24 @@ public class MainMenuUIScene extends UIScene {
 		}
 		this.targetGroup = target;
 		this.progress = 0;
+	}
+
+	public PlayInfoUIObjectGroup getPlayInfoGroup() {
+		return this.playInfoGroup;
+	}
+
+	@Override
+	public String toString() {
+		return "MainMenuUIScene@" + System.identityHashCode(this) + " [currentGroup=" + this.currentGroup + ", targetGroup="
+				+ this.targetGroup + ", progress=" + this.progress + ", restPositions=" + Arrays.toString(this.restPositions)
+				+ ", mainMenuGroup=" + this.mainMenuGroup + ", mainButtonsMenuGroup=" + this.mainButtonsMenuGroup + ", optionsMenuGroup="
+				+ this.optionsMenuGroup + ", optionsVerticalGroup=" + this.optionsVerticalGroup + ", optionsEntriesGroup="
+				+ this.optionsEntriesGroup + ", playMenuGroup=" + this.playMenuGroup + ", playHorizontalGroup=" + this.playHorizontalGroup
+				+ ", playContentGroup=" + this.playContentGroup + ", playInfoGroup=" + this.playInfoGroup + ", groups="
+				+ Arrays.toString(this.groups) + ", layout=" + this.layout + ", SMALL_TEXT_CHAR_SIZE=" + this.SMALL_TEXT_CHAR_SIZE
+				+ ", SMALL_TEXT_TEXT_ALIGNMENT=" + this.SMALL_TEXT_TEXT_ALIGNMENT + ", uiCache=" + this.uiCache + ", hovering="
+				+ this.hovering + ", focused=" + this.focused + ", name=" + this.name + ", camera=" + this.camera + ", entities="
+				+ this.entities + "]";
 	}
 
 }

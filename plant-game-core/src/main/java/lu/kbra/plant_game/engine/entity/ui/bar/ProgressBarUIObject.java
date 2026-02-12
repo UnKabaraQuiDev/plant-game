@@ -16,7 +16,6 @@ import lu.kbra.plant_game.engine.entity.ui.group.OffsetUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.group.UIObjectGroup;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
 import lu.kbra.plant_game.generated.ColorMaterial;
-import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3DPivot;
 
@@ -62,8 +61,6 @@ public class ProgressBarUIObject extends OffsetUIObjectGroup implements LimitedO
 	}
 
 	public <T extends UIObject & ColorMaterialOwner, V extends UIObject & ColorMaterialOwner> ObjectTriggerLatch<ProgressBarUIObject> init(
-			final Dispatcher workers,
-			final Dispatcher render,
 			final Class<T> bgClazz,
 			final Class<V> fgClazz,
 			final ColorMaterial bg,
@@ -100,11 +97,9 @@ public class ProgressBarUIObject extends OffsetUIObjectGroup implements LimitedO
 	}
 
 	public <T extends UIObject & ColorMaterialOwner, V extends UIObject & ColorMaterialOwner> ObjectTriggerLatch<ProgressBarUIObject> init(
-			final Dispatcher workers,
-			final Dispatcher render,
 			final Class<T> bgClazz,
 			final Class<V> fgClazz) {
-		return this.init(workers, render, bgClazz, fgClazz, DEFAULT_BG_COLOR, DEFAULT_FG_COLOR);
+		return this.init(bgClazz, fgClazz, DEFAULT_BG_COLOR, DEFAULT_FG_COLOR);
 	}
 
 	public float getValue() {
