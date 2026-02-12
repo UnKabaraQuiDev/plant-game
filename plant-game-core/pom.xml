@@ -248,6 +248,7 @@
 						<configuration>
 							<platform>linux</platform>
 							<linuxConfig>
+								<wrapJar>true</wrapJar>
 								<generateDeb>true</generateDeb>
 								<generateRpm>false</generateRpm>
 								<generateAppImage>false</generateAppImage>

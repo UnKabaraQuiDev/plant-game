@@ -108,3 +108,7 @@ plugins
 
 # pom.xml
 .local/
+.flattened-pom.xml
+
+steamworks-sdk/
+build-output/

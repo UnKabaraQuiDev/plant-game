@@ -14,7 +14,39 @@ import lu.kbra.standalone.gameengine.impl.GameLogic;
 
 public class PGMain {
 
-	public static void main(String[] args) throws FileNotFoundException, IOException {
+	public static File APP_DIR;
+
+	public static File getAppDataDir(final String appName) {
+		final String os = System.getProperty("os.name").toLowerCase();
+		String path;
+
+		if (os.contains("win")) {
+			// Windows: %APPDATA%
+			path = System.getenv("APPDATA");
+			if (path == null || path.isEmpty()) {
+				// fallback
+				path = System.getProperty("user.home") + "\\AppData\\Roaming";
+			}
+			path += "\\" + appName;
+		} else if (os.contains("mac")) {
+			// macOS: ~/Library/Application Support/
+			path = System.getProperty("user.home") + "/Library/Application Support/" + appName;
+		} else {
+			// Linux / Unix: ~/.<appName>
+			path = System.getProperty("user.home") + "/." + appName.toLowerCase();
+		}
+
+		final File dir = new File(path);
+		if (!dir.exists()) {
+			dir.mkdirs(); // create if missing
+		}
+
+		return dir;
+	}
+
+	public static void main(final String[] args) throws FileNotFoundException, IOException {
+		APP_DIR = getAppDataDir("satisplantory");
+
 		final Properties props = new Properties();
 		props.load(new StringReader(PCUtils.readStringSource("classpath:/config/main.properties")));
 

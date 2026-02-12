@@ -23,8 +23,21 @@
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 		<plugins.dir>${project.basedir}/plugins</plugins.dir>
-		<pclib.version>1.0.0</pclib.version>
+		<pclib.version>1.0.1</pclib.version>
+		<gameengine.version>0.1-SNAPSHOT</gameengine.version>
 	</properties>
+
+	<repositories>
+		<repository>
+			<id>nexus.kbra.lu-releases</id>
+			<url>https://nexus.kbra.lu/repository/maven-releases/</url>
+		</repository>
+		<repository>
+			<id>nexus.kbra.lu-snapshots</id>
+			<url>https://nexus.kbra.lu/repository/maven-snapshots/</url>
+		</repository>
+	</repositories>
+
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
@@ -38,11 +51,16 @@
 				<artifactId>pclib-common</artifactId>
 				<version>${pclib.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>lu.kbra</groupId>
+				<artifactId>pclib-datastruct</artifactId>
+				<version>${pclib.version}</version>
+			</dependency>
 
 			<dependency>
 				<groupId>lu.kbra</groupId>
 				<artifactId>gameengine</artifactId>
-				<version>0.1</version>
+				<version>${gameengine.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>junit</groupId>
@@ -88,6 +106,31 @@
 						</manifest>
 					</archive>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>flatten-maven-plugin</artifactId>
+				<version>1.1.0</version>
+				<configuration>
+					<updatePomFile>true</updatePomFile>
+					<flattenMode>resolveCiFriendliesOnly</flattenMode>
+				</configuration>
+				<executions>
+					<execution>
+						<id>flatten</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>flatten</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>flatten.clean</id>
+						<phase>clean</phase>
+						<goals>
+							<goal>clean</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
