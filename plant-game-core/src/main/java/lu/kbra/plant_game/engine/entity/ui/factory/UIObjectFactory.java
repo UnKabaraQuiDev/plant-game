@@ -6,9 +6,7 @@ import static lu.kbra.plant_game.plugin.registry.UIObjectRegistry.TEXTURE_FILTER
 import static lu.kbra.plant_game.plugin.registry.UIObjectRegistry.TEXTURE_WRAP;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.function.Function;
@@ -50,10 +48,6 @@ public class UIObjectFactory {
 	public static final TextureWrap DEFAULT_TEXTURE_WRAP = TextureWrap.REPEAT;
 
 	public static UIObjectFactory INSTANCE;
-
-	private final Map<Class<? extends UIObject>, Boolean> animatedMesh = new HashMap<>();
-	private final Map<Class<? extends UIObject>, String> dataPath = new HashMap<>();
-	private final Map<Class<? extends UIObject>, Integer> bufferSize = new HashMap<>();
 
 	private final CacheManager cache;
 	private final Dispatcher loader;
