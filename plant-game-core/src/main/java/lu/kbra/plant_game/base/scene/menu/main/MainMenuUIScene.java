@@ -141,43 +141,18 @@ public class MainMenuUIScene extends UIScene {
 			Collections.sort(list);
 			this.playContentMenuGroup.addAll(list);
 
-//			new TaskFuture<>(workers, (Supplier<BezierStripMeshData>) () -> {
-//				final CubicCurve2D.Float curve = new CubicCurve2D.Float(0, 0, 0.5f, 1, 2, 2.8f, 3, 3);
-//				return BezierStripGenerator.generateTriangleMesh(curve, 0.25f, 10, 0, GeoPlane.XZ);
-//			}).then(renderDispatcher, (Function<BezierStripMeshData, Mesh>) arr -> {
-//				final Vec3fAttribArray pos = new Vec3fAttribArray(Mesh.ATTRIB_VERTICES_NAME,
-//						Mesh.ATTRIB_VERTICES_ID,
-//						arr.vertices(),
-//						BufferType.ARRAY,
-//						false);
-//				final UIntAttribArray ind = new UIntAttribArray(Mesh.ATTRIB_INDICES_NAME,
-//						Mesh.ATTRIB_INDICES_ID,
-//						arr.indices(),
-//						BufferType.ELEMENT_ARRAY,
-//						false);
-//				System.err.println(Arrays.stream(arr.vertices()).map(c -> c.x + ", " + c.y + ", " + c.z).collect(Collectors.joining("\n")));
-//				System.err.println(Arrays.stream(arr.indices()).mapToObj(Integer::toString).collect(Collectors.joining("\n")));
-//				return new LoadedMesh("meshTest", null, pos, ind);
-//			}).then(workers, (Consumer<Mesh>) m -> {
-//				System.err.println(m);
-//				TintedMeshUIObject go = new TintedMeshUIObject("meshTestObject", m);
-//				go.setTransform(new Transform3D(new Vector3f(), new Quaternionf().rotateXYZ(0.1f, 0.2f, 0.3f), new Vector3f(0.4f)));
-//				go.setColorMaterial(ColorMaterial.GREEN);
-//				this.playMenuGroup.add(go);
-//				System.err.println(go);
-//			}).push();
-
 			new TaskFuture<>(workers, (Supplier<GeneratedMeshData>) () -> {
 				final Path2D.Float curve = new Path2D.Float();
-				curve.moveTo(list.get(0).getTransform().getTranslation().x(), list.get(0).getTransform().getTranslation().z());
+				curve.moveTo(list.get(0).getTransformedBounds().getBounds2D().getCenterX(),
+						list.get(0).getTransformedBounds().getBounds2D().getCenterY());
 				final float handleDist = 0.5f;
 				list.subList(1, list.size())
 						.forEach(c -> curve.curveTo(curve.getCurrentPoint().getX() + handleDist,
 								curve.getCurrentPoint().getY(),
-								c.getTransform().getTranslation().x() - handleDist,
-								c.getTransform().getTranslation().z(),
-								c.getTransform().getTranslation().x(),
-								c.getTransform().getTranslation().z()));
+								c.getTransformedBounds().getBounds2D().getCenterX() - handleDist,
+								c.getTransformedBounds().getBounds2D().getCenterY(),
+								c.getTransformedBounds().getBounds2D().getCenterX(),
+								c.getTransformedBounds().getBounds2D().getCenterY()));
 
 				return Path2DTransformer.generateTriangleMesh(curve, 0.05f, 50, 0, GeoPlane.XZ);
 			}).then(renderDispatcher, (Function<GeneratedMeshData, Mesh>) arr -> {

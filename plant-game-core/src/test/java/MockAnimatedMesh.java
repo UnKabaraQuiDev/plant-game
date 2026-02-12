@@ -1,3 +1,4 @@
+import java.util.List;
 import java.util.Map;
 
 import lu.kbra.plant_game.engine.loader.AnimatedMeshLoader.AnimationData;
@@ -9,26 +10,22 @@ import lu.kbra.standalone.gameengine.graph.material.Material;
 public class MockAnimatedMesh implements AnimatedMesh {
 
 	protected String id;
-	protected int vertexCount, indexsCount;
+	protected int vertexCount, indicesCount;
 	protected BoundingBox bb;
 	protected AnimationData animationData;
 
 	public MockAnimatedMesh(final String id, final int vertexCount, final int indexsCount, final BoundingBox bb) {
 		this.id = id;
 		this.vertexCount = vertexCount;
-		this.indexsCount = indexsCount;
+		this.indicesCount = indexsCount;
 		this.bb = bb;
 	}
 
-	public MockAnimatedMesh(
-			final String id,
-			final int vertexCount,
-			final int indexsCount,
-			final BoundingBox bb,
+	public MockAnimatedMesh(final String id, final int vertexCount, final int indexsCount, final BoundingBox bb,
 			final AnimationData animationData) {
 		this.id = id;
 		this.vertexCount = vertexCount;
-		this.indexsCount = indexsCount;
+		this.indicesCount = indexsCount;
 		this.bb = bb;
 		this.animationData = animationData;
 	}
@@ -54,11 +51,6 @@ public class MockAnimatedMesh implements AnimatedMesh {
 	}
 
 	@Override
-	public void addAttribArray(final AttribArray data) {
-
-	}
-
-	@Override
 	public void bind() {
 
 	}
@@ -80,7 +72,7 @@ public class MockAnimatedMesh implements AnimatedMesh {
 
 	@Override
 	public int getIndicesCount() {
-		return this.indexsCount;
+		return this.indicesCount;
 	}
 
 	@Override
@@ -101,6 +93,16 @@ public class MockAnimatedMesh implements AnimatedMesh {
 	@Override
 	public void setAnimation(final AnimationData a) {
 		this.animationData = a;
+	}
+
+	@Override
+	public boolean usesEBO() {
+		return true;
+	}
+
+	@Override
+	public List<AttribArray> getAttribs() {
+		return null;
 	}
 
 }
