@@ -11,15 +11,14 @@ import org.joml.Vector3f;
 import org.joml.Vector4f;
 
 import lu.kbra.plant_game.engine.entity.go.GameObject;
-import lu.kbra.plant_game.engine.entity.go.MeshGameObject;
-import lu.kbra.plant_game.engine.entity.go.data.AttributeLocation;
+import lu.kbra.plant_game.engine.entity.go.VariationMeshGameObject;
 import lu.kbra.plant_game.engine.entity.go.mesh.terrain.TerrainMesh;
 import lu.kbra.plant_game.engine.entity.impl.SynchronizedEntityContainer;
 import lu.kbra.standalone.gameengine.objs.entity.ParentAwareComponent;
 import lu.kbra.standalone.gameengine.scene.camera.Camera3D;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-public class TerrainGameObject extends MeshGameObject implements SynchronizedEntityContainer<GameObject> {
+public class TerrainGameObject extends VariationMeshGameObject implements SynchronizedEntityContainer<GameObject> {
 
 	protected Object subEntitiesLock = new Object();
 	protected List<GameObject> subEntities = Collections.synchronizedList(new ArrayList<>());
@@ -33,7 +32,7 @@ public class TerrainGameObject extends MeshGameObject implements SynchronizedEnt
 	public TerrainGameObject(final String str, final TerrainMesh mesh) {
 		super(str, mesh);
 		this.setIsEntityMaterialId(false);
-		this.setObjectIdLocation(AttributeLocation.MESH);
+//		this.setObjectIdLocation(AttributeLocation.MESH);
 		this.setTransform(new Transform3D());
 	}
 
@@ -167,6 +166,18 @@ public class TerrainGameObject extends MeshGameObject implements SynchronizedEnt
 	@Override
 	public List<GameObject> getROEntities() {
 		return List.copyOf(this.subEntities);
+	}
+
+	@Override
+	public String toString() {
+		return "TerrainGameObject@" + System.identityHashCode(this) + " [subEntitiesLock=" + this.subEntitiesLock + ", subEntities="
+				+ this.subEntities + ", parent=" + this.parent + ", terrainEdgeObject=" + this.terrainEdgeObject
+				+ ", terrainHighlightObject=" + this.terrainHighlightObject + ", terrainWaterObject=" + this.terrainWaterObject
+				+ ", minVariation=" + this.minVariation + ", maxVariation=" + this.maxVariation + ", variationCellSize="
+				+ this.variationCellSize + ", hasVariation=" + this.hasVariation + ", materialId=" + this.materialId
+				+ ", isEntityMaterialId=" + this.isEntityMaterialId + ", objectId=" + this.objectId + ", objectIdLocation="
+				+ this.objectIdLocation + ", mesh=" + this.mesh + ", transform=" + this.transform + ", active=" + this.active + ", name="
+				+ this.name + "]";
 	}
 
 }

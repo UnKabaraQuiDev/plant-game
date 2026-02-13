@@ -22,6 +22,18 @@ public class MaterialComputeShader extends ComputeShader {
 	public static final String LIGHT_COLOR = "lightColor";
 	public static final String AMBIENT_LIGHT = "ambientLight";
 
+	public static final String VARIATION_MIN = "variationMin";
+	public static final String VARIATION_MAX = "variationMax";
+	public static final String VARIATION_CELLS_SIZE = "variationCellSize";
+	public static final String COLOR_VARIATION = "colorVariation";
+	public static final String VARIATION_MAP = "variationMap";
+	public static final String VARIATION_MAP_SCALE = "variationMapScale";
+
+	public static final String SINGLE_OBJECT = "singleObject";
+	public static final String SINGLE_OBJECT_ID = "singleObjectId";
+
+	public static final String VARIATION_MAP_TEXTURE_NAME = "_VARIATION_MAP";
+
 	public MaterialComputeShader() {
 		super((ComputeShaderPart) AbstractShaderPart.load("classpath:/shaders/material.comp", getBuildingDeps()), LOCAL_SIZE);
 	}
@@ -44,6 +56,16 @@ public class MaterialComputeShader extends ComputeShader {
 		this.createUniform(LIGHT_DIR);
 		this.createUniform(LIGHT_COLOR);
 		this.createUniform(AMBIENT_LIGHT);
+
+		this.createUniform(VARIATION_MIN);
+		this.createUniform(VARIATION_MAX);
+		this.createUniform(VARIATION_CELLS_SIZE);
+		this.createUniform(COLOR_VARIATION);
+		this.createUniform(VARIATION_MAP);
+
+		this.createUniform(SINGLE_OBJECT);
+		this.createUniform(SINGLE_OBJECT_ID);
+		this.createUniform(VARIATION_MAP_SCALE);
 	}
 
 	private static String generateGlslArray(final ColorMaterial[] colors) {
@@ -54,8 +76,7 @@ public class MaterialComputeShader extends ComputeShader {
 		for (int i = 0; i < colors.length; i++) {
 			final ColorMaterial mat = colors[i];
 			final Vector4fc c = mat.getColor();
-			sb
-					.append("\tvec4(")
+			sb.append("\tvec4(")
 					.append(c.x())
 					.append("f, ")
 					.append(c.y())

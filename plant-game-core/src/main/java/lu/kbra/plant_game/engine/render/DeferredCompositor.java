@@ -35,6 +35,7 @@ import lu.kbra.pclib.logger.GlobalLogger;
 import lu.kbra.pclib.pointer.prim.BooleanPointer;
 import lu.kbra.plant_game.PGLogic;
 import lu.kbra.plant_game.engine.entity.go.GameObject;
+import lu.kbra.plant_game.engine.entity.go.VariationOwner;
 import lu.kbra.plant_game.engine.entity.go.data.AttributeLocation;
 import lu.kbra.plant_game.engine.entity.go.data.Footprint;
 import lu.kbra.plant_game.engine.entity.go.obj.AnimatedMeshFootprintOwner;
@@ -119,6 +120,8 @@ public class DeferredCompositor implements Cleanupable {
 
 	private static final String SWAY_NOISE_PATH = System.getProperty(DeferredCompositor.class.getSimpleName() + ".path.sway_noise",
 			"classpath:/bakes/noise/sway/512.png");
+	private static final String VARIATION_NOISE_PATH = System.getProperty(DeferredCompositor.class.getSimpleName() + ".path.sway_noise",
+			"classpath:/bakes/noise/white/512.png");
 	private static final String FONT_PATH = System.getProperty(DeferredCompositor.class.getSimpleName() + ".path.font",
 			"classpath:/bakes/fonts/QuinqueFive.ttf/48.png");
 
@@ -191,6 +194,7 @@ public class DeferredCompositor implements Cleanupable {
 	protected TransferShader deferredTransferShader;
 	protected InstanceTransferShader deferredInstanceTransferShader;
 	protected Texture swayMap;
+	protected Texture variationMap;
 
 	// ui rendering
 	protected SingleTexture fontTexture;
@@ -260,7 +264,15 @@ public class DeferredCompositor implements Cleanupable {
 				TextureWrap.REPEAT);
 		this.swayMap.setGenerateMipmaps(true);
 		this.swayMap.genMipMaps();
-		cache.addTexture(this.fontTexture);
+		cache.addTexture(this.swayMap);
+
+		this.variationMap = SingleTexture.loadSingleTexture(cache,
+				MaterialComputeShader.VARIATION_MAP_TEXTURE_NAME,
+				VARIATION_NOISE_PATH,
+				TextureFilter.LINEAR,
+				TextureType.TXT2D,
+				TextureWrap.REPEAT);
+		cache.addTexture(this.variationMap);
 
 		this.outputTxt = new SingleTexture(WORLD_FRAMEBUFFER_NAME + ".output", engine.getWindow().getSize());
 		this.outputTxt.setDataType(DataType.UBYTE);
@@ -460,7 +472,7 @@ public class DeferredCompositor implements Cleanupable {
 
 		GL_W.glViewport(0, 0, resolution.x, resolution.y);
 
-		Vector3ic groups = this.materialComputeShader.getGlobalGroup(new Vector3i(resolution.x, resolution.y, 1));
+		final Vector3ic groups = this.materialComputeShader.getGlobalGroup(new Vector3i(resolution.x, resolution.y, 1));
 
 		assert groups.x() != 0;
 		assert groups.y() != 0;
@@ -470,17 +482,22 @@ public class DeferredCompositor implements Cleanupable {
 		this.materialComputeShader.bind();
 
 		this.setupMaterialInputs(this.materialComputeShader, worldScene, resolution, needRegen);
+		this.materialComputeShader.setUniform(MaterialComputeShader.COLOR_VARIATION, false);
+		this.materialComputeShader.setUniform(MaterialComputeShader.SINGLE_OBJECT, false);
 
 		GL_W.glDispatchCompute(groups.x(), groups.y(), 1);
 
+		final int variationMapUniformLoc = this.materialComputeShader.getUniformLocation(MaterialComputeShader.VARIATION_MAP);
+
+		// we need to wait because the textures might overwrite some of these pixels, or not
 		GL_W.glMemoryBarrier(GL_W.GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
 		// txt materials
 
-		groups = this.textureMaterialComputeShader.getGlobalGroup(new Vector3i(resolution.x, resolution.y, 1));
+//		groups = this.textureMaterialComputeShader.getGlobalGroup(new Vector3i(resolution.x, resolution.y, 1));
 
-		assert groups.x() != 0;
-		assert groups.y() != 0;
+//		assert groups.x() != 0;
+//		assert groups.y() != 0;
 
 		this.textureMaterialComputeShader.bind();
 
@@ -494,7 +511,13 @@ public class DeferredCompositor implements Cleanupable {
 		synchronized (worldScene.getEntitiesLock()) {
 
 			for (final SceneEntity entity : worldScene.getEntities().values()) {
-				this.renderTexture(alreadyRendered, txt0UniformLoc, currentMaterialIdLoc, groups.x(), groups.y(), entity);
+				this.renderTexture(alreadyRendered,
+						txt0UniformLoc,
+						variationMapUniformLoc,
+						currentMaterialIdLoc,
+						groups.x(),
+						groups.y(),
+						entity);
 			}
 
 		}
@@ -509,40 +532,29 @@ public class DeferredCompositor implements Cleanupable {
 	private void renderTexture(
 			final Set<Integer> alreadyRendered,
 			final int txt0UniformLoc,
+			final int variationMapUniformLoc,
 			final int currentMaterialIdLoc,
 			final int groupsX,
 			final int groupsY,
 			final SceneEntity entity) {
 
-//		SCREEN.bind();
-//		this.textureMaterialComputeShader.bind();
-
 		if (entity instanceof final MeshOwner mo) {
 			final Mesh mesh = mo.getMesh();
 			this.checkComponent(mesh, entity);
 
-			if (mesh instanceof final TexturedMesh txtMesh) {
-				final SingleTexture txt = txtMesh.getTexture();
-				final int tid = txt.getGlId();
-
-				if (!alreadyRendered.contains(tid)) {
-					txt.bindUniform(txt0UniformLoc, 0);
-
-					this.textureMaterialComputeShader.storeUniformUnsigned(currentMaterialIdLoc, tid);
-
-					GL_W.glDispatchCompute(groupsX, groupsY, 1);
-
-					alreadyRendered.add(tid);
-
-					if (GL_FORCE_SYNC_COMPUTE_SHADERS) {
-						GL_W.glMemoryBarrier(GL_W.GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-					}
-				}
-			}
+			this.renderTextureMesh(mesh,
+					alreadyRendered,
+					txt0UniformLoc,
+					variationMapUniformLoc,
+					currentMaterialIdLoc,
+					groupsX,
+					groupsY,
+					entity);
 		}
 
 		if (entity instanceof final EntityContainer<?> ec) {
-			ec.forEach(e -> this.renderTexture(alreadyRendered, txt0UniformLoc, currentMaterialIdLoc, groupsX, groupsY, e));
+			ec.forEach(e -> this
+					.renderTexture(alreadyRendered, txt0UniformLoc, variationMapUniformLoc, currentMaterialIdLoc, groupsX, groupsY, e));
 		}
 
 		if (entity instanceof final InstanceEmitterOwner ieo) {
@@ -550,22 +562,63 @@ public class DeferredCompositor implements Cleanupable {
 			this.checkComponent(instances, entity);
 			final Mesh mesh = instances.getParticleMesh();
 
-			if (mesh instanceof final TexturedMesh txtMesh) {
-				final SingleTexture txt = txtMesh.getTexture();
-				final int tid = txt.getGlId();
+			this.renderTextureMesh(mesh,
+					alreadyRendered,
+					txt0UniformLoc,
+					variationMapUniformLoc,
+					currentMaterialIdLoc,
+					groupsX,
+					groupsY,
+					entity);
+		}
+	}
 
-				if (!alreadyRendered.contains(tid)) {
+	private void renderTextureMesh(
+			final Mesh mesh,
+			final Set<Integer> alreadyRendered,
+			final int txt0UniformLoc,
+			final int variationMapUniformLoc,
+			final int currentMaterialIdLoc,
+			final int groupsX,
+			final int groupsY,
+			final SceneEntity entity) {
 
-					txt.bindUniform(txt0UniformLoc, 0);
+		if (mesh instanceof final TexturedMesh txtMesh) {
+			final SingleTexture txt = txtMesh.getTexture();
+			final int tid = txt.getGlId();
 
-					this.textureMaterialComputeShader.storeUniformUnsigned(currentMaterialIdLoc, tid);
+			if (!alreadyRendered.contains(tid)) {
+				this.textureMaterialComputeShader.bind();
+				txt.bindUniform(txt0UniformLoc, 5);
 
-					GL_W.glDispatchCompute(groupsX, groupsY, 1);
+				this.textureMaterialComputeShader.storeUniformUnsigned(currentMaterialIdLoc, tid);
 
-					alreadyRendered.add(tid);
+				GL_W.glDispatchCompute(groupsX, groupsY, 1);
 
+				alreadyRendered.add(tid);
+
+				if (GL_FORCE_SYNC_COMPUTE_SHADERS) {
 					GL_W.glMemoryBarrier(GL_W.GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 				}
+			}
+		} else if (entity instanceof GameObject go && go.getObjectIdLocation() == AttributeLocation.ENTITY
+				&& entity instanceof VariationOwner variationOwner) {
+			this.materialComputeShader.bind();
+
+			this.materialComputeShader.setUniform(MaterialComputeShader.COLOR_VARIATION, true);
+			this.materialComputeShader.setUniform(MaterialComputeShader.VARIATION_MIN, variationOwner.getMinVariation());
+			this.materialComputeShader.setUniform(MaterialComputeShader.VARIATION_MAX, variationOwner.getMaxVariation());
+			this.materialComputeShader.setUniform(MaterialComputeShader.VARIATION_CELLS_SIZE, variationOwner.getVariationCellSize());
+			this.materialComputeShader.setUniform(MaterialComputeShader.SINGLE_OBJECT, true);
+			this.materialComputeShader.setUniformUnsigned(MaterialComputeShader.SINGLE_OBJECT_ID, go.getObjectId());
+			this.materialComputeShader.setUniform(MaterialComputeShader.VARIATION_MAP_SCALE, 0.05f);
+
+			this.variationMap.bindUniform(5, 5);
+
+			GL_W.glDispatchCompute(groupsX, groupsY, 1);
+
+			if (GL_FORCE_SYNC_COMPUTE_SHADERS) {
+				GL_W.glMemoryBarrier(GL_W.GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 			}
 		}
 	}

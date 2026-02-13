@@ -11,7 +11,6 @@ import org.joml.Vector2i;
 import org.joml.Vector2ic;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
-import org.joml.Vector3i;
 
 import lu.kbra.pclib.PCUtils;
 import lu.kbra.pclib.pointer.prim.IntPointer;
@@ -24,7 +23,6 @@ import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.cache.attrib.UByteAttribArray;
 import lu.kbra.standalone.gameengine.cache.attrib.UIntAttribArray;
 import lu.kbra.standalone.gameengine.cache.attrib.Vec3fAttribArray;
-import lu.kbra.standalone.gameengine.cache.attrib.Vec3iAttribArray;
 import lu.kbra.standalone.gameengine.geom.LineLoadedMesh;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.utils.gl.consts.BufferType;
@@ -41,7 +39,7 @@ public class WorldGenerator {
 	private int[] indices;
 	private Vector3f[] normals;
 	private byte[] materialIds;
-	private Vector3i[] objectIds;
+//	private Vector3i[] objectIds;
 	private Vector3f[] edgeVertices;
 	private int[] edgeIndices;
 	private byte[] edgeMaterialIds;
@@ -90,8 +88,8 @@ public class WorldGenerator {
 				new Vec3fAttribArray(Mesh.ATTRIB_VERTICES_NAME, Mesh.ATTRIB_VERTICES_ID, this.verts),
 				new UIntAttribArray(Mesh.ATTRIB_INDICES_NAME, Mesh.ATTRIB_INDICES_ID, this.indices, BufferType.ELEMENT_ARRAY),
 				new Vec3fAttribArray(Mesh.ATTRIB_NORMALS_NAME, Mesh.ATTRIB_NORMALS_ID, this.normals),
-				new UByteAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_NAME, GameObject.MESH_ATTRIB_MATERIAL_ID_ID, this.materialIds),
-				new Vec3iAttribArray(GameObject.MESH_ATTRIB_OBJECT_ID_NAME, GameObject.MESH_ATTRIB_OBJECT_ID_ID, this.objectIds));
+				new UByteAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_NAME, GameObject.MESH_ATTRIB_MATERIAL_ID_ID, this.materialIds));
+//				new Vec3iAttribArray(GameObject.MESH_ATTRIB_OBJECT_ID_NAME, GameObject.MESH_ATTRIB_OBJECT_ID_ID, this.objectIds));
 
 		cache.addMesh(mesh);
 
@@ -296,7 +294,7 @@ public class WorldGenerator {
 		this.indices = new int[this.faces.size() * 6];
 		this.normals = new Vector3f[this.faces.size() * 4];
 		this.materialIds = new byte[this.faces.size() * 4];
-		this.objectIds = new Vector3i[this.faces.size() * 4];
+//		this.objectIds = new Vector3i[this.faces.size() * 4];
 		this.meshId = PCUtils.randomIntRange(0, 255);
 
 		final int totalFaceCount = this.faces.size();
@@ -307,14 +305,14 @@ public class WorldGenerator {
 			System.arraycopy(face.indices(faceCount * 4), 0, this.indices, faceCount * 6, 6);
 			Arrays.fill(this.normals, faceCount * 4, faceCount * 4 + 4, face.normal);
 			Arrays.fill(this.materialIds, faceCount * 4, faceCount * 4 + 4, (byte) face.material().getId());
-			if (face.cellPosition != null) {
-				Arrays.fill(this.objectIds,
-						faceCount * 4,
-						faceCount * 4 + 4,
-						new Vector3i(this.meshId, face.cellPosition.x(), face.cellPosition.y()));
-			} else {
-				Arrays.fill(this.objectIds, faceCount * 4, faceCount * 4 + 4, new Vector3i(this.meshId, 0, 0));
-			}
+//			if (face.cellPosition != null) {
+//				Arrays.fill(this.objectIds,
+//						faceCount * 4,
+//						faceCount * 4 + 4,
+//						new Vector3i(this.meshId, face.cellPosition.x(), face.cellPosition.y()));
+//			} else {
+//				Arrays.fill(this.objectIds, faceCount * 4, faceCount * 4 + 4, new Vector3i(this.meshId, 0, 0));
+//			}
 			faceCount++;
 
 			progress.setValue(100 + 100 * faceCount / totalFaceCount);

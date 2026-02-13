@@ -19,6 +19,17 @@ uniform vec3 lightDir;
 uniform vec3 lightColor;
 uniform float ambientLight;
 
+uniform vec3 variationMin;
+uniform vec3 variationMax;
+uniform vec3 variationCellSize;
+uniform bool colorVariation;
+uniform float variationMapScale;
+
+uniform bool singleObject;
+uniform uvec3 singleObjectId;
+
+layout(location = 5) uniform sampler2D variationMap;
+
 void main() {
     ivec2 outPixel = ivec2(gl_GlobalInvocationID.xy);
     if (outPixel.x >= outputSize.x || outPixel.y >= outputSize.y) {
@@ -36,6 +47,10 @@ void main() {
 
 	vec3 color = vec3(0);
 	
+	if(singleObject && ids.yzw != singleObjectId) {
+		return;
+	}
+	
 	if(ids.r > 0 && ids.r <= %NUM_COLORS%) {
 		color = colors[ids.r - 1].rgb;
 	} else {
@@ -46,7 +61,16 @@ void main() {
     color = ambientLight * color + color * lightColor * diff;
     vec4 outColor = vec4(color, 1);
 
-    vec4 outIds = vec4(ids.r, ids.g, ids.b, ids.a);
+	if (colorVariation) {
+	    vec3 worldPos = pos.xyz;
+
+	    vec2 cellIndex = floor(vec2(worldPos.x, worldPos.z) / variationCellSize.xz) * variationMapScale;
+
+	    vec3 variation = texture(variationMap, cellIndex).rgb;
+	    vec3 variationColor = mix(variationMin, variationMax, variation);
+
+		outColor.rgb *= variationColor;
+	}
 
 	imageStore(uOutputTex, outPixel, outColor);
 }

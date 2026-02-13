@@ -17,8 +17,6 @@ public class GameData {
 
 	@JsonIgnore
 	protected LevelData levelData;
-//	@JsonIgnore
-//	protected float currentWaterLevel;
 	protected byte progress = 0;
 	protected LevelState levelState = LevelState.NOT_STARTED;
 	protected Map<ResourceType, Integer> resources = Collections.synchronizedMap(new HashMap<>());
@@ -73,7 +71,6 @@ public class GameData {
 
 	public static GameData fromBlankLevel(final LevelData levelData) {
 		final GameData gd = new GameData(levelData);
-//		gd.setCurrentWaterLevel(levelData.getWorld().getWaterLevel().getMin());
 		levelData.getGame().getStartResources().forEach((k, v) -> gd.getResources().put(k, v));
 		return gd;
 	}
