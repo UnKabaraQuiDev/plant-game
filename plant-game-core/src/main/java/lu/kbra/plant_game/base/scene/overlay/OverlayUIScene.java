@@ -85,7 +85,7 @@ public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner
 					.push();
 		});
 
-		this.buildingInfo.init(workers, renderDispatcher).then(c -> {
+		this.buildingInfo.init().then(c -> {
 			c.getTransform().translationAddY(0.5f);
 			c.setActive(false);
 			this.add(c);

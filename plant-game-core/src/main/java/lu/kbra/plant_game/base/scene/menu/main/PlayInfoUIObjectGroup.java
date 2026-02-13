@@ -1,5 +1,6 @@
 package lu.kbra.plant_game.base.scene.menu.main;
 
+import java.lang.ref.WeakReference;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.function.Consumer;
@@ -10,10 +11,10 @@ import org.joml.Vector2fc;
 import lu.kbra.pclib.concurrency.ObjectTriggerLatch;
 import lu.kbra.pclib.pointer.ObjectPointer;
 import lu.kbra.plant_game.base.scene.overlay.group.impl.AnchoredLayoutUIObjectGroup;
-import lu.kbra.plant_game.base.scene.overlay.group.impl.ParentUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.FlatQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.bar.ProgressBarUIObject;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
+import lu.kbra.plant_game.engine.entity.ui.group.UIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.impl.MarginOwner;
 import lu.kbra.plant_game.engine.entity.ui.text.IndexedProgrammaticTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.ProgrammaticTextUIObject;
@@ -31,15 +32,23 @@ public class PlayInfoUIObjectGroup extends AnchoredLayoutUIObjectGroup implement
 	protected ObjectPointer<ProgrammaticTextUIObject> authorObject = new ObjectPointer<>();
 	protected ProgressBarUIObject progressBar = new IndexedProgressBarUIObject("progress", this, new Transform3D(), 2);
 
+	protected WeakReference<LevelDefinition> levelDef;
+
 	protected float margin = 0.1f;
 
-	public PlayInfoUIObjectGroup(final ParentUIObjectGroup playMenuGroup) {
+	public PlayInfoUIObjectGroup(final UIObjectGroup playMenuGroup) {
 		super(playMenuGroup
 				.getId(), new FlowLayout(true, 0.02f, Anchor2D.TRAILING), playMenuGroup, Anchor.BOTTOM_RIGHT, Anchor.BOTTOM_RIGHT);
 	}
 
 	@Override
 	public void accept(final LevelDefinition t) {
+		if (this.levelDef != null && this.levelDef.get() == t) {
+			return;
+		}
+
+		this.levelDef = new WeakReference<>(t);
+
 		this.titleObject.ifSet(i -> i.setText(t.getLevelData().getLevelName()).flushText());
 		this.authorObject.ifSet(i -> i.setText(t.getLevelData().getAuthor()).flushText());
 		this.progressBar.setValue(50 / 100f).updateScaling();

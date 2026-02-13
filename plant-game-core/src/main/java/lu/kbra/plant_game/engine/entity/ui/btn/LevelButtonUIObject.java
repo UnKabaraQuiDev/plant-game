@@ -3,6 +3,7 @@ package lu.kbra.plant_game.engine.entity.ui.btn;
 import org.joml.Vector4fc;
 
 import lu.kbra.pclib.PCUtils;
+import lu.kbra.pclib.logger.GlobalLogger;
 import lu.kbra.plant_game.base.scene.menu.main.MainMenuUIScene;
 import lu.kbra.plant_game.engine.entity.impl.TintOwner;
 import lu.kbra.plant_game.engine.entity.ui.TexturedQuadMeshUIObject;
@@ -32,6 +33,10 @@ public class LevelButtonUIObject extends TexturedQuadMeshUIObject
 
 	@Override
 	public void click(final WindowInputHandler input) {
+		this.getUISceneParent().filter(MainMenuUIScene.class::isInstance).map(MainMenuUIScene.class::cast).ifPresentOrElse(scene -> {
+			scene.getResumeInfoGroup().accept(this.levelDefinition);
+			scene.startTransition(MainMenuUIScene.RESUME);
+		}, () -> GlobalLogger.warning("No MainMenuUIScene in hierarchy."));
 	}
 
 	@Override
@@ -40,7 +45,8 @@ public class LevelButtonUIObject extends TexturedQuadMeshUIObject
 			this.getUISceneParent()
 					.filter(MainMenuUIScene.class::isInstance)
 					.map(MainMenuUIScene.class::cast)
-					.ifPresent(scene -> scene.getPlayInfoGroup().accept(this.levelDefinition));
+					.ifPresentOrElse(scene -> scene.getPlayInfoGroup().accept(this.levelDefinition),
+							() -> GlobalLogger.warning("No MainMenuUIScene in hierarchy."));
 		}
 		return true;
 	}

@@ -56,6 +56,7 @@ public class MainMenuUIScene extends UIScene {
 	public static final int PLAY = 1;
 	public static final int OPTIONS = 2;
 	public static final int QUIT = 3;
+	public static final int RESUME = 4;
 
 	public static final float GRADIENT_DEPTH = -0.1f;
 
@@ -67,7 +68,7 @@ public class MainMenuUIScene extends UIScene {
 	protected int targetGroup = 0;
 	protected float progress = 0;
 
-	protected Vector3fc[] restPositions = { new Vector3f(), new Vector3f(5, 0, 5), new Vector3f(5, 0, 0), null };
+	protected Vector3fc[] restPositions = { new Vector3f(), new Vector3f(5, 0, 5), new Vector3f(5, 0, 0), null, new Vector3f(5, 0, 10) };
 
 	protected ParentUIObjectGroup mainMenuGroup = new ParentUIObjectGroup("main",
 			new AnchorLayout(),
@@ -93,11 +94,17 @@ public class MainMenuUIScene extends UIScene {
 	protected UIObjectGroup playContentGroup = this.playHorizontalGroup.getContent();
 	protected PlayInfoUIObjectGroup playInfoGroup = new PlayInfoUIObjectGroup(this.playMenuGroup);
 
+	protected ParentUIObjectGroup resumeMenuGroup = new ParentUIObjectGroup("resume",
+			new AnchorLayout(),
+			new Transform3D(this.restPositions[RESUME]));
+	protected ResumeUIObjectGroup resumeInfoGroup = new ResumeUIObjectGroup(this.resumeMenuGroup);
+
 	protected OffsetUIObjectGroup[] groups = new OffsetUIObjectGroup[] {
 			this.mainMenuGroup,
 			this.playMenuGroup,
 			this.optionsMenuGroup,
-			null };
+			null,
+			this.resumeMenuGroup };
 
 	protected Layout layout;
 
@@ -110,7 +117,7 @@ public class MainMenuUIScene extends UIScene {
 
 	@Override
 	public void init(final Dispatcher workers, final Dispatcher renderDispatcher) {
-		super.addAll(this.mainMenuGroup, this.optionsMenuGroup, this.playMenuGroup);
+		super.addAll(this.mainMenuGroup, this.optionsMenuGroup, this.playMenuGroup, this.resumeMenuGroup);
 
 		/* main menu */
 		this.buildMainMenu();
@@ -119,12 +126,16 @@ public class MainMenuUIScene extends UIScene {
 		this.buildOptionsMenu();
 
 		/* play content */
-		this.buildPlayMenu(workers, renderDispatcher);
+		this.buildPlayMenu();
 
+		this.buildResumeMenu();
 	}
 
-	private void buildPlayMenu(final Dispatcher workers, final Dispatcher renderDispatcher) {
+	private void buildResumeMenu() {
+		this.resumeInfoGroup.init();
+	}
 
+	private void buildPlayMenu() {
 		final int count = LevelRegistry.LEVELS.size();
 		final ListTriggerLatch<LevelButtonUIObject> btns = new ListTriggerLatch<>(count, list -> {
 			Collections.sort(list);
@@ -356,6 +367,10 @@ public class MainMenuUIScene extends UIScene {
 
 	public PlayInfoUIObjectGroup getPlayInfoGroup() {
 		return this.playInfoGroup;
+	}
+
+	public ResumeUIObjectGroup getResumeInfoGroup() {
+		return this.resumeInfoGroup;
 	}
 
 	@Override

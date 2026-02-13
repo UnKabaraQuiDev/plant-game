@@ -51,26 +51,34 @@ public class PGMain {
 	}
 
 	public static void main(final String[] args) throws IOException, SteamException {
+		GlobalLogger.INIT_DEFAULT_IF_NOT_INITIALIZED = false;
+
 		final Properties props = new Properties();
 		props.load(new StringReader(PCUtils.readStringSource("classpath:/config/main.properties")));
 
 		if (!SKIP_STEAM) {
 			SteamAPI.loadLibraries();
 
-			if (SteamAPI.restartAppIfNecessary(Integer.parseInt((String) props.get("steam.appId")))) {
+			if (SteamAPI.isSteamRunning()) {
+				if (SteamAPI.restartAppIfNecessary(Integer.parseInt((String) props.get("steam.appId")))) {
 //				STEAM_LAUCHED = false;
 //				APP_DIR = getAppDataDir("satisplantory");
-				System.err.println("Not started in steam app, exitting.");
-				return;
-			}
-			STEAM_LAUCHED = true;
-			APP_DIR = new File("./data/");
-			if (!SteamAPI.init()) {
-				throw new IllegalStateException("Failed to initialize Steam API.");
+					System.err.println("Not started in steam app, exitting.");
+					return;
+				}
+				STEAM_LAUCHED = true;
+				APP_DIR = new File("./data/");
+				if (!SteamAPI.init()) {
+					throw new IllegalStateException("Failed to initialize Steam API.");
+				}
+				System.err.println("Started with steam support.");
+			} else {
+				STEAM_LAUCHED = false;
+				APP_DIR = getAppDataDir("satisplantory");
+				System.err.println("Started without steam support.");
 			}
 		}
 
-		GlobalLogger.INIT_DEFAULT_IF_NOT_INITIALIZED = false;
 		GlobalLogger.init(PCUtils.readStringSource(props.getProperty("logs.config.file")).replace("%APP_DIR%", APP_DIR.getPath()));
 
 		GlobalLogger.info("App dir: " + APP_DIR.getAbsolutePath());

@@ -83,7 +83,7 @@ public class FlowLayout implements Layout, BoundsOwnerParentAware {
 		}
 
 		for (final UIObject child : children) {
-			if (!child.hasTransform() || child instanceof NoLayout) {
+			if (!child.hasTransform() || child instanceof NoLayout || !child.isActive()) {
 				continue;
 			}
 

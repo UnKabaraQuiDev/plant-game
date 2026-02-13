@@ -36,7 +36,6 @@ import lu.kbra.plant_game.engine.scene.ui.layout.AnchorLayout;
 import lu.kbra.plant_game.engine.scene.ui.layout.FlowLayout;
 import lu.kbra.plant_game.engine.scene.world.data.resource.ResourceType;
 import lu.kbra.plant_game.generated.ColorMaterial;
-import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 public class BuildingInfoUIObjectGroup extends FixedBoundsUIObjectGroup implements ExtAnchorOwner, PaddingOwner, MarginOwner {
@@ -75,11 +74,11 @@ public class BuildingInfoUIObjectGroup extends FixedBoundsUIObjectGroup implemen
 		return true;
 	}
 
-	public ObjectTriggerLatch<? extends BuildingInfoUIObjectGroup> init(final Dispatcher workers, final Dispatcher render) {
+	public ObjectTriggerLatch<? extends BuildingInfoUIObjectGroup> init() {
 		final ObjectTriggerLatch<? extends BuildingInfoUIObjectGroup> latch = new ObjectTriggerLatch<>(2, this);
 
 		/* cost */
-		this.addIntLine(workers, render, "cost-line", DefaultResourceType.MONEY, "text.cost").latch(latch);
+		this.addIntLine("cost-line", DefaultResourceType.MONEY, "text.cost").latch(latch);
 
 		/* backdrop */
 		UIObjectFactory.create(IBAnchoredFlatQuadUIObject.class)
@@ -96,12 +95,7 @@ public class BuildingInfoUIObjectGroup extends FixedBoundsUIObjectGroup implemen
 		return latch;
 	}
 
-	public ListTriggerLatch<UIObject> addIntLine(
-			final Dispatcher workers,
-			final Dispatcher render,
-			final String id,
-			final ResourceType rt,
-			final String key) {
+	public ListTriggerLatch<UIObject> addIntLine(final String id, final ResourceType rt, final String key) {
 		final AnchoredFixedIntegerStatLine costValue = new AnchoredFixedIntegerStatLine(id + "-value",
 				0f,
 				Anchor.CENTER_RIGHT,
@@ -114,8 +108,7 @@ public class BuildingInfoUIObjectGroup extends FixedBoundsUIObjectGroup implemen
 						.set(i -> i.setAnchors(Anchor.CENTER_LEFT, Anchor.CENTER_LEFT))
 						.latch(line)
 						.push(),
-				(Consumer<ListTriggerLatch<UIObject>>) line -> costValue
-						.init(workers, render, FONT_HEIGHT, rt.getIconClass(), IntegerTextUIObject.class)
+				(Consumer<ListTriggerLatch<UIObject>>) line -> costValue.init(FONT_HEIGHT, rt.getIconClass(), IntegerTextUIObject.class)
 						.latch(line)
 						.then(AnchoredFixedIntegerStatLine::flushValue));
 	}

@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.joml.Math;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lu.kbra.plant_game.BuildingDefinition;
@@ -15,10 +17,14 @@ public class GameData {
 
 	@JsonIgnore
 	protected LevelData levelData;
-	protected float currentWaterLevel;
+//	@JsonIgnore
+//	protected float currentWaterLevel;
 	protected byte progress = 0;
 	protected LevelState levelState = LevelState.NOT_STARTED;
 	protected Map<ResourceType, Integer> resources = Collections.synchronizedMap(new HashMap<>());
+
+	public GameData() {
+	}
 
 	public GameData(final Map<ResourceType, Integer> resources) {
 		this.resources = resources;
@@ -43,12 +49,10 @@ public class GameData {
 		buildingDefinition.getPrices().forEach((k, v) -> this.resources.compute(k, (k2, v2) -> v2 - v));
 	}
 
-	public void setCurrentWaterLevel(final float currentWaterLevel) {
-		this.currentWaterLevel = currentWaterLevel;
-	}
-
 	public float getCurrentWaterLevel() {
-		return this.currentWaterLevel;
+		return Math.lerp(this.levelData.getWorld().getWaterLevel().getMin(),
+				this.levelData.getWorld().getWaterLevel().getMax(),
+				this.progress / 100f);
 	}
 
 	public byte getProgress() {
@@ -69,16 +73,15 @@ public class GameData {
 
 	public static GameData fromBlankLevel(final LevelData levelData) {
 		final GameData gd = new GameData(levelData);
-		gd.setCurrentWaterLevel(levelData.getWorld().getWaterLevel().getMin());
+//		gd.setCurrentWaterLevel(levelData.getWorld().getWaterLevel().getMin());
 		levelData.getGame().getStartResources().forEach((k, v) -> gd.getResources().put(k, v));
 		return gd;
 	}
 
 	@Override
 	public String toString() {
-		return "GameData@" + System.identityHashCode(this) + " [levelData=" + this.levelData + ", currentWaterLevel="
-				+ this.currentWaterLevel + ", progress=" + this.progress + ", levelState=" + this.levelState + ", resources="
-				+ this.resources + "]";
+		return "GameData@" + System.identityHashCode(this) + " [levelData=" + this.levelData + ", progress=" + this.progress
+				+ ", levelState=" + this.levelState + ", resources=" + this.resources + "]";
 	}
 
 }

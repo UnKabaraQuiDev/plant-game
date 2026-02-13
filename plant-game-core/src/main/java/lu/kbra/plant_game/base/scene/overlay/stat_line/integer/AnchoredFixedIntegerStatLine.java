@@ -8,7 +8,6 @@ import lu.kbra.plant_game.engine.entity.ui.impl.AnchorOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.MarginOwner;
 import lu.kbra.plant_game.engine.entity.ui.text.IntegerTextUIObject;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
-import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 public class AnchoredFixedIntegerStatLine extends FixedIntegerStatLine implements MarginOwner, AnchorOwner {
@@ -43,28 +42,19 @@ public class AnchoredFixedIntegerStatLine extends FixedIntegerStatLine implement
 
 	@Override
 	public <T extends TexturedQuadMeshUIObject, V extends IntegerTextUIObject> ObjectTriggerLatch<? extends AnchoredFixedIntegerStatLine> init(
-			final Dispatcher workers,
-			final Dispatcher render,
 			final float height,
 			final int valueLength,
 			final Class<T> iconClazz,
 			final Class<V> valueClazz) {
-		return (ObjectTriggerLatch<? extends AnchoredFixedIntegerStatLine>) super.init(workers,
-				render,
-				height,
-				valueLength,
-				iconClazz,
-				valueClazz);
+		return (ObjectTriggerLatch<? extends AnchoredFixedIntegerStatLine>) super.init(height, valueLength, iconClazz, valueClazz);
 	}
 
 	@Override
 	public <T extends TexturedQuadMeshUIObject, V extends IntegerTextUIObject> ObjectTriggerLatch<? extends AnchoredFixedIntegerStatLine> init(
-			final Dispatcher workers,
-			final Dispatcher render,
 			final float height,
 			final Class<T> iconClazz,
 			final Class<V> valueClazz) {
-		return (ObjectTriggerLatch<? extends AnchoredFixedIntegerStatLine>) super.init(workers, render, height, iconClazz, valueClazz);
+		return (ObjectTriggerLatch<? extends AnchoredFixedIntegerStatLine>) super.init(height, iconClazz, valueClazz);
 	}
 
 	@Override
