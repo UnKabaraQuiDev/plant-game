@@ -1,0 +1,29 @@
+#version 430
+
+layout(local_size_x = %LOCAL_SIZE_X%, local_size_y = %LOCAL_SIZE_Y%) in;
+
+layout(rgba8, binding = 0) uniform readonly writeonly image2D uOutputTex;
+
+uniform vec3 vignetteColor = vec3(0.0, 0.0, 0.0);
+uniform float vignetteRadius = 0.5;
+uniform float vignetteSoftness = 0.3;
+
+void main() {
+	ivec2 pix = ivec2(gl_GlobalInvocationID.xy);
+	ivec2 size = imageSize(img);
+
+	if (pix.x >= size.x || pix.y >= size.y) {
+		return;
+	}
+
+	vec2 uv = (vec2(pix) / vec2(size)) * 2.0 - 1.0;
+
+	float dist = length(uv);
+	float factor = smoothstep(vignetteRadius, vignetteRadius + vignetteSoftness, dist);
+
+	vec4 color = imageLoad(img, pix);
+	color.rgb = mix(color.rgb, vignetteColor, factor);
+
+	imageStore(img, pix, color);
+}
+

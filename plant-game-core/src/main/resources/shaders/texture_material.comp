@@ -19,7 +19,7 @@ uniform float ambientLight;
 
 uniform uint currentMaterialId;
 
-layout(location = 5) uniform sampler2D txt0;
+layout(location = 6) uniform sampler2D txt0;
 
 void main() {
     ivec2 outPixel = ivec2(gl_GlobalInvocationID.xy);
@@ -45,6 +45,6 @@ void main() {
     }else {
     	return;
     }
-
+    
     imageStore(uOutputTex, outPixel, objectColor);
 }
