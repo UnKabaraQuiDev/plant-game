@@ -1,27 +1,27 @@
 package lu.kbra.plant_game.engine.scene.world.generator;
 
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import javax.imageio.ImageIO;
 
-import lu.kbra.pclib.PCUtils;
+import lu.kbra.plant_game.plugin.PluginDescriptor;
 
 public class ImageWorldGenerator extends WorldGenerator {
 
 	private BufferedImage image;
 	private final float scale;
 
-	public ImageWorldGenerator(final String location, final int height) {
-		this(location, (float) height / 255);
+	public ImageWorldGenerator(final PluginDescriptor plugin, final String location, final int height) {
+		this(plugin, location, (float) height / 255);
 	}
 
-	public ImageWorldGenerator(final String location, final float scale) {
+	public ImageWorldGenerator(final PluginDescriptor plugin, final String location, final float scale) {
 		this.scale = scale;
 
-		try (ByteArrayInputStream bais = new ByteArrayInputStream(PCUtils.readBytesSource(location))) {
-			this.image = ImageIO.read(bais);
+		try (InputStream is = this.getClass().getResourceAsStream(location)) {
+			this.image = ImageIO.read(is);
 		} catch (final IOException e) {
 			throw new RuntimeException("Error while reading: " + location, e);
 		}

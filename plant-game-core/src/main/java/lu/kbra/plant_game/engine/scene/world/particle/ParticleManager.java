@@ -48,6 +48,9 @@ public class ParticleManager {
 
 	public void render(final float dTime) {
 		this.computeShader.bind();
+		if (!this.computeShader.isValid()) {
+			return;
+		}
 
 		this.computeShader.setUniform(GravityParticleComputeShader.D_TIME, dTime);
 		this.computeShader.setUniform(GravityParticleComputeShader.REBOUND_COEFFICIENT, this.reboundCoefficient);

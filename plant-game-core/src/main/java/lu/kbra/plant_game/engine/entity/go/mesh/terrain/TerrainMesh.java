@@ -1,5 +1,7 @@
 package lu.kbra.plant_game.engine.entity.go.mesh.terrain;
 
+import java.util.Arrays;
+
 import org.joml.Vector2ic;
 
 import lu.kbra.plant_game.generated.ColorMaterial;
@@ -18,17 +20,9 @@ public class TerrainMesh extends LoadedMesh {
 	private final Integer[][] cellHeight;
 	private final ColorMaterial[][] materialType;
 
-	public TerrainMesh(
-			final String name,
-			final int objectId,
-			final int width,
-			final int length,
-			final int maxHeight,
-			final Integer[][] cellHeight,
-			final ColorMaterial[][] materialType,
-			final Vec3fAttribArray vertices,
-			final UIntAttribArray indices,
-			final AttribArray... attribs) {
+	public TerrainMesh(final String name, final int objectId, final int width, final int length, final int maxHeight,
+			final Integer[][] cellHeight, final ColorMaterial[][] materialType, final Vec3fAttribArray vertices,
+			final UIntAttribArray indices, final AttribArray... attribs) {
 		super(name, null, vertices, indices, attribs);
 		this.objectId = objectId;
 		this.width = width;
@@ -92,6 +86,16 @@ public class TerrainMesh extends LoadedMesh {
 
 	public int getMaxHeight() {
 		return this.maxHeight;
+	}
+
+	@Override
+	public String toString() {
+		return "TerrainMesh@" + System.identityHashCode(this) + " [objectId=" + this.objectId + ", width=" + this.width + ", length="
+				+ this.length + ", maxHeight=" + this.maxHeight + ", cellHeight=" + Arrays.toString(this.cellHeight) + ", materialType="
+				+ Arrays.toString(this.materialType) + ", name=" + this.name + ", vao=" + this.vao + ", vbo=" + this.vbo + ", material="
+				+ this.material + ", vertices=" + this.vertices + ", indices=" + this.indices + ", attribs=" + this.attribs
+				+ ", vertexCount=" + this.vertexCount + ", indicesCount=" + this.indicesCount + ", boundingBox=" + this.boundingBox
+				+ ", cleanable=" + this.cleanable + "]";
 	}
 
 }

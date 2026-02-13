@@ -50,18 +50,18 @@ public class FixedBoundsUIObjectGroup extends LayoutOffsetUIObjectGroup implemen
 //		final float paddingX = (float) (this.parallelStream().mapToDouble(marginSumX).sum() + paddingSumX.applyAsDouble(this));
 //		final float paddingZ = (float) (this.parallelStream().mapToDouble(marginSumZ).sum() + paddingSumZ.applyAsDouble(this));
 
-		final float outerMarginX = (float) marginSumX.applyAsDouble(this);
-		final float outerMarginZ = (float) marginSumZ.applyAsDouble(this);
+		final float outerPaddingX = (float) paddingSumX.applyAsDouble(this);
+		final float outerPaddingZ = (float) paddingSumZ.applyAsDouble(this);
 
 		this.bounds.setFrame(switch (this.dir) {
-		case VERTICAL -> new Rectangle2D.Float(-this.size / 2 - outerMarginX,
-				(float) compBounds.getY() - outerMarginZ,
-				this.size / 2 + 2 * outerMarginX,
-				(float) compBounds.getHeight() + 2 * outerMarginZ);
-		case HORIZONTAL -> new Rectangle2D.Float((float) compBounds.getX() - outerMarginX,
-				-this.size / 2 - outerMarginZ,
-				(float) compBounds.getWidth() + 2 * outerMarginX,
-				this.size / 2 + 2 * outerMarginZ);
+		case VERTICAL -> new Rectangle2D.Float(-this.size / 2 - outerPaddingX,
+				(float) compBounds.getY() - outerPaddingZ,
+				this.size / 2 + 2 * outerPaddingX,
+				(float) compBounds.getHeight() + 2 * outerPaddingZ);
+		case HORIZONTAL -> new Rectangle2D.Float((float) compBounds.getX() - outerPaddingX,
+				-this.size / 2 - outerPaddingZ,
+				(float) compBounds.getWidth() + 2 * outerPaddingX,
+				this.size / 2 + 2 * outerPaddingZ);
 		});
 
 		return true;
@@ -78,6 +78,14 @@ public class FixedBoundsUIObjectGroup extends LayoutOffsetUIObjectGroup implemen
 	@Override
 	public Shape getBounds() {
 		return this.bounds;
+	}
+
+	@Override
+	public String toString() {
+		return "FixedBoundsUIObjectGroup@" + System.identityHashCode(this) + " [dir=" + this.dir + ", bounds=" + this.bounds + ", size="
+				+ this.size + ", layout=" + this.layout + ", subEntitiesLock=" + this.subEntitiesLock + ", subEntities=" + this.subEntities
+				+ ", computedBounds=" + this.computedBounds + ", transform=" + this.transform + ", active=" + this.active + ", name="
+				+ this.name + "]";
 	}
 
 }

@@ -20,22 +20,20 @@ public abstract class LevelRegistry extends PluginRegistry {
 	public class LevelDefinition implements Comparable<LevelDefinition> {
 
 		protected int idx;
-		protected String levelId;
+//		protected String levelId;
 		protected LevelData levelData;
 		protected LevelState levelState = LevelState.NOT_STARTED;
 		protected byte progress = 0;
 		protected Optional<GameData> gameData;
 
-		public LevelDefinition(final int idx, final String levelId, final LevelData levelData) {
+		public LevelDefinition(final int idx, final LevelData levelData) {
 			this.idx = idx;
-			this.levelId = levelId;
 			this.levelData = levelData;
 		}
 
 		public LevelDefinition(final int idx, final String levelId, final LevelData levelData, final LevelState levelState,
 				final byte progress, final Optional<GameData> gameData) {
 			this.idx = idx;
-			this.levelId = levelId;
 			this.levelData = levelData;
 			this.levelState = levelState;
 			this.progress = progress;
@@ -43,7 +41,7 @@ public abstract class LevelRegistry extends PluginRegistry {
 		}
 
 		public String getInternalName() {
-			return this.getPluginDescriptor().getInternalName() + "." + this.levelId;
+			return this.levelData.getInternalName();
 		}
 
 		public int getIdx() {
@@ -55,7 +53,7 @@ public abstract class LevelRegistry extends PluginRegistry {
 		}
 
 		public String getLevelId() {
-			return this.levelId;
+			return this.levelData.getLevelId();
 		}
 
 		public LevelData getLevelData() {
@@ -74,16 +72,13 @@ public abstract class LevelRegistry extends PluginRegistry {
 			return this.gameData;
 		}
 
-		@Override
-		public int compareTo(final LevelDefinition o) {
-			return Integer.compare(this.idx, o.idx);
+		public void setGameData(final GameData gameData2) {
+			this.gameData = Optional.of(gameData2);
 		}
 
 		@Override
-		public String toString() {
-			return "LevelDefinition@" + System.identityHashCode(this) + " [idx=" + this.idx + ", levelId=" + this.levelId + ", levelData="
-					+ this.levelData + ", levelState=" + this.levelState + ", progress=" + this.progress + ", gameData=" + this.gameData
-					+ "]";
+		public int compareTo(final LevelDefinition o) {
+			return Integer.compare(this.idx, o.idx);
 		}
 
 		public boolean isNew() {
@@ -92,6 +87,21 @@ public abstract class LevelRegistry extends PluginRegistry {
 
 		public boolean hasPast() {
 			return (this.getLevelState() == LevelState.STARTED || this.getLevelState() == LevelState.WON) && this.gameData.isPresent();
+		}
+
+		public void reload() throws IOException {
+			this.gameData = LevelRegistry.this.readProgress(this);
+			this.gameData.ifPresent(c -> {
+				this.levelState = c.getLevelState();
+				this.progress = c.getProgress();
+			});
+		}
+
+		@Override
+		public String toString() {
+			return "LevelDefinition@" + System.identityHashCode(this) + " [idx=" + this.idx + ", levelData=" + this.levelData
+					+ ", levelState=" + this.levelState + ", progress=" + this.progress + ", gameData=" + this.gameData
+					+ ", getInternalName()=" + this.getInternalName() + "]";
 		}
 
 	}
@@ -109,7 +119,9 @@ public abstract class LevelRegistry extends PluginRegistry {
 		try {
 			final LevelData levelData = PGLogic.OBJECT_MAPPER
 					.readValue(PCUtils.readPackagedStringFile(this.getClass(), "/levels/" + id + ".json"), LevelData.class);
-			final LevelDefinition ld = new LevelDefinition(idx, id, levelData);
+			levelData.setPluginDescriptor(this.pluginDescriptor);
+			levelData.setLevelId(id);
+			final LevelDefinition ld = new LevelDefinition(idx, levelData);
 			final Optional<GameData> gd = this.readProgress(ld);
 			gd.ifPresent(c -> {
 				ld.levelState = c.getLevelState();

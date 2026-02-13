@@ -15,7 +15,6 @@ import lu.kbra.pclib.PCUtils;
 import lu.kbra.pclib.datastructure.pair.Pair;
 import lu.kbra.pclib.datastructure.pair.Pairs;
 import lu.kbra.pclib.logger.GlobalLogger;
-
 import lu.kbra.plant_game.BuildingDefinition;
 import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.entity.go.MeshGameObject;
@@ -117,7 +116,7 @@ public class IconRendererTestLogic extends GameLogic {
 	}
 
 	@Test
-	public void main() throws FileNotFoundException, IOException {
+	public void start() throws FileNotFoundException, IOException {
 		final GameLogic gameLogic = new IconRendererTestLogic();
 
 		final Properties props = new Properties();
@@ -128,7 +127,7 @@ public class IconRendererTestLogic extends GameLogic {
 	}
 
 	public static void main(final String[] args) throws FileNotFoundException, IOException {
-		new IconRendererTestLogic().main();
+		new IconRendererTestLogic().start();
 	}
 
 }

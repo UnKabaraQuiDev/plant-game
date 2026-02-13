@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 import org.joml.SimplexNoise;
 import org.joml.Vector2i;
@@ -15,6 +14,7 @@ import org.joml.Vector3fc;
 import org.joml.Vector3i;
 
 import lu.kbra.pclib.PCUtils;
+import lu.kbra.pclib.pointer.prim.IntPointer;
 import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.entity.go.mesh.terrain.TerrainEdgeMesh;
 import lu.kbra.plant_game.engine.entity.go.mesh.terrain.TerrainMesh;
@@ -69,13 +69,17 @@ public class WorldGenerator {
 		this.noiseCompute = new Integer[width][length];
 	}
 
-	public void compute() {
-		this.generateFaces();
-		this.generateVerts();
-		this.generateEdges();
+	public void compute(final IntPointer progress) {
+		progress.setValue(0);
+		this.generateFaces(progress);
+		progress.setValue(100);
+		this.generateVerts(progress);
+		progress.setValue(200);
+		this.generateEdges(progress);
+		progress.setValue(300);
 	}
 
-	public TerrainMesh generateMesh(final CacheManager cache) {
+	public TerrainMesh generateMesh(final IntPointer progress, final CacheManager cache) {
 		final TerrainMesh mesh = new TerrainMesh("terrain-" + this.width + "x" + this.length + "@" + System.identityHashCode(this),
 				this.meshId,
 				this.width,
@@ -88,16 +92,24 @@ public class WorldGenerator {
 				new Vec3fAttribArray(Mesh.ATTRIB_NORMALS_NAME, Mesh.ATTRIB_NORMALS_ID, this.normals),
 				new UByteAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_NAME, GameObject.MESH_ATTRIB_MATERIAL_ID_ID, this.materialIds),
 				new Vec3iAttribArray(GameObject.MESH_ATTRIB_OBJECT_ID_NAME, GameObject.MESH_ATTRIB_OBJECT_ID_ID, this.objectIds));
+
 		cache.addMesh(mesh);
+
+		progress.add(100);
+
 		return mesh;
 	}
 
-	public TerrainEdgeMesh generateEdgeMesh(final CacheManager cache) {
+	public TerrainEdgeMesh generateEdgeMesh(final IntPointer progress, final CacheManager cache) {
 		final Map<Vector3f, Integer> indexMap = new HashMap<>();
 		final List<Vector3f> verts = new ArrayList<>();
 		final List<Integer> inds = new ArrayList<>();
 		final List<Byte> mats = new ArrayList<>();
 
+		final int prevValue = progress.getValue();
+
+		final int totalEdgeCount = this.edges.size();
+		int edgeCount = 0;
 		for (final Edge e : this.edges) {
 			final Vector3f a = e.p1();
 			final Vector3f b = e.p2();
@@ -120,7 +132,12 @@ public class WorldGenerator {
 
 			inds.add(ia);
 			inds.add(ib);
+
+			edgeCount++;
+			progress.setValue(prevValue + 50 * edgeCount / totalEdgeCount);
 		}
+
+		progress.setValue(prevValue + 50);
 
 		this.edgeVertices = verts.toArray(new Vector3f[0]);
 		this.edgeMaterialIds = PCUtils.byteListToPrimitive(mats);
@@ -129,13 +146,22 @@ public class WorldGenerator {
 			this.edgeIndices[i] = inds.get(i);
 		}
 
-		return new TerrainEdgeMesh("terrain_edges-" + this.width + "x" + this.length + "@" + System.identityHashCode(this),
+		progress.setValue(prevValue + 75);
+
+		final TerrainEdgeMesh mesh = new TerrainEdgeMesh(
+				"terrain_edges-" + this.width + "x" + this.length + "@" + System.identityHashCode(this),
 				new Vec3fAttribArray(Mesh.ATTRIB_VERTICES_NAME, Mesh.ATTRIB_VERTICES_ID, this.edgeVertices),
 				new UIntAttribArray(Mesh.ATTRIB_INDICES_NAME, Mesh.ATTRIB_INDICES_ID, this.edgeIndices, BufferType.ELEMENT_ARRAY),
 				new UByteAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_NAME, GameObject.MESH_ATTRIB_MATERIAL_ID_ID, this.edgeMaterialIds));
+
+		cache.addMesh(mesh);
+
+		progress.setValue(prevValue + 100);
+
+		return mesh;
 	}
 
-	public Mesh generateHighlightMesh(final CacheManager cache) {
+	public Mesh generateHighlightMesh(final IntPointer progress, final CacheManager cache) {
 		final float height = 0.1f;
 		final float dist = 0.6f;
 		final float far = 3 * dist;
@@ -156,14 +182,19 @@ public class WorldGenerator {
 
 		final int[] edgeIndices = { 0, 1, 2, 3, 4, 5, 6, 7 };
 
-		return new LineLoadedMesh("terrain_highlight-3x3@" + System.identityHashCode(this),
+		final Mesh mesh = new LineLoadedMesh("terrain_highlight-3x3@" + System.identityHashCode(this),
 				null,
 				1f,
 				new Vec3fAttribArray(Mesh.ATTRIB_VERTICES_NAME, Mesh.ATTRIB_VERTICES_ID, edgeVertices),
 				new UIntAttribArray(Mesh.ATTRIB_INDICES_NAME, Mesh.ATTRIB_INDICES_ID, edgeIndices, BufferType.ELEMENT_ARRAY));
+
+		cache.addMesh(mesh);
+
+		progress.add(100);
+		return mesh;
 	}
 
-	protected void generateFaces() {
+	protected void generateFaces(final IntPointer progress) {
 		this.materialType = new ColorMaterial[this.width][this.length];
 		this.topFaces = new SquareFace[this.width][this.length];
 
@@ -225,11 +256,13 @@ public class WorldGenerator {
 								ColorMaterial.BROWN));
 					}
 				}
+
+				progress.setValue((x * this.width + z) * 100 / (this.width * this.length));
 			}
 		}
 	}
 
-	protected void generateEdges() {
+	protected void generateEdges(final IntPointer progress) {
 		for (int x = 0; x < this.width; x++) {
 			for (int z = 0; z < this.length; z++) {
 				final int h = this.getCellHeight(x, z);
@@ -252,18 +285,21 @@ public class WorldGenerator {
 						this.edges.add(new Edge(new Vector3f(x, top, z + 1), new Vector3f(x + 1, top, z + 1), mat));
 					}
 				}
+
+				progress.setValue(200 + 100 * (x * this.width + z) / (this.width * this.length));
 			}
 		}
 	}
 
-	protected void generateVerts() {
+	protected void generateVerts(final IntPointer progress) {
 		this.verts = new Vector3f[this.faces.size() * 4];
 		this.indices = new int[this.faces.size() * 6];
 		this.normals = new Vector3f[this.faces.size() * 4];
 		this.materialIds = new byte[this.faces.size() * 4];
 		this.objectIds = new Vector3i[this.faces.size() * 4];
-		this.meshId = new Random().nextInt(0, 255);
+		this.meshId = PCUtils.randomIntRange(0, 255);
 
+		final int totalFaceCount = this.faces.size();
 		int faceCount = 0;
 		for (final SquareFace face : this.faces) {
 			final Vector3f[] corners = face.corners();
@@ -280,6 +316,8 @@ public class WorldGenerator {
 				Arrays.fill(this.objectIds, faceCount * 4, faceCount * 4 + 4, new Vector3i(this.meshId, 0, 0));
 			}
 			faceCount++;
+
+			progress.setValue(100 + 100 * faceCount / totalFaceCount);
 		}
 	}
 

@@ -142,6 +142,10 @@ public class ResumeUIObjectGroup extends ParentUIObjectGroup implements DebugBou
 		return ColorMaterial.GREEN;
 	}
 
+	public LevelDefinition getCurrentLevelDefinition() {
+		return this.levelDef == null ? null : this.levelDef.get();
+	}
+
 	@Override
 	public String toString() {
 		return "ResumeUIObjectGroup@" + System.identityHashCode(this) + " [levelDef=" + this.levelDef + ", playInfoUIObjectGroup="

@@ -275,38 +275,44 @@ public class DeferredCompositor implements Cleanupable {
 	}
 
 	public void render(final GameEngine engine, final WorldLevelScene worldScene, final UIScene uiScene) {
+		final CacheManager cache = engine.getCache();
+
 		final int width = engine.getWindow().getWidth();
 		final int height = engine.getWindow().getHeight();
 
-		final float newFov = worldScene.getCamera().getProjection().getFov();
-		final boolean needRegen = !this.oldResolution.equals(width, height) || this.oldFov != newFov;
-		this.oldFov = newFov;
-		final CacheManager cache = engine.getCache();
+		final boolean needRegen;
+		if (worldScene != null) {
+			final float newFov = worldScene.getCamera().getProjection().getFov();
+			needRegen = !this.oldResolution.equals(width, height) || this.oldFov != newFov;
+			this.oldFov = newFov;
 
-		if (needRegen) {
-			this.oldResolution.set(width, height);
-			final float divisor = (float) MathUtils.map(Math.toDegrees(worldScene.getCamera().getProjection().getFov()), 5, 65, 6, 1);
-			// System.err.println("fov: " + worldScene.getCamera().getProjection().getFov()
-			// + "rad "
-			// + Math.toDegrees(worldScene.getCamera().getProjection().getFov()) + "deg = "
-			// + divisor);
-			// idk why this uses the option windowSize but ok
-			this.renderResolution.set(engine.getWindow().getOptions().windowSize).div(PCUtils.clamp(1, 100, divisor));
-			this.renderResolution.set(width, height).div(2);
-			this.outputResolution.set(width, height);
+			if (needRegen) {
+				this.oldResolution.set(width, height);
+				final float divisor = (float) MathUtils.map(Math.toDegrees(worldScene.getCamera().getProjection().getFov()), 5, 65, 6, 1);
+				// System.err.println("fov: " + worldScene.getCamera().getProjection().getFov()
+				// + "rad "
+				// + Math.toDegrees(worldScene.getCamera().getProjection().getFov()) + "deg = "
+				// + divisor);
+				// idk why this uses the option windowSize but ok
+				this.renderResolution.set(engine.getWindow().getOptions().windowSize).div(PCUtils.clamp(1, 100, divisor));
+				this.renderResolution.set(width, height).div(2);
+				this.outputResolution.set(width, height);
 
-			this.resizeFramebuffer(this.worldFramebuffer, this.renderResolution);
+				this.resizeFramebuffer(this.worldFramebuffer, this.renderResolution);
+			}
+
+			GL_W.glEnable(GL_W.GL_MULTISAMPLE);
+
+			this.deferredPass = true;
+			this.renderWorldScene(cache, worldScene, this.renderResolution, needRegen);
+			this.deferredPass = false;
+
+			this.renderMaterials(cache, worldScene, this.renderResolution, needRegen);
+
+			this.renderOutlines(cache, this.renderResolution, needRegen);
+		} else {
+			needRegen = false;
 		}
-
-		GL_W.glEnable(GL_W.GL_MULTISAMPLE);
-
-		this.deferredPass = true;
-		this.renderWorldScene(cache, worldScene, this.renderResolution, needRegen);
-		this.deferredPass = false;
-
-		this.renderMaterials(cache, worldScene, this.renderResolution, needRegen);
-
-		this.renderOutlines(cache, this.renderResolution, needRegen);
 
 		this.blitToScreen(cache, this.outputResolution, needRegen);
 

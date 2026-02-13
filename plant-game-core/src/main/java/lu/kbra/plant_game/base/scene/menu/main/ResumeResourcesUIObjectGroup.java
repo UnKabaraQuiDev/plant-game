@@ -6,25 +6,33 @@ import java.util.function.Consumer;
 import lu.kbra.pclib.concurrency.ObjectTriggerLatch;
 import lu.kbra.pclib.logger.GlobalLogger;
 import lu.kbra.plant_game.base.scene.overlay.group.building.ResourceLineUIObjectGroup;
-import lu.kbra.plant_game.base.scene.overlay.group.impl.AnchoredLayoutUIObjectGroup;
+import lu.kbra.plant_game.engine.entity.ui.data.Direction2d;
 import lu.kbra.plant_game.engine.entity.ui.group.UIObjectGroup;
+import lu.kbra.plant_game.engine.entity.ui.impl.DebugBoundsColor;
 import lu.kbra.plant_game.engine.entity.ui.impl.MarginOwner;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor2D;
 import lu.kbra.plant_game.engine.scene.ui.layout.FlowLayout;
 import lu.kbra.plant_game.engine.scene.world.GameData;
+import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.plant_game.plugin.registry.LevelRegistry.LevelDefinition;
 import lu.kbra.plant_game.plugin.registry.ResourceRegistry;
 
-public class ResumeResourcesUIObjectGroup extends AnchoredLayoutUIObjectGroup implements MarginOwner, Consumer<LevelDefinition> {
+public class ResumeResourcesUIObjectGroup extends AnchoredFBUIObjectGroup
+		/* AnchoredLayoutUIObjectGroup */ implements MarginOwner, Consumer<LevelDefinition>, DebugBoundsColor {
 
 	protected WeakReference<LevelDefinition> levelDef;
 
 	protected float margin;
 
 	public ResumeResourcesUIObjectGroup(final UIObjectGroup parent) {
-		super(parent.getId()
-				+ "-resources", new FlowLayout(true, 0.1f, Anchor2D.LEADING), parent, Anchor.BOTTOM_RIGHT, Anchor.BOTTOM_RIGHT);
+		super(parent.getId() + "-resources",
+				new FlowLayout(true, 0.1f, Anchor2D.LEADING),
+				parent,
+				Direction2d.VERTICAL,
+				2.5f,
+				Anchor.BOTTOM_RIGHT,
+				Anchor.BOTTOM_RIGHT);
 	}
 
 	@Override
@@ -79,6 +87,11 @@ public class ResumeResourcesUIObjectGroup extends AnchoredLayoutUIObjectGroup im
 	@Override
 	public void setMargin(final float margin) {
 		this.margin = margin;
+	}
+
+	@Override
+	public ColorMaterial getBoundsColor() {
+		return ColorMaterial.BROWN;
 	}
 
 	@Override

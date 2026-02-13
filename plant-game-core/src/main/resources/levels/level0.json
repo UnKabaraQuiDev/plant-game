@@ -2,9 +2,9 @@
 	"levelName": "0th Level",
 	"author": "Me",
 	"world": {
-		"generationStrategy": "IMAGE",
-		"generationData": {
-			"path": "classpath:/maps/world_map.png",
+		"generation": {
+			"strategy": "IMAGE",
+			"path": "/maps/world_map.png",
 			"materialPath": null,
 			"height": 4
 		},

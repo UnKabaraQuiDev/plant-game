@@ -2,12 +2,16 @@ package lu.kbra.plant_game;
 
 import java.io.File;
 import java.util.Locale;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import org.lwjgl.glfw.GLFW;
 
 import com.codedisaster.steamworks.SteamAPI;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import lu.kbra.pclib.pointer.prim.IntPointer;
 import lu.kbra.plant_game.base.scene.menu.main.MainMenuUIScene;
 import lu.kbra.plant_game.base.scene.overlay.OverlayUIScene;
 import lu.kbra.plant_game.engine.UpdateFrameState;
@@ -26,7 +30,9 @@ import lu.kbra.plant_game.engine.scene.world.data.LevelData;
 import lu.kbra.plant_game.engine.window.input.MappingInputHandler;
 import lu.kbra.plant_game.plugin.PluginManager;
 import lu.kbra.plant_game.plugin.registry.LevelRegistry;
+import lu.kbra.plant_game.plugin.registry.LevelRegistry.LevelDefinition;
 import lu.kbra.standalone.gameengine.impl.GameLogic;
+import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
 import lu.kbra.standalone.gameengine.impl.future.WorkerDispatcher;
 import lu.kbra.standalone.gameengine.utils.gl.consts.Consts;
 
@@ -37,6 +43,10 @@ public class PGLogic extends GameLogic {
 
 	static {
 		OBJECT_MAPPER = new ObjectMapper();
+
+		OBJECT_MAPPER.setVisibility(PropertyAccessor.ALL, com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE);
+		OBJECT_MAPPER.setVisibility(PropertyAccessor.FIELD, com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY);
+
 		OBJECT_MAPPER.registerModule(new OrgJSONModule());
 		OBJECT_MAPPER.registerModule(new OrgJOMLModule());
 		OBJECT_MAPPER.registerModule(new VersionMatcherModule());
@@ -91,7 +101,7 @@ public class PGLogic extends GameLogic {
 
 		this.uiScene.init(this.WORKERS, this.RENDER_DISPATCHER);
 		this.overlayUIScene.init(this.WORKERS, this.RENDER_DISPATCHER);
-		this.worldScene.init(this.WORKERS, this.RENDER_DISPATCHER, this.gameData);
+		this.worldScene.init(this.WORKERS, this.RENDER_DISPATCHER, this.gameData, new IntPointer(0));
 
 //		this.uiScene = null;
 //		this.uiScene = this.overlayUIScene;
@@ -109,7 +119,9 @@ public class PGLogic extends GameLogic {
 		if (this.uiScene != null) {
 			this.uiScene.input(this.inputHandler, this.frameState);
 		}
-		this.worldScene.input(this.inputHandler, this.frameState);
+		if (this.worldScene != null) {
+			this.worldScene.input(this.inputHandler, this.frameState);
+		}
 
 		if (this.inputHandler.isKeyPressedOnce(GLFW.GLFW_KEY_H)) {
 			this.uiScene.getCache().dump(System.out);
@@ -124,16 +136,17 @@ public class PGLogic extends GameLogic {
 		if (this.uiScene != null) {
 			this.uiScene.update(this.inputHandler, this.compositor, this.WORKERS, this.RENDER_DISPATCHER);
 		}
-		this.worldScene.update(this.inputHandler, this.compositor, this.WORKERS, this.RENDER_DISPATCHER);
+		if (this.worldScene != null) {
+			this.worldScene.update(this.inputHandler, this.compositor, this.WORKERS, this.RENDER_DISPATCHER);
+		}
 	}
 
 	@Override
 	public void render(final float dTime) {
-		this.worldScene.getCamera().getProjection().update(this.window.getWidth(), this.window.getHeight());
-		// uiScene.getCamera().getProjection().update(window.getWidth(),
-		// window.getHeight());
-
-		this.worldScene.render(dTime);
+		if (this.worldScene != null) {
+			this.worldScene.getCamera().getProjection().update(this.window.getWidth(), this.window.getHeight());
+			this.worldScene.render(dTime);
+		}
 
 		this.compositor.render(this.engine, this.worldScene, this.uiScene);
 	}
@@ -143,6 +156,29 @@ public class PGLogic extends GameLogic {
 		if (PGMain.STEAM_LAUCHED && SteamAPI.isSteamRunning()) {
 			SteamAPI.runCallbacks();
 		}
+	}
+
+	public void startLevel(final LevelDefinition currentLevelDefinition) {
+		final WorldLevelScene oldScene = this.worldScene;
+		this.worldScene = null;
+		this.RENDER_DISPATCHER.post(oldScene::cleanup);
+
+		final LevelData levelData = currentLevelDefinition.getLevelData();
+		final IntPointer progress = new IntPointer(0);
+
+		new TaskFuture<>(this.RENDER_DISPATCHER,
+				(Supplier<WorldLevelScene>) () -> new WorldLevelScene(levelData.getInternalName(), this.cache))
+				.then(this.WORKERS, (Consumer<WorldLevelScene>) worldScene -> {
+					this.gameData = GameData.fromBlankLevel(levelData);
+					currentLevelDefinition.setGameData(this.gameData);
+
+					worldScene.init(this.WORKERS, this.RENDER_DISPATCHER, this.gameData, progress).then(c -> this.worldScene = c);
+				})
+				.push();
+	}
+
+	public void resumeLevel(final LevelDefinition currentLevelDefinition) {
+		System.err.println("not supported");
 	}
 
 	@Override
