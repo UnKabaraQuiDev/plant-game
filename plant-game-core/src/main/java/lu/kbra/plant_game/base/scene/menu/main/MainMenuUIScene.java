@@ -37,9 +37,11 @@ import lu.kbra.plant_game.engine.entity.ui.text.VolumeTextUIObject;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
+import lu.kbra.plant_game.engine.scene.ui.layout.Anchor2D;
 import lu.kbra.plant_game.engine.scene.ui.layout.AnchorLayout;
 import lu.kbra.plant_game.engine.scene.ui.layout.FlowLayout;
 import lu.kbra.plant_game.engine.scene.ui.layout.Layout;
+import lu.kbra.plant_game.engine.scene.ui.layout.LayoutOwner;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.plant_game.plugin.registry.LevelRegistry;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
@@ -58,6 +60,8 @@ public class MainMenuUIScene extends UIScene {
 	public static final int QUIT = 3;
 	public static final int RESUME = 4;
 
+	public static final int[] BACK_INDICES = { MAIN, MAIN, MAIN, MAIN, PLAY };
+
 	public static final float GRADIENT_DEPTH = -0.1f;
 
 	public static final float OPTIONS_SCROLL_SPEED = 0.1f;
@@ -73,9 +77,8 @@ public class MainMenuUIScene extends UIScene {
 	protected ParentUIObjectGroup mainMenuGroup = new ParentUIObjectGroup("main",
 			new AnchorLayout(),
 			new Transform3D(new Vector3f(this.restPositions[MAIN])));
-
 	protected MarginAnchoredUIObjectGroup mainButtonsMenuGroup = new MarginAnchoredUIObjectGroup("main.buttons",
-			new FlowLayout(true, 0.06f),
+			new FlowLayout(true, 0.06f, Anchor2D.LEADING),
 			this.mainMenuGroup,
 			Anchor.CENTER_LEFT,
 			Anchor.CENTER_LEFT,
@@ -329,6 +332,13 @@ public class MainMenuUIScene extends UIScene {
 			final OffsetUIObjectGroup target = this.groups[this.targetGroup];
 			final OffsetUIObjectGroup current = this.groups[this.currentGroup];
 
+			if (target instanceof LayoutOwner lo) {
+				lo.doLayout();
+			}
+			if (current instanceof LayoutOwner lo) {
+				lo.doLayout();
+			}
+
 			final float duration = 0.8f;
 			final float dTime = inputHandler.dTime();
 			this.progress = org.joml.Math.clamp(0, 1, this.progress + dTime / duration);
@@ -371,6 +381,14 @@ public class MainMenuUIScene extends UIScene {
 
 	public ResumeUIObjectGroup getResumeInfoGroup() {
 		return this.resumeInfoGroup;
+	}
+
+	public int getCurrentGroup() {
+		return this.currentGroup;
+	}
+
+	public int getTargetGroup() {
+		return this.targetGroup;
 	}
 
 	@Override

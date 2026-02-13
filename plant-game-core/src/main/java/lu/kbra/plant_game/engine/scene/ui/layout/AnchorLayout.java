@@ -33,14 +33,14 @@ public class AnchorLayout implements Layout, BoundsOwnerParentAware {
 
 		final Rectangle2D screenBounds = boundsParent.getBounds().getBounds2D();
 
-		for (final UIObject obj : children) {
-			if (!obj.hasTransform()) {
+		for (final UIObject child : children) {
+			if (!child.hasTransform() || child instanceof NoLayout || !child.isActive()) {
 				continue;
 			}
 			final Anchor objectAnchor;
 			final Anchor targetAnchor;
-			if (!(obj instanceof final AnchorOwner ao)) {
-				GlobalLogger.info("Skipping not anchor: " + obj);
+			if (!(child instanceof final AnchorOwner ao)) {
+				GlobalLogger.info("Skipping not anchor: " + child);
 				continue;
 			}
 			if (!ao.isAnchored()) {
@@ -55,7 +55,7 @@ public class AnchorLayout implements Layout, BoundsOwnerParentAware {
 
 			float margin = 0;
 			// child has margin outwards
-			if (obj instanceof final MarginOwner mo) {
+			if (child instanceof final MarginOwner mo) {
 				margin += mo.getMargin();
 			}
 			// parent has padding inwards
@@ -63,7 +63,7 @@ public class AnchorLayout implements Layout, BoundsOwnerParentAware {
 				margin += po.getPadding();
 			}
 			float marginX, marginZ = marginX = margin;
-			if (obj instanceof final Margin2DOwner mo) {
+			if (child instanceof final Margin2DOwner mo) {
 				marginX += mo.getMarginX();
 				marginZ += mo.getMarginZ();
 			}
@@ -72,8 +72,8 @@ public class AnchorLayout implements Layout, BoundsOwnerParentAware {
 				marginZ += mo.getPaddingZ();
 			}
 
-			final Rectangle2D bounds = obj.getLocalTransformedBounds().getBounds2D();
-			alignAnchors(obj.getTransform(), bounds, screenBounds, objectAnchor, targetAnchor, marginX, marginZ);
+			final Rectangle2D bounds = child.getLocalTransformedBounds().getBounds2D();
+			alignAnchors(child.getTransform(), bounds, screenBounds, objectAnchor, targetAnchor, marginX, marginZ);
 		}
 	}
 

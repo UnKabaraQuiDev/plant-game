@@ -4,6 +4,7 @@ import java.lang.ref.WeakReference;
 import java.util.function.Consumer;
 
 import lu.kbra.pclib.concurrency.ObjectTriggerLatch;
+import lu.kbra.pclib.logger.GlobalLogger;
 import lu.kbra.plant_game.base.scene.overlay.group.building.ResourceLineUIObjectGroup;
 import lu.kbra.plant_game.base.scene.overlay.group.impl.AnchoredLayoutUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.group.UIObjectGroup;
@@ -11,7 +12,7 @@ import lu.kbra.plant_game.engine.entity.ui.impl.MarginOwner;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor2D;
 import lu.kbra.plant_game.engine.scene.ui.layout.FlowLayout;
-import lu.kbra.plant_game.engine.scene.world.LevelState;
+import lu.kbra.plant_game.engine.scene.world.GameData;
 import lu.kbra.plant_game.plugin.registry.LevelRegistry.LevelDefinition;
 import lu.kbra.plant_game.plugin.registry.ResourceRegistry;
 
@@ -22,7 +23,8 @@ public class ResumeResourcesUIObjectGroup extends AnchoredLayoutUIObjectGroup im
 	protected float margin;
 
 	public ResumeResourcesUIObjectGroup(final UIObjectGroup parent) {
-		super(parent.getId() + "-resources", new FlowLayout(true, 0.1f, Anchor2D.LEADING), parent, Anchor.CENTER_LEFT, Anchor.CENTER_LEFT);
+		super(parent.getId()
+				+ "-resources", new FlowLayout(true, 0.1f, Anchor2D.LEADING), parent, Anchor.BOTTOM_RIGHT, Anchor.BOTTOM_RIGHT);
 	}
 
 	@Override
@@ -33,15 +35,27 @@ public class ResumeResourcesUIObjectGroup extends AnchoredLayoutUIObjectGroup im
 
 		this.levelDef = new WeakReference<>(t);
 
-		if (t.getLevelState() == LevelState.NOT_STARTED || t.getLevelState() == LevelState.LOST) {
+		if (t.isNew()) {
 			this.stream().filter(ResourceLineUIObjectGroup.class::isInstance).map(ResourceLineUIObjectGroup.class::cast).forEach(c -> {
 				if (t.getLevelData().getGame().getStartResources().containsKey(c.getResourceType())) {
-					c.getValueObject().set(t.getLevelData().getGame().getStartResources().get(c.getResourceType()));
+					c.getValueObject().set(t.getLevelData().getGame().getStartResources().get(c.getResourceType())).flushValue();
 					c.setActive(true);
 				} else {
 					c.setActive(false);
 				}
 			});
+		} else if (t.hasPast()) {
+			final GameData go = t.getGameData().get();
+			this.stream().filter(ResourceLineUIObjectGroup.class::isInstance).map(ResourceLineUIObjectGroup.class::cast).forEach(c -> {
+				if (go.getResources().containsKey(c.getResourceType())) {
+					c.getValueObject().set(go.getResources().get(c.getResourceType())).flushValue();
+					c.setActive(true);
+				} else {
+					c.setActive(false);
+				}
+			});
+		} else {
+			GlobalLogger.warning("Invalid level state: " + t);
 		}
 	}
 

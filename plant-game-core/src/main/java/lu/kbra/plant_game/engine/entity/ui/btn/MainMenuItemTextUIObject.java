@@ -25,10 +25,14 @@ public abstract class MainMenuItemTextUIObject extends TextUIObject implements N
 
 	@Override
 	public void animate(final float t, final boolean isHovered) {
-		((Transform3DShear) this.getTransform()).shearSet(GeoAxis.X, GeoAxis.Z, t * SHEAR_Y_FACTOR);
-		((Transform3DShear) this.getTransform()).shearSet(GeoAxis.Z, GeoAxis.X, t * SHEAR_X_FACTOR);
-		this.getTransform().scaleSet(1 + t * SCALE_FACTOR);
-		this.getTransform().update();
+		if (this.hasTransform()) {
+			if (this.getTransform() instanceof Transform3DShear t3Ds) {
+				t3Ds.shearSet(GeoAxis.X, GeoAxis.Z, t * SHEAR_Y_FACTOR);
+				t3Ds.shearSet(GeoAxis.Z, GeoAxis.X, t * SHEAR_X_FACTOR);
+			}
+			this.getTransform().scaleSet(1 + t * SCALE_FACTOR);
+			this.getTransform().update();
+		}
 		this.getFirstParentMatching(LayoutOwner.class).ifPresent(LayoutOwner::doLayout);
 	}
 

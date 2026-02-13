@@ -27,7 +27,6 @@ public class BackButtonUIObject extends GrowOnHoverTextUIObject implements Needs
 
 	public BackButtonUIObject(final String str, final TextEmitter text) {
 		super(str, text);
-//		this.setDir(Scale2dDir.HORIZONTAL);
 	}
 
 	@Override
@@ -40,7 +39,7 @@ public class BackButtonUIObject extends GrowOnHoverTextUIObject implements Needs
 		this.getUISceneParent()
 				.filter(MainMenuUIScene.class::isInstance)
 				.map(MainMenuUIScene.class::cast)
-				.ifPresentOrElse(c -> c.startTransition(MainMenuUIScene.MAIN),
+				.ifPresentOrElse(c -> c.startTransition(MainMenuUIScene.BACK_INDICES[c.getCurrentGroup()]),
 						() -> GlobalLogger.severe("No " + MainMenuUIScene.class.getSimpleName() + " found in hierarchy."));
 	}
 

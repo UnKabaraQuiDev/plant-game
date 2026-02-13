@@ -86,6 +86,14 @@ public abstract class LevelRegistry extends PluginRegistry {
 					+ "]";
 		}
 
+		public boolean isNew() {
+			return (this.getLevelState() == LevelState.NOT_STARTED || this.getLevelState() == LevelState.LOST);
+		}
+
+		public boolean hasPast() {
+			return (this.getLevelState() == LevelState.STARTED || this.getLevelState() == LevelState.WON) && this.gameData.isPresent();
+		}
+
 	}
 
 	public static final String DEBUG_PROPERTY = LevelRegistry.class.getSimpleName() + ".debug";

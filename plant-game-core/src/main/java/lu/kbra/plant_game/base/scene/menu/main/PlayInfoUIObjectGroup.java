@@ -28,11 +28,11 @@ import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 public class PlayInfoUIObjectGroup extends AnchoredLayoutUIObjectGroup implements Consumer<LevelDefinition>, MarginOwner {
 
+	protected WeakReference<LevelDefinition> levelDef;
+
 	protected ObjectPointer<ProgrammaticTextUIObject> titleObject = new ObjectPointer<>();
 	protected ObjectPointer<ProgrammaticTextUIObject> authorObject = new ObjectPointer<>();
 	protected ProgressBarUIObject progressBar = new IndexedProgressBarUIObject("progress", this, new Transform3D(), 2);
-
-	protected WeakReference<LevelDefinition> levelDef;
 
 	protected float margin = 0.1f;
 
