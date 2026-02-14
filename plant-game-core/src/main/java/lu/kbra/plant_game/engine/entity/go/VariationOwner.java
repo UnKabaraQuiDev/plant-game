@@ -27,4 +27,8 @@ public interface VariationOwner {
 		return GameEngine.IDENTITY_VECTOR3F;
 	}
 
+	default boolean useObjectTransform() {
+		return false;
+	}
+
 }

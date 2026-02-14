@@ -48,7 +48,7 @@ import lu.kbra.standalone.gameengine.scene.camera.Camera3D;
 import lu.kbra.standalone.gameengine.utils.consts.Direction;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-public final class WorldLevelScene extends Scene3D implements ActiveModalController {
+public class WorldLevelScene extends Scene3D implements ActiveModalController {
 
 	private static final int CAMERA_MOVEMENT_SPEED = 10;
 
@@ -106,6 +106,8 @@ public final class WorldLevelScene extends Scene3D implements ActiveModalControl
 		}).then(workers, (Function<Pair<WorldGenerator, TerrainMesh>, WorldGenerator>) pair -> {
 			this.setTerrain(new TerrainGameObject("terrain-" + levelData.getInternalName(), pair.getValue()));
 			this.getTerrain().getTransform().translationSet(-pair.getValue().getWidth() / 2, 0, -pair.getValue().getLength() / 2);
+			this.getTerrain().getTransform().rotationPivotSub(this.getTerrain().getTransform().getTranslation());
+			this.getTerrain().getTransform().scalePivotSub(this.getTerrain().getTransform().getTranslation());
 			this.getTerrain().getTransform().updateMatrix();
 			return pair.getKey();
 		}).then(render, (Function<WorldGenerator, Pair<WorldGenerator, TerrainEdgeMesh>>) wg -> {

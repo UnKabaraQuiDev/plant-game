@@ -27,6 +27,8 @@ uniform float variationMapScale;
 
 uniform bool singleObject;
 uniform uvec3 singleObjectId;
+uniform bool useObjectTransform;
+uniform mat4 inverseObjectTransform;
 
 layout(location = 5) uniform sampler2D variationMap;
 
@@ -62,7 +64,7 @@ void main() {
     vec4 outColor = vec4(color, 1);
 
 	if (colorVariation) {
-	    vec3 worldPos = pos.xyz;
+	    vec3 worldPos = useObjectTransform ? (inverseObjectTransform * pos).xyz : pos.xyz;
 
 	    vec2 cellIndex = floor(vec2(worldPos.x, worldPos.z) / variationCellSize.xz) * variationMapScale;
 

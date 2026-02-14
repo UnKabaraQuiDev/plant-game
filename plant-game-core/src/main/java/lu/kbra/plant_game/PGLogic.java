@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lu.kbra.pclib.pointer.prim.IntPointer;
 import lu.kbra.plant_game.base.scene.menu.main.MainMenuUIScene;
 import lu.kbra.plant_game.base.scene.overlay.OverlayUIScene;
+import lu.kbra.plant_game.base.scene.world.MainMenuWorldScene;
 import lu.kbra.plant_game.engine.UpdateFrameState;
 import lu.kbra.plant_game.engine.data.json.OrgJOMLModule;
 import lu.kbra.plant_game.engine.data.json.OrgJSONModule;
@@ -84,7 +85,8 @@ public class PGLogic extends GameLogic {
 		this.compositor = new DeferredCompositor(this.engine, this.engine.getRenderThread());
 		this.compositor.getBackgroundColor().set(1, 1, 0, 1);
 
-		this.worldScene = new WorldLevelScene("world", this.cache);
+//		this.worldScene = new WorldLevelScene("world", this.cache);
+		this.worldScene = new MainMenuWorldScene(this.cache);
 
 		this.mainMenuUIScene = new MainMenuUIScene(this.cache);
 		this.overlayUIScene = new OverlayUIScene(this.cache);

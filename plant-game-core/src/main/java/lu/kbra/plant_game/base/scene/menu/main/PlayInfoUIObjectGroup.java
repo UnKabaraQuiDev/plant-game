@@ -51,7 +51,9 @@ public class PlayInfoUIObjectGroup extends AnchoredLayoutUIObjectGroup implement
 
 		this.titleObject.ifSet(i -> i.setText(t.getLevelData().getLevelName()).flushText());
 		this.authorObject.ifSet(i -> i.setText(t.getLevelData().getAuthor()).flushText());
-		this.progressBar.setValue(50 / 100f).updateScaling();
+		this.progressBar.setValue(t.getProgress() / 100f).updateScaling();
+
+		super.setActive(true);
 	}
 
 	public ObjectTriggerLatch<? extends PlayInfoUIObjectGroup> init() {

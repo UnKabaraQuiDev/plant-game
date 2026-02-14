@@ -18,6 +18,7 @@ import lu.kbra.plant_game.PGLogic;
 import lu.kbra.plant_game.base.data.DefaultKeyOption;
 import lu.kbra.plant_game.base.scene.overlay.group.impl.MarginAnchoredUIObjectGroup;
 import lu.kbra.plant_game.base.scene.overlay.group.impl.ParentUIObjectGroup;
+import lu.kbra.plant_game.base.scene.world.MainMenuWorldScene;
 import lu.kbra.plant_game.engine.UpdateFrameState;
 import lu.kbra.plant_game.engine.entity.ui.btn.BackButtonUIObject;
 import lu.kbra.plant_game.engine.entity.ui.btn.LevelButtonUIObject;
@@ -28,7 +29,6 @@ import lu.kbra.plant_game.engine.entity.ui.data.GradientDirection;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
 import lu.kbra.plant_game.engine.entity.ui.gradient.AnchoredGradientQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.group.OffsetUIObjectGroup;
-import lu.kbra.plant_game.engine.entity.ui.group.ScrollContainerUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.group.UIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.icon.LargeLogoUIObject;
 import lu.kbra.plant_game.engine.entity.ui.layout.SpacerUIObject;
@@ -42,6 +42,7 @@ import lu.kbra.plant_game.engine.scene.ui.layout.AnchorLayout;
 import lu.kbra.plant_game.engine.scene.ui.layout.FlowLayout;
 import lu.kbra.plant_game.engine.scene.ui.layout.Layout;
 import lu.kbra.plant_game.engine.scene.ui.layout.LayoutOwner;
+import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.plant_game.plugin.registry.LevelRegistry;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
@@ -61,6 +62,7 @@ public class MainMenuUIScene extends UIScene {
 	public static final int RESUME = 4;
 
 	public static final int[] BACK_INDICES = { MAIN, MAIN, MAIN, MAIN, PLAY };
+	public static final float TRANSITION_DURATION = 0.8f;
 
 	public static final float GRADIENT_DEPTH = -0.1f;
 
@@ -143,43 +145,6 @@ public class MainMenuUIScene extends UIScene {
 		final ListTriggerLatch<LevelButtonUIObject> btns = new ListTriggerLatch<>(count, list -> {
 			Collections.sort(list);
 			this.playContentGroup.addAll(list);
-//			((LayoutOwner) this.playContentMenuGroup).doLayout();
-
-//			new TaskFuture<>(workers, (Supplier<GeneratedMeshData>) () -> {
-//				final Path2D.Float curve = new Path2D.Float();
-//				curve.moveTo(list.get(0).getBounds().getBounds2D().getCenterX(), list.get(0).getBounds().getBounds2D().getCenterY());
-//				final float handleDist = 0.5f;
-//				list.subList(1, list.size())
-//						.forEach(c -> curve.curveTo(curve.getCurrentPoint().getX() + handleDist,
-//								curve.getCurrentPoint().getY(),
-//								c.getBounds().getBounds2D().getCenterX() - handleDist,
-//								c.getBounds().getBounds2D().getCenterY(),
-//								c.getBounds().getBounds2D().getCenterX(),
-//								c.getBounds().getBounds2D().getCenterY()));
-//
-//				return Path2DTransformer.generateTriangleMesh(curve, 0.05f, 50, 0, GeoPlane.XZ);
-//			}).then(renderDispatcher, (Function<GeneratedMeshData, Mesh>) arr -> {
-//				final Vec3fAttribArray pos = new Vec3fAttribArray(Mesh.ATTRIB_VERTICES_NAME,
-//						Mesh.ATTRIB_VERTICES_ID,
-//						arr.vertices(),
-//						BufferType.ARRAY,
-//						false);
-//				final UIntAttribArray ind = new UIntAttribArray(Mesh.ATTRIB_INDICES_NAME,
-//						Mesh.ATTRIB_INDICES_ID,
-//						arr.indices(),
-//						BufferType.ELEMENT_ARRAY,
-//						false);
-////				System.err.println(Arrays.stream(arr.vertices()).map(c -> c.x + ", " + c.y + ", " + c.z).collect(Collectors.joining("\n")));
-////				System.err.println(Arrays.stream(arr.indices()).mapToObj(Integer::toString).collect(Collectors.joining("\n")));
-//				return new LoadedMesh("meshTest", null, pos, ind);
-//			}).then(workers, (Consumer<Mesh>) m -> {
-////				System.err.println(m);
-//				final NLTintedMeshUIObject go = new NLTintedMeshUIObject("meshTestObject", m);
-//				go.setTransform(new Transform3D(new Vector3f(0, -0.1f, 0)));
-//				go.setColorMaterial(ColorMaterial.GREEN);
-//				this.playContentMenuGroup.add(go);
-////				System.err.println(go);
-//			}).push();
 		});
 
 		final float startPosX = -1;
@@ -209,6 +174,7 @@ public class MainMenuUIScene extends UIScene {
 				.push();
 
 		this.playInfoGroup.init();
+		this.playInfoGroup.setActive(false);
 	}
 
 	private void buildOptionsMenu() {
@@ -307,16 +273,6 @@ public class MainMenuUIScene extends UIScene {
 	@Override
 	public void input(final WindowInputHandler inputHandler, final UpdateFrameState frameState) {
 		super.input(inputHandler, frameState);
-
-		final OffsetUIObjectGroup current = this.groups[this.currentGroup];
-		if (current instanceof final ScrollContainerUIObjectGroup scrollContainer && scrollContainer.getScrollBar() != null) {
-			scrollContainer.updateScrollBar();
-			scrollContainer.getScrollBar().addScrollPosition((float) inputHandler.getMouseScroll().y);
-		}
-		current.recomputeBounds();
-
-		frameState.uiSceneCaughtMouseInput = true;
-
 	}
 
 	@Override
@@ -339,9 +295,8 @@ public class MainMenuUIScene extends UIScene {
 				lo.doLayout();
 			}
 
-			final float duration = 0.8f;
 			final float dTime = inputHandler.dTime();
-			this.progress = org.joml.Math.clamp(0, 1, this.progress + dTime / duration);
+			this.progress = org.joml.Math.clamp(0, 1, this.progress + dTime / TRANSITION_DURATION);
 
 			final Vector3f targetPos = new Vector3f(0, 0, 0);
 			final Vector3f targetStart = new Vector3f(this.restPositions[this.targetGroup]);
@@ -373,6 +328,11 @@ public class MainMenuUIScene extends UIScene {
 		}
 		this.targetGroup = target;
 		this.progress = 0;
+
+		final WorldLevelScene wls = PGLogic.INSTANCE.getWorldScene();
+		if (wls instanceof MainMenuWorldScene mmws) {
+			mmws.startTransition(target);
+		}
 	}
 
 	public PlayInfoUIObjectGroup getPlayInfoGroup() {

@@ -57,6 +57,7 @@ import lu.kbra.plant_game.engine.entity.impl.RenderConditionOwner;
 import lu.kbra.plant_game.engine.entity.impl.SwayOwner;
 import lu.kbra.plant_game.engine.entity.impl.TintOwner;
 import lu.kbra.plant_game.engine.entity.impl.TransformOwner;
+import lu.kbra.plant_game.engine.entity.ui.impl.AbsoluteTransform3DOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.DebugBoundsColor;
 import lu.kbra.plant_game.engine.entity.ui.impl.TransformedBoundsOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.TransparentEntity;
@@ -674,6 +675,10 @@ public class DeferredCompositor implements Cleanupable {
 			this.materialComputeShader.setUniform(MaterialComputeShader.SINGLE_OBJECT, true);
 			this.materialComputeShader.setUniformUnsigned(MaterialComputeShader.SINGLE_OBJECT_ID, go.getObjectId());
 			this.materialComputeShader.setUniform(MaterialComputeShader.VARIATION_MAP_SCALE, 0.05f);
+			if (variationOwner.useObjectTransform() && go instanceof AbsoluteTransform3DOwner ato) {
+				this.materialComputeShader.setUniform(MaterialComputeShader.USE_OBJECT_TRANSFORM, true);
+				this.materialComputeShader.setUniform(MaterialComputeShader.INVERSE_OBJECT_TRANSFORM, ato.getAbsoluteTransform().invert());
+			}
 
 			this.variationMap.bindUniform(variationMapUniformLoc, 5);
 

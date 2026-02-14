@@ -32,6 +32,9 @@ public class MaterialComputeShader extends ComputeShader {
 	public static final String SINGLE_OBJECT = "singleObject";
 	public static final String SINGLE_OBJECT_ID = "singleObjectId";
 
+	public static final String USE_OBJECT_TRANSFORM = "useObjectTransform";
+	public static final String INVERSE_OBJECT_TRANSFORM = "inverseObjectTransform";
+
 	public static final String VARIATION_MAP_TEXTURE_NAME = "_VARIATION_MAP";
 
 	public MaterialComputeShader() {
@@ -62,10 +65,13 @@ public class MaterialComputeShader extends ComputeShader {
 		this.createUniform(VARIATION_CELLS_SIZE);
 		this.createUniform(COLOR_VARIATION);
 		this.createUniform(VARIATION_MAP);
+		this.createUniform(VARIATION_MAP_SCALE);
 
 		this.createUniform(SINGLE_OBJECT);
 		this.createUniform(SINGLE_OBJECT_ID);
-		this.createUniform(VARIATION_MAP_SCALE);
+
+		this.createUniform(USE_OBJECT_TRANSFORM);
+		this.createUniform(INVERSE_OBJECT_TRANSFORM);
 	}
 
 	private static String generateGlslArray(final ColorMaterial[] colors) {

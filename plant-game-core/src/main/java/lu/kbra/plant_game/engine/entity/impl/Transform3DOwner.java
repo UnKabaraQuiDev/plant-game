@@ -11,7 +11,7 @@ public interface Transform3DOwner extends TransformOwner {
 	@Deprecated
 	@Override
 	default void setTransform(final Transform t) {
-		this.setTransform((Transform3D) t);
+		this.setTransform(t instanceof Transform3D t3d ? t3d : new Transform3D(t.getMatrix()));
 	}
 
 	void setTransform(Transform3D transform);

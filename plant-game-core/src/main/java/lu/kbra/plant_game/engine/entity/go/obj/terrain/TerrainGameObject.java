@@ -14,11 +14,15 @@ import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.entity.go.VariationMeshGameObject;
 import lu.kbra.plant_game.engine.entity.go.mesh.terrain.TerrainMesh;
 import lu.kbra.plant_game.engine.entity.impl.SynchronizedEntityContainer;
+import lu.kbra.plant_game.engine.entity.impl.Transform3DPivotOwner;
+import lu.kbra.plant_game.engine.entity.ui.impl.AbsoluteTransform3DOwner;
 import lu.kbra.standalone.gameengine.objs.entity.ParentAwareComponent;
 import lu.kbra.standalone.gameengine.scene.camera.Camera3D;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
+import lu.kbra.standalone.gameengine.utils.transform.Transform3DPivot;
 
-public class TerrainGameObject extends VariationMeshGameObject implements SynchronizedEntityContainer<GameObject> {
+public class TerrainGameObject extends VariationMeshGameObject
+		implements SynchronizedEntityContainer<GameObject>, AbsoluteTransform3DOwner, Transform3DPivotOwner {
 
 	protected Object subEntitiesLock = new Object();
 	protected List<GameObject> subEntities = Collections.synchronizedList(new ArrayList<>());
@@ -33,7 +37,7 @@ public class TerrainGameObject extends VariationMeshGameObject implements Synchr
 		super(str, mesh);
 		this.setIsEntityMaterialId(false);
 //		this.setObjectIdLocation(AttributeLocation.MESH);
-		this.setTransform(new Transform3D());
+		this.setTransform(new Transform3DPivot());
 	}
 
 	public Vector2i pickTerrainCell(final Camera3D cam, final Vector2f mousePos, final int windowWidth, final int windowHeight) {
@@ -166,6 +170,27 @@ public class TerrainGameObject extends VariationMeshGameObject implements Synchr
 	@Override
 	public List<GameObject> getROEntities() {
 		return List.copyOf(this.subEntities);
+	}
+
+	@Override
+	public boolean useObjectTransform() {
+		return true;
+	}
+
+	@Override
+	public void setTransform(final Transform3DPivot ie) {
+		this.transform = ie;
+	}
+
+	@Deprecated
+	@Override
+	public void setTransform(final Transform3D ie) {
+		super.setTransform(ie);
+	}
+
+	@Override
+	public Transform3DPivot getTransform() {
+		return (Transform3DPivot) this.transform;
 	}
 
 	@Override

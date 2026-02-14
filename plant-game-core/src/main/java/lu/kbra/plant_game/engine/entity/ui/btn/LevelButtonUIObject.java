@@ -47,6 +47,12 @@ public class LevelButtonUIObject extends TexturedQuadMeshUIObject
 					.map(MainMenuUIScene.class::cast)
 					.ifPresentOrElse(scene -> scene.getPlayInfoGroup().accept(this.levelDefinition),
 							() -> GlobalLogger.warning("No MainMenuUIScene in hierarchy."));
+		} else if (hoverState == HoverState.LEAVE) {
+			this.getUISceneParent()
+					.filter(MainMenuUIScene.class::isInstance)
+					.map(MainMenuUIScene.class::cast)
+					.ifPresentOrElse(scene -> scene.getPlayInfoGroup().setActive(false),
+							() -> GlobalLogger.warning("No MainMenuUIScene in hierarchy."));
 		}
 		return true;
 	}
