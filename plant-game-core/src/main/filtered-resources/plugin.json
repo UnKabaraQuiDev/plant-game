@@ -6,8 +6,9 @@
 	"mainClass": "BaseMain",
 	"registries": [
 		"reg.BaseBuildingRegistry",
-		"reg.BaseResourceRegistry"		,
-		"reg.BaseLevelRegistry"
+		"reg.BaseResourceRegistry",
+		"reg.BaseLevelRegistry",
+		"reg.BaseFilterShaderRegistry"
 	],
 	"dependencies": {}
 }

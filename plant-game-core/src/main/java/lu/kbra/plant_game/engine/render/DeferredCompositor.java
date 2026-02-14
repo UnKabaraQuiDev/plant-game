@@ -4,14 +4,18 @@ import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 
 import org.joml.Matrix4f;
@@ -63,7 +67,6 @@ import lu.kbra.plant_game.engine.render.shader.compute.MaterialComputeShader;
 import lu.kbra.plant_game.engine.render.shader.compute.OutlineShader;
 import lu.kbra.plant_game.engine.render.shader.compute.TextureMaterialComputeShader;
 import lu.kbra.plant_game.engine.render.shader.compute.filter.FilterShader;
-import lu.kbra.plant_game.engine.render.shader.compute.filter.VignetteShader;
 import lu.kbra.plant_game.engine.render.shader.gbuffer.InstanceTransferShader;
 import lu.kbra.plant_game.engine.render.shader.gbuffer.TransferShader;
 import lu.kbra.plant_game.engine.render.shader.render.BlitShader;
@@ -76,6 +79,7 @@ import lu.kbra.plant_game.engine.render.shader.render.TextDirectShader;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.plant_game.generated.ColorMaterial;
+import lu.kbra.plant_game.plugin.registry.FilterShaderRegistry;
 import lu.kbra.standalone.gameengine.GameEngine;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.cache.attrib.UByteAttribArray;
@@ -206,14 +210,15 @@ public class DeferredCompositor implements Cleanupable {
 	protected TextDirectShader directTextShader;
 
 	// material passes
-	protected Vector4f backgroundColor = new Vector4f(0, 0, 0, 1);
+	protected Vector4f backgroundColor = new Vector4f(0, 0, 0, 0);
 	protected SingleTexture outputTxt;
 	protected MaterialComputeShader materialComputeShader;
 	protected TextureMaterialComputeShader textureMaterialComputeShader;
 	protected BlitShader blitShader;
 
 	// filters
-	protected VignetteShader vignetteShader;
+	protected Map<Class<? extends FilterShader<?>>, FilterShader<?>> filterShaders = new HashMap<>();
+	protected List<FilterShaderConfiguration<?>> enabledFilters = new ArrayList<>();
 
 	// debug
 	protected boolean deferredPass = false;
@@ -233,6 +238,7 @@ public class DeferredCompositor implements Cleanupable {
 	protected Map<Vector3ic, Vector4fc> outlinedObjects = new ConcurrentHashMap<>();
 	protected OutlineShader outlineShader;
 
+	@SuppressWarnings("unchecked")
 	public DeferredCompositor(final GameEngine engine, final Thread ownerThread) {
 		final CacheManager cache = engine.getCache();
 		this.ownerThread = ownerThread;
@@ -256,7 +262,10 @@ public class DeferredCompositor implements Cleanupable {
 		cache.addAbstractShader(this.lineDirectShader = new LineDirectShader());
 		cache.addAbstractShader(this.lineInstanceDirectShader = new LineInstanceDirectShader());
 
-		cache.addAbstractShader(this.vignetteShader = new VignetteShader());
+		FilterShaderRegistry.FILTER_SHADERS.stream().map(Supplier::get).forEach(fs -> {
+			cache.addAbstractShader(fs);
+			this.filterShaders.put((Class<? extends FilterShader<?>>) fs.getClass(), fs);
+		});
 
 		this.fontTexture = SingleTexture.loadSingleTexture(cache, TextDirectShader.FONT_TEXTURE_NAME, FONT_PATH, TextureFilter.NEAREST);
 		this.fontTexture.setGenerateMipmaps(true);
@@ -351,12 +360,9 @@ public class DeferredCompositor implements Cleanupable {
 	}
 
 	protected void renderFilters(final CacheManager cache, final Vector2i outputResolution, final boolean needRegen) {
-		this.vignetteShader.bind();
-		if (needRegen) {
-			this.vignetteShader.setUniform(FilterShader.INPUT_SIZE, this.renderResolution);
-			this.vignetteShader.setUniform(FilterShader.OUTPUT_SIZE, outputResolution);
+		if (this.enabledFilters.isEmpty()) {
+			return;
 		}
-		this.outputTxt.bindUniform(this.vignetteShader.getUniformLocation(FilterShader.TXT0), 0);
 
 		SCREEN.bind();
 
@@ -368,18 +374,25 @@ public class DeferredCompositor implements Cleanupable {
 		GL_W.glBindFramebuffer(GL_W.GL_FRAMEBUFFER, 0);
 		GL_W.glViewport(0, 0, outputResolution.x, outputResolution.y);
 
-		this.vignetteShader.setUniform(VignetteShader.FOLLOW_ASPECT_RATIO, false);
-		this.vignetteShader.setUniform(VignetteShader.VIGNETTE_RADIUS, 1.4f);
-		this.vignetteShader.setUniform(VignetteShader.VIGNETTE_SOFTNESS, 0.8f);
-		this.vignetteShader.setUniform(VignetteShader.VIGNETTE_STRENGTH, 1f);
-		this.vignetteShader.setUniform(VignetteShader.POSTERIZE, true);
-		this.vignetteShader.setUniform(VignetteShader.POSTERIZE_LEVELS, 10);
-		this.vignetteShader.setUniform(VignetteShader.VIGNETTE_COLOR, new Vector3f(1, 0, 0));
-		// Needs testing
-//		this.vignetteShader.setUniform(VignetteShader.VIGNETTE_CENTER,
-//				PGLogic.INSTANCE.getUiScene().getMouseCoords(PGLogic.INSTANCE.getInputHandler()));
+		for (FilterShaderConfiguration fsc : this.enabledFilters) {
+			if (!this.filterShaders.containsKey(fsc.getShaderClass())) {
+				GlobalLogger.warning("FilterShader not found for class: " + fsc.getShaderClass());
+				continue;
+			}
+			final FilterShader<?> fs = this.filterShaders.get(fsc.getShaderClass());
 
-		GL_W.glDrawElements(this.vignetteShader.getBeginMode().getGlId(), SCREEN.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
+			fs.bind();
+
+//			if (needRegen) {
+			fs.setUniform(FilterShader.INPUT_SIZE, this.renderResolution);
+			fs.setUniform(FilterShader.OUTPUT_SIZE, outputResolution);
+//			}
+			this.outputTxt.bindUniform(fs.getUniformLocation(FilterShader.TXT0), 0);
+
+			fsc.apply((FilterShader) fsc.getShaderClass().cast(fs));
+
+			GL_W.glDrawElements(fs.getBeginMode().getGlId(), SCREEN.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
+		}
 
 		GL_W.glEnable(GL_W.GL_DEPTH_TEST);
 		GL_W.glEnable(GL_W.GL_CULL_FACE);
@@ -387,7 +400,7 @@ public class DeferredCompositor implements Cleanupable {
 
 		SCREEN.unbind();
 
-		this.vignetteShader.unbind();
+		GL_W.glUseProgram(0);
 	}
 
 	protected void renderUi(final CacheManager cache, final UIScene uiScene, final Vector2i outputResolution, final boolean needRegen) {
@@ -720,7 +733,7 @@ public class DeferredCompositor implements Cleanupable {
 		GL_W.glEnable(GL_W.GL_CULL_FACE);
 		GL_W.glCullFace(GL_W.GL_BACK);
 
-		GL_W.glClearColor(0, 0, 0, 1);
+		GL_W.glClearColor(this.backgroundColor.x, this.backgroundColor.y, this.backgroundColor.z, this.backgroundColor.w);
 		GL_W.glClear(GL_W.GL_COLOR_BUFFER_BIT | GL_W.GL_DEPTH_BUFFER_BIT);
 
 		this.deferredTransferShader.bind();
@@ -1582,6 +1595,22 @@ public class DeferredCompositor implements Cleanupable {
 					"GameObject: " + go.getId() + " (" + go.getClass().getName() + ") has no entity object id.");
 		}
 		return this.outlinedObjects.containsKey(go.getObjectId());
+	}
+
+	public <T extends FilterShader<T>> void enableFilter(final FilterShaderConfiguration<T> config) {
+		Objects.requireNonNull(config);
+
+		this.enabledFilters.add(config);
+	}
+
+	public <T extends FilterShader<T>> void disableFilter(final FilterShaderConfiguration<T> config) {
+		Objects.requireNonNull(config);
+
+		this.enabledFilters.remove(config);
+	}
+
+	public void disableFilters() {
+		this.enabledFilters.clear();
 	}
 
 	public Vector4f getBackgroundColor() {

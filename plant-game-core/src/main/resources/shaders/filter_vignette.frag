@@ -32,8 +32,8 @@ void main() {
 		
 		if (!followAspectRatio) {
 		    float xOffset = (1.0 - aspect);
-		    left   = 1.0 - uv.x *aspect + xOffset;
-		    right  = 1.0 + uv.x *aspect + xOffset;
+		    left   = 1.0 - uv.x * aspect + xOffset;
+		    right  = 1.0 + uv.x * aspect + xOffset;
 		    bottom = 1.0 - uv.y;
 		    top    = 1.0 + uv.y;
 		} else {
