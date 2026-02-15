@@ -6,6 +6,7 @@ import org.joml.Vector3fc;
 import lu.kbra.pclib.PCUtils;
 import lu.kbra.pclib.concurrency.ObjectTriggerLatch;
 import lu.kbra.pclib.pointer.prim.IntPointer;
+import lu.kbra.plant_game.base.entity.go.obj.energy.WaterWheelObject;
 import lu.kbra.plant_game.base.entity.go.obj.water.WaterTowerObject;
 import lu.kbra.plant_game.base.scene.menu.main.MainMenuUIScene;
 import lu.kbra.plant_game.engine.UpdateFrameState;
@@ -24,7 +25,7 @@ import lu.kbra.standalone.gameengine.utils.transform.Transform3DPivot;
 
 public class MainMenuWorldScene extends WorldLevelScene {
 
-	public static float TRANSITION_DURATION = MainMenuUIScene.TRANSITION_DURATION * 2; // seconds
+	public static float TRANSITION_DURATION = MainMenuUIScene.TRANSITION_DURATION; // seconds
 
 	protected final float[] rotationSpeeds = {
 			(float) Math.PI * 2 / 20,
@@ -34,11 +35,16 @@ public class MainMenuWorldScene extends WorldLevelScene {
 			(float) Math.PI * 2 / 20 };
 
 	private final Transform3DOwner[] targets = { null, null, null, null, null };
-	private final Vector3fc[] offsets = { new Vector3f(0, 0, 17), new Vector3f(), new Vector3f(-8, 6, -2), new Vector3f(), new Vector3f() };
+	private final Vector3fc[] offsets = {
+			new Vector3f(0, 0, 17),
+			new Vector3f(0, 0, 0),
+			new Vector3f(-2, 3, -4),
+			new Vector3f(),
+			new Vector3f() };
 	private final Vector3fc[] cameraOffsets = {
 			new Vector3f(50, 45, 0),
 			new Vector3f(),
-			new Vector3f(-6, 4, 4),
+			new Vector3f(-8, 0, 0),
 			new Vector3f(),
 			new Vector3f() };
 
@@ -101,9 +107,15 @@ public class MainMenuWorldScene extends WorldLevelScene {
 			final GameData gameData,
 			final IntPointer worldProgress) {
 		GameObjectFactory.create(WaterTowerObject.class)
-				.set(i -> i.setTransform(new Transform3D(new Vector3f(100, 0, 0))))
+				.set(i -> i.setTransform(new Transform3D(new Vector3f(0, -100, 0))))
 				.add(this)
 				.postInit(i -> this.targets[MainMenuUIScene.OPTIONS] = i)
+				.push();
+
+		GameObjectFactory.create(WaterWheelObject.class)
+				.set(i -> i.setTransform(new Transform3D(new Vector3f(0, 100, 0))))
+				.add(this)
+				.postInit(i -> this.targets[MainMenuUIScene.PLAY] = i)
 				.push();
 
 		return super.init(workers, render, gameData, worldProgress).thenOther(c -> {
@@ -141,7 +153,7 @@ public class MainMenuWorldScene extends WorldLevelScene {
 				this.currentIndex = this.targetIndex;
 				this.progress = 1f;
 			} else {
-				final float t = Interpolators.QUAD_IN_OUT.evaluate(this.progress);
+				final float t = Interpolators.BACK_IN_OUT.evaluate(this.progress);
 				this.currentOffset.set(this.offsetStart).lerp(this.offsetEnd, t);
 				this.currentCenter.set(this.transitionStart).lerp(this.transitionEnd, t).add(this.currentOffset);
 				this.currentCameraOffset.set(this.cameraOffsetStart).lerp(this.cameraOffsetEnd, t);

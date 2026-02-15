@@ -648,7 +648,7 @@ public class DeferredCompositor implements Cleanupable {
 
 		if (mesh instanceof final TexturedMesh txtMesh) {
 			final SingleTexture txt = txtMesh.getTexture();
-			final int tid = txt.getGlId();
+			final int tid = ColorMaterial.values().length + txt.getGlId();
 
 			if (!alreadyRendered.contains(tid)) {
 				this.textureMaterialComputeShader.bind();
@@ -1206,11 +1206,12 @@ public class DeferredCompositor implements Cleanupable {
 			// id is in the entity
 			final int matId = mo.getMaterialId();
 
+			System.err.println(matId + " " + entity.getId());
 			GL_W.glDisableVertexAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_ID);
 			GL_W.glVertexAttribI1ui(GameObject.MESH_ATTRIB_MATERIAL_ID_ID, matId);
 		} else if (mesh instanceof final TexturedMesh txtMesh) {
 			// id in the texture id
-			final int txtId = txtMesh.getTexture().getGlId();
+			final int txtId = ColorMaterial.values().length + txtMesh.getTexture().getGlId();
 
 			GL_W.glDisableVertexAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_ID);
 			GL_W.glVertexAttribI1ui(GameObject.MESH_ATTRIB_MATERIAL_ID_ID, txtId);
@@ -1262,6 +1263,10 @@ public class DeferredCompositor implements Cleanupable {
 		}
 
 		GL_W.glPolygonMode(mesh.getPolygonMode().getGlId(), mesh.getPolygonDrawMode().getGlId());
+
+		if (this.deferredPass) {
+			System.err.println(entity.getId().contains("water") + " " + entity.getId() + " " + mesh);
+		}
 
 		if (mesh.usesEBO()) {
 //			GL_W.glFrontFace(GL_W.GL_CW);
