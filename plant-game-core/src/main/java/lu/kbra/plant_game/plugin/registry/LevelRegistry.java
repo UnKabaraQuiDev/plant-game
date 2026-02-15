@@ -60,6 +60,10 @@ public abstract class LevelRegistry extends PluginRegistry {
 			return this.levelData;
 		}
 
+		public void setLevelData(final LevelData levelData) {
+			this.levelData = levelData;
+		}
+
 		public LevelState getLevelState() {
 			return this.levelState;
 		}
@@ -140,7 +144,9 @@ public abstract class LevelRegistry extends PluginRegistry {
 		if (!dataFile.exists()) {
 			return Optional.empty();
 		}
-		return Optional.ofNullable(PGLogic.OBJECT_MAPPER.readValue(dataFile, GameData.class));
+		final GameData obj = PGLogic.OBJECT_MAPPER.readValue(dataFile, GameData.class);
+		obj.setLevelData(ld.levelData);
+		return Optional.of(obj);
 	}
 
 }

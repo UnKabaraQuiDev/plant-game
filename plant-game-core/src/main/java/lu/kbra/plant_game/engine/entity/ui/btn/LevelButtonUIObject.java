@@ -36,6 +36,7 @@ public class LevelButtonUIObject extends TexturedQuadMeshUIObject
 		this.getUISceneParent().filter(MainMenuUIScene.class::isInstance).map(MainMenuUIScene.class::cast).ifPresentOrElse(scene -> {
 			scene.getResumeInfoGroup().accept(this.levelDefinition);
 			scene.startTransition(MainMenuUIScene.RESUME);
+			scene.getWorldScene().accept(this.levelDefinition);
 		}, () -> GlobalLogger.warning("No MainMenuUIScene in hierarchy."));
 	}
 

@@ -116,8 +116,11 @@ public class MainMenuUIScene extends UIScene {
 	final Optional<Vector2fc> SMALL_TEXT_CHAR_SIZE = Optional.of(new Vector2f(0.2f));
 	final Optional<TextAlignment> SMALL_TEXT_TEXT_ALIGNMENT = Optional.of(TextAlignment.TEXT_LEFT);
 
-	public MainMenuUIScene(final CacheManager parent) {
+	protected final MainMenuWorldScene worldScene;
+
+	public MainMenuUIScene(final CacheManager parent, final MainMenuWorldScene worldScene) {
 		super("main-menu", parent);
+		this.worldScene = worldScene;
 	}
 
 	@Override
@@ -349,6 +352,10 @@ public class MainMenuUIScene extends UIScene {
 
 	public int getTargetGroup() {
 		return this.targetGroup;
+	}
+
+	public MainMenuWorldScene getWorldScene() {
+		return this.worldScene;
 	}
 
 	@Override

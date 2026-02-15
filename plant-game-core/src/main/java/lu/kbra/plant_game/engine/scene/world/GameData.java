@@ -69,6 +69,10 @@ public class GameData {
 		this.levelState = levelState;
 	}
 
+	public void setLevelData(final LevelData levelData) {
+		this.levelData = levelData;
+	}
+
 	public static GameData fromBlankLevel(final LevelData levelData) {
 		final GameData gd = new GameData(levelData);
 		levelData.getGame().getStartResources().forEach((k, v) -> gd.getResources().put(k, v));

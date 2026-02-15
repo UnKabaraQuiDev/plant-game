@@ -11,6 +11,7 @@ import org.joml.Vector3f;
 import org.joml.Vector4f;
 
 import lu.kbra.plant_game.engine.entity.go.GameObject;
+import lu.kbra.plant_game.engine.entity.go.MeshGameObject;
 import lu.kbra.plant_game.engine.entity.go.VariationMeshGameObject;
 import lu.kbra.plant_game.engine.entity.go.mesh.terrain.TerrainMesh;
 import lu.kbra.plant_game.engine.entity.impl.SynchronizedEntityContainer;
@@ -31,7 +32,7 @@ public class TerrainGameObject extends VariationMeshGameObject
 
 	protected TerrainEdgeObject terrainEdgeObject;
 	protected TerrainHighlightObject terrainHighlightObject;
-	protected GameObject terrainWaterObject;
+	protected MeshGameObject terrainWaterObject;
 
 	public TerrainGameObject(final String str, final TerrainMesh mesh) {
 		super(str, mesh);
@@ -142,7 +143,7 @@ public class TerrainGameObject extends VariationMeshGameObject
 		return this.terrainHighlightObject;
 	}
 
-	public <T extends GameObject> void setWaterLevel(final T terrainWaterObject) {
+	public <T extends MeshGameObject> void setWaterLevel(final T terrainWaterObject) {
 		this.replace(this.terrainWaterObject, terrainWaterObject);
 		this.terrainWaterObject = terrainWaterObject;
 	}
@@ -175,6 +176,14 @@ public class TerrainGameObject extends VariationMeshGameObject
 	@Override
 	public boolean useObjectTransform() {
 		return true;
+	}
+
+	public MeshGameObject getTerrainWaterObject() {
+		return this.terrainWaterObject;
+	}
+
+	public TerrainHighlightObject getTerrainHighlightObject() {
+		return this.terrainHighlightObject;
 	}
 
 	@Override

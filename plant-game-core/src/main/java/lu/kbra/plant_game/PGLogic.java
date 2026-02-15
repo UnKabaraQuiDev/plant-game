@@ -56,7 +56,9 @@ public class PGLogic extends GameLogic {
 
 	public final WorkerDispatcher WORKERS = new WorkerDispatcher("WORKERS", 8);
 
+	private MainMenuWorldScene mainMenuWorldScene;
 	private WorldLevelScene worldScene;
+
 	private MainMenuUIScene mainMenuUIScene;
 	private OverlayUIScene overlayUIScene;
 	private UIScene uiScene;
@@ -86,9 +88,10 @@ public class PGLogic extends GameLogic {
 		this.compositor.getBackgroundColor().set(1, 1, 0, 1);
 
 //		this.worldScene = new WorldLevelScene("world", this.cache);
-		this.worldScene = new MainMenuWorldScene(this.cache);
+		this.mainMenuWorldScene = new MainMenuWorldScene(this.cache);
+		this.worldScene = this.mainMenuWorldScene;
 
-		this.mainMenuUIScene = new MainMenuUIScene(this.cache);
+		this.mainMenuUIScene = new MainMenuUIScene(this.cache, this.mainMenuWorldScene);
 		this.overlayUIScene = new OverlayUIScene(this.cache);
 		this.uiScene = this.mainMenuUIScene;
 
@@ -222,6 +225,14 @@ public class PGLogic extends GameLogic {
 
 	public GameData getGameData() {
 		return this.gameData;
+	}
+
+	public MainMenuWorldScene getMainMenuWorldScene() {
+		return this.mainMenuWorldScene;
+	}
+
+	public OverlayUIScene getOverlayUIScene() {
+		return this.overlayUIScene;
 	}
 
 	public PluginManager getPluginManager() {

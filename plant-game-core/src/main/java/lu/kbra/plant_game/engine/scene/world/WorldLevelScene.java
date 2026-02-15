@@ -17,6 +17,7 @@ import org.joml.Vector3ic;
 import lu.kbra.pclib.concurrency.ObjectTriggerLatch;
 import lu.kbra.pclib.datastructure.pair.Pair;
 import lu.kbra.pclib.datastructure.pair.Pairs;
+import lu.kbra.pclib.pointer.ObjectPointer;
 import lu.kbra.pclib.pointer.prim.IntPointer;
 import lu.kbra.plant_game.PGLogic;
 import lu.kbra.plant_game.base.data.DefaultKeyOption;
@@ -94,8 +95,20 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController {
 		this.registerModal(new MoveBuildingModal(this, PGLogic.INSTANCE.getCompositor()));
 
 		final ObjectTriggerLatch<WorldLevelScene> latch = new ObjectTriggerLatch<>(1, this);
+		this.initTerrain(workers, render, Optional.of(gameData), gameData.getLevelData(), worldProgress).then(c -> {
+			this.setTerrain(c.get());
+		}).latch(latch);
+		return latch;
+	}
 
-		final LevelData levelData = gameData.getLevelData();
+	protected ObjectTriggerLatch<ObjectPointer<TerrainGameObject>> initTerrain(
+			final Dispatcher workers,
+			final Dispatcher render,
+			final Optional<GameData> gameData,
+			final LevelData levelData,
+			final IntPointer worldProgress) {
+		final ObjectPointer<TerrainGameObject> data = new ObjectPointer<>();
+		final ObjectTriggerLatch<ObjectPointer<TerrainGameObject>> latch = new ObjectTriggerLatch<>(1, data);
 
 		new TaskFuture<>(workers, (Supplier<WorldGenerator>) () -> {
 			final WorldGenerator wg = levelData.getWorldGenerator();
@@ -104,38 +117,43 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController {
 		}).then(render, (Function<WorldGenerator, Pair<WorldGenerator, TerrainMesh>>) wg -> {
 			return Pairs.readOnly(wg, wg.generateMesh(worldProgress, this.getCache()));
 		}).then(workers, (Function<Pair<WorldGenerator, TerrainMesh>, WorldGenerator>) pair -> {
-			this.setTerrain(new TerrainGameObject("terrain-" + levelData.getInternalName(), pair.getValue()));
-			this.getTerrain().getTransform().translationSet(-pair.getValue().getWidth() / 2, 0, -pair.getValue().getLength() / 2);
-			this.getTerrain().getTransform().rotationPivotSub(this.getTerrain().getTransform().getTranslation());
-			this.getTerrain().getTransform().scalePivotSub(this.getTerrain().getTransform().getTranslation());
-			this.getTerrain().getTransform().updateMatrix();
+			data.set(new TerrainGameObject("terrain-" + levelData.getInternalName(), pair.getValue()));
+			data.get().getTransform().translationSet(-pair.getValue().getWidth() / 2, 0, -pair.getValue().getLength() / 2);
+			data.get().getTransform().rotationPivotSub(data.get().getTransform().getTranslation());
+			data.get().getTransform().scalePivotSub(data.get().getTransform().getTranslation());
+			data.get().getTransform().updateMatrix();
+			this.getCache().addMesh(pair.getValue());
 			return pair.getKey();
 		}).then(render, (Function<WorldGenerator, Pair<WorldGenerator, TerrainEdgeMesh>>) wg -> {
 			return Pairs.readOnly(wg, wg.generateEdgeMesh(worldProgress, this.getCache()));
 		}).then(workers, (Function<Pair<WorldGenerator, TerrainEdgeMesh>, WorldGenerator>) pair -> {
-			final TerrainEdgeObject terrainEdges = new TerrainEdgeObject("terrain-edge-" + levelData.getInternalName(), pair.getValue());
-			this.getTerrain().setTerrainEdgeEntity(terrainEdges);
+			data.get().setTerrainEdgeEntity(new TerrainEdgeObject("terrain-edge-" + levelData.getInternalName(), pair.getValue()));
+			this.getCache().addMesh(pair.getValue());
 			return pair.getKey();
 		}).then(render, (Function<WorldGenerator, Pair<WorldGenerator, Mesh>>) wg -> {
 			return Pairs.readOnly(wg, wg.generateHighlightMesh(worldProgress, this.getCache()));
 		}).then(workers, (Consumer<Pair<WorldGenerator, Mesh>>) pair -> {
-			final TerrainHighlightObject terrainHighlights = new TerrainHighlightObject("terrain-highlight-" + levelData.getInternalName(),
-					pair.getValue());
-			this.getTerrain().setTerrainHighlightEntity(terrainHighlights);
+			data.get()
+					.setTerrainHighlightEntity(
+							new TerrainHighlightObject("terrain-highlight-" + levelData.getInternalName(), pair.getValue()));
+			this.getCache().addMesh(pair.getValue());
 		}).then(render, (Supplier<QuadLoadedMesh>) () -> {
-			final QuadLoadedMesh mesh = new QuadLoadedMesh("water",
+			final QuadLoadedMesh mesh = new QuadLoadedMesh("water-" + levelData.getInternalName(),
 					null,
-					new Vector2f(this.getTerrain().getMesh().getWidth(), this.getTerrain().getMesh().getLength()));
-			this.worldCache.addMesh(mesh);
+					new Vector2f(data.get().getMesh().getWidth(), data.get().getMesh().getLength()));
+			this.getCache().addMesh(mesh);
 			worldProgress.add(100);
 			return mesh;
 		}).then(workers, (Consumer<QuadLoadedMesh>) mesh -> {
-			final MeshGameObject water = new MeshGameObject("water", mesh);
-			water.setTransform(
-					new Transform3D(new Vector3f(mesh.getSize().x() / 2, gameData.getCurrentWaterLevel(), mesh.getSize().y() / 2)));
-			water.setObjectId(WATER_ID);
-			water.setColorMaterial(ColorMaterial.BLUE);
-			this.setWaterLevel(water);
+			data.get().setWaterLevel(new MeshGameObject("water-" + levelData.getInternalName(), mesh));
+			data.get()
+					.getTerrainWaterObject()
+					.setTransform(new Transform3D(new Vector3f(mesh.getSize().x() / 2,
+							gameData.map(c -> c.getCurrentWaterLevel()).orElse(levelData.getWorld().getWaterLevel().getMin()),
+							mesh.getSize().y() / 2)));
+			data.get().getTerrainWaterObject().setObjectId(WATER_ID);
+			data.get().getTerrainWaterObject().setColorMaterial(ColorMaterial.BLUE);
+
 			worldProgress.add(100);
 
 			latch.trigger(null);
@@ -143,6 +161,8 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController {
 
 		return latch;
 	}
+
+	protected boolean shouldStartPlaceModal = false;
 
 	public void input(final WindowInputHandler inputHandler, final UpdateFrameState frameState) {
 		this.posAdd.zero();
@@ -177,6 +197,10 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController {
 		if (!frameState.uiSceneCaughtMouseInput) {
 			this.fovDiff = (float) (inputHandler.getMouseScroll().y * 0.05f);
 		}
+
+		if (!this.hasActiveModal() && inputHandler.isMouseButtonPressedOnce(DefaultKeyOption.PLACE)) {
+			this.shouldStartPlaceModal = true;
+		}
 	}
 
 	public void update(
@@ -188,13 +212,15 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController {
 			this.activeModal.update(inputHandler, compositor, workers, renderDispatcher);
 		}
 
-		if (!this.hasActiveModal() && inputHandler.isMouseButtonPressedOnce(DefaultKeyOption.PLACE)) {
+		if (this.shouldStartPlaceModal) {
 			final MoveBuildingModal modal = this.getModal(MoveBuildingModal.class);
 
 			this.getClickedObject(workers, compositor).then(workers, (Consumer<Optional<PlaceableObject>>) obj -> obj.ifPresent(o -> {
 				modal.setAttachedObject(o);
 				this.startModal(modal);
 			})).push();
+
+			this.shouldStartPlaceModal = false;
 		}
 
 		final float time = (float) inputHandler.getGameEngine().getTotalTime();
@@ -276,7 +302,8 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController {
 		return this.waterLevel;
 	}
 
-	public <T extends GameObject> T setWaterLevel(final T waterLevel) {
+	@Deprecated
+	public <T extends MeshGameObject> T setWaterLevel(final T waterLevel) {
 		this.waterLevel = waterLevel;
 		this.getTerrain().setWaterLevel(waterLevel);
 		return waterLevel;
