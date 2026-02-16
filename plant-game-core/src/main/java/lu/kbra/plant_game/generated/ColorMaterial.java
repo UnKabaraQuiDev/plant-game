@@ -1,10 +1,9 @@
 // @formatter:off
 package lu.kbra.plant_game.generated;
 
-import java.lang.Float;
-import java.lang.Integer;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.joml.Vector4f;
 import org.joml.Vector4fc;
 
@@ -63,7 +62,7 @@ public enum ColorMaterial {
 
 	DARK_RED(0.69803923f, 0.0f, 0.0f, 1f, false, true),
 
-	DARK_GRAY(0.34901962f, 0.34901962f, 0.34901962f, 1f, false, true),
+	DARK_GRAY(0.34901962f, 0.34901962f, 0.34901962f, 1f, false, true), // 28
 
 	DARK_PINK(0.69803923f, 0.47843137f, 0.47843137f, 1f, false, true),
 
@@ -105,7 +104,7 @@ public enum ColorMaterial {
 
 	private final Vector4fc color;
 
-	private ColorMaterial(float r, float g, float b, float a, boolean l, boolean d) {
+	private ColorMaterial(final float r, final float g, final float b, final float a, final boolean l, final boolean d) {
 		this.r = r;
 		this.g = g;
 		this.b = b;
@@ -115,21 +114,21 @@ public enum ColorMaterial {
 		this.color = new Vector4f(r, g, b, a);
 	}
 
-	public static ColorMaterial byId(int id) {
+	public static ColorMaterial byId(final int id) {
 		return COLORS_BY_ID.get(id);
 	}
 
 	public ColorMaterial next() {
-		int nextId = getId() % ColorMaterial.values().length + 1;
+		int nextId = this.getId() % ColorMaterial.values().length + 1;
 		return byId(nextId);
 	}
 
 	public ColorMaterial previous() {
-		int prevId = (getId() - 2 + ColorMaterial.values().length) % ColorMaterial.values().length + 1;
+		int prevId = (this.getId() - 2 + ColorMaterial.values().length) % ColorMaterial.values().length + 1;
 		return byId(prevId);
 	}
 
-	public static ColorMaterial valueOf(float r, float g, float b, float a) {
+	public static ColorMaterial valueOf(final float r, final float g, final float b, final float a) {
 		for (ColorMaterial m : values()) {
 			if (m.r == r && m.g == g && m.b == b && m.a == a) {
 				return m;
@@ -139,15 +138,15 @@ public enum ColorMaterial {
 	}
 
 	public ColorMaterial darker() {
-		return dark ? ColorMaterial.BLACK : light ? byId(getId() - BASE_COLOR_COUNT) : byId(getId() + 2 * BASE_COLOR_COUNT);
+		return this.dark ? ColorMaterial.BLACK : this.light ? byId(this.getId() - BASE_COLOR_COUNT) : byId(this.getId() + 2 * BASE_COLOR_COUNT);
 	}
 
 	public ColorMaterial lighter() {
-		return light ? ColorMaterial.WHITE : dark ? byId(getId() - 2 * BASE_COLOR_COUNT) : byId(getId() + BASE_COLOR_COUNT);
+		return this.light ? ColorMaterial.WHITE : this.dark ? byId(this.getId() - 2 * BASE_COLOR_COUNT) : byId(this.getId() + BASE_COLOR_COUNT);
 	}
 
 	public short getId() {
-		return (short) (ordinal() + 1);
+		return (short) (this.ordinal() + 1);
 	}
 
 	public Vector4fc getColor() {
