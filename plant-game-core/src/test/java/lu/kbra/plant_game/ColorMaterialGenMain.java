@@ -21,6 +21,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
@@ -258,11 +259,28 @@ public class ColorMaterialGenMain extends GenMainConsts {
 				.addStatement("return this.color")
 				.build();
 
+		final MethodSpec getClosest = MethodSpec.methodBuilder("getClosest")
+				.addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+				.returns(ClassName.bestGuess("ColorMaterial"))
+				.addParameter(ParameterSpec.builder(ClassName.get("org.joml", "Vector4fc"), "c", Modifier.FINAL).build())
+				.addStatement("$T closest = null", ClassName.bestGuess("ColorMaterial"))
+				.addStatement("float bestDistance = $T.MAX_VALUE", Float.class)
+				.beginControlFlow("for ($T material : values())", ClassName.bestGuess("ColorMaterial"))
+				.addStatement("$T mc = material.color", ClassName.get("org.joml", "Vector4fc"))
+				.addStatement("float distance = mc.distance(c)")
+				.beginControlFlow("if (distance < bestDistance)")
+				.addStatement("bestDistance = distance")
+				.addStatement("closest = material")
+				.endControlFlow()
+				.endControlFlow()
+				.addStatement("return closest")
+				.build();
 		builder.addMethod(this.createValueOf(name));
 		builder.addMethod(darker);
 		builder.addMethod(lighter);
 		builder.addMethod(getId);
 		builder.addMethod(getColor);
+		builder.addMethod(getClosest);
 
 		return builder.build();
 	}

@@ -27,7 +27,7 @@ import lu.kbra.standalone.gameengine.geom.LineLoadedMesh;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.utils.gl.consts.BufferType;
 
-public class WorldGenerator {
+public abstract class WorldGenerator {
 
 	private int width = 10, length = 15, maxHeight = 5;
 	private final float cellSize = 1f;
@@ -43,6 +43,7 @@ public class WorldGenerator {
 	private Vector3f[] edgeVertices;
 	private int[] edgeIndices;
 	private byte[] edgeMaterialIds;
+	private int[][] faceIndices;
 
 	private int meshId;
 	protected ColorMaterial[][] materialType;
@@ -85,10 +86,15 @@ public class WorldGenerator {
 				this.maxHeight,
 				this.noiseCompute,
 				this.materialType,
+				this.faceIndices,
 				new Vec3fAttribArray(Mesh.ATTRIB_VERTICES_NAME, Mesh.ATTRIB_VERTICES_ID, this.verts),
 				new UIntAttribArray(Mesh.ATTRIB_INDICES_NAME, Mesh.ATTRIB_INDICES_ID, this.indices, BufferType.ELEMENT_ARRAY),
 				new Vec3fAttribArray(Mesh.ATTRIB_NORMALS_NAME, Mesh.ATTRIB_NORMALS_ID, this.normals),
-				new UByteAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_NAME, GameObject.MESH_ATTRIB_MATERIAL_ID_ID, this.materialIds));
+				new UByteAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_NAME,
+						GameObject.MESH_ATTRIB_MATERIAL_ID_ID,
+						this.materialIds,
+						BufferType.ARRAY,
+						false));
 //				new Vec3iAttribArray(GameObject.MESH_ATTRIB_OBJECT_ID_NAME, GameObject.MESH_ATTRIB_OBJECT_ID_ID, this.objectIds));
 
 		cache.addMesh(mesh);
@@ -192,6 +198,8 @@ public class WorldGenerator {
 		return mesh;
 	}
 
+	protected abstract ColorMaterial getCellMaterial(int x, int z, int cellHeight);
+
 	protected void generateFaces(final IntPointer progress) {
 		this.materialType = new ColorMaterial[this.width][this.length];
 		this.topFaces = new SquareFace[this.width][this.length];
@@ -200,15 +208,16 @@ public class WorldGenerator {
 			for (int z = 0; z < this.length; z++) {
 				final int cellHeight = this.getCellHeight(x, z);
 
+				final ColorMaterial material = this.materialType[x][z] = this.getCellMaterial(x, z, cellHeight);
+
 				final SquareFace face = new SquareFace(new Vector2i(x, z),
 						new Vector3f(x, cellHeight, z),
 						new Vector3f(x + 1, cellHeight, z + 1),
 						GameEngine.Y_POS,
-						cellHeight < 0 ? ColorMaterial.GRAY : ColorMaterial.DARK_GREEN);
+						this.materialType[x][z]);
 
 				this.faces.add(face);
 
-				this.materialType[x][z] = cellHeight < 0 ? ColorMaterial.BLUE : ColorMaterial.DARK_GREEN;
 				this.topFaces[x][z] = face;
 
 				final int cellHeightXPos = this.getCellHeight(x + 1, z);
@@ -218,7 +227,7 @@ public class WorldGenerator {
 								new Vector3f(x + 1, y, z),
 								new Vector3f(x + 1, y + 1, z + 1),
 								GameEngine.X_POS,
-								ColorMaterial.BROWN));
+								material));
 					}
 				}
 
@@ -229,29 +238,23 @@ public class WorldGenerator {
 								new Vector3f(x, y, z + 1),
 								new Vector3f(x + 1, y + 1, z + 1),
 								GameEngine.Z_POS,
-								ColorMaterial.BROWN));
+								material));
 					}
 				}
 
 				final int cellHeightXNeg = this.getCellHeight(x - 1, z);
 				if (cellHeight > cellHeightXNeg) {
 					for (int y = cellHeightXNeg; y < cellHeight; y++) {
-						this.faces.add(new SquareFace(null,
-								new Vector3f(x, y, z),
-								new Vector3f(x, y + 1, z + 1),
-								GameEngine.X_NEG,
-								ColorMaterial.BROWN));
+						this.faces.add(
+								new SquareFace(null, new Vector3f(x, y, z), new Vector3f(x, y + 1, z + 1), GameEngine.X_NEG, material));
 					}
 				}
 
 				final int cellHeightZNeg = this.getCellHeight(x, z - 1);
 				if (cellHeight > cellHeightZNeg) {
 					for (int y = cellHeightZNeg; y < cellHeight; y++) {
-						this.faces.add(new SquareFace(null,
-								new Vector3f(x, y, z),
-								new Vector3f(x + 1, y + 1, z),
-								GameEngine.Z_NEG,
-								ColorMaterial.BROWN));
+						this.faces.add(
+								new SquareFace(null, new Vector3f(x, y, z), new Vector3f(x + 1, y + 1, z), GameEngine.Z_NEG, material));
 					}
 				}
 
@@ -264,7 +267,7 @@ public class WorldGenerator {
 		for (int x = 0; x < this.width; x++) {
 			for (int z = 0; z < this.length; z++) {
 				final int h = this.getCellHeight(x, z);
-				final ColorMaterial mat = this.getCellMaterial(x, z);
+				final ColorMaterial mat = this.getTopFaceMaterial(x, z);
 
 				// Horizontal edge on X axis
 				if (x + 1 < this.width) {
@@ -294,8 +297,8 @@ public class WorldGenerator {
 		this.indices = new int[this.faces.size() * 6];
 		this.normals = new Vector3f[this.faces.size() * 4];
 		this.materialIds = new byte[this.faces.size() * 4];
-//		this.objectIds = new Vector3i[this.faces.size() * 4];
 		this.meshId = PCUtils.randomIntRange(0, 255);
+		this.faceIndices = new int[this.width][this.length];
 
 		final int totalFaceCount = this.faces.size();
 		int faceCount = 0;
@@ -305,14 +308,12 @@ public class WorldGenerator {
 			System.arraycopy(face.indices(faceCount * 4), 0, this.indices, faceCount * 6, 6);
 			Arrays.fill(this.normals, faceCount * 4, faceCount * 4 + 4, face.normal);
 			Arrays.fill(this.materialIds, faceCount * 4, faceCount * 4 + 4, (byte) face.material().getId());
-//			if (face.cellPosition != null) {
-//				Arrays.fill(this.objectIds,
-//						faceCount * 4,
-//						faceCount * 4 + 4,
-//						new Vector3i(this.meshId, face.cellPosition.x(), face.cellPosition.y()));
-//			} else {
-//				Arrays.fill(this.objectIds, faceCount * 4, faceCount * 4 + 4, new Vector3i(this.meshId, 0, 0));
-//			}
+
+			if (face.cellPosition() != null) {
+				final Vector2ic cell = face.cellPosition();
+				this.faceIndices[cell.x()][cell.y()] = faceCount * 4;
+			}
+
 			faceCount++;
 
 			progress.setValue(100 + 100 * faceCount / totalFaceCount);
@@ -331,7 +332,7 @@ public class WorldGenerator {
 		return this.noiseCompute[x][z];
 	}
 
-	public ColorMaterial getCellMaterial(final int x, final int z) {
+	public ColorMaterial getTopFaceMaterial(final int x, final int z) {
 		if (x >= this.width || z >= this.length || x < 0 || z < 0) {
 			return null;
 		}

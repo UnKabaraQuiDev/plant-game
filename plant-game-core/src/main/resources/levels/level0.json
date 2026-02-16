@@ -5,7 +5,8 @@
 		"generation": {
 			"strategy": "IMAGE",
 			"path": "/maps/world_map.png",
-			"materialPath": null,
+			"materialPath": "/maps/world_map_materials.png",
+			"colorMaterial": true,	
 			"height": 4
 		},
 		"waterLevel": {

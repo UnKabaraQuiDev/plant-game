@@ -1,10 +1,24 @@
 package lu.kbra.plant_game.engine.entity.go.mesh.terrain;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
+import org.joml.Vector2i;
 import org.joml.Vector2ic;
 
+import lu.kbra.pclib.PCUtils;
+import lu.kbra.pclib.datastructure.pair.Pair;
+import lu.kbra.pclib.datastructure.pair.Pairs;
+import lu.kbra.plant_game.PGLogic;
+import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.generated.ColorMaterial;
+import lu.kbra.standalone.gameengine.cache.attrib.UByteAttribArray;
 import lu.kbra.standalone.gameengine.cache.attrib.UIntAttribArray;
 import lu.kbra.standalone.gameengine.cache.attrib.Vec3fAttribArray;
 import lu.kbra.standalone.gameengine.cache.attrib.impl.AttribArray;
@@ -19,9 +33,12 @@ public class TerrainMesh extends LoadedMesh {
 
 	private final Integer[][] cellHeight;
 	private final ColorMaterial[][] materialType;
+	private int[][] faceIndices;
+
+	protected List<Pair<Vector2i, ColorMaterial>> updateColorMaterial = Collections.synchronizedList(new ArrayList<>());
 
 	public TerrainMesh(final String name, final int objectId, final int width, final int length, final int maxHeight,
-			final Integer[][] cellHeight, final ColorMaterial[][] materialType, final Vec3fAttribArray vertices,
+			final Integer[][] cellHeight, final ColorMaterial[][] materialType, final int[][] faceIndices, final Vec3fAttribArray vertices,
 			final UIntAttribArray indices, final AttribArray... attribs) {
 		super(name, null, vertices, indices, attribs);
 		this.objectId = objectId;
@@ -30,6 +47,83 @@ public class TerrainMesh extends LoadedMesh {
 		this.maxHeight = maxHeight;
 		this.cellHeight = cellHeight;
 		this.materialType = materialType;
+		this.faceIndices = faceIndices;
+	}
+
+	public void setColorMaterial(final Vector2i tile, final ColorMaterial cm) {
+		synchronized (this.updateColorMaterial) {
+			this.updateColorMaterial.add(Pairs.readOnly(tile, cm));
+		}
+	}
+
+	public void flushColorMaterial() {
+		final Map<Integer, byte[]> result = new LinkedHashMap<>();
+
+		synchronized (this.updateColorMaterial) {
+			if (this.updateColorMaterial.isEmpty()) {
+				return;
+			}
+
+			this.updateColorMaterial.sort(Comparator.comparingInt(p -> p.getKey().y() * this.getWidth() + p.getKey().x()));
+
+			final List<Byte> currentValues = new ArrayList<>();
+			int currentStart = -1;
+			int previousIndex = -1;
+
+			for (Pair<Vector2i, ColorMaterial> pair : this.updateColorMaterial) {
+
+				final Vector2i tile = pair.getKey();
+				this.getMaterialTypes()[tile.x()][tile.y()] = pair.getValue();
+
+				final int index = this.getFaceIndex(tile); // (tile.x() + tile.y() * mesh.getWidth());
+				final byte value = (byte) pair.getValue().getId();
+
+				if (currentStart == -1) {
+					currentStart = index;
+
+					for (int i = 0; i < 4; i++) {
+						currentValues.add(value);
+					}
+				} else if (index == previousIndex + 1) {
+					for (int i = 0; i < 4; i++) {
+						currentValues.add(value);
+					}
+				} else {
+					result.put(currentStart, PCUtils.byteListToPrimitive(currentValues));
+					currentValues.clear();
+					currentStart = index;
+
+					for (int i = 0; i < 4; i++) {
+						currentValues.add(value);
+					}
+				}
+
+				previousIndex = index;
+			}
+
+			if (!currentValues.isEmpty()) {
+				result.put(currentStart, PCUtils.byteListToPrimitive(currentValues));
+			}
+
+			this.updateColorMaterial.clear();
+		}
+
+		if (result.isEmpty()) {
+			return;
+		}
+
+		PGLogic.INSTANCE.RENDER_DISPATCHER.post(() -> {
+			final UByteAttribArray array = (UByteAttribArray) this.getAttribs()
+					.stream()
+					.filter(c -> c.getIndex() == GameObject.MESH_ATTRIB_MATERIAL_ID_ID)
+					.findFirst()
+					.orElseThrow(() -> new IllegalStateException("No " + GameObject.MESH_ATTRIB_MATERIAL_ID_NAME + " ("
+							+ GameObject.MESH_ATTRIB_MATERIAL_ID_ID + ") found in mesh: " + this.getId()));
+
+			for (Entry<Integer, byte[]> e : result.entrySet()) {
+				array.update(e.getKey(), e.getValue());
+			}
+		});
 	}
 
 	public int getCellHeight(final int x, final int z) {
@@ -42,6 +136,22 @@ public class TerrainMesh extends LoadedMesh {
 
 	public int getCellHeight(final Vector2ic tile) {
 		return this.getCellHeight(tile.x(), tile.y());
+	}
+
+	public int[][] getFaceIndices() {
+		return this.faceIndices;
+	}
+
+	public int getFaceIndex(final int x, final int z) {
+		if (this.isInBounds(x, z)) {
+			return this.faceIndices[x][z];
+		}
+
+		return Integer.MIN_VALUE;
+	}
+
+	public int getFaceIndex(final Vector2ic tile) {
+		return this.getFaceIndex(tile.x(), tile.y());
 	}
 
 	public boolean isInBounds(final int x, final int z) {

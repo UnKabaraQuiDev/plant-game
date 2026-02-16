@@ -122,13 +122,11 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController {
 			data.get().getTransform().rotationPivotSub(data.get().getTransform().getTranslation());
 			data.get().getTransform().scalePivotSub(data.get().getTransform().getTranslation());
 			data.get().getTransform().updateMatrix();
-			this.getCache().addMesh(pair.getValue());
 			return pair.getKey();
 		}).then(render, (Function<WorldGenerator, Pair<WorldGenerator, TerrainEdgeMesh>>) wg -> {
 			return Pairs.readOnly(wg, wg.generateEdgeMesh(worldProgress, this.getCache()));
 		}).then(workers, (Function<Pair<WorldGenerator, TerrainEdgeMesh>, WorldGenerator>) pair -> {
 			data.get().setTerrainEdgeEntity(new TerrainEdgeObject("terrain-edge-" + levelData.getInternalName(), pair.getValue()));
-			this.getCache().addMesh(pair.getValue());
 			return pair.getKey();
 		}).then(render, (Function<WorldGenerator, Pair<WorldGenerator, Mesh>>) wg -> {
 			return Pairs.readOnly(wg, wg.generateHighlightMesh(worldProgress, this.getCache()));
@@ -136,7 +134,6 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController {
 			data.get()
 					.setTerrainHighlightEntity(
 							new TerrainHighlightObject("terrain-highlight-" + levelData.getInternalName(), pair.getValue()));
-			this.getCache().addMesh(pair.getValue());
 		}).then(render, (Supplier<QuadLoadedMesh>) () -> {
 			final QuadLoadedMesh mesh = new QuadLoadedMesh("water-" + levelData.getInternalName(),
 					null,
@@ -242,6 +239,17 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController {
 		camera.getPosition()
 				.fma(dTime * CAMERA_MOVEMENT_SPEED, this.posAdd.rotateY(-camera.getRotation().getEulerAnglesXYZ(new Vector3f()).y()));
 		camera.updateMatrix();
+
+		if (this.getTerrain() != null) {
+//			this.getTerrain()
+//					.getMesh()
+//					.setColorMaterial(
+//							new Vector2i(PCUtils.randomIntRange(0, this.getTerrain().getMesh().getWidth()),
+//									PCUtils.randomIntRange(0, this.getTerrain().getMesh().getLength())),
+//							ColorMaterial.RED);
+
+			this.getTerrain().getMesh().flushColorMaterial();
+		}
 	}
 
 	public TaskFuture<?, Optional<PlaceableObject>> getClickedObject(final Dispatcher workers, final DeferredCompositor compositor) {

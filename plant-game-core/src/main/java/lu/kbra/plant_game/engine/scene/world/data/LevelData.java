@@ -7,8 +7,11 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.Nulls;
 
 import lu.kbra.plant_game.engine.scene.world.data.building.requirement.BuildingRequirement;
 import lu.kbra.plant_game.engine.scene.world.data.resource.ResourceType;
@@ -111,11 +114,16 @@ public class LevelData {
 		public static final class ImageGeneration extends Generation {
 
 			protected String path;
+			@JsonInclude(JsonInclude.Include.NON_NULL)
 			protected String materialPath;
+			@JsonSetter(nulls = Nulls.SKIP)
+			protected boolean colorMaterial = false;
 
 			@Override
 			public WorldGenerator getGenerator(final PluginDescriptor pluginDescriptor) {
-				return new ImageWorldGenerator(pluginDescriptor, this.path, this.height);
+				return this.materialPath != null
+						? new ImageWorldGenerator(pluginDescriptor, this.path, this.materialPath, this.colorMaterial, this.height)
+						: new ImageWorldGenerator(pluginDescriptor, this.path, this.height);
 			}
 
 			@Override

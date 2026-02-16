@@ -1,9 +1,10 @@
 // @formatter:off
 package lu.kbra.plant_game.generated;
 
+import java.lang.Float;
+import java.lang.Integer;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.joml.Vector4f;
 import org.joml.Vector4fc;
 
@@ -151,5 +152,19 @@ public enum ColorMaterial {
 
 	public Vector4fc getColor() {
 		return this.color;
+	}
+
+	public static ColorMaterial getClosest(final Vector4fc c) {
+		ColorMaterial closest = null;
+		float bestDistance = Float.MAX_VALUE;
+		for (ColorMaterial material : values()) {
+			Vector4fc mc = material.color;
+			float distance = mc.distance(c);
+			if (distance < bestDistance) {
+				bestDistance = distance;
+				closest = material;
+			}
+		}
+		return closest;
 	}
 }
