@@ -2,8 +2,6 @@ package lu.kbra.plant_game;
 
 import java.io.File;
 import java.util.Locale;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 import org.lwjgl.glfw.GLFW;
 
@@ -32,6 +30,7 @@ import lu.kbra.plant_game.engine.window.input.MappingInputHandler;
 import lu.kbra.plant_game.plugin.PluginManager;
 import lu.kbra.plant_game.plugin.registry.LevelRegistry;
 import lu.kbra.plant_game.plugin.registry.LevelRegistry.LevelDefinition;
+import lu.kbra.standalone.gameengine.impl.Cleanupable;
 import lu.kbra.standalone.gameengine.impl.GameLogic;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
 import lu.kbra.standalone.gameengine.impl.future.WorkerDispatcher;
@@ -57,6 +56,7 @@ public class PGLogic extends GameLogic {
 	public final WorkerDispatcher WORKERS = new WorkerDispatcher("WORKERS", 8);
 
 	private MainMenuWorldScene mainMenuWorldScene;
+	private WorldLevelScene gameWorldScene;
 	private WorldLevelScene worldScene;
 
 	private MainMenuUIScene mainMenuUIScene;
@@ -85,14 +85,12 @@ public class PGLogic extends GameLogic {
 		this.pluginManager.onLoad();
 
 		this.compositor = new DeferredCompositor(this.engine, this.engine.getRenderThread());
-		this.compositor.getBackgroundColor().set(1, 1, 0, 1);
 
 //		this.worldScene = new WorldLevelScene("world", this.cache);
 		this.mainMenuWorldScene = new MainMenuWorldScene(this.cache);
 		this.worldScene = this.mainMenuWorldScene;
 
 		this.mainMenuUIScene = new MainMenuUIScene(this.cache, this.mainMenuWorldScene);
-		this.overlayUIScene = new OverlayUIScene(this.cache);
 		this.uiScene = this.mainMenuUIScene;
 
 		UIObjectFactory.INSTANCE = new UIObjectFactory(this.mainMenuUIScene.getCache(), this.WORKERS, this.RENDER_DISPATCHER);
@@ -100,16 +98,10 @@ public class PGLogic extends GameLogic {
 		LocalizationService.INSTANCE = new LocalizationService(Locale.US);
 
 		final LevelData levelData = LevelRegistry.LEVELS.get(0).getLevelData();
-		// OBJECT_MAPPER.readValue(PCUtils.readStringSource("classpath:/levels/level0.json"),
-		// LevelData.class);
 		this.gameData = GameData.fromBlankLevel(levelData);
 
-		this.uiScene.init(this.WORKERS, this.RENDER_DISPATCHER);
-		this.overlayUIScene.init(this.WORKERS, this.RENDER_DISPATCHER);
-		this.worldScene.init(this.WORKERS, this.RENDER_DISPATCHER, this.gameData, new IntPointer(0));
-
-//		this.uiScene = null;
-//		this.uiScene = this.overlayUIScene;
+		this.mainMenuUIScene.init(this.WORKERS, this.RENDER_DISPATCHER);
+		this.mainMenuWorldScene.init(this.WORKERS, this.RENDER_DISPATCHER, this.gameData, new IntPointer(0));
 
 		this.pluginManager.onEnable();
 	}
@@ -164,22 +156,28 @@ public class PGLogic extends GameLogic {
 	}
 
 	public void startLevel(final LevelDefinition currentLevelDefinition) {
-		final WorldLevelScene oldScene = this.worldScene;
-		this.worldScene = null;
-		this.RENDER_DISPATCHER.post(oldScene::cleanup);
+		renderCleanup(this.gameWorldScene);
+		renderCleanup(this.worldScene);
+		renderCleanup(this.overlayUIScene);
+		renderCleanup(this.uiScene);
 
 		final LevelData levelData = currentLevelDefinition.getLevelData();
 		final IntPointer progress = new IntPointer(0);
 
-		new TaskFuture<>(this.RENDER_DISPATCHER,
-				(Supplier<WorldLevelScene>) () -> new WorldLevelScene(levelData.getInternalName(), this.cache))
-				.then(this.WORKERS, (Consumer<WorldLevelScene>) worldScene -> {
-					this.gameData = GameData.fromBlankLevel(levelData);
-					currentLevelDefinition.setGameData(this.gameData);
+		this.gameData = GameData.fromBlankLevel(levelData);
+		currentLevelDefinition.setGameData(this.gameData);
 
-					worldScene.init(this.WORKERS, this.RENDER_DISPATCHER, this.gameData, progress).then(c -> this.worldScene = c);
-				})
-				.push();
+		this.overlayUIScene = new OverlayUIScene(this.cache);
+		new TaskFuture<>(this.WORKERS, (Runnable) () -> {
+			this.overlayUIScene.init(this.WORKERS, this.WORKERS, this.gameData);
+			this.uiScene = this.overlayUIScene;
+		}).push();
+
+		this.gameWorldScene = new WorldLevelScene(levelData.getInternalName(), this.cache);
+		new TaskFuture<>(this.WORKERS, (Runnable) () -> {
+			this.worldScene.init(this.WORKERS, this.RENDER_DISPATCHER, this.gameData, progress).then(c -> System.err.println("latch ok"));
+			this.worldScene = this.gameWorldScene;
+		}).push();
 	}
 
 	public void resumeLevel(final LevelDefinition currentLevelDefinition) {
@@ -193,6 +191,13 @@ public class PGLogic extends GameLogic {
 			this.compositor.cleanup();
 		}
 		this.WORKERS.shutdown();
+	}
+
+	public static void renderCleanup(final Cleanupable c) {
+		if (c == null) {
+			return;
+		}
+		INSTANCE.RENDER_DISPATCHER.post(c::cleanup);
 	}
 
 	public WorldLevelScene getWorldScene() {

@@ -65,10 +65,6 @@ public class UIScene extends Scene3D implements SceneBoundsOwner {
 		this.getCamera().updateMatrix();
 	}
 
-	public void init(final Dispatcher workers, final Dispatcher renderDispatcher) {
-
-	}
-
 	protected Set<UIObject> hovering = new HashSet<>();
 	protected Focusable focused;
 

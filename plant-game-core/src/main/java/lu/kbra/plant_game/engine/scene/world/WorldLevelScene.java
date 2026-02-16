@@ -70,7 +70,7 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController {
 	private float rotation = 0;
 	private float fovDiff = 0;
 
-	private final ParticleManager particleManager;
+	private ParticleManager particleManager;
 
 	private final Map<Class<? extends Modal>, Modal> modals = Collections.synchronizedMap(new HashMap<>());
 	private Modal activeModal;
@@ -78,8 +78,6 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController {
 	public WorldLevelScene(final String name, final CacheManager parentCache) {
 		super(name);
 		this.worldCache = new CacheManager(name, parentCache);
-
-		this.particleManager = new ParticleManager(parentCache, this);
 
 		this.getCamera().setPosition(new Vector3f(-20, 25, 20).mul(1.5f));
 		this.getCamera().lookAt(this.getCamera().getPosition(), new Vector3f(0, 0, 0)).updateMatrix();
@@ -94,9 +92,17 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController {
 			final IntPointer worldProgress) {
 		this.registerModal(new MoveBuildingModal(this, PGLogic.INSTANCE.getCompositor()));
 
-		final ObjectTriggerLatch<WorldLevelScene> latch = new ObjectTriggerLatch<>(1, this);
+		final ObjectTriggerLatch<WorldLevelScene> latch = new ObjectTriggerLatch<>(2, this);
+
+		new TaskFuture<>(render, (Runnable) () -> {
+			this.particleManager = new ParticleManager(this.getCache().getParent(), this);
+			latch.trigger(null);
+			System.err.println("latch 1");
+		}).push();
+
 		this.initTerrain(workers, render, Optional.of(gameData), gameData.getLevelData(), worldProgress).then(c -> {
 			this.setTerrain(c.get());
+			System.err.println("latch 2");
 		}).latch(latch);
 		return latch;
 	}
@@ -293,7 +299,9 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController {
 			this.activeModal.render(dTime);
 		}
 
-		this.particleManager.render(dTime);
+		if (this.particleManager != null) {
+			this.particleManager.render(dTime);
+		}
 	}
 
 	@Override

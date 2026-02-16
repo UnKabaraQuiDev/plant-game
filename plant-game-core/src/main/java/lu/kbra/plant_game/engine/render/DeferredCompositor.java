@@ -100,7 +100,7 @@ import lu.kbra.standalone.gameengine.graph.shader.RenderShader;
 import lu.kbra.standalone.gameengine.graph.texture.SingleTexture;
 import lu.kbra.standalone.gameengine.graph.texture.Texture;
 import lu.kbra.standalone.gameengine.graph.window.Window;
-import lu.kbra.standalone.gameengine.impl.Cleanupable;
+import lu.kbra.standalone.gameengine.impl.AutoCleanupable;
 import lu.kbra.standalone.gameengine.impl.GLObject;
 import lu.kbra.standalone.gameengine.objs.entity.SceneEntity;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
@@ -119,7 +119,7 @@ import lu.kbra.standalone.gameengine.utils.gl.consts.TextureFilter;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextureType;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextureWrap;
 
-public class DeferredCompositor implements Cleanupable {
+public class DeferredCompositor extends AutoCleanupable {
 
 	public enum Method {
 		DIRECT, DEFERRED;
@@ -178,25 +178,21 @@ public class DeferredCompositor implements Cleanupable {
 			+ ".gl_force_sync_compute_shaders";
 	public static final boolean GL_FORCE_SYNC_COMPUTE_SHADERS = Boolean.getBoolean(GL_FORCE_SYNC_COMPUTE_SHADERS_PROPERTY);
 
-	private static Mesh SCREEN = new LoadedMesh(PASS_SCREEN,
-			null,
-			new Vec3fAttribArray("pos",
-					0,
-					new Vector3f[] { new Vector3f(-1, 1, 0), new Vector3f(1, 1, 0), new Vector3f(1, -1, 0), new Vector3f(-1, -1, 0) }),
-			new UIntAttribArray("ind", -1, new int[] { 0, 1, 2, 0, 2, 3 }, BufferType.ELEMENT_ARRAY),
-			new Vec2fAttribArray("uv",
-					1,
-					new Vector2f[] { new Vector2f(0, 1), new Vector2f(1, 1), new Vector2f(1, 0), new Vector2f(0, 0) }));
-	private static QuadMesh QUAD = new QuadLoadedMesh(PASS_BOUNDS,
-			null,
-			new Vector2f(1),
-			new UByteAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_NAME, GameObject.MESH_ATTRIB_MATERIAL_ID_ID, new byte[4]));
+	private Mesh SCREEN;
+	private QuadMesh QUAD;
 
 	protected Thread ownerThread;
 	protected Window window;
 
 	// world rendering
-	protected SingleTexture depthTexture, posTexture, normalTexture, uvTexture, idsTexture;
+	protected SingleTexture depthTexture;
+	protected SingleTexture posTexture;
+	protected SingleTexture normalTexture;
+	protected SingleTexture uvTexture;
+	/**
+	 * (mat, obj, obj, obj)
+	 */
+	protected SingleTexture idsTexture;
 	protected Framebuffer worldFramebuffer;
 	protected TransferShader deferredTransferShader;
 	protected InstanceTransferShader deferredInstanceTransferShader;
@@ -244,6 +240,20 @@ public class DeferredCompositor implements Cleanupable {
 		final CacheManager cache = engine.getCache();
 		this.ownerThread = ownerThread;
 		this.window = engine.getWindow();
+
+		cache.addMesh(this.SCREEN = new LoadedMesh(PASS_SCREEN,
+				null,
+				new Vec3fAttribArray("pos",
+						0,
+						new Vector3f[] { new Vector3f(-1, 1, 0), new Vector3f(1, 1, 0), new Vector3f(1, -1, 0), new Vector3f(-1, -1, 0) }),
+				new UIntAttribArray("ind", -1, new int[] { 0, 1, 2, 0, 2, 3 }, BufferType.ELEMENT_ARRAY),
+				new Vec2fAttribArray("uv",
+						1,
+						new Vector2f[] { new Vector2f(0, 1), new Vector2f(1, 1), new Vector2f(1, 0), new Vector2f(0, 0) })));
+		cache.addMesh(this.QUAD = new QuadLoadedMesh(PASS_BOUNDS,
+				null,
+				new Vector2f(1),
+				new UByteAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_NAME, GameObject.MESH_ATTRIB_MATERIAL_ID_ID, new byte[4])));
 
 		cache.addAbstractShader(this.deferredTransferShader = new TransferShader());
 		cache.addAbstractShader(this.deferredInstanceTransferShader = new InstanceTransferShader());
@@ -318,10 +328,6 @@ public class DeferredCompositor implements Cleanupable {
 			if (needRegen) {
 				this.oldResolution.set(width, height);
 				final float divisor = (float) MathUtils.map(Math.toDegrees(worldScene.getCamera().getProjection().getFov()), 5, 65, 6, 1);
-				// System.err.println("fov: " + worldScene.getCamera().getProjection().getFov()
-				// + "rad "
-				// + Math.toDegrees(worldScene.getCamera().getProjection().getFov()) + "deg = "
-				// + divisor);
 				// idk why this uses the option windowSize but ok
 				this.renderResolution.set(engine.getWindow().getOptions().windowSize).div(PCUtils.clamp(1, 100, divisor));
 				this.renderResolution.set(width, height).div(2);
@@ -365,7 +371,7 @@ public class DeferredCompositor implements Cleanupable {
 			return;
 		}
 
-		SCREEN.bind();
+		this.SCREEN.bind();
 
 		GL_W.glDisable(GL_W.GL_CULL_FACE);
 		GL_W.glDisable(GL_W.GL_DEPTH_TEST);
@@ -392,14 +398,14 @@ public class DeferredCompositor implements Cleanupable {
 
 			fsc.apply((FilterShader) fsc.getShaderClass().cast(fs));
 
-			GL_W.glDrawElements(fs.getBeginMode().getGlId(), SCREEN.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
+			GL_W.glDrawElements(fs.getBeginMode().getGlId(), this.SCREEN.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
 		}
 
 		GL_W.glEnable(GL_W.GL_DEPTH_TEST);
 		GL_W.glEnable(GL_W.GL_CULL_FACE);
 		GL_W.glDisable(GL_W.GL_BLEND);
 
-		SCREEN.unbind();
+		this.SCREEN.unbind();
 
 		GL_W.glUseProgram(0);
 	}
@@ -498,7 +504,7 @@ public class DeferredCompositor implements Cleanupable {
 		}
 		this.outputTxt.bindUniform(this.blitShader.getUniformLocation(BlitShader.TXT0), 0);
 
-		SCREEN.bind();
+		this.SCREEN.bind();
 
 		GL_W.glDisable(GL_W.GL_CULL_FACE);
 		GL_W.glDisable(GL_W.GL_DEPTH_TEST);
@@ -510,11 +516,11 @@ public class DeferredCompositor implements Cleanupable {
 
 		GL_W.glPolygonMode(PolygonMode.FRONT_AND_BACK.getGlId(), PolygonDrawMode.FILL.getGlId());
 
-		GL_W.glDrawElements(this.blitShader.getBeginMode().getGlId(), SCREEN.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
+		GL_W.glDrawElements(this.blitShader.getBeginMode().getGlId(), this.SCREEN.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
 
 		GL_W.glEnable(GL_W.GL_DEPTH_TEST);
 
-		SCREEN.unbind();
+		this.SCREEN.unbind();
 
 		this.blitShader.unbind();
 	}
@@ -530,8 +536,15 @@ public class DeferredCompositor implements Cleanupable {
 			this.outputTxt.resize();
 			this.outputTxt.unbind();
 		}
-		GL_W.glClearTexImage(this.outputTxt
-				.getGlId(), 0, this.outputTxt.getFormat().getGlId(), this.outputTxt.getDataType().getGlId(), new float[] { 0, 0, 0, 0 });
+		GL_W.glClearTexImage(this.outputTxt.getGlId(),
+				0,
+				this.outputTxt.getFormat().getGlId(),
+				this.outputTxt.getDataType().getGlId(),
+				new int[] {
+						(byte) (this.backgroundColor.x * 255),
+						(byte) (this.backgroundColor.y * 255),
+						(byte) (this.backgroundColor.z * 255),
+						(byte) (this.backgroundColor.w * 255) });
 
 		GL_W.glViewport(0, 0, resolution.x, resolution.y);
 
@@ -738,6 +751,13 @@ public class DeferredCompositor implements Cleanupable {
 		GL_W.glEnable(GL_W.GL_CULL_FACE);
 		GL_W.glCullFace(GL_W.GL_BACK);
 
+		this.idsTexture.bind();
+		GL_W.glClearTexImage(this.idsTexture.getGlId(),
+				0,
+				this.idsTexture.getFormat().getGlId(),
+				this.idsTexture.getDataType().getGlId(),
+				new int[] { 100, ColorMaterial.BLACK.getId(), ColorMaterial.BLACK.getId(), ColorMaterial.BLACK.getId() });
+
 		GL_W.glClearColor(this.backgroundColor.x, this.backgroundColor.y, this.backgroundColor.z, this.backgroundColor.w);
 		GL_W.glClear(GL_W.GL_COLOR_BUFFER_BIT | GL_W.GL_DEPTH_BUFFER_BIT);
 
@@ -892,7 +912,7 @@ public class DeferredCompositor implements Cleanupable {
 			final Footprint footprint,
 			final ColorMaterial color) {
 		if (this.deferredPass && DEBUG_FOOTPRINTS && this.deferredTransferShader != null) {
-			QUAD.bind();
+			this.QUAD.bind();
 			this.deferredTransferShader.bind();
 
 			final Vector2ic min = footprint.getMin();
@@ -920,7 +940,7 @@ public class DeferredCompositor implements Cleanupable {
 			GL_W.glPolygonMode(PolygonMode.FRONT_AND_BACK.getGlId(), PolygonDrawMode.LINE.getGlId());
 
 //			GL_W.glDrawElements(mesh.getBeginMode().getGlId(), mesh.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
-			GL_W.glDrawElements(this.deferredTransferShader.getBeginMode().getGlId(), QUAD.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
+			GL_W.glDrawElements(this.deferredTransferShader.getBeginMode().getGlId(), this.QUAD.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
 
 //			GL_W.glEnable(GL_W.GL_DEPTH_TEST);
 			GL_W.glPolygonMode(GL_W.GL_FRONT_AND_BACK, GL_W.GL_FILL);
@@ -1011,8 +1031,6 @@ public class DeferredCompositor implements Cleanupable {
 			}
 		}
 
-//		System.err.println(mesh.getId() + " " + (entity instanceof MaterialIdOwner) + " "
-//				+ (entity instanceof MaterialIdOwner go && go.isEntityMaterialId()));
 		if (entity instanceof final MaterialIdOwner go && go.isEntityMaterialId()) {
 			// id is in the entity
 			final int matId = go.getMaterialId();
@@ -1385,7 +1403,7 @@ public class DeferredCompositor implements Cleanupable {
 			GlobalLogger.warning("Entity: " + entity.getId() + " has no/invalid bounds.");
 		}
 		if (!this.deferredPass && DEBUG_BOUNDS && this.lineDirectShader != null && shape != null) {
-			QUAD.bind();
+			this.QUAD.bind();
 			this.lineDirectShader.bind();
 
 			final Rectangle2D bounds = shape.getBounds2D();
@@ -1409,7 +1427,7 @@ public class DeferredCompositor implements Cleanupable {
 
 			GL_W.glPolygonMode(PolygonMode.FRONT_AND_BACK.getGlId(), PolygonDrawMode.LINE.getGlId());
 
-			GL_W.glDrawElements(this.lineDirectShader.getBeginMode().getGlId(), QUAD.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
+			GL_W.glDrawElements(this.lineDirectShader.getBeginMode().getGlId(), this.QUAD.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
 
 //			GL_W.glEnable(GL_W.GL_DEPTH_TEST);
 			GL_W.glPolygonMode(GL_W.GL_FRONT_AND_BACK, GL_W.GL_FILL);
@@ -1491,12 +1509,16 @@ public class DeferredCompositor implements Cleanupable {
 
 	@Override
 	public void cleanup() {
-		GlobalLogger.log("Cleaning up: " + this.getClass().getName());
-
-		if (SCREEN != null) {
-			SCREEN.cleanup();
-			SCREEN = null;
-		}
+		// managed by the parent's cache
+//		if (this.SCREEN != null) {
+//			this.SCREEN.cleanup();
+//			this.SCREEN = null;
+//
+//			this.QUAD.cleanup();
+//			this.QUAD = null;
+//
+//			GlobalLogger.log("Cleaning up: " + this.getClass().getName());
+//		}
 	}
 
 	public boolean pollObjectId(final boolean blocking) {
@@ -1616,14 +1638,6 @@ public class DeferredCompositor implements Cleanupable {
 
 	public void disableFilters() {
 		this.enabledFilters.clear();
-	}
-
-	public Vector4f getBackgroundColor() {
-		return this.backgroundColor;
-	}
-
-	public void setBackgroundColor(final Vector4f backgroundColor) {
-		this.backgroundColor = backgroundColor;
 	}
 
 	public Window getWindow() {

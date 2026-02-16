@@ -123,7 +123,6 @@ public class MainMenuUIScene extends UIScene {
 		this.worldScene = worldScene;
 	}
 
-	@Override
 	public void init(final Dispatcher workers, final Dispatcher renderDispatcher) {
 		super.addAll(this.mainMenuGroup, this.optionsMenuGroup, this.playMenuGroup, this.resumeMenuGroup);
 

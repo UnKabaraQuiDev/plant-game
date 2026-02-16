@@ -43,6 +43,8 @@ public class PlayInfoUIObjectGroup extends AnchoredLayoutUIObjectGroup implement
 
 	@Override
 	public void accept(final LevelDefinition t) {
+		super.setActive(true);
+
 		if (this.levelDef != null && this.levelDef.get() == t) {
 			return;
 		}
@@ -52,8 +54,6 @@ public class PlayInfoUIObjectGroup extends AnchoredLayoutUIObjectGroup implement
 		this.titleObject.ifSet(i -> i.setText(t.getLevelData().getLevelName()).flushText());
 		this.authorObject.ifSet(i -> i.setText(t.getLevelData().getAuthor()).flushText());
 		this.progressBar.setValue(t.getProgress() / 100f).updateScaling();
-
-		super.setActive(true);
 	}
 
 	public ObjectTriggerLatch<? extends PlayInfoUIObjectGroup> init() {

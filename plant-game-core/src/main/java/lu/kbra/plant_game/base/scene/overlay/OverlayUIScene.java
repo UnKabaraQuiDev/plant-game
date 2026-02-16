@@ -2,6 +2,8 @@ package lu.kbra.plant_game.base.scene.overlay;
 
 import java.util.stream.Collectors;
 
+import lu.kbra.pclib.concurrency.CountTriggerLatch;
+import lu.kbra.pclib.concurrency.ObjectTriggerLatch;
 import lu.kbra.plant_game.PGLogic;
 import lu.kbra.plant_game.base.data.DefaultResourceType;
 import lu.kbra.plant_game.base.scene.overlay.group.building.BuildingInfoUIObjectGroup;
@@ -32,6 +34,7 @@ import lu.kbra.plant_game.engine.scene.ui.layout.AnchorLayout;
 import lu.kbra.plant_game.engine.scene.ui.layout.FlowLayout;
 import lu.kbra.plant_game.engine.scene.ui.layout.Layout;
 import lu.kbra.plant_game.engine.scene.ui.layout.LayoutOwner;
+import lu.kbra.plant_game.engine.scene.world.GameData;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.plant_game.plugin.registry.BuildingRegistry;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
@@ -70,9 +73,11 @@ public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner
 		this.setLayout(new AnchorLayout());
 	}
 
-	@Override
-	public void init(final Dispatcher workers, final Dispatcher renderDispatcher) {
+	public ObjectTriggerLatch<OverlayUIScene> init(final Dispatcher workers, final Dispatcher renderDispatcher, final GameData gameData) {
 		super.addAll(this.statsGroup);
+
+		final ObjectTriggerLatch<OverlayUIScene> latch = new ObjectTriggerLatch<>(8, this);
+		latch.thenOther(OverlayUIScene::doLayout);
 
 		final float height = 0.2f * STATS_GROUP_SCALE;
 
@@ -83,49 +88,59 @@ public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner
 					.set(i -> i.setTarget(c, Anchor.BOTTOM_CENTER, Anchor.TOP_CENTER))
 					.add(this)
 					.push();
-		});
+		}).latch(latch);
 
 		this.buildingInfo.init().then(c -> {
 			c.getTransform().translationAddY(0.5f);
 			c.setActive(false);
 			this.add(c);
+		}).latch(latch);
+
+		final CountTriggerLatch latch2 = new CountTriggerLatch(BuildingRegistry.BUILDING_DEFS.size(), () -> latch.trigger(null));
+
+		BuildingRegistry.BUILDING_DEFS.keySet().forEach(p -> {
+			final CountTriggerLatch latch3 = new CountTriggerLatch(BuildingRegistry.BUILDING_DEFS.get(p).size(),
+					() -> latch2.trigger(null));
+
+			this.buildingPanel.addTab(new BuildingTabUIObjectGroup(p.getLocalizationKey(), p.getIndex(), p.getAccentColor()))
+					.then(tab -> BuildingRegistry.BUILDING_DEFS.get(p).forEach(f -> new BuildingItemUIObjectGroup(f).init().then(obj -> {
+						obj.setTransform(new Transform3D(0.3f));
+						obj.setIndex(f.getIndex());
+						tab.getContent().add(obj);
+					}).latch(latch3)));
 		});
 
-		BuildingRegistry.BUILDING_DEFS.keySet()
-				.forEach(p -> this.buildingPanel
-						.addTab(new BuildingTabUIObjectGroup(p.getLocalizationKey(), p.getIndex(), p.getAccentColor()))
-						.then(tab -> BuildingRegistry.BUILDING_DEFS.get(p)
-								.forEach(f -> new BuildingItemUIObjectGroup(f).init().then(obj -> {
-									obj.setTransform(new Transform3D(0.3f));
-									obj.setIndex(f.getIndex());
-									tab.getContent().add(obj);
-								}))));
-
 		this.waterGroup = new IntegerStatLine("water-counter");
-		this.waterGroup.init(workers,
-				renderDispatcher,
-				height,
-				WaterIconUIObject.class,
-				IntegerTextUIObject.class,
-				SignedIntegerTextUIObject.class);
+		this.waterGroup
+				.init(workers,
+						renderDispatcher,
+						height,
+						WaterIconUIObject.class,
+						IntegerTextUIObject.class,
+						SignedIntegerTextUIObject.class)
+				.latch(latch);
 		this.statsGroup.add(this.waterGroup);
 
 		this.moneyGroup = new IntegerStatLine("money-counter");
-		this.moneyGroup.init(workers,
-				renderDispatcher,
-				height,
-				MoneyIconUIObject.class,
-				IntegerTextUIObject.class,
-				SignedIntegerTextUIObject.class);
+		this.moneyGroup
+				.init(workers,
+						renderDispatcher,
+						height,
+						MoneyIconUIObject.class,
+						IntegerTextUIObject.class,
+						SignedIntegerTextUIObject.class)
+				.latch(latch);
 		this.statsGroup.add(this.moneyGroup);
 
 		this.energyGroup = new IntegerStatLine("energy-counter");
-		this.energyGroup.init(workers,
-				renderDispatcher,
-				height,
-				EnergyIconUIObject.class,
-				IntegerTextUIObject.class,
-				SignedIntegerTextUIObject.class);
+		this.energyGroup
+				.init(workers,
+						renderDispatcher,
+						height,
+						EnergyIconUIObject.class,
+						IntegerTextUIObject.class,
+						SignedIntegerTextUIObject.class)
+				.latch(latch);
 		this.statsGroup.add(this.energyGroup);
 
 		this.progressBar = new AnchoredProgressBarUIObject("level-progress-bar",
@@ -152,10 +167,13 @@ public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner
 						obj.getPopup().setPadding(false);
 						obj.setTarget(pb.getForeground(), Anchor.TOP_CENTER, Anchor.BOTTOM_RIGHT);
 						obj.doLayout();
-					});
+					})
+					.latch(latch);
 			this.progressGroup.doLayout();
 			super.add(this.progressGroup);
-		});
+		}).latch(latch);
+
+		return latch;
 	}
 
 	@Override

@@ -90,11 +90,11 @@ public class LoadedTriangleStripMesh implements Mesh {
 	@Deprecated
 	@Override
 	public void cleanup() {
-		GlobalLogger.log("Cleaning up: " + this.name + " (" + this.vao + ")");
-
 		if (this.vao == -1) {
 			return;
 		}
+
+		GlobalLogger.log("Cleaning up: " + this.name + " (" + this.vao + ")");
 
 		GL_W.glDeleteVertexArrays(this.vao);
 		this.attribs.forEach(AttribArray::cleanup);
