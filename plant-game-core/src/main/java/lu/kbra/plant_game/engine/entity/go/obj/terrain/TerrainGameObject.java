@@ -3,6 +3,8 @@ package lu.kbra.plant_game.engine.entity.go.obj.terrain;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.OptionalInt;
 
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
@@ -10,14 +12,18 @@ import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
+import lu.kbra.pclib.pointer.ObjectPointer;
+import lu.kbra.plant_game.base.entity.go.obj_inst.grass.InstanceSmallGrassObject;
 import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.entity.go.MeshGameObject;
 import lu.kbra.plant_game.engine.entity.go.VariationMeshGameObject;
+import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory;
 import lu.kbra.plant_game.engine.entity.go.mesh.terrain.TerrainMesh;
 import lu.kbra.plant_game.engine.entity.impl.SynchronizedEntityContainer;
 import lu.kbra.plant_game.engine.entity.impl.Transform3DPivotOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.AbsoluteTransform3DOwner;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
+import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.standalone.gameengine.objs.entity.ParentAwareComponent;
 import lu.kbra.standalone.gameengine.scene.camera.Camera3D;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
@@ -35,7 +41,9 @@ public class TerrainGameObject extends VariationMeshGameObject
 	protected TerrainHighlightObject terrainHighlightObject;
 	protected MeshGameObject terrainWaterObject;
 
-	private final float[][] waterLevel;
+	protected final float[][] waterLevel;
+
+	protected ObjectPointer<InstanceSmallGrassObject> smallGrass;
 
 	public TerrainGameObject(final String str, final TerrainMesh mesh) {
 		super(str, mesh);
@@ -51,8 +59,34 @@ public class TerrainGameObject extends VariationMeshGameObject
 			return;
 		}
 		this.waterLevel[tile.x()][tile.y()] += amount;
-		if (this.waterLevel[tile.x()][tile.y()] > 1) {
+		if (this.waterLevel[tile.x()][tile.y()] > 3) {
+			this.addGrass(tile, 1);
+		} else if (this.waterLevel[tile.x()][tile.y()] > 1) {
 			mesh.setGrown(tile, this.active);
+		}
+	}
+
+	private void addGrass(final Vector2i tile, final int level) {
+		switch (level) {
+		case 1 -> {
+			synchronized (this) {
+				if (this.smallGrass == null) {
+					this.smallGrass = new ObjectPointer<>();
+					GameObjectFactory
+							.createInstances(InstanceSmallGrassObject.class, i -> new Transform3D(), OptionalInt.of(32), Optional.empty())
+							.set(i -> i.setColorMaterial(ColorMaterial.GREEN))
+							.set(i -> i.setTransform(new Transform3D(this.getTransform().getTranslation().negate(new Vector3f()))))
+							.get(this.smallGrass)
+							.postInit(i -> i.addInstance(this.getTilePosition(tile)))
+							.add(this)
+							.push();
+					return;
+				}
+			}
+
+			this.smallGrass.waitForIsset();
+			this.smallGrass.get().addInstance(this.getTilePosition(tile));
+		}
 		}
 	}
 
@@ -124,7 +158,7 @@ public class TerrainGameObject extends VariationMeshGameObject
 		return null; // nothing hit
 	}
 
-	public Vector3f getCellPosition(final Vector2i tile) {
+	public Vector3f getTilePosition(final Vector2i tile) {
 		final Vector3f meshTranslation = super.getTransform().getTranslation();
 		final int cellHeight = this.getMesh().getCellHeight(tile.x, tile.y);
 		return new Vector3f(meshTranslation.x + tile.x + 0.5f, meshTranslation.y + cellHeight, meshTranslation.z + tile.y + 0.5f);

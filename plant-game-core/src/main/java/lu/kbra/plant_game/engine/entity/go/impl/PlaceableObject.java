@@ -58,7 +58,7 @@ public interface PlaceableObject extends Transform3DOwner, UniqueID, SceneEntity
 		final Transform3D transform = this.getTransform();
 
 		rotation.rotation(transform.getRotation());
-		transform.translationSet(terrain.getCellPosition(tile));
+		transform.translationSet(terrain.getTilePosition(tile));
 		transform.updateMatrix();
 
 		this.setRotation(rotation);

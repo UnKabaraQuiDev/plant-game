@@ -125,7 +125,7 @@ public class MoveBuildingModal implements Modal {
 			this.worldScene.getTerrain()
 					.getMoveHighlightObject()
 					.getTransform()
-					.translationSet(this.worldScene.getTerrain().getCellPosition(this.currentPos))
+					.translationSet(this.worldScene.getTerrain().getTilePosition(this.currentPos))
 					.translationSub(this.worldScene.getTerrain().getTransform().getTranslation())
 					.updateMatrix();
 			this.attachedObject.placeDown(this.worldScene.getTerrain(), this.currentPos, this.targetRotation);
