@@ -42,7 +42,6 @@ import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.WorkerDispatcher;
 import lu.kbra.standalone.gameengine.objs.entity.ParentAwareComponent;
 import lu.kbra.standalone.gameengine.objs.entity.ParentAwareNode;
-import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
 import lu.kbra.standalone.gameengine.utils.geo.GeoAxis;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3DShear;
@@ -84,7 +83,7 @@ public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner
 		this.buildingPanel.init().then(c -> {
 			this.add(c);
 			UIObjectFactory.create(BuildingPanelToggleButtonUIObject.class)
-					.set(i -> i.setTransform(new Transform3D(0.2f).rotationSet(0, (float) Math.PI, 0).update()))
+					.set(i -> i.setTransform(new Transform3D(0.2f).rotationSet(0, 0, 0).update()))
 					.set(i -> i.setTarget(c, Anchor.BOTTOM_CENTER, Anchor.TOP_CENTER))
 					.add(this)
 					.push();
@@ -180,12 +179,12 @@ public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner
 	public void input(final WindowInputHandler inputHandler, final UpdateFrameState frameState) {
 		super.input(inputHandler, frameState);
 
-		if (this.progressGroup != null && this.progressBar != null) {
-			this.progressBar.setForegroundColor(GameEngineUtils.hsvToColorToVec4f((float) Math.sin(PGLogic.TOTAL_TIME()), 1, 1, 1));
-			this.progressBar.setValue((float) Math.sin(PGLogic.TOTAL_TIME()) / 2 + 0.5f).updateScaling();
-
-			this.progressGroup.set((int) (this.progressBar.getValue() * 101)).flushValue();
-		}
+//		if (this.progressGroup != null && this.progressBar != null) {
+//			this.progressBar.setForegroundColor(GameEngineUtils.hsvToColorToVec4f((float) Math.sin(PGLogic.TOTAL_TIME()), 1, 1, 1));
+//			this.progressBar.setValue((float) Math.sin(PGLogic.TOTAL_TIME()) / 2 + 0.5f).updateScaling();
+//
+//			this.progressGroup.set((int) (this.progressBar.getValue() * 101)).flushValue();
+//		}
 	}
 
 	int frameCounter = 0;

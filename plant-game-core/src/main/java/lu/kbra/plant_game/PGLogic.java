@@ -6,6 +6,7 @@ import java.util.Locale;
 import org.lwjgl.glfw.GLFW;
 
 import com.codedisaster.steamworks.SteamAPI;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -44,8 +45,8 @@ public class PGLogic extends GameLogic {
 	static {
 		OBJECT_MAPPER = new ObjectMapper();
 
-		OBJECT_MAPPER.setVisibility(PropertyAccessor.ALL, com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE);
-		OBJECT_MAPPER.setVisibility(PropertyAccessor.FIELD, com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY);
+		OBJECT_MAPPER.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
+		OBJECT_MAPPER.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
 
 		OBJECT_MAPPER.registerModule(new OrgJSONModule());
 		OBJECT_MAPPER.registerModule(new OrgJOMLModule());
@@ -169,13 +170,13 @@ public class PGLogic extends GameLogic {
 
 		this.overlayUIScene = new OverlayUIScene(this.cache);
 		new TaskFuture<>(this.WORKERS, (Runnable) () -> {
-			this.overlayUIScene.init(this.WORKERS, this.WORKERS, this.gameData);
+			this.overlayUIScene.init(this.WORKERS, this.WORKERS, this.gameData).thenOther(c -> c.doLayout());
 			this.uiScene = this.overlayUIScene;
 		}).push();
 
 		this.gameWorldScene = new WorldLevelScene(levelData.getInternalName(), this.cache);
 		new TaskFuture<>(this.WORKERS, (Runnable) () -> {
-			this.worldScene.init(this.WORKERS, this.RENDER_DISPATCHER, this.gameData, progress).then(c -> System.err.println("latch ok"));
+			this.gameWorldScene.init(this.WORKERS, this.RENDER_DISPATCHER, this.gameData, progress);
 			this.worldScene = this.gameWorldScene;
 		}).push();
 	}

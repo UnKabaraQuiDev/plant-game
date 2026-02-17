@@ -153,7 +153,7 @@ public abstract class WorldGenerator {
 		progress.setValue(prevValue + 75);
 
 		final TerrainEdgeMesh mesh = new TerrainEdgeMesh(
-				"terrain_edges-" + this.width + "x" + this.length + "@" + System.identityHashCode(this),
+				"terrain-edges-" + this.width + "x" + this.length + "@" + System.identityHashCode(this),
 				new Vec3fAttribArray(Mesh.ATTRIB_VERTICES_NAME, Mesh.ATTRIB_VERTICES_ID, this.edgeVertices),
 				new UIntAttribArray(Mesh.ATTRIB_INDICES_NAME, Mesh.ATTRIB_INDICES_ID, this.edgeIndices, BufferType.ELEMENT_ARRAY),
 				new UByteAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_NAME, GameObject.MESH_ATTRIB_MATERIAL_ID_ID, this.edgeMaterialIds));
@@ -186,7 +186,7 @@ public abstract class WorldGenerator {
 
 		final int[] edgeIndices = { 0, 1, 2, 3, 4, 5, 6, 7 };
 
-		final Mesh mesh = new LineLoadedMesh("terrain_highlight-3x3@" + System.identityHashCode(this),
+		final Mesh mesh = new LineLoadedMesh("terrain-highlight-3x3@" + System.identityHashCode(this),
 				null,
 				1f,
 				new Vec3fAttribArray(Mesh.ATTRIB_VERTICES_NAME, Mesh.ATTRIB_VERTICES_ID, edgeVertices),

@@ -22,7 +22,6 @@ import lu.kbra.pclib.pointer.prim.IntPointer;
 import lu.kbra.plant_game.PGLogic;
 import lu.kbra.plant_game.base.data.DefaultKeyOption;
 import lu.kbra.plant_game.engine.UpdateFrameState;
-import lu.kbra.plant_game.engine.entity.go.AnimatedMeshGameObject;
 import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.entity.go.MeshGameObject;
 import lu.kbra.plant_game.engine.entity.go.data.AttributeLocation;
@@ -32,6 +31,8 @@ import lu.kbra.plant_game.engine.entity.go.mesh.terrain.TerrainMesh;
 import lu.kbra.plant_game.engine.entity.go.obj.terrain.TerrainEdgeObject;
 import lu.kbra.plant_game.engine.entity.go.obj.terrain.TerrainGameObject;
 import lu.kbra.plant_game.engine.entity.go.obj.terrain.TerrainHighlightObject;
+import lu.kbra.plant_game.engine.entity.impl.AnimatedTransformOwner;
+import lu.kbra.plant_game.engine.entity.ui.impl.NeedsUpdate;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.scene.world.data.LevelData;
 import lu.kbra.plant_game.engine.scene.world.generator.WorldGenerator;
@@ -44,6 +45,7 @@ import lu.kbra.standalone.gameengine.geom.QuadLoadedMesh;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
 import lu.kbra.standalone.gameengine.objs.entity.SceneEntity;
+import lu.kbra.standalone.gameengine.scene.EntityContainer;
 import lu.kbra.standalone.gameengine.scene.Scene3D;
 import lu.kbra.standalone.gameengine.scene.camera.Camera3D;
 import lu.kbra.standalone.gameengine.utils.consts.Direction;
@@ -97,12 +99,10 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController {
 		new TaskFuture<>(render, (Runnable) () -> {
 			this.particleManager = new ParticleManager(this.getCache().getParent(), this);
 			latch.trigger(null);
-			System.err.println("latch 1");
 		}).push();
 
 		this.initTerrain(workers, render, Optional.of(gameData), gameData.getLevelData(), worldProgress).then(c -> {
 			this.setTerrain(c.get());
-			System.err.println("latch 2");
 		}).latch(latch);
 		return latch;
 	}
@@ -141,9 +141,11 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController {
 					.setTerrainHighlightEntity(
 							new TerrainHighlightObject("terrain-highlight-" + levelData.getInternalName(), pair.getValue()));
 		}).then(render, (Supplier<QuadLoadedMesh>) () -> {
-			final QuadLoadedMesh mesh = new QuadLoadedMesh("water-" + levelData.getInternalName(),
+			final int width = data.get().getMesh().getWidth();
+			final int length = data.get().getMesh().getLength();
+			final QuadLoadedMesh mesh = new QuadLoadedMesh("water-" + levelData.getInternalName() + "-" + width + "x" + length,
 					null,
-					new Vector2f(data.get().getMesh().getWidth(), data.get().getMesh().getLength()));
+					new Vector2f(width, length));
 			this.getCache().addMesh(mesh);
 			worldProgress.add(100);
 			return mesh;
@@ -229,15 +231,7 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController {
 		final float time = (float) inputHandler.getGameEngine().getTotalTime();
 		final float dTime = inputHandler.dTime();
 
-		synchronized (super.getEntitiesLock()) {
-
-			for (final SceneEntity e : this) {
-				if (e instanceof final AnimatedMeshGameObject ago) {
-					ago.computeAnimatedTransform(time);
-				}
-			}
-
-		}
+		this.forEach(e -> this.updateEntity(inputHandler, e, time));
 
 		final Camera3D camera = super.getCamera();
 		camera.getProjection().setFov(camera.getProjection().getFov() + this.fovDiff);
@@ -247,14 +241,21 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController {
 		camera.updateMatrix();
 
 		if (this.getTerrain() != null) {
-//			this.getTerrain()
-//					.getMesh()
-//					.setColorMaterial(
-//							new Vector2i(PCUtils.randomIntRange(0, this.getTerrain().getMesh().getWidth()),
-//									PCUtils.randomIntRange(0, this.getTerrain().getMesh().getLength())),
-//							ColorMaterial.RED);
-
 			this.getTerrain().getMesh().flushColorMaterial();
+		}
+	}
+
+	protected void updateEntity(final WindowInputHandler inputHandler, final SceneEntity e, final float time) {
+		if (e instanceof final EntityContainer<?> ec) {
+			ec.forEach(e2 -> this.updateEntity(inputHandler, e2, time));
+		}
+
+		if (e instanceof final NeedsUpdate needsUpdate) {
+			needsUpdate.update(inputHandler);
+		}
+
+		if (e instanceof final AnimatedTransformOwner ato) {
+			ato.computeAnimatedTransform(time);
 		}
 	}
 

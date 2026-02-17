@@ -23,7 +23,7 @@ public class BuildingPanelToggleButtonUIObject extends ExtAnchoredTexturedQuadMe
 	@Override
 	public void click(final WindowInputHandler input) {
 		this.getUISceneParent().filter(OverlayUIScene.class::isInstance).map(OverlayUIScene.class::cast).ifPresent(c -> {
-			this.getTransform().rotationAdd(0, (float) Math.PI, 0).updateMatrix();
+			this.getTransform().rotationSet(0, c.getBuildingPanel().isActive() ? 0 : (float) Math.PI, 0).updateMatrix();
 			c.getBuildingPanel().setActive(!c.getBuildingPanel().isActive());
 			if (c.getBuildingPanel().isActive()) {
 				this.setAnchors(Anchor.BOTTOM_CENTER, Anchor.TOP_CENTER);

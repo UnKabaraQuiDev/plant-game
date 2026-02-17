@@ -11,6 +11,7 @@ import java.util.Optional;
 
 import lu.kbra.pclib.PCUtils;
 import lu.kbra.pclib.logger.GlobalLogger;
+import lu.kbra.plant_game.PGMain;
 import lu.kbra.plant_game.plugin.PluginJarLoader.LoadedPlugin;
 import lu.kbra.plant_game.plugin.exception.PluginLoadException;
 import lu.kbra.plant_game.plugin.exception.RegistryFailedException;
@@ -34,7 +35,7 @@ public final class PluginManager {
 		try {
 			this.pluginJarLoader
 					.loadAll(this,
-							List.of(Paths.get("plugins")),
+							List.of(Paths.get(PGMain.APP_DIR.getPath()).resolve("plugins")),
 							List.of(OBJECT_MAPPER.readValue(PCUtils.readStringSource("classpath:/plugin.json"), PluginDescriptor.class)))
 					.forEach(lp -> this.plugins.put(lp.main().getClass(), lp));
 		} catch (Exception e) {

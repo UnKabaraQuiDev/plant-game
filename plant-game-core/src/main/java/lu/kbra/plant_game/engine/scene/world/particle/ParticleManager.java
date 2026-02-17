@@ -43,10 +43,13 @@ public class ParticleManager {
 	public ParticleManager(final CacheManager cache, final EntityContainer<SceneEntity> scene) {
 		this.scene = scene;
 
-		cache.addAbstractShader(this.computeShader = new GravityParticleComputeShader());
+		this.computeShader = cache.getAbstractShader(GravityParticleComputeShader.class, GravityParticleComputeShader::new);
 	}
 
 	public void render(final float dTime) {
+		if (this.computeShader == null) {
+			return;
+		}
 		this.computeShader.bind();
 		if (!this.computeShader.isValid()) {
 			return;

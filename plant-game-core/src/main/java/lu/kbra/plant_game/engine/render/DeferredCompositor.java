@@ -227,7 +227,7 @@ public class DeferredCompositor extends AutoCleanupable {
 	protected Vector2i oldResolution = new Vector2i(0), renderResolution = new Vector2i(), outputResolution = new Vector2i();
 
 	// object ids
-	protected BooleanPointer awaitingObjectIdPtr = new BooleanPointer(false);
+	protected BooleanPointer isAwaitingObjectId = new BooleanPointer(false);
 	protected Vector4i objectId = new Vector4i();
 
 	// highlights
@@ -357,9 +357,9 @@ public class DeferredCompositor extends AutoCleanupable {
 
 		this.renderFilters(cache, this.outputResolution, needRegen);
 
-		if (this.awaitingObjectIdPtr.getValue()) {
+		if (this.isAwaitingObjectId.getValue()) {
 			this.getObjectId(engine.getWindow());
-			this.awaitingObjectIdPtr.setValue(false);
+			this.isAwaitingObjectId.setValue(false);
 			GlobalLogger.log(Level.FINEST, "Retrieved object id: " + this.objectId + " at " + engine.getWindow().getMousePosition());
 		} else {
 			this.objectId.zero();
@@ -1522,20 +1522,20 @@ public class DeferredCompositor extends AutoCleanupable {
 	}
 
 	public boolean pollObjectId(final boolean blocking) {
-		this.awaitingObjectIdPtr.setValue(true);
+		this.isAwaitingObjectId.setValue(true);
 		if (blocking) {
 			return this.awaitObjectId();
 		}
-		return !this.awaitingObjectIdPtr.getValue();
+		return !this.isAwaitingObjectId.getValue();
 	}
 
 	public boolean isAwaitingObjectId() {
-		return this.awaitingObjectIdPtr.getValue();
+		return this.isAwaitingObjectId.getValue();
 	}
 
 	public boolean awaitObjectId() {
-		this.awaitingObjectIdPtr.waitForFalse(POLL_OBJECT_ID_TIMEOUT);
-		return !this.awaitingObjectIdPtr.getValue();
+		this.isAwaitingObjectId.waitForFalse(POLL_OBJECT_ID_TIMEOUT);
+		return !this.isAwaitingObjectId.getValue();
 	}
 
 	public Vector4ic getObjectId() {

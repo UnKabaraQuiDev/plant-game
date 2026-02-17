@@ -26,6 +26,7 @@ import lu.kbra.plant_game.engine.entity.ui.prim.BuildingItemUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.prim.IBAnchoredFlatQuadUIObject;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
 import lu.kbra.plant_game.engine.scene.ui.layout.AnchorLayout;
+import lu.kbra.plant_game.engine.scene.ui.layout.LayoutOwner;
 import lu.kbra.plant_game.engine.scene.world.GameData;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
@@ -40,6 +41,7 @@ public class BuildingPanelUIObjectGroup extends AnchoredLayoutUIObjectGroup
 	protected float boundsMarginY = 0f;
 	protected float heightRatio = 1f / 10 * 2;
 
+	protected final Object tabLock = new Object();
 	protected BuildingTabListUIObjectGroup tabList = new BuildingTabListUIObjectGroup();
 	protected Map<String, BuildingTabUIObjectGroup> buildingTabs = new HashMap<>();
 	protected String activeBuildingTabKey;
@@ -67,7 +69,8 @@ public class BuildingPanelUIObjectGroup extends AnchoredLayoutUIObjectGroup
 				.latch(latch)
 				.push();
 
-		latch.thenOther(BuildingPanelUIObjectGroup::recomputeBounds);
+		latch.thenOther(BuildingPanelUIObjectGroup::doLayout);
+		latch.thenOther(c -> c.setActive(false));
 
 		return latch;
 	}
@@ -117,14 +120,16 @@ public class BuildingPanelUIObjectGroup extends AnchoredLayoutUIObjectGroup
 			this.buildingTabs.put(tab.getTitleKey(), tab);
 			this.add(tab);
 
-			if (this.activeBuildingTabKey == null) {
-				this.setClickedTab(tab.getTitleKey(), true);
-				this.activeBuildingTabKey = tab.getTitleKey();
-			} else {
-				this.setClickedTab(tab.getTitleKey(), false);
+			synchronized (this.tabLock) {
+				if (this.activeBuildingTabKey == null) {
+					this.setClickedTab(tab.getTitleKey(), true);
+					this.activeBuildingTabKey = tab.getTitleKey();
+				} else {
+					this.setClickedTab(tab.getTitleKey(), false);
+				}
 			}
 
-			this.doLayout();
+			this.getFirstParentMatching(LayoutOwner.class, true).ifPresent(LayoutOwner::doLayout);
 			latch.trigger(obj);
 		});
 
@@ -132,24 +137,31 @@ public class BuildingPanelUIObjectGroup extends AnchoredLayoutUIObjectGroup
 	}
 
 	public void switchTab(final String tabKey) {
-		if (tabKey.equals(this.activeBuildingTabKey)) {
-			return;
+		synchronized (this.tabLock) {
+			if (tabKey.equals(this.activeBuildingTabKey)) {
+				return;
+			}
+
+			this.setClickedTab(tabKey, true);
+			this.setClickedTab(this.activeBuildingTabKey, false);
+
+			this.getFirstParentMatching(LayoutOwner.class, true).ifPresent(LayoutOwner::doLayout);
+
+			this.activeBuildingTabKey = tabKey;
 		}
-
-		this.setClickedTab(tabKey, true);
-		this.setClickedTab(this.activeBuildingTabKey, false);
-
-		this.activeBuildingTabKey = tabKey;
 	}
 
 	private void setClickedTab(final String tabKey, final boolean active) {
-		final BuildingTabUIObjectGroup tab = this.buildingTabs.get(tabKey);
-		if (tab != null) {
-			tab.setActive(active);
-			this.tabList.getButton(tabKey)
-					.ifPresentOrElse(btn -> btn.setClicked(active), () -> GlobalLogger.warning("No button for tab named: " + tabKey));
-		} else {
-			GlobalLogger.warning("No tab named: " + tabKey);
+		synchronized (this.tabLock) {
+			final BuildingTabUIObjectGroup tab = this.buildingTabs.get(tabKey);
+			if (tab != null) {
+				tab.setActive(active);
+				this.tabList.getButton(tabKey)
+						.ifPresentOrElse(btn -> btn.setClicked(active), () -> GlobalLogger.warning("No button for tab named: " + tabKey));
+//			this.activeBuildingTabKey = active ? tabKey : null;
+			} else {
+				GlobalLogger.warning("No tab named: " + tabKey);
+			}
 		}
 	}
 

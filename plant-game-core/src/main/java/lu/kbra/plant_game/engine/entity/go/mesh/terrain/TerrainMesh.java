@@ -33,7 +33,8 @@ public class TerrainMesh extends LoadedMesh {
 
 	private final Integer[][] cellHeight;
 	private final ColorMaterial[][] materialType;
-	private int[][] faceIndices;
+	private final int[][] faceIndices;
+	private final boolean[][] grown;
 
 	protected List<Pair<Vector2i, ColorMaterial>> updateColorMaterial = Collections.synchronizedList(new ArrayList<>());
 
@@ -48,9 +49,24 @@ public class TerrainMesh extends LoadedMesh {
 		this.cellHeight = cellHeight;
 		this.materialType = materialType;
 		this.faceIndices = faceIndices;
+		this.grown = new boolean[width][length];
+	}
+
+	public void setGrown(final Vector2i tile, final boolean a) {
+		this.grown[tile.x()][tile.y()] = a;
+		if (a) {
+			this.setColorMaterial(tile, switch (PCUtils.randomIntRange(0, 3)) {
+			default -> ColorMaterial.GREEN;
+			case 1 -> ColorMaterial.LIGHT_GREEN;
+			case 2 -> ColorMaterial.DARK_GREEN;
+			});
+		}
 	}
 
 	public void setColorMaterial(final Vector2i tile, final ColorMaterial cm) {
+		if (tile.x < 0 || tile.x > width || tile.y < 0 || tile.y > length) {
+			return;
+		}
 		synchronized (this.updateColorMaterial) {
 			this.updateColorMaterial.add(Pairs.readOnly(tile, cm));
 		}

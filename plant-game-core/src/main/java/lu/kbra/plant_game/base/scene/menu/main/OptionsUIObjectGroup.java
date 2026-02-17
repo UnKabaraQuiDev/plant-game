@@ -93,6 +93,9 @@ public class OptionsUIObjectGroup extends AnchoredFixedPBUIObjectGroup
 	}
 
 	public void applyScrollY() {
+		if (this.scrollYRange == null) {
+			return;
+		}
 		this.recomputeRange();
 		this.scrollY = PCUtils.clampRange(this.scrollYRange.x(), this.scrollYRange.y(), this.scrollY);
 		this.getContent().getTransform().translationSetZ(this.scrollY).update();

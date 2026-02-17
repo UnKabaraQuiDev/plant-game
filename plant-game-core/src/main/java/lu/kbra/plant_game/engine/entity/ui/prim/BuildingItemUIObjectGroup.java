@@ -20,10 +20,11 @@ import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory;
 import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
 import lu.kbra.plant_game.engine.entity.impl.TintOwner;
-import lu.kbra.plant_game.engine.entity.ui.FlatQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.ProgrammaticTexturedQuadMeshUIObject;
+import lu.kbra.plant_game.engine.entity.ui.data.GradientDirection;
 import lu.kbra.plant_game.engine.entity.ui.data.HoverState;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
+import lu.kbra.plant_game.engine.entity.ui.gradient.GradientQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.group.OffsetUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.impl.AbsoluteTransformedBoundsOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.AnimatedOnHover;
@@ -53,7 +54,7 @@ public class BuildingItemUIObjectGroup extends OffsetUIObjectGroup
 
 	protected BuildingDefinition<?> buildingDefinition;
 
-	protected ObjectPointer<FlatQuadUIObject> background = new ObjectPointer<>();
+	protected ObjectPointer<GradientQuadUIObject> background = new ObjectPointer<>();
 
 	public BuildingItemUIObjectGroup(final BuildingDefinition<?> buildingInfo) {
 		super("building-item-" + buildingInfo.getInternalName());
@@ -71,8 +72,9 @@ public class BuildingItemUIObjectGroup extends OffsetUIObjectGroup
 				.latch(latch)
 				.push();
 
-		UIObjectFactory.create(FlatQuadUIObject.class)
-				.set(i -> i.setColor(new Vector4f(ColorMaterial.BLACK.getColor()).mul(1, 1, 1, ALPHA)))
+		UIObjectFactory.create(GradientQuadUIObject.class)
+				.set(i -> i.setDirection(GradientDirection.UV_Y))
+				.set(i -> i.setTint(new Vector4f(ColorMaterial.BLACK.getColor()).mul(1, 1, 1, ALPHA)))
 				.set(i -> i.setTransform(new Transform3D(new Vector3f(0, 0.1f, 0))))
 				.get(this.background)
 				.add(this)
@@ -104,11 +106,6 @@ public class BuildingItemUIObjectGroup extends OffsetUIObjectGroup
 			return;
 		}
 
-//		if (PGLogic.INSTANCE.getGameData().getResources().get(DefaultResourceType.MONEY) < this.buildingDefinition.getPrice()) {
-//			GlobalLogger.warning(this.buildingDefinition.getInternalName() + " not enough money to build.");
-//			return;
-//		}
-
 		final MoveBuildingModal modal = worldScene.getModal(MoveBuildingModal.class);
 		if (worldScene.hasActiveModal()) {
 			return;
@@ -118,13 +115,12 @@ public class BuildingItemUIObjectGroup extends OffsetUIObjectGroup
 				.set(i -> i.setTransform(new Transform3D()))
 				.add(worldScene)
 				.then(PGLogic.INSTANCE.WORKERS, (Consumer) (final Object c) -> {
-					if (!(c instanceof GameObject && c instanceof PlaceableObject)) {
+					if (!(c instanceof GameObject go && c instanceof PlaceableObject po)) {
 						return;
 					}
-					modal.setAttachedObject((PlaceableObject) c);
-					modal.setPlaceHook(() -> {
-						PGLogic.INSTANCE.getGameData().buyBuilding(this.buildingDefinition);
-					});
+					modal.setAttachedObject(po);
+					modal.setPlaceHook(() -> PGLogic.INSTANCE.getGameData().buyBuilding(this.buildingDefinition));
+					modal.setCancelHook(() -> worldScene.remove(go));
 					worldScene.startModal(modal);
 				})
 				.push();

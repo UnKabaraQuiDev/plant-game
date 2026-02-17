@@ -20,6 +20,7 @@ import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwnerParentAware;
 import lu.kbra.plant_game.engine.entity.ui.impl.IndexOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.ObjectGroup;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
+import lu.kbra.plant_game.engine.scene.ui.layout.Anchor2D;
 import lu.kbra.plant_game.engine.scene.ui.layout.FlowLayout;
 import lu.kbra.plant_game.generated.ColorMaterial;
 
@@ -41,7 +42,7 @@ public class BuildingTabUIObjectGroup extends AnchoredLayoutUIObjectGroup
 		this.index = index;
 		this.titleKey = titleKey;
 		this.accentColor = accentColor;
-		this.add(new LayoutOffsetUIObjectGroup(this.getId() + "-container", new FlowLayout(false, 0.05f, true)));
+		this.add(new LayoutOffsetUIObjectGroup(this.getId() + "-container", new FlowLayout(false, 0.05f, Anchor2D.LEADING)));
 	}
 
 	public UIObjectGroup getContent() {
@@ -146,6 +147,9 @@ public class BuildingTabUIObjectGroup extends AnchoredLayoutUIObjectGroup
 	}
 
 	public void applyScrollX() {
+		if (this.scrollXRange == null) {
+			return;
+		}
 		this.recomputeRange();
 		this.scrollX = PCUtils.clampRange(this.scrollXRange.x(), this.scrollXRange.y(), this.scrollX);
 		this.getContent().getTransform().translationSetX(this.scrollX).update();

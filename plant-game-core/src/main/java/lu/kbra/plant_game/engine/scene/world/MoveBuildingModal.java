@@ -135,6 +135,8 @@ public class MoveBuildingModal implements Modal {
 				this.compositor.addOutline(this.attachedObject, RED);
 			}
 			if (this.placeDown) {
+				this.attachedObject.confirmPlaceDown(this.worldScene
+						.getTerrain(), this.source, this.sourceRotation, this.currentPos, this.targetRotation);
 				this.runPlaceHook();
 				this.parent.stopModal();
 			}

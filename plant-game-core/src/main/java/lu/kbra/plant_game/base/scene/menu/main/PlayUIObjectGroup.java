@@ -93,6 +93,9 @@ public class PlayUIObjectGroup extends AnchoredFixedPBUIObjectGroup
 	}
 
 	public void applyScrollX() {
+		if (this.scrollXRange == null) {
+			return;
+		}
 		this.recomputeRange();
 		this.scrollX = PCUtils.clampRange(this.scrollXRange.x(), this.scrollXRange.y(), this.scrollX);
 		this.getContent().getTransform().translationSetX(this.scrollX).update();

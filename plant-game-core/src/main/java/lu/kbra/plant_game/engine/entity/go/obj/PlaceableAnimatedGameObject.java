@@ -35,8 +35,6 @@ public abstract class PlaceableAnimatedGameObject extends AnimatedMeshGameObject
 		this.animatedMeshFootprint = StaticMeshFootprintOwner.computeMeshFootprint(this.getAnimatedMeshFootprintComputeMethod(),
 				this.getAnimatedMesh());
 		this.footprint = Footprint.union(this.getStaticMeshFootprint(), this.getAnimatedMeshFootprint());
-		System.err.println(this.getClass().getSimpleName() + " : " + this.getStaticMeshFootprintComputeMethod() + " = "
-				+ this.getMesh().getBoundingBox() + " = " + this.staticMeshFootprint);
 	}
 
 	@Override

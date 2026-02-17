@@ -67,4 +67,11 @@ public interface PlaceableObject extends Transform3DOwner, UniqueID, SceneEntity
 		return aStartX <= bEndX && aEndX >= bStartX && aStartY <= bEndY && aEndY >= bStartY;
 	}
 
+	void confirmPlaceDown(
+			final TerrainGameObject terrain,
+			final Vector2i source,
+			final Direction sourceRotation,
+			final Vector2i currentPos,
+			final Direction targetRotation);
+
 }

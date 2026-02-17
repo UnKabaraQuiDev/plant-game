@@ -147,10 +147,12 @@ public class BuildingInfoUIObjectGroup extends FixedBoundsUIObjectGroup implemen
 	@Override
 	public boolean recomputeBounds() {
 		final boolean recomp = super.recomputeBounds();
-		this.backdrop.ifSet(p -> {
-			final Rectangle2D b2d = this.getBounds().getBounds2D();
-			p.getTransform().scaleSet((float) b2d.getWidth(), 1, (float) b2d.getHeight()).update();
-		});
+		if (this.backdrop != null) {
+			this.backdrop.ifSet(p -> {
+				final Rectangle2D b2d = this.getBounds().getBounds2D();
+				p.getTransform().scaleSet((float) b2d.getWidth(), 1, (float) b2d.getHeight()).update();
+			});
+		}
 		return recomp;
 	}
 
