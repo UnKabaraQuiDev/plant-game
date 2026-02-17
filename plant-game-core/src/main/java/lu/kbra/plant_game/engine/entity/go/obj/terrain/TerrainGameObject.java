@@ -2,14 +2,11 @@ package lu.kbra.plant_game.engine.entity.go.obj.terrain;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
-import org.joml.Vector2ic;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
@@ -20,29 +17,24 @@ import lu.kbra.plant_game.engine.entity.go.mesh.terrain.TerrainMesh;
 import lu.kbra.plant_game.engine.entity.impl.SynchronizedEntityContainer;
 import lu.kbra.plant_game.engine.entity.impl.Transform3DPivotOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.AbsoluteTransform3DOwner;
-import lu.kbra.plant_game.engine.entity.ui.impl.NeedsUpdate;
-import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
-import lu.kbra.plant_game.generated.ColorMaterial;
+import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.standalone.gameengine.objs.entity.ParentAwareComponent;
 import lu.kbra.standalone.gameengine.scene.camera.Camera3D;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3DPivot;
 
 public class TerrainGameObject extends VariationMeshGameObject
-		implements SynchronizedEntityContainer<GameObject>, AbsoluteTransform3DOwner, Transform3DPivotOwner, NeedsUpdate {
-
-	private static final int RANDOM_TICK_TILE_COUNT = 5;
+		implements SynchronizedEntityContainer<GameObject>, AbsoluteTransform3DOwner, Transform3DPivotOwner {
 
 	protected Object subEntitiesLock = new Object();
 	protected List<GameObject> subEntities = Collections.synchronizedList(new ArrayList<>());
 
-	protected ParentAwareComponent parent;
+	protected WorldLevelScene parent;
 
 	protected TerrainEdgeObject terrainEdgeObject;
 	protected TerrainHighlightObject terrainHighlightObject;
 	protected MeshGameObject terrainWaterObject;
 
-	private final Set<Vector2i> randomTickTileCandidate = Collections.synchronizedSet(new HashSet<>());
 	private final float[][] waterLevel;
 
 	public TerrainGameObject(final String str, final TerrainMesh mesh) {
@@ -53,22 +45,15 @@ public class TerrainGameObject extends VariationMeshGameObject
 		this.waterLevel = new float[mesh.getWidth()][mesh.getLength()];
 	}
 
-	@Override
-	public void update(final WindowInputHandler inputHandler) {
-		final List<Vector2i> tiles = new ArrayList<>(this.randomTickTileCandidate);
-		Collections.shuffle(tiles);
-		for (int i = 0; i < Math.min(tiles.size(), RANDOM_TICK_TILE_COUNT); i++) {
-			final Vector2i tile = tiles.get(tiles.size() - 1 - i);
-			this.getMesh().setColorMaterial(tile, ColorMaterial.RED);
+	public void addWater(final Vector2i tile, final float amount) {
+		final TerrainMesh mesh = this.getMesh();
+		if (tile.x() < 0 || tile.x() > mesh.getWidth() || tile.y() < 0 || tile.y() > mesh.getLength()) {
+			return;
 		}
-	}
-
-	public void addRandomTickTile(final Vector2ic tile) {
-		this.randomTickTileCandidate.add(new Vector2i(tile));
-	}
-
-	public void addRandomTickTile(final int x, final int y) {
-		this.randomTickTileCandidate.add(new Vector2i(x, y));
+		this.waterLevel[tile.x()][tile.y()] += amount;
+		if (this.waterLevel[tile.x()][tile.y()] > 1) {
+			mesh.setGrown(tile, this.active);
+		}
 	}
 
 	public Vector2i pickTerrainCell(final Camera3D cam, final Vector2f mousePos, final int windowWidth, final int windowHeight) {
@@ -180,11 +165,11 @@ public class TerrainGameObject extends VariationMeshGameObject
 
 	@Override
 	public <T extends ParentAwareComponent> void setParent(final T e) {
-		this.parent = e;
+		this.parent = (WorldLevelScene) e;
 	}
 
 	@Override
-	public ParentAwareComponent getParent() {
+	public WorldLevelScene getParent() {
 		return this.parent;
 	}
 

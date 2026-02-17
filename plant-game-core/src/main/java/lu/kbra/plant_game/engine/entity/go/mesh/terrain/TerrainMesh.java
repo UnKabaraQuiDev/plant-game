@@ -53,18 +53,25 @@ public class TerrainMesh extends LoadedMesh {
 	}
 
 	public void setGrown(final Vector2i tile, final boolean a) {
-		this.grown[tile.x()][tile.y()] = a;
-		if (a) {
+		if (a && !this.grown[tile.x()][tile.y()]) {
 			this.setColorMaterial(tile, switch (PCUtils.randomIntRange(0, 3)) {
 			default -> ColorMaterial.GREEN;
 			case 1 -> ColorMaterial.LIGHT_GREEN;
 			case 2 -> ColorMaterial.DARK_GREEN;
 			});
+		} else if (!a && this.grown[tile.x()][tile.y()]) {
+			this.setColorMaterial(tile, switch (PCUtils.randomIntRange(0, 4)) {
+			default -> ColorMaterial.BROWN;
+			case 1 -> ColorMaterial.LIGHT_BROWN;
+			case 2 -> ColorMaterial.DARK_BROWN;
+			case 3 -> ColorMaterial.DARK_GRAY;
+			});
 		}
+		this.grown[tile.x()][tile.y()] = a;
 	}
 
 	public void setColorMaterial(final Vector2i tile, final ColorMaterial cm) {
-		if (tile.x < 0 || tile.x > width || tile.y < 0 || tile.y > length) {
+		if (tile.x < 0 || tile.x > this.width || tile.y < 0 || tile.y > this.length) {
 			return;
 		}
 		synchronized (this.updateColorMaterial) {

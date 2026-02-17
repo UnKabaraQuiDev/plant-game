@@ -1,5 +1,7 @@
 package lu.kbra.plant_game.engine.entity.go.obj;
 
+import org.joml.Vector2i;
+
 import lu.kbra.plant_game.engine.entity.go.MeshGameObject;
 import lu.kbra.plant_game.engine.entity.go.data.Footprint;
 import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
@@ -10,8 +12,10 @@ import lu.kbra.standalone.gameengine.utils.consts.Direction;
 public abstract class PlaceableMeshGameObject extends MeshGameObject
 		implements PlaceableObject, NeedsPostConstruct, StaticMeshFootprintOwner {
 
-	protected Direction rotation = Direction.DEFAULT();
 	protected Footprint footprint;
+
+	protected Direction rotation = Direction.DEFAULT();
+	protected Vector2i tile;
 
 	public PlaceableMeshGameObject(final String str, final Mesh mesh) {
 		super(str, mesh);
@@ -20,9 +24,6 @@ public abstract class PlaceableMeshGameObject extends MeshGameObject
 	@Override
 	public void init() {
 		this.footprint = StaticMeshFootprintOwner.computeMeshFootprint(this.getFootprintComputeMethod(), this.getMesh());
-//		System.err
-//				.println(this.getClass().getSimpleName() + " : " + this.getFootprintComputeMethod() + " = "
-//						+ this.getMesh().getBoundingBox() + " = " + this.footprint);
 	}
 
 	protected FootprintComputeMethod getFootprintComputeMethod() {
@@ -51,11 +52,21 @@ public abstract class PlaceableMeshGameObject extends MeshGameObject
 	}
 
 	@Override
+	public Vector2i getTile() {
+		return this.tile;
+	}
+
+	@Override
+	public void setTile(final Vector2i tile) {
+		this.tile = tile;
+	}
+
+	@Override
 	public String toString() {
-		return "PlaceableMeshGameObject [rotation=" + this.rotation + ", footprint=" + this.footprint + ", materialId=" + this.materialId
-				+ ", isEntityMaterialId=" + this.isEntityMaterialId + ", objectId=" + this.objectId + ", objectIdLocation="
-				+ this.objectIdLocation + ", mesh=" + this.mesh + ", transform=" + this.transform + ", active=" + this.active + ", name="
-				+ this.name + "]";
+		return "PlaceableMeshGameObject@" + System.identityHashCode(this) + " [footprint=" + this.footprint + ", rotation=" + this.rotation
+				+ ", tile=" + this.tile + ", materialId=" + this.materialId + ", isEntityMaterialId=" + this.isEntityMaterialId
+				+ ", objectId=" + this.objectId + ", objectIdLocation=" + this.objectIdLocation + ", mesh=" + this.mesh + ", transform="
+				+ this.transform + ", active=" + this.active + ", name=" + this.name + "]";
 	}
 
 }

@@ -24,6 +24,20 @@ public interface PlaceableObject extends Transform3DOwner, UniqueID, SceneEntity
 
 	void setRotation(Direction dir);
 
+	Vector2i getTile();
+
+	void setTile(Vector2i v);
+
+	default void confirmPlaceDown(
+			final TerrainGameObject terrain,
+			final Vector2i source,
+			final Direction sourceRotation,
+			final Vector2i currentPos,
+			final Direction targetRotation) {
+		this.setTile(currentPos);
+		this.setRotation(targetRotation);
+	}
+
 	default boolean isPlaceable(final WorldLevelScene scene, final Vector2i tile, final Direction rotation) {
 		final TerrainMesh mesh = scene.getTerrain().getMesh();
 
@@ -66,12 +80,5 @@ public interface PlaceableObject extends Transform3DOwner, UniqueID, SceneEntity
 			final int bEndY) {
 		return aStartX <= bEndX && aEndX >= bStartX && aStartY <= bEndY && aEndY >= bStartY;
 	}
-
-	void confirmPlaceDown(
-			final TerrainGameObject terrain,
-			final Vector2i source,
-			final Direction sourceRotation,
-			final Vector2i currentPos,
-			final Direction targetRotation);
 
 }

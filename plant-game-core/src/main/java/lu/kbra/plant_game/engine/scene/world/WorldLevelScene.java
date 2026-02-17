@@ -239,7 +239,7 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController {
 		this.forEach(e -> this.updateEntity(inputHandler, e, time));
 
 		synchronized (this.needsRandomTick) {
-			long now = System.currentTimeMillis();
+			final long now = System.currentTimeMillis();
 
 			for (Map.Entry<NeedsRandomTick, Long> entry : this.needsRandomTick.entrySet()) {
 				if (now - entry.getValue() > RANDOM_TICK_DELAY) {
@@ -319,6 +319,14 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController {
 		if (this.particleManager != null) {
 			this.particleManager.render(dTime);
 		}
+	}
+
+	@Deprecated
+	public <T extends NeedsRandomTick> T addRandomTick(final T obj) {
+		synchronized (this.needsRandomTick) {
+			this.needsRandomTick.put(obj, System.currentTimeMillis());
+		}
+		return obj;
 	}
 
 	@Override

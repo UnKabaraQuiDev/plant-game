@@ -119,7 +119,12 @@ public class BuildingItemUIObjectGroup extends OffsetUIObjectGroup
 						return;
 					}
 					modal.setAttachedObject(po);
-					modal.setPlaceHook(() -> gameData.buyBuilding(this.buildingDefinition));
+					modal.setPlaceHook(() -> {
+						gameData.buyBuilding(this.buildingDefinition);
+//						if (go instanceof NeedsRandomTick nrt) {
+//							worldScene.addRandomTick(nrt);
+//						}
+					});
 					modal.setCancelHook(() -> worldScene.remove(go));
 					worldScene.startModal(modal);
 				})
