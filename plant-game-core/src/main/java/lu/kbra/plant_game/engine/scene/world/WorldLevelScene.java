@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.WeakHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -21,6 +22,7 @@ import lu.kbra.pclib.pointer.ObjectPointer;
 import lu.kbra.pclib.pointer.prim.IntPointer;
 import lu.kbra.plant_game.PGLogic;
 import lu.kbra.plant_game.base.data.DefaultKeyOption;
+import lu.kbra.plant_game.base.entity.go.obj.water.NeedsRandomTick;
 import lu.kbra.plant_game.engine.UpdateFrameState;
 import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.entity.go.MeshGameObject;
@@ -54,6 +56,7 @@ import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 public class WorldLevelScene extends Scene3D implements ActiveModalController {
 
 	private static final int CAMERA_MOVEMENT_SPEED = 10;
+	private static final long RANDOM_TICK_DELAY = 1000;
 
 	public static final Vector3ic WATER_ID = new Vector3i(2, 0, 0);
 
@@ -76,6 +79,8 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController {
 
 	private final Map<Class<? extends Modal>, Modal> modals = Collections.synchronizedMap(new HashMap<>());
 	private Modal activeModal;
+
+	private final WeakHashMap<NeedsRandomTick, Long> needsRandomTick = new WeakHashMap<>();
 
 	public WorldLevelScene(final String name, final CacheManager parentCache) {
 		super(name);
@@ -233,6 +238,17 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController {
 
 		this.forEach(e -> this.updateEntity(inputHandler, e, time));
 
+		synchronized (this.needsRandomTick) {
+			long now = System.currentTimeMillis();
+
+			for (Map.Entry<NeedsRandomTick, Long> entry : this.needsRandomTick.entrySet()) {
+				if (now - entry.getValue() > RANDOM_TICK_DELAY) {
+					entry.getKey().randomTick(inputHandler, this);
+					entry.setValue(now);
+				}
+			}
+		}
+
 		final Camera3D camera = super.getCamera();
 		camera.getProjection().setFov(camera.getProjection().getFov() + this.fovDiff);
 		camera.getRotation().rotateY((float) Math.toRadians(this.rotation * 50 * dTime));
@@ -303,6 +319,16 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController {
 		if (this.particleManager != null) {
 			this.particleManager.render(dTime);
 		}
+	}
+
+	@Override
+	public <T extends SceneEntity> T add(final T entity) {
+		if (entity instanceof NeedsRandomTick nrt) {
+			synchronized (this.needsRandomTick) {
+				this.needsRandomTick.put(nrt, 0L);
+			}
+		}
+		return super.add(entity);
 	}
 
 	@Override

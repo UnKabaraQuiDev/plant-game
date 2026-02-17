@@ -114,12 +114,12 @@ public class BuildingItemUIObjectGroup extends OffsetUIObjectGroup
 		GameObjectFactory.create(this.buildingDefinition.getClazz())
 				.set(i -> i.setTransform(new Transform3D()))
 				.add(worldScene)
-				.then(PGLogic.INSTANCE.WORKERS, (Consumer) (final Object c) -> {
+				.then(PGLogic.INSTANCE.WORKERS, (Consumer) (c) -> {
 					if (!(c instanceof GameObject go && c instanceof PlaceableObject po)) {
 						return;
 					}
 					modal.setAttachedObject(po);
-					modal.setPlaceHook(() -> PGLogic.INSTANCE.getGameData().buyBuilding(this.buildingDefinition));
+					modal.setPlaceHook(() -> gameData.buyBuilding(this.buildingDefinition));
 					modal.setCancelHook(() -> worldScene.remove(go));
 					worldScene.startModal(modal);
 				})

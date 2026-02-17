@@ -43,11 +43,14 @@ public class TerrainGameObject extends VariationMeshGameObject
 	protected MeshGameObject terrainWaterObject;
 
 	private final Set<Vector2i> randomTickTileCandidate = Collections.synchronizedSet(new HashSet<>());
+	private final float[][] waterLevel;
 
 	public TerrainGameObject(final String str, final TerrainMesh mesh) {
 		super(str, mesh);
 		this.setIsEntityMaterialId(false);
 		this.setTransform(new Transform3DPivot());
+
+		this.waterLevel = new float[mesh.getWidth()][mesh.getLength()];
 	}
 
 	@Override
