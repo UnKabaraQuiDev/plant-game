@@ -32,6 +32,12 @@ import lu.kbra.standalone.gameengine.utils.transform.Transform3DPivot;
 public class TerrainGameObject extends VariationMeshGameObject
 		implements SynchronizedEntityContainer<GameObject>, AbsoluteTransform3DOwner, Transform3DPivotOwner {
 
+	private static final int GREEN_BIT = 1 << 0;
+	private static final int SMALL_GRASS_BIT = 1 << 1;
+	private static final int MEDIUM_GRASS_BIT = 1 << 2;
+	private static final int LARGE_GRASS_BIT = 1 << 3;
+	private static final int FLOWER_BIT = 1 << 4;
+
 	protected Object subEntitiesLock = new Object();
 	protected List<GameObject> subEntities = Collections.synchronizedList(new ArrayList<>());
 
@@ -42,6 +48,7 @@ public class TerrainGameObject extends VariationMeshGameObject
 	protected MeshGameObject terrainWaterObject;
 
 	protected final float[][] waterLevel;
+	protected final byte[][] population;
 
 	protected ObjectPointer<InstanceSmallGrassObject> smallGrass;
 
@@ -51,6 +58,7 @@ public class TerrainGameObject extends VariationMeshGameObject
 		this.setTransform(new Transform3DPivot());
 
 		this.waterLevel = new float[mesh.getWidth()][mesh.getLength()];
+		this.population = new byte[mesh.getWidth()][mesh.getLength()];
 	}
 
 	public void addWater(final Vector2i tile, final float amount) {
@@ -59,14 +67,18 @@ public class TerrainGameObject extends VariationMeshGameObject
 			return;
 		}
 		this.waterLevel[tile.x()][tile.y()] += amount;
-		if (this.waterLevel[tile.x()][tile.y()] > 3) {
-			this.addGrass(tile, 1);
+		if (this.waterLevel[tile.x()][tile.y()] > 2) {
+			this.addGrass(tile, 0);
 		} else if (this.waterLevel[tile.x()][tile.y()] > 1) {
 			mesh.setGrown(tile, this.active);
 		}
 	}
 
 	private void addGrass(final Vector2i tile, final int level) {
+		if ((this.population[tile.x()][tile.y()] & (SMALL_GRASS_BIT << level)) != 0) {
+			return;
+		}
+
 		switch (level) {
 		case 1 -> {
 			synchronized (this) {
@@ -80,12 +92,14 @@ public class TerrainGameObject extends VariationMeshGameObject
 							.postInit(i -> i.addInstance(this.getTilePosition(tile)))
 							.add(this)
 							.push();
+					this.population[tile.x()][tile.y()] |= (SMALL_GRASS_BIT << level);
 					return;
 				}
 			}
 
 			this.smallGrass.waitForIsset();
 			this.smallGrass.get().addInstance(this.getTilePosition(tile));
+			this.population[tile.x()][tile.y()] |= (SMALL_GRASS_BIT << level);
 		}
 		}
 	}

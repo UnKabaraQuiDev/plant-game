@@ -83,10 +83,6 @@ public class GameObjectFactory {
 				.then(new GOCreatingTaskFuture(this.loader, clazz));
 	}
 
-//	public <T extends GameObject & MeshOwner> GOCreatingTaskFuture<T> taskManual_(final Class<T> clazz) {
-//		return new TaskFuture<>(this.loader, (final Mesh m) -> Arrays.asList(m)).then(new GOCreatingTaskFuture(this.loader, clazz));
-//	}
-
 	public static <T extends GameObject> GOCreatingTaskFuture<T> create(final Class<T> clazz) {
 		if (NoMeshObject.class.isAssignableFrom(clazz)) {
 			return INSTANCE.createNoMesh_((Class) clazz);
@@ -114,9 +110,5 @@ public class GameObjectFactory {
 	public static <T extends GameObject & MeshOwner> GOCreatingTaskFuture<T> createManual(final Class<T> clazz, final Mesh mesh) {
 		return INSTANCE.createManual_(clazz, mesh);
 	}
-
-//	public static <T extends GameObject & MeshOwner> GOCreatingTaskFuture<T> taskManual(final Class<T> clazz) {
-//		return INSTANCE.taskManual_(clazz);
-//	}
 
 }
