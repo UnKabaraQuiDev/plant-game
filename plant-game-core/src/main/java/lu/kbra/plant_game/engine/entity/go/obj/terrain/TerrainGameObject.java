@@ -138,6 +138,7 @@ public class TerrainGameObject extends VariationMeshGameObject
 			System.err.println(instanceIndex);
 			switch (grass.getAsInt()) {
 			case SMALL_GRASS_LEVEL -> {
+				// the index changes :(
 				this.smallGrass.get().removeInstance(instanceIndex);
 			}
 			case MEDIUM_GRASS_LEVEL -> {

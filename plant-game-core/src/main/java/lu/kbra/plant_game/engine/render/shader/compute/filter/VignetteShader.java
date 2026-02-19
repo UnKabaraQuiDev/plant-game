@@ -10,15 +10,15 @@ public class VignetteShader extends FilterShader<VignetteShader> {
 
 	public static class VignetteShaderConfiguration extends FilterShaderConfiguration<VignetteShader> {
 
-		protected Vector3f color;
-		protected float radius;
-		protected float softness;
-		protected float strength;
-		protected Vector2f center;
-		protected boolean followAspectRatio;
-		protected boolean edgeStyle;
-		protected boolean posterize;
-		protected int posterizeLevels;
+		protected Vector3f color = new Vector3f(1, 0, 0);
+		protected float radius = 1.4f;
+		protected float softness = 0.8f;
+		protected float strength = 1f;
+		protected Vector2f center = new Vector2f(0);
+		protected boolean followAspectRatio = false;
+		protected boolean edgeStyle = true;
+		protected boolean posterize = true;
+		protected int posterizeLevels = 8;
 
 		@Override
 		public Class<VignetteShader> getShaderClass() {
@@ -27,16 +27,16 @@ public class VignetteShader extends FilterShader<VignetteShader> {
 
 		@Override
 		public void apply(final VignetteShader filterShader) {
-			filterShader.setUniform(VignetteShader.VIGNETTE_COLOR, new Vector3f(1, 0, 0));
-			filterShader.setUniform(VignetteShader.VIGNETTE_RADIUS, 1.4f);
-			filterShader.setUniform(VignetteShader.VIGNETTE_SOFTNESS, 0.8f);
-			filterShader.setUniform(VignetteShader.VIGNETTE_STRENGTH, 1f);
-			filterShader.setUniform(VignetteShader.FOLLOW_ASPECT_RATIO, false);
+			filterShader.setUniform(VignetteShader.VIGNETTE_COLOR, this.color);
+			filterShader.setUniform(VignetteShader.VIGNETTE_RADIUS, this.radius);
+			filterShader.setUniform(VignetteShader.VIGNETTE_SOFTNESS, this.softness);
+			filterShader.setUniform(VignetteShader.VIGNETTE_STRENGTH, this.strength);
+			filterShader.setUniform(VignetteShader.FOLLOW_ASPECT_RATIO, this.followAspectRatio);
 
 			filterShader.setUniform(VignetteShader.EDGE_STYLE, this.edgeStyle);
 
-			filterShader.setUniform(VignetteShader.POSTERIZE, true);
-			filterShader.setUniform(VignetteShader.POSTERIZE_LEVELS, 10);
+			filterShader.setUniform(VignetteShader.POSTERIZE, this.posterize);
+			filterShader.setUniform(VignetteShader.POSTERIZE_LEVELS, this.posterizeLevels);
 		}
 
 		public void setColor(final Vector3f color) {

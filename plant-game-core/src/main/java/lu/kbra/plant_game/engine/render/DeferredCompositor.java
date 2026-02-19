@@ -304,7 +304,7 @@ public class DeferredCompositor extends AutoCleanupable {
 		this.outputTxt = new SingleTexture(WORLD_FRAMEBUFFER_NAME + ".output", engine.getWindow().getSize());
 		this.outputTxt.setDataType(DataType.UBYTE);
 		this.outputTxt.setFormat(TexelFormat.RGBA);
-		this.outputTxt.setInternalFormat(TexelInternalFormat.RGBA8);
+		this.outputTxt.setInternalFormat(TexelInternalFormat.RGBA16F);
 		this.outputTxt.setFilters(TextureFilter.NEAREST);
 		this.outputTxt.setGenerateMipmaps(false);
 		this.outputTxt.setup();
@@ -540,11 +540,7 @@ public class DeferredCompositor extends AutoCleanupable {
 				0,
 				this.outputTxt.getFormat().getGlId(),
 				this.outputTxt.getDataType().getGlId(),
-				new int[] {
-						(byte) (this.backgroundColor.x * 255),
-						(byte) (this.backgroundColor.y * 255),
-						(byte) (this.backgroundColor.z * 255),
-						(byte) (this.backgroundColor.w * 255) });
+				new float[] { (this.backgroundColor.x), (this.backgroundColor.y), (this.backgroundColor.z), (this.backgroundColor.w) });
 
 		GL_W.glViewport(0, 0, resolution.x, resolution.y);
 
