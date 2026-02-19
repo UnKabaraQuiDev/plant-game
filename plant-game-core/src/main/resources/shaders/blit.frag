@@ -1,4 +1,4 @@
-#version {version}
+#version 420
 
 in vec2 texCoord;
 in vec2 fragPos;

@@ -1,14 +1,25 @@
 package lu.kbra.plant_game.engine.render.shader.compute.filter;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.OptionalInt;
+
 import lu.kbra.plant_game.engine.render.FilterShaderConfiguration;
 import lu.kbra.standalone.gameengine.graph.shader.part.AbstractShaderPart;
+import lu.kbra.standalone.gameengine.utils.gl.consts.DataType;
+import lu.kbra.standalone.gameengine.utils.gl.consts.TexelFormat;
+import lu.kbra.standalone.gameengine.utils.gl.consts.TexelInternalFormat;
+import lu.kbra.standalone.gameengine.utils.gl.consts.TextureFilter;
+import lu.kbra.standalone.gameengine.utils.gl.consts.TextureWrap;
 
 public class BlurShader extends FilterShader<BlurShader> {
 
 	public static class BlurShaderConfiguration extends FilterShaderConfiguration<BlurShader> {
 
-		protected float threshold;
-		protected boolean horizontal;
+		protected float threshold = 0;
+		protected boolean horizontal = true;
+
+		protected boolean shouldBlit = false;
 
 		@Override
 		public Class<BlurShader> getShaderClass() {
@@ -29,10 +40,14 @@ public class BlurShader extends FilterShader<BlurShader> {
 			this.horizontal = horizontal;
 		}
 
+		public void setShouldBlit(final boolean shouldBlit) {
+			this.shouldBlit = shouldBlit;
+		}
+
 		@Override
 		public String toString() {
 			return "BlurShaderConfiguration@" + System.identityHashCode(this) + " [threshold=" + this.threshold + ", horizontal="
-					+ this.horizontal + "]";
+					+ this.horizontal + ", shouldBlit=" + this.shouldBlit + "]";
 		}
 
 	}
@@ -54,6 +69,24 @@ public class BlurShader extends FilterShader<BlurShader> {
 	@Override
 	public BlurShaderConfiguration newConfigurationInstance() {
 		return new BlurShaderConfiguration();
+	}
+
+	@Override
+	public boolean blitOutputTexture(final FilterShaderConfiguration<BlurShader> fsc) {
+		return fsc instanceof BlurShaderConfiguration bsc ? bsc.shouldBlit : false;
+	}
+
+	@Override
+	public List<TextureOutputConfig> getTextureOutputs() {
+		return List.of(new TextureOutputConfig(TXT0,
+				OptionalInt.of(0),
+				"out_FragColor",
+				TextureFilter.NEAREST,
+				Optional.empty(),
+				TextureWrap.CLAMP_TO_EDGE,
+				DataType.FLOAT,
+				TexelFormat.RGBA,
+				TexelInternalFormat.RGBA16F));
 	}
 
 }

@@ -1,5 +1,6 @@
 package lu.kbra.plant_game.base.reg;
 
+import lu.kbra.plant_game.engine.render.shader.compute.filter.BlurShader;
 import lu.kbra.plant_game.engine.render.shader.compute.filter.VignetteShader;
 import lu.kbra.plant_game.plugin.PluginDescriptor;
 import lu.kbra.plant_game.plugin.exception.RegistryFailedException;
@@ -13,6 +14,7 @@ public class BaseFilterShaderRegistry extends FilterShaderRegistry {
 
 	@Override
 	public void init() throws RegistryFailedException {
+		this.register(BlurShader::new);
 		this.register(VignetteShader::new);
 	}
 

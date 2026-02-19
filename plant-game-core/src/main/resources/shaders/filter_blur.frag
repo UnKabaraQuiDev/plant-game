@@ -3,8 +3,6 @@
 in vec2 texCoord;
 in vec2 fragPos;
 
-out vec4 fragColor;
-
 uniform sampler2D txt0;
 uniform ivec2 inputSize;
 uniform ivec2 outputSize;
@@ -32,7 +30,6 @@ void main() {
 
 	if (brightness < threshold) {
 		out_FragColor = vec4(0.0);
-		return;
 	}
 
 	vec3 result = centerColor * weights[0];
@@ -59,4 +56,6 @@ void main() {
 	}
 
 	out_FragColor = vec4(result, 1.0);
+	
+	out_FragColor = vec4(texture(txt0, texCoord).rgb, 1);
 }

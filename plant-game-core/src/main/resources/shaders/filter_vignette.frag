@@ -3,8 +3,6 @@
 in vec2 texCoord;
 in vec2 fragPos;
 
-out vec4 fragColor;
-
 uniform sampler2D txt0;
 uniform ivec2 inputSize;
 uniform ivec2 outputSize;

@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import lu.kbra.pclib.pointer.prim.IntPointer;
 import lu.kbra.plant_game.engine.scene.world.generator.WorldGenerator;
+import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.standalone.gameengine.utils.MathUtils;
 import lu.kbra.standalone.gameengine.utils.gl.consts.Consts;
 import lu.kbra.standalone.gameengine.utils.interpolation.Interpolators;
@@ -21,7 +22,13 @@ public class WorldGeneratorTest {
 	@Test
 	public void testGenerateWorldSimplex() throws IOException {
 		final int width = 50, height = 30;
-		this.worldGenerator = new WorldGenerator(width, height, 0);
+		this.worldGenerator = new WorldGenerator(width, height, 0) {
+			@Override
+			protected ColorMaterial getCellMaterial(final int x, final int z, final int cellHeight) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+		};
 
 		this.draw(this.worldGenerator, width, height, "simplex-0.png");
 	}
@@ -31,6 +38,12 @@ public class WorldGeneratorTest {
 		final int width = 50, height = 30;
 		this.worldGenerator = new WorldGenerator(width, height, 0) {
 			private NoiseGenerator noise = new NoiseGenerator(1234, 10);
+
+			@Override
+			protected ColorMaterial getCellMaterial(final int x, final int z, final int cellHeight) {
+				// TODO Auto-generated method stub
+				return null;
+			}
 
 			@Override
 			protected Integer genNoise(final int x, final int z) {
