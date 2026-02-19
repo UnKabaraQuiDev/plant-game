@@ -1,5 +1,7 @@
 package lu.kbra.plant_game.engine.scene.world;
 
+import java.util.Optional;
+
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.joml.Vector4f;
@@ -35,8 +37,8 @@ public class MoveBuildingModal implements Modal {
 	protected Vector2i source;
 	protected Direction sourceRotation;
 
-	protected Direction targetRotation;
 	protected Vector2i currentPos;
+	protected Direction targetRotation;
 
 	protected boolean placeDown;
 
@@ -137,6 +139,8 @@ public class MoveBuildingModal implements Modal {
 			if (this.placeDown) {
 				this.attachedObject.confirmPlaceDown(this.worldScene
 						.getTerrain(), this.source, this.sourceRotation, this.currentPos, this.targetRotation);
+				this.worldScene.getTerrain()
+						.place(Optional.ofNullable(this.source), Optional.ofNullable(this.sourceRotation), this.attachedObject);
 				this.runPlaceHook();
 				this.parent.stopModal();
 			}

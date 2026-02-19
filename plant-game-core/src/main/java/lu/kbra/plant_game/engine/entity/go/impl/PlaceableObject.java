@@ -1,5 +1,7 @@
 package lu.kbra.plant_game.engine.entity.go.impl;
 
+import java.util.function.Consumer;
+
 import org.joml.Vector2i;
 
 import lu.kbra.plant_game.engine.entity.go.data.Footprint;
@@ -27,6 +29,10 @@ public interface PlaceableObject extends Transform3DOwner, UniqueID, SceneEntity
 	Vector2i getTile();
 
 	void setTile(Vector2i v);
+
+	default void forEachCell(final Consumer<Vector2i> action) {
+		this.getFootprint().forEachCell(this.getTile(), this.getRotation(), action);
+	}
 
 	default void confirmPlaceDown(
 			final TerrainGameObject terrain,

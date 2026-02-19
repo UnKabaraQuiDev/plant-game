@@ -103,7 +103,7 @@ public class Footprint {
 		return cell.x >= abs.min.x && cell.y >= abs.min.y && cell.x < abs.max.x && cell.y < abs.max.y;
 	}
 
-	public void forEachCell(final Vector2i pivotPos, final Direction rotation, final Consumer<Vector2i> action) {
+	public void forEachCell(final Vector2ic pivotPos, final Direction rotation, final Consumer<Vector2i> action) {
 		final Vector2i tmp = new Vector2i();
 		for (int y = this.min.y(); y < this.max.y(); y++) {
 			for (int x = this.min.x(); x < this.max.x(); x++) {
@@ -115,7 +115,7 @@ public class Footprint {
 		}
 	}
 
-	public boolean anyCellMatch(final Vector2i pivotPos, final Direction rotation, final Predicate<Vector2i> predicate) {
+	public boolean anyCellMatch(final Vector2ic pivotPos, final Direction rotation, final Predicate<Vector2i> predicate) {
 		final Vector2i tmp = new Vector2i();
 		for (int y = this.min.y(); y < this.max.y(); y++) {
 			for (int x = this.min.x(); x < this.max.x(); x++) {
@@ -130,7 +130,7 @@ public class Footprint {
 		return false;
 	}
 
-	public boolean allCellsMatch(final Vector2i pivotPos, final Direction rotation, final Predicate<Vector2i> predicate) {
+	public boolean allCellsMatch(final Vector2ic pivotPos, final Direction rotation, final Predicate<Vector2i> predicate) {
 		final Vector2i tmp = new Vector2i();
 		for (int y = this.min.y(); y < this.max.y(); y++) {
 			for (int x = this.min.x(); x < this.max.x(); x++) {
