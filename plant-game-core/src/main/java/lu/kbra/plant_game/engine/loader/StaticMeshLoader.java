@@ -24,7 +24,7 @@ import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
 public class StaticMeshLoader {
 
 	public record GenericMeshData(String filePath, Vector3f origin, boolean textureMaterial, String texturePath, float deformRatio,
-			float speedRatio) {
+			float speedRatio, boolean bloomTextureMaterial, String bloomTexturePath, float bloomStrength) {
 
 	}
 
@@ -54,8 +54,20 @@ public class StaticMeshLoader {
 				: jsonObj.optString("texture_path");
 		final float deformRatio = jsonObj.optFloat("deform_ratio", 1);
 		final float speedRatio = jsonObj.optFloat("speed_ratio", 1);
+		final boolean bloomTextureMaterial = jsonObj.optBoolean("bloom_texture_material", false);
+		final String bloomTexturePath = textureMaterial ? baseURI.resolve(jsonObj.optString("bloom_texture_path")).toString()
+				: jsonObj.optString("bloom_texture_path");
+		final float bloomStrength = jsonObj.optFloat("bloom_strength", 1);
 
-		return new GenericMeshData(meshFilePath, origin, textureMaterial, texturePath, deformRatio, speedRatio);
+		return new GenericMeshData(meshFilePath,
+				origin,
+				textureMaterial,
+				texturePath,
+				deformRatio,
+				speedRatio,
+				bloomTextureMaterial,
+				bloomTexturePath,
+				bloomStrength);
 	}
 
 	public static TaskFuture<?, Mesh> getStaticFuture(
@@ -81,7 +93,21 @@ public class StaticMeshLoader {
 
 	public static Mesh createStatic(final CacheManager cache, final String meshName, final GenericMeshData meshData) {
 		final Mesh staticMesh;
-		if (meshData.textureMaterial()) {
+		if (meshData.textureMaterial() && meshData.bloomTextureMaterial()) {
+			final SingleTexture txt0 = cache.hasTexture(meshData.texturePath()) ? (SingleTexture) cache.getTexture(meshData.texturePath())
+					: SingleTexture.loadSingleTexture(cache, meshData.texturePath(), meshData.texturePath());
+			final SingleTexture txtBloom = cache.hasTexture(meshData.bloomTexturePath())
+					? (SingleTexture) cache.getTexture(meshData.bloomTexturePath())
+					: SingleTexture.loadSingleTexture(cache, meshData.bloomTexturePath(), meshData.bloomTexturePath());
+
+			staticMesh = DelegatingObjLoader.loadBloomTexturedMesh(meshName,
+					null,
+					meshData.filePath(),
+					meshData.origin(),
+					txt0,
+					txtBloom,
+					meshData.bloomStrength());
+		} else if (meshData.textureMaterial()) {
 			final SingleTexture txt0 = cache.hasTexture(meshData.texturePath()) ? (SingleTexture) cache.getTexture(meshData.texturePath())
 					: SingleTexture.loadSingleTexture(cache, meshData.texturePath(), meshData.texturePath());
 

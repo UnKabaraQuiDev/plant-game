@@ -8,7 +8,8 @@ uniform float threshold;
 uniform int radius;
 uniform bool blend;
 
-layout(binding = 6) uniform sampler2D txt0;
+uniform sampler2D txtDiffuse;
+uniform sampler2D txtBloom;
 
 float brightness(vec3 color) {
 	return dot(color, vec3(0.2126, 0.7152, 0.0722));
@@ -19,25 +20,23 @@ void main() {
 
 	if (gid.x >= inputSize.x || gid.y >= inputSize.y) return;
 
-	// Convert pixel coordinates to normalized [0,1]
 	vec2 uv = (vec2(gid) + 0.5) / vec2(inputSize);
-	vec4 color = texture(txt0, uv);
+	vec4 color = texture(txtBloom, uv);
 
-	if (brightness(color.rgb) <= threshold) {
+	/*if (brightness(color.rgb) <= threshold) {
 		imageStore(uOutputImage, gid, color);
 		return;
-	}
+	}*/
 
 	vec3 sum = vec3(0.0);
 	int count = 0;
 
-	// Box blur using normalized offsets
 	for (int y = -radius; y <= radius; ++y) {
 		for (int x = -radius; x <= radius; ++x) {
 			ivec2 offset = ivec2(x, y);
 			ivec2 neighbor = clamp(gid + offset, ivec2(0,0), inputSize - 1);
 			vec2 nUV = (vec2(neighbor) + 0.5) / vec2(inputSize);
-			vec3 nColor = texture(txt0, nUV).rgb;
+			vec3 nColor = texture(txtBloom, nUV).rgb;
 			if (brightness(nColor) > threshold) {
 				sum += nColor;
 				count++;
@@ -49,11 +48,13 @@ void main() {
 
 	if (blend) {
 		vec4 src = vec4(blurred, color.a); // blended pixel
-		vec4 dst = color;
+		vec4 dst = texture(txtDiffuse, uv);
 		vec4 result = src * src.a + dst * (1.0 - src.a);
 		imageStore(uOutputImage, gid, result);
 	} else {
 		imageStore(uOutputImage, gid, vec4(blurred, color.a));
 	}
+	
+	imageStore(uOutputImage, gid, texture(txtDiffuse, uv));
 }
 

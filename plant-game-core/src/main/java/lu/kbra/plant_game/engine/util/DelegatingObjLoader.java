@@ -5,8 +5,10 @@ import org.joml.Vector3f;
 import lu.kbra.plant_game.engine.loader.AnimatedMeshLoader.AnimationData;
 import lu.kbra.plant_game.engine.mesh.AnimatedLoadedMesh;
 import lu.kbra.plant_game.engine.mesh.AnimatedTexturedLoadedMesh;
+import lu.kbra.plant_game.engine.mesh.LoadedTexturedBloomMesh;
 import lu.kbra.plant_game.engine.mesh.LoadedTexturedMesh;
 import lu.kbra.plant_game.engine.mesh.OffsetLoadedMesh;
+import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.geom.utils.ObjLoader;
 import lu.kbra.standalone.gameengine.graph.material.Material;
 import lu.kbra.standalone.gameengine.graph.texture.SingleTexture;
@@ -54,6 +56,21 @@ public class DelegatingObjLoader {
 				path,
 				t -> new AnimatedTexturedLoadedMesh(t
 						.name(), null, origin, texture, animationData, t.vertices(), t.indices(), t.attribs()));
+	}
+
+	public static Mesh loadBloomTexturedMesh(
+			final String name,
+			final Material material,
+			final String path,
+			final Vector3f origin,
+			final SingleTexture txt0,
+			final SingleTexture txtBloom,
+			final float bloomStrength) {
+		return ObjLoader.loadMesh(name,
+				material,
+				path,
+				t -> new LoadedTexturedBloomMesh(t
+						.name(), null, origin, txt0, txtBloom, bloomStrength, t.vertices(), t.indices(), t.attribs()));
 	}
 
 }

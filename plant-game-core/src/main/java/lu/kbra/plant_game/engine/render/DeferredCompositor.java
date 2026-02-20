@@ -63,6 +63,7 @@ import lu.kbra.plant_game.engine.entity.ui.impl.TransformedBoundsOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.TransparentEntity;
 import lu.kbra.plant_game.engine.entity.ui.text.TextEmitterOwner;
 import lu.kbra.plant_game.engine.mesh.MaterialMesh;
+import lu.kbra.plant_game.engine.mesh.TexturedBloomMesh;
 import lu.kbra.plant_game.engine.mesh.TexturedMesh;
 import lu.kbra.plant_game.engine.render.shader.compute.MaterialComputeShader;
 import lu.kbra.plant_game.engine.render.shader.compute.OutlineShader;
@@ -121,6 +122,8 @@ import lu.kbra.standalone.gameengine.utils.gl.consts.TextureType;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextureWrap;
 
 public class DeferredCompositor extends AutoCleanupable {
+
+	public static final int BLOOM_TID_OFFSET = 10000;
 
 	protected static enum Method {
 		DIRECT, DEFERRED;
@@ -212,6 +215,7 @@ public class DeferredCompositor extends AutoCleanupable {
 	// material passes
 	protected Vector4f backgroundColor = new Vector4f(0, 0, 0, 0);
 	protected SingleTexture outputTxt;
+	protected SingleTexture outputBloomTxt;
 	protected MaterialComputeShader materialComputeShader;
 	protected TextureMaterialComputeShader textureMaterialComputeShader;
 	protected OutlineShader outlineShader;
@@ -313,12 +317,19 @@ public class DeferredCompositor extends AutoCleanupable {
 
 		this.outputTxt = new SingleTexture(WORLD_FRAMEBUFFER_NAME + ".output", engine.getWindow().getSize());
 		this.outputTxt.setDataType(DataType.FLOAT);
-		this.outputTxt.setFormat(TexelFormat.RGBA);
-		this.outputTxt.setInternalFormat(TexelInternalFormat.RGBA16F);
+		this.outputTxt.setTexelFormat(TexelFormat.RGBA);
+		this.outputTxt.setTexelInternalFormat(TexelInternalFormat.RGBA16F);
 		this.outputTxt.setFilters(TextureFilter.NEAREST);
 		this.outputTxt.setGenerateMipmaps(false);
 		this.outputTxt.setup();
 		this.cache.addTexture(this.outputTxt);
+
+		this.outputBloomTxt = new SingleTexture(WORLD_FRAMEBUFFER_NAME + ".outputBloom", engine.getWindow().getSize());
+		this.outputBloomTxt.setColorFormat(DataType.FLOAT, TexelFormat.RGBA, TexelInternalFormat.RGBA16F);
+		this.outputBloomTxt.setFilters(TextureFilter.LINEAR);
+		this.outputBloomTxt.setGenerateMipmaps(false);
+		this.outputBloomTxt.setup();
+		this.cache.addTexture(this.outputBloomTxt);
 
 		this.cache.addFramebuffer(this.worldFramebuffer = this.genWorldFramebuffer(this.cache, engine.getWindow().getSize()));
 	}
@@ -390,15 +401,22 @@ public class DeferredCompositor extends AutoCleanupable {
 			this.blurComputeShader.setUniform(BlurComputeShader.OUTPUT_SIZE, resolution);
 		}
 
-		this.outputTxt.bindUniform(this.blurComputeShader, BlurComputeShader.TXT0, 0);
+		this.outputTxt.bindUniform(this.blurComputeShader, BlurComputeShader.TXT_DIFFUSE, 1);
+		this.outputBloomTxt.bindUniform(this.blurComputeShader, BlurComputeShader.TXT_BLOOM, 2);
 
-		GL_W.glBindImageTexture(0, this.outputTxt.getGlId(), 0, false, 0, GL_W.GL_WRITE_ONLY, this.outputTxt.getInternalFormat().getGlId());
+		GL_W.glBindImageTexture(0,
+				this.outputTxt.getGlId(),
+				0,
+				false,
+				0,
+				GL_W.GL_READ_WRITE,
+				this.outputTxt.getTexelInternalFormat().getGlId());
 
 		final Vector3ic groups = this.blurComputeShader.getGlobalGroup(new Vector3i(resolution.x, resolution.y, 1));
 
 		GL_W.glDispatchCompute(groups.x(), groups.y(), 1);
 
-		GL_W.glMemoryBarrier(GL_W.GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+		GL_W.glMemoryBarrier(GL_W.GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | GL_W.GL_TEXTURE_FETCH_BARRIER_BIT);
 
 		this.blurComputeShader.unbind();
 
@@ -518,7 +536,7 @@ public class DeferredCompositor extends AutoCleanupable {
 					false,
 					0,
 					GL_W.GL_READ_WRITE,
-					this.outputTxt.getInternalFormat().getGlId());
+					this.outputTxt.getTexelInternalFormat().getGlId());
 
 			this.posTexture.bindUniform(computeShader.getUniformLocation("uPosTex"), 0);
 			this.normalTexture.bindUniform(computeShader.getUniformLocation("uNormalTex"), 1);
@@ -566,23 +584,13 @@ public class DeferredCompositor extends AutoCleanupable {
 			final Vector2i resolution,
 			final boolean needRegen) {
 		if (needRegen) {
-			this.outputTxt.setSize(resolution);
-			this.outputTxt.bind();
-			this.outputTxt.resize();
-			this.outputTxt.unbind();
+			this.outputTxt.resize(resolution);
+			this.outputBloomTxt.resize(resolution);
 		}
-		GL_W.glClearTexImage(this.outputTxt.getGlId(),
-				0,
-				this.outputTxt.getFormat().getGlId(),
-				this.outputTxt.getDataType().getGlId(),
-				new float[] { this.backgroundColor.x, this.backgroundColor.y, this.backgroundColor.z, this.backgroundColor.w });
-
-		GL_W.glViewport(0, 0, resolution.x, resolution.y);
+		this.outputTxt.clear(this.backgroundColor);
+		this.outputBloomTxt.clear(this.backgroundColor);
 
 		final Vector3ic groups = this.materialComputeShader.getGlobalGroup(new Vector3i(resolution.x, resolution.y, 1));
-
-		assert groups.x() != 0;
-		assert groups.y() != 0;
 
 		// regular materials
 
@@ -592,6 +600,13 @@ public class DeferredCompositor extends AutoCleanupable {
 		this.materialComputeShader.setUniform(MaterialComputeShader.COLOR_VARIATION, false);
 		this.materialComputeShader.setUniform(MaterialComputeShader.SINGLE_OBJECT, false);
 
+		GL_W.glBindImageTexture(0,
+				this.outputTxt.getGlId(),
+				0,
+				false,
+				0,
+				GL_W.GL_WRITE_ONLY,
+				this.outputTxt.getTexelInternalFormat().getGlId());
 		GL_W.glDispatchCompute(groups.x(), groups.y(), 1);
 
 		final int variationMapUniformLoc = this.materialComputeShader.getUniformLocation(MaterialComputeShader.VARIATION_MAP);
@@ -601,15 +616,10 @@ public class DeferredCompositor extends AutoCleanupable {
 
 		// txt materials
 
-//		groups = this.textureMaterialComputeShader.getGlobalGroup(new Vector3i(resolution.x, resolution.y, 1));
-
-//		assert groups.x() != 0;
-//		assert groups.y() != 0;
-
 		this.textureMaterialComputeShader.bind();
 
 		this.setupMaterialInputs(this.textureMaterialComputeShader, worldScene, resolution, needRegen);
-		final int txt0UniformLoc = this.textureMaterialComputeShader.getUniformLocation(TextureMaterialComputeShader.TXT0);
+		final int txtDiffuseUniformLoc = this.textureMaterialComputeShader.getUniformLocation(TextureMaterialComputeShader.TXT_DIFFUSE);
 		final int currentMaterialIdLoc = this.textureMaterialComputeShader
 				.getUniformLocation(TextureMaterialComputeShader.CURRENT_MATERIAL_ID);
 
@@ -619,7 +629,7 @@ public class DeferredCompositor extends AutoCleanupable {
 
 			for (final SceneEntity entity : worldScene.getEntities().values()) {
 				this.renderTexture(alreadyRendered,
-						txt0UniformLoc,
+						txtDiffuseUniformLoc,
 						variationMapUniformLoc,
 						currentMaterialIdLoc,
 						groups.x(),
@@ -638,7 +648,7 @@ public class DeferredCompositor extends AutoCleanupable {
 
 	private void renderTexture(
 			final Set<Integer> alreadyRendered,
-			final int txt0UniformLoc,
+			final int txtDiffuseUniformLoc,
 			final int variationMapUniformLoc,
 			final int currentMaterialIdLoc,
 			final int groupsX,
@@ -651,7 +661,7 @@ public class DeferredCompositor extends AutoCleanupable {
 
 			this.renderTextureMesh(mesh,
 					alreadyRendered,
-					txt0UniformLoc,
+					txtDiffuseUniformLoc,
 					variationMapUniformLoc,
 					currentMaterialIdLoc,
 					groupsX,
@@ -660,8 +670,13 @@ public class DeferredCompositor extends AutoCleanupable {
 		}
 
 		if (entity instanceof final EntityContainer<?> ec) {
-			ec.forEach(e -> this
-					.renderTexture(alreadyRendered, txt0UniformLoc, variationMapUniformLoc, currentMaterialIdLoc, groupsX, groupsY, e));
+			ec.forEach(e -> this.renderTexture(alreadyRendered,
+					txtDiffuseUniformLoc,
+					variationMapUniformLoc,
+					currentMaterialIdLoc,
+					groupsX,
+					groupsY,
+					e));
 		}
 
 		if (entity instanceof final InstanceEmitterOwner ieo) {
@@ -671,7 +686,7 @@ public class DeferredCompositor extends AutoCleanupable {
 
 			this.renderTextureMesh(mesh,
 					alreadyRendered,
-					txt0UniformLoc,
+					txtDiffuseUniformLoc,
 					variationMapUniformLoc,
 					currentMaterialIdLoc,
 					groupsX,
@@ -683,23 +698,57 @@ public class DeferredCompositor extends AutoCleanupable {
 	private void renderTextureMesh(
 			final Mesh mesh,
 			final Set<Integer> alreadyRendered,
-			final int txt0UniformLoc,
+			final int txtDiffuseUniformLoc,
 			final int variationMapUniformLoc,
 			final int currentMaterialIdLoc,
 			final int groupsX,
 			final int groupsY,
 			final SceneEntity entity) {
 
+		if (mesh instanceof final TexturedBloomMesh txtBloomMesh) {
+			final SingleTexture txt = txtBloomMesh.getBloomTexture();
+			final int tid = ColorMaterial.values().length + txt.getGlId();
+			System.err.println("rendering bloom: " + txt.getId());
+			if (!alreadyRendered.contains(BLOOM_TID_OFFSET + tid)) {
+				this.textureMaterialComputeShader.bind();
+				txt.bindUniform(txtDiffuseUniformLoc, 5);
+				this.textureMaterialComputeShader.setUniform(TextureMaterialComputeShader.STRENGTH, txtBloomMesh.getBloomStrength());
+				this.textureMaterialComputeShader.storeUniformUnsigned(txtDiffuseUniformLoc, tid);
+
+				GL_W.glBindImageTexture(0,
+						this.outputBloomTxt.getGlId(),
+						0,
+						false,
+						0,
+						GL_W.GL_WRITE_ONLY,
+						this.outputTxt.getTexelInternalFormat().getGlId());
+				GL_W.glDispatchCompute(groupsX, groupsY, 1);
+
+				alreadyRendered.add(BLOOM_TID_OFFSET + tid);
+
+				if (GL_FORCE_SYNC_COMPUTE_SHADERS) {
+					GL_W.glMemoryBarrier(GL_W.GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+				}
+			}
+		}
 		if (mesh instanceof final TexturedMesh txtMesh) {
 			final SingleTexture txt = txtMesh.getTexture();
 			final int tid = ColorMaterial.values().length + txt.getGlId();
 
+			System.err.println("rendering not bloom: " + txt.getId());
 			if (!alreadyRendered.contains(tid)) {
 				this.textureMaterialComputeShader.bind();
-				txt.bindUniform(txt0UniformLoc, 6);
-
+				txt.bindUniform(txtDiffuseUniformLoc, 5);
+				this.textureMaterialComputeShader.setUniform(TextureMaterialComputeShader.STRENGTH, 1f);
 				this.textureMaterialComputeShader.storeUniformUnsigned(currentMaterialIdLoc, tid);
 
+				GL_W.glBindImageTexture(0,
+						this.outputTxt.getGlId(),
+						0,
+						false,
+						0,
+						GL_W.GL_WRITE_ONLY,
+						this.outputTxt.getTexelInternalFormat().getGlId());
 				GL_W.glDispatchCompute(groupsX, groupsY, 1);
 
 				alreadyRendered.add(tid);
@@ -739,25 +788,22 @@ public class DeferredCompositor extends AutoCleanupable {
 			final WorldLevelScene worldScene,
 			final Vector2i resolution,
 			final boolean needRegen) {
-		this.posTexture.bind(0);
-		this.normalTexture.bind(1);
-		this.uvTexture.bind(2);
-		this.idsTexture.bind(3);
-		this.depthTexture.bind(4);
+//		this.posTexture.bind(0);
+//		this.normalTexture.bind(1);
+//		this.uvTexture.bind(2);
+//		this.idsTexture.bind(3);
+//		this.depthTexture.bind(4);
+		this.posTexture.bindUniform(computeShader.getUniformLocation("uPosTex"), 0);
+		this.normalTexture.bindUniform(computeShader.getUniformLocation("uNormalTex"), 1);
+		this.uvTexture.bindUniform(computeShader.getUniformLocation("uUvTex"), 2);
+		this.idsTexture.bindUniform(computeShader.getUniformLocation("uIdsTex"), 3);
+		this.depthTexture.bindUniform(computeShader.getUniformLocation("uDepthTex"), 4);
 
 		computeShader.setUniform(MaterialComputeShader.LIGHT_COLOR, worldScene.getLightColor());
 		computeShader.setUniform(MaterialComputeShader.LIGHT_DIR, worldScene.getLightDirection());
 		computeShader.setUniform(MaterialComputeShader.AMBIENT_LIGHT, worldScene.getAmbientLight());
 
 		if (needRegen) {
-			GL_W.glBindImageTexture(0,
-					this.outputTxt.getGlId(),
-					0,
-					false,
-					0,
-					GL_W.GL_WRITE_ONLY,
-					this.outputTxt.getInternalFormat().getGlId());
-
 			this.posTexture.bindUniform(computeShader.getUniformLocation("uPosTex"), 0);
 			this.normalTexture.bindUniform(computeShader.getUniformLocation("uNormalTex"), 1);
 			this.uvTexture.bindUniform(computeShader.getUniformLocation("uUvTex"), 2);
@@ -785,7 +831,7 @@ public class DeferredCompositor extends AutoCleanupable {
 		this.idsTexture.bind();
 		GL_W.glClearTexImage(this.idsTexture.getGlId(),
 				0,
-				this.idsTexture.getFormat().getGlId(),
+				this.idsTexture.getTexelFormat().getGlId(),
 				this.idsTexture.getDataType().getGlId(),
 				new int[] { 100, ColorMaterial.BLACK.getId(), ColorMaterial.BLACK.getId(), ColorMaterial.BLACK.getId() });
 
@@ -1482,8 +1528,8 @@ public class DeferredCompositor extends AutoCleanupable {
 
 		this.depthTexture = new SingleTexture(WORLD_FRAMEBUFFER_NAME + ".depth", width, height);
 		this.depthTexture.setDataType(DataType.FLOAT);
-		this.depthTexture.setFormat(TexelFormat.DEPTH);
-		this.depthTexture.setInternalFormat(TexelInternalFormat.DEPTH_COMPONENT24);
+		this.depthTexture.setTexelFormat(TexelFormat.DEPTH);
+		this.depthTexture.setTexelInternalFormat(TexelInternalFormat.DEPTH_COMPONENT24);
 		this.depthTexture.setFilters(TextureFilter.NEAREST);
 		this.depthTexture.setWraps(TextureWrap.CLAMP_TO_EDGE);
 		this.depthTexture.setGenerateMipmaps(false);
@@ -1493,8 +1539,8 @@ public class DeferredCompositor extends AutoCleanupable {
 
 		this.posTexture = new SingleTexture(WORLD_FRAMEBUFFER_NAME + ".pos", width, height);
 		this.posTexture.setDataType(DataType.FLOAT);
-		this.posTexture.setFormat(TexelFormat.RGB);
-		this.posTexture.setInternalFormat(TexelInternalFormat.RGB32F);
+		this.posTexture.setTexelFormat(TexelFormat.RGB);
+		this.posTexture.setTexelInternalFormat(TexelInternalFormat.RGB32F);
 		this.posTexture.setFilters(TextureFilter.NEAREST);
 		this.posTexture.setGenerateMipmaps(false);
 		this.posTexture.setup();
@@ -1503,8 +1549,8 @@ public class DeferredCompositor extends AutoCleanupable {
 
 		this.normalTexture = new SingleTexture(WORLD_FRAMEBUFFER_NAME + ".normal", width, height);
 		this.normalTexture.setDataType(DataType.FLOAT);
-		this.normalTexture.setFormat(TexelFormat.RGB);
-		this.normalTexture.setInternalFormat(TexelInternalFormat.RGB16F);
+		this.normalTexture.setTexelFormat(TexelFormat.RGB);
+		this.normalTexture.setTexelInternalFormat(TexelInternalFormat.RGB16F);
 		this.normalTexture.setFilters(TextureFilter.NEAREST);
 		this.normalTexture.setGenerateMipmaps(false);
 		this.normalTexture.setup();
@@ -1513,8 +1559,8 @@ public class DeferredCompositor extends AutoCleanupable {
 
 		this.uvTexture = new SingleTexture(WORLD_FRAMEBUFFER_NAME + ".uv", width, height);
 		this.uvTexture.setDataType(DataType.FLOAT);
-		this.uvTexture.setFormat(TexelFormat.RG);
-		this.uvTexture.setInternalFormat(TexelInternalFormat.RG16F);
+		this.uvTexture.setTexelFormat(TexelFormat.RG);
+		this.uvTexture.setTexelInternalFormat(TexelInternalFormat.RG16F);
 		this.uvTexture.setFilters(TextureFilter.NEAREST);
 		this.uvTexture.setGenerateMipmaps(false);
 		this.uvTexture.setup();
@@ -1523,8 +1569,8 @@ public class DeferredCompositor extends AutoCleanupable {
 
 		this.idsTexture = new SingleTexture(WORLD_FRAMEBUFFER_NAME + ".ids", width, height);
 		this.idsTexture.setDataType(DataType.UINT);
-		this.idsTexture.setFormat(TexelFormat.RGBA_INTEGER);
-		this.idsTexture.setInternalFormat(TexelInternalFormat.RGBA32UI);
+		this.idsTexture.setTexelFormat(TexelFormat.RGBA_INTEGER);
+		this.idsTexture.setTexelInternalFormat(TexelInternalFormat.RGBA32UI);
 		this.idsTexture.setFilters(TextureFilter.NEAREST);
 		this.idsTexture.setGenerateMipmaps(false);
 		this.idsTexture.setup();
@@ -1589,9 +1635,9 @@ public class DeferredCompositor extends AutoCleanupable {
 		this.worldFramebuffer.bind(GL_W.GL_READ_FRAMEBUFFER);
 		GL_W.glReadBuffer(FrameBufferAttachment.COLOR_FIRST.getGlId() + WORLD_FRAMEBUFFER_IDS_IDX);
 		final IntBuffer pixel = BufferUtils.createIntBuffer(4);
-		GL11.glReadPixels(x, y, 1, 1, this.idsTexture.getFormat().getGlId(), this.idsTexture.getDataType().getGlId(), pixel);
+		GL11.glReadPixels(x, y, 1, 1, this.idsTexture.getTexelFormat().getGlId(), this.idsTexture.getDataType().getGlId(), pixel);
 		assert GL_W.checkError(
-				"ReadPixels(" + mousePosition + ", " + this.idsTexture.getFormat() + ", " + this.idsTexture.getDataType() + ")");
+				"ReadPixels(" + mousePosition + ", " + this.idsTexture.getTexelFormat() + ", " + this.idsTexture.getDataType() + ")");
 		this.worldFramebuffer.unbind(GL_W.GL_READ_FRAMEBUFFER);
 
 		final int r = pixel.get(0);

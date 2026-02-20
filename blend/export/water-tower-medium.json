@@ -10,7 +10,10 @@
                 0.0
             ],
             "texture_material": true,
-            "texture_path": "textures/water_tower_base.png"
+            "texture_path": "textures/water_tower_base.png",
+			"bloom_texture_material": true,
+			"bloom_texture_path": "textures/water_tower_base-bloom.png",
+			"bloom_strength": 1
         }
     }
 }

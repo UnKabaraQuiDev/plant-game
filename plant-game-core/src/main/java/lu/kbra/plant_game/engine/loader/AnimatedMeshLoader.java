@@ -74,6 +74,10 @@ public class AnimatedMeshLoader {
 				: jsonObj.optString("texture_path");
 		final float deformRatio = jsonObj.optFloat("deform_ratio", 1);
 		final float speedRatio = jsonObj.optFloat("speed_ratio", 1);
+		final boolean bloomTextureMaterial = jsonObj.optBoolean("bloom_texture_material", false);
+		final String bloomTexturePath = textureMaterial ? baseURI.resolve(jsonObj.optString("bloom_texture_path")).toString()
+				: jsonObj.optString("bloom_texture_path");
+		final float bloomStrength = jsonObj.optFloat("bloom_strength", 1);
 
 		// -- anim
 		final JSONObject animationObj = jsonObj.getJSONObject("animation");
@@ -86,7 +90,16 @@ public class AnimatedMeshLoader {
 
 		final AnimationData animData = new AnimationData(startPosition, endPosition, startRotation, endRotation, startScale, endScale);
 
-		return new AnimatedMeshData(new GenericMeshData(meshFilePath, origin, textureMaterial, texturePath, deformRatio, speedRatio),
+		return new AnimatedMeshData(
+				new GenericMeshData(meshFilePath,
+						origin,
+						textureMaterial,
+						texturePath,
+						deformRatio,
+						speedRatio,
+						bloomTextureMaterial,
+						bloomTexturePath,
+						bloomStrength),
 				animData);
 	}
 

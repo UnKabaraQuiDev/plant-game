@@ -40,7 +40,7 @@ public class StaticTexturedMeshLoader {
 				releaseLock(meshName);
 				throw new SkipThen(cache.getMesh(meshName));
 			}
-			
+
 			return txt;
 		}).then(render, (ThrowingFunction<SingleTexture, TexturedQuadMesh, Throwable>) txt2 -> createStaticQuad(cache, meshName, txt2));
 	}
@@ -90,23 +90,12 @@ public class StaticTexturedMeshLoader {
 	}
 
 	static TexturedQuadMesh createStaticQuad(final CacheManager cache, final String meshName, final SingleTexture txt) {
-		final TexturedQuadMesh staticMesh = new TexturedQuadLoadedMesh(meshName, txt,
+		final TexturedQuadMesh staticMesh = new TexturedQuadLoadedMesh(meshName,
+				txt,
 				GameEngineUtils.normalizeSize(txt.getWidth(), txt.getHeight()));
 		cache.addMesh(staticMesh);
 		releaseLock(meshName);
 		return staticMesh;
 	}
-
-//	static TexturedMesh createStatic(final CacheManager cache, final String meshName, final GenericMeshData meshData) {
-//		final SingleTexture txt0 = cache.hasTexture(meshData.texturePath()) ? (SingleTexture) cache.getTexture(meshData.texturePath())
-//				: SingleTexture.loadSingleTexture(cache, meshData.texturePath(), meshData.texturePath());
-//
-//		final TexturedMesh texturedMesh = DelegatingObjLoader
-//				.loadTexturedMesh(meshName, null, meshData.filePath(), meshData.origin(), txt0);
-//
-//		cache.addMesh(texturedMesh);
-//		releaseLock(meshName);
-//		return texturedMesh;
-//	}
 
 }

@@ -11,7 +11,8 @@ public class BlurComputeShader extends ComputeShader {
 
 	private static final Vector3ic LOCAL_SIZE = new Vector3i(16, 16, 1);
 
-	public static final String TXT0 = "txt0";
+	public static final String TXT_DIFFUSE = "txtDiffuse";
+	public static final String TXT_BLOOM = "txtBloom";
 	public static final String THRESHOLD = "threshold";
 	public static final String RADIUS = "radius";
 	public static final String BLEND = "blend";
@@ -25,10 +26,11 @@ public class BlurComputeShader extends ComputeShader {
 	public void createUniforms() {
 		super.createUniforms();
 
-		this.createUniform(TXT0);
-		this.createUniform(THRESHOLD);
-		this.createUniform(RADIUS);
-		this.createUniform(BLEND);
+		super.createUniform(TXT_DIFFUSE);
+		super.createUniform(THRESHOLD);
+		super.createUniform(RADIUS);
+		super.createUniform(BLEND);
+		super.createUniform(TXT_BLOOM);
 	}
 
 }

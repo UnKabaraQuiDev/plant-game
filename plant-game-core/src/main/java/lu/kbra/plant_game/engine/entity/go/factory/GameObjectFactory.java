@@ -35,7 +35,8 @@ public class GameObjectFactory {
 	public static GameObjectFactory INSTANCE;
 
 	private final CacheManager cache;
-	private final Dispatcher loader, render;
+	private final Dispatcher loader;
+	private final Dispatcher render;
 
 	public GameObjectFactory(final CacheManager cache, final Dispatcher loader, final Dispatcher render) {
 		this.cache = cache;
