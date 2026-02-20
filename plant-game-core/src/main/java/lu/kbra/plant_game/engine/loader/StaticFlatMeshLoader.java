@@ -18,6 +18,7 @@ import lu.kbra.standalone.gameengine.impl.future.YieldExecutionThrowable;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextureFilter;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextureWrap;
 import lu.kbra.standalone.gameengine.utils.mem.img.MemImage;
+import lu.kbra.standalone.gameengine.utils.mem.img.MemImageFormat;
 
 public class StaticFlatMeshLoader {
 
@@ -44,7 +45,11 @@ public class StaticFlatMeshLoader {
 			}
 
 			final SingleTexture whiteTexture = new SingleTexture(TEXTURE_NAME,
-					MemImage.fromDirect(1, 1, 3, buffer -> buffer.put((byte) 255).put((byte) 255).put((byte) 255).flip()));
+					MemImage.fromDirect(1,
+							1,
+							3,
+							buffer -> buffer.put((byte) 255).put((byte) 255).put((byte) 255).flip(),
+							MemImageFormat.UBYTE));
 			whiteTexture.setFilters(TextureFilter.NEAREST);
 			whiteTexture.setWraps(TextureWrap.CLAMP_TO_EDGE);
 

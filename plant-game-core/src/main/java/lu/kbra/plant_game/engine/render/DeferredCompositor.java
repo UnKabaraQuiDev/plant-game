@@ -35,8 +35,6 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 
 import lu.kbra.pclib.PCUtils;
-import lu.kbra.pclib.datastructure.pair.Pair;
-import lu.kbra.pclib.datastructure.pair.Pairs;
 import lu.kbra.pclib.logger.GlobalLogger;
 import lu.kbra.pclib.pointer.prim.BooleanPointer;
 import lu.kbra.plant_game.PGLogic;
@@ -71,8 +69,6 @@ import lu.kbra.plant_game.engine.render.shader.compute.OutlineShader;
 import lu.kbra.plant_game.engine.render.shader.compute.TextureMaterialComputeShader;
 import lu.kbra.plant_game.engine.render.shader.compute.filter.BlurComputeShader;
 import lu.kbra.plant_game.engine.render.shader.compute.filter.FilterShader;
-import lu.kbra.plant_game.engine.render.shader.compute.filter.FilterShader.TextureDependencyConfig;
-import lu.kbra.plant_game.engine.render.shader.compute.filter.FilterShader.TextureOutputConfig;
 import lu.kbra.plant_game.engine.render.shader.gbuffer.InstanceTransferShader;
 import lu.kbra.plant_game.engine.render.shader.gbuffer.TransferShader;
 import lu.kbra.plant_game.engine.render.shader.render.BlitShader;
@@ -225,9 +221,6 @@ public class DeferredCompositor extends AutoCleanupable {
 	// filters
 	protected Map<Class<? extends FilterShader<?>>, FilterShader<?>> filterShaders = new HashMap<>();
 	protected List<FilterShaderConfiguration<?>> enabledFilters = new ArrayList<>();
-	// true if should be resized to the window's size
-	protected Map<Class<? extends FilterShader<?>>, Map<String, Pair<SingleTexture, Boolean>>> textureOutputs = new HashMap<>();
-	protected Framebuffer filterFramebuffer;
 
 	// debug
 	protected boolean deferredPass = false;
@@ -330,46 +323,6 @@ public class DeferredCompositor extends AutoCleanupable {
 		this.cache.addFramebuffer(this.worldFramebuffer = this.genWorldFramebuffer(this.cache, engine.getWindow().getSize()));
 	}
 
-	protected <T extends FilterShader<T>> void prepareFilterOutputs(final FilterShader<T> fs) {
-		if (this.filterFramebuffer == null) {
-			this.filterFramebuffer = new Framebuffer(FILTER_FRAMEBUFFER_NAME);
-			this.filterFramebuffer.gen();
-			this.filterFramebuffer.bind();
-
-			this.cache.addFramebuffer(this.filterFramebuffer);
-		}
-
-		if (this.textureOutputs.containsKey(fs.getClass())) {
-//			for (Pair<SingleTexture, Boolean> pair : this.textureOutputs.get(fs.getClass()).values()) {
-//				if (pair.getValue()) {
-//					final SingleTexture st = pair.getKey();
-//					st.bind();
-//					st.setSize(this.window.getSize());
-//					st.resize();
-//					st.unbind();
-//				}
-//			}
-			return;
-		}
-
-		for (final TextureOutputConfig toc : fs.getTextureOutputs()) {
-			final SingleTexture st = new SingleTexture(
-					fs.getPluginDescriptor().getInternalName() + "-" + fs.getClass().getSimpleName() + "-" + toc.name,
-					toc.textureSize.orElse(this.window.getSize()));
-			st.setDataType(toc.dataType);
-			st.setFormat(toc.texelFormat);
-			st.setInternalFormat(toc.texelInternalFormat);
-			st.setFilters(toc.filter);
-			st.setWraps(toc.wrap);
-			st.setup();
-
-			this.cache.addTexture(st);
-
-			this.textureOutputs.computeIfAbsent((Class<? extends FilterShader<?>>) fs.getClass(), (k) -> new HashMap<>());
-			this.textureOutputs.get(fs.getClass()).put(toc.name, Pairs.readOnly(st, toc.textureSize.isEmpty()));
-		}
-	}
-
 	public void render(final GameEngine engine, final WorldLevelScene worldScene, final UIScene uiScene) {
 		final CacheManager cache = engine.getCache();
 
@@ -466,92 +419,25 @@ public class DeferredCompositor extends AutoCleanupable {
 
 		final Set<Integer> alreadyResized = new HashSet<>();
 
+		GL_W.glBindFramebuffer(GL_W.GL_FRAMEBUFFER, 0);
+		GL_W.glViewport(0, 0, outputResolution.x, outputResolution.y);
+
 		for (FilterShaderConfiguration fsc : this.enabledFilters) {
 			if (!this.filterShaders.containsKey(fsc.getShaderClass())) {
 				GlobalLogger.warning("FilterShader not found for class: " + fsc.getShaderClass());
 				continue;
 			}
 			final FilterShader<?> fs = this.filterShaders.get(fsc.getShaderClass());
-			this.prepareFilterOutputs(fs);
-
-			int textureIndex = 0;
 
 			fs.bind();
 
 			fs.setUniform(FilterShader.INPUT_SIZE, this.renderResolution);
-			this.outputTxt.bindUniform(fs, FilterShader.TXT0, textureIndex++);
-
-			if (!fs.getTextureDependencies().isEmpty()) {
-				for (final TextureDependencyConfig tdc : fs.getTextureDependencies()) {
-					final SingleTexture target = this.textureOutputs.get(tdc.filterShaderSource).get(tdc.name).getKey();
-					target.bindUniform(fs, tdc.uniformName, textureIndex++);
-				}
-			}
-
-			if (fs.getTextureOutputs().isEmpty()) {
-				GL_W.glBindFramebuffer(GL_W.GL_FRAMEBUFFER, 0);
-				GL_W.glViewport(0, 0, outputResolution.x, outputResolution.y);
-				fs.setUniform(FilterShader.OUTPUT_SIZE, outputResolution);
-			} else {
-				this.filterFramebuffer.bind();
-				this.filterFramebuffer.clearAttachments();
-				final Vector2i minRes = new Vector2i(this.window.getSize());
-
-				for (final TextureOutputConfig toc : fs.getTextureOutputs()) {
-					final SingleTexture target = this.textureOutputs.get(fs.getClass()).get(toc.name).getKey();
-					target.bind();
-
-					if (!alreadyResized.contains(target.getGlId())) {
-						if (toc.textureSize.isEmpty() && needRegen) {
-							target.setSize(this.window.getSize());
-							target.resize();
-						} else if (target.getDataType().isInteger()) {
-							GL_W.glClearTexImage(target
-									.getGlId(), 0, target.getFormat().getGlId(), target.getDataType().getGlId(), new int[] { 0, 0, 0, 0 });
-						} else if (target.getDataType().isFloat()) {
-							GL_W.glClearTexImage(target.getGlId(),
-									0,
-									target.getFormat().getGlId(),
-									target.getDataType().getGlId(),
-									new float[] { 0, 0, 0, 0 });
-						}
-						alreadyResized.add(target.getGlId());
-					}
-
-					minRes.min(target.getSize2D());
-//					System.err.println("rendering to: " + target.getId() + " " + target.getSize2D() + " " + minRes + " "
-//							+ fs.getFragDataLocation(toc.targetName));
-
-					this.filterFramebuffer.attachTexture(FrameBufferAttachment.COLOR_FIRST, fs.getFragDataLocation(toc.targetName), target);
-				}
-				this.filterFramebuffer.setup();
-				GL_W.glViewport(0, 0, minRes.x, minRes.y);
-				fs.setUniform(FilterShader.OUTPUT_SIZE, minRes);
-			}
+			fs.setUniform(FilterShader.OUTPUT_SIZE, outputResolution);
+			this.outputTxt.bindUniform(fs, FilterShader.TXT0, 0);
 
 			fsc.apply((FilterShader) fsc.getShaderClass().cast(fs));
 
 			GL_W.glDrawElements(fs.getBeginMode().getGlId(), this.SCREEN.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
-
-			if (!fs.getTextureOutputs().isEmpty() && fs.blitOutputTexture(fsc)) {
-				if (fs.getTextureOutputs().size() > 1) {
-					throw new IllegalStateException("Can only blit one output texture (" + fs.getClass() + ").");
-				}
-
-				GL_W.glBindFramebuffer(GL_W.GL_FRAMEBUFFER, 0);
-				GL_W.glViewport(0, 0, outputResolution.x, outputResolution.y);
-
-				final SingleTexture target = this.textureOutputs.get(fs.getClass()).get(fs.getTextureOutputs().getFirst().name).getKey();
-//				final SingleTexture target = this.outputTxt;
-
-				this.blitShader.bind();
-				this.blitShader.setUniform(ComputeShader.INPUT_SIZE, target.getSize2D());
-				this.blitShader.setUniform(ComputeShader.OUTPUT_SIZE, outputResolution);
-
-				target.bindUniform(this.blitShader, BlitShader.TXT0, 0);
-
-				GL_W.glDrawElements(this.blitShader.getBeginMode().getGlId(), this.SCREEN.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
-			}
 		}
 
 		GL_W.glEnable(GL_W.GL_DEPTH_TEST);
