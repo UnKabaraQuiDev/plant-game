@@ -12,8 +12,10 @@ import lu.kbra.standalone.gameengine.utils.gl.consts.TexelInternalFormat;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextureFilter;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextureWrap;
 
+@Deprecated
 public class BlurShader extends FilterShader<BlurShader> {
 
+	@Deprecated
 	public static class BlurShaderConfiguration extends FilterShaderConfiguration<BlurShader> {
 
 		protected float threshold = 0;
@@ -52,13 +54,17 @@ public class BlurShader extends FilterShader<BlurShader> {
 
 	}
 
+	@Deprecated
 	public static final String THRESHOLD = "threshold";
+	@Deprecated
 	public static final String HORIZONTAL = "horizontal";
 
+	@Deprecated
 	public BlurShader() {
 		super(AbstractShaderPart.load("classpath:/shaders/filter.vert"), AbstractShaderPart.load("classpath:/shaders/filter_blur.frag"));
 	}
 
+	@Deprecated
 	@Override
 	public void createUniforms() {
 		super.createUniforms();
@@ -66,16 +72,19 @@ public class BlurShader extends FilterShader<BlurShader> {
 		this.createUniform(THRESHOLD);
 	}
 
+	@Deprecated
 	@Override
 	public BlurShaderConfiguration newConfigurationInstance() {
 		return new BlurShaderConfiguration();
 	}
 
+	@Deprecated
 	@Override
 	public boolean blitOutputTexture(final FilterShaderConfiguration<BlurShader> fsc) {
 		return fsc instanceof BlurShaderConfiguration bsc ? bsc.shouldBlit : false;
 	}
 
+	@Deprecated
 	@Override
 	public List<TextureOutputConfig> getTextureOutputs() {
 		return List.of(new TextureOutputConfig(TXT0,

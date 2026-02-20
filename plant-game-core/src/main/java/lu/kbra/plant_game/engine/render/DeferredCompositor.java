@@ -69,6 +69,7 @@ import lu.kbra.plant_game.engine.mesh.TexturedMesh;
 import lu.kbra.plant_game.engine.render.shader.compute.MaterialComputeShader;
 import lu.kbra.plant_game.engine.render.shader.compute.OutlineShader;
 import lu.kbra.plant_game.engine.render.shader.compute.TextureMaterialComputeShader;
+import lu.kbra.plant_game.engine.render.shader.compute.filter.BlurComputeShader;
 import lu.kbra.plant_game.engine.render.shader.compute.filter.FilterShader;
 import lu.kbra.plant_game.engine.render.shader.compute.filter.FilterShader.TextureDependencyConfig;
 import lu.kbra.plant_game.engine.render.shader.compute.filter.FilterShader.TextureOutputConfig;
@@ -217,6 +218,8 @@ public class DeferredCompositor extends AutoCleanupable {
 	protected SingleTexture outputTxt;
 	protected MaterialComputeShader materialComputeShader;
 	protected TextureMaterialComputeShader textureMaterialComputeShader;
+	protected OutlineShader outlineShader;
+	protected BlurComputeShader blurComputeShader;
 	protected BlitShader blitShader;
 
 	// filters
@@ -244,7 +247,6 @@ public class DeferredCompositor extends AutoCleanupable {
 	// highlights
 	protected volatile boolean outlineChanged = false;
 	protected Map<Vector3ic, Vector4fc> outlinedObjects = new ConcurrentHashMap<>();
-	protected OutlineShader outlineShader;
 
 	@SuppressWarnings("unchecked")
 	public DeferredCompositor(final GameEngine engine, final Thread ownerThread) {
@@ -273,6 +275,7 @@ public class DeferredCompositor extends AutoCleanupable {
 		this.cache.addAbstractShader(this.textureMaterialComputeShader = new TextureMaterialComputeShader());
 
 		this.cache.addAbstractShader(this.outlineShader = new OutlineShader());
+		this.cache.addAbstractShader(this.blurComputeShader = new BlurComputeShader());
 
 		this.cache.addAbstractShader(this.blitShader = new BlitShader());
 
@@ -399,13 +402,15 @@ public class DeferredCompositor extends AutoCleanupable {
 			this.renderMaterials(cache, worldScene, this.renderResolution, needRegen);
 
 			this.renderOutlines(cache, this.renderResolution, needRegen);
+
+			this.renderBloom(cache, this.renderResolution, needRegen);
 		} else {
 			needRegen = false;
 		}
 
 		this.renderFilters(cache, this.outputResolution, needRegen);
 
-//		this.blitToScreen(cache, this.outputResolution, needRegen);
+		this.blitToScreen(cache, this.outputResolution, needRegen);
 
 		if (uiScene != null) {
 			this.renderUi(cache, uiScene, this.outputResolution, needRegen);
@@ -418,6 +423,32 @@ public class DeferredCompositor extends AutoCleanupable {
 		} else {
 			this.objectId.zero();
 		}
+	}
+
+	private void renderBloom(final CacheManager cache, final Vector2i resolution, final boolean needRegen) {
+		this.blurComputeShader.bind();
+
+		this.blurComputeShader.setUniform(BlurComputeShader.RADIUS, 3);
+		this.blurComputeShader.setUniform(BlurComputeShader.BLEND, true);
+		this.blurComputeShader.setUniform(BlurComputeShader.THRESHOLD, 1f);
+
+		if (needRegen) {
+			this.blurComputeShader.setUniform(BlurComputeShader.INPUT_SIZE, resolution);
+			this.blurComputeShader.setUniform(BlurComputeShader.OUTPUT_SIZE, resolution);
+		}
+
+		this.outputTxt.bindUniform(this.blurComputeShader, BlurComputeShader.TXT0, 0);
+
+		GL_W.glBindImageTexture(0, this.outputTxt.getGlId(), 0, false, 0, GL_W.GL_WRITE_ONLY, this.outputTxt.getInternalFormat().getGlId());
+
+		final Vector3ic groups = this.blurComputeShader.getGlobalGroup(new Vector3i(resolution.x, resolution.y, 1));
+
+		GL_W.glDispatchCompute(groups.x(), groups.y(), 1);
+
+		GL_W.glMemoryBarrier(GL_W.GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
+		this.blurComputeShader.unbind();
+
 	}
 
 	protected void renderFilters(final CacheManager cache, final Vector2i outputResolution, final boolean needRegen) {
@@ -519,21 +550,6 @@ public class DeferredCompositor extends AutoCleanupable {
 
 				target.bindUniform(this.blitShader, BlitShader.TXT0, 0);
 
-//				final MemImage mi = target.getStoredImage();
-//				final ByteBuffer byteBuffer = MemoryUtil.memAlloc(target.getWidth() * target.getHeight() * 4);
-//
-//				for (int i = 0; i < target.getWidth() * target.getHeight() * 4; i++) {
-//					float value = mi.getBuffer().getFloat();
-//
-//					value = Math.max(0.0f, Math.min(1.0f, value));
-//
-//					byteBuffer.put(i, (byte) (value * 255.0f));
-//				}
-//				final MemImage mi2 = new MemImage(target.getWidth(), target.getHeight(), 4, byteBuffer, MemImageOrigin.OPENGL);
-//				FileUtils.STBISave("/home/pcy113/Downloads/img.png", mi2);
-//				mi.cleanup();
-//				mi2.cleanup();
-
 				GL_W.glDrawElements(this.blitShader.getBeginMode().getGlId(), this.SCREEN.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
 			}
 		}
@@ -573,17 +589,13 @@ public class DeferredCompositor extends AutoCleanupable {
 	protected void renderOutlines(final CacheManager cache, final Vector2i resolution, final boolean needRegen) {
 		GL_W.glViewport(0, 0, resolution.x, resolution.y);
 
-		final int groupsX = (resolution.x + 15) / 16;
-		final int groupsY = (resolution.y + 15) / 16;
-
-		assert groupsX != 0;
-		assert groupsY != 0;
+		final Vector3ic groups = this.outlineShader.getGlobalGroup(new Vector3i(resolution.x, resolution.y, 1));
 
 		this.outlineShader.bind();
 
 		this.setupOutlineInputs(this.outlineShader, resolution, needRegen);
 
-		GL_W.glDispatchCompute(groupsX, groupsY, 1);
+		GL_W.glDispatchCompute(groups.x(), groups.y(), 1);
 
 		GL_W.glMemoryBarrier(GL_W.GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 

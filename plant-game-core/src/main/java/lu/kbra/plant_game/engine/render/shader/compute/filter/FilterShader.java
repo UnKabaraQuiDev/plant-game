@@ -102,14 +102,17 @@ public abstract class FilterShader<T extends FilterShader<T>> extends RenderShad
 
 	public abstract FilterShaderConfiguration<T> newConfigurationInstance();
 
+	@Deprecated
 	public List<TextureDependencyConfig> getTextureDependencies() {
 		return Collections.emptyList();
 	}
 
+	@Deprecated
 	public List<TextureOutputConfig> getTextureOutputs() {
 		return Collections.emptyList();
 	}
 
+	@Deprecated
 	public boolean blitOutputTexture(final FilterShaderConfiguration<T> fsc) {
 		return false;
 	}

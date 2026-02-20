@@ -8,7 +8,7 @@ layout(location = 2) uniform sampler2D uUvTex;
 layout(location = 3) uniform usampler2D uIdsTex;
 layout(location = 4) uniform sampler2D uDepthTex;
 
-layout(rgba8, binding = 0) uniform writeonly image2D uOutputTex;
+layout(rgba16f, binding = 0) uniform writeonly image2D uOutputTex;
 
 uniform ivec2 inputSize;
 uniform ivec2 outputSize;

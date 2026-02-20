@@ -23,8 +23,6 @@ import lu.kbra.plant_game.engine.data.locale.LocalizationService;
 import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
-import lu.kbra.plant_game.engine.render.shader.compute.filter.BlurShader;
-import lu.kbra.plant_game.engine.render.shader.compute.filter.BlurShader.BlurShaderConfiguration;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
 import lu.kbra.plant_game.engine.scene.world.GameData;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
@@ -106,12 +104,6 @@ public class PGLogic extends GameLogic {
 		this.mainMenuWorldScene.init(this.WORKERS, this.RENDER_DISPATCHER, this.gameData, new IntPointer(0));
 
 		this.pluginManager.onEnable();
-
-		this.compositor.enableFilter(this.compositor.getFilterShader(BlurShader.class).newConfigurationInstance());
-		final BlurShaderConfiguration v = this.compositor.getFilterShader(BlurShader.class).newConfigurationInstance();
-		v.setHorizontal(false);
-		v.setShouldBlit(true);
-		this.compositor.enableFilter(v);
 	}
 
 	private final UpdateFrameState frameState = new UpdateFrameState();
