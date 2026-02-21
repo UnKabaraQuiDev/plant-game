@@ -16,6 +16,7 @@
 	<description>The core of a game about plants</description>
 
 	<properties>
+		<mainClass>lu.kbra.plant_game.PGMain</mainClass>
 		<package.base>lu.kbra.plant_game.base</package.base>
 		<package.registries>${package.base}.reg</package.registries>
 		<lwjgl.natives>natives-${os.detected.classifier}</lwjgl.natives>
@@ -76,27 +77,6 @@
 		</extensions>
 
 		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-shade-plugin</artifactId>
-				<version>3.5.0</version>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>shade</goal>
-						</goals>
-						<configuration>
-							<transformers>
-								<transformer
-									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-									<mainClass>lu.kbra.plant_game.PGMain</mainClass>
-								</transformer>
-							</transformers>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -169,7 +149,7 @@
 					</execution>
 				</executions>
 				<configuration>
-					<mainClass>lu.kbra.plant_game.PGMain</mainClass>
+					<mainClass>${mainClass}</mainClass>
 				</configuration>
 			</plugin>
 
@@ -180,12 +160,12 @@
 
 				<executions>
 					<execution>
-						<phase>package</phase>
+						<phase>install</phase>
 						<goals>
 							<goal>package</goal>
 						</goals>
 						<configuration>
-							<mainClass>lu.kbra.plant_game.PGMain</mainClass>
+							<mainClass>${mainClass}</mainClass>
 							<bundleJre>true</bundleJre>
 							<bundleJre>true</bundleJre>
 							<customizedJre>true</customizedJre>
@@ -196,7 +176,7 @@
 								<module>jdk.unsupported</module>
 							</modules>
 							<name>Satisplantory</name>
-							<vendor>lu.kbra</vendor>
+							<vendor>${project.groupId}}</vendor>
 							<version>${project.version}</version>
 							<input>${project.build.directory}</input>
 							<mainJar>${project.build.finalName}.jar</mainJar>
@@ -210,6 +190,69 @@
 	</build>
 
 	<profiles>
+		<profile>
+			<id>all</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-shade-plugin</artifactId>
+						<version>3.5.0</version>
+						<executions>
+							<execution>
+								<phase>install</phase>
+								<goals>
+									<goal>shade</goal>
+								</goals>
+								<configuration>
+									<classifier>shaded</classifier>
+									<transformers>
+										<transformer
+											implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+											<mainClass>${mainClass}</mainClass>
+										</transformer>
+										<transformer
+											implementation="org.apache.maven.plugins.shade.resource.ApacheLicenseResourceTransformer" />
+										<transformer
+											implementation="org.apache.maven.plugins.shade.resource.ApacheNoticeResourceTransformer" />
+									</transformers>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-source-plugin</artifactId>
+						<version>3.4.0</version>
+						<executions>
+							<execution>
+								<id>attach-sources</id>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<version>3.12.0</version>
+						<executions>
+							<execution>
+								<id>attach-javadocs</id>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<doclint>all,-reference,-missing,-accessibility</doclint>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
 		<profile>
 			<id>windows</id>
 			<activation>

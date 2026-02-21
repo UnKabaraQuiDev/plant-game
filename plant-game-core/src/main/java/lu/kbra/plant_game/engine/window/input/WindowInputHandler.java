@@ -25,12 +25,12 @@ public interface WindowInputHandler {
 	float dTime();
 
 	/**
-	 * @param GLFW code
+	 * @param code GLFW code
 	 */
 	KeyState getKeyState(int code);
 
 	/**
-	 * @param GLFW code
+	 * @param code GLFW code
 	 */
 	KeyState getButtonState(int code);
 
@@ -39,7 +39,7 @@ public interface WindowInputHandler {
 	}
 
 	/**
-	 * @param GLFW code
+	 * @param code GLFW code
 	 */
 	boolean isKeyHeld(int code);
 
@@ -48,7 +48,7 @@ public interface WindowInputHandler {
 	}
 
 	/**
-	 * @param GLFW code
+	 * @param code GLFW code
 	 */
 	boolean isKeyPressed(int code);
 
@@ -57,7 +57,7 @@ public interface WindowInputHandler {
 	}
 
 	/**
-	 * @param GLFW code
+	 * @param code GLFW code
 	 */
 	boolean isKeyRepeat(int code);
 
@@ -66,7 +66,7 @@ public interface WindowInputHandler {
 	}
 
 	/**
-	 * @param GLFW code
+	 * @param code GLFW code
 	 */
 	boolean isMouseButtonPressed(int code);
 
@@ -75,7 +75,7 @@ public interface WindowInputHandler {
 	}
 
 	/**
-	 * @param GLFW code
+	 * @param code GLFW code
 	 */
 	boolean isKeyPressedOnce(int code);
 
@@ -84,7 +84,7 @@ public interface WindowInputHandler {
 	}
 
 	/**
-	 * @param GLFW code
+	 * @param code GLFW code
 	 */
 	boolean isMouseButtonPressedOnce(int code);
 
@@ -93,7 +93,7 @@ public interface WindowInputHandler {
 	}
 
 	/**
-	 * @param GLFW code
+	 * @param code GLFW code
 	 */
 	boolean isKeyPressedOrRepeat(int code);
 
@@ -125,7 +125,7 @@ public interface WindowInputHandler {
 	}
 
 	/**
-	 * @param GLFW code
+	 * @param code GLFW code
 	 */
 	String getButtonName(int code);
 
@@ -134,7 +134,7 @@ public interface WindowInputHandler {
 	}
 
 	/**
-	 * @param GLFW code
+	 * @param code GLFW code
 	 */
 	String getKeyName(int code);
 
@@ -143,7 +143,7 @@ public interface WindowInputHandler {
 	}
 
 	/**
-	 * @param GLFW code
+	 * @param code GLFW code
 	 */
 	String getInputName(int code);
 
