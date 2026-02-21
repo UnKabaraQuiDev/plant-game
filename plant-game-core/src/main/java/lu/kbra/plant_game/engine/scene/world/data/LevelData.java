@@ -2,6 +2,7 @@ package lu.kbra.plant_game.engine.scene.world.data;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.joml.Vector2f;
 import org.joml.Vector3f;
@@ -12,7 +13,10 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.Nulls;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
+import lu.kbra.plant_game.engine.data.json.LevelDataModule.BuildingOverrideDeserializer;
+import lu.kbra.plant_game.engine.scene.world.LevelBuildingRegistry;
 import lu.kbra.plant_game.engine.scene.world.data.building.requirement.BuildingRequirement;
 import lu.kbra.plant_game.engine.scene.world.data.resource.ResourceType;
 import lu.kbra.plant_game.engine.scene.world.generator.ImageWorldGenerator;
@@ -26,6 +30,8 @@ public class LevelData {
 	protected PluginDescriptor pluginDescriptor;
 	@JsonIgnore
 	protected String levelId;
+	@JsonIgnore
+	protected LevelBuildingRegistry buildingRegistry;
 
 	public static class World {
 
@@ -166,14 +172,25 @@ public class LevelData {
 
 	public static class Game {
 
+		@JsonDeserialize(using = BuildingOverrideDeserializer.class)
 		public static class BuildingOverride {
 
-			protected int price;
+			protected Map<ResourceType, Integer> prices;
 			protected List<BuildingRequirement> unlockRequirements;
 			protected List<BuildingRequirement> buildRequirements;
 
-			public int getPrice() {
-				return this.price;
+			public BuildingOverride() {
+			}
+
+			public BuildingOverride(final Map<ResourceType, Integer> prices, final List<BuildingRequirement> unlockRequirements,
+					final List<BuildingRequirement> buildRequirements) {
+				this.prices = prices;
+				this.unlockRequirements = unlockRequirements;
+				this.buildRequirements = buildRequirements;
+			}
+
+			public Map<ResourceType, Integer> getPrices() {
+				return this.prices;
 			}
 
 			public List<BuildingRequirement> getUnlockRequirements() {
@@ -186,21 +203,21 @@ public class LevelData {
 
 			@Override
 			public String toString() {
-				return "BuildingOverride@" + System.identityHashCode(this) + " [price=" + this.price + ", unlockRequirements="
+				return "BuildingOverride@" + System.identityHashCode(this) + " [prices=" + this.prices + ", unlockRequirements="
 						+ this.unlockRequirements + ", buildRequirements=" + this.buildRequirements + "]";
 			}
 
 		}
 
 		protected Map<ResourceType, Integer> startResources;
-		protected List<String> lockedBuildings;
+		protected Set<String> lockedBuildings;
 		protected Map<String, BuildingOverride> buildingsOverride;
 
 		public Map<ResourceType, Integer> getStartResources() {
 			return this.startResources;
 		}
 
-		public List<String> getLockedBuildings() {
+		public Set<String> getLockedBuildings() {
 			return this.lockedBuildings;
 		}
 
@@ -270,10 +287,22 @@ public class LevelData {
 		return this.world.generation.getGenerator(this.pluginDescriptor);
 	}
 
+	public LevelBuildingRegistry getBuildingRegistry() {
+		if (this.buildingRegistry == null) {
+			this.createBuildingRegistry();
+		}
+		return this.buildingRegistry;
+	}
+
+	private void createBuildingRegistry() {
+		this.buildingRegistry = new LevelBuildingRegistry(this);
+	}
+
 	@Override
 	public String toString() {
 		return "LevelData@" + System.identityHashCode(this) + " [pluginDescriptor=" + this.pluginDescriptor + ", levelId=" + this.levelId
-				+ ", levelName=" + this.levelName + ", author=" + this.author + ", world=" + this.world + ", game=" + this.game + "]";
+				+ ", buildingRegistry=" + this.buildingRegistry + ", levelName=" + this.levelName + ", author=" + this.author + ", world="
+				+ this.world + ", game=" + this.game + "]";
 	}
 
 }

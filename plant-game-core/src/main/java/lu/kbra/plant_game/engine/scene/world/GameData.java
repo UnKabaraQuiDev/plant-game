@@ -17,6 +17,7 @@ public class GameData {
 
 	@JsonIgnore
 	protected LevelData levelData;
+
 	protected byte progress = 0;
 	protected LevelState levelState = LevelState.NOT_STARTED;
 	protected Map<ResourceType, Integer> resources = Collections.synchronizedMap(new HashMap<>());

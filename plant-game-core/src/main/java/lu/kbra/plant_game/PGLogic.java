@@ -8,6 +8,8 @@ import org.lwjgl.glfw.GLFW;
 import com.codedisaster.steamworks.SteamAPI;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.StreamReadFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lu.kbra.pclib.pointer.prim.IntPointer;
@@ -15,6 +17,7 @@ import lu.kbra.plant_game.base.scene.menu.main.MainMenuUIScene;
 import lu.kbra.plant_game.base.scene.overlay.OverlayUIScene;
 import lu.kbra.plant_game.base.scene.world.MainMenuWorldScene;
 import lu.kbra.plant_game.engine.UpdateFrameState;
+import lu.kbra.plant_game.engine.data.json.LevelDataModule;
 import lu.kbra.plant_game.engine.data.json.OrgJOMLModule;
 import lu.kbra.plant_game.engine.data.json.OrgJSONModule;
 import lu.kbra.plant_game.engine.data.json.ResourceTypeModule;
@@ -40,10 +43,10 @@ import lu.kbra.standalone.gameengine.utils.gl.consts.Consts;
 public class PGLogic extends GameLogic {
 
 	public static PGLogic INSTANCE;
-	public static ObjectMapper OBJECT_MAPPER;
+	public static final ObjectMapper OBJECT_MAPPER;
 
 	static {
-		OBJECT_MAPPER = new ObjectMapper();
+		OBJECT_MAPPER = new ObjectMapper(JsonFactory.builder().configure(StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION, true).build());
 
 		OBJECT_MAPPER.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
 		OBJECT_MAPPER.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
@@ -52,8 +55,7 @@ public class PGLogic extends GameLogic {
 		OBJECT_MAPPER.registerModule(new OrgJOMLModule());
 		OBJECT_MAPPER.registerModule(new VersionMatcherModule());
 		OBJECT_MAPPER.registerModule(new ResourceTypeModule());
-
-		TaskFuture.STACK_TRACE = true;
+		OBJECT_MAPPER.registerModule(new LevelDataModule());
 	}
 
 	public final WorkerDispatcher WORKERS = new WorkerDispatcher("WORKERS", 8);
@@ -171,7 +173,7 @@ public class PGLogic extends GameLogic {
 
 		this.overlayUIScene = new OverlayUIScene(this.cache);
 		new TaskFuture<>(this.WORKERS, (Runnable) () -> {
-			this.overlayUIScene.init(this.WORKERS, this.WORKERS, this.gameData).thenOther(c -> c.doLayout());
+			this.overlayUIScene.init(this.WORKERS, this.WORKERS, this.gameData).thenOther(OverlayUIScene::doLayout);
 			this.uiScene = this.overlayUIScene;
 		}).push();
 

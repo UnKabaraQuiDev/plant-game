@@ -1,5 +1,7 @@
 package lu.kbra.plant_game;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -14,7 +16,7 @@ import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.plant_game.engine.scene.world.data.building.requirement.BuildingRequirement;
 import lu.kbra.plant_game.engine.scene.world.data.resource.ResourceType;
 
-public class BuildingDefinition<T extends GameObject & PlaceableObject> implements Consumer<BuildingInfoUIObjectGroup> {
+public class BuildingDefinition<T extends GameObject & PlaceableObject> implements Consumer<BuildingInfoUIObjectGroup>, Cloneable {
 
 	protected final Class<T> clazz;
 	protected final String internalName;
@@ -90,6 +92,16 @@ public class BuildingDefinition<T extends GameObject & PlaceableObject> implemen
 
 	public int getIndex() {
 		return this.index;
+	}
+
+	@Override
+	public BuildingDefinition<T> clone() {
+		return new BuildingDefinition<>(this.clazz,
+				this.internalName,
+				new HashMap<>(this.prices),
+				new ArrayList<>(this.unlockRequirements),
+				new ArrayList<>(this.buildingRequirements),
+				this.index);
 	}
 
 	@Override

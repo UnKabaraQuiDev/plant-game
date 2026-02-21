@@ -35,6 +35,7 @@ import lu.kbra.plant_game.engine.scene.ui.layout.FlowLayout;
 import lu.kbra.plant_game.engine.scene.ui.layout.Layout;
 import lu.kbra.plant_game.engine.scene.ui.layout.LayoutOwner;
 import lu.kbra.plant_game.engine.scene.world.GameData;
+import lu.kbra.plant_game.engine.scene.world.data.LevelData;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.plant_game.plugin.registry.BuildingRegistry;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
@@ -97,12 +98,13 @@ public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner
 
 		final CountTriggerLatch latch2 = new CountTriggerLatch(BuildingRegistry.BUILDING_DEFS.size(), () -> latch.trigger(null));
 
-		BuildingRegistry.BUILDING_DEFS.keySet().forEach(p -> {
-			final CountTriggerLatch latch3 = new CountTriggerLatch(BuildingRegistry.BUILDING_DEFS.get(p).size(),
-					() -> latch2.trigger(null));
+		final LevelData levelData = gameData.getLevelData();
 
-			this.buildingPanel.addTab(new BuildingTabUIObjectGroup(p.getLocalizationKey(), p.getIndex(), p.getAccentColor()))
-					.then(tab -> BuildingRegistry.BUILDING_DEFS.get(p).forEach(f -> new BuildingItemUIObjectGroup(f).init().then(obj -> {
+		levelData.getBuildingRegistry().getBuildingDefinitions().forEach((k, v) -> {
+			final CountTriggerLatch latch3 = new CountTriggerLatch(v.size(), () -> latch2.trigger(null));
+
+			this.buildingPanel.addTab(new BuildingTabUIObjectGroup(k.getLocalizationKey(), k.getIndex(), k.getAccentColor()))
+					.then(tab -> v.forEach(f -> new BuildingItemUIObjectGroup(f).init().then(obj -> {
 						obj.setTransform(new Transform3D(0.3f));
 						obj.setIndex(f.getIndex());
 						tab.getContent().add(obj);

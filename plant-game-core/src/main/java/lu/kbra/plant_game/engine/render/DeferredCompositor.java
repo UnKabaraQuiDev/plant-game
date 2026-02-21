@@ -1411,7 +1411,6 @@ public class DeferredCompositor extends AutoCleanupable {
 		}
 
 		GL_W.glPolygonMode(mesh.getPolygonMode().getGlId(), mesh.getPolygonDrawMode().getGlId());
-		System.err.println(mesh.getId() + " " + mesh.getPolygonMode() + " " + mesh.getPolygonDrawMode());
 
 		if (mesh.usesEBO()) {
 			GL_W.glDrawElements(mesh.getBeginMode().getGlId(), mesh.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
