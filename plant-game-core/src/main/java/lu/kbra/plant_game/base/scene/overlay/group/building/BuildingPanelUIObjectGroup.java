@@ -28,7 +28,7 @@ import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
 import lu.kbra.plant_game.engine.scene.ui.layout.AnchorLayout;
 import lu.kbra.plant_game.engine.scene.ui.layout.LayoutOwner;
 import lu.kbra.plant_game.engine.scene.world.GameData;
-import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
+import lu.kbra.plant_game.engine.scene.world.SunLightOwner;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;;
@@ -93,7 +93,7 @@ public class BuildingPanelUIObjectGroup extends AnchoredLayoutUIObjectGroup
 
 	@Override
 	public void update(final WindowInputHandler input) {
-		final WorldLevelScene world = PGLogic.INSTANCE.getWorldScene();
+		final SunLightOwner world = PGLogic.INSTANCE.getWorldScene();
 		final GameData gameData = PGLogic.INSTANCE.getGameData();
 
 		final BuildingTabUIObjectGroup buildingTab = this.buildingTabs.get(this.activeBuildingTabKey);

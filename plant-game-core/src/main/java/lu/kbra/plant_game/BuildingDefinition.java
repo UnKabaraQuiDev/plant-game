@@ -10,7 +10,7 @@ import lu.kbra.plant_game.base.scene.overlay.stat_line.integer.FixedIntegerStatL
 import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
 import lu.kbra.plant_game.engine.scene.world.GameData;
-import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
+import lu.kbra.plant_game.engine.scene.world.SunLightOwner;
 import lu.kbra.plant_game.engine.scene.world.data.building.requirement.BuildingRequirement;
 import lu.kbra.plant_game.engine.scene.world.data.resource.ResourceType;
 
@@ -33,11 +33,11 @@ public class BuildingDefinition<T extends GameObject & PlaceableObject> implemen
 		this.index = index;
 	}
 
-	public boolean isUnlocked(final GameData gameData, final WorldLevelScene worldLevelScene) {
+	public boolean isUnlocked(final GameData gameData, final SunLightOwner worldLevelScene) {
 		return this.unlockRequirements.stream().allMatch(c -> c.isFulfilled(worldLevelScene));
 	}
 
-	public boolean canBuild(final GameData gameData, final WorldLevelScene worldLevelScene) {
+	public boolean canBuild(final GameData gameData, final SunLightOwner worldLevelScene) {
 		return this.getPrices().entrySet().stream().allMatch(e -> gameData.getResources().get(e.getKey()) > e.getValue())
 				&& this.buildingRequirements.stream().allMatch(c -> c.isFulfilled(worldLevelScene));
 	}

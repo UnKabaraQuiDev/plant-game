@@ -2,10 +2,11 @@ package lu.kbra.plant_game.engine.render.shader.compute;
 
 import java.util.Map;
 
+import lu.kbra.plant_game.engine.render.ShadowShader;
 import lu.kbra.standalone.gameengine.graph.shader.part.AbstractShaderPart;
 import lu.kbra.standalone.gameengine.graph.shader.part.ComputeShaderPart;
 
-public class TextureMaterialComputeShader extends MaterialComputeShader {
+public class TextureMaterialComputeShader extends MaterialComputeShader implements ShadowShader {
 
 	public static final String TXT_DIFFUSE = "txtDiffuse";
 	public static final String TXT_BLOOM = "txtBloom";
@@ -27,10 +28,14 @@ public class TextureMaterialComputeShader extends MaterialComputeShader {
 		super.createUniforms();
 
 		this.createUniform(TXT_DIFFUSE);
-		this.createUniform(TXT_BLOOM);
+
 		this.createUniform(CURRENT_MATERIAL_ID);
+
+		this.createUniform(TXT_BLOOM);
 		this.createUniform(BLOOM_STRENGTH);
 		this.createUniform(APPLY_BLOOM);
+
+		this.createUniform(LIGHT_SPACE_MATRIX);
 	}
 
 }

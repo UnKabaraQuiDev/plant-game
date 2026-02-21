@@ -6,12 +6,13 @@ import org.joml.Vector3i;
 import org.joml.Vector3ic;
 import org.joml.Vector4fc;
 
+import lu.kbra.plant_game.engine.render.ShadowShader;
 import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.standalone.gameengine.graph.shader.ComputeShader;
 import lu.kbra.standalone.gameengine.graph.shader.part.AbstractShaderPart;
 import lu.kbra.standalone.gameengine.graph.shader.part.ComputeShaderPart;
 
-public class MaterialComputeShader extends ComputeShader {
+public class MaterialComputeShader extends ComputeShader implements ShadowShader {
 
 	public static final Vector3ic LOCAL_SIZE = new Vector3i(16, 16, 1);
 
@@ -20,6 +21,7 @@ public class MaterialComputeShader extends ComputeShader {
 
 	public static final String LIGHT_DIR = "lightDir";
 	public static final String LIGHT_COLOR = "lightColor";
+	public static final String LIGHT_INTENSITY = "lightIntensity";
 	public static final String AMBIENT_LIGHT = "ambientLight";
 
 	public static final String VARIATION_MIN = "variationMin";
@@ -58,6 +60,7 @@ public class MaterialComputeShader extends ComputeShader {
 
 		this.createUniform(LIGHT_DIR);
 		this.createUniform(LIGHT_COLOR);
+		this.createUniform(LIGHT_INTENSITY);
 		this.createUniform(AMBIENT_LIGHT);
 
 		this.createUniform(VARIATION_MIN);
@@ -72,6 +75,8 @@ public class MaterialComputeShader extends ComputeShader {
 
 		this.createUniform(USE_OBJECT_TRANSFORM);
 		this.createUniform(INVERSE_OBJECT_TRANSFORM);
+
+		this.createUniform(LIGHT_SPACE_MATRIX);
 	}
 
 	private static String generateGlslArray(final ColorMaterial[] colors) {

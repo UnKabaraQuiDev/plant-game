@@ -33,6 +33,7 @@ import lu.kbra.plant_game.engine.entity.ui.impl.UISceneParentAware;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
 import lu.kbra.plant_game.engine.scene.world.GameData;
 import lu.kbra.plant_game.engine.scene.world.MoveBuildingModal;
+import lu.kbra.plant_game.engine.scene.world.SunLightOwner;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.plant_game.generated.ColorMaterial;
@@ -202,7 +203,7 @@ public class BuildingItemUIObjectGroup extends OffsetUIObjectGroup
 		return super.getBounds();
 	}
 
-	public void updateTintStatus(final GameData gameData, final WorldLevelScene world) {
+	public void updateTintStatus(final GameData gameData, final SunLightOwner world) {
 		if (this.buildingDefinition.canBuild(gameData, world)) {
 			this.setColorMaterial(ColorMaterial.GREEN);
 		} else if (this.buildingDefinition.isUnlocked(gameData, world)) {

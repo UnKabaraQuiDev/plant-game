@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import lu.kbra.plant_game.engine.data.locale.LocalizationService;
 import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
-import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
+import lu.kbra.plant_game.engine.scene.world.SunLightOwner;
 import lu.kbra.plant_game.plugin.registry.BuildingRegistry;
 
 @JsonTypeName("MIN_BUILD")
@@ -46,7 +46,7 @@ public class MinBuildUnlockRequirement implements BuildingRequirement {
 	}
 
 	@Override
-	public boolean isFulfilled(final WorldLevelScene scene) {
+	public boolean isFulfilled(final SunLightOwner scene) {
 		return false;
 	}
 

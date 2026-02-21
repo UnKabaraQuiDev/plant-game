@@ -11,13 +11,16 @@ layout(location = 3) uniform usampler2D uIdsTex;
 layout(location = 4) uniform sampler2D uDepthTex;
 
 layout(rgba16f, binding = 0) uniform writeonly image2D uOutputTex;
+layout(rgba16f, binding = 1) uniform writeonly image2D uOutputBloomTex;
 
 uniform ivec2 inputSize;
 uniform ivec2 outputSize;
 
 uniform vec3 lightDir;
 uniform vec3 lightColor;
+uniform float lightIntensity;
 uniform float ambientLight;
+uniform mat4 lightSpaceMatrix;
 
 uniform vec3 variationMin;
 uniform vec3 variationMax;
@@ -31,21 +34,26 @@ uniform bool useObjectTransform;
 uniform mat4 inverseObjectTransform;
 
 layout(location = 5) uniform sampler2D variationMap;
+// 6: txtDiffuse
+// 7: txtBloom
+layout(location = 8) uniform sampler2D shadowMap;
+
+float ShadowCalculation(vec3 worldPos, vec3 normal);
 
 void main() {
-    ivec2 outPixel = ivec2(gl_GlobalInvocationID.xy);
-    if (outPixel.x >= outputSize.x || outPixel.y >= outputSize.y) {
-        return;
-    }
+	ivec2 outPixel = ivec2(gl_GlobalInvocationID.xy);
+	if (outPixel.x >= outputSize.x || outPixel.y >= outputSize.y) {
+		return;
+	}
 
-    vec2 screenUv = (vec2(outPixel) + 0.5) / vec2(outputSize);
-    ivec2 screenCoord = ivec2(screenUv * vec2(inputSize));
+	vec2 screenUv = (vec2(outPixel) + 0.5) / vec2(outputSize);
+	ivec2 screenCoord = ivec2(screenUv * vec2(inputSize));
 
-    vec4 pos = texelFetch(uPosTex, screenCoord, 0);
-    vec3 normal = texelFetch(uNormalTex, screenCoord, 0).xyz;
-    vec2 uv = texelFetch(uUvTex, screenCoord, 0).xy;
-    uvec4 ids = texelFetch(uIdsTex, screenCoord, 0);
-    float depth = texelFetch(uDepthTex, screenCoord, 0).r;
+	vec3 pos = texelFetch(uPosTex, screenCoord, 0).xyz;
+	vec3 normal = texelFetch(uNormalTex, screenCoord, 0).xyz;
+	vec2 uv = texelFetch(uUvTex, screenCoord, 0).xy;
+	uvec4 ids = texelFetch(uIdsTex, screenCoord, 0);
+	float depth = texelFetch(uDepthTex, screenCoord, 0).r;
 
 	vec3 color = vec3(0);
 	
@@ -60,19 +68,40 @@ void main() {
 	}
 	
 	float diff = max(dot(normal, normalize(lightDir)), 0.0);
-    color = ambientLight * color + color * lightColor * diff;
-    vec4 outColor = vec4(color, 1);
+	float shadow = ShadowCalculation(pos, normal);
+	color = ambientLight * color + color * lightColor * lightIntensity * diff * (1.0 - shadow);
+	vec4 outColor = vec4(color, 1);
 
 	if (colorVariation) {
-	    vec3 worldPos = useObjectTransform ? (inverseObjectTransform * pos).xyz : pos.xyz;
+		vec3 worldPos = useObjectTransform ? (inverseObjectTransform * vec4(pos, 0)).xyz : pos;
 
-	    vec2 cellIndex = floor(vec2(worldPos.x, worldPos.z) / variationCellSize.xz) * variationMapScale;
+		vec2 cellIndex = floor(vec2(worldPos.x, worldPos.z) / variationCellSize.xz) * variationMapScale;
 
-	    vec3 variation = texture(variationMap, cellIndex).rgb;
-	    vec3 variationColor = mix(variationMin, variationMax, variation);
+		vec3 variation = texture(variationMap, cellIndex).rgb;
+		vec3 variationColor = mix(variationMin, variationMax, variation);
 
 		outColor.rgb *= variationColor;
 	}
+	
+//	outColor = vec4(vec3(shadow), 1);
 
 	imageStore(uOutputTex, outPixel, outColor);
 }
+
+float ShadowCalculation(vec3 worldPos, vec3 normal) {
+	vec4 fragPosLight = lightSpaceMatrix * vec4(worldPos, 1.0);
+	vec3 projCoords = fragPosLight.xyz / fragPosLight.w;
+	projCoords = projCoords * 0.5 + 0.5; // from [-1,1] to [0,1]
+
+	if(projCoords.x < 0.0 || projCoords.x > 1.0 ||
+	   projCoords.y < 0.0 || projCoords.y > 1.0) {
+		return 0.0;
+	}
+
+	float closestDepth = texture(shadowMap, projCoords.xy).r;
+	float currentDepth = projCoords.z;
+
+	float bias = max(0.005 * (1.0 - dot(normal, normalize(lightDir))), 0.001);
+	return currentDepth - bias > closestDepth ? 1.0 : 0.0;
+}
+

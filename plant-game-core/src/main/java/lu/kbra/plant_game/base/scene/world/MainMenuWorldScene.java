@@ -78,6 +78,8 @@ public class MainMenuWorldScene extends WorldLevelScene implements Consumer<Leve
 
 	public MainMenuWorldScene(final CacheManager parentCache) {
 		super("mainMenuWorld", parentCache);
+
+		super.lightDirectionSet(new Vector3f(0, 0.6f, -1));
 	}
 
 	public void startTransition(final int target) {

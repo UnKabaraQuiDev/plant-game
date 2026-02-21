@@ -80,14 +80,14 @@ public class DeferredIconRenderer extends DeferredCompositor {
 		this.resizeFramebuffer(this.worldFramebuffer, this.renderResolution);
 
 		this.deferredPass = true;
-		this.renderWorldScene(cache, this.fakeWorld, this.renderResolution, true);
+		this.renderWorldScene(this.fakeWorld, this.renderResolution, true);
 		this.deferredPass = false;
 
-		this.renderMaterials(cache, this.fakeWorld, this.renderResolution, true);
+		this.renderMaterials(this.fakeWorld, this.renderResolution, true);
 
-		this.renderOutlines(cache, this.renderResolution, true);
+		this.renderOutlines(this.renderResolution, true);
 
-		this.blitToScreen(cache, engine.getWindow().getSize(), true);
+		this.blitToScreen(engine.getWindow().getSize(), true);
 
 		return this.outputTxt.getStoredImage();
 	}

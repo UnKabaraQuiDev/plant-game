@@ -9,6 +9,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import org.joml.Matrix4f;
+import org.joml.Matrix4fc;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
@@ -42,6 +44,7 @@ import lu.kbra.plant_game.engine.scene.world.particle.ParticleManager;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
+import lu.kbra.standalone.gameengine.geom.BoundingBox;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.geom.QuadLoadedMesh;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
@@ -53,7 +56,7 @@ import lu.kbra.standalone.gameengine.scene.camera.Camera3D;
 import lu.kbra.standalone.gameengine.utils.consts.Direction;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-public class WorldLevelScene extends Scene3D implements ActiveModalController {
+public class WorldLevelScene extends Scene3D implements ActiveModalController, SunLightOwner {
 
 	private static final int CAMERA_MOVEMENT_SPEED = 10;
 	private static final long RANDOM_TICK_DELAY = 1000;
@@ -68,6 +71,10 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController {
 	private Vector3f lightColor = new Vector3f(1);
 	private Vector3f lightDirection = new Vector3f(0.8f, 0.5f, 0.5f).normalize();
 	private float ambientLight = 0.25f;
+	private float lightIntensity = 1f;
+	private final Matrix4fc lightViewMatrix = new Matrix4f();
+	private final Matrix4fc lightProjectionMatrix = new Matrix4f();
+	private final Matrix4fc lightSpaceMatrix = new Matrix4f();
 
 	private Vector2f windDirection = new Vector2f(1, 1).normalize();
 
@@ -90,6 +97,8 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController {
 		this.getCamera().lookAt(this.getCamera().getPosition(), new Vector3f(0, 0, 0)).updateMatrix();
 		this.getCamera().getProjection().setFov((float) Math.toRadians(40));
 		this.getLightDirection().set(new Vector3f(0.5f, 0.5f, 0.5f).normalize());
+
+		this.recomputeLightMatrices(new BoundingBox(new Vector3f(-1), new Vector3f(1)), new Vector3f(0));
 	}
 
 	public ObjectTriggerLatch<WorldLevelScene> init(
@@ -367,34 +376,66 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController {
 	public void setTerrain(final TerrainGameObject terrain) {
 		super.replace(this.terrain, terrain);
 		this.terrain = terrain;
+		this.recomputeLightMatrices(terrain.getMesh().getBoundingBox(), terrain.getAbsoluteTransform().getTranslation(new Vector3f()));
 	}
 
 	public CacheManager getCache() {
 		return this.worldCache;
 	}
 
+	@Override
 	public Vector3f getLightColor() {
 		return this.lightColor;
 	}
 
+	@Override
 	public void setLightColor(final Vector3f lightColor) {
 		this.lightColor = lightColor;
 	}
 
+	@Override
 	public Vector3f getLightDirection() {
 		return this.lightDirection;
 	}
 
+	@Override
 	public void setLightDirection(final Vector3f lightDirection) {
 		this.lightDirection = lightDirection;
 	}
 
+	@Override
 	public float getAmbientLight() {
 		return this.ambientLight;
 	}
 
+	@Override
 	public void setAmbientLight(final float ambientLight) {
 		this.ambientLight = ambientLight;
+	}
+
+	@Override
+	public float getLightIntensity() {
+		return this.lightIntensity;
+	}
+
+	@Override
+	public void setLightIntensity(final float lightIntensity) {
+		this.lightIntensity = lightIntensity;
+	}
+
+	@Override
+	public Matrix4fc getLightViewMatrix() {
+		return this.lightViewMatrix;
+	}
+
+	@Override
+	public Matrix4fc getLightProjectionMatrix() {
+		return this.lightProjectionMatrix;
+	}
+
+	@Override
+	public Matrix4fc getLightSpaceMatrix() {
+		return this.lightSpaceMatrix;
 	}
 
 	public Vector2f getWindDirection() {
