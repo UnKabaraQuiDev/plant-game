@@ -13,6 +13,9 @@ import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 public class FixedBoundsUIObjectGroup extends LayoutOffsetUIObjectGroup implements BoundsOwnerParentAware {
 
+	/**
+	 * component size
+	 */
 	protected Direction2d dir;
 	protected Rectangle2D.Float bounds = new Rectangle2D.Float();
 	protected float size;

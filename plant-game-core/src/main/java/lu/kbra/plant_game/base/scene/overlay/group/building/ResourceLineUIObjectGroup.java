@@ -60,6 +60,16 @@ public class ResourceLineUIObjectGroup extends BoundedUIObjectGroup {
 		return latch;
 	}
 
+	public ResourceLineUIObjectGroup set(final int value) {
+		this.valueObject.set(value);
+		return this;
+	}
+
+	public ResourceLineUIObjectGroup flushValue() {
+		this.valueObject.flushValue();
+		return this;
+	}
+
 	public AnchoredFixedIntegerStatLine getValueObject() {
 		return this.valueObject;
 	}

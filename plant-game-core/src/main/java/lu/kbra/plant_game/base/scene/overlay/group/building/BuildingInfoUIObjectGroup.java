@@ -3,22 +3,25 @@ package lu.kbra.plant_game.base.scene.overlay.group.building;
 import java.awt.geom.Rectangle2D;
 import java.lang.ref.WeakReference;
 import java.util.List;
+import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.joml.Quaternionf;
+import org.joml.Vector2f;
+import org.joml.Vector2fc;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
+import lu.kbra.pclib.concurrency.DeferredTriggerLatch;
 import lu.kbra.pclib.concurrency.ListTriggerLatch;
 import lu.kbra.pclib.concurrency.ObjectTriggerLatch;
 import lu.kbra.pclib.pointer.ObjectPointer;
 import lu.kbra.plant_game.BuildingDefinition;
 import lu.kbra.plant_game.base.data.DefaultResourceType;
 import lu.kbra.plant_game.base.scene.overlay.group.impl.AnchoredLayoutUIObjectGroup;
-import lu.kbra.plant_game.base.scene.overlay.group.impl.BoundedUIObjectGroup;
 import lu.kbra.plant_game.base.scene.overlay.group.impl.FixedBoundsUIObjectGroup;
-import lu.kbra.plant_game.base.scene.overlay.stat_line.integer.AnchoredFixedIntegerStatLine;
 import lu.kbra.plant_game.base.scene.overlay.stat_line.integer.FixedIntegerStatLine;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.data.Direction2d;
@@ -29,19 +32,22 @@ import lu.kbra.plant_game.engine.entity.ui.impl.ExtAnchorOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.MarginOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.PaddingOwner;
 import lu.kbra.plant_game.engine.entity.ui.prim.IBAnchoredFlatQuadUIObject;
-import lu.kbra.plant_game.engine.entity.ui.text.AnchoredProgrammaticTextUIObject;
-import lu.kbra.plant_game.engine.entity.ui.text.IntegerTextUIObject;
+import lu.kbra.plant_game.engine.entity.ui.text.ProgrammaticTextUIObject;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
 import lu.kbra.plant_game.engine.scene.ui.layout.AnchorLayout;
 import lu.kbra.plant_game.engine.scene.ui.layout.FlowLayout;
 import lu.kbra.plant_game.engine.scene.world.data.resource.ResourceType;
 import lu.kbra.plant_game.generated.ColorMaterial;
+import lu.kbra.plant_game.plugin.registry.ResourceRegistry;
+import lu.kbra.standalone.gameengine.impl.WeakArrayList;
+import lu.kbra.standalone.gameengine.impl.WeakList;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 public class BuildingInfoUIObjectGroup extends FixedBoundsUIObjectGroup implements ExtAnchorOwner, PaddingOwner, MarginOwner {
 
 	public static final float FONT_HEIGHT = FixedIntegerStatLine.GAP;
 	public static final int COLUMN_COUNT = 25;
+	public static final Vector2fc SMALLEST_CHAR_SIZE = new Vector2f(FONT_HEIGHT / 2.5f);
 
 	protected final LayoutOffsetUIObjectGroup content;
 
@@ -51,6 +57,9 @@ public class BuildingInfoUIObjectGroup extends FixedBoundsUIObjectGroup implemen
 	protected Anchor targetAnchor = Anchor.TOP_CENTER;
 	protected WeakReference<UIObject> target;
 	protected WeakReference<BuildingDefinition<?>> buildingDef;
+
+	protected WeakList<ResourceLineUIObjectGroup> resourceLines = new WeakArrayList<>();
+	protected WeakList<ProgrammaticTextUIObject> messages = new WeakArrayList<>();
 
 	protected float margin = 0.1f;
 	protected float padding = 0.02f;
@@ -75,10 +84,12 @@ public class BuildingInfoUIObjectGroup extends FixedBoundsUIObjectGroup implemen
 	}
 
 	public ObjectTriggerLatch<? extends BuildingInfoUIObjectGroup> init() {
-		final ObjectTriggerLatch<? extends BuildingInfoUIObjectGroup> latch = new ObjectTriggerLatch<>(2, this);
+		final ObjectTriggerLatch<? extends BuildingInfoUIObjectGroup> latch = new ObjectTriggerLatch<>(3, this);
 
 		/* cost */
-		this.addIntLine("cost-line", DefaultResourceType.MONEY, "text.cost").latch(latch);
+		this.addCostIntLine(DefaultResourceType.MONEY).latch(latch);
+
+		this.addStringLine().latch(latch);
 
 		/* backdrop */
 		UIObjectFactory.create(IBAnchoredFlatQuadUIObject.class)
@@ -95,46 +106,56 @@ public class BuildingInfoUIObjectGroup extends FixedBoundsUIObjectGroup implemen
 		return latch;
 	}
 
-	public ListTriggerLatch<UIObject> addIntLine(final String id, final ResourceType rt, final String key) {
-		final AnchoredFixedIntegerStatLine costValue = new AnchoredFixedIntegerStatLine(id + "-value",
-				0f,
-				Anchor.CENTER_RIGHT,
-				Anchor.CENTER_RIGHT);
-		return this.addLine(id,
-				rt,
-				(Consumer<ListTriggerLatch<UIObject>>) line -> UIObjectFactory
-						.createText(AnchoredProgrammaticTextUIObject.class, FONT_HEIGHT, key)
-						.set(i -> i.setTransform(new Transform3D(new Vector3f(0, 0.2f, 0))))
-						.set(i -> i.setAnchors(Anchor.CENTER_LEFT, Anchor.CENTER_LEFT))
-						.latch(line)
-						.push(),
-				(Consumer<ListTriggerLatch<UIObject>>) line -> costValue.init(FONT_HEIGHT, rt.getIconClass(), IntegerTextUIObject.class)
-						.latch(line)
-						.then(AnchoredFixedIntegerStatLine::flushValue));
+	public ObjectTriggerLatch<? extends ResourceLineUIObjectGroup> addCostIntLine(final ResourceType resourceType) {
+		return this.addIntLine(ResourceRegistry.getInternalName(resourceType), resourceType);
+	}
+
+	public DeferredTriggerLatch<ProgrammaticTextUIObject> addStringLine() {
+		return UIObjectFactory
+				.createText(ProgrammaticTextUIObject.class,
+						OptionalInt.of(64),
+						Optional.of(SMALLEST_CHAR_SIZE),
+						Optional.empty(),
+						Optional.empty(),
+						Optional.empty())
+				.set(i -> i.setTransform(new Transform3D()))
+				.add(this.content)
+				.postInit(this.messages::add)
+				.pushAsLatch();
+	}
+
+	public ObjectTriggerLatch<? extends ResourceLineUIObjectGroup> addIntLine(final String id, final ResourceType rt) {
+		final ResourceLineUIObjectGroup newLine = new ResourceLineUIObjectGroup(id, new AnchorLayout(), Direction2d.VERTICAL, rt);
+		return newLine.init().thenOther(c -> {
+			this.content.add(c);
+			this.resourceLines.add(c);
+		});
 	}
 
 	public ListTriggerLatch<UIObject> addLine(
 			final String id,
 			final ResourceType rt,
 			final Function<ListTriggerLatch<UIObject>, UOCreatingTaskFuture<? extends UIObject>>... funcs) {
-		final ListTriggerLatch<UIObject> line = new ListTriggerLatch<>(funcs.length, (final List<UIObject> lineChildren) -> {
-			final BoundedUIObjectGroup lineObj = new ResourceLineUIObjectGroup(id, new AnchorLayout(), Direction2d.VERTICAL, rt);
-			lineObj.addAll(lineChildren);
-			this.content.add(lineObj);
+		final ListTriggerLatch<UIObject> latch = new ListTriggerLatch<>(funcs.length, (final List<UIObject> lineChildren) -> {
+			final ResourceLineUIObjectGroup newLine = new ResourceLineUIObjectGroup(id, new AnchorLayout(), Direction2d.VERTICAL, rt);
+			newLine.addAll(lineChildren);
+			this.content.add(newLine);
+			this.resourceLines.add(newLine);
 		});
 
 		for (Function<ListTriggerLatch<UIObject>, UOCreatingTaskFuture<? extends UIObject>> func : funcs) {
-			func.apply(line).push();
+			func.apply(latch).push();
 		}
 
-		return line;
+		return latch;
 	}
 
 	public ListTriggerLatch<UIObject> addLine(final String id, final ResourceType rt, final Consumer<ListTriggerLatch<UIObject>>... funcs) {
 		final ListTriggerLatch<UIObject> line = new ListTriggerLatch<>(funcs.length, (final List<UIObject> list) -> {
-			final BoundedUIObjectGroup costLine = new ResourceLineUIObjectGroup(id, new AnchorLayout(), Direction2d.VERTICAL, rt);
-			costLine.addAll(list);
-			this.content.add(costLine);
+			final ResourceLineUIObjectGroup newLine = new ResourceLineUIObjectGroup(id, new AnchorLayout(), Direction2d.VERTICAL, rt);
+			newLine.addAll(list);
+			this.content.add(newLine);
+			this.resourceLines.add(newLine);
 		});
 
 		for (Consumer<ListTriggerLatch<UIObject>> func : funcs) {
@@ -150,7 +171,8 @@ public class BuildingInfoUIObjectGroup extends FixedBoundsUIObjectGroup implemen
 		if (this.backdrop != null) {
 			this.backdrop.ifSet(p -> {
 				final Rectangle2D b2d = this.getBounds().getBounds2D();
-				p.getTransform().scaleSet((float) b2d.getWidth(), 1, (float) b2d.getHeight()).update();
+				System.err.println(b2d);
+				p.getTransform().scaleSet((float) b2d.getWidth(), 1, (float) b2d.getHeight()).updateMatrix();
 			});
 		}
 		return recomp;
@@ -172,6 +194,14 @@ public class BuildingInfoUIObjectGroup extends FixedBoundsUIObjectGroup implemen
 		} else if (this.getTarget() != target) {
 			this.target = new WeakReference<>(target);
 		}
+	}
+
+	public WeakList<ResourceLineUIObjectGroup> getResourceLines() {
+		return this.resourceLines;
+	}
+
+	public WeakList<ProgrammaticTextUIObject> getMessages() {
+		return this.messages;
 	}
 
 	@Override

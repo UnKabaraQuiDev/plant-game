@@ -2,19 +2,26 @@ package lu.kbra.plant_game;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.IntStream;
 
+import lu.kbra.pclib.concurrency.CountTriggerLatch;
+import lu.kbra.pclib.pointer.prim.IntPointer;
 import lu.kbra.plant_game.base.scene.overlay.group.building.BuildingInfoUIObjectGroup;
 import lu.kbra.plant_game.base.scene.overlay.group.building.ResourceLineUIObjectGroup;
-import lu.kbra.plant_game.base.scene.overlay.stat_line.integer.FixedIntegerStatLine;
 import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
+import lu.kbra.plant_game.engine.entity.ui.text.ProgrammaticTextUIObject;
 import lu.kbra.plant_game.engine.scene.world.GameData;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.plant_game.engine.scene.world.data.building.requirement.BuildingRequirement;
 import lu.kbra.plant_game.engine.scene.world.data.resource.ResourceType;
+import lu.kbra.plant_game.generated.ColorMaterial;
+import lu.kbra.standalone.gameengine.impl.WeakList;
 
 public class BuildingDefinition<T extends GameObject & PlaceableObject> implements Consumer<BuildingInfoUIObjectGroup>, Cloneable {
 
@@ -46,24 +53,61 @@ public class BuildingDefinition<T extends GameObject & PlaceableObject> implemen
 
 	@Override
 	public void accept(final BuildingInfoUIObjectGroup t) {
-		t.getContent()
-				.getROEntities()
-				.stream()
-				.filter(ResourceLineUIObjectGroup.class::isInstance)
-				.map(ResourceLineUIObjectGroup.class::cast)
-				.forEach(b -> {
-					if (this.prices.containsKey(b.getResourceType())) {
-						b.stream()
-								.filter(FixedIntegerStatLine.class::isInstance)
-								.map(FixedIntegerStatLine.class::cast)
-								.forEach(f -> f.set(this.prices.get(b.getResourceType())).flushValue());
-					} else {
-						b.stream()
-								.filter(FixedIntegerStatLine.class::isInstance)
-								.map(FixedIntegerStatLine.class::cast)
-								.forEach(f -> f.set(0).flushValue());
-					}
-				});
+		{
+			final WeakList<ResourceLineUIObjectGroup> resourceLinesList = t.getResourceLines();
+
+			final Set<ResourceType> handled = new HashSet<>();
+
+			resourceLinesList.forEach(b -> {
+				final ResourceType type = b.getResourceType();
+				if (this.prices.containsKey(type)) {
+					b.set(this.prices.get(type)).flushValue();
+					b.setActive(true);
+					handled.add(type);
+				} else {
+					b.setActive(false);
+				}
+			});
+
+			for (final Map.Entry<ResourceType, Integer> entry : this.prices.entrySet()) {
+				if (!handled.contains(entry.getKey())) {
+					t.addCostIntLine(entry.getKey());
+				}
+			}
+		}
+
+		{
+			final WeakList<ProgrammaticTextUIObject> messagesList = t.getMessages();
+			if (messagesList.size() < this.unlockRequirements.size() + this.buildingRequirements.size()) {
+				final int missing = this.unlockRequirements.size() + this.buildingRequirements.size() - messagesList.size();
+				// refresh when done
+				final CountTriggerLatch latch = new CountTriggerLatch(missing, () -> this.accept(t));
+				IntStream.range(0, missing).forEach(i -> t.addStringLine().latch(latch));
+			}
+
+			final List<BuildingRequirement> brs = new ArrayList<>(this.unlockRequirements);
+			brs.addAll(this.buildingRequirements);
+
+			final IntPointer ip = new IntPointer(0);
+			messagesList.forEach(str -> {
+				if (ip.getValue() < brs.size()) {
+					final BuildingRequirement br = brs.get(ip.getValue());
+					System.err.println(br.getLocalizationValue());
+					str.setText(br.getLocalizationValue()).flushText();
+					str.getTextEmitter()
+							.setForegroundColor(br.isFulfilled(PGLogic.INSTANCE.getWorldScene()) ? ColorMaterial.GREEN.getColor()
+									: ColorMaterial.RED.getColor());
+					str.setActive(true);
+				} else {
+					str.setActive(false);
+				}
+				ip.increment();
+			});
+		}
+
+		t.doLayout();
+		t.getContent().doLayout();
+		t.doLayout();
 	}
 
 	public String getInternalName() {
