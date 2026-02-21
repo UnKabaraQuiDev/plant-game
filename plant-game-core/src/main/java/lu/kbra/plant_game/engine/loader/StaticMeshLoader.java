@@ -20,6 +20,7 @@ import lu.kbra.standalone.gameengine.impl.future.SkipThen;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
 import lu.kbra.standalone.gameengine.impl.future.YieldExecutionThrowable;
 import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
+import lu.kbra.standalone.gameengine.utils.gl.consts.TextureFilter;
 
 public class StaticMeshLoader {
 
@@ -98,7 +99,8 @@ public class StaticMeshLoader {
 					: SingleTexture.loadSingleTexture(cache, meshData.texturePath(), meshData.texturePath());
 			final SingleTexture txtBloom = cache.hasTexture(meshData.bloomTexturePath())
 					? (SingleTexture) cache.getTexture(meshData.bloomTexturePath())
-					: SingleTexture.loadSingleTexture(cache, meshData.bloomTexturePath(), meshData.bloomTexturePath());
+					: SingleTexture
+							.loadSingleTexture(cache, meshData.bloomTexturePath(), meshData.bloomTexturePath(), TextureFilter.LINEAR);
 
 			staticMesh = DelegatingObjLoader.loadBloomTexturedMesh(meshName,
 					null,

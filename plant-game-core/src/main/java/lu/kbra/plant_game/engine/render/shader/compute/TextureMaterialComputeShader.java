@@ -7,9 +7,11 @@ import lu.kbra.standalone.gameengine.graph.shader.part.ComputeShaderPart;
 
 public class TextureMaterialComputeShader extends MaterialComputeShader {
 
-	public static final String TXT_DIFFUSE = "txt0";
+	public static final String TXT_DIFFUSE = "txtDiffuse";
+	public static final String TXT_BLOOM = "txtBloom";
 	public static final String CURRENT_MATERIAL_ID = "currentMaterialId";
-	public static final String STRENGTH = "strength";
+	public static final String BLOOM_STRENGTH = "bloomStrength";
+	public static final String APPLY_BLOOM = "applyBloom";
 
 	public TextureMaterialComputeShader() {
 		super((ComputeShaderPart) AbstractShaderPart.load("classpath:/shaders/texture_material.comp", getBuildingDeps()));
@@ -25,8 +27,10 @@ public class TextureMaterialComputeShader extends MaterialComputeShader {
 		super.createUniforms();
 
 		this.createUniform(TXT_DIFFUSE);
+		this.createUniform(TXT_BLOOM);
 		this.createUniform(CURRENT_MATERIAL_ID);
-		this.createUniform(STRENGTH);
+		this.createUniform(BLOOM_STRENGTH);
+		this.createUniform(APPLY_BLOOM);
 	}
 
 }

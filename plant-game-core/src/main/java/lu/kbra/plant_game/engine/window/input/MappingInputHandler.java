@@ -8,9 +8,9 @@ import java.util.Map;
 
 import org.lwjgl.glfw.GLFW;
 
+import lu.kbra.plant_game.PGLogic;
 import lu.kbra.standalone.gameengine.GameEngine;
 import lu.kbra.standalone.gameengine.graph.window.KeyState;
-import lu.kbra.standalone.gameengine.utils.gl.consts.Consts;
 
 public class MappingInputHandler extends DefaultInputHandler {
 
@@ -157,7 +157,7 @@ public class MappingInputHandler extends DefaultInputHandler {
 
 		this.source = file;
 
-		final InputMappingConfig config = Consts.OBJECT_MAPPER.readValue(file, InputMappingConfig.class);
+		final InputMappingConfig config = PGLogic.OBJECT_MAPPER.readValue(file, InputMappingConfig.class);
 
 		this.resetKeyMappings();
 		this.resetMouseMappings();
@@ -203,7 +203,7 @@ public class MappingInputHandler extends DefaultInputHandler {
 			file.createNewFile();
 		}
 
-		Consts.OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValue(file, cfg);
+		PGLogic.OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValue(file, cfg);
 	}
 
 	public File getSource() {

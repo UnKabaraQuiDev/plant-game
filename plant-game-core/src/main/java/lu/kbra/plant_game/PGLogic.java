@@ -52,6 +52,8 @@ public class PGLogic extends GameLogic {
 		OBJECT_MAPPER.registerModule(new OrgJOMLModule());
 		OBJECT_MAPPER.registerModule(new VersionMatcherModule());
 		OBJECT_MAPPER.registerModule(new ResourceTypeModule());
+
+		TaskFuture.STACK_TRACE = true;
 	}
 
 	public final WorkerDispatcher WORKERS = new WorkerDispatcher("WORKERS", 8);

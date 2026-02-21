@@ -2,7 +2,6 @@ package lu.kbra.plant_game.engine.entity.ui.prim;
 
 import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
-import java.io.File;
 import java.util.function.Consumer;
 
 import org.joml.Vector3f;
@@ -66,7 +65,7 @@ public class BuildingItemUIObjectGroup extends OffsetUIObjectGroup
 
 		UIObjectFactory
 				.createManual(ProgrammaticTexturedQuadMeshUIObject.class,
-						"image:" + new File(Consts.ICONS_BAKES_RES_DIR, this.buildingDefinition.getInternalPath() + ".png").getPath())
+						"image:classpath:" + Consts.ICONS_BAKES_DIR + this.buildingDefinition.getInternalPath() + ".png")
 				.set(i -> i.setTransform(new Transform3D(new Vector3f(0, 0.2f, 0))))
 				.add(this)
 				.latch(latch)
