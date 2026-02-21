@@ -67,6 +67,7 @@ import lu.kbra.plant_game.engine.mesh.TexturedBloomMesh;
 import lu.kbra.plant_game.engine.mesh.TexturedMesh;
 import lu.kbra.plant_game.engine.render.shader.compute.MaterialComputeShader;
 import lu.kbra.plant_game.engine.render.shader.compute.OutlineShader;
+import lu.kbra.plant_game.engine.render.shader.compute.ShadowShader;
 import lu.kbra.plant_game.engine.render.shader.compute.TextureMaterialComputeShader;
 import lu.kbra.plant_game.engine.render.shader.compute.filter.BlurComputeShader;
 import lu.kbra.plant_game.engine.render.shader.compute.filter.FilterShader;

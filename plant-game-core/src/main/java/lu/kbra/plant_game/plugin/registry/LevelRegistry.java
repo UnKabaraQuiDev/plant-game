@@ -20,7 +20,6 @@ public abstract class LevelRegistry extends PluginRegistry {
 	public class LevelDefinition implements Comparable<LevelDefinition> {
 
 		protected int idx;
-//		protected String levelId;
 		protected LevelData levelData;
 		protected LevelState levelState = LevelState.NOT_STARTED;
 		protected byte progress = 0;

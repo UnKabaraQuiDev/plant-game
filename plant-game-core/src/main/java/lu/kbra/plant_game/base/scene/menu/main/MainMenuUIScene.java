@@ -42,7 +42,7 @@ import lu.kbra.plant_game.engine.scene.ui.layout.AnchorLayout;
 import lu.kbra.plant_game.engine.scene.ui.layout.FlowLayout;
 import lu.kbra.plant_game.engine.scene.ui.layout.Layout;
 import lu.kbra.plant_game.engine.scene.ui.layout.LayoutOwner;
-import lu.kbra.plant_game.engine.scene.world.SunLightOwner;
+import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.plant_game.plugin.registry.LevelRegistry;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
@@ -331,7 +331,7 @@ public class MainMenuUIScene extends UIScene {
 		this.targetGroup = target;
 		this.progress = 0;
 
-		final SunLightOwner wls = PGLogic.INSTANCE.getWorldScene();
+		final WorldLevelScene wls = PGLogic.INSTANCE.getWorldScene();
 		if (wls instanceof MainMenuWorldScene mmws) {
 			mmws.startTransition(target);
 		}

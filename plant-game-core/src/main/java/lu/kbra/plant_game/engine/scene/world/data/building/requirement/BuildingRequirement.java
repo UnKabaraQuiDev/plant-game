@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import lu.kbra.plant_game.engine.data.locale.Localizable;
-import lu.kbra.plant_game.engine.scene.world.SunLightOwner;
+import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type", visible = true)
 @JsonSubTypes(
@@ -16,6 +16,6 @@ import lu.kbra.plant_game.engine.scene.world.SunLightOwner;
 @JsonIgnoreProperties({ "type" })
 public interface BuildingRequirement extends Localizable {
 
-	boolean isFulfilled(SunLightOwner scene);
+	boolean isFulfilled(WorldLevelScene scene);
 
 }

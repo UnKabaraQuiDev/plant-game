@@ -1,4 +1,4 @@
-package lu.kbra.plant_game.engine.render;
+package lu.kbra.plant_game.engine.render.shader.compute;
 
 public interface ShadowShader {
 

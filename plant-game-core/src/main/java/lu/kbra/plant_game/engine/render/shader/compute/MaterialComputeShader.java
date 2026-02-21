@@ -6,7 +6,6 @@ import org.joml.Vector3i;
 import org.joml.Vector3ic;
 import org.joml.Vector4fc;
 
-import lu.kbra.plant_game.engine.render.ShadowShader;
 import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.standalone.gameengine.graph.shader.ComputeShader;
 import lu.kbra.standalone.gameengine.graph.shader.part.AbstractShaderPart;

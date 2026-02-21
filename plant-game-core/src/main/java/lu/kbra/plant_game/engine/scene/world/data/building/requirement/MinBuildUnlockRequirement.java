@@ -1,17 +1,17 @@
 package lu.kbra.plant_game.engine.scene.world.data.building.requirement;
 
-import java.text.MessageFormat;
-
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
-import lu.kbra.plant_game.engine.data.locale.LocalizationService;
+import lu.kbra.plant_game.BuildingDefinition;
+import lu.kbra.plant_game.engine.data.locale.AbstractLocalizationString;
+import lu.kbra.plant_game.engine.data.locale.Localizable;
 import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
-import lu.kbra.plant_game.engine.scene.world.SunLightOwner;
+import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.plant_game.plugin.registry.BuildingRegistry;
 
 @JsonTypeName("MIN_BUILD")
-public class MinBuildUnlockRequirement implements BuildingRequirement {
+public class MinBuildUnlockRequirement extends AbstractLocalizationString implements BuildingRequirement {
 
 	private int count;
 	private String building;
@@ -19,14 +19,26 @@ public class MinBuildUnlockRequirement implements BuildingRequirement {
 	public MinBuildUnlockRequirement() {
 	}
 
+	@Deprecated
 	public MinBuildUnlockRequirement(final int count, final String building) {
 		this.count = count;
 		this.building = building;
+		this.addParam(Localizable.raw(count));
+		this.addParam(Localizable.of(building));
 	}
 
 	public MinBuildUnlockRequirement(final int count, final Class<? extends GameObject> building) {
 		this.count = count;
-		this.building = BuildingRegistry.getInternalObjectName(building);
+		this.building = BuildingRegistry.getInternalName(building);
+		this.addParam(Localizable.raw(count));
+		this.addParam(PlaceableObject.getLocalizable(building));
+	}
+
+	public MinBuildUnlockRequirement(final int count, final BuildingDefinition<?> building) {
+		this.count = count;
+		this.building = building.getInternalName();
+		this.addParam(Localizable.raw(count));
+		this.addParam(PlaceableObject.getLocalizable(building.getClazz()));
 	}
 
 	public int getCount() {
@@ -46,7 +58,7 @@ public class MinBuildUnlockRequirement implements BuildingRequirement {
 	}
 
 	@Override
-	public boolean isFulfilled(final SunLightOwner scene) {
+	public boolean isFulfilled(final WorldLevelScene scene) {
 		return false;
 	}
 
@@ -56,10 +68,9 @@ public class MinBuildUnlockRequirement implements BuildingRequirement {
 	}
 
 	@Override
-	public String getLocalizationValue() {
-		return MessageFormat.format(BuildingRequirement.super.getLocalizationValue(),
-				this.count,
-				LocalizationService.get(PlaceableObject.LOCALIZATION_KEY + this.building.replace(":", ".")));
+	public String toString() {
+		return "MinBuildUnlockRequirement@" + System.identityHashCode(this) + " [count=" + this.count + ", building=" + this.building
+				+ ", params=" + this.params + ", computed=" + this.computed + "]";
 	}
 
 }
