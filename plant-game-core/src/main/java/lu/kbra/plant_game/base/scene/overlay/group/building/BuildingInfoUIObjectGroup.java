@@ -17,6 +17,8 @@ import org.joml.Vector4f;
 import lu.kbra.pclib.concurrency.DeferredTriggerLatch;
 import lu.kbra.pclib.concurrency.ListTriggerLatch;
 import lu.kbra.pclib.concurrency.ObjectTriggerLatch;
+import lu.kbra.pclib.datastructure.list.WeakArrayList;
+import lu.kbra.pclib.datastructure.list.WeakList;
 import lu.kbra.pclib.pointer.ObjectPointer;
 import lu.kbra.plant_game.BuildingDefinition;
 import lu.kbra.plant_game.base.data.DefaultResourceType;
@@ -39,8 +41,6 @@ import lu.kbra.plant_game.engine.scene.ui.layout.FlowLayout;
 import lu.kbra.plant_game.engine.scene.world.data.resource.ResourceType;
 import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.plant_game.plugin.registry.ResourceRegistry;
-import lu.kbra.standalone.gameengine.impl.WeakArrayList;
-import lu.kbra.standalone.gameengine.impl.WeakList;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 public class BuildingInfoUIObjectGroup extends FixedBoundsUIObjectGroup implements ExtAnchorOwner, PaddingOwner, MarginOwner {

@@ -23,7 +23,6 @@ import org.junit.Test;
 import org.lwjgl.BufferUtils;
 
 import lu.kbra.pclib.logger.GlobalLogger;
-
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
 
 public class FontAtlasGenMain extends GenMainConsts {

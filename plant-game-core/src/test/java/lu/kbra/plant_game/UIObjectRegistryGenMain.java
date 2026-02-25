@@ -35,7 +35,6 @@ import com.squareup.javapoet.WildcardTypeName;
 
 import lu.kbra.pclib.PCUtils;
 import lu.kbra.pclib.datastructure.pair.Pairs;
-
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.util.InternalConstructorFunction;
 import lu.kbra.plant_game.engine.util.annotation.BufferSize;

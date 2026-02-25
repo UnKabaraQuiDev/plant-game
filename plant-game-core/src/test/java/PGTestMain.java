@@ -7,7 +7,6 @@ import java.util.Properties;
 
 import lu.kbra.pclib.PCUtils;
 import lu.kbra.pclib.logger.GlobalLogger;
-
 import lu.kbra.plant_game.PGLogic;
 import lu.kbra.standalone.gameengine.GameEngine;
 import lu.kbra.standalone.gameengine.graph.window.WindowOptions;

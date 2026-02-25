@@ -10,6 +10,7 @@ import java.util.function.Consumer;
 import java.util.stream.IntStream;
 
 import lu.kbra.pclib.concurrency.CountTriggerLatch;
+import lu.kbra.pclib.datastructure.list.WeakList;
 import lu.kbra.pclib.pointer.prim.IntPointer;
 import lu.kbra.plant_game.base.scene.overlay.group.building.BuildingInfoUIObjectGroup;
 import lu.kbra.plant_game.base.scene.overlay.group.building.ResourceLineUIObjectGroup;
@@ -21,7 +22,6 @@ import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.plant_game.engine.scene.world.data.building.requirement.BuildingRequirement;
 import lu.kbra.plant_game.engine.scene.world.data.resource.ResourceType;
 import lu.kbra.plant_game.generated.ColorMaterial;
-import lu.kbra.standalone.gameengine.impl.WeakList;
 
 public class BuildingDefinition<T extends GameObject & PlaceableObject> implements Consumer<BuildingInfoUIObjectGroup>, Cloneable {
 
