@@ -84,11 +84,8 @@ public class UIScene extends Scene3D implements SceneBoundsOwner {
 
 		final Set<UIObject> newHovered = new HashSet<>();
 
-		synchronized (super.getEntitiesLock()) {
-			for (final SceneEntity e : this) {
-				this.checkInput(e, inputHandler, frameState, mouseWorld2DPoint, newHovered, GameEngine.IDENTITY_MATRIX4F);
-			}
-		}
+		this.forEach((final SceneEntity e) -> this
+				.checkInput(e, inputHandler, frameState, mouseWorld2DPoint, newHovered, GameEngine.IDENTITY_MATRIX4F));
 
 		this.hovering.removeAll(newHovered);
 		for (final UIObject uiObj : this.hovering) {

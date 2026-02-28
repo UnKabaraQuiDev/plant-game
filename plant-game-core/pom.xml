@@ -47,12 +47,6 @@
 			<groupId>org.reflections</groupId>
 			<artifactId>reflections</artifactId>
 		</dependency>
-
-		<dependency>
-			<groupId>lu.kbra</groupId>
-			<artifactId>plant-game-autogen</artifactId>
-			<version>0.1</version>
-		</dependency>
 	</dependencies>
 
 	<build>
@@ -159,8 +153,7 @@
 							<goal>compile</goal>
 						</goals>
 						<configuration>
-							<outputDirectory>
-								${project.build.directory}/generated-classes</outputDirectory>
+							<outputDirectory>${project.build.directory}/classes</outputDirectory>
 							<compileSourceRoots>
 								<compileSourceRoot>
 									${project.build.directory}/generated-sources</compileSourceRoot>
@@ -253,6 +246,7 @@
 							</execution>
 						</executions>
 					</plugin>
+
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-source-plugin</artifactId>
@@ -266,6 +260,7 @@
 							</execution>
 						</executions>
 					</plugin>
+
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-javadoc-plugin</artifactId>

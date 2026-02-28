@@ -12,11 +12,12 @@ public class InstanceSmallGrassObject extends ResizableInstanceSwayGameObject {
 
 	@Override
 	public String toString() {
-		return "InstanceSmallGrassObject@" + System.identityHashCode(this) + " [resizing=" + this.resizing + ", positions=" + this.positions
-				+ ", count=" + this.count + ", deformRatio=" + this.deformRatio + ", speedRatio=" + this.speedRatio + ", scaleRatio="
-				+ this.scaleRatio + ", materialId=" + this.materialId + ", isEntityMaterialId=" + this.isEntityMaterialId
-				+ ", instanceEmitter=" + this.instanceEmitter + ", objectId=" + this.objectId + ", objectIdLocation="
-				+ this.objectIdLocation + ", transform=" + this.transform + ", active=" + this.active + ", name=" + this.name + "]";
+		return "InstanceSmallGrassObject@" + System.identityHashCode(this) + " [lock=" + this.lock + ", resizing=" + this.resizing
+				+ ", pending=" + this.pending + ", dirty=" + this.dirty + ", count=" + this.count + ", deformRatio=" + this.deformRatio
+				+ ", speedRatio=" + this.speedRatio + ", scaleRatio=" + this.scaleRatio + ", materialId=" + this.materialId
+				+ ", isEntityMaterialId=" + this.isEntityMaterialId + ", instanceEmitter=" + this.instanceEmitter + ", objectId="
+				+ this.objectId + ", objectIdLocation=" + this.objectIdLocation + ", transform=" + this.transform + ", active="
+				+ this.active + ", name=" + this.name + "]";
 	}
 
 }

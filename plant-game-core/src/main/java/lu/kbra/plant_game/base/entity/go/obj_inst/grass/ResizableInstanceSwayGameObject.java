@@ -1,7 +1,9 @@
 package lu.kbra.plant_game.base.entity.go.obj_inst.grass;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Queue;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.joml.Vector3f;
 
@@ -16,86 +18,116 @@ import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 public class ResizableInstanceSwayGameObject extends InstanceSwayGameObject implements ParticleCountOwner {
 
+	protected final Object lock = new Object();
 	protected volatile boolean resizing = false;
-	protected final List<Pair<Integer, Vector3f>> positions = new ArrayList<>();
+	protected final Queue<Pair<Integer, Vector3f>> pending = new ConcurrentLinkedQueue<>();
+	protected final Set<Integer> dirty = ConcurrentHashMap.newKeySet();
 	protected int count = 0;
 
 	public ResizableInstanceSwayGameObject(final String str, final InstanceEmitter ie) {
 		super(str, ie);
 	}
 
-	public void removeInstance(final int instanceIndex) {
-		final int lastIndex;
+	public void removeInstance(final int index) {
+		final int last;
 
-		synchronized (this) {
-			if (instanceIndex < 0 || instanceIndex >= this.count) {
+		synchronized (this.lock) {
+			if (index < 0 || index >= this.count) {
 				return;
 			}
 
-			lastIndex = this.count - 1;
+			last = this.count - 1;
 
-			if (instanceIndex != lastIndex) {
-				final Transform3D removed = (Transform3D) this.instanceEmitter.getParticles()[instanceIndex].getTransform();
-				final Transform3D last = (Transform3D) this.instanceEmitter.getParticles()[lastIndex].getTransform();
+			if (index != last) {
+				final Transform3D a = (Transform3D) this.instanceEmitter.getParticles()[index].getTransform();
+				final Transform3D b = (Transform3D) this.instanceEmitter.getParticles()[last].getTransform();
 
-				removed.set(last);
-				removed.updateMatrix();
+				a.set(b);
+				a.updateMatrix();
+
+				this.dirty.add(index);
 			}
 
 			this.count--;
 		}
 
-		System.err.println(this.getId() + " removed: " + instanceIndex + " = " + this.count);
-
-		PGLogic.INSTANCE.RENDER_DISPATCHER.post(() -> this.instanceEmitter.updateParticlesTransforms());
+		this.dispatchDirty();
 	}
 
 	public int addInstance(final Vector3f position) {
 		final int index;
-		synchronized (this) {
+		synchronized (this.lock) {
 			index = this.count++;
 		}
-		this.setInstance(index, position);
+
+		this.setInstanceInternal(index, position);
+
 		return index;
 	}
 
-	private void setInstance(final int instanceIndex, final Vector3f position) {
-		synchronized (this) {
-			if (instanceIndex >= this.instanceEmitter.getParticleCount()) {
-				this.positions.add(Pairs.readOnly(instanceIndex, position));
-				this.reallocate();
-				return;
-			}
-			if (this.resizing) {
-				this.positions.add(Pairs.readOnly(instanceIndex, position));
-				return;
-			}
+	private void setInstanceInternal(final int index, final Vector3f position) {
+		if (this.needsResize(index)) {
+			this.pending.add(Pairs.readOnly(index, position));
+			this.requestResize();
+			return;
 		}
-		System.err.println(this.getId() + " set: " + instanceIndex + " = " + this.count);
 
-		((Transform3D) this.instanceEmitter.getParticles()[instanceIndex].getTransform()).translationSet(position).updateMatrix();
-		PGLogic.INSTANCE.RENDER_DISPATCHER.post(() -> this.instanceEmitter.updateParticlesTransforms());
+		if (this.resizing) {
+			this.pending.add(Pairs.readOnly(index, position));
+			return;
+		}
+
+		this.applyTransform(index, position);
 	}
 
-	private boolean reallocate() {
-		synchronized (this) {
+	private boolean needsResize(final int index) {
+		return index >= this.instanceEmitter.getParticleCount();
+	}
+
+	private void applyTransform(final int index, final Vector3f position) {
+		final Transform3D t = (Transform3D) this.instanceEmitter.getParticles()[index].getTransform();
+		t.translationSet(position).updateMatrix();
+		this.dirty.add(index);
+
+		this.dispatchDirty();
+	}
+
+	private void requestResize() {
+		synchronized (this.lock) {
 			if (this.resizing) {
-				return false;
+				return;
 			}
 			this.resizing = true;
 		}
+
 		new TaskFuture<>(PGLogic.INSTANCE.RENDER_DISPATCHER, (Runnable) () -> {
-			super.instanceEmitter.resize(this.instanceEmitter.getParticleCount() + 32, i -> new Transform3D());
-			synchronized (ResizableInstanceSwayGameObject.this) {
+			this.instanceEmitter.resize(this.instanceEmitter.getParticleCount() + 32, i -> new Transform3D());
+		}).then(PGLogic.INSTANCE.WORKERS, (Runnable) () -> {
+			synchronized (this.lock) {
 				this.resizing = false;
 			}
-		}).then(PGLogic.INSTANCE.WORKERS, (Runnable) () -> {
-			this.positions.removeIf(v -> {
-				this.setInstance(v.getKey(), v.getValue());
-				return true;
-			});
+			this.flushPending();
 		}).push();
-		return true;
+	}
+
+	private void flushPending() {
+		Pair<Integer, Vector3f> p;
+
+		while ((p = this.pending.poll()) != null) {
+			this.applyTransform(p.getKey(), p.getValue());
+		}
+	}
+
+	private void dispatchDirty() {
+
+		if (this.dirty.isEmpty()) {
+			return;
+		}
+
+		PGLogic.INSTANCE.RENDER_DISPATCHER.post(() -> {
+			this.instanceEmitter.updateParticlesTransforms(this.dirty);
+			this.dirty.clear();
+		});
 	}
 
 	@Override
@@ -105,11 +137,12 @@ public class ResizableInstanceSwayGameObject extends InstanceSwayGameObject impl
 
 	@Override
 	public String toString() {
-		return "ResizableInstanceSwayGameObject@" + System.identityHashCode(this) + " [resizing=" + this.resizing + ", positions="
-				+ this.positions + ", count=" + this.count + ", deformRatio=" + this.deformRatio + ", speedRatio=" + this.speedRatio
-				+ ", scaleRatio=" + this.scaleRatio + ", materialId=" + this.materialId + ", isEntityMaterialId=" + this.isEntityMaterialId
-				+ ", instanceEmitter=" + this.instanceEmitter + ", objectId=" + this.objectId + ", objectIdLocation="
-				+ this.objectIdLocation + ", transform=" + this.transform + ", active=" + this.active + ", name=" + this.name + "]";
+		return "ResizableInstanceSwayGameObject@" + System.identityHashCode(this) + " [lock=" + this.lock + ", resizing=" + this.resizing
+				+ ", pending=" + this.pending + ", dirty=" + this.dirty + ", count=" + this.count + ", deformRatio=" + this.deformRatio
+				+ ", speedRatio=" + this.speedRatio + ", scaleRatio=" + this.scaleRatio + ", materialId=" + this.materialId
+				+ ", isEntityMaterialId=" + this.isEntityMaterialId + ", instanceEmitter=" + this.instanceEmitter + ", objectId="
+				+ this.objectId + ", objectIdLocation=" + this.objectIdLocation + ", transform=" + this.transform + ", active="
+				+ this.active + ", name=" + this.name + "]";
 	}
 
 }
