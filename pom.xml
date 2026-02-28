@@ -25,6 +25,7 @@
 		<plugins.dir>${project.basedir}/plugins</plugins.dir>
 		<pclib.version>1.0.2-SNAPSHOT</pclib.version>
 		<gameengine.version>0.1-SNAPSHOT</gameengine.version>
+		
 		<steam.appId>4424580</steam.appId>
 	</properties>
 
@@ -100,6 +101,16 @@
 					</archive>
 				</configuration>
 			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<version>3.1.2</version>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
+
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>flatten-maven-plugin</artifactId>

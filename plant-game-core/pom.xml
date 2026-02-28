@@ -20,6 +20,9 @@
 		<package.base>lu.kbra.plant_game.base</package.base>
 		<package.registries>${package.base}.reg</package.registries>
 		<lwjgl.natives>natives-${os.detected.classifier}</lwjgl.natives>
+
+		<steam.buildScript>
+			${project.basedir}/../steam/app_build_${steam.appId}.vdf</steam.buildScript>
 	</properties>
 
 	<dependencies>
@@ -78,6 +81,26 @@
 
 		<plugins>
 			<plugin>
+				<groupId>lu.kbra</groupId>
+				<artifactId>steam-deploy</artifactId>
+				<version>1.0</version>
+				<executions>
+					<execution>
+						<id>steam-deploy</id>
+						<phase>deploy</phase>
+						<goals>
+							<goal>deploy</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<steamcmdPath>steamcmd</steamcmdPath>
+					<serverId>steam</serverId>
+					<buildScript>${steam.buildScript}</buildScript>
+				</configuration>
+			</plugin>
+
+			<!--<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.11.0</version>
@@ -97,7 +120,8 @@
 						</configuration>
 					</execution>
 				</executions>
-			</plugin>
+			</plugin>-->
+
 			<plugin>
 				<groupId>lu.kbra</groupId>
 				<artifactId>plant-game-autogen</artifactId>
@@ -112,6 +136,7 @@
 					</execution>
 				</executions>
 			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -133,10 +158,18 @@
 						<goals>
 							<goal>compile</goal>
 						</goals>
+						<configuration>
+							<outputDirectory>
+								${project.build.directory}/generated-classes</outputDirectory>
+							<compileSourceRoots>
+								<compileSourceRoot>
+									${project.build.directory}/generated-sources</compileSourceRoot>
+							</compileSourceRoots>
+						</configuration>
 					</execution>
-
 				</executions>
 			</plugin>
+
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>

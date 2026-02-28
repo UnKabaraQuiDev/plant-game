@@ -52,18 +52,21 @@ import lu.kbra.pclib.datastructure.pair.Pairs;
 public class GOAutogenMojo extends AbstractMojo implements AutogenDefaults {
 
 	@Parameter(defaultValue = "${project}", required = true, readonly = true)
-	MavenProject project;
+	private MavenProject project;
+
+	@Parameter(property = "outputDir", defaultValue = "/generated-sources/", required = false)
+	private String outputDir;
 
 	@Override
 	public void execute() throws MojoExecutionException {
-		final String generatedSourcesDir = project.getBuild().getDirectory() + "/generated-sources/autogen/";
+		final String generatedSourcesDir = this.project.getBuild().getDirectory() + this.outputDir;
 		final Path path = Paths.get(generatedSourcesDir);
 		if (Files.notExists(path)) {
 			try {
 				Files.createDirectories(path);
-				project.addCompileSourceRoot(generatedSourcesDir);
-				getLog().info("Created source directory: " + generatedSourcesDir);
-			} catch (IOException e) {
+				this.project.addCompileSourceRoot(generatedSourcesDir);
+				this.getLog().info("Created source directory: " + generatedSourcesDir);
+			} catch (final IOException e) {
 				throw new MojoExecutionException("Error creating directory " + generatedSourcesDir, e);
 			}
 		}
@@ -72,7 +75,7 @@ public class GOAutogenMojo extends AbstractMojo implements AutogenDefaults {
 		final String packageOut;
 
 		try {
-			final File resourcesDirectory = new File(project.getBuild().getOutputDirectory());
+			final File resourcesDirectory = new File(this.project.getBuild().getOutputDirectory());
 			final File pluginJson = new File(resourcesDirectory, "plugin.json");
 			if (!pluginJson.exists()) {
 				throw new IOException("plugin.json file not found in resources directory! -> " + pluginJson.getPath());
@@ -82,8 +85,8 @@ public class GOAutogenMojo extends AbstractMojo implements AutogenDefaults {
 					new String(Files.readAllBytes(Paths.get(pluginJson.getPath()))));
 			packageIn = pluginsObj.getString("package");
 			packageOut = packageIn + ".autogen";
-			getLog().info("Plugin generated package: " + packageOut);
-		} catch (IOException e) {
+			this.getLog().info("Plugin generated package: " + packageOut);
+		} catch (final IOException e) {
 			throw new MojoExecutionException("Error reading plugin.json ", e);
 		}
 
@@ -91,15 +94,15 @@ public class GOAutogenMojo extends AbstractMojo implements AutogenDefaults {
 		final URL[] urls;
 
 		try {
-			File outputDirectory = new File(project.getBuild().getOutputDirectory());
+			final File outputDirectory = new File(this.project.getBuild().getOutputDirectory());
 
-			URL url = outputDirectory.toURI().toURL();
+			final URL url = outputDirectory.toURI().toURL();
 
-			List<URL> urlList = new ArrayList<>();
+			final List<URL> urlList = new ArrayList<>();
 
 			urlList.add(url);
 
-			for (Artifact artifact : (Set<Artifact>) project.getArtifacts()) {
+			for (final Artifact artifact : (Set<Artifact>) this.project.getArtifacts()) {
 				if (artifact.getScope().equals(Artifact.SCOPE_COMPILE)
 						|| artifact.getScope().equals(Artifact.SCOPE_RUNTIME)) {
 					urlList.add(artifact.getFile().toURI().toURL());
@@ -107,32 +110,33 @@ public class GOAutogenMojo extends AbstractMojo implements AutogenDefaults {
 			}
 
 			urls = urlList.toArray(new URL[0]);
-			cl = new URLClassLoader(urls, getClass().getClassLoader());
-		} catch (Exception e) {
+			cl = new URLClassLoader(urls, this.getClass().getClassLoader());
+		} catch (final Exception e) {
 			throw new MojoExecutionException("Error loading compiled class", e);
 		}
 
 		try {
-			genRegistry(cl, urls, packageIn, packageOut, new File(generatedSourcesDir));
+			this.genRegistry(cl, urls, packageIn, packageOut, new File(generatedSourcesDir));
 		} catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException
 				| IOException | RuntimeException e) {
 			e.printStackTrace();
 			throw new MojoExecutionException("Error generating GO registry: ", e);
 		}
-		
-		project.addCompileSourceRoot(generatedSourcesDir);
+
+		this.project.addCompileSourceRoot(generatedSourcesDir);
 //		project.getCompileSourceRoots().add(generatedSourcesDir);
 	}
 
-	public void genRegistry(final ClassLoader scanClassLoader, final URL[] urls, String scanPackage,
-			String outputPackage, final File outputDir) throws IOException, ClassNotFoundException,
+	public void genRegistry(final ClassLoader scanClassLoader, final URL[] urls, final String scanPackage,
+			final String outputPackage, final File outputDir) throws IOException, ClassNotFoundException,
 			NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 		final Class<?> gameObjectClass = scanClassLoader.loadClass("lu.kbra.plant_game.engine.entity.go.GameObject");
 		final Class<?> internalConstructorFunctionClass = scanClassLoader
 				.loadClass("lu.kbra.plant_game.engine.util.InternalConstructorFunction");
 		final Class<? extends Annotation> dataPathClass = (Class<? extends Annotation>) scanClassLoader
 				.loadClass("lu.kbra.plant_game.engine.util.annotation.DataPath");
-		final Class<?> gameObjectRegistryClass = scanClassLoader.loadClass("lu.kbra.plant_game.plugin.registry.GameObjectRegistry");
+		final Class<?> gameObjectRegistryClass = scanClassLoader
+				.loadClass("lu.kbra.plant_game.plugin.registry.GameObjectRegistry");
 		final Class<? extends Annotation> bufferSizeClass = (Class<? extends Annotation>) scanClassLoader
 				.loadClass("lu.kbra.plant_game.engine.util.annotation.BufferSize");
 		final Class<? extends Annotation> textureOptionClass = (Class<? extends Annotation>) scanClassLoader
@@ -192,10 +196,10 @@ public class GOAutogenMojo extends AbstractMojo implements AutogenDefaults {
 			}
 
 			final Optional<String> dataPath = c.isAnnotationPresent(dataPathClass)
-					? Optional.of(getStringValue(c.getAnnotation(dataPathClass)))
+					? Optional.of(this.getStringValue(c.getAnnotation(dataPathClass)))
 					: Optional.empty();
 			final OptionalInt bufferSize = c.isAnnotationPresent(bufferSizeClass)
-					? OptionalInt.of(getIntValue(c.getAnnotation(bufferSizeClass)))
+					? OptionalInt.of(this.getIntValue(c.getAnnotation(bufferSizeClass)))
 					: OptionalInt.empty();
 			final Optional<Annotation> textureOption = Optional.ofNullable(c.getAnnotation(textureOptionClass));
 			final String listName = "list" + c.getSimpleName();
@@ -234,9 +238,9 @@ public class GOAutogenMojo extends AbstractMojo implements AutogenDefaults {
 			dataPath.ifPresent(t -> initMethod.addStatement(dataPathMap + ".put($T.class, $S)", c, t));
 			textureOption.ifPresent(t -> {
 				initMethod.addStatement(textureFilterMap + ".put($T.class, $T.$L)", c, textureFilterClass,
-						getEnumValue(t, "textureFilter"));
+						this.getEnumValue(t, "textureFilter"));
 				initMethod.addStatement(textureWrapMap + ".put($T.class, $T.$L)", c, textureWrapClass,
-						getEnumValue(t, "textureWrap"));
+						this.getEnumValue(t, "textureWrap"));
 			});
 //			price.ifPresent(p -> staticCodeBlock.addStatement("$N.put($T.class, $L)", defaultPriceHashMap, c, p));
 			initMethod.addCode("\n");
