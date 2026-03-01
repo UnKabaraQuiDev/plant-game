@@ -77,6 +77,9 @@ public class TerrainGameObject extends VariationMeshGameObject
 	private static final int MEDIUM_GRASS_LEVEL = 1;
 	private static final int LARGE_GRASS_LEVEL = 2;
 
+	public static final String WATER_FACTOR_PROPERTY = TerrainGameObject.class.getSimpleName() + ".water_factor";
+	public static float WATER_GROW_SPEED = PCUtils.getFloat(WATER_FACTOR_PROPERTY, 1f);
+
 	protected Object subEntitiesLock = new Object();
 	protected List<GameObject> subEntities = Collections.synchronizedList(new ArrayList<>());
 
@@ -158,7 +161,7 @@ public class TerrainGameObject extends VariationMeshGameObject
 		if (tile.x() < 0 || tile.x() > mesh.getWidth() || tile.y() < 0 || tile.y() > mesh.getLength()) {
 			return;
 		}
-		this.waterLevel[tile.x()][tile.y()] += amount;
+		this.waterLevel[tile.x()][tile.y()] += amount * WATER_GROW_SPEED;
 		System.err.println(tile + " = " + this.waterLevel[tile.x()][tile.y()]);
 		if (this.waterLevel[tile.x()][tile.y()] >= 7) {
 			this.addFlower(tile);
