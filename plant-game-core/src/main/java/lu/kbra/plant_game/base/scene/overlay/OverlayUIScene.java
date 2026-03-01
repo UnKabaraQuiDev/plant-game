@@ -232,7 +232,8 @@ public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner
 	@Override
 	public void doLayout() {
 		synchronized (this.getEntitiesLock()) {
-			this.getEntities().values().stream().filter(e -> e instanceof final LayoutOwner lp).forEach(e -> ((LayoutOwner) e).doLayout());
+			new Exception().fillInStackTrace().printStackTrace();
+			this.getEntities().values().stream().filter(e -> e instanceof LayoutOwner).forEach(e -> ((LayoutOwner) e).doLayout());
 			if (this.layout == null) {
 				return;
 			}

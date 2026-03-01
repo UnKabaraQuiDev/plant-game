@@ -2,8 +2,11 @@ package lu.kbra.plant_game.engine.scene.ui;
 
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.joml.Matrix4f;
@@ -220,7 +223,6 @@ public class UIScene extends Scene3D implements SceneBoundsOwner {
 		final float halfWidth = halfHeight * this.getCamera().getProjection().getAspectRatio();
 		final float size = this.getCamera().getProjection().getSize();
 
-//		return new Rectangle2D.Float(-halfWidth / 2, -1, halfWidth, 2);
 		final float minX = -halfWidth / size; // left
 		final float maxX = halfWidth / size; // right
 
@@ -228,6 +230,65 @@ public class UIScene extends Scene3D implements SceneBoundsOwner {
 		final float maxY = halfHeight / size; // bottom
 
 		return new Rectangle2D.Float(minX, minY, maxX - minX, maxY - minY);
+	}
+
+	@Override
+	public void setEntities(final Map<String, SceneEntity> entities) {
+		super.setEntities(entities);
+		if (this instanceof LayoutOwner lo) {
+			lo.doLayout();
+		}
+	}
+
+	@Override
+	public <T extends SceneEntity> T add(final T entity) {
+		final T re = super.add(entity);
+		if (this instanceof LayoutOwner lo) {
+			lo.doLayout();
+		}
+		return re;
+	}
+
+	@Override
+	public <T extends SceneEntity> T[] addAll(final T... entities) {
+		final T[] re = super.addAll(entities);
+		if (this instanceof LayoutOwner lo) {
+			lo.doLayout();
+		}
+		return re;
+	}
+
+	@Override
+	public <T extends SceneEntity> Optional<T> remove(final T e) {
+		final Optional<T> o = super.remove(e);
+		if (this instanceof LayoutOwner lo) {
+			lo.doLayout();
+		}
+		return o;
+	}
+
+	@Override
+	public <T extends SceneEntity, O extends SceneEntity> Optional<O> replace(final O old, final T new_) {
+		final Optional<O> o = super.replace(old, new_);
+		if (this instanceof LayoutOwner lo) {
+			lo.doLayout();
+		}
+		return o;
+	}
+
+	@Override
+	public <T extends SceneEntity> boolean addAll(final Collection<? extends T> entities) {
+		final boolean b = super.addAll(entities);
+		if (this instanceof LayoutOwner lo) {
+			lo.doLayout();
+		}
+		return b;
+	}
+
+	@Override
+	public String toString() {
+		return "UIScene@" + System.identityHashCode(this) + " [uiCache=" + this.uiCache + ", hovering=" + this.hovering + ", focused="
+				+ this.focused + ", name=" + this.name + ", camera=" + this.camera + ", entities=" + this.entities + "]";
 	}
 
 }

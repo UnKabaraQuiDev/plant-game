@@ -66,6 +66,7 @@ public class ResizableInstanceSwayGameObject extends InstanceSwayGameObject impl
 	}
 
 	private void setInstanceInternal(final int index, final Vector3f position) {
+		System.err.println("setting: " + index + " = " + position);
 		if (this.needsResize(index)) {
 			this.pending.add(Pairs.readOnly(index, position));
 			this.requestResize();
@@ -88,6 +89,7 @@ public class ResizableInstanceSwayGameObject extends InstanceSwayGameObject impl
 		final Transform3D t = (Transform3D) this.instanceEmitter.getParticles()[index].getTransform();
 		t.translationSet(position).updateMatrix();
 		this.dirty.add(index);
+		System.err.println("applying: " + index + " " + position + " = " + t.getMatrix().getTranslation(new Vector3f()));
 
 		this.dispatchDirty();
 	}
@@ -100,14 +102,15 @@ public class ResizableInstanceSwayGameObject extends InstanceSwayGameObject impl
 			this.resizing = true;
 		}
 
-		new TaskFuture<>(PGLogic.INSTANCE.RENDER_DISPATCHER, (Runnable) () -> {
-			this.instanceEmitter.resize(this.instanceEmitter.getParticleCount() + 32, i -> new Transform3D());
-		}).then(PGLogic.INSTANCE.WORKERS, (Runnable) () -> {
-			synchronized (this.lock) {
-				this.resizing = false;
-			}
-			this.flushPending();
-		}).push();
+		new TaskFuture<>(PGLogic.INSTANCE.RENDER_DISPATCHER,
+				(Runnable) () -> this.instanceEmitter.resize(this.instanceEmitter.getParticleCount() + 32, i -> new Transform3D()))
+				.then(PGLogic.INSTANCE.WORKERS, (Runnable) () -> {
+					synchronized (this.lock) {
+						this.resizing = false;
+					}
+					this.flushPending();
+				})
+				.push();
 	}
 
 	private void flushPending() {
@@ -119,15 +122,14 @@ public class ResizableInstanceSwayGameObject extends InstanceSwayGameObject impl
 	}
 
 	private void dispatchDirty() {
-
 		if (this.dirty.isEmpty()) {
 			return;
 		}
 
-		PGLogic.INSTANCE.RENDER_DISPATCHER.post(() -> {
-			this.instanceEmitter.updateParticlesTransforms(this.dirty);
-			this.dirty.clear();
-		});
+		System.err.println("flushing: " + this.dirty);
+		this.instanceEmitter.updateParticlesTransforms(this.dirty, PGLogic.INSTANCE.WORKERS, PGLogic.INSTANCE.RENDER_DISPATCHER)
+				.then(PGLogic.INSTANCE.WORKERS, (Runnable) this.dirty::clear)
+				.push();
 	}
 
 	@Override
