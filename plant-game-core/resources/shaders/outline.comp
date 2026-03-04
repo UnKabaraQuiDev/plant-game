@@ -1,0 +1,76 @@
+#version 430
+
+layout(local_size_x = %LOCAL_SIZE_X%, local_size_y = %LOCAL_SIZE_Y%) in;
+
+layout(location = 0) uniform sampler2D uPosTex;
+layout(location = 1) uniform sampler2D uNormalTex;
+layout(location = 2) uniform sampler2D uUvTex;
+layout(location = 3) uniform usampler2D uIdsTex;
+layout(location = 4) uniform sampler2D uDepthTex;
+
+layout(rgba8, binding = 0) uniform image2D uOutputTex;
+
+uniform int currentTargetCount;
+uniform uvec3[%MAX_COUNT%] targetIds;
+uniform vec4[%MAX_COUNT%] targetColors;
+
+uniform ivec2 inputSize;
+uniform ivec2 outputSize;
+
+void main() {
+    ivec2 outPixel = ivec2(gl_GlobalInvocationID.xy);
+    if (outPixel.x >= outputSize.x || outPixel.y >= outputSize.y) {
+        return;
+    }
+
+    vec2 screenUv = (vec2(outPixel) + 0.5) / vec2(outputSize);
+    ivec2 screenCoord = ivec2(screenUv * vec2(inputSize));
+
+    uvec4 ids = texelFetch(uIdsTex, screenCoord, 0);
+    uvec3 myId = ids.yzw;
+
+    // check if this pixel belongs to any target
+    int matchedIndex = -1;
+    for (int i = 0; i < currentTargetCount; ++i) {
+        if (all(equal(myId, targetIds[i]))) {
+            matchedIndex = i;
+            break;
+        }
+    }
+    
+    if (matchedIndex == -1) {
+    	return;
+    }
+    
+    vec4 baseColor = imageLoad(uOutputTex, outPixel);
+    vec4 outColor = baseColor;
+
+    bool edge = false;
+
+    // check 3x3 neighbors
+    for (int oy = -1; oy <= 1 && !edge; ++oy) {
+        for (int ox = -1; ox <= 1 && !edge; ++ox) {
+            ivec2 nCoord = screenCoord + ivec2(ox, oy);
+            if (nCoord.x < 0 || nCoord.y < 0 || 
+                nCoord.x >= inputSize.x || nCoord.y >= inputSize.y) {
+                continue;
+            }
+
+            uvec4 nIds = texelFetch(uIdsTex, nCoord, 0);
+            uvec3 nId = nIds.yzw;
+
+            // neighbor differs or is not one of the targets
+            if (!all(equal(nId, myId))) {
+                edge = true;
+            }
+        }
+    }
+
+    if (edge) {
+        vec4 outlineColor = targetColors[matchedIndex];
+        outColor = mix(baseColor, outlineColor, outlineColor.a);
+    }
+
+    imageStore(uOutputTex, outPixel, outColor);
+}
+

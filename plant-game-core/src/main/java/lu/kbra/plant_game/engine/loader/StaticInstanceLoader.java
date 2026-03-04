@@ -12,7 +12,7 @@ import java.util.function.Supplier;
 import lu.kbra.pclib.PCUtils;
 import lu.kbra.pclib.impl.ThrowingFunction;
 import lu.kbra.pclib.impl.ThrowingSupplier;
-import lu.kbra.plant_game.engine.loader.StaticMeshLoader.GenericMeshData;
+import lu.kbra.plant_game.engine.loader.GenericMeshData;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.cache.attrib.impl.AttribArray;
 import lu.kbra.standalone.gameengine.geom.Mesh;

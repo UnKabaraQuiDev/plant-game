@@ -60,15 +60,15 @@ public class IconRendererTestLogic extends GameLogic {
 		this.pluginManager.load();
 		this.pluginManager.onLoad();
 
-		for (final BuildingDefinition<?> bd : BuildingRegistry.BUILDING_DEFS.values().stream().flatMap(List::stream).toList()) {
+		for (final BuildingDefinition<?> bd : BuildingRegistry.BUILDING_DEFS.values().stream().flatMap(List::stream)
+				.toList()) {
 			final Class<? extends GameObject> goClazz = bd.getClazz();
 			if (!MeshGameObject.class.isAssignableFrom(goClazz) || !PlaceableObject.class.isAssignableFrom(goClazz)) {
 				continue;
 			}
-			final TaskFuture<List<Object>, ? extends GameObject>.TaskState<? extends GameObject> state = GameObjectFactory.create(goClazz)
-					.set(t -> t.setTransform(new Transform3D()))
-					.set(t -> this.objs.offer(Pairs.readOnly(bd, (MeshGameObject) t)))
-					.push();
+			final TaskFuture<? extends GameObject, ? extends GameObject>.TaskState<? extends GameObject> state = GameObjectFactory
+					.create(goClazz).set(t -> t.setTransform(new Transform3D()))
+					.set(t -> this.objs.offer(Pairs.readOnly(bd, (MeshGameObject) t))).push();
 			this.awaitingCount++;
 		}
 	}
@@ -97,8 +97,8 @@ public class IconRendererTestLogic extends GameLogic {
 		final int size = 1024;
 
 		GlobalLogger.info("Starting rendering.");
-		final MemImage img = this.iconRenderer
-				.renderIcon(this.engine, obj.getValue(), size, new Vector3f(1), new Vector3f(1, 1, 1).normalize(), 0.1f);
+		final MemImage img = this.iconRenderer.renderIcon(this.engine, obj.getValue(), size, new Vector3f(1),
+				new Vector3f(1, 1, 1).normalize(), 0.1f);
 		GlobalLogger.info("Rendering done.");
 		final File outFile = new File(Consts.ICONS_BAKES_RES_DIR, obj.getKey().getInternalPath() + ".png");
 		FileUtils.STBISave(outFile, img);

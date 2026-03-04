@@ -14,7 +14,7 @@ import lu.kbra.pclib.datastructure.pair.Pair;
 import lu.kbra.pclib.datastructure.pair.Pairs;
 import lu.kbra.pclib.impl.ThrowingFunction;
 import lu.kbra.pclib.impl.ThrowingSupplier;
-import lu.kbra.plant_game.engine.loader.StaticMeshLoader.GenericMeshData;
+import lu.kbra.plant_game.engine.loader.GenericMeshData;
 import lu.kbra.plant_game.engine.mesh.AnimatedMesh;
 import lu.kbra.plant_game.engine.util.DelegatingObjLoader;
 import lu.kbra.standalone.gameengine.cache.CacheManager;

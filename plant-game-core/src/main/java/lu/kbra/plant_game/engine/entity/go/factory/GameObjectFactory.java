@@ -3,29 +3,22 @@ package lu.kbra.plant_game.engine.entity.go.factory;
 import static lu.kbra.plant_game.plugin.registry.GameObjectRegistry.BUFFER_SIZE;
 import static lu.kbra.plant_game.plugin.registry.GameObjectRegistry.DATA_PATH;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
+import lu.kbra.plant_game.engine.entity.factory.ObjectFactory;
+import lu.kbra.plant_game.engine.entity.factory.ResolveContext;
+import lu.kbra.plant_game.engine.entity.factory.Resolver;
 import lu.kbra.plant_game.engine.entity.go.GameObject;
-import lu.kbra.plant_game.engine.entity.impl.AnimatedMeshOwner;
 import lu.kbra.plant_game.engine.entity.impl.InstanceEmitterOwner;
-import lu.kbra.plant_game.engine.entity.impl.MeshOwner;
-import lu.kbra.plant_game.engine.entity.impl.NoMeshObject;
-import lu.kbra.plant_game.engine.loader.AnimatedMeshLoader;
-import lu.kbra.plant_game.engine.loader.AnimatedMeshLoader.AnimatedMeshes;
 import lu.kbra.plant_game.engine.loader.StaticInstanceLoader;
-import lu.kbra.plant_game.engine.loader.StaticMeshLoader;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.cache.attrib.impl.AttribArray;
-import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.geom.instance.InstanceEmitter;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
-import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
 import lu.kbra.standalone.gameengine.utils.transform.Transform;
 
 public class GameObjectFactory {
@@ -42,74 +35,40 @@ public class GameObjectFactory {
 		this.cache = cache;
 		this.loader = loader;
 		this.render = render;
+		// configure DI resolver
+		ObjectFactory.setResolver(new Resolver(new ResolveContext(cache, loader, render)));
 	}
 
-	public <T extends GameObject & InstanceEmitterOwner> GOCreatingTaskFuture<T> createInstances_(
-			final Class<T> clazz,
-			final IntFunction<Transform> transforms,
-			final OptionalInt bufferSize,
-			final Optional<String> name,
+	public <T extends GameObject & InstanceEmitterOwner> GOCreatingTaskFuture<T> createInstances_(final Class<T> clazz,
+			final IntFunction<Transform> transforms, final OptionalInt bufferSize, final Optional<String> name,
 			final Supplier<AttribArray>... attribs) {
 
-		return StaticInstanceLoader
-				.getFuture(this.cache, name.orElse(clazz.getSimpleName()), DATA_PATH.get(clazz), bufferSize.orElseGet(() -> {
+		return StaticInstanceLoader.getFuture(this.cache, name.orElse(clazz.getSimpleName()), DATA_PATH.get(clazz),
+				bufferSize.orElseGet(() -> {
 					if (!BUFFER_SIZE.containsKey(clazz)) {
-						throw new IllegalArgumentException("Class: " + clazz.getName() + " defines no default buffer size.");
+						throw new IllegalArgumentException(
+								"Class: " + clazz.getName() + " defines no default buffer size.");
 					}
 					return BUFFER_SIZE.get(clazz);
 				}), transforms, attribs, this.loader, this.render)
-				.then(this.loader, (Function<InstanceEmitter, List<Object>>) Arrays::asList)
-				.then(new GOCreatingTaskFuture(this.loader, clazz));
-	}
-
-	public <T extends GameObject & MeshOwner> GOCreatingTaskFuture<T> createMesh_(final Class<T> clazz) {
-		return StaticMeshLoader.getStaticFuture(this.cache, clazz.getName(), DATA_PATH.get(clazz), this.loader, this.render)
-				.then(this.loader, (Function<Mesh, List<Object>>) Arrays::asList)
-				.then(new GOCreatingTaskFuture(this.loader, clazz));
-	}
-
-	public <T extends GameObject & MeshOwner> GOCreatingTaskFuture<T> createManual_(final Class<T> clazz, final Mesh mesh) {
-		return new TaskFuture<>(this.loader, (Supplier<List<Object>>) () -> Arrays.asList(mesh))
-				.then(new GOCreatingTaskFuture(this.loader, clazz));
-	}
-
-	public <T extends GameObject & NoMeshObject> GOCreatingTaskFuture<T> createNoMesh_(final Class<T> clazz) {
-		return new GOCreatingTaskFuture(this.loader, clazz);
-	}
-
-	public <T extends GameObject & AnimatedMeshOwner & MeshOwner> GOCreatingTaskFuture<T> createAnimatedMesh_(final Class<T> clazz) {
-		return AnimatedMeshLoader.getAnimatedFuture(this.cache, clazz.getName(), DATA_PATH.get(clazz), this.loader, this.render)
 				.then(this.loader,
-						(Function<AnimatedMeshes, List<Object>>) meshes -> Arrays.asList(meshes.staticMesh(), meshes.animatedMesh()))
-				.then(new GOCreatingTaskFuture(this.loader, clazz));
+						(Function<InstanceEmitter, T>) emitter -> ObjectFactory.create(clazz)
+								.with(InstanceEmitter.class, emitter).push().join())
+				.then(new GOCreatingTaskFuture<>(this.loader, clazz));
 	}
 
 	public static <T extends GameObject> GOCreatingTaskFuture<T> create(final Class<T> clazz) {
-		if (NoMeshObject.class.isAssignableFrom(clazz)) {
-			return INSTANCE.createNoMesh_((Class) clazz);
-		}
-		// split this for AnimatedMesh & Mesh and only AnimatedMesh
-		if (AnimatedMeshOwner.class.isAssignableFrom(clazz)) {
-			return INSTANCE.createAnimatedMesh_((Class) clazz);
-		}
-		if (MeshOwner.class.isAssignableFrom(clazz)) {
-			return INSTANCE.createMesh_((Class) clazz);
-		}
-		throw new UnsupportedOperationException(clazz.getName());
+		return ObjectFactory.create(clazz).then(new GOCreatingTaskFuture<>(INSTANCE.loader, clazz));
 	}
 
 	@SafeVarargs
 	public static <T extends GameObject & InstanceEmitterOwner> GOCreatingTaskFuture<T> createInstances(
-			final Class<T> clazz,
-			final IntFunction<Transform> transforms,
-			final OptionalInt bufferSize,
-			final Optional<String> name,
-			final Supplier<AttribArray>... attribs) {
+			final Class<T> clazz, final IntFunction<Transform> transforms, final OptionalInt bufferSize,
+			final Optional<String> name, final Supplier<AttribArray>... attribs) {
 		return INSTANCE.createInstances_(clazz, transforms, bufferSize, name, attribs);
 	}
 
-	public static <T extends GameObject & MeshOwner> GOCreatingTaskFuture<T> createManual(final Class<T> clazz, final Mesh mesh) {
-		return INSTANCE.createManual_(clazz, mesh);
-	}
+	// manual creation can be done through
+	// ObjectFactory.create(clazz).with(Mesh.class, mesh)
 
 }

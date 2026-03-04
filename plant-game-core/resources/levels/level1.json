@@ -1,0 +1,55 @@
+{
+	"levelName": "1st Level",
+	"author": "Me",
+	"world": {
+		"generation": {
+			"strategy": "IMAGE",
+			"path": "/maps/world_map.png",
+			"materialPath": "/maps/world_map_materials_color.png",
+			"colorMaterial": true,	
+			"height": 4
+		},
+		"waterLevel": {
+			"max": 1.7,
+			"min": 0.2
+		},
+		"light": {
+			"color": [1, 1, 1],
+			"ambient": 0.25,
+			"direction": [0.5, 0.5, 0.5]
+		},
+		"wind": {
+			"strength": 1,
+			"direction": [1, 1]
+		}
+	},
+	"game": {
+		"startResources": {
+			"base:water": 200,
+			"base:energy": 100,
+			"base:money": 100
+		},
+		"lockedBuildings": [
+			"base:water-tower-large"
+		],
+		"buildingsOverride": {
+			"base:water-tower-medium": {
+				"price": 100,
+				"unlockRequirements": [
+					{
+						"type": "MIN_BUILD",
+						"count": 2,
+						"building": "base:water-tower-small"
+					}
+				],
+				"buildRequirements": [
+					{
+						"type": "MIN_RESOURCE",
+						"count": 2000,
+						"resource": "base:water"
+					}
+				]
+			}
+		}
+	}
+}

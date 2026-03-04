@@ -1,0 +1,59 @@
+#version 430
+
+layout(local_size_x = %LOCAL_SIZE_X%, local_size_y = %LOCAL_SIZE_Y%) in;
+
+layout(rgba16f, binding = 0) uniform writeonly image2D uOutputImage;
+
+uniform ivec2 inputSize;
+uniform int radius;
+uniform float weights[%MAX_RADIUS%];
+uniform bool horizontal;
+
+uniform sampler2D txtBloom;
+
+float brightness(vec3 color) {
+	return dot(color, vec3(0.2126, 0.7152, 0.0722));
+}
+
+void main()
+{
+	ivec2 gid = ivec2(gl_GlobalInvocationID.xy);
+
+	if (gid.x >= inputSize.x || gid.y >= inputSize.y)
+		return;
+
+	vec2 texSize = vec2(inputSize);
+	vec2 uv = (vec2(gid) + 0.5) / texSize;
+
+	vec4 center = texture(txtBloom, uv);
+
+	vec3 accumColor = center.rgb * center.a * weights[0];
+	float accumAlpha = center.a * weights[0];
+	
+	for (int i = 1; i <= radius; ++i) {
+		ivec2 offset = horizontal
+			? ivec2(i, 0)
+			: ivec2(0, i);
+	
+		ivec2 pos1 = clamp(gid + offset, ivec2(0), inputSize - 1);
+		ivec2 pos2 = clamp(gid - offset, ivec2(0), inputSize - 1);
+	
+		vec2 uv1 = (vec2(pos1) + 0.5) / texSize;
+		vec2 uv2 = (vec2(pos2) + 0.5) / texSize;
+	
+		vec4 s1 = texture(txtBloom, uv1);
+		vec4 s2 = texture(txtBloom, uv2);
+	
+		accumColor += s1.rgb * s1.a * weights[i];
+		accumColor += s2.rgb * s2.a * weights[i];
+	
+		accumAlpha += s1.a * weights[i];
+		accumAlpha += s2.a * weights[i];
+	}
+	
+	vec3 finalColor = accumAlpha > 0.0
+		? accumColor / accumAlpha
+		: vec3(0.0);
+	
+	imageStore(uOutputImage, gid, vec4(finalColor, accumAlpha));
+}

@@ -24,10 +24,6 @@ import lu.kbra.standalone.gameengine.utils.gl.consts.TextureFilter;
 
 public class StaticMeshLoader {
 
-	public record GenericMeshData(String filePath, Vector3f origin, boolean textureMaterial, String texturePath, float deformRatio,
-			float speedRatio, boolean bloomTextureMaterial, String bloomTexturePath, float bloomStrength) {
-
-	}
 
 	public static GenericMeshData getStaticMeshData(final String path) {
 		try {

@@ -5,37 +5,37 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-import lu.kbra.pclib.PCUtils;
-import lu.kbra.pclib.concurrency.DeferredTriggerLatch;
-import lu.kbra.pclib.concurrency.GenericTriggerLatch;
-import lu.kbra.pclib.pointer.ObjectPointer;
 import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.entity.impl.NeedsPostConstruct;
-import lu.kbra.plant_game.plugin.registry.GameObjectRegistry;
+import lu.kbra.plant_game.engine.util.latch.DeferredTriggerLatch;
+import lu.kbra.plant_game.engine.util.latch.GenericTriggerLatch;
+import lu.kbra.pclib.pointer.ObjectPointer;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
 import lu.kbra.standalone.gameengine.scene.EntityContainer;
 
-public class GOCreatingTaskFuture<T extends GameObject> extends TaskFuture<List<Object>, T> {
+/**
+ * Post-processing wrapper for GameObject creation.
+ * <p>
+ * This future expects the GameObject instance as input and applies hooks.
+ */
+public class GOCreatingTaskFuture<T extends GameObject> extends TaskFuture<T, T> {
 
-	protected Class<T> clazz;
-
-	protected List<Consumer<T>> postCreateHooks = new ArrayList<>();
-	protected List<Consumer<T>> postInitHooks = new ArrayList<>();
+	protected final Class<T> clazz;
+	protected final List<Consumer<T>> postCreateHooks = new ArrayList<>();
+	protected final List<Consumer<T>> postInitHooks = new ArrayList<>();
 
 	public GOCreatingTaskFuture(final Dispatcher dispatcher, final Class<T> clazz) {
 		super(dispatcher);
 		this.clazz = clazz;
-		super.task = list -> {
-			final T instance = GameObjectRegistry.create(clazz,
-					PCUtils.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime() },
-							list == null ? new Object[0] : list.toArray()));
-			this.postCreateHooks.forEach(pch -> pch.accept(instance));
-			if (instance instanceof final NeedsPostConstruct npc) {
+		super.task = instance -> {
+			final T v = this.clazz.cast(instance);
+			this.postCreateHooks.forEach(h -> h.accept(v));
+			if (v instanceof final NeedsPostConstruct npc) {
 				npc.init();
 			}
-			this.postInitHooks.forEach(pch -> pch.accept(instance));
-			return instance;
+			this.postInitHooks.forEach(h -> h.accept(v));
+			return v;
 		};
 	}
 
@@ -46,13 +46,13 @@ public class GOCreatingTaskFuture<T extends GameObject> extends TaskFuture<List<
 
 	public GOCreatingTaskFuture<T> add(final EntityContainer<? super T> parent) {
 		Objects.requireNonNull(parent);
-		this.postInitHooks.add(v -> parent.add(v));
+		this.postInitHooks.add(parent::add);
 		return this;
 	}
 
 	public GOCreatingTaskFuture<T> get(final ObjectPointer<? super T> ptr) {
 		Objects.requireNonNull(ptr);
-		this.postInitHooks.add(v -> ptr.set(v));
+		this.postInitHooks.add(ptr::set);
 		return this;
 	}
 
@@ -63,7 +63,7 @@ public class GOCreatingTaskFuture<T extends GameObject> extends TaskFuture<List<
 
 	public GOCreatingTaskFuture<T> latch(final GenericTriggerLatch<? super T> latch) {
 		Objects.requireNonNull(latch);
-		this.postInitHooks.add((final T v) -> latch.trigger(v));
+		this.postInitHooks.add(latch::trigger);
 		return this;
 	}
 
@@ -73,5 +73,4 @@ public class GOCreatingTaskFuture<T extends GameObject> extends TaskFuture<List<
 		this.push();
 		return latch;
 	}
-
 }

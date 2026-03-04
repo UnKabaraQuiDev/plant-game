@@ -1,14 +1,23 @@
 package lu.kbra.plant_game.engine.util;
 
+import java.lang.reflect.Constructor;
 import java.util.Arrays;
 import java.util.function.Function;
 
-public class InternalConstructorFunction<T> implements Function<Object[], T> {
+/**
+ * Internal wrapper around a public constructor.
+ * <p>
+ * The constructor reference is kept so runtime systems can inspect
+ * parameter/constructor/class annotations at runtime.
+ */
+public final class InternalConstructorFunction<T> implements Function<Object[], T> {
 
+	private final Constructor<?> constructor;
 	private final Class<?>[] params;
 	private final Function<Object[], T> delegate;
 
-	public InternalConstructorFunction(final Class<?>[] params, final Function<Object[], T> delegate) {
+	public InternalConstructorFunction(final Constructor<?> constructor, final Class<?>[] params, final Function<Object[], T> delegate) {
+		this.constructor = constructor;
 		this.params = params;
 		this.delegate = delegate;
 	}
@@ -20,6 +29,10 @@ public class InternalConstructorFunction<T> implements Function<Object[], T> {
 
 	public Class<?>[] getParams() {
 		return this.params;
+	}
+
+	public Constructor<?> getConstructor() {
+		return this.constructor;
 	}
 
 	public Function<Object[], T> getDelegate() {
@@ -76,7 +89,8 @@ public class InternalConstructorFunction<T> implements Function<Object[], T> {
 
 	@Override
 	public String toString() {
-		return "InternalConstructorFunction [params=" + Arrays.toString(this.params) + ", delegate=" + this.delegate + "]";
+		return "InternalConstructorFunction [constructor=" + this.constructor + ", params=" + Arrays.toString(this.params) + ", delegate="
+				+ this.delegate + "]";
 	}
 
 }

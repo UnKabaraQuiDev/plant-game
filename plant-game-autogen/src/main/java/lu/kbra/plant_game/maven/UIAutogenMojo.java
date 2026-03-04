@@ -208,18 +208,28 @@ public class UIAutogenMojo extends AbstractMojo implements AutogenDefaults {
 			initMethod.addCode("/* $L $T $L */\n", spacer, TypeName.get(c), spacer);
 			initMethod.addStatement("final $T $L = new $T<>()", specificSubListType, listName, ArrayList.class);
 
+			int conIdx = 0;
 			for (final Constructor<?> con : Arrays.stream(c.getConstructors())
 					.sorted(Comparator.comparing(Constructor<?>::getParameterCount)).collect(Collectors.toList())) {
 
+				final String conVar = "con_" + c.getSimpleName() + "_" + (conIdx++);
 				initMethod.addStatement(
-						"$L.add(new $T<>(new $T {" + IntStream.range(0, con.getParameterCount())
+						"final $T $L = $T.class.getConstructor(" + IntStream.range(0, con.getParameterCount())
+								.mapToObj(i -> "$T.class").collect(Collectors.joining(", ")) + ")",
+						PCUtils.concatStreams(
+								Stream.of(java.lang.reflect.Constructor.class, conVar, c),
+								Arrays.stream(con.getParameterTypes()).map(TypeName::get))
+								.toArray());
+
+				initMethod.addStatement(
+						"$L.add(new $T<>($L, new $T {" + IntStream.range(0, con.getParameterCount())
 								.mapToObj(i -> "$T.class").collect(Collectors.joining(", "))
 								+ "}, ($T[] arr) -> ($T) new $T("
 								+ IntStream.range(0, con.getParameterCount()).mapToObj(i -> "($T) $L")
 										.collect(Collectors.joining(", "))
-								+ ")))",
+								+ ")))" ,
 						PCUtils.concatStreams(
-								Stream.of(listName, internalConstructorFunctionClass, ArrayTypeName.of(Class.class)),
+								Stream.of(listName, internalConstructorFunctionClass, conVar, ArrayTypeName.of(Class.class)),
 								Arrays.stream(con.getParameterTypes()).map(TypeName::get),
 								Stream.of(Object.class, gameObjectClass, c),
 								IntStream.range(0, con.getParameterCount())

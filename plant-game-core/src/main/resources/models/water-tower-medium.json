@@ -1,0 +1,19 @@
+{
+    "collection_name": "water-tower-medium",
+    "animated": false,
+    "meshes": {
+        "static": {
+            "file": "models/water-tower-medium_static.obj",
+            "offset_from_origin": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "texture_material": true,
+            "texture_path": "textures/water_tower_base.png",
+			"bloom_texture_material": true,
+			"bloom_texture_path": "textures/water_tower_base-bloom.png",
+			"bloom_strength": 5
+        }
+    }
+}
