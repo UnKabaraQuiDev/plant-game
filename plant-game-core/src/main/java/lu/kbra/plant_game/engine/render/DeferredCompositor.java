@@ -389,7 +389,7 @@ public class DeferredCompositor extends AutoCleanupable {
 			needRegen = false;
 		}
 
-//		this.renderFilters(cache, this.outputResolution, needRegen);
+		this.renderFilters(cache, this.outputResolution, needRegen);
 
 		this.blitToScreen(this.outputResolution, needRegen);
 

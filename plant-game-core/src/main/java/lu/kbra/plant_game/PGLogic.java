@@ -26,6 +26,8 @@ import lu.kbra.plant_game.engine.data.locale.LocalizationService;
 import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
+import lu.kbra.plant_game.engine.render.shader.compute.filter.VignetteShader;
+import lu.kbra.plant_game.engine.render.shader.compute.filter.VignetteShader.VignetteShaderConfiguration;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
 import lu.kbra.plant_game.engine.scene.world.GameData;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
@@ -108,6 +110,9 @@ public class PGLogic extends GameLogic {
 		this.mainMenuWorldScene.init(this.WORKERS, this.RENDER_DISPATCHER, this.gameData, new IntPointer(0));
 
 		this.pluginManager.onEnable();
+
+		final VignetteShaderConfiguration config = compositor.getFilterShader(VignetteShader.class).newConfigurationInstance();
+		compositor.enableFilter(config);
 	}
 
 	private final UpdateFrameState frameState = new UpdateFrameState();
