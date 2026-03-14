@@ -96,7 +96,7 @@ public class BuildingDefinition<T extends GameObject & PlaceableObject> implemen
 					str.setText(br.getLocalizationValue()).flushText();
 					str.getTextEmitter()
 							.setForegroundColor(br.isFulfilled(PGLogic.INSTANCE.getWorldScene()) ? ColorMaterial.GREEN.getColor()
-									: ColorMaterial.RED.getColor());
+									: ColorMaterial.LIGHT_RED.getColor());
 					str.setActive(true);
 				} else {
 					str.setActive(false);
@@ -105,8 +105,6 @@ public class BuildingDefinition<T extends GameObject & PlaceableObject> implemen
 			});
 		}
 
-		t.doLayout();
-		t.getContent().doLayout();
 		t.doLayout();
 	}
 

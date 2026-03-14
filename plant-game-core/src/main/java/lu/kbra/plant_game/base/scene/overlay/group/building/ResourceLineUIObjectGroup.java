@@ -1,24 +1,26 @@
 package lu.kbra.plant_game.base.scene.overlay.group.building;
 
+import java.awt.geom.Rectangle2D;
+
 import org.joml.Vector3f;
 
 import lu.kbra.pclib.concurrency.ObjectTriggerLatch;
 import lu.kbra.pclib.pointer.ObjectPointer;
-import lu.kbra.plant_game.base.scene.overlay.group.impl.BoundedUIObjectGroup;
 import lu.kbra.plant_game.base.scene.overlay.stat_line.integer.AnchoredFixedIntegerStatLine;
 import lu.kbra.plant_game.base.scene.overlay.stat_line.integer.FixedIntegerStatLine;
-import lu.kbra.plant_game.engine.entity.ui.data.Direction2d;
+import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
+import lu.kbra.plant_game.engine.entity.ui.group.LayoutOffsetUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.text.IndexedAnchoredProgrammaticTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.IntegerTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.ProgrammaticTextUIObject;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
-import lu.kbra.plant_game.engine.scene.ui.layout.AnchorLayout;
+import lu.kbra.plant_game.engine.scene.ui.layout.FlowLayout;
 import lu.kbra.plant_game.engine.scene.ui.layout.Layout;
 import lu.kbra.plant_game.engine.scene.world.data.resource.ResourceType;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-public class ResourceLineUIObjectGroup extends BoundedUIObjectGroup {
+public class ResourceLineUIObjectGroup extends LayoutOffsetUIObjectGroup implements MinBoundsOwner {
 
 	public static final float FONT_HEIGHT = FixedIntegerStatLine.GAP;
 	public static final int COLUMN_COUNT = 25;
@@ -28,13 +30,13 @@ public class ResourceLineUIObjectGroup extends BoundedUIObjectGroup {
 	protected ObjectPointer<ProgrammaticTextUIObject> textObject = new ObjectPointer<>();
 	protected AnchoredFixedIntegerStatLine valueObject;
 
-	public ResourceLineUIObjectGroup(final String str, final Layout layout, final Direction2d dir, final ResourceType resourceType) {
-		super(str, layout, dir);
+	public ResourceLineUIObjectGroup(final String str, final Layout layout, final ResourceType resourceType) {
+		super(str, layout);
 		this.resourceType = resourceType;
 	}
 
 	public ResourceLineUIObjectGroup(final String str, final ResourceType resourceType) {
-		super(str, new AnchorLayout(), Direction2d.VERTICAL);
+		super(str, new FlowLayout(false, 0.05f));
 		this.resourceType = resourceType;
 	}
 
@@ -58,6 +60,18 @@ public class ResourceLineUIObjectGroup extends BoundedUIObjectGroup {
 				.then(AnchoredFixedIntegerStatLine::flushValue);
 
 		return latch;
+	}
+
+	@Override
+	public Rectangle2D getMinBounds() {
+		float width = 0;
+		float height = 0;
+		for (UIObject obj : this) {
+			final Rectangle2D rect = obj.getLocalTransformedBounds().getBounds2D();
+			width += rect.getWidth();
+			height += rect.getHeight();
+		}
+		return new Rectangle2D.Float(-width / 2, -height, width, height);
 	}
 
 	public ResourceLineUIObjectGroup set(final int value) {
@@ -88,10 +102,10 @@ public class ResourceLineUIObjectGroup extends BoundedUIObjectGroup {
 
 	@Override
 	public String toString() {
-		return "ResourceLineUIObjectGroup@" + System.identityHashCode(this) + " [resourceType=" + this.resourceType + ", dir=" + this.dir
-				+ ", bounds=" + this.bounds + ", layout=" + this.layout + ", subEntitiesLock=" + this.subEntitiesLock + ", subEntities="
-				+ this.subEntities + ", computedBounds=" + this.computedBounds + ", transform=" + this.transform + ", active=" + this.active
-				+ ", name=" + this.name + "]";
+		return "ResourceLineUIObjectGroup@" + System.identityHashCode(this) + " [resourceType=" + this.resourceType + ", textObject="
+				+ this.textObject + ", valueObject=" + this.valueObject + ", layout=" + this.layout + ", subEntitiesLock="
+				+ this.subEntitiesLock + ", subEntities=" + this.subEntities + ", computedBounds=" + this.computedBounds + ", transform="
+				+ this.transform + ", active=" + this.active + ", name=" + this.name + "]";
 	}
 
 }

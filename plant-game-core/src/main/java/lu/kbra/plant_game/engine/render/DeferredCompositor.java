@@ -168,6 +168,8 @@ public class DeferredCompositor extends AutoCleanupable {
 	public static final Vector4f DEBUG_BOUNDS_COLOR = new Vector4f(0, 1, 1, 1);
 	public static final String DEBUG_BOUNDS_LINE_WIDTH_PROPERTY = DeferredCompositor.class.getSimpleName() + ".debug_bounds.line_width";
 	public static float DEBUG_BOUNDS_LINE_WIDTH = Float.parseFloat(System.getProperty(DEBUG_BOUNDS_LINE_WIDTH_PROPERTY, "1"));
+	public static final String DEBUG_BOUNDS_IGNORE_DEPTH_PROPERTY = DeferredCompositor.class.getSimpleName() + ".debug_bounds.ignore_depth";
+	public static boolean DEBUG_BOUNDS_IGNORE_DEPTH = Boolean.getBoolean(DEBUG_BOUNDS_IGNORE_DEPTH_PROPERTY);
 
 	public static final String DEBUG_FOOTPRINTS_PROPERTY = DeferredCompositor.class.getSimpleName() + ".debug_footprints";
 	public static boolean DEBUG_FOOTPRINTS = Boolean.getBoolean(DEBUG_FOOTPRINTS_PROPERTY);
@@ -1552,13 +1554,17 @@ public class DeferredCompositor extends AutoCleanupable {
 				GL_W.glEnable(GL_W.GL_LINE_SMOOTH);
 			}
 			GL_W.glLineWidth(DEBUG_BOUNDS_LINE_WIDTH);
-//			GL_W.glDisable(GL_W.GL_DEPTH_TEST);
+			if (DEBUG_BOUNDS_IGNORE_DEPTH) {
+				GL_W.glDisable(GL_W.GL_DEPTH_TEST);
+			}
 
 			GL_W.glPolygonMode(PolygonMode.FRONT_AND_BACK.getGlId(), PolygonDrawMode.LINE.getGlId());
 
 			GL_W.glDrawElements(this.lineDirectShader.getBeginMode().getGlId(), this.QUAD.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
 
-//			GL_W.glEnable(GL_W.GL_DEPTH_TEST);
+			if (DEBUG_BOUNDS_IGNORE_DEPTH) {
+				GL_W.glEnable(GL_W.GL_DEPTH_TEST);
+			}
 			GL_W.glPolygonMode(GL_W.GL_FRONT_AND_BACK, GL_W.GL_FILL);
 		}
 	}

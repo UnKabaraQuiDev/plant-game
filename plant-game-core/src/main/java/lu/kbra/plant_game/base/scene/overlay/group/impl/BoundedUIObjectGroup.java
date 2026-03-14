@@ -13,6 +13,11 @@ import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwnerParentAware;
 import lu.kbra.plant_game.engine.scene.ui.layout.Layout;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
+/**
+ * Direction = Sub-components' size<br>
+ * Horizontal = Vertical parent + horizontal children<br>
+ * Vertical = Horizontal parent + vertical children<br>
+ */
 public class BoundedUIObjectGroup extends LayoutOffsetUIObjectGroup implements BoundsOwnerParentAware {
 
 	/**

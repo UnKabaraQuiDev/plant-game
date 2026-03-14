@@ -27,7 +27,7 @@
 		"startResources": {
 			"base:water": 200,
 			"base:energy": 100,
-			"base:money": 100
+			"base:money": 500
 		},
 		"lockedBuildings": [
 			"base:water-tower-large"

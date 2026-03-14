@@ -2,6 +2,7 @@ package lu.kbra.plant_game.engine.entity.ui.impl;
 
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
 
 import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
@@ -27,6 +28,10 @@ public interface TransformedBoundsOwner extends BoundsOwner, Transform3DOwner {
 
 	default Shape getTransformedBounds(final Matrix4fc parentMatrix) {
 		return getTransformedBounds(this.getBounds(), this.getTransform(), parentMatrix);
+	}
+
+	default Shape getTransformedBounds(final Rectangle2D bounds) {
+		return getTransformedBounds(this.getBounds(), this.getTransform());
 	}
 
 	static Shape getLocalTransformedBounds(final Shape bounds, final Transform3D transform) {

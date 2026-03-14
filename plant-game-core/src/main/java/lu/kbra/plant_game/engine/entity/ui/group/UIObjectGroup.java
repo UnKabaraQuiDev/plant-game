@@ -9,6 +9,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.function.ToDoubleFunction;
 
+import lu.kbra.plant_game.base.scene.overlay.group.building.MinBoundsOwner;
 import lu.kbra.plant_game.engine.entity.impl.NoMeshObject;
 import lu.kbra.plant_game.engine.entity.impl.SynchronizedEntityContainer;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
@@ -162,11 +163,16 @@ public class UIObjectGroup extends UIObject implements ObjectGroup<UIObject>, No
 		final Area combined = new Area();
 		synchronized (this.getEntitiesLock()) {
 			this.getWEntities().forEach(se -> {
-				if (se instanceof IgnoreBounds) {
+				if (se instanceof IgnoreBounds || !se.isActive()) {
 					return;
 				}
 				if (se instanceof final UIObjectGroup objGroup) {
 					objGroup.recomputeBounds();
+				}
+				if (se instanceof MinBoundsOwner mbo) {
+					final Shape otherBounds = mbo.getTransformedMinBounds();
+					combined.add(new Area(otherBounds));
+					return;
 				}
 				final Shape otherBounds = se.getTransformedBounds();
 				if (otherBounds == null) {

@@ -11,6 +11,11 @@ import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwnerParentAware;
 import lu.kbra.plant_game.engine.scene.ui.layout.Layout;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
+/**
+ * Direction = Sub-components' size<br>
+ * Horizontal = Vertical size + horizontal children<br>
+ * Vertical = Horizontal size + vertical children<br>
+ */
 public class FixedBoundsUIObjectGroup extends LayoutOffsetUIObjectGroup implements BoundsOwnerParentAware {
 
 	/**
@@ -49,9 +54,6 @@ public class FixedBoundsUIObjectGroup extends LayoutOffsetUIObjectGroup implemen
 
 		super.recomputeBounds();
 		final Rectangle2D compBounds = super.computedBounds.getBounds2D();
-
-//		final float paddingX = (float) (this.parallelStream().mapToDouble(marginSumX).sum() + paddingSumX.applyAsDouble(this));
-//		final float paddingZ = (float) (this.parallelStream().mapToDouble(marginSumZ).sum() + paddingSumZ.applyAsDouble(this));
 
 		final float outerPaddingX = (float) paddingSumX.applyAsDouble(this);
 		final float outerPaddingZ = (float) paddingSumZ.applyAsDouble(this);
