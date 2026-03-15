@@ -90,8 +90,12 @@ public interface PlaceableObject extends Transform3DOwner, UniqueID, SceneEntity
 		return aStartX <= bEndX && aEndX >= bStartX && aStartY <= bEndY && aEndY >= bStartY;
 	}
 
-	static Localizable getLocalizable(final Class<? extends GameObject> building) {
-		return Localizable.of(LOCALIZATION_KEY + BuildingRegistry.getInternalName(building).replace(":", "."));
+	static <T extends GameObject & PlaceableObject> Localizable getLocalizable(final Class<T> building) {
+		return Localizable.of(getLocalizableKey(building));
+	}
+
+	static <T extends GameObject & PlaceableObject> String getLocalizableKey(final Class<T> building) {
+		return LOCALIZATION_KEY + BuildingRegistry.getInternalName(building).replace(":", ".");
 	}
 
 }

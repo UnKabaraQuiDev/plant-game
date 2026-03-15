@@ -92,7 +92,6 @@ public class BuildingItemUIObjectGroup extends OffsetUIObjectGroup
 		}
 
 		final GameData gameData = PGLogic.INSTANCE.getGameData();
-//		final LevelData levelData = gameData.getLevelData();
 		final WorldLevelScene worldScene = PGLogic.INSTANCE.getWorldScene();
 
 		if (!this.buildingDefinition.isUnlocked(gameData, worldScene)) {
@@ -118,12 +117,7 @@ public class BuildingItemUIObjectGroup extends OffsetUIObjectGroup
 						return;
 					}
 					modal.setAttachedObject(po);
-					modal.setPlaceHook(() -> {
-						gameData.buyBuilding(this.buildingDefinition);
-//						if (go instanceof NeedsRandomTick nrt) {
-//							worldScene.addRandomTick(nrt);
-//						}
-					});
+					modal.setPlaceHook(() -> gameData.buyBuilding(this.buildingDefinition));
 					modal.setCancelHook(() -> worldScene.remove(go));
 					worldScene.startModal(modal);
 				})
@@ -203,13 +197,7 @@ public class BuildingItemUIObjectGroup extends OffsetUIObjectGroup
 	}
 
 	public void updateTintStatus(final GameData gameData, final WorldLevelScene world) {
-		if (this.buildingDefinition.canBuild(gameData, world)) {
-			this.setColorMaterial(ColorMaterial.GREEN);
-		} else if (this.buildingDefinition.isUnlocked(gameData, world)) {
-			this.setColorMaterial(ColorMaterial.ORANGE);
-		} else {
-			this.setColorMaterial(ColorMaterial.GRAY);
-		}
+		this.setColorMaterial(this.buildingDefinition.getColorMaterial(gameData, world));
 	}
 
 	@Override

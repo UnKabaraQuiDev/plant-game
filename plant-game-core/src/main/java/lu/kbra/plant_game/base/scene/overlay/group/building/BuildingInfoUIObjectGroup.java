@@ -48,10 +48,13 @@ public class BuildingInfoUIObjectGroup extends LayoutOffsetUIObjectGroup impleme
 	public static final float FONT_HEIGHT = FixedIntegerStatLine.GAP;
 	public static final int COLUMN_COUNT = 25;
 	public static final Vector2fc SMALLEST_CHAR_SIZE = new Vector2f(FONT_HEIGHT / 1.75f);
+	public static final float MEDIUM_FONT_SIZE = FixedIntegerStatLine.GAP * 0.8f;
+	public static final Vector2fc BIGGEST_CHAR_SIZE = new Vector2f(FONT_HEIGHT);
 
 	protected final LayoutOffsetUIObjectGroup content;
 
 	protected ObjectPointer<UIObject> backdrop = new ObjectPointer<>();
+	protected ObjectPointer<ProgrammaticTextUIObject> title = new ObjectPointer<>();
 
 	protected Anchor objectAnchor = Anchor.BOTTOM_CENTER;
 	protected Anchor targetAnchor = Anchor.TOP_CENTER;
@@ -75,6 +78,15 @@ public class BuildingInfoUIObjectGroup extends LayoutOffsetUIObjectGroup impleme
 			public void doSort() {
 				synchronized (this.getEntitiesLock()) {
 					this.getWEntities().sort((o1, o2) -> {
+						System.err.println("cmp: " + o1.getId() + " " + o2.getId());
+
+						if (o1 instanceof TextUIObject t1 && "title".equals(t1.getId())) {
+							return -1;
+						}
+						if (o2 instanceof TextUIObject t2 && "title".equals(t2.getId())) {
+							return 1;
+						}
+
 						if (o1 instanceof ResourceLineUIObjectGroup && o2 instanceof TextUIObject) {
 							return -1;
 						}
@@ -108,7 +120,7 @@ public class BuildingInfoUIObjectGroup extends LayoutOffsetUIObjectGroup impleme
 	}
 
 	public ObjectTriggerLatch<? extends BuildingInfoUIObjectGroup> init() {
-		final ObjectTriggerLatch<? extends BuildingInfoUIObjectGroup> latch = new ObjectTriggerLatch<>(3, this);
+		final ObjectTriggerLatch<? extends BuildingInfoUIObjectGroup> latch = new ObjectTriggerLatch<>(4, this);
 		final float size = COLUMN_COUNT * FONT_HEIGHT;
 
 		this.add(SpacerUIObject.getSpacer(size, 0));
@@ -117,6 +129,20 @@ public class BuildingInfoUIObjectGroup extends LayoutOffsetUIObjectGroup impleme
 		this.addCostIntLine(DefaultResourceType.MONEY).latch(latch);
 
 		this.addStringLine().latch(latch);
+
+		UIObjectFactory
+				.createText(ProgrammaticTextUIObject.class,
+						OptionalInt.of(COLUMN_COUNT),
+						Optional.of(BIGGEST_CHAR_SIZE),
+						Optional.empty(),
+						Optional.empty(),
+						Optional.empty())
+				.set(i -> i.setTransform(new Transform3D()))
+				.set(i -> i.setId("title"))
+				.add(this.content)
+				.get(this.title)
+				.latch(latch)
+				.push();
 
 		/* backdrop */
 		UIObjectFactory.create(IBAnchoredFlatQuadUIObject.class)
@@ -153,7 +179,7 @@ public class BuildingInfoUIObjectGroup extends LayoutOffsetUIObjectGroup impleme
 
 	public ObjectTriggerLatch<? extends ResourceLineUIObjectGroup> addIntLine(final String id, final ResourceType rt) {
 		final ResourceLineUIObjectGroup newLine = new ResourceLineUIObjectGroup(id, rt);
-		return newLine.init().thenOther(c -> {
+		return newLine.init(MEDIUM_FONT_SIZE).thenOther(c -> {
 			this.content.add(c);
 			this.resourceLines.add(c);
 		});
@@ -223,6 +249,10 @@ public class BuildingInfoUIObjectGroup extends LayoutOffsetUIObjectGroup impleme
 		} else if (this.getTarget() != target) {
 			this.target = new WeakReference<>(target);
 		}
+	}
+
+	public ObjectPointer<ProgrammaticTextUIObject> getTitle() {
+		return this.title;
 	}
 
 	public WeakList<ResourceLineUIObjectGroup> getResourceLines() {

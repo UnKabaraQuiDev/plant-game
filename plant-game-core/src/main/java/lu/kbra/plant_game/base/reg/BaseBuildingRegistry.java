@@ -6,7 +6,7 @@ import static lu.kbra.plant_game.DefaultBuildingCategories.WATER;
 import java.util.List;
 
 import lu.kbra.plant_game.base.entity.go.obj.energy.SolarPanelSmallObject;
-import lu.kbra.plant_game.base.entity.go.obj.energy.WaterWheelObject;
+import lu.kbra.plant_game.base.entity.go.obj.energy.WaterWheelSmallObject;
 import lu.kbra.plant_game.base.entity.go.obj.energy.WindTurbineMediumObject;
 import lu.kbra.plant_game.base.entity.go.obj.water.WaterSprinklerObject3x3;
 import lu.kbra.plant_game.base.entity.go.obj.water.WaterSprinklerObject5x5;
@@ -27,7 +27,7 @@ public class BaseBuildingRegistry extends BuildingRegistry {
 //		register(ENERGY, SolarPanelMediumObject.class, 45, List.of(), List.of(), 20);
 		this.register(ENERGY, SolarPanelSmallObject.class, 40, List.of(), List.of(), 10);
 		this.register(ENERGY, WindTurbineMediumObject.class, 125, List.of(), List.of(), 20);
-		this.register(ENERGY, WaterWheelObject.class, 125, List.of(), List.of(), 30);
+		this.register(ENERGY, WaterWheelSmallObject.class, 125, List.of(), List.of(), 30);
 
 		this.register(WATER, WaterTowerObject.class, 60, List.of(), List.of(), 20);
 		this.register(WATER, WaterSprinklerObject3x3.class, 80, List.of(), List.of(), 30);

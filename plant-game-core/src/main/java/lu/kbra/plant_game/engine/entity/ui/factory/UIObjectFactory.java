@@ -68,6 +68,8 @@ public class UIObjectFactory {
 			final Optional<String> key,
 			final Supplier<AttribArray>... attribs) {
 
+		System.err.println(clazz.getSimpleName() + " = " + key.orElse(DATA_PATH.get(clazz)));
+
 		return StaticTextLoader.getFuture(this.cache,
 				name.orElse(ProgrammaticUIObject.class.isAssignableFrom(clazz) ? key.orElse(clazz.getSimpleName() + "#" + System.nanoTime())
 						: clazz.getSimpleName()),

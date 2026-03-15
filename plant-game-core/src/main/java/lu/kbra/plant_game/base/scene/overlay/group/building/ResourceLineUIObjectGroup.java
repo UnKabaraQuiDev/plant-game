@@ -62,6 +62,28 @@ public class ResourceLineUIObjectGroup extends LayoutOffsetUIObjectGroup impleme
 		return latch;
 	}
 
+	public ObjectTriggerLatch<? extends ResourceLineUIObjectGroup> init(final float fontSize) {
+		final ObjectTriggerLatch<? extends ResourceLineUIObjectGroup> latch = new ObjectTriggerLatch<>(2, this);
+
+		this.valueObject = new AnchoredFixedIntegerStatLine(this.getId() + "-value", 0f, Anchor.CENTER_RIGHT, Anchor.CENTER_RIGHT);
+		this.add(this.valueObject);
+
+		UIObjectFactory.createText(IndexedAnchoredProgrammaticTextUIObject.class, fontSize, this.getResourceType().getLocalizationKey())
+				.set(i -> i.setTransform(new Transform3D(new Vector3f(0, 0.2f, 0))))
+				.set(i -> i.setAnchors(Anchor.CENTER_LEFT, Anchor.CENTER_LEFT))
+				.set(i -> i.setIndex(-1)) // before the other
+				.get(this.textObject)
+				.add(this)
+				.latch(latch)
+				.push();
+
+		this.valueObject.init(FONT_HEIGHT, this.getResourceType().getIconClass(), IntegerTextUIObject.class)
+				.latch(latch)
+				.then(AnchoredFixedIntegerStatLine::flushValue);
+
+		return latch;
+	}
+
 	@Override
 	public Rectangle2D getMinBounds() {
 		float width = 0;

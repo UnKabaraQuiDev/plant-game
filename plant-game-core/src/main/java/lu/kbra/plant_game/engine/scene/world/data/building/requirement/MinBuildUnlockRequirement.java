@@ -27,7 +27,7 @@ public class MinBuildUnlockRequirement extends AbstractLocalizationString implem
 		this.addParam(Localizable.of(building));
 	}
 
-	public MinBuildUnlockRequirement(final int count, final Class<? extends GameObject> building) {
+	public <T extends GameObject & PlaceableObject> MinBuildUnlockRequirement(final int count, final Class<T> building) {
 		this.count = count;
 		this.building = BuildingRegistry.getInternalName(building);
 		this.addParam(Localizable.raw(count));

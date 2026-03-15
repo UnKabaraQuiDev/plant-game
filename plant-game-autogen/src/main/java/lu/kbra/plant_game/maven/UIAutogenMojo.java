@@ -191,6 +191,10 @@ public class UIAutogenMojo extends AbstractMojo implements AutogenDefaults {
 			if (java.lang.reflect.Modifier.isAbstract(c.getModifiers())) {
 				continue;
 			}
+			if (c.getName().contains("$")) {
+				System.err.println("Skipping anonymous class: " + c.getName());
+				continue;
+			}
 
 			final Optional<String> dataPath = c.isAnnotationPresent(dataPathClass)
 					? Optional.of(this.getStringValue(c.getAnnotation(dataPathClass)))

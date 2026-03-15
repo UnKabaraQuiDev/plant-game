@@ -53,11 +53,6 @@ public final class MeshLoaderLocks {
 			throw new IllegalStateException("Render thread can't create nor wait on locks (" + source + ")");
 		}
 
-//		if (Thread.currentThread() == lock.owner) {
-//			throw new IllegalStateException(
-//					"Lock: " + meshName + " is being held by current thread: " + Thread.currentThread().getName() + " (" + lock + ")");
-//		}
-
 		if (lock.getValue()) {
 			log(Level.FINEST, "Thread: " + Thread.currentThread().getName() + " skipped lock: " + meshName + " (" + source + ") " + lock);
 			return true;

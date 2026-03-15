@@ -14,6 +14,7 @@ import lu.kbra.pclib.datastructure.list.WeakList;
 import lu.kbra.pclib.pointer.prim.IntPointer;
 import lu.kbra.plant_game.base.scene.overlay.group.building.BuildingInfoUIObjectGroup;
 import lu.kbra.plant_game.base.scene.overlay.group.building.ResourceLineUIObjectGroup;
+import lu.kbra.plant_game.engine.data.locale.Localizable;
 import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
 import lu.kbra.plant_game.engine.entity.ui.text.ProgrammaticTextUIObject;
@@ -23,7 +24,8 @@ import lu.kbra.plant_game.engine.scene.world.data.building.requirement.BuildingR
 import lu.kbra.plant_game.engine.scene.world.data.resource.ResourceType;
 import lu.kbra.plant_game.generated.ColorMaterial;
 
-public class BuildingDefinition<T extends GameObject & PlaceableObject> implements Consumer<BuildingInfoUIObjectGroup>, Cloneable {
+public class BuildingDefinition<T extends GameObject & PlaceableObject>
+		implements Consumer<BuildingInfoUIObjectGroup>, Cloneable, Localizable {
 
 	protected final Class<T> clazz;
 	protected final String internalName;
@@ -53,6 +55,16 @@ public class BuildingDefinition<T extends GameObject & PlaceableObject> implemen
 
 	@Override
 	public void accept(final BuildingInfoUIObjectGroup t) {
+		final GameData gameData = PGLogic.INSTANCE.getGameData();
+		final WorldLevelScene worldScene = PGLogic.INSTANCE.getWorldScene();
+
+		{
+			t.getTitle().ifSet(s -> {
+				s.setText(this.getLocalizationValue()).flushText();
+				s.getTextEmitter().setForegroundColor(this.getTextColorMaterial(gameData, worldScene).getColor());
+			});
+		}
+
 		{
 			final WeakList<ResourceLineUIObjectGroup> resourceLinesList = t.getResourceLines();
 
@@ -92,11 +104,10 @@ public class BuildingDefinition<T extends GameObject & PlaceableObject> implemen
 			messagesList.forEach(str -> {
 				if (ip.getValue() < brs.size()) {
 					final BuildingRequirement br = brs.get(ip.getValue());
-					System.err.println(br.getLocalizationValue());
 					str.setText(br.getLocalizationValue()).flushText();
 					str.getTextEmitter()
-							.setForegroundColor(br.isFulfilled(PGLogic.INSTANCE.getWorldScene()) ? ColorMaterial.GREEN.getColor()
-									: ColorMaterial.LIGHT_RED.getColor());
+							.setForegroundColor(
+									br.isFulfilled(worldScene) ? ColorMaterial.GREEN.getColor() : ColorMaterial.LIGHT_RED.getColor());
 					str.setActive(true);
 				} else {
 					str.setActive(false);
@@ -106,6 +117,31 @@ public class BuildingDefinition<T extends GameObject & PlaceableObject> implemen
 		}
 
 		t.doLayout();
+	}
+
+	public ColorMaterial getColorMaterial(final GameData gameData, final WorldLevelScene world) {
+		if (this.canBuild(gameData, world)) {
+			return ColorMaterial.GREEN;
+		}
+		if (this.isUnlocked(gameData, world)) {
+			return ColorMaterial.ORANGE;
+		}
+		return ColorMaterial.GRAY;
+	}
+
+	public ColorMaterial getTextColorMaterial(final GameData gameData, final WorldLevelScene world) {
+		if (this.canBuild(gameData, world)) {
+			return ColorMaterial.GREEN;
+		}
+		if (this.isUnlocked(gameData, world)) {
+			return ColorMaterial.ORANGE;
+		}
+		return ColorMaterial.LIGHT_GRAY;
+	}
+
+	@Override
+	public String getLocalizationKey() {
+		return PlaceableObject.getLocalizableKey(this.clazz);
 	}
 
 	public String getInternalName() {

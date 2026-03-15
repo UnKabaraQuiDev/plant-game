@@ -40,6 +40,10 @@ public class StaticTextLoader {
 			final Dispatcher loader,
 			final Dispatcher render) {
 
+		if (key == null) {
+			throw new NullPointerException("Null key.");
+		}
+
 		final String absKey;
 		if (key.startsWith("localization:")) {
 			absKey = key.replaceFirst("localization:", "");

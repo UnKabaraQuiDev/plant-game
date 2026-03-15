@@ -13,11 +13,11 @@ import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.utils.consts.Direction;
 
 @DataPath("classpath:/models/water-wheel-small.json")
-public class WaterWheelObject extends PlaceableAnimatedGameObject implements WaterContainer {
+public class WaterWheelSmallObject extends PlaceableAnimatedGameObject implements WaterContainer {
 
 	protected long waterLevel;
 
-	public WaterWheelObject(final String str, final Mesh mesh, final AnimatedMesh animatedMesh) {
+	public WaterWheelSmallObject(final String str, final Mesh mesh, final AnimatedMesh animatedMesh) {
 		super(str, mesh, animatedMesh);
 	}
 
