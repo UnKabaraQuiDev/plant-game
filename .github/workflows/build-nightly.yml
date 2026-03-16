@@ -68,7 +68,7 @@ jobs:
         )
       with:
         distribution: temurin
-        java-version: 17
+        java-version: 21
         server-id: nexus.kbra.lu-snapshots
         server-username: MAVEN_USERNAME
         server-password: MAVEN_PASSWORD
@@ -82,7 +82,7 @@ jobs:
         )
       with:
         distribution: temurin
-        java-version: 17
+        java-version: 21
         server-id: steam
         server-username: STEAM_USERNAME
         server-password: STEAM_PASSWORD
