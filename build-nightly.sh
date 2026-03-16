@@ -9,7 +9,10 @@ DATE="$(date +%Y%m%d)"
 BASE_VERSION="$(mvn help:evaluate \
 	-Dexpression=project.version \
 	-q \
-	-DforceStdout)"
+	-DforceStdout)" || {
+		echo "mvn help:evaluate failed"
+		echo 1
+	}
 
 BASE_VERSION="${BASE_VERSION%-SNAPSHOT}"
 VERSION="${BASE_VERSION}.${DATE}-NIGHTLY"
@@ -21,6 +24,15 @@ COMMON_ARGS=(
 	-Drevision="${VERSION}"
 	-Dsteam.branch=nightly
 )
+
+if [ ! -d "${HOME}/.steam" ]; then
+	if id -u steam >/dev/null 2>&1; then
+		COMMON_ARGS+=(-Dsteam.user=steam)
+	else
+		echo "Current user has no ~/.steam and user 'steam' does not exist" >&2
+		exit 1
+	fi
+fi
 
 echo "Step 1: clean workspace"
 mvn "${COMMON_ARGS[@]}" clean
