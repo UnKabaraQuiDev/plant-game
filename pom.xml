@@ -55,6 +55,17 @@
 		</snapshotRepository>
 	</distributionManagement>
 
+	<pluginRepositories>
+		<pluginRepository>
+			<id>nexus.kbra.lu-releases</id>
+			<url>https://nexus.kbra.lu/repository/maven-releases/</url>
+		</pluginRepository>
+		<pluginRepository>
+			<id>nexus.kbra.lu-snapshots</id>
+			<url>https://nexus.kbra.lu/repository/maven-snapshots/</url>
+		</pluginRepository>
+	</pluginRepositories>
+
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
