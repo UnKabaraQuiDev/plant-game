@@ -18,14 +18,14 @@
 	</modules>
 
 	<properties>
-		<revision>0.1</revision>
+		<revision>0.1-SNAPSHOT</revision>
 		<java.version>21</java.version>
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 		<plugins.dir>${project.basedir}/plugins</plugins.dir>
 		<pclib.version>1.0.2-SNAPSHOT</pclib.version>
 		<gameengine.version>0.1-SNAPSHOT</gameengine.version>
-		
+
 		<steam.appId>4424580</steam.appId>
 	</properties>
 
@@ -108,6 +108,7 @@
 				<version>3.1.2</version>
 				<configuration>
 					<skip>true</skip>
+					<deployAtEnd>true</deployAtEnd>
 				</configuration>
 			</plugin>
 

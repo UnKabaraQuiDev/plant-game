@@ -21,8 +21,11 @@
 		<package.registries>${package.base}.reg</package.registries>
 		<lwjgl.natives>natives-${os.detected.classifier}</lwjgl.natives>
 
-		<steam.buildScript>
-			${project.basedir}/../steam/app_build_${steam.appId}.vdf</steam.buildScript>
+		<steam.appName>Satisplantory</steam.appName>
+		<steam.branch>snapshot</steam.branch>
+		<!-- default branch depots -->
+		<steam.depotId.windows>4424582</steam.depotId.windows>
+		<steam.depotId.linux>4424581</steam.depotId.linux>
 	</properties>
 
 	<dependencies>
@@ -166,46 +169,27 @@
 						<configuration>
 							<steamcmdPath>steamcmd</steamcmdPath>
 							<serverId>steam</serverId>
-							<buildScript>${steam.buildScript}</buildScript>
-							<steam.branch>main</steam.branch>
+							<buildScript>${project.basedir}/../steam/app_build_generic.vdf</buildScript>
+
+							<filterVdfs>true</filterVdfs>
+							<filters>
+								<appId>${steam.appId}</appId>
+								<appName>${steam.appName}</appName>
+								<description>${project.version}</description>
+								<branch>${steam.branch}</branch>
+								<contentRoot>
+									${project.basedir}/target/dist/</contentRoot>
+								<buildOutput>
+									${project.build.directory}/../steam-output</buildOutput>
+								<depotId.windows>${steam.depotId.windows}</depotId.windows>
+								<depotId.linux>${steam.depotId.linux}</depotId.linux>
+							</filters>
 						</configuration>
-					</plugin>
-
-					<plugin>
-						<groupId>io.github.fvarrui</groupId>
-						<artifactId>javapackager</artifactId>
-						<version>1.7.6</version>
-
-						<executions>
-							<execution>
-								<phase>install</phase>
-								<goals>
-									<goal>package</goal>
-								</goals>
-								<configuration>
-									<mainClass>${mainClass}</mainClass>
-									<bundleJre>true</bundleJre>
-									<bundleJre>true</bundleJre>
-									<customizedJre>true</customizedJre>
-									<modules>
-										<module>java.base</module>
-										<module>java.desktop</module>
-										<module>java.logging</module>
-										<module>jdk.unsupported</module>
-									</modules>
-									<name>Satisplantory</name>
-									<vendor>${project.groupId}}</vendor>
-									<version>${project.version}</version>
-									<input>${project.build.directory}</input>
-									<mainJar>${project.build.finalName}.jar</mainJar>
-									<output>${project.build.directory}/dist</output>
-								</configuration>
-							</execution>
-						</executions>
 					</plugin>
 				</plugins>
 			</build>
 		</profile>
+
 		<profile>
 			<id>shade-package</id>
 			<build>
@@ -221,7 +205,6 @@
 									<goal>shade</goal>
 								</goals>
 								<configuration>
-									<classifier>shaded</classifier>
 									<transformers>
 										<transformer
 											implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
@@ -239,6 +222,7 @@
 				</plugins>
 			</build>
 		</profile>
+
 		<profile>
 			<id>all</id>
 			<build>
@@ -308,24 +292,45 @@
 		<profile>
 			<id>native-windows</id>
 
-			<activation>
-				<os>
-					<family>windows</family>
-				</os>
-			</activation>
-
-			<properties>
-				<lwjgl.natives>natives-windows</lwjgl.natives>
-			</properties>
-
 			<build>
 				<plugins>
 					<plugin>
 						<groupId>io.github.fvarrui</groupId>
 						<artifactId>javapackager</artifactId>
-						<configuration>
-							<platform>windows</platform>
-						</configuration>
+						<version>1.7.6</version>
+
+						<executions>
+							<execution>
+								<id>package-windows</id>
+								<phase>install</phase>
+								<goals>
+									<goal>package</goal>
+								</goals>
+								<configuration>
+									<mainClass>${mainClass}</mainClass>
+									<bundleJre>true</bundleJre>
+									<bundleJre>true</bundleJre>
+									<customizedJre>true</customizedJre>
+									<outputDirectory>
+										${project.build.directory}/dist/windows/</outputDirectory>
+
+									<platform>windows</platform>
+
+									<winConfig>
+									</winConfig>
+
+									<modules>
+										<module>java.base</module>
+										<module>java.desktop</module>
+										<module>java.logging</module>
+										<module>jdk.unsupported</module>
+									</modules>
+
+									<name>${steam.appName}</name>
+									<version>${project.version}</version>
+								</configuration>
+							</execution>
+						</executions>
 					</plugin>
 				</plugins>
 			</build>
@@ -334,24 +339,49 @@
 		<profile>
 			<id>native-linux</id>
 
-			<activation>
-				<os>
-					<family>unix</family>
-				</os>
-			</activation>
-
-			<properties>
-				<lwjgl.natives>natives-linux</lwjgl.natives>
-			</properties>
-
 			<build>
 				<plugins>
 					<plugin>
 						<groupId>io.github.fvarrui</groupId>
 						<artifactId>javapackager</artifactId>
-						<configuration>
-							<platform>linux</platform>
-						</configuration>
+						<version>1.7.6</version>
+
+						<executions>
+							<execution>
+								<id>package-linux</id>
+								<phase>install</phase>
+								<goals>
+									<goal>package</goal>
+								</goals>
+								<configuration>
+									<mainClass>${mainClass}</mainClass>
+									<bundleJre>true</bundleJre>
+									<bundleJre>true</bundleJre>
+									<customizedJre>true</customizedJre>
+									<outputDirectory>
+										${project.build.directory}/dist/linux/</outputDirectory>
+
+									<platform>linux</platform>
+
+									<linuxConfig>
+										<wrapJar>true</wrapJar>
+										<generateDeb>true</generateDeb>
+										<generateRpm>false</generateRpm>
+										<generateAppImage>false</generateAppImage>
+									</linuxConfig>
+
+									<modules>
+										<module>java.base</module>
+										<module>java.desktop</module>
+										<module>java.logging</module>
+										<module>jdk.unsupported</module>
+									</modules>
+
+									<name>${steam.appName}</name>
+									<version>${project.version}</version>
+								</configuration>
+							</execution>
+						</executions>
 					</plugin>
 				</plugins>
 			</build>

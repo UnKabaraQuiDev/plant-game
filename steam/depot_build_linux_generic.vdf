@@ -1,0 +1,11 @@
+"DepotBuild"
+{
+	"DepotID" "@depotId.linux@"
+
+	"FileMapping"
+	{
+		"LocalPath" "linux/@appName@/*"
+		"DepotPath" "linux/"
+		"Recursive" "1"
+  }
+}

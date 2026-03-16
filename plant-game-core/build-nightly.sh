@@ -1,51 +1,37 @@
 #!/usr/bin/env bash
 
-set -e
+set -euo pipefail
 
 echo "Starting nightly build"
 
-DATE=$(date +%Y%m%d)
+DATE="$(date +%Y%m%d)"
 
-BASE_VERSION=$(mvn help:evaluate \
+BASE_VERSION="$(mvn help:evaluate \
 	-Dexpression=project.version \
-	-q -DforceStdout)
+	-q \
+	-DforceStdout)"
 
-BASE_VERSION=${BASE_VERSION%-SNAPSHOT}
-
+BASE_VERSION="${BASE_VERSION%-SNAPSHOT}"
 VERSION="${BASE_VERSION}-NIGHTLY-${DATE}"
 
-echo "Nightly version: $VERSION"
+echo "Nightly version: ${VERSION}"
 
-echo "Step 1: compile + package + sources + javadoc + deploy nexus"
+COMMON_ARGS=(
+	-DskipTests
+	-Drevision="${VERSION}"
+	-Dsteam.branch=nightly
+)
 
-mvn -Pall \
-	-DskipTests \
-	-Drevision=$VERSION \
-	clean deploy
+echo "Step 1: clean workspace"
+mvn "${COMMON_ARGS[@]}" clean
 
+echo "Step 2: build native packages"
+mvn -Pnative-linux,native-wnidows "${COMMON_ARGS[@]}" install
 
-echo "Step 2: native linux package"
+echo "Step 3: deploy artifacts to Nexus"
+mvn -Pall "${COMMON_ARGS[@]}" deploy
 
-mvn -Pnative-package,native-linux \
-	-DskipTests \
-	-Drevision=$VERSION \
-	install
+echo "Step 4: deploy nightly build to Steam"
+mvn -pl plant-game-core -Pnative-package "${COMMON_ARGS[@]}" lu.kbra:steam-deploy:deploy
 
-
-echo "Step 3: native windows package"
-
-mvn -Pnative-package,native-windows \
-	-DskipTests \
-	-Drevision=$VERSION \
-	install
-
-
-echo "Step 4: steam deploy"
-
-mvn -Pnative-package \
-	-DskipTests \
-	-Drevision=$VERSION \
-	deploy
-
-
-echo "Nightly build completed: $VERSION"
+echo "Nightly build completed: ${VERSION}"

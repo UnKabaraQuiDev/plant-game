@@ -1,0 +1,15 @@
+"AppBuild"
+{
+	"AppID" "@appId@"
+	"Desc" "@description@"
+	"Preview" "0"
+	"SetLive" "@branch@"
+	"ContentRoot" "@contentRoot@"
+	"BuildOutput" "@buildOutput@"
+	"verbose" "0"
+	"Depots"
+	{
+		"@depotId.linux@" "depot_build_linux_generic.vdf"
+		"@depotId.windows@" "depot_build_windows_generic.vdf"
+	}
+}
