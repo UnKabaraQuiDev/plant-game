@@ -101,7 +101,7 @@
 				<version>${project.version}</version>
 				<executions>
 					<execution>
-						<phase>process-classes</phase>
+						<phase>compile</phase>
 						<goals>
 							<goal>gen-go-registry</goal>
 							<goal>gen-ui-registry</goal>
@@ -122,7 +122,6 @@
 							<goal>compile</goal>
 						</goals>
 						<configuration>
-							<outputDirectory>${project.build.directory}/classes</outputDirectory>
 							<compileSourceRoots>
 								<compileSourceRoot>
 									${project.build.directory}/generated-sources</compileSourceRoot>
@@ -303,18 +302,12 @@
 
 									<platform>windows</platform>
 
-									<winConfig>
-									    <fileVersion>${winVersion}</fileVersion>
-									    <txtFileVersion>${winVersion}</txtFileVersion>
-									    <productVersion>${winVersion}</productVersion>
-									    <txtProductVersion>${winVersion}</txtProductVersion>
-									</winConfig>
 									<linuxConfig>
-                                                                                <wrapJar>true</wrapJar>
-                                                                                <generateDeb>true</generateDeb>
-                                                                                <generateRpm>false</generateRpm>
-                                                                                <generateAppImage>false</generateAppImage>
-                                                                        </linuxConfig>
+										<wrapJar>true</wrapJar>
+										<generateDeb>true</generateDeb>
+										<generateRpm>false</generateRpm>
+										<generateAppImage>false</generateAppImage>
+									</linuxConfig>
 
 									<name>${steam.appName}</name>
 									<version>${winVersion}</version>
@@ -359,13 +352,6 @@
 										<generateRpm>false</generateRpm>
 										<generateAppImage>false</generateAppImage>
 									</linuxConfig>
-									<winConfig>
-                                                                            <fileVersion>${winVersion}</fileVersion>
-                                                                            <txtFileVersion>${winVersion}</txtFileVersion>
-                                                                            <productVersion>${winVersion}</productVersion>
-                                                                            <txtProductVersion>${winVersion}</txtProductVersion>
-                                                                        </winConfig>
-
 
 									<modules>
 										<module>java.base</module>
