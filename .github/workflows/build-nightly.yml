@@ -8,6 +8,10 @@ on:
   schedule:
     - cron: '0 3 * * *'
 
+concurrency:
+  group: nightly-build
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: self-hosted
@@ -21,6 +25,7 @@ jobs:
     steps:
     - uses: actions/checkout@v6
       with:
+        ref: nightly
         fetch-depth: 0
 
     - name: Debug
