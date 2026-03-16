@@ -15,14 +15,18 @@ BASE_VERSION="$(mvn -B help:evaluate \
 	}
 
 BASE_VERSION="${BASE_VERSION%-SNAPSHOT}"
-VERSION="${BASE_VERSION}-${DATE}-NIGHTLY-SNAPSHOT"
+VERSION="${BASE_VERSION}-${DATE}-NIGHTLY"
+WIN_VERSION="${BASE_VERSION}.${DATE}"
 
-echo "Nightly version: ${VERSION}"
+echo "Nightly version: ${VERSION} (${WIN_VERSION})"
 
 COMMON_ARGS=(
 	-DskipTests
 	-Drevision="${VERSION}"
+	-DwinVersion="${WIN_VERSION}"
 	-Dsteam.branch=nightly
+#	-DrepositoryId=nexus.kbra.lu-snapshots
+	-DaltDeploymentRepository=nexus.kbra.lu-nightly::default::https://nexus.kbra.lu/repository/maven-nightly/
 )
 
 if [ ! -d "${HOME}/.steam" ]; then
@@ -38,7 +42,7 @@ echo "Step 1: clean workspace"
 mvn -B "${COMMON_ARGS[@]}" clean
 
 echo "Step 2: build native packages & deploy to nexus"
-mvn -B -Pall,native-linux,native-windows "${COMMON_ARGS[@]}" deploy
+mvn -B -Pall,native-linux "${COMMON_ARGS[@]}" deploy
 
 echo "Step 3: deploy nightly build to Steam"
 mvn -B -pl plant-game-core -Pnative-package "${COMMON_ARGS[@]}" lu.kbra:steam-deploy:deploy

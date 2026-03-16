@@ -27,6 +27,7 @@
 		<steam.depotId.windows>4424582</steam.depotId.windows>
 		<steam.depotId.linux>4424581</steam.depotId.linux>
 		<steam.user></steam.user>
+		<winVersion>${project.version}</winVersion>
 	</properties>
 
 	<dependencies>
@@ -303,17 +304,20 @@
 									<platform>windows</platform>
 
 									<winConfig>
+									    <fileVersion>${winVersion}</fileVersion>
+									    <txtFileVersion>${winVersion}</txtFileVersion>
+									    <productVersion>${winVersion}</productVersion>
+									    <txtProductVersion>${winVersion}</txtProductVersion>
 									</winConfig>
-
-									<modules>
-										<module>java.base</module>
-										<module>java.desktop</module>
-										<module>java.logging</module>
-										<module>jdk.unsupported</module>
-									</modules>
+									<linuxConfig>
+                                                                                <wrapJar>true</wrapJar>
+                                                                                <generateDeb>true</generateDeb>
+                                                                                <generateRpm>false</generateRpm>
+                                                                                <generateAppImage>false</generateAppImage>
+                                                                        </linuxConfig>
 
 									<name>${steam.appName}</name>
-									<version>${project.version}</version>
+									<version>${winVersion}</version>
 								</configuration>
 							</execution>
 						</executions>
@@ -355,6 +359,13 @@
 										<generateRpm>false</generateRpm>
 										<generateAppImage>false</generateAppImage>
 									</linuxConfig>
+									<winConfig>
+                                                                            <fileVersion>${winVersion}</fileVersion>
+                                                                            <txtFileVersion>${winVersion}</txtFileVersion>
+                                                                            <productVersion>${winVersion}</productVersion>
+                                                                            <txtProductVersion>${winVersion}</txtProductVersion>
+                                                                        </winConfig>
+
 
 									<modules>
 										<module>java.base</module>
@@ -364,7 +375,7 @@
 									</modules>
 
 									<name>${steam.appName}</name>
-									<version>${project.version}</version>
+									<version>${winVersion}</version>
 								</configuration>
 							</execution>
 						</executions>
