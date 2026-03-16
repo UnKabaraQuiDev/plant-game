@@ -6,11 +6,11 @@ echo "Starting nightly build"
 
 DATE="$(date +%Y%m%d)"
 
-BASE_VERSION="$(mvn help:evaluate \
+BASE_VERSION="$(mvn -B help:evaluate \
 	-Dexpression=project.version \
 	-q \
 	-DforceStdout)" || {
-		echo "mvn help:evaluate failed"
+		echo "mvn -B help:evaluate failed"
 		echo 1
 	}
 
@@ -35,12 +35,12 @@ if [ ! -d "${HOME}/.steam" ]; then
 fi
 
 echo "Step 1: clean workspace"
-mvn "${COMMON_ARGS[@]}" clean
+mvn -B "${COMMON_ARGS[@]}" clean
 
 echo "Step 2: build native packages & deploy to nexus"
-mvn -Pall,native-linux,native-windows "${COMMON_ARGS[@]}" deploy
+mvn -B -Pall,native-linux,native-windows "${COMMON_ARGS[@]}" deploy
 
 echo "Step 3: deploy nightly build to Steam"
-mvn -pl plant-game-core -Pnative-package "${COMMON_ARGS[@]}" lu.kbra:steam-deploy:deploy
+mvn -B -pl plant-game-core -Pnative-package "${COMMON_ARGS[@]}" lu.kbra:steam-deploy:deploy
 
 echo "Nightly build completed: ${VERSION}"
