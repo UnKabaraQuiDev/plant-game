@@ -96,15 +96,6 @@ jobs:
             "password": "${{ secrets.STEAM_PASSWORD }}"
           }]
 
-    - name: Cache Maven packages
-      uses: actions/cache@v3
-      with:
-        path: |
-          ~/.m2/repository
-        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-        restore-keys: |
-          ${{ runner.os }}-maven-
-
     - name: Deploy nightly
       if: >
         steps.snapshot.outputs.is_snapshot == 'true' &&
