@@ -180,7 +180,7 @@
 								<contentRoot>
 									${project.basedir}/target/dist/</contentRoot>
 								<buildOutput>
-									${project.build.directory}/../steam-output</buildOutput>
+									${project.build.directory}/steam-output</buildOutput>
 								<depotId.windows>${steam.depotId.windows}</depotId.windows>
 								<depotId.linux>${steam.depotId.linux}</depotId.linux>
 							</filters>

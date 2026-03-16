@@ -12,7 +12,7 @@ BASE_VERSION="$(mvn help:evaluate \
 	-DforceStdout)"
 
 BASE_VERSION="${BASE_VERSION%-SNAPSHOT}"
-VERSION="${BASE_VERSION}-NIGHTLY-${DATE}"
+VERSION="${BASE_VERSION}.${DATE}-NIGHTLY"
 
 echo "Nightly version: ${VERSION}"
 
@@ -25,13 +25,10 @@ COMMON_ARGS=(
 echo "Step 1: clean workspace"
 mvn "${COMMON_ARGS[@]}" clean
 
-echo "Step 2: build native packages"
-mvn -Pnative-linux,native-wnidows "${COMMON_ARGS[@]}" install
+echo "Step 2: build native packages & deploy to nexus"
+mvn -Pall,native-linux,native-windows "${COMMON_ARGS[@]}" deploy
 
-echo "Step 3: deploy artifacts to Nexus"
-mvn -Pall "${COMMON_ARGS[@]}" deploy
-
-echo "Step 4: deploy nightly build to Steam"
+echo "Step 3: deploy nightly build to Steam"
 mvn -pl plant-game-core -Pnative-package "${COMMON_ARGS[@]}" lu.kbra:steam-deploy:deploy
 
 echo "Nightly build completed: ${VERSION}"
