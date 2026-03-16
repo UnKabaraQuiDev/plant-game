@@ -25,7 +25,7 @@ COMMON_ARGS=(
 	-Drevision="${VERSION}"
 	-DwinVersion="${WIN_VERSION}"
 	-Dsteam.branch=nightly
-#	-DrepositoryId=nexus.kbra.lu-snapshots
+	-U -up
 	-DaltDeploymentRepository=nexus.kbra.lu-nightly::default::https://nexus.kbra.lu/repository/maven-nightly/
 )
 
