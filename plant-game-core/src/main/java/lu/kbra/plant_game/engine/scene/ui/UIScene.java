@@ -17,6 +17,7 @@ import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.lwjgl.glfw.GLFW;
 
+import lu.kbra.pclib.PCUtils;
 import lu.kbra.pclib.logger.GlobalLogger;
 import lu.kbra.plant_game.base.scene.menu.main.NeedsFocusInput;
 import lu.kbra.plant_game.engine.UpdateFrameState;
@@ -46,6 +47,9 @@ import lu.kbra.standalone.gameengine.scene.camera.Camera;
 
 public class UIScene extends Scene3D implements SceneBoundsOwner {
 
+	public static final String PROJECTION_SIZE_PROPERTY = UIScene.class.getSimpleName() + ".projection_size";
+	public static float PROJECTION_SIZE = PCUtils.getFloat(PROJECTION_SIZE_PROPERTY, 0.75f);
+
 	public static final Comparator<Entity> DEPTH_COMPARATOR = Comparator
 			.comparing((final Entity e) -> e instanceof Transform3DOwner && ((Transform3DOwner) e).hasTransform()
 					? ((Transform3DOwner) e).getTransform().getTranslation().y
@@ -60,7 +64,7 @@ public class UIScene extends Scene3D implements SceneBoundsOwner {
 		this.setCamera(Camera.orthographicCamera3D());
 		this.getCamera().getPosition().set(0, 1, 0);
 		this.getCamera().getRotation().set(new Quaternionf().lookAlong(new Vector3f(0, -1, 0), new Vector3f(0, 0, -1)));
-		this.getCamera().getProjection().setSize(1);
+		this.getCamera().getProjection().setSize(PROJECTION_SIZE);
 		this.getCamera().getProjection().setNearPlane(0.001f);
 		this.getCamera().getProjection().setFarPlane(1000f);
 		this.getCamera().getProjection().setPerspective(false);

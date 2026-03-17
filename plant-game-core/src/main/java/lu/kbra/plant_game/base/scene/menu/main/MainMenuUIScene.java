@@ -2,6 +2,7 @@ package lu.kbra.plant_game.base.scene.menu.main;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
 
@@ -20,6 +21,7 @@ import lu.kbra.plant_game.base.scene.overlay.group.impl.MarginAnchoredUIObjectGr
 import lu.kbra.plant_game.base.scene.overlay.group.impl.ParentUIObjectGroup;
 import lu.kbra.plant_game.base.scene.world.MainMenuWorldScene;
 import lu.kbra.plant_game.engine.UpdateFrameState;
+import lu.kbra.plant_game.engine.entity.impl.TransformOwner;
 import lu.kbra.plant_game.engine.entity.ui.btn.BackButtonUIObject;
 import lu.kbra.plant_game.engine.entity.ui.btn.LevelButtonUIObject;
 import lu.kbra.plant_game.engine.entity.ui.btn.OptionsButtonUIObject;
@@ -74,7 +76,7 @@ public class MainMenuUIScene extends UIScene {
 	protected int targetGroup = 0;
 	protected float progress = 0;
 
-	protected Vector3fc[] restPositions = { new Vector3f(), new Vector3f(5, 0, 5), new Vector3f(5, 0, 0), null, new Vector3f(5, 0, 10) };
+	protected Vector3fc[] restPositions = { new Vector3f(0), new Vector3f(5, 0, 5), new Vector3f(8, 0, 0), null, new Vector3f(5, 0, 10) };
 
 	protected ParentUIObjectGroup mainMenuGroup = new ParentUIObjectGroup("main",
 			new AnchorLayout(),
@@ -124,6 +126,9 @@ public class MainMenuUIScene extends UIScene {
 	}
 
 	public void init(final Dispatcher workers, final Dispatcher renderDispatcher) {
+		final float size = 1f / this.getCamera().getProjection().getSize();
+		Arrays.stream(this.restPositions).filter(Objects::nonNull).forEach(c -> ((Vector3f) c).mul(size));
+
 		super.addAll(this.mainMenuGroup, this.optionsMenuGroup, this.playMenuGroup, this.resumeMenuGroup);
 
 		/* main menu */
@@ -136,6 +141,12 @@ public class MainMenuUIScene extends UIScene {
 		this.buildPlayMenu();
 
 		this.buildResumeMenu();
+
+		this.stream()
+				.filter(TransformOwner.class::isInstance)
+				.map(TransformOwner.class::cast)
+				.filter(TransformOwner::hasTransform)
+				.forEach(c -> c.getTransform().updateMatrix());
 	}
 
 	private void buildResumeMenu() {
@@ -154,7 +165,7 @@ public class MainMenuUIScene extends UIScene {
 		LevelRegistry.LEVELS.forEach(ld -> {
 			final int j = ip.increment();
 			UIObjectFactory.create(LevelButtonUIObject.class)
-					.set(i -> i.setTransform(new Transform3D(new Vector3f(startPosX + 0.8f * j, 0, (0.6f * j) % (2 - 0.5f) - 1),
+					.set(i -> i.setTransform(new Transform3D(new Vector3f(startPosX + 0.8f * j, 0, 0.6f * j % (2 - 0.5f) - 1),
 							new Quaternionf().rotateY((float) Math.random()),
 							new Vector3f(0.5f))))
 					.set(i -> i.setLevelDefinition(ld))
@@ -190,10 +201,12 @@ public class MainMenuUIScene extends UIScene {
 			new OptionKeyUIObjectGroup(key, this.optionsEntriesGroup).init(PGLogic.INSTANCE.getInputHandler(), charSize);
 		}
 
+		final float size = 1f / this.getCamera().getProjection().getSize();
+
 		UIObjectFactory.create(AnchoredGradientQuadUIObject.class)
 				.set(i -> i.setTransform(new Transform3D(new Vector3f(0, GRADIENT_DEPTH, 0),
 						new Quaternionf().rotateY((float) Math.PI),
-						new Vector3f(2.5f, 1, 2))))
+						new Vector3f(2.5f, 1, 2).mul(size))))
 				.set(i -> i.setDirection(GradientDirection.UV_X))
 				.set(i -> i.setTint(GameEngineUtils.hexToColorToVec4f("317dac8c")))
 				.set(i -> i.setAnchors(Anchor.CENTER_RIGHT, Anchor.CENTER_RIGHT))
@@ -203,7 +216,7 @@ public class MainMenuUIScene extends UIScene {
 		UIObjectFactory.create(AnchoredGradientQuadUIObject.class)
 				.set(i -> i.setTransform(new Transform3D(new Vector3f(0, GRADIENT_DEPTH - 0.1f, 0),
 						new Quaternionf().rotateY((float) Math.PI),
-						new Vector3f(5f, 1, 2))))
+						new Vector3f(5f, 1, 2).mul(size))))
 				.set(i -> i.setDirection(GradientDirection.UV_Y))
 				.set(i -> i.setTint(GameEngineUtils.hexToColorToVec4f("000000ff")))
 				.set(i -> i.setAnchors(Anchor.TOP_LEFT, Anchor.TOP_LEFT))
@@ -227,6 +240,8 @@ public class MainMenuUIScene extends UIScene {
 	private void buildMainMenu() {
 		final Optional<Vector2fc> SMALL_TEXT_CHAR_SIZE = Optional.of(new Vector2f(0.2f));
 		final Optional<TextAlignment> SMALL_TEXT_TEXT_ALIGNMENT = Optional.of(TextAlignment.TEXT_CENTER);
+
+		final float size = 1f / this.getCamera().getProjection().getSize();
 
 		UIObjectFactory
 				.createText(PlayButtonUIObject.class,
@@ -264,7 +279,8 @@ public class MainMenuUIScene extends UIScene {
 				.push();
 
 		UIObjectFactory.create(AnchoredGradientQuadUIObject.class)
-				.set(i -> i.setTransform(new Transform3D(new Vector3f(0, GRADIENT_DEPTH, 0), new Quaternionf(), new Vector3f(2.5f, 1, 2))))
+				.set(i -> i.setTransform(
+						new Transform3D(new Vector3f(0, GRADIENT_DEPTH, 0), new Quaternionf(), new Vector3f(2.5f, 1, 2).mul(size))))
 				.set(i -> i.setDirection(GradientDirection.UV_X))
 				.set(i -> i.setTint(GameEngineUtils.hexToColorToVec4f("3b784a")))
 				.set(i -> i.setAnchors(Anchor.CENTER_LEFT, Anchor.CENTER_LEFT))
@@ -290,10 +306,10 @@ public class MainMenuUIScene extends UIScene {
 			final OffsetUIObjectGroup target = this.groups[this.targetGroup];
 			final OffsetUIObjectGroup current = this.groups[this.currentGroup];
 
-			if (target instanceof LayoutOwner lo) {
+			if (target instanceof final LayoutOwner lo) {
 				lo.doLayout();
 			}
-			if (current instanceof LayoutOwner lo) {
+			if (current instanceof final LayoutOwner lo) {
 				lo.doLayout();
 			}
 
@@ -332,7 +348,7 @@ public class MainMenuUIScene extends UIScene {
 		this.progress = 0;
 
 		final WorldLevelScene wls = PGLogic.INSTANCE.getWorldScene();
-		if (wls instanceof MainMenuWorldScene mmws) {
+		if (wls instanceof final MainMenuWorldScene mmws) {
 			mmws.startTransition(target);
 		}
 	}
