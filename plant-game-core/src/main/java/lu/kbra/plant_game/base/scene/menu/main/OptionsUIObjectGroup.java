@@ -25,7 +25,7 @@ import lu.kbra.plant_game.generated.ColorMaterial;
 public class OptionsUIObjectGroup extends AnchoredFixedPBUIObjectGroup
 		implements NeedsBoundsInput, LimitedObjectGroup<UIObject>, DebugBoundsColor, MarginOwner {
 
-	protected float scrollSpeed = 0.8f;
+	protected float scrollSpeed = 0.15f;
 
 	protected float scrollY;
 	protected Vector2f scrollYRange = new Vector2f();
@@ -35,7 +35,7 @@ public class OptionsUIObjectGroup extends AnchoredFixedPBUIObjectGroup
 
 	public OptionsUIObjectGroup(final UIObjectGroup parent) {
 		super("options.vert", null, parent, Direction2d.VERTICAL, 3f, Anchor.BOTTOM_LEFT, Anchor.BOTTOM_LEFT);
-		super.add(new BoundedUIObjectGroup(this.getId() + "-content", new FlowLayout(true, 0.04f, true), Direction2d.VERTICAL));
+		super.add(new BoundedUIObjectGroup(this.getId() + "-content", new FlowLayout(true, 0.04f, Anchor2D.LEADING), Direction2d.VERTICAL));
 		this.setMargin(0.05f);
 	}
 

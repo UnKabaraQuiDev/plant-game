@@ -25,6 +25,9 @@ public class FlowLayout implements Layout, BoundsOwnerParentAware {
 		this.gap = gap;
 	}
 
+	/**
+	 * Default {@code Anchor2D}: {@link Anchor2D.LEADING}
+	 */
 	@Deprecated
 	public FlowLayout(final boolean vertical, final float gap, final boolean fixed) {
 		this.vertical = vertical;
