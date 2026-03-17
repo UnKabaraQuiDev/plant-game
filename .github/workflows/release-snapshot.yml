@@ -5,10 +5,6 @@ on:
     tags:
       - "v*-SNAPSHOT"
 
-concurrency:
-  group: snapshot-${{ github.ref }}
-  cancel-in-progress: false
-
 permissions:
   contents: write
 
@@ -23,42 +19,42 @@ jobs:
       STEAM_PASSWORD: ${{ secrets.STEAM_PASSWORD }}
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
+    - name: Checkout repository
+      uses: actions/checkout@v6
 
-      - name: Set up Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 21
+    - name: Set up Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: 21
 
-      - name: Configure Maven servers
-        uses: s4u/maven-settings-action@v4.0.0
-        with:
-          servers: |
-            [{
-              "id": "nexus.kbra.lu-snapshots",
-              "username": "${{ secrets.MAVEN_USERNAME }}",
-              "password": "${{ secrets.MAVEN_PASSWORD }}"
-            },
-            {
-              "id": "steam",
-              "username": "${{ secrets.STEAM_USERNAME }}",
-              "password": "${{ secrets.STEAM_PASSWORD }}"
-            }]
+    - name: Configure Maven servers
+      uses: s4u/maven-settings-action@v4.0.0
+      with:
+        servers: |
+          [{
+            "id": "nexus.kbra.lu-snapshots",
+            "username": "${{ secrets.MAVEN_USERNAME }}",
+            "password": "${{ secrets.MAVEN_PASSWORD }}"
+          },
+          {
+            "id": "steam",
+            "username": "${{ secrets.STEAM_USERNAME }}",
+            "password": "${{ secrets.STEAM_PASSWORD }}"
+          }]
 
-      - name: Deploy snapshot
-        run: bash ./build-snapshot.sh
+    - name: Deploy snapshot
+      run: bash ./build-snapshot.sh
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ github.ref_name }}
-          name: Snapshot ${{ github.ref_name }}
-          prerelease: true
-          body: |
-            ## Changes
-            - Automated build
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ github.ref_name }}
+        name: Snapshot ${{ github.ref_name }}
+        prerelease: true
+        body: |
+          ## Changes
+          - Automated build
 
-            ## Version
-            ${{ github.ref_name }} ${{ github.sha }}
+          ## Version
+          ${{ github.ref_name }} ${{ github.sha }}
