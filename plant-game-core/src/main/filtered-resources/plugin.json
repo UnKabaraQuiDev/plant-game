@@ -1,9 +1,9 @@
 {
-	"displayName": "Satisplantory Base",
-	"internalName": "base",
+	"displayName": "${plugin.name}",
+	"internalName": "${plugin.internalName}",
 	"version": "${project.version}",
-	"package": "${package.base}",
-	"mainClass": "BaseMain",
+	"package": "${plugin.package}",
+	"mainClass": "${plugin.mainName}",
 	"registries": [
 		"reg.BaseBuildingRegistry",
 		"reg.BaseResourceRegistry",

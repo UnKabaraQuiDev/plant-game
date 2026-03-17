@@ -5,9 +5,9 @@
 
 	<parent>
 		<groupId>lu.kbra</groupId>
-		<artifactId>plant-game</artifactId>
+		<artifactId>plant-game-plugin-template</artifactId>
 		<version>${revision}</version>
-		<relativePath>../pom.xml</relativePath>
+		<relativePath>../plant-game-plugin-template/pom.xml</relativePath>
 	</parent>
 
 	<artifactId>plant-game-core</artifactId>
@@ -17,9 +17,12 @@
 
 	<properties>
 		<mainClass>lu.kbra.plant_game.PGMain</mainClass>
-		<package.base>lu.kbra.plant_game.base</package.base>
-		<package.registries>${package.base}.reg</package.registries>
-		
+
+		<plugin.name>Satisplantory Base</plugin.name>
+		<plugin.internalName>base</plugin.internalName>
+		<plugin.mainName>BaseMain</plugin.mainName>
+		<plugin.package>${project.groupId}.plant_game.${plugin.internalName}</plugin.package>
+
 		<lwjgl.natives>natives-${os.detected.classifier}</lwjgl.natives>
 		<winVersion>${project.version}</winVersion>
 	</properties>
@@ -45,103 +48,7 @@
 	</dependencies>
 
 	<build>
-		<resources>
-			<resource>
-				<directory>src/main/filtered-resources</directory>
-				<filtering>true</filtering>
-			</resource>
-			<resource>
-				<directory>src/main/resources</directory>
-			</resource>
-		</resources>
-
-		<extensions>
-			<extension>
-				<groupId>kr.motd.maven</groupId>
-				<artifactId>os-maven-plugin</artifactId>
-				<version>1.7.1</version>
-			</extension>
-			<extension>
-				<groupId>org.apache.maven.wagon</groupId>
-				<artifactId>wagon-http</artifactId>
-				<version>3.5.3</version>
-			</extension>
-		</extensions>
-
 		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<executions>
-
-					<!-- normal compile -->
-					<execution>
-						<id>default-compile</id>
-						<phase>compile</phase>
-						<goals>
-							<goal>compile</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-
-			<plugin>
-				<groupId>lu.kbra</groupId>
-				<artifactId>plant-game-autogen</artifactId>
-				<version>${project.version}</version>
-				<executions>
-					<execution>
-						<phase>compile</phase>
-						<goals>
-							<goal>gen-go-registry</goal>
-							<goal>gen-ui-registry</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>build-helper-maven-plugin</artifactId>
-				<version>3.3.0</version>
-				<executions>
-					<execution>
-						<id>attach-generated-sources</id>
-						<phase>process-classes</phase>
-						<goals>
-							<goal>add-source</goal>
-						</goals>
-						<configuration>
-							<sources>
-								<source>
-									${project.build.directory}/generated-sources</source>
-							</sources>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<executions>
-					<!-- second compile pass -->
-					<execution>
-						<id>recompile-generated</id>
-						<phase>process-classes</phase>
-						<goals>
-							<goal>compile</goal>
-						</goals>
-						<configuration>
-							<compileSourceRoots>
-								<compileSourceRoot>
-									${project.build.directory}/generated-sources</compileSourceRoot>
-							</compileSourceRoots>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>

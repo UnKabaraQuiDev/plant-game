@@ -22,17 +22,10 @@
 		<plugin.mainName></plugin.mainName>
 
 		<plugin.package>${project.groupId}.${plugin.internalName}</plugin.package>
-		<plugin.mainClass>${package.base}.${plugin.mainName}</plugin.mainClass>
-		<plugin.package.registries>${package.base}.reg</plugin.package.registries>
+		<plugin.mainClass>${plugin.package}.${plugin.mainName}</plugin.mainClass>
+		<plugin.package.registries>${plugin.package}.reg</plugin.package.registries>
 		<plugin.vanilla.version>${revision}</plugin.vanilla.version>
 	</properties>
-
-	<dependencies>
-		<dependency>
-			<groupId>lu.kbra</groupId>
-			<artifactId>plant-game-core</artifactId>
-		</dependency>
-	</dependencies>
 
 	<build>
 		<resources>

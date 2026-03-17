@@ -14,7 +14,6 @@
 	<modules>
 		<module>plant-game-autogen</module>
 		<module>plant-game-core</module>
-		<module>plant-game-vanilla</module>
 		<module>plant-game-plugin-template</module>
 	</modules>
 
