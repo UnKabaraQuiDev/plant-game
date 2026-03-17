@@ -9,8 +9,11 @@ concurrency:
   group: snapshot-${{ github.ref }}
   cancel-in-progress: false
 
+permissions:
+  contents: write
+
 jobs:
-  release:
+  build:
     runs-on: self-hosted
 
     env:
@@ -51,3 +54,11 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
+          name: Snapshot ${{ github.ref_name }}
+          prerelease: true
+          body: |
+            ## Changes
+            - Automated build
+
+            ## Version
+            ${{ github.ref_name }} ${{ github.sha }}

@@ -1,16 +1,16 @@
-name: Release (Nightly)
+  name: Release (Nightly)
 
 on:
   workflow_dispatch:
   schedule:
     - cron: '0 4 * * *'
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: self-hosted
-
-    permissions:
-      contents: read
 
     env:
       MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
@@ -99,3 +99,16 @@ jobs:
           steps.changes.outputs.has_changes == 'true'
         )
       run: bash ./build-nightly.sh
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ github.ref_name }}
+        name: Nightly ${{ github.ref_name }}
+        prerelease: true
+        body: |
+          ## Changes
+          - Automated build
+
+          ## Version
+          ${{ github.ref_name }} ${{ github.sha }}
