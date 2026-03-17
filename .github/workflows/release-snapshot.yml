@@ -34,7 +34,7 @@ jobs:
         with:
           servers: |
             [{
-              "id": "nexus.kbra.lu-snapshot",
+              "id": "nexus.kbra.lu-snapshots",
               "username": "${{ secrets.MAVEN_USERNAME }}",
               "password": "${{ secrets.MAVEN_PASSWORD }}"
             },
