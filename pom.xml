@@ -15,6 +15,7 @@
 		<module>plant-game-autogen</module>
 		<module>plant-game-core</module>
 		<module>plant-game-vanilla</module>
+		<module>plant-game-plugin-template</module>
 	</modules>
 
 	<properties>
@@ -27,6 +28,12 @@
 		<gameengine.version>0.1-SNAPSHOT</gameengine.version>
 
 		<steam.appId>4424580</steam.appId>
+		<steam.appName>Satisplantory</steam.appName>
+		<steam.branch>snapshot</steam.branch>
+		<!-- default branch depots -->
+		<steam.depotId.windows>4424582</steam.depotId.windows>
+		<steam.depotId.linux>4424581</steam.depotId.linux>
+		<steam.user></steam.user>
 	</properties>
 
 	<repositories>
@@ -73,16 +80,7 @@
 				<artifactId>pclib</artifactId>
 				<version>${pclib.version}</version>
 				<type>pom</type>
-			</dependency>
-			<dependency>
-				<groupId>lu.kbra</groupId>
-				<artifactId>pclib-common</artifactId>
-				<version>${pclib.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>lu.kbra</groupId>
-				<artifactId>pclib-datastruct</artifactId>
-				<version>${pclib.version}</version>
+				<scope>import</scope>
 			</dependency>
 
 			<dependency>
@@ -108,6 +106,27 @@
 				<artifactId>reflections</artifactId>
 				<version>0.10.2</version>
 				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>lu.kbra</groupId>
+				<artifactId>plant-game-autogen</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>lu.kbra</groupId>
+				<artifactId>plant-game-core</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>lu.kbra</groupId>
+				<artifactId>plant-game-vanilla</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>lu.kbra</groupId>
+				<artifactId>plant-game-plugin-template</artifactId>
+				<version>${revision}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

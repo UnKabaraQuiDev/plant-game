@@ -7,9 +7,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -24,7 +21,6 @@ import java.util.stream.Stream;
 import javax.lang.model.element.Modifier;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -49,46 +45,38 @@ import lu.kbra.pclib.PCUtils;
 import lu.kbra.pclib.datastructure.pair.Pairs;
 
 @Mojo(name = "gen-go-registry", defaultPhase = LifecyclePhase.PROCESS_CLASSES, requiresDependencyResolution = ResolutionScope.COMPILE)
-public class GOAutogenMojo extends AbstractMojo implements AutogenDefaults {
+public class GOAutogenMojo extends AutogenDefaults {
 
 	@Parameter(defaultValue = "${project}", required = true, readonly = true)
 	private MavenProject project;
 
-	@Parameter(property = "outputDir", defaultValue = "/generated-sources/", required = false)
+	@Parameter(property = "outputDir", defaultValue = "/generated-sources/autogen/", required = false)
 	private String outputDir;
+
+	@Parameter(property = "failOnMissingFiles", defaultValue = "false")
+	private boolean failOnMissingFiles;
 
 	@Override
 	public void execute() throws MojoExecutionException {
-		final String generatedSourcesDir = this.project.getBuild().getDirectory() + this.outputDir;
-		final Path path = Paths.get(generatedSourcesDir);
-		if (Files.notExists(path)) {
-			try {
-				Files.createDirectories(path);
-				this.project.addCompileSourceRoot(generatedSourcesDir);
-				this.getLog().info("Created source directory: " + generatedSourcesDir);
-			} catch (final IOException e) {
-				throw new MojoExecutionException("Error creating directory " + generatedSourcesDir, e);
-			}
-		}
+		final File generatedSourcesDir = genOutputDir(project, outputDir);
 
 		final String packageIn;
 		final String packageOut;
 
-		try {
-			final File resourcesDirectory = new File(this.project.getBuild().getOutputDirectory());
-			final File pluginJson = new File(resourcesDirectory, "plugin.json");
-			if (!pluginJson.exists()) {
-				throw new IOException("plugin.json file not found in resources directory! -> " + pluginJson.getPath());
+		final Optional<JSONObject> pluginReg = getPluginDefinition(project);
+		if (!pluginReg.isPresent()) {
+			if (failOnMissingFiles) {
+				throw new MojoExecutionException("plugin.json file not found in resources directory!");
+			} else {
+				getLog().warn(
+						"plugin.json file not found, skipping. Use failOnMissingFiles=true to fail at this point");
+				return;
 			}
-
-			final JSONObject pluginsObj = new JSONObject(
-					new String(Files.readAllBytes(Paths.get(pluginJson.getPath()))));
-			packageIn = pluginsObj.getString("package");
-			packageOut = packageIn + ".autogen";
-			this.getLog().info("Plugin generated package: " + packageOut);
-		} catch (final IOException e) {
-			throw new MojoExecutionException("Error reading plugin.json ", e);
 		}
+
+		packageIn = pluginReg.get().getString("package");
+		packageOut = packageIn + ".autogen";
+		this.getLog().info("Plugin generated package: " + packageOut);
 
 		final ClassLoader cl;
 		final URL[] urls;
@@ -116,14 +104,14 @@ public class GOAutogenMojo extends AbstractMojo implements AutogenDefaults {
 		}
 
 		try {
-			this.genRegistry(cl, urls, packageIn, packageOut, new File(generatedSourcesDir));
+			this.genRegistry(cl, urls, packageIn, packageOut, generatedSourcesDir);
 		} catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException
 				| IOException | RuntimeException e) {
 			e.printStackTrace();
 			throw new MojoExecutionException("Error generating GO registry: ", e);
 		}
 
-		this.project.addCompileSourceRoot(generatedSourcesDir);
+//		this.project.addCompileSourceRoot(generatedSourcesDir);
 //		project.getCompileSourceRoots().add(generatedSourcesDir);
 	}
 

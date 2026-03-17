@@ -19,14 +19,8 @@
 		<mainClass>lu.kbra.plant_game.PGMain</mainClass>
 		<package.base>lu.kbra.plant_game.base</package.base>
 		<package.registries>${package.base}.reg</package.registries>
+		
 		<lwjgl.natives>natives-${os.detected.classifier}</lwjgl.natives>
-
-		<steam.appName>Satisplantory</steam.appName>
-		<steam.branch>snapshot</steam.branch>
-		<!-- default branch depots -->
-		<steam.depotId.windows>4424582</steam.depotId.windows>
-		<steam.depotId.linux>4424581</steam.depotId.linux>
-		<steam.user></steam.user>
 		<winVersion>${project.version}</winVersion>
 	</properties>
 

@@ -5,80 +5,21 @@
 
 	<parent>
 		<groupId>lu.kbra</groupId>
-		<artifactId>plant-game</artifactId>
+		<artifactId>plant-game-plugin-template</artifactId>
 		<version>${revision}</version>
-		<relativePath>../pom.xml</relativePath>
+		<relativePath>../plant-game-plugin-template/pom.xml</relativePath>
 	</parent>
 
 	<artifactId>plant-game-vanilla</artifactId>
 
 	<name>Plant Game (Vanilla plugin)</name>
 	<description>The vanilla part of a game about plants</description>
-
-	<dependencies>
-		<dependency>
-			<groupId>lu.kbra</groupId>
-			<artifactId>plant-game-core</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>lu.kbra</groupId>
-			<artifactId>gameengine</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.squareup</groupId>
-			<artifactId>javapoet</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.reflections</groupId>
-			<artifactId>reflections</artifactId>
-		</dependency>
-	</dependencies>
-
-	<build>
-		<directory>${plugins.dir}</directory>
-		<finalName>${project.artifactId}</finalName>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.11.0</version>
-				<executions>
-					<execution>
-						<id>compile-generator</id>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>compile</goal>
-						</goals>
-						<configuration>
-							<includes>
-								<include>**/*GenMain.java</include>
-							</includes>
-							<outputDirectory>
-								${project.build.directory}/generated-classes</outputDirectory>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.1.2</version>
-				<configuration>
-					<includes>
-						<include>**/*GenMain.java</include>
-					</includes>
-					<additionalClasspathElements>
-						<additionalClasspathElement>
-							${project.build.directory}/generated-classes</additionalClasspathElement>
-					</additionalClasspathElements>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+	
+	<properties>
+		<plugin.name>Satisplantory Base</plugin.name>
+		<plugin.internalName>base</plugin.internalName>
+		<plugin.mainName>BaseMain</plugin.mainName>
+		<plugin.package>${project.groupId}.plant_game.${plugin.internalName}</plugin.package>
+	</properties>
 
 </project>
