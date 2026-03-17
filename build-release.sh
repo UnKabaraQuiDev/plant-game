@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-echo "Starting nightly build"
+echo "Starting release build"
 
 DATE="$(date +%Y%m%d)"
 
@@ -14,18 +14,18 @@ BASE_VERSION="$(mvn -B help:evaluate \
 		echo 1
 	}
 
-BASE_VERSION="${BASE_VERSION%-SNAPSHOT}"
-VERSION="${BASE_VERSION}-${DATE}-NIGHTLY"
+BASE_VERSION="${BASE_VERSION%}"
+VERSION="${BASE_VERSION}-${DATE}"
 WIN_VERSION="${BASE_VERSION}.${DATE}"
 
-echo "Nightly version: ${VERSION} (${WIN_VERSION})"
+echo "Release version: ${VERSION} (${WIN_VERSION})"
 
 COMMON_ARGS=(
 	-DskipTests
 	-Drevision="${VERSION}"
 	-DwinVersion="${WIN_VERSION}"
-	-Dsteam.branch=nightly
-	-DaltDeploymentRepository=nexus.kbra.lu-nightly::default::https://nexus.kbra.lu/repository/maven-nightly/
+	-Dsteam.branch=default
+	-DaltDeploymentRepository=nexus.kbra.lu-releases::default::https://nexus.kbra.lu/repository/maven-releases/
 )
 
 if [ ! -d "${HOME}/.steam" ]; then
@@ -43,7 +43,7 @@ mvn -B "${COMMON_ARGS[@]}" clean
 echo "Step 2: build native packages & deploy to nexus"
 mvn -B -Pall,native-linux "${COMMON_ARGS[@]}" deploy
 
-echo "Step 3: deploy nightly build to Steam"
+echo "Step 3: deploy release build to Steam"
 mvn -B -pl plant-game-core -Psteam-deploy "${COMMON_ARGS[@]}" lu.kbra:steam-deploy:deploy
 
-echo "Nightly build completed: ${VERSION}"
+echo "Release build completed: ${VERSION}"

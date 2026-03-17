@@ -172,7 +172,7 @@
 
 	<profiles>
 		<profile>
-			<id>native-package</id>
+			<id>steam-deploy</id>
 			<build>
 				<plugins>
 					<plugin>
