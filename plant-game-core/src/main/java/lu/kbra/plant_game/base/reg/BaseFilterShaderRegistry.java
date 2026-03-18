@@ -13,7 +13,7 @@ public class BaseFilterShaderRegistry extends FilterShaderRegistry {
 	}
 
 	@Override
-	public void init() throws RegistryFailedException {
+	public void register() throws RegistryFailedException {
 		this.register(BlurShader::new);
 		this.register(VignetteShader::new);
 	}

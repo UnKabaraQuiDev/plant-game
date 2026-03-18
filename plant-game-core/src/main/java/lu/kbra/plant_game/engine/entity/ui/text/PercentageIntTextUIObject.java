@@ -9,9 +9,9 @@ public class PercentageIntTextUIObject extends IntegerTextUIObject {
 	}
 
 	@Override
-	public void init() {
+	public void postConstruct() {
 		super.paddingLength--; // for the % sign
-		super.init();
+		super.postConstruct();
 	}
 
 	@Override

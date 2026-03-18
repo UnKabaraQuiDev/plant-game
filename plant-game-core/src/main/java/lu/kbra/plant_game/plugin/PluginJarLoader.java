@@ -24,18 +24,6 @@ import lu.kbra.pclib.PCUtils;
 
 public class PluginJarLoader {
 
-//	public static LoadedPlugin baseLoadedPlugin;
-//
-//	public LoadedPlugin getBaseLoadedPlugin() {
-//		if (baseLoadedPlugin == null) {
-//			baseLoadedPlugin = new LoadedPlugin(null,
-//					PGLogic.OBJECT_MAPPER.readValue(PCUtils.readStringSource("classpath:/plugin.json"), PluginDescriptor.class),
-//					PGLogic.class.getClassLoader(),
-//					null);
-//		}
-//		return baseLoadedPlugin;
-//	}
-
 	public record LoadedPlugin(Path jarPath, PluginDescriptor descriptor, ClassLoader classLoader, PluginMain main) {
 	}
 
@@ -80,6 +68,7 @@ public class PluginJarLoader {
 			final ClassLoader loader = desc.getClass().getClassLoader();
 			final Class<? extends PluginMain> main = (Class<? extends PluginMain>) loader.loadClass(desc.relativePath(desc.getMainClass()));
 			final PluginMain mainInst = main.getDeclaredConstructor(PluginManager.class, PluginDescriptor.class).newInstance(parent, desc);
+			desc.setPluginClass(main);
 
 			result.add(new LoadedPlugin(null, desc, loader, mainInst));
 		}
@@ -93,6 +82,7 @@ public class PluginJarLoader {
 			final PluginDescriptor desc = descriptors.get(name);
 			final Class<? extends PluginMain> main = (Class<? extends PluginMain>) loader.loadClass(desc.relativePath(desc.getMainClass()));
 			final PluginMain mainInst = main.getDeclaredConstructor(PluginManager.class, PluginDescriptor.class).newInstance(parent, desc);
+			desc.setPluginClass(main);
 
 			result.add(new LoadedPlugin(jar, desc, loader, mainInst));
 		}

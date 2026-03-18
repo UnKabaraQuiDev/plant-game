@@ -23,8 +23,7 @@ public class BaseBuildingRegistry extends BuildingRegistry {
 	}
 
 	@Override
-	public void init() {
-//		register(ENERGY, SolarPanelMediumObject.class, 45, List.of(), List.of(), 20);
+	public void register() {
 		this.register(ENERGY, SolarPanelSmallObject.class, 40, List.of(), List.of(), 10);
 		this.register(ENERGY, WindTurbineMediumObject.class, 125, List.of(), List.of(), 20);
 		this.register(ENERGY, WaterWheelSmallObject.class, 125, List.of(), List.of(), 30);

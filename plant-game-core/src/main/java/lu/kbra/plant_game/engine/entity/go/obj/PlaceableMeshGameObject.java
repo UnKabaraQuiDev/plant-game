@@ -22,7 +22,7 @@ public abstract class PlaceableMeshGameObject extends MeshGameObject
 	}
 
 	@Override
-	public void init() {
+	public void postConstruct() {
 		this.footprint = StaticMeshFootprintOwner.computeMeshFootprint(this.getFootprintComputeMethod(), this.getMesh());
 	}
 

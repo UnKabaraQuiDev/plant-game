@@ -7,14 +7,14 @@ import lu.kbra.plant_game.plugin.registry.KeyRegistry;
 
 public class BaseKeyRegistry extends KeyRegistry {
 
-	public BaseKeyRegistry(PluginDescriptor pluginDescriptor) {
+	public BaseKeyRegistry(final PluginDescriptor pluginDescriptor) {
 		super(pluginDescriptor);
 	}
 
 	@Override
-	public void init() throws RegistryFailedException {
+	public void register() throws RegistryFailedException {
 		for (DefaultKeyOption dko : DefaultKeyOption.values()) {
-			register(dko);
+			this.register(dko);
 		}
 	}
 

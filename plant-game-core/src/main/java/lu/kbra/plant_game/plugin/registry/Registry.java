@@ -7,6 +7,6 @@ public interface Registry {
 
 	PluginDescriptor getPluginDescriptor();
 
-	void init() throws RegistryFailedException;
+	void register() throws RegistryFailedException;
 
 }

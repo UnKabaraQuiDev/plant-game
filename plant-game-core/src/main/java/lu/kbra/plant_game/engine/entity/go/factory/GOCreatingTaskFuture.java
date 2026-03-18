@@ -32,7 +32,7 @@ public class GOCreatingTaskFuture<T extends GameObject> extends TaskFuture<List<
 							list == null ? new Object[0] : list.toArray()));
 			this.postCreateHooks.forEach(pch -> pch.accept(instance));
 			if (instance instanceof final NeedsPostConstruct npc) {
-				npc.init();
+				npc.postConstruct();
 			}
 			this.postInitHooks.forEach(pch -> pch.accept(instance));
 			return instance;

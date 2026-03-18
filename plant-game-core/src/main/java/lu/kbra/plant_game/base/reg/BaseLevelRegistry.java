@@ -11,7 +11,7 @@ public class BaseLevelRegistry extends LevelRegistry {
 	}
 
 	@Override
-	public void init() throws RegistryFailedException {
+	public void register() throws RegistryFailedException {
 		this.register(0, "level0");
 		this.register(10, "level1");
 		this.register(20, "level2");

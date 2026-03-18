@@ -30,7 +30,7 @@ public class SliderUIObject extends TextUIObject
 	}
 
 	@Override
-	public void init() {
+	public void postConstruct() {
 		this.updateText(true);
 	}
 

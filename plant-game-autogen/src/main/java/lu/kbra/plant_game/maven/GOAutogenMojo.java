@@ -169,7 +169,7 @@ public class GOAutogenMojo extends AutogenDefaults {
 		final Set<? extends Class<?>> classes = reflections.getSubTypesOf(gameObjectClass);
 //		classes.add(gameObjectClass);
 
-		final Builder initMethod = MethodSpec.methodBuilder("init").returns(TypeName.VOID).addModifiers(Modifier.PUBLIC)
+		final Builder initMethod = MethodSpec.methodBuilder(AutogenDefaults.REGISTER_METHOD_NAME).returns(TypeName.VOID).addModifiers(Modifier.PUBLIC)
 				.addAnnotation(Override.class);
 
 		final String spacer = PCUtils.repeatString(" ", 15);

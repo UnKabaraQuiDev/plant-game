@@ -33,7 +33,7 @@ public class OptionKeyUIObject extends ProgrammaticGrowOnHoverTextUIObject
 	}
 
 	@Override
-	public void init() {
+	public void postConstruct() {
 		if (this.transform instanceof final Transform3DPivot t3dp) {
 			final Vector2f textBounds = this.getTextEmitter().getTextBounds();
 			t3dp.scalePivotSet(textBounds.x / 2, 0, textBounds.y / 2);

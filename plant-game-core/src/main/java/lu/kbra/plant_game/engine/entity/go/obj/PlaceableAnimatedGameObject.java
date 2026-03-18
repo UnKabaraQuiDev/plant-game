@@ -33,7 +33,7 @@ public abstract class PlaceableAnimatedGameObject extends AnimatedMeshGameObject
 	}
 
 	@Override
-	public void init() {
+	public void postConstruct() {
 		this.staticMeshFootprint = StaticMeshFootprintOwner.computeMeshFootprint(this.getStaticMeshFootprintComputeMethod(),
 				this.getMesh());
 		this.animatedMeshFootprint = StaticMeshFootprintOwner.computeMeshFootprint(this.getAnimatedMeshFootprintComputeMethod(),

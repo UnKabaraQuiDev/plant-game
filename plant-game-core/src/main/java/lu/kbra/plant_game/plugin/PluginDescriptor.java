@@ -2,6 +2,7 @@ package lu.kbra.plant_game.plugin;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public final class PluginDescriptor {
@@ -47,6 +48,8 @@ public final class PluginDescriptor {
 	@JsonProperty("package")
 	protected String package_;
 	protected String mainClass;
+	@JsonIgnore
+	protected Class<? extends PluginMain> pluginClass;
 	protected List<String> registries;
 	protected Dependencies dependencies;
 
@@ -68,6 +71,14 @@ public final class PluginDescriptor {
 
 	public String getMainClass() {
 		return this.mainClass;
+	}
+
+	public Class<? extends PluginMain> getPluginClass() {
+		return this.pluginClass;
+	}
+
+	public void setPluginClass(final Class<? extends PluginMain> pluginClass) {
+		this.pluginClass = pluginClass;
 	}
 
 	public List<String> getRegistries() {

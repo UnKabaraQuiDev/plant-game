@@ -2,7 +2,7 @@ package lu.kbra.plant_game;
 
 import lu.kbra.plant_game.generated.ColorMaterial;
 
-public enum DefaultBuildingCategories implements BuildingCategory, Comparable<DefaultBuildingCategories> {
+public enum DefaultBuildingCategories implements BuildingCategory {
 
 	ENERGY(ColorMaterial.YELLOW, 10), WATER(ColorMaterial.CYAN, 20);
 

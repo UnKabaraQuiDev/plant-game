@@ -11,7 +11,7 @@ public class BaseResourceRegistry extends ResourceRegistry {
 	}
 
 	@Override
-	public void init() {
+	public void register() {
 		super.register(DefaultResourceType.ENERGY);
 		super.register(DefaultResourceType.WATER);
 		super.register(DefaultResourceType.MONEY);

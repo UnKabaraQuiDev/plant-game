@@ -22,7 +22,7 @@ public class IntegerTextUIObject extends ProgrammaticTextUIObject implements Nee
 	}
 
 	@Override
-	public void init() {
+	public void postConstruct() {
 		this.updateTextContent();
 	}
 

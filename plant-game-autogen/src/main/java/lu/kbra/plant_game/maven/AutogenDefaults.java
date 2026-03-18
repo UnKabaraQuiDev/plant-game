@@ -17,6 +17,8 @@ import org.json.JSONObject;
 
 public abstract class AutogenDefaults extends AbstractMojo {
 
+	public static final String REGISTER_METHOD_NAME = "register";
+
 	public Optional<JSONObject> getPluginDefinition(final MavenProject project) throws MojoExecutionException {
 		try {
 			final File resourcesDirectory = new File(project.getBuild().getOutputDirectory());

@@ -10,9 +10,9 @@ public class PercentageSignedIntTextUIObject extends SignedIntegerTextUIObject {
 	}
 
 	@Override
-	public void init() {
+	public void postConstruct() {
 		super.paddingLength--;
-		super.init();
+		super.postConstruct();
 	}
 
 	@Override
