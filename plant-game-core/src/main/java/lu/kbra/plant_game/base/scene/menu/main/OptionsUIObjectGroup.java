@@ -70,12 +70,14 @@ public class OptionsUIObjectGroup extends AnchoredFixedPBUIObjectGroup
 		final Rectangle2D parentBounds = this.getBounds().getBounds2D();
 		if (parentBounds.getWidth() > contentBounds.getWidth()) { // should probably include margin in calculations
 			switch (this.contentAnchor) {
-			case LEADING -> this.scrollYRange.set(parentBounds.getMinY() - contentBounds.getMinY() + this.getMargin(),
-					parentBounds.getMinY() - contentBounds.getMinY() + this.getMargin()); // untested
-			case CENTER -> this.scrollYRange.set(parentBounds.getCenterY() - contentBounds.getCenterY(),
-					parentBounds.getCenterY() - contentBounds.getCenterY());
-			case TRAILING -> this.scrollYRange.set(parentBounds.getMaxY() - contentBounds.getMaxY() - this.getMargin(),
-					parentBounds.getMaxY() - contentBounds.getMaxY() - this.getMargin());
+			case LEADING -> this.scrollYRange
+					.set(parentBounds.getMinY() - contentBounds.getMinY() + this.getMargin(),
+							parentBounds.getMinY() - contentBounds.getMinY() + this.getMargin()); // untested
+			case CENTER -> this.scrollYRange
+					.set(parentBounds.getCenterY() - contentBounds.getCenterY(), parentBounds.getCenterY() - contentBounds.getCenterY());
+			case TRAILING -> this.scrollYRange
+					.set(parentBounds.getMaxY() - contentBounds.getMaxY() - this.getMargin(),
+							parentBounds.getMaxY() - contentBounds.getMaxY() - this.getMargin());
 			}
 		} else {
 			this.scrollYRange.set(parentBounds.getMinY() - contentBounds.getMinY(), parentBounds.getMaxY() - contentBounds.getMaxY());

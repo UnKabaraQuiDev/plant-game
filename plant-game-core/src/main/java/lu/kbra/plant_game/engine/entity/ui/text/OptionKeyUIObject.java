@@ -4,27 +4,26 @@ import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
 
 import lu.kbra.plant_game.PGLogic;
-import lu.kbra.plant_game.base.data.DefaultKeyOption;
 import lu.kbra.plant_game.engine.data.locale.LocalizationService;
 import lu.kbra.plant_game.engine.entity.impl.NeedsPostConstruct;
 import lu.kbra.plant_game.engine.entity.ui.impl.Focusable;
-import lu.kbra.plant_game.engine.entity.ui.impl.IndexOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsClick;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsInput;
 import lu.kbra.plant_game.engine.window.input.KeyOption;
 import lu.kbra.plant_game.engine.window.input.MappingInputHandler;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
+import lu.kbra.plant_game.plugin.registry.KeyRegistry;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3DPivot;
 
 public class OptionKeyUIObject extends ProgrammaticGrowOnHoverTextUIObject
-		implements NeedsClick, Focusable, NeedsInput, IndexOwner, NeedsPostConstruct {
+		implements NeedsClick, Focusable, NeedsInput, NeedsPostConstruct {
 
 	public static enum State {
 		IDLE, WAITING_RELEASE, WAITING_INPUT;
 	}
 
-	protected String key;
+	protected KeyOption keyOption;
 
 	private State awaitInput = State.IDLE;
 	private boolean focused = false;
@@ -97,13 +96,9 @@ public class OptionKeyUIObject extends ProgrammaticGrowOnHoverTextUIObject
 
 	public void setKeyValue(String value) {
 		final int length = this.getTextEmitter().getBufferLength();
-		final String loc = LocalizationService.get("key." + this.getKey());
+		final String loc = LocalizationService.get(KeyRegistry.getLocalizationKey(getKeyOption()));
 		value = "[" + (value == null ? " " : value) + "]";
 		super.setText(loc + " ".repeat(Math.max(length - loc.length() - value.length(), 0)) + value);
-	}
-
-	public KeyOption getKeyOption() {
-		return DefaultKeyOption.valueOf(this.key.toUpperCase());
 	}
 
 	@Override
@@ -121,25 +116,18 @@ public class OptionKeyUIObject extends ProgrammaticGrowOnHoverTextUIObject
 		return this.focused;
 	}
 
-	public String getKey() {
-		return this.key;
+	public KeyOption getKeyOption() {
+		return keyOption;
 	}
 
-	public void setKey(final String key) {
-		this.key = key;
-	}
-
-	@Override
-	public int getIndex() {
-		// TODO: Replace with KeyRegistry
-		return DefaultKeyOption.valueOf(this.getKey().toUpperCase()).ordinal();
+	public void setKeyOption(KeyOption keyOption) {
+		this.keyOption = keyOption;
 	}
 
 	@Override
 	public String toString() {
-		return "OptionKeyUIObject@" + System.identityHashCode(this) + " [key=" + this.key + ", awaitInput=" + this.awaitInput + ", focused="
-				+ this.focused + ", dir=" + this.dir + ", progress=" + this.progress + ", transform=" + this.transform + ", active="
-				+ this.active + ", name=" + this.name + "]";
+		return "OptionKeyUIObject [keyOption=" + keyOption + ", awaitInput=" + awaitInput + ", focused=" + focused + ", dir=" + dir
+				+ ", progress=" + progress + ", transform=" + transform + ", active=" + active + ", name=" + name + "]";
 	}
 
 }

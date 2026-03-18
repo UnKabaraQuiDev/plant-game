@@ -1,5 +1,6 @@
 package lu.kbra.plant_game.base.scene.menu.main;
 
+import java.security.KeyRep;
 import java.util.Optional;
 import java.util.OptionalInt;
 
@@ -23,6 +24,7 @@ import lu.kbra.plant_game.engine.scene.ui.layout.AnchorLayout;
 import lu.kbra.plant_game.engine.window.input.KeyOption;
 import lu.kbra.plant_game.engine.window.input.MappingInputHandler;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
+import lu.kbra.plant_game.plugin.registry.KeyRegistry;
 import lu.kbra.standalone.gameengine.GameEngine;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextAlignment;
 import lu.kbra.standalone.gameengine.utils.interpolation.Interpolator;
@@ -109,7 +111,7 @@ public class OptionKeyUIObjectGroup extends BoundedUIObjectGroup implements Grow
 		final ObjectTriggerLatch<OptionKeyUIObjectGroup> latch = new ObjectTriggerLatch<>(2, this);
 
 		UIObjectFactory
-				.createText(AnchoredProgrammaticTextUIObject.class, charSize, keyOption.getLocalizationKey())
+				.createText(AnchoredProgrammaticTextUIObject.class, charSize, KeyRegistry.getLocalizationKey(keyOption))
 				.set(i -> i.setTransform(new Transform3D()))
 				.set(i -> i.setAnchors(Anchor.CENTER_LEFT, Anchor.CENTER_LEFT))
 				.add(this)

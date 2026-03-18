@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import lu.kbra.plant_game.engine.data.locale.Localizable;
 import lu.kbra.plant_game.engine.window.input.KeyOption;
 import lu.kbra.plant_game.plugin.PluginDescriptor;
 
@@ -41,6 +42,14 @@ public abstract class KeyRegistry extends PluginRegistry {
 
 	public static <T extends KeyOption> T getKeyOption(String k) {
 		return (T) KEYS_DEFS.get(k);
+	}
+
+	public static String getLocalizationKey(KeyOption keyOption) {
+		return KeyOption.LOCALIZATION_KEY + getInternalName(keyOption).replaceAll("[:/ ]", ".");
+	}
+
+	public static Localizable getLocalization(KeyOption keyOption) {
+		return Localizable.of(getLocalizationKey(keyOption));
 	}
 
 }

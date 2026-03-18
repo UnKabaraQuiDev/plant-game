@@ -16,7 +16,19 @@ public interface Localizable {
 	}
 
 	static Localizable raw(final Object raw) {
-		return () -> Objects.toString(raw);
+		return new Localizable() {
+			final String r = Objects.toString(raw);
+
+			@Override
+			public String getLocalizationKey() {
+				return "raw";
+			}
+
+			@Override
+			public String getLocalizationValue() {
+				return r;
+			}
+		};
 	}
 
 	static Localizable of(final String key) {
