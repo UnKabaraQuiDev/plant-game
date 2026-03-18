@@ -118,7 +118,7 @@
 						<configuration>
 							<compileSourceRoots>
 								<compileSourceRoot>
-									${project.build.directory}/generated-sources</compileSourceRoot>
+									${project.build.directory}/generated-sources/autogen/</compileSourceRoot>
 							</compileSourceRoots>
 						</configuration>
 					</execution>

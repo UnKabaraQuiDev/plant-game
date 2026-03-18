@@ -10,6 +10,9 @@ public abstract class PluginRegistry implements Registry {
 		this.pluginDescriptor = pluginDescriptor;
 	}
 
+	public void postInit() {
+	}
+
 	@Override
 	public PluginDescriptor getPluginDescriptor() {
 		return this.pluginDescriptor;

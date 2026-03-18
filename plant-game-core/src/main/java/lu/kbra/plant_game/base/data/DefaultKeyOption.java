@@ -28,4 +28,9 @@ public enum DefaultKeyOption implements KeyOption {
 		return physicalKey;
 	}
 
+	@Override
+	public int getIndex() {
+		return ordinal();
+	}
+
 }

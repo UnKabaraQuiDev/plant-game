@@ -108,7 +108,8 @@ public class OptionKeyUIObjectGroup extends BoundedUIObjectGroup implements Grow
 	public ObjectTriggerLatch<OptionKeyUIObjectGroup> init(final WindowInputHandler inputHandler, final float charSize) {
 		final ObjectTriggerLatch<OptionKeyUIObjectGroup> latch = new ObjectTriggerLatch<>(2, this);
 
-		UIObjectFactory.createText(AnchoredProgrammaticTextUIObject.class, charSize, "key." + this.keyOption.toString().toLowerCase())
+		UIObjectFactory
+				.createText(AnchoredProgrammaticTextUIObject.class, charSize, keyOption.getLocalizationKey())
 				.set(i -> i.setTransform(new Transform3D()))
 				.set(i -> i.setAnchors(Anchor.CENTER_LEFT, Anchor.CENTER_LEFT))
 				.add(this)

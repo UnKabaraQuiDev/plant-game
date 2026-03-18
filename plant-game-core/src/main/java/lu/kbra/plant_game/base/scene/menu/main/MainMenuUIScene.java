@@ -16,7 +16,6 @@ import lu.kbra.pclib.PCUtils;
 import lu.kbra.pclib.concurrency.ListTriggerLatch;
 import lu.kbra.pclib.pointer.prim.IntPointer;
 import lu.kbra.plant_game.PGLogic;
-import lu.kbra.plant_game.base.data.DefaultKeyOption;
 import lu.kbra.plant_game.base.scene.overlay.group.impl.MarginAnchoredUIObjectGroup;
 import lu.kbra.plant_game.base.scene.overlay.group.impl.ParentUIObjectGroup;
 import lu.kbra.plant_game.base.scene.world.MainMenuWorldScene;
@@ -46,6 +45,7 @@ import lu.kbra.plant_game.engine.scene.ui.layout.Layout;
 import lu.kbra.plant_game.engine.scene.ui.layout.LayoutOwner;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
+import lu.kbra.plant_game.plugin.registry.KeyRegistry;
 import lu.kbra.plant_game.plugin.registry.LevelRegistry;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
@@ -78,31 +78,23 @@ public class MainMenuUIScene extends UIScene {
 
 	protected Vector3fc[] restPositions = { new Vector3f(0), new Vector3f(5, 0, 5), new Vector3f(8, 0, 0), null, new Vector3f(5, 0, 10) };
 
-	protected ParentUIObjectGroup mainMenuGroup = new ParentUIObjectGroup("main",
-			new AnchorLayout(),
+	protected ParentUIObjectGroup mainMenuGroup = new ParentUIObjectGroup("main", new AnchorLayout(),
 			new Transform3D(new Vector3f(this.restPositions[MAIN])));
 	protected MarginAnchoredUIObjectGroup mainButtonsMenuGroup = new MarginAnchoredUIObjectGroup("main.buttons",
-			new FlowLayout(true, 0.06f, Anchor2D.LEADING),
-			this.mainMenuGroup,
-			Anchor.CENTER_LEFT,
-			Anchor.CENTER_LEFT,
-			0.25f);
+			new FlowLayout(true, 0.06f, Anchor2D.LEADING), this.mainMenuGroup, Anchor.CENTER_LEFT, Anchor.CENTER_LEFT, 0.25f);
 
-	protected ParentUIObjectGroup optionsMenuGroup = new ParentUIObjectGroup("options",
-			new AnchorLayout(),
+	protected ParentUIObjectGroup optionsMenuGroup = new ParentUIObjectGroup("options", new AnchorLayout(),
 			new Transform3D(this.restPositions[OPTIONS]));
 	protected OptionsUIObjectGroup optionsVerticalGroup = new OptionsUIObjectGroup(this.optionsMenuGroup);
 	protected UIObjectGroup optionsEntriesGroup = this.optionsVerticalGroup.getContent();
 
-	protected ParentUIObjectGroup playMenuGroup = new ParentUIObjectGroup("play",
-			new AnchorLayout(),
+	protected ParentUIObjectGroup playMenuGroup = new ParentUIObjectGroup("play", new AnchorLayout(),
 			new Transform3D(this.restPositions[PLAY]));
 	protected PlayUIObjectGroup playHorizontalGroup = new PlayUIObjectGroup(this.playMenuGroup);
 	protected UIObjectGroup playContentGroup = this.playHorizontalGroup.getContent();
 	protected PlayInfoUIObjectGroup playInfoGroup = new PlayInfoUIObjectGroup(this.playMenuGroup);
 
-	protected ParentUIObjectGroup resumeMenuGroup = new ParentUIObjectGroup("resume",
-			new AnchorLayout(),
+	protected ParentUIObjectGroup resumeMenuGroup = new ParentUIObjectGroup("resume", new AnchorLayout(),
 			new Transform3D(this.restPositions[RESUME]));
 	protected ResumeUIObjectGroup resumeInfoGroup = new ResumeUIObjectGroup(this.resumeMenuGroup);
 
@@ -142,7 +134,8 @@ public class MainMenuUIScene extends UIScene {
 
 		this.buildResumeMenu();
 
-		this.stream()
+		this
+				.stream()
 				.filter(TransformOwner.class::isInstance)
 				.map(TransformOwner.class::cast)
 				.filter(TransformOwner::hasTransform)
@@ -164,10 +157,11 @@ public class MainMenuUIScene extends UIScene {
 		final IntPointer ip = new IntPointer(0);
 		LevelRegistry.LEVELS.forEach(ld -> {
 			final int j = ip.increment();
-			UIObjectFactory.create(LevelButtonUIObject.class)
-					.set(i -> i.setTransform(new Transform3D(new Vector3f(startPosX + 0.8f * j, 0, 0.6f * j % (2 - 0.5f) - 1),
-							new Quaternionf().rotateY((float) Math.random()),
-							new Vector3f(0.5f))))
+			UIObjectFactory
+					.create(LevelButtonUIObject.class)
+					.set(i -> i
+							.setTransform(new Transform3D(new Vector3f(startPosX + 0.8f * j, 0, 0.6f * j % (2 - 0.5f) - 1),
+									new Quaternionf().rotateY((float) Math.random()), new Vector3f(0.5f))))
 					.set(i -> i.setLevelDefinition(ld))
 					.latch(btns)
 					.push();
@@ -197,26 +191,28 @@ public class MainMenuUIScene extends UIScene {
 
 		this.optionsEntriesGroup.add(SpacerUIObject.getVerticalSpacer(0.1f));
 
-		for (final DefaultKeyOption key : DefaultKeyOption.values()) {
-			new OptionKeyUIObjectGroup(key, this.optionsEntriesGroup).init(PGLogic.INSTANCE.getInputHandler(), charSize);
-		}
+		KeyRegistry.KEYS
+				.forEach(key -> new OptionKeyUIObjectGroup(key, this.optionsEntriesGroup)
+						.init(PGLogic.INSTANCE.getInputHandler(), charSize));
 
 		final float size = 1f / this.getCamera().getProjection().getSize();
 
-		UIObjectFactory.create(AnchoredGradientQuadUIObject.class)
-				.set(i -> i.setTransform(new Transform3D(new Vector3f(0, GRADIENT_DEPTH, 0),
-						new Quaternionf().rotateY((float) Math.PI),
-						new Vector3f(2.5f, 1, 2).mul(size))))
+		UIObjectFactory
+				.create(AnchoredGradientQuadUIObject.class)
+				.set(i -> i
+						.setTransform(new Transform3D(new Vector3f(0, GRADIENT_DEPTH, 0), new Quaternionf().rotateY((float) Math.PI),
+								new Vector3f(2.5f, 1, 2).mul(size))))
 				.set(i -> i.setDirection(GradientDirection.UV_X))
 				.set(i -> i.setTint(GameEngineUtils.hexToColorToVec4f("317dac8c")))
 				.set(i -> i.setAnchors(Anchor.CENTER_RIGHT, Anchor.CENTER_RIGHT))
 				.add(this.optionsMenuGroup)
 				.push();
 
-		UIObjectFactory.create(AnchoredGradientQuadUIObject.class)
-				.set(i -> i.setTransform(new Transform3D(new Vector3f(0, GRADIENT_DEPTH - 0.1f, 0),
-						new Quaternionf().rotateY((float) Math.PI),
-						new Vector3f(5f, 1, 2).mul(size))))
+		UIObjectFactory
+				.create(AnchoredGradientQuadUIObject.class)
+				.set(i -> i
+						.setTransform(new Transform3D(new Vector3f(0, GRADIENT_DEPTH - 0.1f, 0), new Quaternionf().rotateY((float) Math.PI),
+								new Vector3f(5f, 1, 2).mul(size))))
 				.set(i -> i.setDirection(GradientDirection.UV_Y))
 				.set(i -> i.setTint(GameEngineUtils.hexToColorToVec4f("000000ff")))
 				.set(i -> i.setAnchors(Anchor.TOP_LEFT, Anchor.TOP_LEFT))
@@ -271,16 +267,19 @@ public class MainMenuUIScene extends UIScene {
 				.add(this.mainButtonsMenuGroup)
 				.push();
 
-		UIObjectFactory.create(LargeLogoUIObject.class)
+		UIObjectFactory
+				.create(LargeLogoUIObject.class)
 				.set(i -> i.setTransform(new Transform3D(2)))
 				.set(i -> i.setAnchors(Anchor.CENTER_CENTER, Anchor.TOP_CENTER))
 				.set(i -> i.setMargin(0.25f))
 				.add(this.mainMenuGroup)
 				.push();
 
-		UIObjectFactory.create(AnchoredGradientQuadUIObject.class)
-				.set(i -> i.setTransform(
-						new Transform3D(new Vector3f(0, GRADIENT_DEPTH, 0), new Quaternionf(), new Vector3f(2.5f, 1, 2).mul(size))))
+		UIObjectFactory
+				.create(AnchoredGradientQuadUIObject.class)
+				.set(i -> i
+						.setTransform(
+								new Transform3D(new Vector3f(0, GRADIENT_DEPTH, 0), new Quaternionf(), new Vector3f(2.5f, 1, 2).mul(size))))
 				.set(i -> i.setDirection(GradientDirection.UV_X))
 				.set(i -> i.setTint(GameEngineUtils.hexToColorToVec4f("3b784a")))
 				.set(i -> i.setAnchors(Anchor.CENTER_LEFT, Anchor.CENTER_LEFT))
