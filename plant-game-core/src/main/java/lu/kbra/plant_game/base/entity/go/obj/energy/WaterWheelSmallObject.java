@@ -3,22 +3,31 @@ package lu.kbra.plant_game.base.entity.go.obj.energy;
 import org.joml.Matrix4f;
 import org.joml.Vector2i;
 
+import lu.kbra.plant_game.PGLogic;
+import lu.kbra.plant_game.base.data.DefaultResourceType;
+import lu.kbra.plant_game.base.entity.go.obj.water.NeedsRandomTick;
 import lu.kbra.plant_game.engine.entity.go.impl.WaterContainer;
 import lu.kbra.plant_game.engine.entity.go.obj.FootprintComputeMethod;
 import lu.kbra.plant_game.engine.entity.go.obj.PlaceableAnimatedGameObject;
 import lu.kbra.plant_game.engine.mesh.AnimatedMesh;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
+import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.utils.consts.Direction;
 
 @DataPath("classpath:/models/water-wheel-small.json")
-public class WaterWheelSmallObject extends PlaceableAnimatedGameObject implements WaterContainer {
+public class WaterWheelSmallObject extends PlaceableAnimatedGameObject implements WaterContainer, NeedsRandomTick {
 
 	protected long waterLevel;
 
 	public WaterWheelSmallObject(final String str, final Mesh mesh, final AnimatedMesh animatedMesh) {
 		super(str, mesh, animatedMesh);
+	}
+
+	@Override
+	public void randomTick(final WindowInputHandler inputHandler, final WorldLevelScene worldLevelScene) {
+		PGLogic.INSTANCE.getGameData().getResources().compute(DefaultResourceType.ENERGY, (k, v) -> v + 1);
 	}
 
 	@Override

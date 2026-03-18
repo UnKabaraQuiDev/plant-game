@@ -1,8 +1,7 @@
 package lu.kbra.plant_game.engine.scene.world;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.joml.Math;
 
@@ -20,7 +19,7 @@ public class GameData {
 
 	protected byte progress = 0;
 	protected LevelState levelState = LevelState.NOT_STARTED;
-	protected Map<ResourceType, Integer> resources = Collections.synchronizedMap(new HashMap<>());
+	protected Map<ResourceType, Integer> resources = new ConcurrentHashMap<>();
 
 	public GameData() {
 	}

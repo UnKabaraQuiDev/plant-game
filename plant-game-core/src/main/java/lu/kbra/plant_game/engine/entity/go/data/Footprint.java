@@ -153,7 +153,6 @@ public class Footprint {
 
 	public static Footprint union(final Footprint a, final Footprint b) {
 		final Vector2i min = new Vector2i(Math.min(a.min.x, b.min.x), Math.min(a.min.y, b.min.y));
-
 		final Vector2i max = new Vector2i(Math.max(a.max.x, b.max.x), Math.max(a.max.y, b.max.y));
 
 		return new Footprint(min, max);
