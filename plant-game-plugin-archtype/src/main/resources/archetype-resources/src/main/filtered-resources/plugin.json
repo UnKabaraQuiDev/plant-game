@@ -1,0 +1,11 @@
+{
+	"displayName": "${plugin.name}",
+	"internalName": "${plugin.internalName}",
+	"version": "${project.version}",
+	"package": "${plugin.package}",
+	"mainClass": "${plugin.mainName}",
+	"registries": [],
+	"dependencies": {
+		"base": "${plugin.vanilla.version}"
+	}
+}

@@ -5,9 +5,9 @@
 
 	<parent>
 		<groupId>lu.kbra</groupId>
-		<artifactId>plant-game-plugin-template</artifactId>
+		<artifactId>plant-game-plugin-parent</artifactId>
 		<version>${revision}</version>
-		<relativePath>../plant-game-plugin-template/pom.xml</relativePath>
+		<relativePath>../plant-game-plugin-parent/pom.xml</relativePath>
 	</parent>
 
 	<artifactId>plant-game-core</artifactId>

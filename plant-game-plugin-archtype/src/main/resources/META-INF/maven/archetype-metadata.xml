@@ -1,0 +1,29 @@
+<archetype-descriptor name="plant-game-plugin-archetype">
+
+	<requiredProperties>
+		<requiredProperty key="artifactId" />
+		<requiredProperty key="name" />
+		<requiredProperty key="description" />
+		<requiredProperty key="revision" />
+		<requiredProperty key="plugin.internalName" />
+		<requiredProperty key="plugin.package" />
+		<requiredProperty key="plugin.internalNameCamel" />
+	</requiredProperties>
+
+	<fileSets>
+		<fileSet filtered="true" packaged="false">
+			<directory></directory>
+			<includes>
+				<include>pom.xml</include>
+			</includes>
+		</fileSet>
+
+		<fileSet filtered="true" packaged="true">
+			<directory>src/main/filtered-resources</directory>
+			<includes>
+				<include>plugin.json</include>
+			</includes>
+		</fileSet>
+	</fileSets>
+
+</archetype-descriptor>

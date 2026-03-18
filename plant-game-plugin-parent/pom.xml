@@ -11,10 +11,10 @@
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<artifactId>plant-game-plugin-template</artifactId>
+	<artifactId>plant-game-plugin-parent</artifactId>
 	<packaging>pom</packaging>
 
-	<name>Plant Game (Plugin Template)</name>
+	<name>Plant Game (Plugin Parent)</name>
 
 	<properties>
 		<plugin.name></plugin.name>
