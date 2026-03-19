@@ -15,22 +15,26 @@ import lu.kbra.standalone.gameengine.utils.gl.consts.TextureWrap;
 
 public abstract class GameObjectRegistry extends PluginRegistry {
 
-	public static final Map<Class<? extends GameObject>, List<InternalConstructorFunction<GameObject>>> GAME_OBJECT_CONSTRUCTORS;
-	public static final Map<Class<? extends GameObject>, String> DATA_PATH;
-	public static final Map<Class<? extends GameObject>, Integer> BUFFER_SIZE;
-	public static final Map<Class<? extends GameObject>, TextureFilter> TEXTURE_FILTER;
-	public static final Map<Class<? extends GameObject>, TextureWrap> TEXTURE_WRAP;
-
-	static {
-		GAME_OBJECT_CONSTRUCTORS = new HashMap<>();
-		DATA_PATH = new HashMap<>();
-		BUFFER_SIZE = new HashMap<>();
-		TEXTURE_FILTER = new HashMap<>();
-		TEXTURE_WRAP = new HashMap<>();
-	}
+	public static final Map<String, Class<? extends GameObject>> GAME_OBJECT_CLASSES = new HashMap<>();
+	public static final Map<Class<? extends GameObject>, List<InternalConstructorFunction<GameObject>>> GAME_OBJECT_CONSTRUCTORS = new HashMap<>();
+	public static final Map<Class<? extends GameObject>, String> DATA_PATH = new HashMap<>();
+	public static final Map<Class<? extends GameObject>, Integer> BUFFER_SIZE = new HashMap<>();
+	public static final Map<Class<? extends GameObject>, TextureFilter> TEXTURE_FILTER = new HashMap<>();
+	public static final Map<Class<? extends GameObject>, TextureWrap> TEXTURE_WRAP = new HashMap<>();
 
 	public GameObjectRegistry(final PluginDescriptor pluginDescriptor) {
 		super(pluginDescriptor);
+	}
+
+	@Override
+	public void postConstruct() {
+		GAME_OBJECT_CONSTRUCTORS.forEach((k, v) -> GAME_OBJECT_CLASSES.put(k.getName(), k));
+		// some GameObjects may not have a constructor
+		DATA_PATH.forEach((k, v) -> GAME_OBJECT_CLASSES.put(k.getName(), k));
+	}
+
+	public static <T extends GameObject> Class<T> getClass(final String name) {
+		return (Class<T>) GAME_OBJECT_CLASSES.get(name);
 	}
 
 	@SuppressWarnings("unchecked")

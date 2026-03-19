@@ -15,9 +15,9 @@
         "animated": {
             "file": "models/water-sprinkler-7x7_animated.obj",
             "offset_from_origin": [
-                -0.03061925247311592,
-                2.747666835784912,
-                -1.1838243007659912
+                1.1175870895385742e-08,
+                0.0,
+                1.3605823516845703
             ],
             "texture_material": false,
             "texture_path": null,

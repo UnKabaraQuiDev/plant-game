@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.joml.Vector2f;
+import org.joml.Vector2i;
 import org.joml.Vector3f;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -15,6 +16,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
+import lu.kbra.plant_game.base.entity.go.obj.StarterPodSmallObject;
 import lu.kbra.plant_game.engine.data.json.LevelDataModule.BuildingOverrideDeserializer;
 import lu.kbra.plant_game.engine.scene.world.LevelBuildingRegistry;
 import lu.kbra.plant_game.engine.scene.world.data.building.requirement.BuildingRequirement;
@@ -23,6 +25,7 @@ import lu.kbra.plant_game.engine.scene.world.generator.ImageWorldGenerator;
 import lu.kbra.plant_game.engine.scene.world.generator.WorldGenerationStrategy;
 import lu.kbra.plant_game.engine.scene.world.generator.WorldGenerator;
 import lu.kbra.plant_game.plugin.PluginDescriptor;
+import lu.kbra.standalone.gameengine.utils.consts.Direction;
 
 public class LevelData {
 
@@ -34,6 +37,26 @@ public class LevelData {
 	protected LevelBuildingRegistry buildingRegistry;
 
 	public static class World {
+
+		public static class StarterPod {
+
+			protected String podClass = StarterPodSmallObject.class.getName();
+			protected Vector2i tile;
+			protected Direction direction = Direction.DEFAULT();
+
+			public String getPodClass() {
+				return this.podClass;
+			}
+
+			public Vector2i getTile() {
+				return this.tile;
+			}
+
+			public Direction getDirection() {
+				return this.direction;
+			}
+
+		}
 
 		public static class WaterLevel {
 
@@ -140,9 +163,9 @@ public class LevelData {
 
 		}
 
-//		protected WorldGenerationStrategy generationStrategy;
 		protected Generation generation;
 		protected WaterLevel waterLevel;
+		protected StarterPod starterPod;
 		protected Light light;
 		protected Wind wind;
 
@@ -152,6 +175,10 @@ public class LevelData {
 
 		public WaterLevel getWaterLevel() {
 			return this.waterLevel;
+		}
+
+		public StarterPod getStarterPod() {
+			return this.starterPod;
 		}
 
 		public Light getLight() {
@@ -165,7 +192,7 @@ public class LevelData {
 		@Override
 		public String toString() {
 			return "World@" + System.identityHashCode(this) + " [generation=" + this.generation + ", waterLevel=" + this.waterLevel
-					+ ", light=" + this.light + ", wind=" + this.wind + "]";
+					+ ", starterPod=" + this.starterPod + ", light=" + this.light + ", wind=" + this.wind + "]";
 		}
 
 	}

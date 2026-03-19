@@ -15,9 +15,9 @@
         "animated": {
             "file": "models/wind-turbine-medium_animated.obj",
             "offset_from_origin": [
-                0.5455766916275024,
-                -0.49184975028038025,
-                4.774105072021484
+                0.0,
+                0.0,
+                3.534115791320801
             ],
             "texture_material": false,
             "texture_path": null
