@@ -10,7 +10,7 @@ import lu.kbra.plant_game.engine.mesh.TexturedMesh;
 import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 
-public class MeshGameObject extends GameObject implements MeshOwner, MaterialIdOwner {
+public class MeshGameObject extends GenericGameObject implements MeshOwner, MaterialIdOwner {
 
 	public static final int MESH_ATTRIB_MATERIAL_ID_ID = 3;
 	public static final int MESH_ATTRIB_OBJECT_ID_ID = 4;

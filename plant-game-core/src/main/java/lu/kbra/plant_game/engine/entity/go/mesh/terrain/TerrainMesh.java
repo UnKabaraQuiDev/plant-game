@@ -16,7 +16,7 @@ import lu.kbra.pclib.PCUtils;
 import lu.kbra.pclib.datastructure.pair.Pair;
 import lu.kbra.pclib.datastructure.pair.Pairs;
 import lu.kbra.plant_game.PGLogic;
-import lu.kbra.plant_game.engine.entity.go.GameObject;
+import lu.kbra.plant_game.engine.entity.go.GenericGameObject;
 import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.standalone.gameengine.cache.attrib.UByteAttribArray;
 import lu.kbra.standalone.gameengine.cache.attrib.UIntAttribArray;
@@ -138,10 +138,10 @@ public class TerrainMesh extends LoadedMesh {
 		PGLogic.INSTANCE.RENDER_DISPATCHER.post(() -> {
 			final UByteAttribArray array = (UByteAttribArray) this.getAttribs()
 					.stream()
-					.filter(c -> c.getIndex() == GameObject.MESH_ATTRIB_MATERIAL_ID_ID)
+					.filter(c -> c.getIndex() == GenericGameObject.MESH_ATTRIB_MATERIAL_ID_ID)
 					.findFirst()
-					.orElseThrow(() -> new IllegalStateException("No " + GameObject.MESH_ATTRIB_MATERIAL_ID_NAME + " ("
-							+ GameObject.MESH_ATTRIB_MATERIAL_ID_ID + ") found in mesh: " + this.getId()));
+					.orElseThrow(() -> new IllegalStateException("No " + GenericGameObject.MESH_ATTRIB_MATERIAL_ID_NAME + " ("
+							+ GenericGameObject.MESH_ATTRIB_MATERIAL_ID_ID + ") found in mesh: " + this.getId()));
 
 			for (Entry<Integer, byte[]> e : result.entrySet()) {
 				array.update(e.getKey(), e.getValue());

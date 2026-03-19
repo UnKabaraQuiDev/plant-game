@@ -15,7 +15,7 @@ import lu.kbra.plant_game.BuildingDefinition;
 import lu.kbra.plant_game.PGLogic;
 import lu.kbra.plant_game.base.scene.overlay.OverlayUIScene;
 import lu.kbra.plant_game.base.scene.overlay.group.building.BuildingInfoUIObjectGroup;
-import lu.kbra.plant_game.engine.entity.go.GameObject;
+import lu.kbra.plant_game.engine.entity.go.GenericGameObject;
 import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory;
 import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
 import lu.kbra.plant_game.engine.entity.impl.TintOwner;
@@ -113,7 +113,7 @@ public class BuildingItemUIObjectGroup extends OffsetUIObjectGroup
 				.set(i -> i.setTransform(new Transform3D()))
 				.add(worldScene)
 				.then(PGLogic.INSTANCE.WORKERS, (Consumer) (c) -> {
-					if (!(c instanceof GameObject go && c instanceof PlaceableObject po)) {
+					if (!(c instanceof GenericGameObject go && c instanceof PlaceableObject po)) {
 						return;
 					}
 					modal.setAttachedObject(po);

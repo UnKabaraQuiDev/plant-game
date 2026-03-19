@@ -4,7 +4,7 @@ import lu.kbra.plant_game.engine.entity.impl.InstanceEmitterOwner;
 import lu.kbra.plant_game.engine.entity.impl.MaterialIdOwner;
 import lu.kbra.standalone.gameengine.geom.instance.InstanceEmitter;
 
-public class InstanceGameObject extends GameObject implements InstanceEmitterOwner, MaterialIdOwner {
+public class InstanceGameObject extends GenericGameObject implements InstanceEmitterOwner, MaterialIdOwner {
 
 	protected short materialId;
 	protected boolean isEntityMaterialId = true;

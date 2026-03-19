@@ -12,7 +12,7 @@ import lu.kbra.pclib.PCUtils;
 import lu.kbra.plant_game.BuildingCategory;
 import lu.kbra.plant_game.BuildingDefinition;
 import lu.kbra.plant_game.base.data.DefaultResourceType;
-import lu.kbra.plant_game.engine.entity.go.GameObject;
+import lu.kbra.plant_game.engine.entity.go.GenericGameObject;
 import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
 import lu.kbra.plant_game.engine.scene.world.data.building.requirement.BuildingRequirement;
 import lu.kbra.plant_game.engine.scene.world.data.resource.ResourceType;
@@ -20,14 +20,14 @@ import lu.kbra.plant_game.plugin.PluginDescriptor;
 
 public abstract class BuildingRegistry extends PluginRegistry {
 
-	public static final Map<Class<? extends GameObject>, String> BUILDING_NAMES = new ConcurrentHashMap<>();
+	public static final Map<Class<? extends GenericGameObject>, String> BUILDING_NAMES = new ConcurrentHashMap<>();
 	public static final Map<BuildingCategory, List<BuildingDefinition<?>>> BUILDING_DEFS = new ConcurrentHashMap<>();
 
 	public BuildingRegistry(final PluginDescriptor pluginDescriptor) {
 		super(pluginDescriptor);
 	}
 
-	protected <T extends GameObject & PlaceableObject> void register(
+	protected <T extends GenericGameObject & PlaceableObject> void register(
 			final BuildingCategory cate,
 			final Class<T> clazz,
 			final int price,
@@ -41,14 +41,14 @@ public abstract class BuildingRegistry extends PluginRegistry {
 		}, unlock, building, index));
 	}
 
-	protected final <T extends GameObject & PlaceableObject> String getInternalName_(final Class<T> clazz) {
+	protected final <T extends GenericGameObject & PlaceableObject> String getInternalName_(final Class<T> clazz) {
 		if (!GameObjectRegistry.DATA_PATH.containsKey(clazz)) {
 			throw new IllegalArgumentException("Class: " + clazz + " not registered in " + GameObjectRegistry.class.getSimpleName());
 		}
 		return this.pluginDescriptor.getInternalName() + ":" + PCUtils.getFileName(GameObjectRegistry.DATA_PATH.get(clazz));
 	}
 
-	protected <T extends GameObject & PlaceableObject> void register(
+	protected <T extends GenericGameObject & PlaceableObject> void register(
 			final BuildingCategory cate,
 			final Class<T> clazz,
 			final Map<ResourceType, Integer> prices,
@@ -68,7 +68,7 @@ public abstract class BuildingRegistry extends PluginRegistry {
 		BUILDING_NAMES.put(def.getClazz(), def.getInternalName());
 	}
 
-	public static String getInternalName(final Class<? extends GameObject> clazz) {
+	public static String getInternalName(final Class<? extends GenericGameObject> clazz) {
 		if (!BUILDING_NAMES.containsKey(clazz)) {
 			throw new NoSuchElementException("Class: " + clazz + " isn't registered.");
 		}

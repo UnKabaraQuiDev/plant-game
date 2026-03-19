@@ -15,7 +15,7 @@ import lu.kbra.pclib.pointer.prim.IntPointer;
 import lu.kbra.plant_game.base.scene.overlay.group.building.BuildingInfoUIObjectGroup;
 import lu.kbra.plant_game.base.scene.overlay.group.building.ResourceLineUIObjectGroup;
 import lu.kbra.plant_game.engine.data.locale.Localizable;
-import lu.kbra.plant_game.engine.entity.go.GameObject;
+import lu.kbra.plant_game.engine.entity.go.GenericGameObject;
 import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
 import lu.kbra.plant_game.engine.entity.ui.text.ProgrammaticTextUIObject;
 import lu.kbra.plant_game.engine.scene.world.GameData;
@@ -24,7 +24,7 @@ import lu.kbra.plant_game.engine.scene.world.data.building.requirement.BuildingR
 import lu.kbra.plant_game.engine.scene.world.data.resource.ResourceType;
 import lu.kbra.plant_game.generated.ColorMaterial;
 
-public class BuildingDefinition<T extends GameObject & PlaceableObject>
+public class BuildingDefinition<T extends GenericGameObject & PlaceableObject>
 		implements Consumer<BuildingInfoUIObjectGroup>, Cloneable, Localizable {
 
 	protected final Class<T> clazz;

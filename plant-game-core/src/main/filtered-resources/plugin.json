@@ -4,12 +4,6 @@
 	"version": "${project.version}",
 	"package": "${plugin.package}",
 	"mainClass": "${plugin.mainName}",
-	"registries": [
-		"reg.BaseBuildingRegistry",
-		"reg.BaseResourceRegistry",
-		"reg.BaseLevelRegistry",
-		"reg.BaseFilterShaderRegistry",
-		"reg.BaseKeyRegistry"
-	],
+	"registries": [],
 	"dependencies": {}
 }

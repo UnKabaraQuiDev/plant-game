@@ -38,7 +38,7 @@ import lu.kbra.pclib.PCUtils;
 import lu.kbra.pclib.logger.GlobalLogger;
 import lu.kbra.pclib.pointer.prim.BooleanPointer;
 import lu.kbra.plant_game.PGLogic;
-import lu.kbra.plant_game.engine.entity.go.GameObject;
+import lu.kbra.plant_game.engine.entity.go.GenericGameObject;
 import lu.kbra.plant_game.engine.entity.go.VariationOwner;
 import lu.kbra.plant_game.engine.entity.go.data.AttributeLocation;
 import lu.kbra.plant_game.engine.entity.go.data.Footprint;
@@ -274,7 +274,7 @@ public class DeferredCompositor extends AutoCleanupable {
 		this.cache.addMesh(this.QUAD = new QuadLoadedMesh(PASS_BOUNDS,
 				null,
 				new Vector2f(1),
-				new UByteAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_NAME, GameObject.MESH_ATTRIB_MATERIAL_ID_ID, new byte[4])));
+				new UByteAttribArray(GenericGameObject.MESH_ATTRIB_MATERIAL_ID_NAME, GenericGameObject.MESH_ATTRIB_MATERIAL_ID_ID, new byte[4])));
 
 		this.cache.addAbstractShader(this.deferredTransferShader = new TransferShader());
 		this.cache.addAbstractShader(this.deferredInstanceTransferShader = new InstanceTransferShader());
@@ -826,7 +826,7 @@ public class DeferredCompositor extends AutoCleanupable {
 					GL_W.glMemoryBarrier(GL_W.GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 				}
 			}
-		} else if (entity instanceof GameObject go && go.getObjectIdLocation() == AttributeLocation.ENTITY
+		} else if (entity instanceof GenericGameObject go && go.getObjectIdLocation() == AttributeLocation.ENTITY
 				&& entity instanceof VariationOwner variationOwner) {
 			this.materialComputeShader.bind();
 
@@ -1053,8 +1053,8 @@ public class DeferredCompositor extends AutoCleanupable {
 			final Matrix4f mat = new Matrix4f(parentTransform).mul(new Matrix4f(localTransform)).mul(localOffset);
 
 			this.deferredTransferShader.setUniform(RenderShader.TRANSFORMATION_MATRIX, mat);
-			GL_W.glDisableVertexAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_ID);
-			GL_W.glVertexAttribI1ui(GameObject.MESH_ATTRIB_MATERIAL_ID_ID, color.getId());
+			GL_W.glDisableVertexAttribArray(GenericGameObject.MESH_ATTRIB_MATERIAL_ID_ID);
+			GL_W.glVertexAttribI1ui(GenericGameObject.MESH_ATTRIB_MATERIAL_ID_ID, color.getId());
 
 			if (GL_LINE_SMOOTHING) {
 				GL_W.glEnable(GL_W.GL_LINE_SMOOTH);
@@ -1066,7 +1066,7 @@ public class DeferredCompositor extends AutoCleanupable {
 			GL_W.glDrawElements(this.deferredTransferShader.getBeginMode().getGlId(), this.QUAD.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
 
 			GL_W.glPolygonMode(GL_W.GL_FRONT_AND_BACK, GL_W.GL_FILL);
-			GL_W.glEnableVertexAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_ID);
+			GL_W.glEnableVertexAttribArray(GenericGameObject.MESH_ATTRIB_MATERIAL_ID_ID);
 		}
 	}
 
@@ -1168,32 +1168,32 @@ public class DeferredCompositor extends AutoCleanupable {
 			// id is in the entity
 			final int matId = go.getMaterialId();
 
-			GL_W.glDisableVertexAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_ID);
-			GL_W.glVertexAttribI1ui(GameObject.MESH_ATTRIB_MATERIAL_ID_ID, matId);
+			GL_W.glDisableVertexAttribArray(GenericGameObject.MESH_ATTRIB_MATERIAL_ID_ID);
+			GL_W.glVertexAttribI1ui(GenericGameObject.MESH_ATTRIB_MATERIAL_ID_ID, matId);
 		} else if (mesh instanceof final TexturedMesh txtMesh) { // id in the texture id
 			final int txtId = txtMesh.getTexture().getGlId();
 
-			GL_W.glDisableVertexAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_ID);
-			GL_W.glVertexAttribI1ui(GameObject.MESH_ATTRIB_MATERIAL_ID_ID, txtId);
+			GL_W.glDisableVertexAttribArray(GenericGameObject.MESH_ATTRIB_MATERIAL_ID_ID);
+			GL_W.glVertexAttribI1ui(GenericGameObject.MESH_ATTRIB_MATERIAL_ID_ID, txtId);
 		} else if (mesh instanceof final MaterialMesh matMesh) { // id is in the mesh
 			final int matId = matMesh.getMaterialId();
 
-			GL_W.glDisableVertexAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_ID);
-			GL_W.glVertexAttribI1ui(GameObject.MESH_ATTRIB_MATERIAL_ID_ID, matId);
+			GL_W.glDisableVertexAttribArray(GenericGameObject.MESH_ATTRIB_MATERIAL_ID_ID);
+			GL_W.glVertexAttribI1ui(GenericGameObject.MESH_ATTRIB_MATERIAL_ID_ID, matId);
 		} else if (entity instanceof final MaterialIdOwner mo && !mo.isEntityMaterialId()
-				&& mesh.getVbo().containsKey(GameObject.MESH_ATTRIB_MATERIAL_ID_ID)) {
+				&& mesh.getVbo().containsKey(GenericGameObject.MESH_ATTRIB_MATERIAL_ID_ID)) {
 			// id is in the mesh buffer
-			GL_W.glEnableVertexAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_ID);
+			GL_W.glEnableVertexAttribArray(GenericGameObject.MESH_ATTRIB_MATERIAL_ID_ID);
 		}
 
-		if (entity instanceof final GameObject go && go.getObjectIdLocation() != AttributeLocation.MESH) {
+		if (entity instanceof final GenericGameObject go && go.getObjectIdLocation() != AttributeLocation.MESH) {
 			// object id is in the entity
 			final Vector3ic objId = go.getObjectId();
-			GL_W.glDisableVertexAttribArray(GameObject.MESH_ATTRIB_OBJECT_ID_ID);
-			GL_W.glVertexAttribI3ui(GameObject.MESH_ATTRIB_OBJECT_ID_ID, objId.x(), objId.y(), objId.z());
-		} else if (entity instanceof final GameObject go && go.getObjectIdLocation() == AttributeLocation.MESH) {
+			GL_W.glDisableVertexAttribArray(GenericGameObject.MESH_ATTRIB_OBJECT_ID_ID);
+			GL_W.glVertexAttribI3ui(GenericGameObject.MESH_ATTRIB_OBJECT_ID_ID, objId.x(), objId.y(), objId.z());
+		} else if (entity instanceof final GenericGameObject go && go.getObjectIdLocation() == AttributeLocation.MESH) {
 			// object id is in the mesh
-			GL_W.glEnableVertexAttribArray(GameObject.MESH_ATTRIB_OBJECT_ID_ID);
+			GL_W.glEnableVertexAttribArray(GenericGameObject.MESH_ATTRIB_OBJECT_ID_ID);
 		}
 
 		GL_W.glPolygonMode(PolygonMode.FRONT_AND_BACK.getGlId(), PolygonDrawMode.FILL.getGlId());
@@ -1357,35 +1357,35 @@ public class DeferredCompositor extends AutoCleanupable {
 			// id is in the entity
 			final int matId = mo.getMaterialId();
 
-			GL_W.glDisableVertexAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_ID);
-			GL_W.glVertexAttribI1ui(GameObject.MESH_ATTRIB_MATERIAL_ID_ID, matId);
+			GL_W.glDisableVertexAttribArray(GenericGameObject.MESH_ATTRIB_MATERIAL_ID_ID);
+			GL_W.glVertexAttribI1ui(GenericGameObject.MESH_ATTRIB_MATERIAL_ID_ID, matId);
 		} else if (mesh instanceof final TexturedMesh txtMesh) {
 			// id in the texture id
 			final int txtId = ColorMaterial.values().length + txtMesh.getTexture().getGlId();
 
-			GL_W.glDisableVertexAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_ID);
-			GL_W.glVertexAttribI1ui(GameObject.MESH_ATTRIB_MATERIAL_ID_ID, txtId);
+			GL_W.glDisableVertexAttribArray(GenericGameObject.MESH_ATTRIB_MATERIAL_ID_ID);
+			GL_W.glVertexAttribI1ui(GenericGameObject.MESH_ATTRIB_MATERIAL_ID_ID, txtId);
 		} else if (mesh instanceof final MaterialMesh matMesh) {
 			// id is in the mesh
 			final int matId = matMesh.getMaterialId();
 
-			GL_W.glDisableVertexAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_ID);
-			GL_W.glVertexAttribI1ui(GameObject.MESH_ATTRIB_MATERIAL_ID_ID, matId);
+			GL_W.glDisableVertexAttribArray(GenericGameObject.MESH_ATTRIB_MATERIAL_ID_ID);
+			GL_W.glVertexAttribI1ui(GenericGameObject.MESH_ATTRIB_MATERIAL_ID_ID, matId);
 		} else if (entity instanceof final MaterialIdOwner mo && !mo.isEntityMaterialId()
-				&& mesh.getVbo().containsKey(GameObject.MESH_ATTRIB_MATERIAL_ID_ID)) {
+				&& mesh.getVbo().containsKey(GenericGameObject.MESH_ATTRIB_MATERIAL_ID_ID)) {
 			// id is in the mesh buffer
-			GL_W.glEnableVertexAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_ID);
+			GL_W.glEnableVertexAttribArray(GenericGameObject.MESH_ATTRIB_MATERIAL_ID_ID);
 		}
 
 		if (entity instanceof final ObjectIdOwner oio && oio.getObjectIdLocation() != AttributeLocation.MESH) {
 			// object id is in the entity
 			final Vector3ic objId = oio.getObjectId();
 
-			GL_W.glDisableVertexAttribArray(GameObject.MESH_ATTRIB_OBJECT_ID_ID);
-			GL_W.glVertexAttribI3ui(GameObject.MESH_ATTRIB_OBJECT_ID_ID, objId.x(), objId.y(), objId.z());
+			GL_W.glDisableVertexAttribArray(GenericGameObject.MESH_ATTRIB_OBJECT_ID_ID);
+			GL_W.glVertexAttribI3ui(GenericGameObject.MESH_ATTRIB_OBJECT_ID_ID, objId.x(), objId.y(), objId.z());
 		} else if (entity instanceof final ObjectIdOwner oio && oio.getObjectIdLocation() == AttributeLocation.MESH) {
 			// object id is in the mesh
-			GL_W.glEnableVertexAttribArray(GameObject.MESH_ATTRIB_OBJECT_ID_ID);
+			GL_W.glEnableVertexAttribArray(GenericGameObject.MESH_ATTRIB_OBJECT_ID_ID);
 		}
 
 		if (mesh instanceof final LineMesh lineMesh) {
@@ -1451,10 +1451,10 @@ public class DeferredCompositor extends AutoCleanupable {
 		} else if (this.deferredPass && DEBUG_TRIANGLES && this.deferredTransferShader != null) {
 			this.deferredTransferShader.bind();
 
-			if (mesh.getVbo().containsKey(GameObject.MESH_ATTRIB_MATERIAL_ID_ID)) {
-				GL_W.glDisableVertexAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_ID);
+			if (mesh.getVbo().containsKey(GenericGameObject.MESH_ATTRIB_MATERIAL_ID_ID)) {
+				GL_W.glDisableVertexAttribArray(GenericGameObject.MESH_ATTRIB_MATERIAL_ID_ID);
 			}
-			GL_W.glVertexAttribI1ui(GameObject.MESH_ATTRIB_MATERIAL_ID_ID, ColorMaterial.LIGHT_GREEN.getId());
+			GL_W.glVertexAttribI1ui(GenericGameObject.MESH_ATTRIB_MATERIAL_ID_ID, ColorMaterial.LIGHT_GREEN.getId());
 			this.deferredTransferShader.setUniform(RenderShader.TRANSFORMATION_MATRIX, transformationMatrix);
 
 			if (GL_LINE_SMOOTHING) {
@@ -1473,8 +1473,8 @@ public class DeferredCompositor extends AutoCleanupable {
 
 			GL_W.glEnable(GL_W.GL_DEPTH_TEST);
 			GL_W.glPolygonMode(GL_W.GL_FRONT_AND_BACK, GL_W.GL_FILL);
-			if (mesh.getVbo().containsKey(GameObject.MESH_ATTRIB_MATERIAL_ID_ID)) {
-				GL_W.glEnableVertexAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_ID);
+			if (mesh.getVbo().containsKey(GenericGameObject.MESH_ATTRIB_MATERIAL_ID_ID)) {
+				GL_W.glEnableVertexAttribArray(GenericGameObject.MESH_ATTRIB_MATERIAL_ID_ID);
 			}
 		}
 	}
@@ -1729,7 +1729,7 @@ public class DeferredCompositor extends AutoCleanupable {
 
 	public void addOutline(final SceneEntity e, final Vector4fc color) {
 		Objects.requireNonNull(e);
-		if (!(e instanceof final GameObject go)) {
+		if (!(e instanceof final GenericGameObject go)) {
 			throw new UnsupportedOperationException("Unsupported object: " + e + " (" + e.getClass().getName() + ")");
 		}
 		if (go.getObjectIdLocation() != AttributeLocation.ENTITY) {
@@ -1742,7 +1742,7 @@ public class DeferredCompositor extends AutoCleanupable {
 
 	public void removeOutline(final SceneEntity e) {
 		Objects.requireNonNull(e);
-		if (!(e instanceof final GameObject go)) {
+		if (!(e instanceof final GenericGameObject go)) {
 			throw new UnsupportedOperationException("Unsupported object: " + e + " (" + e.getClass().getName() + ")");
 		}
 		if (go.getObjectIdLocation() != AttributeLocation.ENTITY) {
@@ -1757,7 +1757,7 @@ public class DeferredCompositor extends AutoCleanupable {
 		if (e == null) {
 			return null;
 		}
-		if (!(e instanceof final GameObject go)) {
+		if (!(e instanceof final GenericGameObject go)) {
 			throw new UnsupportedOperationException("Unsupported object: " + e + " (" + e.getClass().getName() + ")");
 		}
 		if (go.getObjectIdLocation() != AttributeLocation.ENTITY) {
@@ -1771,7 +1771,7 @@ public class DeferredCompositor extends AutoCleanupable {
 		if (e == null) {
 			return false;
 		}
-		if (!(e instanceof final GameObject go)) {
+		if (!(e instanceof final GenericGameObject go)) {
 			return false;
 		}
 		if (go.getObjectIdLocation() != AttributeLocation.ENTITY) {

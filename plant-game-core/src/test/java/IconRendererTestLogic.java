@@ -16,7 +16,7 @@ import lu.kbra.pclib.datastructure.pair.Pair;
 import lu.kbra.pclib.datastructure.pair.Pairs;
 import lu.kbra.pclib.logger.GlobalLogger;
 import lu.kbra.plant_game.BuildingDefinition;
-import lu.kbra.plant_game.engine.entity.go.GameObject;
+import lu.kbra.plant_game.engine.entity.go.GenericGameObject;
 import lu.kbra.plant_game.engine.entity.go.MeshGameObject;
 import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory;
 import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
@@ -61,11 +61,11 @@ public class IconRendererTestLogic extends GameLogic {
 		this.pluginManager.onLoad();
 
 		for (final BuildingDefinition<?> bd : BuildingRegistry.BUILDING_DEFS.values().stream().flatMap(List::stream).toList()) {
-			final Class<? extends GameObject> goClazz = bd.getClazz();
+			final Class<? extends GenericGameObject> goClazz = bd.getClazz();
 			if (!MeshGameObject.class.isAssignableFrom(goClazz) || !PlaceableObject.class.isAssignableFrom(goClazz)) {
 				continue;
 			}
-			final TaskFuture<List<Object>, ? extends GameObject>.TaskState<? extends GameObject> state = GameObjectFactory.create(goClazz)
+			final TaskFuture<List<Object>, ? extends GenericGameObject>.TaskState<? extends GenericGameObject> state = GameObjectFactory.create(goClazz)
 					.set(t -> t.setTransform(new Transform3D()))
 					.set(t -> this.objs.offer(Pairs.readOnly(bd, (MeshGameObject) t)))
 					.push();

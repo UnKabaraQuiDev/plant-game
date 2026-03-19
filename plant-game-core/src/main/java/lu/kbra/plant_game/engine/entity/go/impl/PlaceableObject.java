@@ -5,7 +5,7 @@ import java.util.function.Consumer;
 import org.joml.Vector2i;
 
 import lu.kbra.plant_game.engine.data.locale.Localizable;
-import lu.kbra.plant_game.engine.entity.go.GameObject;
+import lu.kbra.plant_game.engine.entity.go.GenericGameObject;
 import lu.kbra.plant_game.engine.entity.go.data.Footprint;
 import lu.kbra.plant_game.engine.entity.go.mesh.terrain.TerrainMesh;
 import lu.kbra.plant_game.engine.entity.go.obj.terrain.TerrainGameObject;
@@ -90,11 +90,11 @@ public interface PlaceableObject extends Transform3DOwner, UniqueID, SceneEntity
 		return aStartX <= bEndX && aEndX >= bStartX && aStartY <= bEndY && aEndY >= bStartY;
 	}
 
-	static <T extends GameObject & PlaceableObject> Localizable getLocalizable(final Class<T> building) {
+	static <T extends GenericGameObject & PlaceableObject> Localizable getLocalizable(final Class<T> building) {
 		return Localizable.of(getLocalizableKey(building));
 	}
 
-	static <T extends GameObject & PlaceableObject> String getLocalizableKey(final Class<T> building) {
+	static <T extends GenericGameObject & PlaceableObject> String getLocalizableKey(final Class<T> building) {
 		return LOCALIZATION_KEY + BuildingRegistry.getInternalName(building).replace(":", ".");
 	}
 

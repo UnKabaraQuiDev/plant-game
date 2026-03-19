@@ -32,7 +32,7 @@ import lu.kbra.plant_game.base.entity.go.obj.StarterPodObject;
 import lu.kbra.plant_game.base.entity.go.obj.energy.ResourceProducer;
 import lu.kbra.plant_game.base.entity.go.obj.water.NeedsRandomTick;
 import lu.kbra.plant_game.engine.UpdateFrameState;
-import lu.kbra.plant_game.engine.entity.go.GameObject;
+import lu.kbra.plant_game.engine.entity.go.GenericGameObject;
 import lu.kbra.plant_game.engine.entity.go.MeshGameObject;
 import lu.kbra.plant_game.engine.entity.go.data.AttributeLocation;
 import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory;
@@ -76,7 +76,7 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController, S
 
 	private final CacheManager worldCache;
 
-	private GameObject waterLevel;
+	private GenericGameObject waterLevel;
 	private TerrainGameObject terrain;
 
 	private Vector3f lightColor = new Vector3f(1);
@@ -200,6 +200,7 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController, S
 					.set(i -> i.setTransform(new Transform3D()))
 					.add(this)
 					.postInit(c -> c.placeDown(this.terrain, pod.getTile(), pod.getDirection()))
+					.postInit(c -> worldProgress.add(100))
 					.latch(latch)
 					.push();
 		}).push();
@@ -334,9 +335,9 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController, S
 				.then(workers,
 						(Function<Vector3i, Optional<PlaceableObject>>) ids -> super.getEntities().values()
 								.parallelStream()
-								.filter(e -> e instanceof GameObject && e instanceof PlaceableObject
-										&& ((GameObject) e).getObjectIdLocation() == AttributeLocation.ENTITY)
-								.filter(e -> ids.equals(((GameObject) e).getObjectId()))
+								.filter(e -> e instanceof GenericGameObject && e instanceof PlaceableObject
+										&& ((GenericGameObject) e).getObjectIdLocation() == AttributeLocation.ENTITY)
+								.filter(e -> ids.equals(((GenericGameObject) e).getObjectId()))
 								.map(PlaceableObject.class::cast)
 								.findFirst());
 	}
@@ -354,7 +355,7 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController, S
 			return false;
 		}
 
-		return !this.getEntities().values().stream().map(GameObject.class::cast).anyMatch(c -> {
+		return !this.getEntities().values().stream().map(GenericGameObject.class::cast).anyMatch(c -> {
 			if (!c.hasTransform() || !(c instanceof final PlaceableObject po) || c == targetObject) {
 				return false;
 			}
@@ -470,7 +471,7 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController, S
 		this.activeModal = activeModal;
 	}
 
-	public GameObject getWaterLevel() {
+	public GenericGameObject getWaterLevel() {
 		return this.waterLevel;
 	}
 

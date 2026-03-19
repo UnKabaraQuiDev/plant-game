@@ -78,6 +78,7 @@
 						<goals>
 							<goal>gen-go-registry</goal>
 							<goal>gen-ui-registry</goal>
+							<goal>gen-plugin-registries</goal>
 						</goals>
 					</execution>
 				</executions>

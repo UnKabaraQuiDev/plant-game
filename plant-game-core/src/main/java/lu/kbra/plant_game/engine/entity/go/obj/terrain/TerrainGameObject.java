@@ -19,7 +19,7 @@ import lu.kbra.pclib.pointer.ObjectPointer;
 import lu.kbra.plant_game.base.entity.go.obj_inst.grass.InstanceLargeGrassObject;
 import lu.kbra.plant_game.base.entity.go.obj_inst.grass.InstanceMediumGrassObject;
 import lu.kbra.plant_game.base.entity.go.obj_inst.grass.InstanceSmallGrassObject;
-import lu.kbra.plant_game.engine.entity.go.GameObject;
+import lu.kbra.plant_game.engine.entity.go.GenericGameObject;
 import lu.kbra.plant_game.engine.entity.go.MeshGameObject;
 import lu.kbra.plant_game.engine.entity.go.VariationMeshGameObject;
 import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory;
@@ -37,7 +37,7 @@ import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3DPivot;
 
 public class TerrainGameObject extends VariationMeshGameObject
-		implements SynchronizedEntityContainer<GameObject>, AbsoluteTransform3DOwner, Transform3DPivotOwner {
+		implements SynchronizedEntityContainer<GenericGameObject>, AbsoluteTransform3DOwner, Transform3DPivotOwner {
 
 	private static final int GREEN_BIT = 1 << 0;
 	private static final int SMALL_GRASS_BIT = 1 << 1;
@@ -81,7 +81,7 @@ public class TerrainGameObject extends VariationMeshGameObject
 	public static float WATER_GROW_SPEED = PCUtils.getFloat(WATER_FACTOR_PROPERTY, 1f);
 
 	protected Object subEntitiesLock = new Object();
-	protected List<GameObject> subEntities = Collections.synchronizedList(new ArrayList<>());
+	protected List<GenericGameObject> subEntities = Collections.synchronizedList(new ArrayList<>());
 
 	protected WorldLevelScene parent;
 
@@ -411,12 +411,12 @@ public class TerrainGameObject extends VariationMeshGameObject
 	}
 
 	@Override
-	public List<GameObject> getWEntities() {
+	public List<GenericGameObject> getWEntities() {
 		return this.subEntities;
 	}
 
 	@Override
-	public List<GameObject> getROEntities() {
+	public List<GenericGameObject> getROEntities() {
 		return List.copyOf(this.subEntities);
 	}
 

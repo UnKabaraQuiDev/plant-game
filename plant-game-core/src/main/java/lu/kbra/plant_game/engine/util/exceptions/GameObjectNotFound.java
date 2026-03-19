@@ -7,7 +7,7 @@ public class GameObjectNotFound extends GameObjectException {
 	private final Class<? extends GameObject> clazz;
 	private final Object[] args;
 
-	public GameObjectNotFound(Class<? extends GameObject> clazz, Object[] args) {
+	public GameObjectNotFound(final Class<? extends GameObject> clazz, final Object[] args) {
 		super("GameObject not found for name: " + clazz.getName());
 		this.clazz = clazz;
 		this.args = args;
