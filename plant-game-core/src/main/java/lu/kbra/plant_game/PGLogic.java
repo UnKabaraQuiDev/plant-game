@@ -1,6 +1,7 @@
 package lu.kbra.plant_game;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Locale;
 
 import org.lwjgl.glfw.GLFW;
@@ -12,6 +13,7 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.StreamReadFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import lu.kbra.pclib.logger.GlobalLogger;
 import lu.kbra.pclib.pointer.prim.IntPointer;
 import lu.kbra.plant_game.base.scene.menu.main.MainMenuUIScene;
 import lu.kbra.plant_game.base.scene.overlay.OverlayUIScene;
@@ -40,7 +42,6 @@ import lu.kbra.standalone.gameengine.impl.Cleanupable;
 import lu.kbra.standalone.gameengine.impl.GameLogic;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
 import lu.kbra.standalone.gameengine.impl.future.WorkerDispatcher;
-import lu.kbra.standalone.gameengine.utils.gl.consts.Consts;
 
 public class PGLogic extends GameLogic {
 
@@ -85,7 +86,7 @@ public class PGLogic extends GameLogic {
 	public void init() throws Exception {
 		this.inputHandler = new MappingInputHandler(this.engine);
 		this.inputHandler.setOwner(this.engine.getUpdateThread());
-		this.inputHandler.loadMappings(new File(Consts.CONFIG_DIR, "mappings.json"));
+		this.inputHandler.loadMappings(new File(PGMain.CONFIG_DIR, "mappings.json"));
 
 		this.pluginManager.load();
 
@@ -111,8 +112,8 @@ public class PGLogic extends GameLogic {
 
 		this.pluginManager.onEnable();
 
-		final VignetteShaderConfiguration config = compositor.getFilterShader(VignetteShader.class).newConfigurationInstance();
-		compositor.enableFilter(config);
+		final VignetteShaderConfiguration config = this.compositor.getFilterShader(VignetteShader.class).newConfigurationInstance();
+		this.compositor.enableFilter(config);
 	}
 
 	private final UpdateFrameState frameState = new UpdateFrameState();
@@ -195,6 +196,12 @@ public class PGLogic extends GameLogic {
 
 	@Override
 	public void cleanup() {
+		try {
+			this.inputHandler.saveMappings();
+		} catch (IOException e) {
+			GlobalLogger.severe("Couldn't save InputHandler mappings.", e);
+		}
+
 		this.pluginManager.onDisable();
 		if (this.compositor != null) {
 			this.compositor.cleanup();

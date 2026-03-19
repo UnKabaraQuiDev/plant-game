@@ -1,9 +1,14 @@
 package lu.kbra.plant_game.engine.entity.go.impl;
 
-public interface EnergyProducer {
+import lu.kbra.plant_game.base.data.DefaultResourceType;
+import lu.kbra.plant_game.base.entity.go.obj.energy.GenericResourceProducer;
+import lu.kbra.plant_game.engine.scene.world.data.resource.ResourceType;
 
-	long getProductionRate();
+public interface EnergyProducer extends GenericResourceProducer {
 
-	boolean isActive();
+	@Override
+	default ResourceType getProducedType() {
+		return DefaultResourceType.ENERGY;
+	}
 
 }

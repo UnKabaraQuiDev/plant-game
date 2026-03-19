@@ -3,10 +3,14 @@ package lu.kbra.plant_game;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Properties;
 
 import com.codedisaster.steamworks.SteamAPI;
 import com.codedisaster.steamworks.SteamException;
+import com.codedisaster.steamworks.SteamLibraryLoader;
+import com.codedisaster.steamworks.SteamLibraryLoaderLwjgl3;
 
 import lu.kbra.pclib.PCUtils;
 import lu.kbra.pclib.logger.GlobalLogger;
@@ -21,6 +25,8 @@ public class PGMain {
 
 	public static boolean STEAM_LAUCHED = false;
 	public static File APP_DIR;
+	public static File APP_DATA_DIR;
+	public static File CONFIG_DIR;
 
 	public static File getAppDataDir(final String appName) {
 		final String os = System.getProperty("os.name").toLowerCase();
@@ -43,9 +49,6 @@ public class PGMain {
 		}
 
 		final File dir = new File(path);
-		if (!dir.exists()) {
-			dir.mkdirs(); // create if missing
-		}
 
 		return dir;
 	}
@@ -56,21 +59,32 @@ public class PGMain {
 		final Properties props = new Properties();
 		props.load(new StringReader(PCUtils.readStringSource("classpath:/config/main.properties")));
 
-		if (!SKIP_STEAM) {
-			SteamAPI.loadLibraries();
+		if (SKIP_STEAM) {
+			STEAM_LAUCHED = false;
+			APP_DIR = getAppDataDir("satisplantory");
+			System.err.println("Started without steam support (forced).");
+		} else {
+			final SteamLibraryLoader loader = new SteamLibraryLoaderLwjgl3();
+			if (!SteamAPI.loadLibraries(loader)) {
+				throw new IllegalStateException("Failed to load native libraries.");
+			}
+
+			if (!SteamAPI.init()) {
+				throw new IllegalStateException("Failed to initialize Steam API.");
+			}
 
 			if (SteamAPI.isSteamRunning()) {
 				if (SteamAPI.restartAppIfNecessary(Integer.parseInt((String) props.get("steam.appId")))) {
-//				STEAM_LAUCHED = false;
-//				APP_DIR = getAppDataDir("satisplantory");
 					System.err.println("Not started in steam app, exitting.");
 					return;
 				}
-				STEAM_LAUCHED = true;
-				APP_DIR = new File("./data/");
-				if (!SteamAPI.init()) {
-					throw new IllegalStateException("Failed to initialize Steam API.");
+				if (System.getenv("STEAM_COMPAT_INSTALL_PATH") == null || System.getenv("STEAM_COMPAT_INSTALL_PATH").isBlank()) {
+					throw new IllegalArgumentException("Steam path not found in env.");
 				}
+
+				STEAM_LAUCHED = true;
+				APP_DIR = new File(System.getenv("STEAM_COMPAT_INSTALL_PATH"));
+
 				System.err.println("Started with steam support.");
 			} else {
 				STEAM_LAUCHED = false;
@@ -79,9 +93,15 @@ public class PGMain {
 			}
 		}
 
+		APP_DATA_DIR = new File(APP_DIR, "data");
+		Files.createDirectories(Paths.get(APP_DATA_DIR.getPath()));
+		CONFIG_DIR = new File(APP_DATA_DIR, "config");
+		Files.createDirectories(Paths.get(CONFIG_DIR.getPath()));
+
 		GlobalLogger.init(PCUtils.readStringSource(props.getProperty("logs.config.file")).replace("%APP_DIR%", APP_DIR.getPath()));
 
 		GlobalLogger.info("App dir: " + APP_DIR.getAbsolutePath());
+		GlobalLogger.info("Started with steam: " + STEAM_LAUCHED + " (Force disabled: " + SKIP_STEAM + ")");
 		GlobalLogger.info("Removed " + PCUtils.deleteOldFiles(GlobalLogger.getLogger().getLogFile().getParentFile(), 20)
 				+ " entries from the logs directory.");
 

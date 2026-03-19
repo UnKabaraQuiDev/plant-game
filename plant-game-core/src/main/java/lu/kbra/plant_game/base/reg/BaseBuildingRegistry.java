@@ -11,7 +11,7 @@ import lu.kbra.plant_game.base.entity.go.obj.energy.WindTurbineMediumObject;
 import lu.kbra.plant_game.base.entity.go.obj.water.WaterSprinklerObject3x3;
 import lu.kbra.plant_game.base.entity.go.obj.water.WaterSprinklerObject5x5;
 import lu.kbra.plant_game.base.entity.go.obj.water.WaterSprinklerObject7x7;
-import lu.kbra.plant_game.base.entity.go.obj.water.WaterTowerObject;
+import lu.kbra.plant_game.base.entity.go.obj.water.WaterTowerMediumObject;
 import lu.kbra.plant_game.engine.scene.world.data.building.requirement.MinBuildUnlockRequirement;
 import lu.kbra.plant_game.plugin.PluginDescriptor;
 import lu.kbra.plant_game.plugin.registry.BuildingRegistry;
@@ -28,7 +28,7 @@ public class BaseBuildingRegistry extends BuildingRegistry {
 		this.register(ENERGY, WindTurbineMediumObject.class, 125, List.of(), List.of(), 20);
 		this.register(ENERGY, WaterWheelSmallObject.class, 125, List.of(), List.of(), 30);
 
-		this.register(WATER, WaterTowerObject.class, 60, List.of(), List.of(), 20);
+		this.register(WATER, WaterTowerMediumObject.class, 60, List.of(), List.of(), 20);
 		this.register(WATER, WaterSprinklerObject3x3.class, 80, List.of(), List.of(), 30);
 		this.register(WATER,
 				WaterSprinklerObject5x5.class,

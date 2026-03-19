@@ -19,27 +19,27 @@ public class GameData {
 
 	protected byte progress = 0;
 	protected LevelState levelState = LevelState.NOT_STARTED;
-	protected Map<ResourceType, Integer> resources = new ConcurrentHashMap<>();
+	protected Map<ResourceType, Float> resources = new ConcurrentHashMap<>();
 
 	public GameData() {
 	}
 
-	public GameData(final Map<ResourceType, Integer> resources) {
+	public GameData(final Map<ResourceType, Float> resources) {
 		this.resources = resources;
 	}
 
 	public GameData(final LevelData levelData) {
 		this.levelData = levelData;
-		this.resources.put(DefaultResourceType.WATER, 0);
-		this.resources.put(DefaultResourceType.ENERGY, 0);
-		this.resources.put(DefaultResourceType.MONEY, 0);
+		this.resources.put(DefaultResourceType.WATER, 0f);
+		this.resources.put(DefaultResourceType.ENERGY, 0f);
+		this.resources.put(DefaultResourceType.MONEY, 0f);
 	}
 
 	public LevelData getLevelData() {
 		return this.levelData;
 	}
 
-	public Map<ResourceType, Integer> getResources() {
+	public Map<ResourceType, Float> getResources() {
 		return this.resources;
 	}
 
@@ -75,7 +75,7 @@ public class GameData {
 
 	public static GameData fromBlankLevel(final LevelData levelData) {
 		final GameData gd = new GameData(levelData);
-		levelData.getGame().getStartResources().forEach((k, v) -> gd.getResources().put(k, v));
+		levelData.getGame().getStartResources().forEach((k, v) -> gd.getResources().put(k, (float) v));
 		return gd;
 	}
 

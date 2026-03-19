@@ -139,7 +139,7 @@ public abstract class LevelRegistry extends PluginRegistry {
 	}
 
 	protected Optional<GameData> readProgress(final LevelDefinition ld) throws IOException {
-		final File dataFile = new File(PGMain.APP_DIR, "/games/" + ld.getInternalName() + "/game.json");
+		final File dataFile = new File(PGMain.APP_DATA_DIR, "/games/" + ld.getInternalName() + "/game.json");
 		if (!dataFile.exists()) {
 			return Optional.empty();
 		}

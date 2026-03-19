@@ -1,8 +1,9 @@
 package lu.kbra.plant_game.plugin;
 
-import static lu.kbra.plant_game.PGLogic.OBJECT_MAPPER;
-
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.Optional;
 
 import lu.kbra.pclib.PCUtils;
 import lu.kbra.pclib.logger.GlobalLogger;
+import lu.kbra.plant_game.PGLogic;
 import lu.kbra.plant_game.PGMain;
 import lu.kbra.plant_game.engine.entity.impl.NeedsPostConstruct;
 import lu.kbra.plant_game.plugin.PluginJarLoader.LoadedPlugin;
@@ -25,19 +27,27 @@ public final class PluginManager {
 
 	public static final String FAIL_ON_REGISTRY_NOT_FOUND_PROPERTY = PluginManager.class.getSimpleName() + ".fail_on_registry_not_founds";
 	public static boolean FAIL_ON_REGISTRY_NOT_FOUND = Boolean.getBoolean(FAIL_ON_REGISTRY_NOT_FOUND_PROPERTY);
-	public static final String SKIP_FAIL_ON_REGISTRY_EXCEPTION_PROPERTY = PluginManager.class.getSimpleName()
-			+ ".skip_fail_on_registry_exception";
-	public static boolean SKIP_FAIL_ON_REGISTRY_EXCEPTION = PCUtils.getBoolean(SKIP_FAIL_ON_REGISTRY_EXCEPTION_PROPERTY, true);
+	public static final String FAIL_ON_REGISTRY_EXCEPTION_PROPERTY = PluginManager.class.getSimpleName() + ".fail_on_registry_exception";
+	public static boolean FAIL_ON_REGISTRY_EXCEPTION = PCUtils.getBoolean(FAIL_ON_REGISTRY_EXCEPTION_PROPERTY, true);
+	public static final String EXTERNAL_PLUGIN_PATHS_PROPERTY = PluginManager.class.getSimpleName() + ".ext_plugin_paths";
+	public static String EXTERNAL_PLUGINS_PATH = System.getProperty(EXTERNAL_PLUGIN_PATHS_PROPERTY);
 
 	private final PluginJarLoader pluginJarLoader = new PluginJarLoader();
 	private final Map<Class<? extends PluginMain>, LoadedPlugin> plugins = new HashMap<>();
 
 	public void load() {
 		try {
-			this.pluginJarLoader
-					.loadAll(this,
-							List.of(Paths.get(PGMain.APP_DIR.getPath()).resolve("plugins")),
-							List.of(OBJECT_MAPPER.readValue(PCUtils.readStringSource("classpath:/plugin.json"), PluginDescriptor.class)))
+			final List<Path> pluginDirs = new ArrayList<>();
+			if (EXTERNAL_PLUGINS_PATH != null && !EXTERNAL_PLUGINS_PATH.isBlank()) {
+				Arrays.stream(EXTERNAL_PLUGINS_PATH.split(";")).map(Paths::get).forEach(pluginDirs::add);
+			}
+			pluginDirs.add(Paths.get(PGMain.APP_DIR.getPath()).resolve("plugins"));
+			pluginDirs.add(Paths.get(PGMain.APP_DATA_DIR.getPath()).resolve("plugins"));
+
+			final PluginDescriptor basePluginDescriptor = PGLogic.OBJECT_MAPPER
+					.readValue(PCUtils.readStringSource("classpath:/plugin.json"), PluginDescriptor.class);
+
+			this.pluginJarLoader.loadAll(this, pluginDirs, List.of(basePluginDescriptor))
 					.forEach(lp -> this.plugins.put(lp.main().getClass(), lp));
 		} catch (Exception e) {
 			throw new RuntimeException("Failed to load plugins.", e);
@@ -98,7 +108,7 @@ public final class PluginManager {
 						}
 					} catch (RegistryFailedException e) {
 						GlobalLogger.warning("Exception when initializing registry: " + regName + " from: " + c.descriptor().toString());
-						if (!SKIP_FAIL_ON_REGISTRY_EXCEPTION) {
+						if (!FAIL_ON_REGISTRY_EXCEPTION) {
 							throw e;
 						}
 					}

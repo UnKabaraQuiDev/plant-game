@@ -11,7 +11,7 @@ import lu.kbra.pclib.PCUtils;
 import lu.kbra.pclib.concurrency.ObjectTriggerLatch;
 import lu.kbra.pclib.pointer.prim.IntPointer;
 import lu.kbra.plant_game.PGLogic;
-import lu.kbra.plant_game.base.entity.go.obj.water.WaterTowerObject;
+import lu.kbra.plant_game.base.entity.go.obj.water.WaterTowerMediumObject;
 import lu.kbra.plant_game.base.scene.menu.main.MainMenuUIScene;
 import lu.kbra.plant_game.engine.UpdateFrameState;
 import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory;
@@ -146,7 +146,7 @@ public class MainMenuWorldScene extends WorldLevelScene implements Consumer<Leve
 			final Dispatcher render,
 			final GameData gameData,
 			final IntPointer worldProgress) {
-		GameObjectFactory.create(WaterTowerObject.class)
+		GameObjectFactory.create(WaterTowerMediumObject.class)
 				.set(i -> i.setTransform(new Transform3D(new Vector3f(0, -100, 0))))
 				.set(i -> i.setActive(false))
 				.add(this)

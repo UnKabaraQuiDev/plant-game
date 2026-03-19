@@ -56,7 +56,7 @@ public class ResumeResourcesUIObjectGroup extends AnchoredFBUIObjectGroup
 			final GameData go = t.getGameData().get();
 			this.stream().filter(ResourceLineUIObjectGroup.class::isInstance).map(ResourceLineUIObjectGroup.class::cast).forEach(c -> {
 				if (go.getResources().containsKey(c.getResourceType())) {
-					c.getValueObject().set(go.getResources().get(c.getResourceType())).flushValue();
+					c.getValueObject().set((int) Math.ceil(go.getResources().get(c.getResourceType()))).flushValue();
 					c.setActive(true);
 				} else {
 					c.setActive(false);

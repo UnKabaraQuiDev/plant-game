@@ -26,6 +26,7 @@ public class LevelDataModule extends SimpleModule {
 	}
 
 	public static class BuildingOverrideDeserializer extends JsonDeserializer<BuildingOverride> {
+
 		@Override
 		public BuildingOverride deserialize(final JsonParser parser, final DeserializationContext ctx) throws IOException {
 			final ObjectMapper mapper = (ObjectMapper) parser.getCodec();
@@ -66,6 +67,7 @@ public class LevelDataModule extends SimpleModule {
 
 			return new BuildingOverride(prices, unlockRequirements, buildRequirements);
 		}
+
 	}
 
 }

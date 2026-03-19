@@ -33,7 +33,7 @@ public class ResourceTypeModule extends SimpleModule {
 
 		@Override
 		public Object deserializeKey(final String key, final DeserializationContext ctxt) throws IOException {
-			ResourceType resourceType = ResourceRegistry.RESOURCE_TYPE_DEFS.get(key);
+			final ResourceType resourceType = ResourceRegistry.RESOURCE_TYPE_DEFS.get(key);
 			if (resourceType == null) {
 				throw new IllegalStateException("Unsupported type: " + key);
 			}
@@ -47,8 +47,8 @@ public class ResourceTypeModule extends SimpleModule {
 
 		@Override
 		public ResourceType deserialize(final JsonParser jp, final DeserializationContext ctxt) throws IOException {
-			String key = jp.getValueAsString();
-			ResourceType resourceType = ResourceRegistry.RESOURCE_TYPE_DEFS.get(key);
+			final String key = jp.getValueAsString();
+			final ResourceType resourceType = ResourceRegistry.RESOURCE_TYPE_DEFS.get(key);
 			if (resourceType == null) {
 				throw new IllegalArgumentException("Unsupported type: " + key);
 			}
@@ -60,7 +60,7 @@ public class ResourceTypeModule extends SimpleModule {
 
 		@Override
 		public void serialize(final ResourceType value, final JsonGenerator gen, final SerializerProvider provider) throws IOException {
-			for (Map.Entry<String, ResourceType> entry : ResourceRegistry.RESOURCE_TYPE_DEFS.entrySet()) {
+			for (final Map.Entry<String, ResourceType> entry : ResourceRegistry.RESOURCE_TYPE_DEFS.entrySet()) {
 				if (Objects.equals(value, entry.getValue())) {
 					gen.writeString(entry.getKey());
 					return;

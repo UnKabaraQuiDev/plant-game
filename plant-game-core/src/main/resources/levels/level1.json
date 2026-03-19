@@ -25,31 +25,11 @@
 	},
 	"game": {
 		"startResources": {
-			"base:water": 200,
-			"base:energy": 100,
-			"base:money": 100
+			"base:water": 25,
+			"base:energy": 35,
+			"base:money": 1000
 		},
-		"lockedBuildings": [
-			"base:water-tower-large"
-		],
-		"buildingsOverride": {
-			"base:water-tower-medium": {
-				"price": 100,
-				"unlockRequirements": [
-					{
-						"type": "MIN_BUILD",
-						"count": 2,
-						"building": "base:water-tower-small"
-					}
-				],
-				"buildRequirements": [
-					{
-						"type": "MIN_RESOURCE",
-						"count": 2000,
-						"resource": "base:water"
-					}
-				]
-			}
-		}
+		"lockedBuildings": [],
+		"buildingsOverride": {}
 	}
 }

@@ -198,13 +198,10 @@ public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner
 			final WorkerDispatcher workers,
 			final Dispatcher render) {
 		super.update(inputHandler, compositor, workers, render);
-//		PGLogic.INSTANCE.getGameData()
-//				.getResources()
-//				.compute(DefaultResourceType.WATER, (k, v) -> v + (this.frameCounter++ % 200 == 0 ? (int) Math.rint(Math.random()) : 0));
 
-		this.waterGroup.setTarget(PGLogic.INSTANCE.getGameData().getResources().get(DefaultResourceType.WATER));
-		this.energyGroup.setTarget(PGLogic.INSTANCE.getGameData().getResources().get(DefaultResourceType.ENERGY));
-		this.moneyGroup.setTarget(PGLogic.INSTANCE.getGameData().getResources().get(DefaultResourceType.MONEY));
+		this.waterGroup.setTarget((int) Math.ceil(PGLogic.INSTANCE.getGameData().getResources().get(DefaultResourceType.WATER)));
+		this.energyGroup.setTarget((int) Math.ceil(PGLogic.INSTANCE.getGameData().getResources().get(DefaultResourceType.ENERGY)));
+		this.moneyGroup.setTarget((int) Math.ceil(PGLogic.INSTANCE.getGameData().getResources().get(DefaultResourceType.MONEY)));
 	}
 
 	public BuildingInfoUIObjectGroup getBuildingInfo() {

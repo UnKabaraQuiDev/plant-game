@@ -1,13 +1,22 @@
 package lu.kbra.plant_game.engine.entity.go.impl;
 
-public interface WaterContainer {
+import java.util.Map;
 
-	long getWater();
+import lu.kbra.plant_game.base.data.DefaultResourceType;
+import lu.kbra.plant_game.engine.scene.world.data.resource.ResourceType;
 
-	boolean hasWater(long val);
+public interface WaterContainer extends ResourceContainer {
 
-	void addWater(long val);
+	@Override
+	default ResourceType[] getAllowedResources() {
+		return new ResourceType[] { DefaultResourceType.WATER };
+	}
 
-	void removeWater(long val);
+	@Override
+	default Map<ResourceType, Integer> getMaxResources() {
+		return Map.of(DefaultResourceType.WATER, this.getMaxWater());
+	}
+
+	int getMaxWater();
 
 }

@@ -3,6 +3,7 @@ package lu.kbra.plant_game.engine.scene.world;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.WeakHashMap;
 import java.util.function.Consumer;
@@ -18,18 +19,23 @@ import org.joml.Vector3i;
 import org.joml.Vector3ic;
 
 import lu.kbra.pclib.concurrency.ObjectTriggerLatch;
+import lu.kbra.pclib.datastructure.list.WeakArrayList;
+import lu.kbra.pclib.datastructure.list.WeakList;
 import lu.kbra.pclib.datastructure.pair.Pair;
 import lu.kbra.pclib.datastructure.pair.Pairs;
 import lu.kbra.pclib.pointer.ObjectPointer;
 import lu.kbra.pclib.pointer.prim.IntPointer;
 import lu.kbra.plant_game.PGLogic;
 import lu.kbra.plant_game.base.data.DefaultKeyOption;
+import lu.kbra.plant_game.base.data.DefaultResourceType;
+import lu.kbra.plant_game.base.entity.go.obj.energy.ResourceProducer;
 import lu.kbra.plant_game.base.entity.go.obj.water.NeedsRandomTick;
 import lu.kbra.plant_game.engine.UpdateFrameState;
 import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.entity.go.MeshGameObject;
 import lu.kbra.plant_game.engine.entity.go.data.AttributeLocation;
 import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
+import lu.kbra.plant_game.engine.entity.go.impl.ResourceContainer;
 import lu.kbra.plant_game.engine.entity.go.mesh.terrain.TerrainEdgeMesh;
 import lu.kbra.plant_game.engine.entity.go.mesh.terrain.TerrainMesh;
 import lu.kbra.plant_game.engine.entity.go.obj.terrain.TerrainEdgeObject;
@@ -39,6 +45,7 @@ import lu.kbra.plant_game.engine.entity.impl.AnimatedTransformOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsUpdate;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.scene.world.data.LevelData;
+import lu.kbra.plant_game.engine.scene.world.data.resource.ResourceType;
 import lu.kbra.plant_game.engine.scene.world.generator.WorldGenerator;
 import lu.kbra.plant_game.engine.scene.world.particle.ParticleManager;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
@@ -47,6 +54,7 @@ import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.geom.BoundingBox;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.geom.QuadLoadedMesh;
+import lu.kbra.standalone.gameengine.impl.GameLogic;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
 import lu.kbra.standalone.gameengine.objs.entity.SceneEntity;
@@ -59,7 +67,6 @@ import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 public class WorldLevelScene extends Scene3D implements ActiveModalController, SunLightOwner {
 
 	private static final int CAMERA_MOVEMENT_SPEED = 10;
-	private static final long RANDOM_TICK_DELAY = 1000;
 
 	public static final Vector3ic WATER_ID = new Vector3i(2, 0, 0);
 
@@ -87,7 +94,11 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController, S
 	private final Map<Class<? extends Modal>, Modal> modals = Collections.synchronizedMap(new HashMap<>());
 	private Modal activeModal;
 
-	private final WeakHashMap<NeedsRandomTick, Long> needsRandomTick = new WeakHashMap<>();
+	private GameData gameData;
+
+	private final Map<NeedsRandomTick, Long> needsRandomTick = new WeakHashMap<>();
+	private final WeakList<ResourceProducer> resourceProducing = new WeakArrayList<>();
+	private final Map<ResourceType, Integer> maxResources = new HashMap<>();
 
 	public WorldLevelScene(final String name, final CacheManager parentCache) {
 		super(name);
@@ -99,6 +110,8 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController, S
 		this.getLightDirection().set(new Vector3f(0.5f, 0.5f, 0.5f).normalize());
 
 		this.recomputeLightMatrices(new BoundingBox(new Vector3f(-1), new Vector3f(1)), new Vector3f(0));
+
+		this.maxResources.put(DefaultResourceType.MONEY, Integer.MAX_VALUE);
 	}
 
 	public ObjectTriggerLatch<WorldLevelScene> init(
@@ -106,6 +119,8 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController, S
 			final Dispatcher render,
 			final GameData gameData,
 			final IntPointer worldProgress) {
+		this.gameData = gameData;
+
 		this.registerModal(new MoveBuildingModal(this, PGLogic.INSTANCE.getCompositor()));
 
 		final ObjectTriggerLatch<WorldLevelScene> latch = new ObjectTriggerLatch<>(2, this);
@@ -115,9 +130,9 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController, S
 			latch.trigger(null);
 		}).push();
 
-		this.initTerrain(workers, render, Optional.of(gameData), gameData.getLevelData(), worldProgress).then(c -> {
-			this.setTerrain(c.get());
-		}).latch(latch);
+		this.initTerrain(workers, render, Optional.of(gameData), gameData.getLevelData(), worldProgress)
+				.then(c -> this.setTerrain(c.get()))
+				.latch(latch);
 		return latch;
 	}
 
@@ -222,6 +237,8 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController, S
 		}
 	}
 
+	protected final ResourceBuffer resourceBuffer = new ResourceBuffer();
+
 	public void update(
 			final WindowInputHandler inputHandler,
 			final DeferredCompositor compositor,
@@ -245,17 +262,34 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController, S
 		final float time = (float) inputHandler.getGameEngine().getTotalTime();
 		final float dTime = inputHandler.dTime();
 
+		// this also clears
+		this.resourceBuffer.copyFrom(this.gameData);
+
 		this.forEach(e -> this.updateEntity(inputHandler, e, time));
 
 		synchronized (this.needsRandomTick) {
 			final long now = System.currentTimeMillis();
 
-			for (Map.Entry<NeedsRandomTick, Long> entry : this.needsRandomTick.entrySet()) {
-				if (now - entry.getValue() > RANDOM_TICK_DELAY) {
-					entry.getKey().randomTick(inputHandler, this);
-					entry.setValue(now);
+			for (Entry<NeedsRandomTick, Long> entry : this.needsRandomTick.entrySet()) {
+				final NeedsRandomTick obj = entry.getKey();
+
+				while (now >= entry.getValue()) {
+					obj.randomTick(inputHandler, this);
+					entry.setValue(entry.getValue() + obj.getRandomTickDuration());
 				}
 			}
+		}
+
+		this.resourceBuffer.clear();
+
+		synchronized (this.resourceProducing) {
+			this.resourceProducing.forEach(c -> c.produce(dTime, this.resourceBuffer));
+		}
+
+		final Map<ResourceType, Float> result = this.gameData.getResources();
+		this.resourceBuffer.getProduced().forEach((type, value) -> result.merge(type, value, Float::sum));
+		synchronized (this.maxResources) {
+			result.entrySet().forEach(e -> e.setValue(Math.clamp(e.getValue(), 0, this.maxResources.getOrDefault(e.getKey(), 0))));
 		}
 
 		final Camera3D camera = super.getCamera();
@@ -333,19 +367,86 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController, S
 	@Deprecated
 	public <T extends NeedsRandomTick> T addRandomTick(final T obj) {
 		synchronized (this.needsRandomTick) {
-			this.needsRandomTick.put(obj, System.currentTimeMillis());
+			this.needsRandomTick.put(obj, System.currentTimeMillis() + obj.getRandomTickDuration());
 		}
 		return obj;
 	}
 
 	@Override
-	public <T extends SceneEntity> T add(final T entity) {
-		if (entity instanceof NeedsRandomTick nrt) {
+	protected <T extends SceneEntity> void onAdd(final T entity) {
+		if (entity instanceof final NeedsRandomTick nrt) {
 			synchronized (this.needsRandomTick) {
-				this.needsRandomTick.put(nrt, 0L);
+				this.needsRandomTick.put(nrt, System.currentTimeMillis() + nrt.getRandomTickDuration());
 			}
 		}
-		return super.add(entity);
+		if (entity instanceof final ResourceProducer rp) {
+			synchronized (this.resourceProducing) {
+				this.resourceProducing.add(rp);
+			}
+		}
+		if (entity instanceof final ResourceContainer rc) {
+			synchronized (this.maxResources) {
+				rc.getMaxResources().forEach((k, v) -> this.maxResources.merge(k, v, Integer::sum));
+			}
+		}
+	}
+
+	@Override
+	protected <T extends SceneEntity> void onRemove(final T entity) {
+		if (entity instanceof final NeedsRandomTick nrt) {
+			synchronized (this.needsRandomTick) {
+				this.needsRandomTick.remove(nrt);
+			}
+		}
+		if (entity instanceof final ResourceProducer rp) {
+			synchronized (this.resourceProducing) {
+				this.resourceProducing.remove(rp);
+			}
+		}
+		if (entity instanceof final ResourceContainer rc) {
+			synchronized (this.maxResources) {
+				rc.getMaxResources().forEach((k, v) -> this.maxResources.merge(k, -v, Integer::sum));
+			}
+		}
+	}
+
+	public void recomputeMaxResources() {
+		synchronized (this.maxResources) {
+			this.maxResources.clear();
+		}
+		this.forEach(se -> {
+			if (se instanceof final ResourceContainer rc) {
+				synchronized (this.maxResources) {
+					rc.getMaxResources().forEach((k, v) -> this.maxResources.merge(k, v, Integer::sum));
+				}
+			}
+		});
+	}
+
+	public void recomputeResourceProducer() {
+		synchronized (this.resourceProducing) {
+			this.resourceProducing.clear();
+		}
+		this.forEach(se -> {
+			if (se instanceof final ResourceProducer rp) {
+				synchronized (this.resourceProducing) {
+					this.resourceProducing.add(rp);
+				}
+			}
+		});
+	}
+
+	public void recomputeNeedsRandomTick() {
+		synchronized (this.needsRandomTick) {
+			this.needsRandomTick.clear();
+		}
+		this.forEach(se -> {
+			if (se instanceof final NeedsRandomTick rp) {
+				synchronized (this.needsRandomTick) {
+					this.needsRandomTick.put(rp, System.currentTimeMillis() + rp.getRandomTickDuration());
+				}
+			}
+		});
 	}
 
 	@Override
@@ -446,10 +547,21 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController, S
 		this.windDirection = windDirection;
 	}
 
+	@Deprecated
 	public float getWaterHeight() {
 		return this.getWaterLevel() == null ? 0
 				: (this.getWaterLevel().getTransform().getTranslation().y() + this.getTerrain().getTransform().getTranslation().y())
 						/ this.getTerrain().getTransform().getScale().y();
+	}
+
+	public GameData getGameData() {
+		return this.gameData;
+	}
+
+	public ResourceBuffer getResourceBuffer() {
+		assert Thread.currentThread() == GameLogic.INSTANCE.getGameEngine().getUpdateThread()
+				: "Access denied from: " + Thread.currentThread().getName();
+		return this.resourceBuffer;
 	}
 
 	public ParticleManager getParticleManager() {

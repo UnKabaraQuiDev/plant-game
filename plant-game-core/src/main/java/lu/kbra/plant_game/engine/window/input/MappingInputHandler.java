@@ -151,11 +151,11 @@ public class MappingInputHandler extends DefaultInputHandler {
 	}
 
 	public void loadMappings(final File file) throws IOException {
+		this.source = file;
+
 		if (!file.exists()) {
 			return;
 		}
-
-		this.source = file;
 
 		final InputMappingConfig config = PGLogic.OBJECT_MAPPER.readValue(file, InputMappingConfig.class);
 
@@ -180,6 +180,10 @@ public class MappingInputHandler extends DefaultInputHandler {
 	}
 
 	public void saveMappings(final File file) throws IOException {
+		if (file == null) {
+			return;
+		}
+
 		final InputMappingConfig cfg = new InputMappingConfig();
 		cfg.keyMap = new HashMap<>();
 		cfg.mouseMap = new HashMap<>();

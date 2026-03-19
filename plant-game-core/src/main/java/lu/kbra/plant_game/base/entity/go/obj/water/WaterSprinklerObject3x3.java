@@ -4,6 +4,7 @@ import org.joml.Matrix4f;
 import org.joml.Vector2i;
 
 import lu.kbra.pclib.PCUtils;
+import lu.kbra.plant_game.base.data.DefaultResourceType;
 import lu.kbra.plant_game.engine.entity.go.obj.PlaceableAnimatedGameObject;
 import lu.kbra.plant_game.engine.mesh.AnimatedMesh;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
@@ -22,13 +23,12 @@ public class WaterSprinklerObject3x3 extends PlaceableAnimatedGameObject impleme
 
 	@Override
 	public void randomTick(final WindowInputHandler inputHandler, final WorldLevelScene worldLevelScene) {
-		if (this.tile == null) {
+		if (this.tile == null || !worldLevelScene.getResourceBuffer().tryConsume(DefaultResourceType.WATER, 10)) {
 			return;
 		}
 
 		final int x = PCUtils.randomIntRange(-2, 2);
 		final int z = PCUtils.randomIntRange(-2, 2);
-//		worldLevelScene.getTerrain().getMesh().setGrown(this.getTile().add(x, z, new Vector2i()), true);
 		worldLevelScene.getTerrain().addWater(this.getTile().add(x, z, new Vector2i()), PCUtils.randomFloatRange(0.33f, 0.67f));
 	}
 

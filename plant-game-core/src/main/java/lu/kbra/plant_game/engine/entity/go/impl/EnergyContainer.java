@@ -1,13 +1,22 @@
 package lu.kbra.plant_game.engine.entity.go.impl;
 
-public interface EnergyContainer {
+import java.util.Map;
 
-	long getMaxPower();
+import lu.kbra.plant_game.base.data.DefaultResourceType;
+import lu.kbra.plant_game.engine.scene.world.data.resource.ResourceType;
 
-	void getCurrentPower();
+public interface EnergyContainer extends ResourceContainer {
 
-	void removePower(long power);
+	@Override
+	default ResourceType[] getAllowedResources() {
+		return new ResourceType[] { DefaultResourceType.ENERGY };
+	}
 
-	void addPower(long power);
+	@Override
+	default Map<ResourceType, Integer> getMaxResources() {
+		return Map.of(DefaultResourceType.ENERGY, this.getMaxEnergy());
+	}
+
+	int getMaxEnergy();
 
 }
