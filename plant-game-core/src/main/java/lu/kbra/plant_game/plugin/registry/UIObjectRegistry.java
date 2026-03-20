@@ -42,7 +42,8 @@ public abstract class UIObjectRegistry extends PluginRegistry {
 		if (!UI_OBJECT_CONSTRUCTORS.containsKey(clazz)) {
 			throw new UIObjectNotFound(clazz, args);
 		}
-		final Optional<InternalConstructorFunction<UIObject>> bestConstructor = UI_OBJECT_CONSTRUCTORS.get(clazz)
+		final Optional<InternalConstructorFunction<UIObject>> bestConstructor = UI_OBJECT_CONSTRUCTORS
+				.get(clazz)
 				.parallelStream()
 				.filter((v) -> v.matches(args))
 				.findFirst();
@@ -51,4 +52,10 @@ public abstract class UIObjectRegistry extends PluginRegistry {
 		}
 		throw new UIObjectConstructorNotFound(clazz, args);
 	}
+
+	@Override
+	public int getPriority() {
+		return 300;
+	}
+
 }

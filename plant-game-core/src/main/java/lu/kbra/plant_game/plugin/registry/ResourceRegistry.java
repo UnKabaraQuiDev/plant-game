@@ -49,4 +49,9 @@ public abstract class ResourceRegistry extends PluginRegistry {
 		return RESOURCE_NAMES.get(resource);
 	}
 
+	@Override
+	public int getPriority() {
+		return 200;
+	}
+
 }

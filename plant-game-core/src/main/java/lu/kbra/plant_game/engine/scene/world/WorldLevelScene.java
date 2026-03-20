@@ -134,9 +134,7 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController, S
 			latch.trigger(null);
 		}).push();
 
-		this.initTerrain(workers, render, Optional.of(gameData), gameData.getLevelData(), worldProgress)
-				.then(c -> this.setTerrain(c.get()))
-				.latch(latch);
+		this.initTerrain(workers, render, Optional.of(gameData), gameData.getLevelData(), worldProgress).latch(latch);
 		return latch;
 	}
 
@@ -170,21 +168,22 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController, S
 		}).then(render, (Function<WorldGenerator, Pair<WorldGenerator, Mesh>>) wg -> {
 			return Pairs.readOnly(wg, wg.generateHighlightMesh(worldProgress, this.getCache()));
 		}).then(workers, (Consumer<Pair<WorldGenerator, Mesh>>) pair -> {
-			data.get()
+			data
+					.get()
 					.setTerrainHighlightEntity(
 							new TerrainHighlightObject("terrain-highlight-" + levelData.getInternalName(), pair.getValue()));
 		}).then(render, (Supplier<QuadLoadedMesh>) () -> {
 			final int width = data.get().getMesh().getWidth();
 			final int length = data.get().getMesh().getLength();
-			final QuadLoadedMesh mesh = new QuadLoadedMesh("water-" + levelData.getInternalName() + "-" + width + "x" + length,
-					null,
+			final QuadLoadedMesh mesh = new QuadLoadedMesh("water-" + levelData.getInternalName() + "-" + width + "x" + length, null,
 					new Vector2f(width, length));
 			this.getCache().addMesh(mesh);
 			worldProgress.add(100);
 			return mesh;
 		}).then(workers, (Consumer<QuadLoadedMesh>) mesh -> {
 			data.get().setWaterLevel(new MeshGameObject("water-" + levelData.getInternalName(), mesh));
-			data.get()
+			data
+					.get()
 					.getTerrainWaterObject()
 					.setTransform(new Transform3D(new Vector3f(mesh.getSize().x() / 2,
 							gameData.map(c -> c.getCurrentWaterLevel()).orElse(levelData.getWorld().getWaterLevel().getMin()),
@@ -196,10 +195,19 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController, S
 		}).then(workers, (Runnable) () -> {
 			final StarterPod pod = levelData.getWorld().getStarterPod();
 
-			GameObjectFactory.create(GameObjectRegistry.<StarterPodObject>getClass(pod.getPodClass()))
+			this.setTerrain(data.get());
+
+			GameObjectFactory
+					.create(GameObjectRegistry.<StarterPodObject>getClass(pod.getPodClass()))
 					.set(i -> i.setTransform(new Transform3D()))
-					.add(this)
+					.postInit(c -> data.get().add(c))
 					.postInit(c -> c.placeDown(this.terrain, pod.getTile(), pod.getDirection()))
+					.postInit(c -> c
+							.getTransform()
+							.translationAdd(data.get().getMesh().getBoundingBox().getSize().x() / 2,
+									0,
+									data.get().getMesh().getBoundingBox().getSize().z() / 2)
+							.updateMatrix())
 					.postInit(c -> worldProgress.add(100))
 					.latch(latch)
 					.push();
@@ -307,7 +315,8 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController, S
 		final Camera3D camera = super.getCamera();
 		camera.getProjection().setFov(camera.getProjection().getFov() + this.fovDiff);
 		camera.getRotation().rotateY((float) Math.toRadians(this.rotation * 50 * dTime));
-		camera.getPosition()
+		camera
+				.getPosition()
 				.fma(dTime * CAMERA_MOVEMENT_SPEED, this.posAdd.rotateY(-camera.getRotation().getEulerAnglesXYZ(new Vector3f()).y()));
 		camera.updateMatrix();
 
@@ -331,9 +340,11 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController, S
 	}
 
 	public TaskFuture<?, Optional<PlaceableObject>> getClickedObject(final Dispatcher workers, final DeferredCompositor compositor) {
-		return this.getClickedId(workers, compositor)
+		return this
+				.getClickedId(workers, compositor)
 				.then(workers,
-						(Function<Vector3i, Optional<PlaceableObject>>) ids -> super.getEntities().values()
+						(Function<Vector3i, Optional<PlaceableObject>>) ids -> super.getEntities()
+								.values()
 								.parallelStream()
 								.filter(e -> e instanceof GenericGameObject && e instanceof PlaceableObject
 										&& ((GenericGameObject) e).getObjectIdLocation() == AttributeLocation.ENTITY)

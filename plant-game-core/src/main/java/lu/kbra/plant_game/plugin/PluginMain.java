@@ -26,8 +26,7 @@ public abstract class PluginMain {
 
 	@Override
 	public String toString() {
-		return "PluginMain@" + System.identityHashCode(this) + " [pluginManager=" + this.pluginManager + ", pluginDescriptor="
-				+ this.pluginDescriptor + "]";
+		return "PluginMain@" + System.identityHashCode(this) + " [pluginDescriptor=" + this.pluginDescriptor + "]";
 	}
 
 }

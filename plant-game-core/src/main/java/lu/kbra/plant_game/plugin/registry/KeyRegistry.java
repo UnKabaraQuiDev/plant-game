@@ -58,4 +58,9 @@ public abstract class KeyRegistry extends PluginRegistry {
 		return Localizable.of(getLocalizationKey(keyOption));
 	}
 
+	@Override
+	public int getPriority() {
+		return 100;
+	}
+
 }

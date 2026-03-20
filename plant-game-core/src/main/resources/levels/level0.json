@@ -21,6 +21,9 @@
 		"wind": {
 			"strength": 1,
 			"direction": [1, 1]
+		},
+		"starterPod": {
+			"tile": [10, 10]
 		}
 	},
 	"game": {

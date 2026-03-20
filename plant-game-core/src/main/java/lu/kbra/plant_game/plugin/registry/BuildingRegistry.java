@@ -74,5 +74,10 @@ public abstract class BuildingRegistry extends PluginRegistry {
 		}
 		return BUILDING_NAMES.get(clazz);
 	}
+	
+	@Override
+	public int getPriority() {
+		return 500;
+	}
 
 }

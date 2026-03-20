@@ -3,6 +3,7 @@ package lu.kbra.plant_game.plugin.registry;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -138,6 +139,11 @@ public abstract class LevelRegistry extends PluginRegistry {
 		}
 	}
 
+	@Override
+	public void postConstruct() {
+		LEVELS.sort(Comparator.comparingInt(LevelRegistry.LevelDefinition::getIdx));
+	}
+
 	protected Optional<GameData> readProgress(final LevelDefinition ld) throws IOException {
 		final File dataFile = new File(PGMain.APP_DATA_DIR, "/games/" + ld.getInternalName() + "/game.json");
 		if (!dataFile.exists()) {
@@ -146,6 +152,11 @@ public abstract class LevelRegistry extends PluginRegistry {
 		final GameData obj = PGLogic.OBJECT_MAPPER.readValue(dataFile, GameData.class);
 		obj.setLevelData(ld.levelData);
 		return Optional.of(obj);
+	}
+
+	@Override
+	public int getPriority() {
+		return 500;
 	}
 
 }

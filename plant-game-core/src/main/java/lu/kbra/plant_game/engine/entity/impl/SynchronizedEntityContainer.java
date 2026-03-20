@@ -18,9 +18,6 @@ import lu.kbra.standalone.gameengine.scene.EntityContainer;
 
 public interface SynchronizedEntityContainer<B extends SceneEntity> extends EntityContainer<B>, ParentAwareNode {
 
-//	protected Object getEntitiesLock() = new Object();
-//	protected List<B> getWEntities() = Collections.synchronizedList(new ArrayList<>());
-
 	Object getEntitiesLock();
 
 	List<B> getWEntities();

@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.PriorityQueue;
 
 import lu.kbra.pclib.PCUtils;
 import lu.kbra.pclib.logger.GlobalLogger;
@@ -47,7 +48,8 @@ public final class PluginManager {
 			final PluginDescriptor basePluginDescriptor = PGLogic.OBJECT_MAPPER
 					.readValue(PCUtils.readStringSource("classpath:/plugin.json"), PluginDescriptor.class);
 
-			this.pluginJarLoader.loadAll(this, pluginDirs, List.of(basePluginDescriptor))
+			this.pluginJarLoader
+					.loadAll(this, pluginDirs, List.of(basePluginDescriptor))
 					.forEach(lp -> this.plugins.put(lp.main().getClass(), lp));
 		} catch (Exception e) {
 			throw new RuntimeException("Failed to load plugins.", e);
@@ -62,27 +64,33 @@ public final class PluginManager {
 
 		for (LoadedPlugin c : this.plugins.values()) {
 			try {
+				final PriorityQueue<Registry> registries = new PriorityQueue(Comparator.comparingInt(Registry::getPriority));
+
 				try {
-					final Class<? extends GameObjectRegistry> goDefClazz = (Class<? extends GameObjectRegistry>) c.classLoader()
+					final Class<? extends GameObjectRegistry> goDefClazz = (Class<? extends GameObjectRegistry>) c
+							.classLoader()
 							.loadClass(c.descriptor().relativePath(goReg));
 					final GameObjectRegistry reg = goDefClazz.getDeclaredConstructor(PluginDescriptor.class).newInstance(c.descriptor());
-					reg.register();
+					registries.add(reg);
 				} catch (ClassNotFoundException e) {
-					GlobalLogger.info(c.descriptor().toString() + " doesn't define a GameObject Registry ("
-							+ c.descriptor().relativePath(goReg) + ")");
+					GlobalLogger
+							.info(c.descriptor().toString() + " doesn't define a GameObject Registry (" + c.descriptor().relativePath(goReg)
+									+ ")");
 					if (FAIL_ON_REGISTRY_NOT_FOUND) {
 						throw new PluginLoadException(c.descriptor(), c.descriptor().relativePath(goReg), e);
 					}
 				}
 
 				try {
-					final Class<? extends UIObjectRegistry> uiDefClazz = (Class<? extends UIObjectRegistry>) c.classLoader()
+					final Class<? extends UIObjectRegistry> uiDefClazz = (Class<? extends UIObjectRegistry>) c
+							.classLoader()
 							.loadClass(c.descriptor().relativePath(uiReg));
 					final UIObjectRegistry reg = uiDefClazz.getDeclaredConstructor(PluginDescriptor.class).newInstance(c.descriptor());
-					reg.register();
+					registries.add(reg);
 				} catch (ClassNotFoundException e) {
-					GlobalLogger.info(
-							c.descriptor().toString() + " doesn't define a UIObject Registry (" + c.descriptor().relativePath(uiReg) + ")");
+					GlobalLogger
+							.info(c.descriptor().toString() + " doesn't define a UIObject Registry (" + c.descriptor().relativePath(uiReg)
+									+ ")");
 					if (FAIL_ON_REGISTRY_NOT_FOUND) {
 						throw new PluginLoadException(c.descriptor(), c.descriptor().relativePath(uiReg), e);
 					}
@@ -94,20 +102,33 @@ public final class PluginManager {
 							GlobalLogger.warning("Invalid registry found in: " + c.descriptor().toString() + ": '" + regName + "'");
 							return;
 						}
-						final Class<? extends Registry> resourceDefClazz = (Class<? extends Registry>) c.classLoader()
+						final Class<? extends Registry> resourceDefClazz = (Class<? extends Registry>) c
+								.classLoader()
 								.loadClass(c.descriptor().relativePath(regName));
 						final Registry reg = resourceDefClazz.getDeclaredConstructor(PluginDescriptor.class).newInstance(c.descriptor());
-						reg.register();
-						if (reg instanceof NeedsPostConstruct pr) {
-							pr.postConstruct();
-						}
+						registries.add(reg);
+						GlobalLogger.info("Found: " + c.toString() + " with priority: " + reg.getPriority());
 					} catch (ClassNotFoundException e) {
 						GlobalLogger.info("Couldn't find " + c.toString() + "'s Resources registry.");
 						if (FAIL_ON_REGISTRY_NOT_FOUND) {
 							throw new PluginLoadException(c.descriptor(), e);
 						}
+					}
+				}
+
+				for (Registry r : registries) {
+					try {
+						GlobalLogger
+								.info("Registering: " + PCUtils.leftPadString(Integer.toString(r.getPriority()), " ", 5) + " | "
+										+ r.getClass().getSimpleName());
+						r.register();
+						if (r instanceof NeedsPostConstruct) {
+							((NeedsPostConstruct) r).postConstruct();
+						}
 					} catch (RegistryFailedException e) {
-						GlobalLogger.warning("Exception when initializing registry: " + regName + " from: " + c.descriptor().toString());
+						GlobalLogger
+								.warning("Exception when initializing registry: " + r.getClass().getName() + " from: "
+										+ c.descriptor().toString());
 						if (!FAIL_ON_REGISTRY_EXCEPTION) {
 							throw e;
 						}
@@ -119,8 +140,6 @@ public final class PluginManager {
 				throw new PluginLoadException(c.descriptor(), e);
 			}
 		}
-
-		LevelRegistry.LEVELS.sort(Comparator.comparingInt(c -> c.getIdx()));
 	}
 
 	public void onEnable() {

@@ -15,6 +15,9 @@ public interface AnimatedMesh extends Mesh {
 
 	default Matrix4f computeTransform(Matrix4f target, float t) {
 		final AnimationData animation = getAnimation();
+		if (animation == null) {
+			return target;
+		}
 
 		final Vector3f pos = new Vector3f();
 		animation.startPosition().lerp(animation.endPosition(), t, pos);
