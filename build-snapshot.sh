@@ -41,7 +41,7 @@ echo "Step 1: clean workspace"
 mvn -B "${COMMON_ARGS[@]}" clean
 
 echo "Step 2: build native packages & deploy to nexus"
-mvn -B -Pall,native-linux "${COMMON_ARGS[@]}" deploy
+mvn -B -Pall,native-linux,native-windows "${COMMON_ARGS[@]}" deploy
 
 echo "Step 3: deploy snapshot build to Steam"
 mvn -B -pl plant-game-core -Psteam-deploy "${COMMON_ARGS[@]}" lu.kbra:steam-deploy:deploy
