@@ -15,7 +15,7 @@ BASE_VERSION="$(mvn -B help:evaluate \
 	}
 
 BASE_VERSION="${BASE_VERSION%-SNAPSHOT}"
-VERSION="${BASE_VERSION}-SNAPSHOT+${DATE}"
+VERSION="${BASE_VERSION}-SNAPSHOT${DATE}"
 WIN_VERSION="${BASE_VERSION}.${DATE}"
 
 echo "Snapshot version: ${VERSION} (${WIN_VERSION})"
@@ -25,7 +25,7 @@ COMMON_ARGS=(
 	-Drevision="${VERSION}"
 	-DwinVersion="${WIN_VERSION}"
 	-Dsteam.branch=snapshot
-	-DaltDeploymentRepository=nexus.kbra.lu-snapshots::default::https://nexus.kbra.lu/repository/maven-snapshots/
+	-DaltDeploymentRepository=nexus.kbra.lu-nightly::default::https://nexus.kbra.lu/repository/maven-nightly/
 )
 
 if [ ! -d "${HOME}/.steam" ]; then

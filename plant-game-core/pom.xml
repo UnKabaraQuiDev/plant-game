@@ -75,7 +75,7 @@
 					<plugin>
 						<groupId>lu.kbra</groupId>
 						<artifactId>steam-deploy</artifactId>
-						<version>1.1.6</version>
+						<version>1.1.7-SNAPSHOT</version>
 						<executions>
 							<execution>
 								<id>steam-deploy</id>
@@ -91,6 +91,7 @@
 							<serverId>steam</serverId>
 							<buildScript>
 								${project.basedir}/../steam/app_build_generic.vdf</buildScript>
+							<defaultBranch>${steam.defaultBranch}</defaultBranch>
 
 							<filterVdfs>true</filterVdfs>
 							<filters>
