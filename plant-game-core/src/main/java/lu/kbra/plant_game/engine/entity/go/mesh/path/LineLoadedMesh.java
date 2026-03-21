@@ -4,7 +4,7 @@ import org.joml.Vector3f;
 
 import lu.kbra.standalone.gameengine.cache.attrib.UIntAttribArray;
 import lu.kbra.standalone.gameengine.cache.attrib.Vec3fAttribArray;
-import lu.kbra.standalone.gameengine.cache.attrib.impl.AttribArray;
+import lu.kbra.standalone.gameengine.cache.attrib.impl.JavaAttribArray;
 import lu.kbra.standalone.gameengine.geom.LineMesh;
 import lu.kbra.standalone.gameengine.geom.LoadedMesh;
 import lu.kbra.standalone.gameengine.utils.gl.consts.BeginMode;
@@ -24,7 +24,7 @@ public class LineLoadedMesh extends LoadedMesh implements LineMesh {
 			final int objectId,
 			final Vec3fAttribArray vertices,
 			final UIntAttribArray indices,
-			final AttribArray... attribs) {
+			final JavaAttribArray... attribs) {
 		super(name, null, vertices, indices, attribs);
 		this.objectId = objectId;
 	}

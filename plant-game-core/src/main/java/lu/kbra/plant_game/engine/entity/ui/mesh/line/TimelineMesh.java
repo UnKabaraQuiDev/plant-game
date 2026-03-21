@@ -10,7 +10,7 @@ import lu.kbra.plant_game.engine.mesh.TexturedMesh;
 import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.standalone.gameengine.cache.attrib.UIntAttribArray;
 import lu.kbra.standalone.gameengine.cache.attrib.Vec3fAttribArray;
-import lu.kbra.standalone.gameengine.cache.attrib.impl.AttribArray;
+import lu.kbra.standalone.gameengine.cache.attrib.impl.JavaAttribArray;
 import lu.kbra.standalone.gameengine.graph.texture.SingleTexture;
 
 public class TimelineMesh extends LineLoadedMesh implements TexturedMesh, TintOwner {
@@ -20,13 +20,13 @@ public class TimelineMesh extends LineLoadedMesh implements TexturedMesh, TintOw
 	private float defaultYDepth = -0.1f;
 
 	public TimelineMesh(final String name, final int objectId, final SingleTexture txt, final Vec3fAttribArray vertices,
-			final UIntAttribArray indices, final AttribArray... attribs) {
+			final UIntAttribArray indices, final JavaAttribArray... attribs) {
 		super(name, objectId, vertices, indices, attribs);
 		this.txt = txt;
 	}
 
 	public TimelineMesh(final String name, final int objectId, final SingleTexture txt, final Vec3fAttribArray vertices,
-			final UIntAttribArray indices, final float defaultYDepth, final AttribArray... attribs) {
+			final UIntAttribArray indices, final float defaultYDepth, final JavaAttribArray... attribs) {
 		super(name, objectId, vertices, indices, attribs);
 		this.defaultYDepth = defaultYDepth;
 		this.txt = txt;

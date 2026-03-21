@@ -2,7 +2,7 @@ package lu.kbra.plant_game.base.scene.menu.main;
 
 import lu.kbra.plant_game.engine.mesh.TexturedMesh;
 import lu.kbra.standalone.gameengine.cache.attrib.Vec3fAttribArray;
-import lu.kbra.standalone.gameengine.cache.attrib.impl.AttribArray;
+import lu.kbra.standalone.gameengine.cache.attrib.impl.JavaAttribArray;
 import lu.kbra.standalone.gameengine.graph.material.Material;
 import lu.kbra.standalone.gameengine.graph.texture.SingleTexture;
 
@@ -14,7 +14,7 @@ public class TexturedLoadedTriangleStripMesh extends LoadedTriangleStripMesh imp
 
 	@Deprecated
 	public TexturedLoadedTriangleStripMesh(final String name, final Material material, final SingleTexture texture,
-			final Vec3fAttribArray vertices, final AttribArray... attribs) {
+			final Vec3fAttribArray vertices, final JavaAttribArray... attribs) {
 		super(name, material, vertices, attribs);
 		this.texture = texture;
 	}

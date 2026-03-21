@@ -9,7 +9,7 @@ import java.util.logging.Level;
 
 import lu.kbra.pclib.logger.GlobalLogger;
 import lu.kbra.standalone.gameengine.cache.attrib.Vec3fAttribArray;
-import lu.kbra.standalone.gameengine.cache.attrib.impl.AttribArray;
+import lu.kbra.standalone.gameengine.cache.attrib.impl.JavaAttribArray;
 import lu.kbra.standalone.gameengine.generated.gl_wrapper.GL_W;
 import lu.kbra.standalone.gameengine.geom.BoundingBox;
 import lu.kbra.standalone.gameengine.geom.Mesh;
@@ -32,7 +32,7 @@ public class LoadedTriangleStripMesh implements Mesh {
 	@Deprecated
 	protected Vec3fAttribArray vertices;
 	@Deprecated
-	protected List<AttribArray> attribs;
+	protected List<JavaAttribArray> attribs;
 
 	@Deprecated
 	protected int vertexCount;
@@ -41,7 +41,7 @@ public class LoadedTriangleStripMesh implements Mesh {
 
 	@Deprecated
 	public LoadedTriangleStripMesh(final String name, final Material material, final Vec3fAttribArray vertices,
-			final AttribArray... attribs) {
+			final JavaAttribArray... attribs) {
 		this.name = name;
 		this.vertices = vertices;
 		this.material = material;
@@ -56,7 +56,7 @@ public class LoadedTriangleStripMesh implements Mesh {
 		vertices.setIndex(ATTRIB_VERTICES_ID);
 		this.storeAttribArray(vertices);
 
-		for (AttribArray a : attribs) {
+		for (JavaAttribArray a : attribs) {
 			if (this.vbo.containsKey(a.getIndex())) {
 				GlobalLogger.log(Level.WARNING, "Duplicate of index: " + a.getIndex() + " from " + a.getName() + ", in Mesh: " + name);
 				continue;
@@ -77,7 +77,7 @@ public class LoadedTriangleStripMesh implements Mesh {
 
 	@Deprecated
 	@Override
-	public List<AttribArray> getAttribs() {
+	public List<JavaAttribArray> getAttribs() {
 		return this.attribs;
 	}
 
@@ -97,7 +97,7 @@ public class LoadedTriangleStripMesh implements Mesh {
 		GlobalLogger.log("Cleaning up: " + this.name + " (" + this.vao + ")");
 
 		GL_W.glDeleteVertexArrays(this.vao);
-		this.attribs.forEach(AttribArray::cleanup);
+		this.attribs.forEach(JavaAttribArray::cleanup);
 		this.attribs = null;
 		this.vbo = null;
 		this.vao = -1;

@@ -3,7 +3,7 @@ import java.util.Map;
 
 import lu.kbra.plant_game.engine.loader.AnimatedMeshLoader.AnimationData;
 import lu.kbra.plant_game.engine.mesh.AnimatedMesh;
-import lu.kbra.standalone.gameengine.cache.attrib.impl.AttribArray;
+import lu.kbra.standalone.gameengine.cache.attrib.impl.JavaAttribArray;
 import lu.kbra.standalone.gameengine.geom.BoundingBox;
 import lu.kbra.standalone.gameengine.graph.material.Material;
 
@@ -101,7 +101,7 @@ public class MockAnimatedMesh implements AnimatedMesh {
 	}
 
 	@Override
-	public List<AttribArray> getAttribs() {
+	public List<JavaAttribArray> getAttribs() {
 		return null;
 	}
 

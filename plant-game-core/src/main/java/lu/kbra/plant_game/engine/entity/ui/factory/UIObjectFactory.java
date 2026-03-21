@@ -28,7 +28,7 @@ import lu.kbra.plant_game.engine.loader.StaticTextLoader;
 import lu.kbra.plant_game.engine.loader.StaticTexturedMeshLoader;
 import lu.kbra.plant_game.engine.mesh.TexturedQuadMesh;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
-import lu.kbra.standalone.gameengine.cache.attrib.impl.AttribArray;
+import lu.kbra.standalone.gameengine.cache.attrib.impl.JavaAttribArray;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.graph.texture.SingleTexture;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
@@ -66,7 +66,7 @@ public class UIObjectFactory {
 			final Optional<TextAlignment> textAlignment,
 			final Optional<String> name,
 			final Optional<String> key,
-			final Supplier<AttribArray>... attribs) {
+			final Supplier<JavaAttribArray>... attribs) {
 
 		System.err.println(clazz.getSimpleName() + " = " + key.orElse(DATA_PATH.get(clazz)));
 
@@ -166,7 +166,7 @@ public class UIObjectFactory {
 			final Optional<TextAlignment> textAlignment,
 			final Optional<String> name,
 			final Optional<String> key,
-			final Supplier<AttribArray>... attribs) {
+			final Supplier<JavaAttribArray>... attribs) {
 		return INSTANCE.createText_(clazz, bufferSize, charSize, textAlignment, name, key, attribs);
 	}
 

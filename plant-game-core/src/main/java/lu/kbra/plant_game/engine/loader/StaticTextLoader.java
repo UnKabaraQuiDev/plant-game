@@ -15,7 +15,7 @@ import lu.kbra.pclib.impl.ThrowingFunction;
 import lu.kbra.pclib.impl.ThrowingSupplier;
 import lu.kbra.plant_game.engine.data.locale.LocalizationService;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
-import lu.kbra.standalone.gameengine.cache.attrib.impl.AttribArray;
+import lu.kbra.standalone.gameengine.cache.attrib.impl.JavaAttribArray;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.SkipThen;
@@ -36,7 +36,7 @@ public class StaticTextLoader {
 			final Vector2fc charSize,
 			final TextAlignment textAlignment,
 			final OptionalInt bufferSize,
-			final Supplier<AttribArray>[] attribs,
+			final Supplier<JavaAttribArray>[] attribs,
 			final Dispatcher loader,
 			final Dispatcher render) {
 
@@ -64,10 +64,10 @@ public class StaticTextLoader {
 			return LocalizationService.get(absKey);
 		});
 
-		final List<AttribArray> createdAttribs = new ArrayList<>();
+		final List<JavaAttribArray> createdAttribs = new ArrayList<>();
 
 		if (attribs != null && attribs.length != 0) {
-			for (final Supplier<AttribArray> aa : attribs) {
+			for (final Supplier<JavaAttribArray> aa : attribs) {
 				tf = tf.then(render, (ThrowingFunction<Mesh, Mesh, Throwable>) mesh -> {
 					createdAttribs.add(aa.get());
 					return mesh;

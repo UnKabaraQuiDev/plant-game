@@ -5,7 +5,7 @@ import org.joml.Vector3f;
 import lu.kbra.plant_game.engine.loader.AnimatedMeshLoader.AnimationData;
 import lu.kbra.standalone.gameengine.cache.attrib.UIntAttribArray;
 import lu.kbra.standalone.gameengine.cache.attrib.Vec3fAttribArray;
-import lu.kbra.standalone.gameengine.cache.attrib.impl.AttribArray;
+import lu.kbra.standalone.gameengine.cache.attrib.impl.JavaAttribArray;
 import lu.kbra.standalone.gameengine.graph.material.Material;
 import lu.kbra.standalone.gameengine.graph.texture.SingleTexture;
 
@@ -15,7 +15,7 @@ public class AnimatedTexturedLoadedMesh extends OffsetLoadedMesh implements Text
 	protected AnimationData animation;
 
 	public AnimatedTexturedLoadedMesh(final String name, final Material mat, final Vector3f origin, final SingleTexture texture, final AnimationData data,
-			final Vec3fAttribArray vertices, final UIntAttribArray indices, final AttribArray... attribs) {
+			final Vec3fAttribArray vertices, final UIntAttribArray indices, final JavaAttribArray... attribs) {
 		super(name, mat, origin, vertices, indices, attribs);
 		this.texture = texture;
 		this.animation = data;

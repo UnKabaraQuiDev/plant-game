@@ -21,7 +21,7 @@ import lu.kbra.plant_game.engine.loader.AnimatedMeshLoader.AnimatedMeshes;
 import lu.kbra.plant_game.engine.loader.StaticInstanceLoader;
 import lu.kbra.plant_game.engine.loader.StaticMeshLoader;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
-import lu.kbra.standalone.gameengine.cache.attrib.impl.AttribArray;
+import lu.kbra.standalone.gameengine.cache.attrib.impl.JavaAttribArray;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.geom.instance.InstanceEmitter;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
@@ -49,7 +49,7 @@ public class GameObjectFactory {
 			final IntFunction<Transform> transforms,
 			final OptionalInt bufferSize,
 			final Optional<String> name,
-			final Supplier<AttribArray>... attribs) {
+			final Supplier<JavaAttribArray>... attribs) {
 
 		return StaticInstanceLoader
 				.getFuture(this.cache, name.orElse(clazz.getSimpleName()), DATA_PATH.get(clazz), bufferSize.orElseGet(() -> {
@@ -104,7 +104,7 @@ public class GameObjectFactory {
 			final IntFunction<Transform> transforms,
 			final OptionalInt bufferSize,
 			final Optional<String> name,
-			final Supplier<AttribArray>... attribs) {
+			final Supplier<JavaAttribArray>... attribs) {
 		return INSTANCE.createInstances_(clazz, transforms, bufferSize, name, attribs);
 	}
 

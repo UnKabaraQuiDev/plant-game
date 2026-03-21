@@ -1,7 +1,7 @@
 import java.util.List;
 import java.util.Map;
 
-import lu.kbra.standalone.gameengine.cache.attrib.impl.AttribArray;
+import lu.kbra.standalone.gameengine.cache.attrib.impl.JavaAttribArray;
 import lu.kbra.standalone.gameengine.geom.BoundingBox;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.graph.material.Material;
@@ -40,7 +40,7 @@ public class MockMesh implements Mesh {
 	}
 
 	@Override
-	public void addAttribArray(final AttribArray data) {
+	public void addAttribArray(final JavaAttribArray data) {
 
 	}
 
@@ -85,7 +85,7 @@ public class MockMesh implements Mesh {
 	}
 
 	@Override
-	public List<AttribArray> getAttribs() {
+	public List<JavaAttribArray> getAttribs() {
 		return null;
 	}
 

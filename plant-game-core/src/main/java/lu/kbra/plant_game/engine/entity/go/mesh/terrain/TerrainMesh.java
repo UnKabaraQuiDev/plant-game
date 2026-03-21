@@ -21,7 +21,7 @@ import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.standalone.gameengine.cache.attrib.UByteAttribArray;
 import lu.kbra.standalone.gameengine.cache.attrib.UIntAttribArray;
 import lu.kbra.standalone.gameengine.cache.attrib.Vec3fAttribArray;
-import lu.kbra.standalone.gameengine.cache.attrib.impl.AttribArray;
+import lu.kbra.standalone.gameengine.cache.attrib.impl.JavaAttribArray;
 import lu.kbra.standalone.gameengine.geom.LoadedMesh;
 
 public class TerrainMesh extends LoadedMesh {
@@ -40,7 +40,7 @@ public class TerrainMesh extends LoadedMesh {
 
 	public TerrainMesh(final String name, final int objectId, final int width, final int length, final int maxHeight,
 			final Integer[][] cellHeight, final ColorMaterial[][] materialType, final int[][] faceIndices, final Vec3fAttribArray vertices,
-			final UIntAttribArray indices, final AttribArray... attribs) {
+			final UIntAttribArray indices, final JavaAttribArray... attribs) {
 		super(name, null, vertices, indices, attribs);
 		this.objectId = objectId;
 		this.width = width;

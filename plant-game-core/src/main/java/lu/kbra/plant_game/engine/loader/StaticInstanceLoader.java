@@ -14,7 +14,7 @@ import lu.kbra.pclib.impl.ThrowingFunction;
 import lu.kbra.pclib.impl.ThrowingSupplier;
 import lu.kbra.plant_game.engine.loader.StaticMeshLoader.GenericMeshData;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
-import lu.kbra.standalone.gameengine.cache.attrib.impl.AttribArray;
+import lu.kbra.standalone.gameengine.cache.attrib.impl.JavaAttribArray;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.geom.instance.InstanceEmitter;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
@@ -35,7 +35,7 @@ public class StaticInstanceLoader {
 			final String path,
 			final int bufferSize,
 			final IntFunction<Transform> transforms,
-			final Supplier<AttribArray>[] attribs,
+			final Supplier<JavaAttribArray>[] attribs,
 			final Dispatcher loader,
 			final Dispatcher render) {
 
@@ -63,10 +63,10 @@ public class StaticInstanceLoader {
 			return getStaticMeshData(path);
 		}).then(render, (ThrowingFunction<GenericMeshData, Mesh, Throwable>) obj -> StaticMeshLoader.createStatic(cache, meshName, obj));
 
-		final List<AttribArray> createdAttribs = new ArrayList<>();
+		final List<JavaAttribArray> createdAttribs = new ArrayList<>();
 
 		if (attribs != null && attribs.length != 0) {
-			for (final Supplier<AttribArray> aa : attribs) {
+			for (final Supplier<JavaAttribArray> aa : attribs) {
 				tf = tf.then(render, (ThrowingFunction<Mesh, Mesh, Throwable>) mesh -> {
 					createdAttribs.add(aa.get());
 					return mesh;
@@ -85,12 +85,12 @@ public class StaticInstanceLoader {
 			final Mesh mesh,
 			final int bufferSize,
 			final IntFunction<Transform> transform,
-			final List<AttribArray> attribs) {
+			final List<JavaAttribArray> attribs) {
 		final InstanceEmitter te = new InstanceEmitter(name,
 				mesh,
 				PCUtils.clamp(MIN_INSTANCE_BUFFER_LENGTH, MAX_INSTANCE_BUFFER_LENGTH, bufferSize),
 				transform,
-				attribs.toArray(AttribArray[]::new));
+				attribs.toArray(JavaAttribArray[]::new));
 		if (cache.hasInstanceEmitter(name)) {
 			throw new IllegalStateException("InstanceEmitter: " + name + " already exists.");
 		}

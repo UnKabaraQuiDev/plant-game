@@ -4,7 +4,7 @@ import org.joml.Vector3f;
 
 import lu.kbra.standalone.gameengine.cache.attrib.UIntAttribArray;
 import lu.kbra.standalone.gameengine.cache.attrib.Vec3fAttribArray;
-import lu.kbra.standalone.gameengine.cache.attrib.impl.AttribArray;
+import lu.kbra.standalone.gameengine.cache.attrib.impl.JavaAttribArray;
 import lu.kbra.standalone.gameengine.graph.material.Material;
 import lu.kbra.standalone.gameengine.graph.texture.SingleTexture;
 
@@ -13,7 +13,7 @@ public class LoadedTexturedMesh extends OffsetLoadedMesh implements TexturedMesh
 	protected SingleTexture texture;
 
 	public LoadedTexturedMesh(final String name, final Material material, final Vector3f origin, final SingleTexture texture, final Vec3fAttribArray vertices,
-			final UIntAttribArray indices, final AttribArray... attribs) {
+			final UIntAttribArray indices, final JavaAttribArray... attribs) {
 		super(name, material, origin, vertices, indices, attribs);
 		this.texture = texture;
 	}
