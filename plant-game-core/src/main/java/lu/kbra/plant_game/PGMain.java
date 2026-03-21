@@ -48,9 +48,7 @@ public class PGMain {
 			path = System.getProperty("user.home") + "/." + appName.toLowerCase();
 		}
 
-		final File dir = new File(path);
-
-		return dir;
+		return new File(path);
 	}
 
 	public static void main(final String[] args) throws IOException, SteamException {
@@ -69,11 +67,7 @@ public class PGMain {
 				throw new IllegalStateException("Failed to load native libraries.");
 			}
 
-			if (!SteamAPI.init()) {
-				throw new IllegalStateException("Failed to initialize Steam API.");
-			}
-
-			if (SteamAPI.isSteamRunning()) {
+			if (SteamAPI.init() && SteamAPI.isSteamRunning()) {
 				if (SteamAPI.restartAppIfNecessary(Integer.parseInt((String) props.get("steam.appId")))) {
 					System.err.println("Not started in steam app, exitting.");
 					return;

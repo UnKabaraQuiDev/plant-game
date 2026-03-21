@@ -125,20 +125,24 @@ public class FixedIntegerStatLine extends LayoutOffsetUIObjectGroup implements L
 		return this.icon != null;
 	}
 
-	public IntegerTextUIObject getValue() {
+	public IntegerTextUIObject getValueObject() {
 		return this.value;
 	}
 
+	public int getValue() {
+		return this.getValueObject().getValue();
+	}
+
 	public FixedIntegerStatLine set(final int value) {
-		this.getValue().setValue(value);
+		this.getValueObject().setValue(value);
 		return this;
 	}
 
 	public FixedIntegerStatLine flushValue() {
-		if (this.getValue() == null) {
+		if (this.getValueObject() == null) {
 			return this;
 		}
-		this.getValue().flushValue();
+		this.getValueObject().flushValue();
 		return this;
 	}
 

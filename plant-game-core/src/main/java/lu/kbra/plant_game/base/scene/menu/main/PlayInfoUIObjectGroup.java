@@ -9,6 +9,7 @@ import org.joml.Vector2f;
 import org.joml.Vector2fc;
 
 import lu.kbra.pclib.concurrency.ObjectTriggerLatch;
+import lu.kbra.pclib.logger.GlobalLogger;
 import lu.kbra.pclib.pointer.ObjectPointer;
 import lu.kbra.plant_game.base.scene.overlay.group.impl.AnchoredLayoutUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.FlatQuadUIObject;
@@ -21,6 +22,7 @@ import lu.kbra.plant_game.engine.entity.ui.text.ProgrammaticTextUIObject;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor2D;
 import lu.kbra.plant_game.engine.scene.ui.layout.FlowLayout;
+import lu.kbra.plant_game.engine.scene.ui.layout.LayoutOwner;
 import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.plant_game.plugin.registry.LevelRegistry.LevelDefinition;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextAlignment;
@@ -44,6 +46,9 @@ public class PlayInfoUIObjectGroup extends AnchoredLayoutUIObjectGroup implement
 	@Override
 	public void accept(final LevelDefinition t) {
 		super.setActive(true);
+
+		this.getFirstParentMatching(LayoutOwner.class, false)
+				.ifPresentOrElse(LayoutOwner::doLayout, () -> GlobalLogger.warning("No LayoutOwner found in hierarchy."));
 
 		if (this.levelDef != null && this.levelDef.get() == t) {
 			return;

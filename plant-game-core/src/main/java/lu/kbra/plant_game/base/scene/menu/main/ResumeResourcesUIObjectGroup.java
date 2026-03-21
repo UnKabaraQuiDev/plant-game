@@ -5,11 +5,15 @@ import java.util.function.Consumer;
 
 import lu.kbra.pclib.concurrency.ObjectTriggerLatch;
 import lu.kbra.pclib.logger.GlobalLogger;
+import lu.kbra.pclib.pointer.ObjectPointer;
 import lu.kbra.plant_game.base.scene.overlay.group.building.ResourceLineUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.data.Direction2d;
+import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
 import lu.kbra.plant_game.engine.entity.ui.group.UIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.impl.DebugBoundsColor;
 import lu.kbra.plant_game.engine.entity.ui.impl.MarginOwner;
+import lu.kbra.plant_game.engine.entity.ui.text.ProgrammaticTextUIObject;
+import lu.kbra.plant_game.engine.entity.ui.text.TextUIObject;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor2D;
 import lu.kbra.plant_game.engine.scene.ui.layout.FlowLayout;
@@ -17,22 +21,43 @@ import lu.kbra.plant_game.engine.scene.world.GameData;
 import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.plant_game.plugin.registry.LevelRegistry.LevelDefinition;
 import lu.kbra.plant_game.plugin.registry.ResourceRegistry;
+import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 public class ResumeResourcesUIObjectGroup extends AnchoredFBUIObjectGroup
-		/* AnchoredLayoutUIObjectGroup */ implements MarginOwner, Consumer<LevelDefinition>, DebugBoundsColor {
+		implements MarginOwner, Consumer<LevelDefinition>, DebugBoundsColor {
 
 	protected WeakReference<LevelDefinition> levelDef;
+	protected ObjectPointer<ProgrammaticTextUIObject> title = new ObjectPointer<>();
 
 	protected float margin;
 
 	public ResumeResourcesUIObjectGroup(final UIObjectGroup parent) {
 		super(parent.getId() + "-resources",
-				new FlowLayout(true, 0.1f, Anchor2D.LEADING),
+				new FlowLayout(true, 0.05f, Anchor2D.TRAILING),
 				parent,
 				Direction2d.VERTICAL,
 				2.5f,
 				Anchor.BOTTOM_RIGHT,
 				Anchor.BOTTOM_RIGHT);
+	}
+
+	@Override
+	public void doSort() {
+		super.sort((o1, o2) -> {
+
+			if (o1 instanceof TextUIObject && !(o2 instanceof TextUIObject)) {
+				return -1;
+			}
+			if (o2 instanceof TextUIObject && !(o1 instanceof TextUIObject)) {
+				return 1;
+			}
+
+			if (o1 instanceof ResourceLineUIObjectGroup g1 && o2 instanceof ResourceLineUIObjectGroup g2) {
+				return Integer.compare(g1.getValue(), g2.getValue());
+			}
+
+			return 0;
+		});
 	}
 
 	@Override
@@ -65,16 +90,24 @@ public class ResumeResourcesUIObjectGroup extends AnchoredFBUIObjectGroup
 		} else {
 			GlobalLogger.warning("Invalid level state: " + t);
 		}
+
+		this.doLayout();
 	}
 
 	public ObjectTriggerLatch<? extends ResumeResourcesUIObjectGroup> init() {
 		final ObjectTriggerLatch<? extends ResumeResourcesUIObjectGroup> latch = new ObjectTriggerLatch<>(
-				ResourceRegistry.RESOURCE_TYPE_DEFS.size(),
+				ResourceRegistry.RESOURCE_TYPE_DEFS.size() + 1,
 				this);
 
-		ResourceRegistry.RESOURCE_TYPE_DEFS.forEach((k, rt) -> {
-			new ResourceLineUIObjectGroup("res-" + k, rt).init().then(this::add).latch(latch);
-		});
+		UIObjectFactory.createText(ProgrammaticTextUIObject.class, 0.1f, "total-resources.title")
+				.set(i -> i.setTransform(new Transform3D()))
+				.add(this)
+				.get(this.title)
+				.latch(latch)
+				.push();
+
+		ResourceRegistry.RESOURCE_TYPE_DEFS
+				.forEach((k, rt) -> new ResourceLineUIObjectGroup("res-" + k, rt).init().then(this::add).latch(latch));
 
 		return latch;
 	}

@@ -96,6 +96,10 @@ public class ResourceLineUIObjectGroup extends LayoutOffsetUIObjectGroup impleme
 		return new Rectangle2D.Float(-width / 2, -height, width, height);
 	}
 
+	public int getValue() {
+		return this.valueObject.getValue();
+	}
+
 	public ResourceLineUIObjectGroup set(final int value) {
 		this.valueObject.set(value);
 		return this;
