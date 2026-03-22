@@ -1,5 +1,6 @@
-package lu.kbra.plant_game;
+package lu.kbra.plant_game.base.data;
 
+import lu.kbra.plant_game.engine.scene.world.data.building.BuildingCategory;
 import lu.kbra.plant_game.generated.ColorMaterial;
 
 public enum DefaultBuildingCategories implements BuildingCategory {

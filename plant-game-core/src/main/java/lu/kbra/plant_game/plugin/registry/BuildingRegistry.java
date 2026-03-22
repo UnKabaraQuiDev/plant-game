@@ -9,11 +9,11 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
 
 import lu.kbra.pclib.PCUtils;
-import lu.kbra.plant_game.BuildingCategory;
-import lu.kbra.plant_game.BuildingDefinition;
 import lu.kbra.plant_game.base.data.DefaultResourceType;
 import lu.kbra.plant_game.engine.entity.go.GenericGameObject;
 import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
+import lu.kbra.plant_game.engine.scene.world.data.building.BuildingCategory;
+import lu.kbra.plant_game.engine.scene.world.data.building.BuildingDefinition;
 import lu.kbra.plant_game.engine.scene.world.data.building.requirement.BuildingRequirement;
 import lu.kbra.plant_game.engine.scene.world.data.resource.ResourceType;
 import lu.kbra.plant_game.plugin.PluginDescriptor;

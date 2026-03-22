@@ -10,9 +10,9 @@ import java.util.Optional;
 import lu.kbra.pclib.PCUtils;
 import lu.kbra.plant_game.PGLogic;
 import lu.kbra.plant_game.PGMain;
-import lu.kbra.plant_game.engine.scene.world.GameData;
-import lu.kbra.plant_game.engine.scene.world.LevelState;
+import lu.kbra.plant_game.engine.scene.world.data.GameData;
 import lu.kbra.plant_game.engine.scene.world.data.LevelData;
+import lu.kbra.plant_game.engine.scene.world.data.LevelState;
 import lu.kbra.plant_game.plugin.PluginDescriptor;
 import lu.kbra.plant_game.plugin.exception.RegistryFailedException;
 

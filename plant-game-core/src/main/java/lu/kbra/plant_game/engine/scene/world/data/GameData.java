@@ -1,4 +1,4 @@
-package lu.kbra.plant_game.engine.scene.world;
+package lu.kbra.plant_game.engine.scene.world.data;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -7,9 +7,8 @@ import org.joml.Math;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import lu.kbra.plant_game.BuildingDefinition;
 import lu.kbra.plant_game.base.data.DefaultResourceType;
-import lu.kbra.plant_game.engine.scene.world.data.LevelData;
+import lu.kbra.plant_game.engine.scene.world.data.building.BuildingDefinition;
 import lu.kbra.plant_game.engine.scene.world.data.resource.ResourceType;
 
 public class GameData {

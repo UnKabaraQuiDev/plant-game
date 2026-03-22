@@ -17,7 +17,7 @@ import lu.kbra.plant_game.engine.entity.ui.text.TextUIObject;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor2D;
 import lu.kbra.plant_game.engine.scene.ui.layout.FlowLayout;
-import lu.kbra.plant_game.engine.scene.world.GameData;
+import lu.kbra.plant_game.engine.scene.world.data.GameData;
 import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.plant_game.plugin.registry.LevelRegistry.LevelDefinition;
 import lu.kbra.plant_game.plugin.registry.ResourceRegistry;

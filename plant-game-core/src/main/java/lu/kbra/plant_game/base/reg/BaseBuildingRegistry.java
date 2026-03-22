@@ -1,7 +1,7 @@
 package lu.kbra.plant_game.base.reg;
 
-import static lu.kbra.plant_game.DefaultBuildingCategories.ENERGY;
-import static lu.kbra.plant_game.DefaultBuildingCategories.WATER;
+import static lu.kbra.plant_game.base.data.DefaultBuildingCategories.ENERGY;
+import static lu.kbra.plant_game.base.data.DefaultBuildingCategories.WATER;
 
 import java.util.List;
 

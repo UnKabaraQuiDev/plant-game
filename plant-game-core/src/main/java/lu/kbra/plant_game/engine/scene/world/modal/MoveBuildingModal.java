@@ -1,4 +1,4 @@
-package lu.kbra.plant_game.engine.scene.world;
+package lu.kbra.plant_game.engine.scene.world.modal;
 
 import java.util.Optional;
 
@@ -12,6 +12,7 @@ import lu.kbra.plant_game.engine.UpdateFrameState;
 import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
 import lu.kbra.plant_game.engine.entity.go.obj.terrain.TerrainGameObject;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
+import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.objs.entity.ParentAwareComponent;

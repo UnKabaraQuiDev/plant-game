@@ -8,18 +8,15 @@ import java.net.URLClassLoader;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Deque;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Objects;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 
+import lu.kbra.pclib.datastructure.tree.dependency.DependencyResolver;
 import lu.kbra.pclib.logger.GlobalLogger;
 
 public class PluginJarLoader {
@@ -64,16 +61,12 @@ public class PluginJarLoader {
 			}
 		}
 
-//		final Set<String> duplicates = PCUtils
-//				.computeDuplicates(descriptors.values(), PluginDescriptor::getInternalName, PluginDescriptor::toString);
-//		if (duplicates.size() > 0) {
-//			throw new IllegalStateException("Duplicate plugins found: " + duplicates);
-//		}
-
 		final List<String> order = this.resolveLoadOrder(descriptors);
 
 		final Map<String, ClassLoader> loaders = new HashMap<>();
 		final List<LoadedPlugin> result = new ArrayList<>();
+
+		int id = 0;
 
 		for (PluginDescriptor desc : existingPlugins) {
 			final ClassLoader loader = desc.getClass().getClassLoader();
@@ -81,8 +74,11 @@ public class PluginJarLoader {
 					.loadClass(desc.relativeClassPath(desc.getMainClass()));
 			final PluginMain mainInst = main.getDeclaredConstructor(PluginManager.class, PluginDescriptor.class).newInstance(parent, desc);
 			desc.setPluginClass(main);
+			desc.setLoadId(id);
 
 			result.add(new LoadedPlugin(null, desc, loader, mainInst));
+
+			id++;
 		}
 
 		for (final String name : order) {
@@ -96,8 +92,11 @@ public class PluginJarLoader {
 					.loadClass(desc.relativeClassPath(desc.getMainClass()));
 			final PluginMain mainInst = main.getDeclaredConstructor(PluginManager.class, PluginDescriptor.class).newInstance(parent, desc);
 			desc.setPluginClass(main);
+			desc.setLoadId(id);
 
 			result.add(new LoadedPlugin(jar, desc, loader, mainInst));
+
+			id++;
 		}
 
 		return result;
@@ -112,29 +111,25 @@ public class PluginJarLoader {
 			}
 
 			try (InputStream in = jar.getInputStream(entry)) {
-				return OBJECT_MAPPER.readValue(in, PluginDescriptor.class);
+				final PluginDescriptor pd = OBJECT_MAPPER.readValue(in, PluginDescriptor.class);
+				pd.setSourceJar(jarPath.toString());
+				return pd;
 			}
 		}
 	}
 
 	private List<String> resolveLoadOrder(final Map<String, PluginDescriptor> descriptors) {
+		for (final Map.Entry<String, PluginDescriptor> entry : descriptors.entrySet()) {
+			final String plugin = entry.getKey();
+			final PluginDescriptor descriptor = entry.getValue();
+			final PluginDescriptor.InternalDependencies deps = descriptor.getInternalDependencies();
 
-		final Map<String, Set<String>> graph = new HashMap<>();
-
-		for (final var e : descriptors.entrySet()) {
-			final String plugin = e.getKey();
-			graph.putIfAbsent(plugin, new HashSet<>());
-
-			final PluginDescriptor.InternalDependencies deps = e.getValue().getInternalDependencies();
 			if (deps == null) {
 				continue;
 			}
 
-			/* Required dependencies */
-
 			if (deps.getRequired() != null) {
-				for (final var dep : deps.getRequired()) {
-
+				for (final PluginDescriptor.InternalDependencies.VersionnedPluginDescriptor dep : deps.getRequired()) {
 					final PluginDescriptor target = descriptors.get(dep.getInternalName());
 					if (target == null) {
 						throw new IllegalStateException("Missing required dependency: " + dep.getInternalName() + " for plugin " + plugin);
@@ -144,16 +139,11 @@ public class PluginJarLoader {
 						throw new IllegalStateException("Version mismatch: " + plugin + " requires " + dep.getInternalName() + " "
 								+ dep.getVersion() + ", found " + target.getVersion());
 					}
-
-					graph.get(plugin).add(dep.getInternalName());
 				}
 			}
 
-			/* Optional dependencies */
-
 			if (deps.getOptional() != null) {
-				for (final var dep : deps.getOptional()) {
-
+				for (final PluginDescriptor.InternalDependencies.VersionnedPluginDescriptor dep : deps.getOptional()) {
 					final PluginDescriptor target = descriptors.get(dep.getInternalName());
 					if (target == null) {
 						continue;
@@ -163,68 +153,21 @@ public class PluginJarLoader {
 						throw new IllegalStateException("Version mismatch: " + plugin + " optionally depends on " + dep.getInternalName()
 								+ " " + dep.getVersion() + ", found " + target.getVersion());
 					}
-
-					graph.get(plugin).add(dep.getInternalName());
 				}
 			}
 		}
 
-		return this.topoSort(graph);
-	}
-
-	private List<String> topoSort(final Map<String, Set<String>> graph) {
-		final Map<String, State> state = new HashMap<>();
-		final List<String> result = new ArrayList<>();
-
-		for (final String node : graph.keySet()) {
-			if (state.get(node) == null) {
-				this.dfs(node, graph, state, result, new ArrayDeque<>());
-			}
-		}
-
-		Collections.reverse(result);
-		return result;
-	}
-
-	private void dfs(
-			final String node,
-			final Map<String, Set<String>> graph,
-			final Map<String, State> state,
-			final List<String> out,
-			final Deque<String> stack) {
-		state.put(node, State.VISITING);
-		stack.push(node);
-
-		for (final String dep : graph.getOrDefault(node, Set.of())) {
-			final State s = state.get(dep);
-
-			if (s == State.VISITING) {
-				throw new IllegalStateException("Dependency cycle: " + this.buildCycle(dep, stack));
+		return DependencyResolver.of(descriptors.values()).resolve((plugin, dependency) -> {
+			final PluginDescriptor descriptor = descriptors.get(plugin);
+			if (descriptor == null) {
+				return false;
 			}
 
-			if (s == null) {
-				this.dfs(dep, graph, state, out, stack);
-			}
-		}
-
-		stack.pop();
-		state.put(node, State.VISITED);
-		out.add(node);
-	}
-
-	private String buildCycle(final String start, final Deque<String> stack) {
-		final StringBuilder sb = new StringBuilder();
-		for (final String s : stack) {
-			sb.append(s).append(" -> ");
-			if (s.equals(start)) {
-				break;
-			}
-		}
-		return sb.append(start).toString();
-	}
-
-	private enum State {
-		VISITING, VISITED
+			return descriptor.getInternalDependencies()
+					.getOptional()
+					.stream()
+					.anyMatch(dep -> Objects.equals(dep.getInternalName(), dependency));
+		}).stream().map(PluginDescriptor::getInternalName).toList();
 	}
 
 	private ClassLoader createClassLoader(final Path jarPath) throws Exception {

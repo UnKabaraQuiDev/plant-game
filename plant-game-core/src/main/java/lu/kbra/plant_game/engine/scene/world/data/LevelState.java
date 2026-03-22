@@ -1,4 +1,4 @@
-package lu.kbra.plant_game.engine.scene.world;
+package lu.kbra.plant_game.engine.scene.world.data;
 
 import org.joml.Vector4fc;
 

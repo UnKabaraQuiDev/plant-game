@@ -1,4 +1,4 @@
-package lu.kbra.plant_game.engine.scene.world;
+package lu.kbra.plant_game.engine.scene.world.modal;
 
 import java.util.Map;
 

@@ -1,4 +1,4 @@
-package lu.kbra.plant_game.engine.scene.world;
+package lu.kbra.plant_game.engine.scene.world.data;
 
 import org.joml.Matrix4f;
 import org.joml.Matrix4fc;

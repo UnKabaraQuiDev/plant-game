@@ -18,13 +18,13 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import lu.kbra.plant_game.base.entity.go.obj.StarterPodSmallObject;
 import lu.kbra.plant_game.engine.data.json.LevelDataModule.BuildingOverrideDeserializer;
-import lu.kbra.plant_game.engine.scene.world.LevelBuildingRegistry;
 import lu.kbra.plant_game.engine.scene.world.data.building.requirement.BuildingRequirement;
 import lu.kbra.plant_game.engine.scene.world.data.resource.ResourceType;
 import lu.kbra.plant_game.engine.scene.world.generator.ImageWorldGenerator;
 import lu.kbra.plant_game.engine.scene.world.generator.WorldGenerationStrategy;
 import lu.kbra.plant_game.engine.scene.world.generator.WorldGenerator;
 import lu.kbra.plant_game.plugin.PluginDescriptor;
+import lu.kbra.plant_game.plugin.registry.LevelBuildingRegistry;
 import lu.kbra.standalone.gameengine.utils.consts.Direction;
 
 public class LevelData {

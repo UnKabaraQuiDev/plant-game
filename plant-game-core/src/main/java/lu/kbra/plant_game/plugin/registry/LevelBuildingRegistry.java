@@ -1,14 +1,13 @@
-package lu.kbra.plant_game.engine.scene.world;
+package lu.kbra.plant_game.plugin.registry;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import lu.kbra.plant_game.BuildingCategory;
-import lu.kbra.plant_game.BuildingDefinition;
 import lu.kbra.plant_game.engine.scene.world.data.LevelData;
-import lu.kbra.plant_game.plugin.registry.BuildingRegistry;
+import lu.kbra.plant_game.engine.scene.world.data.building.BuildingCategory;
+import lu.kbra.plant_game.engine.scene.world.data.building.BuildingDefinition;
 
 public class LevelBuildingRegistry {
 

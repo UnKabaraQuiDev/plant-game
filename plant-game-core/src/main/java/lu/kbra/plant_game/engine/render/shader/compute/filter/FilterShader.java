@@ -7,7 +7,7 @@ import java.util.OptionalInt;
 
 import org.joml.Vector2i;
 
-import lu.kbra.plant_game.engine.render.FilterShaderConfiguration;
+import lu.kbra.plant_game.engine.render.filter.FilterShaderConfiguration;
 import lu.kbra.plant_game.plugin.PluginDescriptor;
 import lu.kbra.standalone.gameengine.graph.shader.ComputeShader;
 import lu.kbra.standalone.gameengine.graph.shader.RenderShader;

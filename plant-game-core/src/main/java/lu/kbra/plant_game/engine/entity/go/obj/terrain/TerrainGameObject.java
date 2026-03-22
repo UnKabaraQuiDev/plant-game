@@ -20,7 +20,6 @@ import lu.kbra.plant_game.base.entity.go.obj_inst.grass.InstanceLargeGrassObject
 import lu.kbra.plant_game.base.entity.go.obj_inst.grass.InstanceMediumGrassObject;
 import lu.kbra.plant_game.base.entity.go.obj_inst.grass.InstanceSmallGrassObject;
 import lu.kbra.plant_game.engine.entity.go.GameObject;
-import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.entity.go.MeshGameObject;
 import lu.kbra.plant_game.engine.entity.go.VariationMeshGameObject;
 import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory;

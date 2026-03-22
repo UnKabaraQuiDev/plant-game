@@ -1,6 +1,6 @@
 package lu.kbra.plant_game.base.entity.go.obj.energy;
 
-import lu.kbra.plant_game.engine.scene.world.ResourceBuffer;
+import lu.kbra.plant_game.engine.scene.world.data.ResourceBuffer;
 import lu.kbra.plant_game.engine.scene.world.data.resource.ResourceType;
 import lu.kbra.standalone.gameengine.objs.entity.SceneEntity;
 

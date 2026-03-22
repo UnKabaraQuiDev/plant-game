@@ -2,12 +2,12 @@ package lu.kbra.plant_game.engine.scene.world.data.building.requirement;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
-import lu.kbra.plant_game.BuildingDefinition;
 import lu.kbra.plant_game.engine.data.locale.AbstractLocalizationString;
 import lu.kbra.plant_game.engine.data.locale.Localizable;
 import lu.kbra.plant_game.engine.entity.go.GenericGameObject;
 import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
+import lu.kbra.plant_game.engine.scene.world.data.building.BuildingDefinition;
 import lu.kbra.plant_game.plugin.registry.BuildingRegistry;
 
 @JsonTypeName("MIN_BUILD")

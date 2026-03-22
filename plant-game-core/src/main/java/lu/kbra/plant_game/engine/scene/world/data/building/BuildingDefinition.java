@@ -1,4 +1,4 @@
-package lu.kbra.plant_game;
+package lu.kbra.plant_game.engine.scene.world.data.building;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,14 +12,15 @@ import java.util.stream.IntStream;
 import lu.kbra.pclib.concurrency.CountTriggerLatch;
 import lu.kbra.pclib.datastructure.list.WeakList;
 import lu.kbra.pclib.pointer.prim.IntPointer;
+import lu.kbra.plant_game.PGLogic;
 import lu.kbra.plant_game.base.scene.overlay.group.building.BuildingInfoUIObjectGroup;
 import lu.kbra.plant_game.base.scene.overlay.group.building.ResourceLineUIObjectGroup;
 import lu.kbra.plant_game.engine.data.locale.Localizable;
 import lu.kbra.plant_game.engine.entity.go.GenericGameObject;
 import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
 import lu.kbra.plant_game.engine.entity.ui.text.ProgrammaticTextUIObject;
-import lu.kbra.plant_game.engine.scene.world.GameData;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
+import lu.kbra.plant_game.engine.scene.world.data.GameData;
 import lu.kbra.plant_game.engine.scene.world.data.building.requirement.BuildingRequirement;
 import lu.kbra.plant_game.engine.scene.world.data.resource.ResourceType;
 import lu.kbra.plant_game.generated.ColorMaterial;

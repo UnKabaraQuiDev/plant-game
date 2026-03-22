@@ -1,4 +1,4 @@
-package lu.kbra.plant_game.engine.scene.world;
+package lu.kbra.plant_game.engine.scene.world.modal;
 
 public interface ActiveModalController extends ActiveModalOwner, ModalsOwner {
 

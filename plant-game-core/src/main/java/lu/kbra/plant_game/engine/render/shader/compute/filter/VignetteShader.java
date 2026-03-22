@@ -3,7 +3,7 @@ package lu.kbra.plant_game.engine.render.shader.compute.filter;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 
-import lu.kbra.plant_game.engine.render.FilterShaderConfiguration;
+import lu.kbra.plant_game.engine.render.filter.FilterShaderConfiguration;
 import lu.kbra.standalone.gameengine.graph.shader.part.AbstractShaderPart;
 
 public class VignetteShader extends FilterShader<VignetteShader> {

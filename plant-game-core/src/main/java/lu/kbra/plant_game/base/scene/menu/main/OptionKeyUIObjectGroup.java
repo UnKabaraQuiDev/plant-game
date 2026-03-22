@@ -1,6 +1,5 @@
 package lu.kbra.plant_game.base.scene.menu.main;
 
-import java.security.KeyRep;
 import java.util.Optional;
 import java.util.OptionalInt;
 

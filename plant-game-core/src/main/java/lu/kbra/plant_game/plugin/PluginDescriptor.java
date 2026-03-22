@@ -1,11 +1,14 @@
 package lu.kbra.plant_game.plugin;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 
 import lu.kbra.pclib.datastructure.tree.dependency.DependencyOwner;
 
@@ -33,8 +36,10 @@ public final class PluginDescriptor implements DependencyOwner<String> {
 
 		}
 
-		protected List<VersionnedPluginDescriptor> optional;
-		protected List<VersionnedPluginDescriptor> required;
+		@JsonSetter(nulls = Nulls.AS_EMPTY)
+		protected List<VersionnedPluginDescriptor> optional = new ArrayList<>();
+		@JsonSetter(nulls = Nulls.AS_EMPTY)
+		protected List<VersionnedPluginDescriptor> required = new ArrayList<>();
 
 		public List<VersionnedPluginDescriptor> getOptional() {
 			return this.optional;
@@ -56,9 +61,14 @@ public final class PluginDescriptor implements DependencyOwner<String> {
 	protected Class<? extends PluginMain> pluginClass;
 	protected List<String> registries;
 	@JsonProperty("dependencies")
-	protected InternalDependencies internalDependencies;
+	@JsonSetter(nulls = Nulls.AS_EMPTY)
+	protected InternalDependencies internalDependencies = new InternalDependencies();
 	@JsonIgnore
 	protected boolean shared = false;
+	@JsonIgnore
+	protected String sourceJar;
+	@JsonIgnore
+	protected int loadId;
 
 	public String getDisplayName() {
 		return this.displayName;
@@ -115,6 +125,22 @@ public final class PluginDescriptor implements DependencyOwner<String> {
 
 	void setShared(final boolean shared) {
 		this.shared = shared;
+	}
+
+	public String getSourceJar() {
+		return this.sourceJar;
+	}
+
+	void setSourceJar(final String sourceJar) {
+		this.sourceJar = sourceJar;
+	}
+
+	public int getLoadId() {
+		return this.loadId;
+	}
+
+	void setLoadId(final int loadId) {
+		this.loadId = loadId;
 	}
 
 	@Override

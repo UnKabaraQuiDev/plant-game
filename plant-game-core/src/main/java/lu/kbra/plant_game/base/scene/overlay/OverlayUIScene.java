@@ -34,7 +34,7 @@ import lu.kbra.plant_game.engine.scene.ui.layout.AnchorLayout;
 import lu.kbra.plant_game.engine.scene.ui.layout.FlowLayout;
 import lu.kbra.plant_game.engine.scene.ui.layout.Layout;
 import lu.kbra.plant_game.engine.scene.ui.layout.LayoutOwner;
-import lu.kbra.plant_game.engine.scene.world.GameData;
+import lu.kbra.plant_game.engine.scene.world.data.GameData;
 import lu.kbra.plant_game.engine.scene.world.data.LevelData;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.plant_game.plugin.registry.BuildingRegistry;

@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
 
-import lu.kbra.plant_game.engine.render.FilterShaderConfiguration;
+import lu.kbra.plant_game.engine.render.filter.FilterShaderConfiguration;
 import lu.kbra.standalone.gameengine.graph.shader.part.AbstractShaderPart;
 import lu.kbra.standalone.gameengine.utils.gl.consts.DataType;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TexelFormat;
