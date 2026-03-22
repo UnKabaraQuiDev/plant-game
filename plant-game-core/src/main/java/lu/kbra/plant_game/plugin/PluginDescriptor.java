@@ -1,13 +1,17 @@
 package lu.kbra.plant_game.plugin;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public final class PluginDescriptor {
+import lu.kbra.pclib.datastructure.tree.dependency.DependencyOwner;
 
-	public static class Dependencies {
+public final class PluginDescriptor implements DependencyOwner<String> {
+
+	public static class InternalDependencies {
 
 		public static class VersionnedPluginDescriptor {
 
@@ -51,7 +55,10 @@ public final class PluginDescriptor {
 	@JsonIgnore
 	protected Class<? extends PluginMain> pluginClass;
 	protected List<String> registries;
-	protected Dependencies dependencies;
+	@JsonProperty("dependencies")
+	protected InternalDependencies internalDependencies;
+	@JsonIgnore
+	protected boolean shared = false;
 
 	public String getDisplayName() {
 		return this.displayName;
@@ -77,7 +84,7 @@ public final class PluginDescriptor {
 		return this.pluginClass;
 	}
 
-	public void setPluginClass(final Class<? extends PluginMain> pluginClass) {
+	void setPluginClass(final Class<? extends PluginMain> pluginClass) {
 		this.pluginClass = pluginClass;
 	}
 
@@ -85,8 +92,29 @@ public final class PluginDescriptor {
 		return this.registries;
 	}
 
-	public Dependencies getDependencies() {
-		return this.dependencies;
+	public InternalDependencies getInternalDependencies() {
+		return this.internalDependencies;
+	}
+
+	@Override
+	public Set<String> getDependencies() {
+		final Set<String> all = new HashSet<>();
+		this.internalDependencies.optional.stream().map(InternalDependencies.VersionnedPluginDescriptor::getInternalName).forEach(all::add);
+		this.internalDependencies.required.stream().map(InternalDependencies.VersionnedPluginDescriptor::getInternalName).forEach(all::add);
+		return all;
+	}
+
+	@Override
+	public String getKey() {
+		return this.internalName;
+	}
+
+	public boolean isShared() {
+		return this.shared;
+	}
+
+	void setShared(final boolean shared) {
+		this.shared = shared;
 	}
 
 	@Override
@@ -94,8 +122,8 @@ public final class PluginDescriptor {
 		return this.displayName + " (" + this.internalName + ":" + this.version + ")";
 	}
 
-	public String relativePath(final String buildingReg) {
-		return buildingReg == null || buildingReg.isBlank() ? null : this.package_ + "." + buildingReg;
+	public String relativeClassPath(final String className) {
+		return className == null || className.isBlank() ? null : this.package_ + "." + className;
 	}
 
 }

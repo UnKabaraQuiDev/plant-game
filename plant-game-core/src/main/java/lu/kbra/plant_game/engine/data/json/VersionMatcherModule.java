@@ -11,7 +11,7 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
-import lu.kbra.plant_game.plugin.PluginDescriptor.Dependencies.VersionnedPluginDescriptor;
+import lu.kbra.plant_game.plugin.PluginDescriptor.InternalDependencies.VersionnedPluginDescriptor;
 import lu.kbra.plant_game.plugin.VersionMatcher;
 import lu.kbra.plant_game.plugin.VersionMatcher.BoundsVersionMatcher;
 import lu.kbra.plant_game.plugin.VersionMatcher.BoundsVersionMatcher.BoundsDirection;

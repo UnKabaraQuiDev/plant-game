@@ -20,11 +20,16 @@ import java.util.Set;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 
-import lu.kbra.pclib.PCUtils;
+import lu.kbra.pclib.logger.GlobalLogger;
 
 public class PluginJarLoader {
 
 	public record LoadedPlugin(Path jarPath, PluginDescriptor descriptor, ClassLoader classLoader, PluginMain main) {
+
+		public boolean isInternal() {
+			return this.jarPath == null;
+		}
+
 	}
 
 	private final ClassLoader pluginClassLoader = PluginJarLoader.class.getClassLoader();
@@ -37,11 +42,17 @@ public class PluginJarLoader {
 		final Map<String, PluginDescriptor> descriptors = new HashMap<>();
 
 		for (Path pluginsDir : pluginsDirs) {
+			pluginsDir = pluginsDir.normalize();
 			Files.createDirectories(pluginsDir);
 
 			try (DirectoryStream<Path> stream = Files.newDirectoryStream(pluginsDir, "*.jar")) {
 				for (final Path jarPath : stream) {
 					final PluginDescriptor desc = this.loadDescriptor(jarPath);
+
+					if (desc == null) {
+						GlobalLogger.info("Skipping plugin: " + jarPath + ", no `plugin.json` found.");
+						continue;
+					}
 
 					final String name = desc.getInternalName();
 					if (pluginJars.putIfAbsent(name, jarPath) != null) {
@@ -53,11 +64,11 @@ public class PluginJarLoader {
 			}
 		}
 
-		final Set<String> duplicates = PCUtils
-				.computeDuplicates(descriptors.values(), PluginDescriptor::getInternalName, PluginDescriptor::toString);
-		if (duplicates.size() > 0) {
-			throw new IllegalStateException("Duplicate plugins found: " + duplicates);
-		}
+//		final Set<String> duplicates = PCUtils
+//				.computeDuplicates(descriptors.values(), PluginDescriptor::getInternalName, PluginDescriptor::toString);
+//		if (duplicates.size() > 0) {
+//			throw new IllegalStateException("Duplicate plugins found: " + duplicates);
+//		}
 
 		final List<String> order = this.resolveLoadOrder(descriptors);
 
@@ -66,7 +77,8 @@ public class PluginJarLoader {
 
 		for (PluginDescriptor desc : existingPlugins) {
 			final ClassLoader loader = desc.getClass().getClassLoader();
-			final Class<? extends PluginMain> main = (Class<? extends PluginMain>) loader.loadClass(desc.relativePath(desc.getMainClass()));
+			final Class<? extends PluginMain> main = (Class<? extends PluginMain>) loader
+					.loadClass(desc.relativeClassPath(desc.getMainClass()));
 			final PluginMain mainInst = main.getDeclaredConstructor(PluginManager.class, PluginDescriptor.class).newInstance(parent, desc);
 			desc.setPluginClass(main);
 
@@ -80,7 +92,8 @@ public class PluginJarLoader {
 			loaders.put(name, loader);
 
 			final PluginDescriptor desc = descriptors.get(name);
-			final Class<? extends PluginMain> main = (Class<? extends PluginMain>) loader.loadClass(desc.relativePath(desc.getMainClass()));
+			final Class<? extends PluginMain> main = (Class<? extends PluginMain>) loader
+					.loadClass(desc.relativeClassPath(desc.getMainClass()));
 			final PluginMain mainInst = main.getDeclaredConstructor(PluginManager.class, PluginDescriptor.class).newInstance(parent, desc);
 			desc.setPluginClass(main);
 
@@ -94,7 +107,8 @@ public class PluginJarLoader {
 		try (JarFile jar = new JarFile(jarPath.toFile())) {
 			final ZipEntry entry = jar.getEntry("plugin.json");
 			if (entry == null) {
-				throw new IllegalStateException("plugin.json missing in " + jarPath);
+//				throw new IllegalStateException("plugin.json missing in " + jarPath);
+				return null;
 			}
 
 			try (InputStream in = jar.getInputStream(entry)) {
@@ -111,7 +125,7 @@ public class PluginJarLoader {
 			final String plugin = e.getKey();
 			graph.putIfAbsent(plugin, new HashSet<>());
 
-			final PluginDescriptor.Dependencies deps = e.getValue().getDependencies();
+			final PluginDescriptor.InternalDependencies deps = e.getValue().getInternalDependencies();
 			if (deps == null) {
 				continue;
 			}
