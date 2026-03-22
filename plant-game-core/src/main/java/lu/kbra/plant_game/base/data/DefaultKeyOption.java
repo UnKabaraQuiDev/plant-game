@@ -15,22 +15,23 @@ public enum DefaultKeyOption implements KeyOption {
 	TURN_CCW(GLFW.GLFW_KEY_R),
 	TURN_CW(GLFW.GLFW_KEY_T),
 	PLACE(GLFW.GLFW_MOUSE_BUTTON_LEFT),
-	CANCEL(GLFW.GLFW_MOUSE_BUTTON_RIGHT);
+	CANCEL(GLFW.GLFW_MOUSE_BUTTON_RIGHT),
+	INSPECT(GLFW.GLFW_MOUSE_BUTTON_MIDDLE);
 
 	private final int physicalKey;
 
-	private DefaultKeyOption(int physicalKey) {
+	private DefaultKeyOption(final int physicalKey) {
 		this.physicalKey = physicalKey;
 	}
 
 	@Override
 	public int getPhysicalKey() {
-		return physicalKey;
+		return this.physicalKey;
 	}
 
 	@Override
 	public int getIndex() {
-		return ordinal();
+		return this.ordinal();
 	}
 
 }

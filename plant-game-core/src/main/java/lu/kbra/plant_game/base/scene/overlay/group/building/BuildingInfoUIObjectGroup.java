@@ -78,8 +78,6 @@ public class BuildingInfoUIObjectGroup extends LayoutOffsetUIObjectGroup impleme
 			public void doSort() {
 				synchronized (this.getEntitiesLock()) {
 					this.getWEntities().sort((o1, o2) -> {
-						System.err.println("cmp: " + o1.getId() + " " + o2.getId());
-
 						if (o1 instanceof TextUIObject t1 && "title".equals(t1.getId())) {
 							return -1;
 						}

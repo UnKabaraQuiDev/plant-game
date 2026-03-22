@@ -48,12 +48,13 @@ import lu.kbra.plant_game.engine.entity.ui.impl.NeedsUpdate;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.scene.world.data.GameData;
 import lu.kbra.plant_game.engine.scene.world.data.LevelData;
+import lu.kbra.plant_game.engine.scene.world.data.LevelData.World.StarterPod;
 import lu.kbra.plant_game.engine.scene.world.data.ResourceBuffer;
 import lu.kbra.plant_game.engine.scene.world.data.SunLightOwner;
-import lu.kbra.plant_game.engine.scene.world.data.LevelData.World.StarterPod;
 import lu.kbra.plant_game.engine.scene.world.data.resource.ResourceType;
 import lu.kbra.plant_game.engine.scene.world.generator.WorldGenerator;
 import lu.kbra.plant_game.engine.scene.world.modal.ActiveModalController;
+import lu.kbra.plant_game.engine.scene.world.modal.InspectBuildingModal;
 import lu.kbra.plant_game.engine.scene.world.modal.Modal;
 import lu.kbra.plant_game.engine.scene.world.modal.MoveBuildingModal;
 import lu.kbra.plant_game.engine.scene.world.particle.ParticleManager;
@@ -132,6 +133,7 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController, S
 		this.gameData = gameData;
 
 		this.registerModal(new MoveBuildingModal(this, PGLogic.INSTANCE.getCompositor()));
+		this.registerModal(new InspectBuildingModal(this));
 
 		final ObjectTriggerLatch<WorldLevelScene> latch = new ObjectTriggerLatch<>(2, this);
 
@@ -174,22 +176,21 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController, S
 		}).then(render, (Function<WorldGenerator, Pair<WorldGenerator, Mesh>>) wg -> {
 			return Pairs.readOnly(wg, wg.generateHighlightMesh(worldProgress, this.getCache()));
 		}).then(workers, (Consumer<Pair<WorldGenerator, Mesh>>) pair -> {
-			data
-					.get()
+			data.get()
 					.setTerrainHighlightEntity(
 							new TerrainHighlightObject("terrain-highlight-" + levelData.getInternalName(), pair.getValue()));
 		}).then(render, (Supplier<QuadLoadedMesh>) () -> {
 			final int width = data.get().getMesh().getWidth();
 			final int length = data.get().getMesh().getLength();
-			final QuadLoadedMesh mesh = new QuadLoadedMesh("water-" + levelData.getInternalName() + "-" + width + "x" + length, null,
+			final QuadLoadedMesh mesh = new QuadLoadedMesh("water-" + levelData.getInternalName() + "-" + width + "x" + length,
+					null,
 					new Vector2f(width, length));
 			this.getCache().addMesh(mesh);
 			worldProgress.add(100);
 			return mesh;
 		}).then(workers, (Consumer<QuadLoadedMesh>) mesh -> {
 			data.get().setWaterLevel(new MeshGameObject("water-" + levelData.getInternalName(), mesh));
-			data
-					.get()
+			data.get()
 					.getTerrainWaterObject()
 					.setTransform(new Transform3D(new Vector3f(mesh.getSize().x() / 2,
 							gameData.map(c -> c.getCurrentWaterLevel()).orElse(levelData.getWorld().getWaterLevel().getMin()),
@@ -203,13 +204,11 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController, S
 
 			this.setTerrain(data.get());
 
-			GameObjectFactory
-					.create(GameObjectRegistry.<StarterPodObject>getClass(pod.getPodClass()))
+			GameObjectFactory.create(GameObjectRegistry.<StarterPodObject>getClass(pod.getPodClass()))
 					.set(i -> i.setTransform(new Transform3D()))
 					.postInit(c -> data.get().add(c))
 					.postInit(c -> c.placeDown(this.terrain, pod.getTile(), pod.getDirection()))
-					.postInit(c -> c
-							.getTransform()
+					.postInit(c -> c.getTransform()
 							.translationAdd(data.get().getMesh().getBoundingBox().getSize().x() / 2,
 									0,
 									data.get().getMesh().getBoundingBox().getSize().z() / 2)
@@ -223,6 +222,7 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController, S
 	}
 
 	protected boolean shouldStartPlaceModal = false;
+	protected boolean shouldStartInspectModal = false;
 
 	public void input(final WindowInputHandler inputHandler, final UpdateFrameState frameState) {
 		this.posAdd.zero();
@@ -261,6 +261,10 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController, S
 		if (!this.hasActiveModal() && inputHandler.isMouseButtonPressedOnce(DefaultKeyOption.PLACE)) {
 			this.shouldStartPlaceModal = true;
 		}
+
+		if (!this.hasActiveModal() && inputHandler.isMouseButtonPressedOnce(DefaultKeyOption.INSPECT)) {
+			this.shouldStartInspectModal = true;
+		}
 	}
 
 	protected final ResourceBuffer resourceBuffer = new ResourceBuffer();
@@ -283,6 +287,17 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController, S
 			})).push();
 
 			this.shouldStartPlaceModal = false;
+		}
+
+		if (this.shouldStartInspectModal) {
+			final InspectBuildingModal modal = this.getModal(InspectBuildingModal.class);
+
+			this.getClickedObject(workers, compositor).then(workers, (Consumer<Optional<PlaceableObject>>) obj -> obj.ifPresent(o -> {
+				modal.setAttachedObject(o);
+				this.startModal(modal);
+			})).push();
+
+			this.shouldStartInspectModal = false;
 		}
 
 		final float time = (float) inputHandler.getGameEngine().getTotalTime();
@@ -321,8 +336,7 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController, S
 		final Camera3D camera = super.getCamera();
 		camera.getProjection().setFov(camera.getProjection().getFov() + this.fovDiff);
 		camera.getRotation().rotateY((float) Math.toRadians(this.rotation * 50 * dTime));
-		camera
-				.getPosition()
+		camera.getPosition()
 				.fma(dTime * CAMERA_MOVEMENT_SPEED, this.posAdd.rotateY(-camera.getRotation().getEulerAnglesXYZ(new Vector3f()).y()));
 		camera.updateMatrix();
 
@@ -346,11 +360,9 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController, S
 	}
 
 	public TaskFuture<?, Optional<PlaceableObject>> getClickedObject(final Dispatcher workers, final DeferredCompositor compositor) {
-		return this
-				.getClickedId(workers, compositor)
+		return this.getClickedId(workers, compositor)
 				.then(workers,
-						(Function<Vector3i, Optional<PlaceableObject>>) ids -> super.getEntities()
-								.values()
+						(Function<Vector3i, Optional<PlaceableObject>>) ids -> super.getEntities().values()
 								.parallelStream()
 								.filter(e -> e instanceof GenericGameObject && e instanceof PlaceableObject
 										&& ((GenericGameObject) e).getObjectIdLocation() == AttributeLocation.ENTITY)
