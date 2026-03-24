@@ -39,10 +39,22 @@ COMMON_ARGS=(
   -DaltDeploymentRepository=nexus.kbra.lu-nightly::default::https://nexus.kbra.lu/repository/maven-nightly/
 )
 
+if [ ! -d "${HOME}/.steam" ]; then
+  if id -u steam >/dev/null 2>&1; then
+    COMMON_ARGS+=(-Dsteam.user=steam)
+  else
+    echo "Missing ~/.steam and no 'steam' user" >&2
+    exit 1
+  fi
+fi
+
 echo "Cleaning workspace"
 mvn -B "${COMMON_ARGS[@]}" clean
 
 echo "Building Windows native + deploy"
 mvn -B -Pall,native-build,native-windows "${COMMON_ARGS[@]}" deploy
+
+echo "Deploying to Steam"
+mvn -B -pl plant-game-core -Psteam-deploy "${COMMON_ARGS[@]}" lu.kbra:steam-deploy:deploy
 
 echo "Windows snapshot build done"

@@ -10,53 +10,57 @@ permissions:
   contents: write
 
 jobs:
-  build:
-    runs-on: self-hosted
-
-    env:
-      MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
-      MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
-      STEAM_USERNAME: ${{ secrets.STEAM_USERNAME }}
-      STEAM_PASSWORD: ${{ secrets.STEAM_PASSWORD }}
-
+  linux:
+    runs-on: [self-hosted, linux]
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-
-      - name: Set up Java
-        uses: actions/setup-java@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 21
-
-      - name: Configure Maven servers
-        uses: s4u/maven-settings-action@v4.0.0
+      - uses: s4u/maven-settings-action@v4.0.0
         with:
           servers: |
             [{
               "id": "nexus.kbra.lu-snapshots",
               "username": "${{ secrets.MAVEN_USERNAME }}",
               "password": "${{ secrets.MAVEN_PASSWORD }}"
-            },
-            {
+            }]
+      - run: bash ./scripts/build-snapshot-linux.sh
+
+  windows:
+    runs-on: [self-hosted, windows]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: s4u/maven-settings-action@v4.0.0
+        with:
+          servers: |
+            [{
+              "id": "nexus.kbra.lu-snapshots",
+              "username": "${{ secrets.MAVEN_USERNAME }}",
+              "password": "${{ secrets.MAVEN_PASSWORD }}"
+            }]
+      - run: bash ./scripts/build-snapshot-windows.sh
+
+  deploy:
+    needs: [linux, windows]
+    runs-on: [self-hosted, linux]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: s4u/maven-settings-action@v4.0.0
+        with:
+          servers: |
+            [{
               "id": "steam",
               "username": "${{ secrets.STEAM_USERNAME }}",
               "password": "${{ secrets.STEAM_PASSWORD }}"
             }]
-
-      - name: Deploy snapshot
-        run: bash ./scripts/build-snapshot.sh
-
-      - name: Create GitHub Release
-        if: github.event_name == 'push'
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ github.ref_name }}
-          name: Snapshot ${{ github.ref_name }}
-          prerelease: true
-          body: |
-            ## Changes
-            - Automated build
-
-            ## Version
-            ${{ github.ref_name }} ${{ github.sha }}
+      - run: bash ./scripts/build-snapshot-deploy.sh
