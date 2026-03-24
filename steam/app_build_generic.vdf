@@ -9,7 +9,6 @@
 	"verbose" "0"
 	"Depots"
 	{
-		"@depotId.linux@" "depot_build_linux_generic.vdf"
-		"@depotId.windows@" "depot_build_windows_generic.vdf"
+		"@depotId@" "depot_build_generic.vdf"
 	}
 }

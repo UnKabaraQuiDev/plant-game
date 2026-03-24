@@ -33,7 +33,9 @@
 		<steam.defaultBranch>false</steam.defaultBranch>
 		<steam.depotId.linux>4424581</steam.depotId.linux>
 		<steam.depotId.windows>4424582</steam.depotId.windows>
+		<steam.depotId>${steam.depotId.linux}</steam.depotId>
 		<steam.user></steam.user>
+		<steam.platform>linux</steam.platform>
 	</properties>
 
 	<repositories>

@@ -24,7 +24,6 @@
 		<plugin.package>${project.groupId}.plant_game.${plugin.internalName}</plugin.package>
 
 		<lwjgl.natives>natives-${os.detected.classifier}</lwjgl.natives>
-		<winVersion>${project.version}</winVersion>
 	</properties>
 
 	<dependencies>
@@ -103,8 +102,8 @@
 									${project.build.directory}/dist/</contentRoot>
 								<buildOutput>
 									${project.build.directory}/steam-output</buildOutput>
-								<depotId.windows>${steam.depotId.windows}</depotId.windows>
-								<depotId.linux>${steam.depotId.linux}</depotId.linux>
+								<depotId>${steam.depotId}</depotId>
+								<platform>${steam.platform}</platform>
 							</filters>
 						</configuration>
 					</plugin>
@@ -200,53 +199,6 @@
 			<build>
 				<plugins>
 					<plugin>
-						<artifactId>maven-dependency-plugin</artifactId>
-						<version>3.6.0</version>
-						<executions>
-							<execution>
-								<id>copy-dependencies</id>
-								<phase>package</phase>
-								<goals>
-									<goal>copy-dependencies</goal>
-								</goals>
-								<configuration>
-									<outputDirectory>
-										${project.build.directory}/jpackage-input</outputDirectory>
-									<includeScope>runtime</includeScope>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-
-					<plugin>
-						<artifactId>maven-resources-plugin</artifactId>
-						<version>3.3.1</version>
-						<executions>
-							<execution>
-								<id>copy-jar</id>
-								<phase>package</phase>
-								<goals>
-									<goal>copy-resources</goal>
-								</goals>
-								<configuration>
-									<outputDirectory>
-										${project.build.directory}/jpackage-input</outputDirectory>
-									<resources>
-										<resource>
-											<directory>
-												${project.build.directory}</directory>
-											<includes>
-												<include>
-													${project.build.finalName}.jar</include>
-											</includes>
-										</resource>
-									</resources>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-
-					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>exec-maven-plugin</artifactId>
 						<version>3.1.0</version>
@@ -269,7 +221,7 @@
 										<argument>${steam.appName}</argument>
 
 										<argument>--app-version</argument>
-										<argument>${winVersion}</argument>
+										<argument>${project.version}</argument>
 
 										<argument>--input</argument>
 										<argument>
@@ -300,7 +252,7 @@
 		</profile>
 
 		<profile>
-			<id>native-linux</id>
+			<id>native-build</id>
 
 			<build>
 				<plugins>
@@ -350,7 +302,15 @@
 							</execution>
 						</executions>
 					</plugin>
+				</plugins>
+			</build>
+		</profile>
 
+		<profile>
+			<id>native-linux</id>
+
+			<build>
+				<plugins>
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>exec-maven-plugin</artifactId>
@@ -374,7 +334,7 @@
 										<argument>${steam.appName}</argument>
 
 										<argument>--app-version</argument>
-										<argument>${winVersion}</argument>
+										<argument>${project.version}</argument>
 
 										<argument>--input</argument>
 										<argument>

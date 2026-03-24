@@ -46,7 +46,7 @@ jobs:
             }]
 
       - name: Deploy release
-        run: bash ./build-release.sh
+        run: bash ./scripts/build-release.sh
 
       - name: Create GitHub Release
         if: github.event_name == 'push'

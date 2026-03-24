@@ -45,7 +45,7 @@ jobs:
             }]
 
       - name: Deploy snapshot
-        run: bash ./build-snapshot.sh
+        run: bash ./scripts/build-snapshot.sh
 
       - name: Create GitHub Release
         if: github.event_name == 'push'
