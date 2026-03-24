@@ -200,35 +200,97 @@
 			<build>
 				<plugins>
 					<plugin>
-						<groupId>io.github.fvarrui</groupId>
-						<artifactId>javapackager</artifactId>
-						<version>1.7.6</version>
+						<artifactId>maven-dependency-plugin</artifactId>
+						<version>3.6.0</version>
+						<executions>
+							<execution>
+								<id>copy-dependencies</id>
+								<phase>package</phase>
+								<goals>
+									<goal>copy-dependencies</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>
+										${project.build.directory}/jpackage-input</outputDirectory>
+									<includeScope>runtime</includeScope>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+
+					<plugin>
+						<artifactId>maven-resources-plugin</artifactId>
+						<version>3.3.1</version>
+						<executions>
+							<execution>
+								<id>copy-jar</id>
+								<phase>package</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>
+										${project.build.directory}/jpackage-input</outputDirectory>
+									<resources>
+										<resource>
+											<directory>
+												${project.build.directory}</directory>
+											<includes>
+												<include>
+													${project.build.finalName}.jar</include>
+											</includes>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>exec-maven-plugin</artifactId>
+						<version>3.1.0</version>
 
 						<executions>
 							<execution>
 								<id>package-windows</id>
 								<phase>install</phase>
 								<goals>
-									<goal>package</goal>
+									<goal>exec</goal>
 								</goals>
+
 								<configuration>
-									<mainClass>${mainClass}</mainClass>
-									<bundleJre>true</bundleJre>
-									<customizedJre>true</customizedJre>
-									<outputDirectory>
-										${project.build.directory}/dist/windows/</outputDirectory>
+									<executable>jpackage</executable>
+									<arguments>
+										<argument>--type</argument>
+										<argument>exe</argument>
 
-									<platform>windows</platform>
+										<argument>--name</argument>
+										<argument>${steam.appName}</argument>
 
-									<linuxConfig>
-										<wrapJar>true</wrapJar>
-										<generateDeb>true</generateDeb>
-										<generateRpm>false</generateRpm>
-										<generateAppImage>false</generateAppImage>
-									</linuxConfig>
+										<argument>--app-version</argument>
+										<argument>${winVersion}</argument>
 
-									<name>${steam.appName}</name>
-									<version>${winVersion}</version>
+										<argument>--input</argument>
+										<argument>
+											${project.build.directory}/jpackage-input</argument>
+
+										<argument>--main-jar</argument>
+										<argument>${project.build.finalName}.jar</argument>
+
+										<argument>--main-class</argument>
+										<argument>${mainClass}</argument>
+
+										<argument>--dest</argument>
+										<argument>
+											${project.build.directory}/dist/windows</argument>
+
+										<argument>--add-modules</argument>
+										<argument>
+											java.base,java.desktop,java.logging,jdk.unsupported</argument>
+
+										<argument>--win-console</argument>
+									</arguments>
 								</configuration>
 							</execution>
 						</executions>
@@ -243,42 +305,95 @@
 			<build>
 				<plugins>
 					<plugin>
-						<groupId>io.github.fvarrui</groupId>
-						<artifactId>javapackager</artifactId>
-						<version>1.7.6</version>
+						<artifactId>maven-dependency-plugin</artifactId>
+						<version>3.6.0</version>
+						<executions>
+							<execution>
+								<id>copy-dependencies</id>
+								<phase>package</phase>
+								<goals>
+									<goal>copy-dependencies</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>
+										${project.build.directory}/jpackage-input</outputDirectory>
+									<includeScope>runtime</includeScope>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+
+					<plugin>
+						<artifactId>maven-resources-plugin</artifactId>
+						<version>3.3.1</version>
+						<executions>
+							<execution>
+								<id>copy-jar</id>
+								<phase>package</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>
+										${project.build.directory}/jpackage-input</outputDirectory>
+									<resources>
+										<resource>
+											<directory>
+												${project.build.directory}</directory>
+											<includes>
+												<include>
+													${project.build.finalName}.jar</include>
+											</includes>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>exec-maven-plugin</artifactId>
+						<version>3.1.0</version>
 
 						<executions>
 							<execution>
 								<id>package-linux</id>
 								<phase>install</phase>
 								<goals>
-									<goal>package</goal>
+									<goal>exec</goal>
 								</goals>
+
 								<configuration>
-									<mainClass>${mainClass}</mainClass>
-									<bundleJre>true</bundleJre>
-									<customizedJre>true</customizedJre>
-									<outputDirectory>
-										${project.build.directory}/dist/linux/</outputDirectory>
+									<executable>jpackage</executable>
+									<arguments>
+										<argument>--type</argument>
+										<argument>app-image</argument>
 
-									<platform>linux</platform>
+										<argument>--name</argument>
+										<argument>${steam.appName}</argument>
 
-									<linuxConfig>
-										<wrapJar>true</wrapJar>
-										<generateDeb>true</generateDeb>
-										<generateRpm>false</generateRpm>
-										<generateAppImage>false</generateAppImage>
-									</linuxConfig>
+										<argument>--app-version</argument>
+										<argument>${winVersion}</argument>
 
-									<modules>
-										<module>java.base</module>
-										<module>java.desktop</module>
-										<module>java.logging</module>
-										<module>jdk.unsupported</module>
-									</modules>
+										<argument>--input</argument>
+										<argument>
+											${project.build.directory}/jpackage-input/</argument>
 
-									<name>${steam.appName}</name>
-									<version>${winVersion}</version>
+										<argument>--main-jar</argument>
+										<argument>${project.build.finalName}.jar</argument>
+
+										<argument>--main-class</argument>
+										<argument>${mainClass}</argument>
+
+										<argument>--dest</argument>
+										<argument>
+											${project.build.directory}/dist/linux</argument>
+
+										<argument>--add-modules</argument>
+										<argument>
+											java.base,java.desktop,java.logging,jdk.unsupported</argument>
+									</arguments>
 								</configuration>
 							</execution>
 						</executions>

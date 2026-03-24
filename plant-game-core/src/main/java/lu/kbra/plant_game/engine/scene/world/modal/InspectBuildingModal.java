@@ -39,7 +39,7 @@ public class InspectBuildingModal implements Modal {
 		this.popup = this.uiScene.getEntity(InspectBuildingUIObjectGroup.NAME);
 		if (this.popup == null) {
 			this.popup = new InspectBuildingUIObjectGroup();
-			this.popup.init().then();
+//			this.popup.init().then();
 			this.uiScene.add(this.popup);
 		}
 	}
