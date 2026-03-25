@@ -27,8 +27,9 @@ DEPOT_ID="$(mvn -B help:evaluate \
 
 BASE_VERSION="${BASE_VERSION%-SNAPSHOT}"
 VERSION="${BASE_VERSION}-RELEASE${DATE}"
+APP_VERSION="${BASE_VERSION}.114.${DATE}"
 
-echo "Version [RELEASE]: ${VERSION}"
+echo "Version [RELEASE]: ${VERSION} (${BASE_VERSION}) = ${APP_VERSION}"
 
 COMMON_ARGS=(
   -DskipTests
@@ -37,6 +38,7 @@ COMMON_ARGS=(
   -Dsteam.defaultBranch=true
   -Dsteam.platform=linux
   -Dsteam.depotId=${DEPOT_ID}
+  -DappVersion=${APP_VERSION}
   -DaltDeploymentRepository=nexus.kbra.lu-nightly::default::https://nexus.kbra.lu/repository/maven-nightly/
 )
 
