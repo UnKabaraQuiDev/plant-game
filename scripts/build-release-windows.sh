@@ -37,6 +37,7 @@ COMMON_ARGS=(
   -Dsteam.branch=default
   -Dsteam.defaultBranch=true
   -Dsteam.platform=windows
+  -Dsteam.cmdPath=C:\\steamcmd\\steamcmd.exe
   -Dsteam.depotId=${DEPOT_ID}
   -DappVersion=${APP_VERSION}
   -DaltDeploymentRepository=nexus.kbra.lu-nightly::default::https://nexus.kbra.lu/repository/maven-nightly/
