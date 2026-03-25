@@ -1,67 +1,122 @@
 name: Release (Release)
 
 on:
+  workflow_dispatch:
   push:
     tags:
       - "v*"
       - "!v*-SNAPSHOT"
-  workflow_dispatch:
 
 permissions:
   contents: write
 
+env:
+  MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
+  MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
+  STEAM_USERNAME: ${{ secrets.STEAM_USERNAME }}
+  STEAM_PASSWORD: ${{ secrets.STEAM_PASSWORD }}
+
 jobs:
+  prepare:
+    runs-on: [self-hosted, linux]
+
+    outputs:
+      is_snapshot: ${{ steps.snapshot.outputs.is_snapshot }}
+      has_changes: ${{ steps.changes.outputs.has_changes }}
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Check for commits
+        id: changes
+        if: github.event_name == 'schedule'
+        run: |
+          if [ -n "$(git log --since='26 hours ago' -1 --oneline -- . ':(exclude).github/**')" ]; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Detect SNAPSHOT
+        id: snapshot
+        run: |
+          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          if [[ "$VERSION" == *"-SNAPSHOT" ]]; then
+            echo "is_snapshot=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_snapshot=false" >> $GITHUB_OUTPUT
+          fi
+
   linux:
+    needs: prepare
     runs-on: [self-hosted, linux]
+
+    if: >
+      needs.prepare.outputs.is_snapshot == 'true' &&
+      (
+        github.event_name != 'schedule' ||
+        needs.prepare.outputs.has_changes == 'true'
+      )
+
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-java@v4
+
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: 21
+
       - uses: s4u/maven-settings-action@v4.0.0
         with:
           servers: |
             [{
-              "id": "nexus.kbra.lu-releases",
+              "id": "nexus.kbra.lu-nightly",
               "username": "${{ secrets.MAVEN_USERNAME }}",
               "password": "${{ secrets.MAVEN_PASSWORD }}"
-            }]
-      - run: bash ./scripts/build-release-linux.sh
-
-  windows:
-    runs-on: [self-hosted, windows]
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 21
-      - uses: s4u/maven-settings-action@v4.0.0
-        with:
-          servers: |
-            [{
-              "id": "nexus.kbra.lu-releases",
-              "username": "${{ secrets.MAVEN_USERNAME }}",
-              "password": "${{ secrets.MAVEN_PASSWORD }}"
-            }]
-      - run: bash ./scripts/build-release-windows.sh
-
-  deploy:
-    needs: [linux, windows]
-    runs-on: [self-hosted, linux]
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 21
-      - uses: s4u/maven-settings-action@v4.0.0
-        with:
-          servers: |
-            [{
+            },
+            {
               "id": "steam",
               "username": "${{ secrets.STEAM_USERNAME }}",
               "password": "${{ secrets.STEAM_PASSWORD }}"
             }]
-      - run: bash ./scripts/build-release-deploy.sh
+
+      - name: Build Linux
+        run: bash ./scripts/build-release-linux.sh
+
+  windows:
+    needs: prepare
+    runs-on: [self-hosted, windows]
+
+    if: >
+      needs.prepare.outputs.is_snapshot == 'true' &&
+      (
+        github.event_name != 'schedule' ||
+        needs.prepare.outputs.has_changes == 'true'
+      )
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: s4u/maven-settings-action@v4.0.0
+        with:
+          servers: |
+            [{
+              "id": "nexus.kbra.lu-nightly",
+              "username": "${{ secrets.MAVEN_USERNAME }}",
+              "password": "${{ secrets.MAVEN_PASSWORD }}"
+            },
+            {
+              "id": "steam",
+              "username": "${{ secrets.STEAM_USERNAME }}",
+              "password": "${{ secrets.STEAM_PASSWORD }}"
+            }]
+
+      - name: Build Windows
+        run: bash ./scripts/build-release-windows.sh

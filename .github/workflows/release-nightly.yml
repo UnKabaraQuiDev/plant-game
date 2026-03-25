@@ -16,7 +16,7 @@ env:
 
 jobs:
   prepare:
-    runs-on: self-hosted
+    runs-on: [self-hosted, linux]
 
     outputs:
       is_snapshot: ${{ steps.snapshot.outputs.is_snapshot }}
@@ -73,6 +73,11 @@ jobs:
               "id": "nexus.kbra.lu-nightly",
               "username": "${{ secrets.MAVEN_USERNAME }}",
               "password": "${{ secrets.MAVEN_PASSWORD }}"
+            },
+            {
+              "id": "steam",
+              "username": "${{ secrets.STEAM_USERNAME }}",
+              "password": "${{ secrets.STEAM_PASSWORD }}"
             }]
 
       - name: Build Linux
@@ -104,6 +109,11 @@ jobs:
               "id": "nexus.kbra.lu-nightly",
               "username": "${{ secrets.MAVEN_USERNAME }}",
               "password": "${{ secrets.MAVEN_PASSWORD }}"
+            },
+            {
+              "id": "steam",
+              "username": "${{ secrets.STEAM_USERNAME }}",
+              "password": "${{ secrets.STEAM_PASSWORD }}"
             }]
 
       - name: Build Windows
