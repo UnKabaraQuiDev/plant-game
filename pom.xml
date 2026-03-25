@@ -36,6 +36,7 @@
 		<steam.depotId>${steam.depotId.linux}</steam.depotId>
 		<steam.user></steam.user>
 		<steam.platform>linux</steam.platform>
+		<steam.cmdPath>/usr/games/steamcmd</steam.cmdPath>
 	</properties>
 
 	<repositories>

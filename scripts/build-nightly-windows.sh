@@ -35,11 +35,12 @@ COMMON_ARGS=(
   -Drevision="${VERSION}"
   -Dsteam.branch=nightly
   -Dsteam.platform=windows
+  -Dsteam.cmdPath=C:\steamcmd\steamcmd.exe
   -Dsteam.depotId=${DEPOT_ID}
   -DaltDeploymentRepository=nexus.kbra.lu-nightly::default::https://nexus.kbra.lu/repository/maven-nightly/
 )
 
-if [ ! -d "${HOME}/.steam" ]; then
+if [ ! -d "C:/steamcmd" ]; then
   if id -u steam >/dev/null 2>&1; then
     COMMON_ARGS+=(-Dsteam.user=steam)
   else

@@ -86,7 +86,7 @@
 						</executions>
 						<configuration>
 							<user>${steam.user}</user>
-							<steamcmdPath>/usr/games/steamcmd</steamcmdPath>
+							<steamcmdPath>${steam.cmdPath}</steamcmdPath>
 							<serverId>steam</serverId>
 							<buildScript>
 								${project.basedir}/../steam/app_build_generic.vdf</buildScript>
