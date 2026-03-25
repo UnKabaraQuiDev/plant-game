@@ -84,7 +84,7 @@
 					<plugin>
 						<groupId>lu.kbra</groupId>
 						<artifactId>steam-deploy</artifactId>
-						<version>1.1.7-SNAPSHOT</version>
+						<version>1.1.8</version>
 						<executions>
 							<execution>
 								<id>steam-deploy</id>
