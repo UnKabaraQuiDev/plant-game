@@ -231,7 +231,7 @@
 										<argument>${steam.appName}</argument>
 
 										<argument>--app-version</argument>
-										<argument>${project.version}</argument>
+										<argument>${appVersion}</argument>
 
 										<argument>--input</argument>
 										<argument>
@@ -344,7 +344,7 @@
 										<argument>${steam.appName}</argument>
 
 										<argument>--app-version</argument>
-										<argument>${project.version}</argument>
+										<argument>${appVersion}</argument>
 
 										<argument>--input</argument>
 										<argument>

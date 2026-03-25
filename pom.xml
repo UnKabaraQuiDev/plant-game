@@ -37,6 +37,7 @@
 		<steam.user></steam.user>
 		<steam.platform>linux</steam.platform>
 		<steam.cmdPath>/usr/games/steamcmd</steam.cmdPath>
+		<appVersion>${project.version}</appVersion>
 	</properties>
 
 	<repositories>
