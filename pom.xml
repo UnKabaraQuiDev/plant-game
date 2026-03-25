@@ -79,6 +79,13 @@
 				<artifactId>gameengine</artifactId>
 				<version>${gameengine.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>lu.kbra</groupId>
+				<artifactId>gameengine</artifactId>
+				<version>${gameengine.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
 
 			<dependency>
 				<groupId>junit</groupId>
