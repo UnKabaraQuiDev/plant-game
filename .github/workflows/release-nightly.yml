@@ -81,14 +81,14 @@ jobs:
             }]
             
       - name: Clone pclib
-        run: git clone https://github.com/UnKabaraQuiDev/PCLib.git pclib
+        run: git clone git@github.com:UnKabaraQuiDev/PCLib.git pclib
 
       - name: Build pclib
         run: mvn -B install -DskipTests
         working-directory: pclib
 
       - name: Clone StandaloneGameEngine
-        run: git clone https://github.com/UnKabaraQuiDev/StandaloneGameEngine.git gameengine
+        run: git clone git@github.com:UnKabaraQuiDev/StandaloneGameEngine.git gameengine
 
       - name: Build StandaloneGameEngine
         run: mvn -B install -DskipTests
@@ -131,14 +131,14 @@ jobs:
             }]
 
       - name: Clone pclib
-        run: git clone https://github.com/UnKabaraQuiDev/PCLib.git pclib
+        run: git clone git@github.com:UnKabaraQuiDev/PCLib.git pclib
 
       - name: Build pclib
         run: mvn -B install -DskipTests
         working-directory: pclib
 
       - name: Clone StandaloneGameEngine
-        run: git clone https://github.com/UnKabaraQuiDev/StandaloneGameEngine.git gameengine
+        run: git clone git@github.com:UnKabaraQuiDev/StandaloneGameEngine.git gameengine
 
       - name: Build StandaloneGameEngine
         run: mvn -B install -DskipTests
