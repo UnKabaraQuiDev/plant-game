@@ -79,6 +79,20 @@ jobs:
               "username": "${{ secrets.STEAM_USERNAME }}",
               "password": "${{ secrets.STEAM_PASSWORD }}"
             }]
+            
+      - name: Clone pclib
+        run: git clone https://github.com/UnKabaraQuiDev/PCLib.git pclib
+
+      - name: Build pclib
+        run: mvn -B install -DskipTests
+        working-directory: pclib
+
+      - name: Clone StandaloneGameEngine
+        run: git clone https://github.com/UnKabaraQuiDev/StandaloneGameEngine.git gameengine
+
+      - name: Build StandaloneGameEngine
+        run: mvn -B install -DskipTests
+        working-directory: gameengine
 
       - name: Build Linux
         run: bash ./scripts/build-nightly-linux.sh
@@ -115,6 +129,20 @@ jobs:
               "username": "${{ secrets.STEAM_USERNAME }}",
               "password": "${{ secrets.STEAM_PASSWORD }}"
             }]
+
+      - name: Clone pclib
+        run: git clone https://github.com/UnKabaraQuiDev/PCLib.git pclib
+
+      - name: Build pclib
+        run: mvn -B install -DskipTests
+        working-directory: pclib
+
+      - name: Clone StandaloneGameEngine
+        run: git clone https://github.com/UnKabaraQuiDev/StandaloneGameEngine.git gameengine
+
+      - name: Build StandaloneGameEngine
+        run: mvn -B install -DskipTests
+        working-directory: gameengine
 
       - name: Build Windows
         run: bash ./scripts/build-nightly-windows.sh
