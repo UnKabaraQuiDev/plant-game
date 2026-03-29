@@ -1,15 +1,15 @@
 #version 430
 
 layout(std430, binding = 0) buffer Acceleration {
-    vec4 acc[];
+	vec4 acc[];
 };
 
 layout(std430, binding = 1) buffer Velocity {
-    vec4 vel[];
+	vec4 vel[];
 };
 
 layout(std430, binding = 2) buffer Transform {
-    mat4 model[];
+	mat4 model[];
 };
 
 uniform vec3 acceleration;
@@ -30,45 +30,45 @@ layout(local_size_x = %LOCAL_SIZE_X%) in;
 vec3 getScale(mat4 m);
 
 void main() {
-    uint i = gl_GlobalInvocationID.x;
+	uint i = gl_GlobalInvocationID.x;
 
-    if (i >= count){
-    	return;
-    }
+	if (i >= count){
+		return;
+	}
 
 	if (applyAcceleration) {
 		vec3 scale = getScale(model[i]);
 		float volume = scale.x * scale.y * scale.z;
 	
-	    acc[i].xyz += acceleration * volume * density;
+		acc[i].xyz += acceleration * volume * density;
 	}
 	
-   	vel[i].xyz += acc[i].xyz * dTime;
-   	
-   	if (applyDrag) {
-   		vel[i].xyz *= max(0.0, 1.0 - dragCoefficient * dTime);
-   	}
-   	
-    model[i][3].xyz += vel[i].xyz * dTime; 
-    
-    if (enforceMinY && model[i][3].y <= minY) {
-    	model[i][3].y = minY;
-    	vel[i].y *= -reboundCoefficient;
-    	vel[i].xz *= frictionCoefficient;
-    }
-    if (applyDrag && length(vel[i].xyz) < 1e-3) {
-	    vel[i].xyz = vec3(0.0);
+	vel[i].xyz += acc[i].xyz * dTime;
+	
+	if (applyDrag) {
+		vel[i].xyz *= max(0.0, 1.0 - dragCoefficient * dTime);
+	}
+	
+	model[i][3].xyz += vel[i].xyz * dTime; 
+	
+	if (enforceMinY && model[i][3].y <= minY) {
+		model[i][3].y = minY;
+		vel[i].y *= -reboundCoefficient;
+		vel[i].xz *= frictionCoefficient;
+	}
+	if (applyDrag && length(vel[i].xyz) < 1e-3) {
+		vel[i].xyz = vec3(0.0);
 	}
 
 	if (resetAcceleration) {
-	    acc[i].xyz = vec3(0.0);
+		acc[i].xyz = vec3(0.0);
 	}
 }
 
 vec3 getScale(mat4 m) {
-    float sx = length(m[0].xyz);
-    float sy = length(m[1].xyz);
-    float sz = length(m[2].xyz);
-    return vec3(sx, sy, sz);
+	float sx = length(m[0].xyz);
+	float sy = length(m[1].xyz);
+	float sz = length(m[2].xyz);
+	return vec3(sx, sy, sz);
 }
 

@@ -7,6 +7,7 @@ import java.util.Locale;
 import org.lwjgl.glfw.GLFW;
 
 import com.codedisaster.steamworks.SteamAPI;
+import com.codedisaster.steamworks.SteamSupport;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonFactory;
@@ -160,7 +161,7 @@ public class PGLogic extends GameLogic {
 
 	@Override
 	public void main() {
-		if (PGMain.STEAM_LAUCHED && SteamAPI.isSteamRunning()) {
+		if (SteamSupport.STEAM_LAUCHED && SteamAPI.isSteamRunning()) {
 			SteamAPI.runCallbacks();
 		}
 	}
