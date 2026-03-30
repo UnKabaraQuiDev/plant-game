@@ -40,15 +40,24 @@ public final class PluginManager {
 			if (EXTERNAL_PLUGINS_PATH != null && !EXTERNAL_PLUGINS_PATH.isBlank()) {
 				Arrays.stream(EXTERNAL_PLUGINS_PATH.split(";")).map(Paths::get).forEach(pluginDirs::add);
 			}
-			pluginDirs.add(Paths.get(PGMain.APP_DIR.getPath()).resolve("plugins"));
-			final Path sharedPluginDir = Paths.get(PGMain.APP_DATA_DIR.getPath()).resolve("plugins");
-			pluginDirs.add(sharedPluginDir);
+
+			if (PGMain.APP_DIR != null) {
+				pluginDirs.add(Paths.get(PGMain.APP_DIR.getPath()).resolve("plugins"));
+			}
+
+			final Path sharedPluginDir;
+			if (PGMain.APP_DATA_DIR != null) {
+				sharedPluginDir = Paths.get(PGMain.APP_DATA_DIR.getPath()).resolve("plugins");
+				pluginDirs.add(sharedPluginDir);
+			} else {
+				sharedPluginDir = null;
+			}
 
 			final PluginDescriptor basePluginDescriptor = PGLogic.OBJECT_MAPPER
 					.readValue(PCUtils.readStringSource("classpath:/plugin.json"), PluginDescriptor.class);
 
 			this.pluginJarLoader.loadAll(this, pluginDirs, List.of(basePluginDescriptor)).forEach(pd -> {
-				if (!pd.isInternal() && PCUtils.isSubPath(pd.jarPath(), sharedPluginDir)) {
+				if (sharedPluginDir != null && !pd.isInternal() && PCUtils.isSubPath(pd.jarPath(), sharedPluginDir)) {
 					pd.descriptor().setShared(true);
 				}
 				this.plugins.put(pd.main().getClass(), pd);

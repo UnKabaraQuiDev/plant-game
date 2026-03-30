@@ -52,7 +52,6 @@ public class MappingInputHandler extends DefaultInputHandler {
 	}
 
 	public void remapMouseButton(final int logical, final int physical) {
-		System.err.println(logical + " = " + physical);
 		if (logical >= 0 && logical < this.mouseMap.length) {
 			this.mouseMap[logical] = physical;
 		}
