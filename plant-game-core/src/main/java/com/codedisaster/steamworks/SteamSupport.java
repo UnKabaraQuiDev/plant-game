@@ -1,11 +1,13 @@
 package com.codedisaster.steamworks;
 
 import static lu.kbra.plant_game.PGMain.APP_DIR;
+import static lu.kbra.plant_game.PGMain.ROOT_DIR;
 
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public final class SteamSupport {
 
@@ -24,16 +26,17 @@ public final class SteamSupport {
 
 			return Paths.get(base, appName).toFile();
 		}
+
 		if (os.contains("mac")) {
 			return Paths.get(System.getProperty("user.home"), "Library", "Application Support", appName).toFile();
 		}
+
 		return Paths.get(System.getProperty("user.home"), "." + appName.toLowerCase()).toFile();
 	}
 
 	public static void init(final boolean skipSteam, final String appId) throws SteamException {
 		if (skipSteam) {
 			STEAM_LAUCHED = false;
-			APP_DIR = getAppDataDir("satisplantory");
 			System.err.println("Started without steam support (forced).");
 		} else {
 			final SteamLibraryLoader loader = new SteamLibraryLoaderLwjgl3();
@@ -46,22 +49,31 @@ public final class SteamSupport {
 					System.err.println("Not started in steam app, exitting.");
 					return;
 				}
-				if (System.getenv("STEAM_COMPAT_INSTALL_PATH") == null || System.getenv("STEAM_COMPAT_INSTALL_PATH").isBlank()) {
-					throw new IllegalArgumentException("Steam path not found in env.");
-				}
 
 				STEAM_LAUCHED = true;
-				APP_DIR = new File(System.getenv("STEAM_COMPAT_INSTALL_PATH"));
 
 				System.err.println("Started with steam support.");
 			} else {
 				STEAM_LAUCHED = false;
-				APP_DIR = getAppDataDir("satisplantory");
 				System.err.println("Started without steam support.");
 			}
 		}
 
-		System.err.println(SteamJNI.getInstallDir(Integer.parseInt(appId)));
+		final String os = System.getProperty("os.name").toLowerCase();
+		if (ROOT_DIR == null) {
+			if (os.contains("win")) {
+				APP_DIR = new File(".").getAbsoluteFile();
+			} else {
+				if (System.getenv("STEAM_COMPAT_INSTALL_PATH") == null || System.getenv("STEAM_COMPAT_INSTALL_PATH").isBlank()) {
+					APP_DIR = new File(".").getAbsoluteFile();
+				} else {
+					APP_DIR = new File(System.getenv("STEAM_COMPAT_INSTALL_PATH")).getAbsoluteFile();
+				}
+			}
+		} else {
+			APP_DIR = new File(ROOT_DIR).getAbsoluteFile();
+		}
+		System.err.println("OS: [" + os + "] App dir: " + APP_DIR.getPath());
 	}
 
 	public static <T extends SteamInterface> T get(final Class<T> clazz) {
@@ -74,12 +86,40 @@ public final class SteamSupport {
 		});
 	}
 
+	public static <T extends SteamInterface> T get(final Class<T> clazz, final Supplier<T> supp) {
+		return (T) STEAM_INTERFACES.computeIfAbsent(clazz, (k) -> supp.get());
+	}
+
 	public static void dispose() {
 		if (STEAM_LAUCHED) {
 			STEAM_INTERFACES.values().forEach(e -> e.dispose());
 
 			SteamAPI.shutdown();
 		}
+	}
+
+	public static SteamUser user() {
+		return SteamSupport.get(SteamUser.class);
+	}
+
+	public static SteamUserStats userStats() {
+		return SteamSupport.get(SteamUserStats.class);
+	}
+
+	public static SteamUtils utils() {
+		return SteamSupport.get(SteamUtils.class);
+	}
+
+	public static SteamApps apps() {
+		return SteamSupport.get(SteamApps.class);
+	}
+
+	public static SteamController controller() {
+		return SteamSupport.get(SteamController.class);
+	}
+
+	public static SteamFriends friends() {
+		return SteamSupport.get(SteamFriends.class);
 	}
 
 }

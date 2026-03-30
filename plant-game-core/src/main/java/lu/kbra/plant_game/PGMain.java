@@ -7,9 +7,14 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Properties;
 
-import com.codedisaster.steamworks.SteamApps;
 import com.codedisaster.steamworks.SteamException;
+import com.codedisaster.steamworks.SteamFriends;
+import com.codedisaster.steamworks.SteamFriendsCallback;
 import com.codedisaster.steamworks.SteamSupport;
+import com.codedisaster.steamworks.SteamUser;
+import com.codedisaster.steamworks.SteamUserCallback;
+import com.codedisaster.steamworks.SteamUserStats;
+import com.codedisaster.steamworks.SteamUserStatsCallback;
 
 import lu.kbra.pclib.PCUtils;
 import lu.kbra.pclib.logger.GlobalLogger;
@@ -19,6 +24,8 @@ import lu.kbra.standalone.gameengine.impl.GameLogic;
 
 public class PGMain {
 
+	public static final String ROOT_DIR_PROPERTY = PGMain.class.getSimpleName() + ".root_dir";
+	public static final String ROOT_DIR = System.getProperty(ROOT_DIR_PROPERTY);
 	public static final String SKIP_STEAM_PROPERTY = PGMain.class.getSimpleName() + ".skip_steam";
 	public static final boolean SKIP_STEAM = Boolean.getBoolean(SKIP_STEAM_PROPERTY);
 
@@ -35,7 +42,18 @@ public class PGMain {
 		SteamSupport.init(SKIP_STEAM, (String) props.get("steam.appId"));
 
 		if (SteamSupport.STEAM_LAUCHED) {
-			System.err.println(SteamSupport.get(SteamApps.class).getCurrentGameLanguage());
+			System.err.println(SteamSupport.get(SteamFriends.class, () -> new SteamFriends(new SteamFriendsCallback() {
+
+			})));
+
+			System.err.println(SteamSupport.get(SteamUserStats.class, () -> new SteamUserStats(new SteamUserStatsCallback() {
+
+			})));
+
+			System.err.println(SteamSupport.get(SteamFriends.class)
+					.getFriendPersonaName(SteamSupport.get(SteamUser.class, () -> new SteamUser(new SteamUserCallback() {
+
+					})).getSteamID()));
 		}
 
 		APP_DATA_DIR = new File(APP_DIR, "data");
@@ -50,10 +68,13 @@ public class PGMain {
 		GlobalLogger.info("Removed " + PCUtils.deleteOldFiles(GlobalLogger.getLogger().getLogFile().getParentFile(), 20)
 				+ " entries from the logs directory.");
 
-		final GameLogic gameLogic = new PGLogic();
-
-		final GameEngine engine = new GameEngine("plant-game", gameLogic, new WindowOptions(props, "windowOptions"));
-		engine.start();
+		try {
+			final GameLogic gameLogic = new PGLogic();
+			final GameEngine engine = new GameEngine("plant-game", gameLogic, new WindowOptions(props, "windowOptions"));
+			engine.start();
+		} catch (Throwable t) {
+			t.printStackTrace();
+		}
 
 		SteamSupport.dispose();
 	}
