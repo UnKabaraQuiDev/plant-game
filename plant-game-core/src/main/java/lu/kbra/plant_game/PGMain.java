@@ -8,13 +8,7 @@ import java.nio.file.Paths;
 import java.util.Properties;
 
 import com.codedisaster.steamworks.SteamException;
-import com.codedisaster.steamworks.SteamFriends;
-import com.codedisaster.steamworks.SteamFriendsCallback;
 import com.codedisaster.steamworks.SteamSupport;
-import com.codedisaster.steamworks.SteamUser;
-import com.codedisaster.steamworks.SteamUserCallback;
-import com.codedisaster.steamworks.SteamUserStats;
-import com.codedisaster.steamworks.SteamUserStatsCallback;
 
 import lu.kbra.pclib.PCUtils;
 import lu.kbra.pclib.logger.GlobalLogger;
@@ -40,21 +34,6 @@ public class PGMain {
 		props.load(new StringReader(PCUtils.readStringSource("classpath:/config/main.properties")));
 
 		SteamSupport.init(SKIP_STEAM, (String) props.get("steam.appId"));
-
-		if (SteamSupport.STEAM_LAUCHED) {
-			System.err.println(SteamSupport.get(SteamFriends.class, () -> new SteamFriends(new SteamFriendsCallback() {
-
-			})));
-
-			System.err.println(SteamSupport.get(SteamUserStats.class, () -> new SteamUserStats(new SteamUserStatsCallback() {
-
-			})));
-
-			System.err.println(SteamSupport.get(SteamFriends.class)
-					.getFriendPersonaName(SteamSupport.get(SteamUser.class, () -> new SteamUser(new SteamUserCallback() {
-
-					})).getSteamID()));
-		}
 
 		APP_DATA_DIR = new File(APP_DIR, "data");
 		Files.createDirectories(Paths.get(APP_DATA_DIR.getPath()));

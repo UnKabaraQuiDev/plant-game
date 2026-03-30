@@ -69,8 +69,7 @@ public class TerrainGameObject extends VariationMeshGameObject
 	private static final int FLOWER_TYPE_FIRST_BIT_INDEX = 8;
 	private static final int GRASS_ID_FIRST_BIT_INDEX = 12;
 	private static final int GRASS_ID_MAX = 0xFF;
-	private static final int GRASS_ID_BIT_MASK = IntStream
-			.range(GRASS_ID_FIRST_BIT_INDEX, GRASS_ID_FIRST_BIT_INDEX + 8)
+	private static final int GRASS_ID_BIT_MASK = IntStream.range(GRASS_ID_FIRST_BIT_INDEX, GRASS_ID_FIRST_BIT_INDEX + 8)
 			.map(c -> 1 << c)
 			.reduce(0, (a, b) -> a | b);
 

@@ -29,8 +29,6 @@ public interface AbsoluteTransform3DOwner extends Transform3DOwner, ParentAwareN
 		}
 
 		return combined;
-
-//		return getAbsoluteTransform(this);
 	}
 
 	static <T extends Transform3DOwner & ParentAwareNode> Matrix4f getAbsoluteTransform(final T entity) {
