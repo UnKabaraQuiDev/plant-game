@@ -48,8 +48,42 @@ jobs:
             echo "is_snapshot=false" >> $GITHUB_OUTPUT
           fi
 
-  linux:
+  format:
     needs: prepare
+    runs-on: [self-hosted, linux]
+
+    if: >
+      needs.prepare.outputs.is_snapshot == 'true' &&
+      (
+        github.event_name != 'schedule' ||
+        needs.prepare.outputs.has_changes == 'true'
+      )
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Apply formatting
+        run: mvn -B -Pformat clean initialize spotless:apply
+
+      - name: Commit & push if needed
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+          git add .
+          git diff --cached --quiet || git commit -m "[NIGHTLY] Apply code formatting"
+
+          git push || echo "Push failed, continuing..."
+
+  linux:
+    needs: format
     runs-on: [self-hosted, linux]
 
     if: >
@@ -99,7 +133,7 @@ jobs:
         run: bash ./scripts/build-snapshot-linux.sh
 
   windows:
-    needs: prepare
+    needs: format
     runs-on: [self-hosted, windows]
 
     if: >
