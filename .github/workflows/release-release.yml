@@ -1,11 +1,15 @@
 name: Release (Release)
 
 on:
-  workflow_dispatch:
   push:
     tags:
       - "v*"
       - "!v*-SNAPSHOT"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to build"
+        required: true
 
 permissions:
   contents: write
@@ -21,49 +25,54 @@ jobs:
     runs-on: [self-hosted, linux]
 
     outputs:
-      is_snapshot: ${{ steps.snapshot.outputs.is_snapshot }}
-      has_changes: ${{ steps.changes.outputs.has_changes }}
+      should_format: ${{ steps.decide.outputs.should_format }}
 
     steps:
       - uses: actions/checkout@v6
         with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
           fetch-depth: 0
 
-      - name: Check for commits
-        id: changes
-        if: github.event_name == 'schedule'
-        run: |
-          if [ -n "$(git log --since='26 hours ago' -1 --oneline -- . ':(exclude).github/**')" ]; then
-            echo "has_changes=true" >> $GITHUB_OUTPUT
-          else
-            echo "has_changes=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Detect SNAPSHOT
-        id: snapshot
+      - name: Ensure NOT a SNAPSHOT version
         run: |
           VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          echo "Detected version: $VERSION"
+
           if [[ "$VERSION" == *"-SNAPSHOT" ]]; then
-            echo "is_snapshot=true" >> $GITHUB_OUTPUT
-          else
-            echo "is_snapshot=false" >> $GITHUB_OUTPUT
+            echo "Snapshot version detected. Release aborted."
+            exit 1
           fi
+
+      - name: Decide if formatting should run
+        id: decide
+        run: |
+          SHOULD_FORMAT=false
+
+          if [ "${{ github.event_name }}" = "push" ]; then
+            TAG_COMMIT=$(git rev-list -n 1 ${{ github.ref }})
+            HEAD_COMMIT=$(git rev-parse HEAD)
+
+            echo "Tag commit: $TAG_COMMIT"
+            echo "HEAD commit: $HEAD_COMMIT"
+
+            if [ "$TAG_COMMIT" = "$HEAD_COMMIT" ]; then
+              SHOULD_FORMAT=true
+            fi
+          fi
+
+          echo "should_format=$SHOULD_FORMAT" >> $GITHUB_OUTPUT
 
   format:
     needs: prepare
     runs-on: [self-hosted, linux]
 
-    if: >
-      needs.prepare.outputs.is_snapshot == 'true' &&
-      (
-        github.event_name != 'schedule' ||
-        needs.prepare.outputs.has_changes == 'true'
-      )
+    if: needs.prepare.outputs.should_format == 'true'
 
     steps:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          ref: ${{ github.event.inputs.tag || github.ref }}
 
       - uses: actions/setup-java@v5
         with:
@@ -84,15 +93,10 @@ jobs:
           git push || echo "Push failed, continuing..."
 
   linux:
-    needs: format
+    needs: [prepare, format]
     runs-on: [self-hosted, linux]
 
-    if: >
-      needs.prepare.outputs.is_snapshot == 'true' &&
-      (
-        github.event_name != 'schedule' ||
-        needs.prepare.outputs.has_changes == 'true'
-      )
+    if: always()
 
     steps:
       - uses: actions/checkout@v6
@@ -134,15 +138,10 @@ jobs:
         run: bash ./scripts/build-release-linux.sh
 
   windows:
-    needs: format
+    needs: [prepare, format]
     runs-on: [self-hosted, windows]
 
-    if: >
-      needs.prepare.outputs.is_snapshot == 'true' &&
-      (
-        github.event_name != 'schedule' ||
-        needs.prepare.outputs.has_changes == 'true'
-      )
+    if: always()
 
     steps:
       - uses: actions/checkout@v6

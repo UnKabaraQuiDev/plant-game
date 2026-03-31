@@ -1,10 +1,14 @@
 name: Release (Snapshot)
 
 on:
-  workflow_dispatch:
   push:
     tags:
       - "v*-SNAPSHOT"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to build"
+        required: true
 
 permissions:
   contents: write
@@ -20,44 +24,42 @@ jobs:
     runs-on: [self-hosted, linux]
 
     outputs:
-      is_snapshot: ${{ steps.snapshot.outputs.is_snapshot }}
-      has_changes: ${{ steps.changes.outputs.has_changes }}
+      should_format: ${{ steps.decide.outputs.should_format }}
 
     steps:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          ref: ${{ github.event.inputs.tag || github.ref }}
 
-      - name: Check for commits
-        id: changes
-        if: github.event_name == 'schedule'
+      - name: Decide if formatting should run
+        id: decide
         run: |
-          if [ -n "$(git log --since='26 hours ago' -1 --oneline -- . ':(exclude).github/**')" ]; then
-            echo "has_changes=true" >> $GITHUB_OUTPUT
-          else
-            echo "has_changes=false" >> $GITHUB_OUTPUT
+          # Default: do NOT format
+          SHOULD_FORMAT=false
+
+          # Only format on tag push (not workflow_dispatch)
+          if [ "${{ github.event_name }}" = "push" ]; then
+
+            TAG_COMMIT=$(git rev-list -n 1 ${{ github.ref }})
+            HEAD_COMMIT=$(git rev-parse HEAD)
+
+            echo "Tag commit: $TAG_COMMIT"
+            echo "HEAD commit: $HEAD_COMMIT"
+
+            # Only format if tag points to latest commit
+            if [ "$TAG_COMMIT" = "$HEAD_COMMIT" ]; then
+              SHOULD_FORMAT=true
+            fi
           fi
 
-      - name: Detect SNAPSHOT
-        id: snapshot
-        run: |
-          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-          if [[ "$VERSION" == *"-SNAPSHOT" ]]; then
-            echo "is_snapshot=true" >> $GITHUB_OUTPUT
-          else
-            echo "is_snapshot=false" >> $GITHUB_OUTPUT
-          fi
+          echo "should_format=$SHOULD_FORMAT" >> $GITHUB_OUTPUT
 
   format:
     needs: prepare
     runs-on: [self-hosted, linux]
 
-    if: >
-      needs.prepare.outputs.is_snapshot == 'true' &&
-      (
-        github.event_name != 'schedule' ||
-        needs.prepare.outputs.has_changes == 'true'
-      )
+    if: needs.prepare.outputs.should_format == 'true'
 
     steps:
       - uses: actions/checkout@v6
@@ -83,15 +85,10 @@ jobs:
           git push || echo "Push failed, continuing..."
 
   linux:
-    needs: format
+    needs: [format, prepare]
     runs-on: [self-hosted, linux]
 
-    if: >
-      needs.prepare.outputs.is_snapshot == 'true' &&
-      (
-        github.event_name != 'schedule' ||
-        needs.prepare.outputs.has_changes == 'true'
-      )
+    if: always()
 
     steps:
       - uses: actions/checkout@v6
@@ -133,15 +130,10 @@ jobs:
         run: bash ./scripts/build-snapshot-linux.sh
 
   windows:
-    needs: format
+    needs: [format, prepare]
     runs-on: [self-hosted, windows]
 
-    if: >
-      needs.prepare.outputs.is_snapshot == 'true' &&
-      (
-        github.event_name != 'schedule' ||
-        needs.prepare.outputs.has_changes == 'true'
-      )
+    if: always()
 
     steps:
       - uses: actions/checkout@v6
