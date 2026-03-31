@@ -19,9 +19,8 @@ public final class TextLoaderLocks {
 
 		final Object lock = locks.computeIfAbsent(meshName, k -> {
 			creator.set(true);
-			GlobalLogger
-					.log(Level.FINEST,
-							"Thread: " + Thread.currentThread().getName() + " created lock on: " + meshName + " (" + source + ")");
+			GlobalLogger.log(Level.FINEST,
+					"Thread: " + Thread.currentThread().getName() + " created lock on: " + meshName + " (" + source + ")");
 			return new Object();
 		});
 
@@ -32,8 +31,8 @@ public final class TextLoaderLocks {
 		synchronized (lock) {
 			int iter = 0;
 			while (locks.containsKey(meshName) && locks.get(meshName) == lock && iter++ < 5) {
-				GlobalLogger
-						.log(Level.FINEST, "Thread " + Thread.currentThread().getName() + " waiting on: " + meshName + " (" + source + ")");
+				GlobalLogger.log(Level.FINEST,
+						"Thread " + Thread.currentThread().getName() + " waiting on: " + meshName + " (" + source + ")");
 				lock.wait(LOAD_WAIT_TIMEOUT);
 			}
 			if (iter > 5) {
@@ -50,8 +49,8 @@ public final class TextLoaderLocks {
 			synchronized (lock) {
 				lock.notifyAll();
 			}
-			GlobalLogger
-					.log(Level.FINEST, "Thread " + Thread.currentThread().getName() + " released lock: " + meshName + " (" + source + ")");
+			GlobalLogger.log(Level.FINEST,
+					"Thread " + Thread.currentThread().getName() + " released lock: " + meshName + " (" + source + ")");
 		} else {
 			GlobalLogger.severe("Lock wasn't held for: " + meshName + " (" + source + ")");
 		}

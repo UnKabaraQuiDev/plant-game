@@ -40,7 +40,10 @@ public class LoadedTriangleStripMesh implements Mesh {
 	protected final BoundingBox boundingBox;
 
 	@Deprecated
-	public LoadedTriangleStripMesh(final String name, final Material material, final Vec3fAttribArray vertices,
+	public LoadedTriangleStripMesh(
+			final String name,
+			final Material material,
+			final Vec3fAttribArray vertices,
 			final JavaAttribArray... attribs) {
 		this.name = name;
 		this.vertices = vertices;

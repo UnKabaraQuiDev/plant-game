@@ -18,26 +18,45 @@ public class AnchoredPBUIObjectGroup extends AnchoredLayoutUIObjectGroup impleme
 	protected Direction2d dir;
 	protected Rectangle2D.Float bounds = new Rectangle2D.Float();
 
-	public AnchoredPBUIObjectGroup(final String str, final Layout layout, final Direction2d dir, final Anchor obj, final Anchor tar,
+	public AnchoredPBUIObjectGroup(
+			final String str,
+			final Layout layout,
+			final Direction2d dir,
+			final Anchor obj,
+			final Anchor tar,
 			final UIObject... values) {
 		super(str, layout, obj, tar, values);
 		this.dir = dir;
 	}
 
-	public AnchoredPBUIObjectGroup(final String str, final Layout layout, final Transform3D transform, final Direction2d dir,
+	public AnchoredPBUIObjectGroup(
+			final String str,
+			final Layout layout,
+			final Transform3D transform,
+			final Direction2d dir,
 			final UIObject... values) {
 		super(str, layout, transform, values);
 		this.dir = dir;
 	}
 
-	public AnchoredPBUIObjectGroup(final String str, final Layout layout, final UIObjectGroup parent, final Direction2d dir,
+	public AnchoredPBUIObjectGroup(
+			final String str,
+			final Layout layout,
+			final UIObjectGroup parent,
+			final Direction2d dir,
 			final UIObject... values) {
 		super(str, layout, parent, values);
 		this.dir = dir;
 	}
 
-	public AnchoredPBUIObjectGroup(final String str, final Layout layout, final UIObjectGroup parent, final Direction2d dir,
-			final Anchor obj, final Anchor tar, final UIObject... values) {
+	public AnchoredPBUIObjectGroup(
+			final String str,
+			final Layout layout,
+			final UIObjectGroup parent,
+			final Direction2d dir,
+			final Anchor obj,
+			final Anchor tar,
+			final UIObject... values) {
 		super(str, layout, parent, obj, tar, values);
 		this.dir = dir;
 	}

@@ -21,14 +21,23 @@ public class AnchoredLayoutUIObjectGroup extends LayoutOffsetUIObjectGroup imple
 		super(str, layout, parent, values);
 	}
 
-	public AnchoredLayoutUIObjectGroup(final String str, final Layout layout, final UIObjectGroup parent, final Anchor obj,
-			final Anchor tar, final UIObject... values) {
+	public AnchoredLayoutUIObjectGroup(
+			final String str,
+			final Layout layout,
+			final UIObjectGroup parent,
+			final Anchor obj,
+			final Anchor tar,
+			final UIObject... values) {
 		super(str, layout, parent, values);
 		this.objectAnchor = obj;
 		this.targetAnchor = tar;
 	}
 
-	public AnchoredLayoutUIObjectGroup(final String str, final Layout layout, final Anchor obj, final Anchor tar,
+	public AnchoredLayoutUIObjectGroup(
+			final String str,
+			final Layout layout,
+			final Anchor obj,
+			final Anchor tar,
 			final UIObject... values) {
 		super(str, layout, values);
 		this.objectAnchor = obj;

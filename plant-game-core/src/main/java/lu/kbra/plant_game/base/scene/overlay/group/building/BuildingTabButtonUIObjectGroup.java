@@ -28,7 +28,10 @@ public class BuildingTabButtonUIObjectGroup extends OffsetUIObjectGroup implemen
 	protected ProgrammaticTextUIObject textComponent;
 	protected FlatQuadUIObject backgroundComponent;
 
-	public BuildingTabButtonUIObjectGroup(final String str, final Transform3D transform, final String titleKey,
+	public BuildingTabButtonUIObjectGroup(
+			final String str,
+			final Transform3D transform,
+			final String titleKey,
 			final ColorMaterial activeTabColor) {
 		super(str, transform);
 		this.titleKey = titleKey;

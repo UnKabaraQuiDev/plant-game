@@ -23,8 +23,7 @@ public class CenteringFlowLayout extends FlowLayout implements SceneParentAware 
 			return;
 		}
 
-		final float totalHeight = (float) (children
-				.parallelStream()
+		final float totalHeight = (float) (children.parallelStream()
 				.map(e -> e.getBounds().getBounds2D().getHeight())
 				.collect(Collectors.summingDouble(Double::valueOf)) + this.gap * (children.size() - 1));
 

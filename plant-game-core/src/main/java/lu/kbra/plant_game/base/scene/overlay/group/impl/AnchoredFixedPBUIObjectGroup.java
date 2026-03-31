@@ -13,22 +13,42 @@ public class AnchoredFixedPBUIObjectGroup extends FixedPBUIObjectGroup implement
 	protected Anchor objectAnchor;
 	protected Anchor targetAnchor;
 
-	public AnchoredFixedPBUIObjectGroup(final String str, final Layout layout, final Direction2d dir, final float size, final Anchor obj,
-			final Anchor tar, final UIObject... values) {
+	public AnchoredFixedPBUIObjectGroup(
+			final String str,
+			final Layout layout,
+			final Direction2d dir,
+			final float size,
+			final Anchor obj,
+			final Anchor tar,
+			final UIObject... values) {
 		super(str, layout, dir, size, values);
 		this.objectAnchor = obj;
 		this.targetAnchor = tar;
 	}
 
-	public AnchoredFixedPBUIObjectGroup(final String str, final Layout layout, final Transform3D transform, final Direction2d dir,
-			final float size, final Anchor obj, final Anchor tar, final UIObject... values) {
+	public AnchoredFixedPBUIObjectGroup(
+			final String str,
+			final Layout layout,
+			final Transform3D transform,
+			final Direction2d dir,
+			final float size,
+			final Anchor obj,
+			final Anchor tar,
+			final UIObject... values) {
 		super(str, layout, transform, dir, size, values);
 		this.objectAnchor = obj;
 		this.targetAnchor = tar;
 	}
 
-	public AnchoredFixedPBUIObjectGroup(final String str, final Layout layout, final UIObjectGroup parent, final Direction2d dir,
-			final float size, final Anchor obj, final Anchor tar, final UIObject... values) {
+	public AnchoredFixedPBUIObjectGroup(
+			final String str,
+			final Layout layout,
+			final UIObjectGroup parent,
+			final Direction2d dir,
+			final float size,
+			final Anchor obj,
+			final Anchor tar,
+			final UIObject... values) {
 		super(str, layout, parent, dir, size, values);
 		this.objectAnchor = obj;
 		this.targetAnchor = tar;

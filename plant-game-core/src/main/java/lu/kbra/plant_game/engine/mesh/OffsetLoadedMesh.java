@@ -13,8 +13,13 @@ public class OffsetLoadedMesh extends LoadedMesh implements OffsetOwner {
 
 	private Vector3f offset;
 
-	public OffsetLoadedMesh(final String name, final Material material, final Vector3f offset, final Vec3fAttribArray vertices,
-			final UIntAttribArray indices, final JavaAttribArray... attribs) {
+	public OffsetLoadedMesh(
+			final String name,
+			final Material material,
+			final Vector3f offset,
+			final Vec3fAttribArray vertices,
+			final UIntAttribArray indices,
+			final JavaAttribArray... attribs) {
 		super(name, material, vertices, indices, attribs);
 		this.offset = offset;
 	}

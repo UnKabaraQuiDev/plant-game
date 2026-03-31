@@ -20,7 +20,9 @@ public class OptionKeyUIObject extends ProgrammaticGrowOnHoverTextUIObject
 		implements NeedsClick, Focusable, NeedsInput, NeedsPostConstruct {
 
 	public static enum State {
-		IDLE, WAITING_RELEASE, WAITING_INPUT;
+		IDLE,
+		WAITING_RELEASE,
+		WAITING_INPUT;
 	}
 
 	protected KeyOption keyOption;

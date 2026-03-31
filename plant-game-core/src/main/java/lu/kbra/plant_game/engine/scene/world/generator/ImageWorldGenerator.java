@@ -36,13 +36,21 @@ public class ImageWorldGenerator extends WorldGenerator {
 		this.setSize(this.image.getWidth(null), this.image.getHeight(null), (int) (255 * scale));
 	}
 
-	public ImageWorldGenerator(final PluginDescriptor plugin, final String location, final String materialLocation,
-			final boolean colorMaterial, final int height) {
+	public ImageWorldGenerator(
+			final PluginDescriptor plugin,
+			final String location,
+			final String materialLocation,
+			final boolean colorMaterial,
+			final int height) {
 		this(plugin, location, materialLocation, colorMaterial, (float) height / 255);
 	}
 
-	public ImageWorldGenerator(final PluginDescriptor plugin, final String location, final String materialLocation,
-			final boolean colorMaterial, final float scale) {
+	public ImageWorldGenerator(
+			final PluginDescriptor plugin,
+			final String location,
+			final String materialLocation,
+			final boolean colorMaterial,
+			final float scale) {
 		this.scale = scale;
 		this.colorMaterial = colorMaterial;
 

@@ -14,8 +14,15 @@ public class AnimatedTexturedLoadedMesh extends OffsetLoadedMesh implements Text
 	protected SingleTexture texture;
 	protected AnimationData animation;
 
-	public AnimatedTexturedLoadedMesh(final String name, final Material mat, final Vector3f origin, final SingleTexture texture, final AnimationData data,
-			final Vec3fAttribArray vertices, final UIntAttribArray indices, final JavaAttribArray... attribs) {
+	public AnimatedTexturedLoadedMesh(
+			final String name,
+			final Material mat,
+			final Vector3f origin,
+			final SingleTexture texture,
+			final AnimationData data,
+			final Vec3fAttribArray vertices,
+			final UIntAttribArray indices,
+			final JavaAttribArray... attribs) {
 		super(name, mat, origin, vertices, indices, attribs);
 		this.texture = texture;
 		this.animation = data;

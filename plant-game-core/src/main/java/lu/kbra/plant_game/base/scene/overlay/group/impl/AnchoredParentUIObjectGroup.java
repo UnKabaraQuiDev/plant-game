@@ -13,7 +13,11 @@ import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 public class AnchoredParentUIObjectGroup extends AnchoredLayoutUIObjectGroup implements BoundsOwnerParentAware {
 
-	public AnchoredParentUIObjectGroup(final String str, final Layout layout, final Anchor obj, final Anchor tar,
+	public AnchoredParentUIObjectGroup(
+			final String str,
+			final Layout layout,
+			final Anchor obj,
+			final Anchor tar,
 			final UIObject... values) {
 		super(str, layout, obj, tar, values);
 	}

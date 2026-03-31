@@ -19,14 +19,25 @@ public class TimelineMesh extends LineLoadedMesh implements TexturedMesh, TintOw
 	private SingleTexture txt;
 	private float defaultYDepth = -0.1f;
 
-	public TimelineMesh(final String name, final int objectId, final SingleTexture txt, final Vec3fAttribArray vertices,
-			final UIntAttribArray indices, final JavaAttribArray... attribs) {
+	public TimelineMesh(
+			final String name,
+			final int objectId,
+			final SingleTexture txt,
+			final Vec3fAttribArray vertices,
+			final UIntAttribArray indices,
+			final JavaAttribArray... attribs) {
 		super(name, objectId, vertices, indices, attribs);
 		this.txt = txt;
 	}
 
-	public TimelineMesh(final String name, final int objectId, final SingleTexture txt, final Vec3fAttribArray vertices,
-			final UIntAttribArray indices, final float defaultYDepth, final JavaAttribArray... attribs) {
+	public TimelineMesh(
+			final String name,
+			final int objectId,
+			final SingleTexture txt,
+			final Vec3fAttribArray vertices,
+			final UIntAttribArray indices,
+			final float defaultYDepth,
+			final JavaAttribArray... attribs) {
 		super(name, objectId, vertices, indices, attribs);
 		this.defaultYDepth = defaultYDepth;
 		this.txt = txt;

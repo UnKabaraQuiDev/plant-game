@@ -35,8 +35,13 @@ public class BuildingDefinition<T extends GameObject & PlaceableObject>
 	protected final List<BuildingRequirement> buildingRequirements;
 	protected final int index;
 
-	public BuildingDefinition(final Class<T> clazz, final String internalName, final Map<ResourceType, Integer> prices,
-			final List<BuildingRequirement> unlockRequirements, final List<BuildingRequirement> buildingRequirements, final int index) {
+	public BuildingDefinition(
+			final Class<T> clazz,
+			final String internalName,
+			final Map<ResourceType, Integer> prices,
+			final List<BuildingRequirement> unlockRequirements,
+			final List<BuildingRequirement> buildingRequirements,
+			final int index) {
 		this.clazz = clazz;
 		this.internalName = internalName;
 		this.prices = prices;

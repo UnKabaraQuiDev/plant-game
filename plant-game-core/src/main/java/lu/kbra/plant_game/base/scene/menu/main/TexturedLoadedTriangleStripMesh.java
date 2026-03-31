@@ -13,8 +13,12 @@ public class TexturedLoadedTriangleStripMesh extends LoadedTriangleStripMesh imp
 	protected SingleTexture texture;
 
 	@Deprecated
-	public TexturedLoadedTriangleStripMesh(final String name, final Material material, final SingleTexture texture,
-			final Vec3fAttribArray vertices, final JavaAttribArray... attribs) {
+	public TexturedLoadedTriangleStripMesh(
+			final String name,
+			final Material material,
+			final SingleTexture texture,
+			final Vec3fAttribArray vertices,
+			final JavaAttribArray... attribs) {
 		super(name, material, vertices, attribs);
 		this.texture = texture;
 	}

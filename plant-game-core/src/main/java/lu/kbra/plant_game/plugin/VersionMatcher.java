@@ -69,7 +69,10 @@ sealed public interface VersionMatcher permits StrictVersionMatcher, RangeVersio
 	public static final class BoundsVersionMatcher implements VersionMatcher {
 
 		public static enum BoundsDirection {
-			UPPER, LOWER, UPPER_INCL, LOWER_INCL;
+			UPPER,
+			LOWER,
+			UPPER_INCL,
+			LOWER_INCL;
 		}
 
 		private final String target;

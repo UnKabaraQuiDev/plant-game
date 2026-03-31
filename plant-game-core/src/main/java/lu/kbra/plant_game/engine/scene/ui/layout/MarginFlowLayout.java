@@ -21,8 +21,14 @@ public class MarginFlowLayout extends FlowLayout implements SceneParentAware {
 
 	protected ParentAwareComponent parent;
 
-	public MarginFlowLayout(final boolean vertical, final float gap, final float marginLeft, final float marginRight, final float marginTop,
-			final float marginBottom, final byte flags) {
+	public MarginFlowLayout(
+			final boolean vertical,
+			final float gap,
+			final float marginLeft,
+			final float marginRight,
+			final float marginTop,
+			final float marginBottom,
+			final byte flags) {
 		super(vertical, gap);
 		this.marginLeft = marginLeft;
 		this.marginRight = marginRight;

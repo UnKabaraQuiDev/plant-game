@@ -31,7 +31,7 @@ import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.plant_game.engine.scene.world.data.GameData;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.plant_game.generated.ColorMaterial;
-import lu.kbra.standalone.gameengine.utils.transform.Transform3D;;
+import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 public class BuildingPanelUIObjectGroup extends AnchoredLayoutUIObjectGroup
 		implements BoundsOwnerParentAware, NeedsBoundsInput, NeedsUpdate, MarginOwner {

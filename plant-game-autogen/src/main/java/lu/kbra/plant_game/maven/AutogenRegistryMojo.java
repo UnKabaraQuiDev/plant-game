@@ -51,17 +51,19 @@ public class AutogenRegistryMojo extends AutogenDefaults {
 		try {
 			final Class<?> registryBase = cl.loadClass(PLUGIN_REGISTRY_CLASS);
 
-			final ConfigurationBuilder builder = new ConfigurationBuilder().addClassLoaders(cl).forPackage(basePackage,
-					cl);
+			final ConfigurationBuilder builder = new ConfigurationBuilder().addClassLoaders(cl).forPackage(basePackage, cl);
 
 			final Reflections reflections = new Reflections(builder);
 
 			final Set<Class<?>> registries = (Set<Class<?>>) reflections.getSubTypesOf((Class) registryBase);
 
-			final Set<String> relativeNames = registries.stream().filter(c -> !c.isInterface())
+			final Set<String> relativeNames = registries.stream()
+					.filter(c -> !c.isInterface())
 					.filter(c -> !java.lang.reflect.Modifier.isAbstract(c.getModifiers()))
-					.filter(c -> !c.getName().contains("$")).map(Class::getName)
-					.map(name -> toRelative(basePackage, name)).filter(c -> !c.startsWith(GENERATED_PACKAGE_NAME))
+					.filter(c -> !c.getName().contains("$"))
+					.map(Class::getName)
+					.map(name -> toRelative(basePackage, name))
+					.filter(c -> !c.startsWith(GENERATED_PACKAGE_NAME))
 					.collect(Collectors.toSet());
 
 			// existing registries

@@ -32,7 +32,11 @@ public class IndexedProgressBarUIObject extends ProgressBarUIObject implements I
 		super(str, parent, values);
 	}
 
-	public IndexedProgressBarUIObject(final String str, final UIScene parent, final Transform3D transform, final float margin,
+	public IndexedProgressBarUIObject(
+			final String str,
+			final UIScene parent,
+			final Transform3D transform,
+			final float margin,
 			final float value) {
 		super(str, parent, transform, margin, value);
 	}

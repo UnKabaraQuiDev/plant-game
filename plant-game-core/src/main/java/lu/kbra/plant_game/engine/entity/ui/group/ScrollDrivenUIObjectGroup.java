@@ -25,8 +25,13 @@ public class ScrollDrivenUIObjectGroup extends OffsetUIObjectGroup implements Ne
 	protected Direction dir;
 
 	@Deprecated
-	public ScrollDrivenUIObjectGroup(final String str, final Transform3D transform, final Supplier<Float> scrollRatio, final Direction dir,
-			final float margin, final UIObject... values) {
+	public ScrollDrivenUIObjectGroup(
+			final String str,
+			final Transform3D transform,
+			final Supplier<Float> scrollRatio,
+			final Direction dir,
+			final float margin,
+			final UIObject... values) {
 		super(str, transform, values);
 		this.scrollRatioSupplier = scrollRatio;
 		this.dir = dir;
@@ -34,7 +39,11 @@ public class ScrollDrivenUIObjectGroup extends OffsetUIObjectGroup implements Ne
 	}
 
 	@Deprecated
-	public ScrollDrivenUIObjectGroup(final String str, final Supplier<Float> scrollRatio, final Direction dir, final float margin,
+	public ScrollDrivenUIObjectGroup(
+			final String str,
+			final Supplier<Float> scrollRatio,
+			final Direction dir,
+			final float margin,
 			final UIObject... values) {
 		super(str, values);
 		this.scrollRatioSupplier = scrollRatio;
@@ -43,8 +52,13 @@ public class ScrollDrivenUIObjectGroup extends OffsetUIObjectGroup implements Ne
 	}
 
 	@Deprecated
-	public ScrollDrivenUIObjectGroup(final String str, final UIObjectGroup parent, final Supplier<Float> scrollRatio, final Direction dir,
-			final float margin, final UIObject... values) {
+	public ScrollDrivenUIObjectGroup(
+			final String str,
+			final UIObjectGroup parent,
+			final Supplier<Float> scrollRatio,
+			final Direction dir,
+			final float margin,
+			final UIObject... values) {
 		super(str, parent, values);
 		this.scrollRatioSupplier = scrollRatio;
 		this.dir = dir;

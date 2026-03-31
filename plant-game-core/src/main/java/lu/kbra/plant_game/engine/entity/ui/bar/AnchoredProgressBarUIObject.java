@@ -20,7 +20,10 @@ public class AnchoredProgressBarUIObject extends ProgressBarUIObject implements 
 		super(str, values);
 	}
 
-	public AnchoredProgressBarUIObject(final String str, final UIObjectGroup parent, final Transform3D transform,
+	public AnchoredProgressBarUIObject(
+			final String str,
+			final UIObjectGroup parent,
+			final Transform3D transform,
 			final UIObject... values) {
 		super(str, parent, transform, values);
 	}
@@ -29,7 +32,11 @@ public class AnchoredProgressBarUIObject extends ProgressBarUIObject implements 
 		super(str, parent, values);
 	}
 
-	public AnchoredProgressBarUIObject(final String str, final UIScene parent, final Transform3D transform, final float margin,
+	public AnchoredProgressBarUIObject(
+			final String str,
+			final UIScene parent,
+			final Transform3D transform,
+			final float margin,
 			final float value) {
 		super(str, parent, transform, margin, value);
 	}
@@ -48,8 +55,14 @@ public class AnchoredProgressBarUIObject extends ProgressBarUIObject implements 
 		this.targetAnchor = tar;
 	}
 
-	public AnchoredProgressBarUIObject(final String str, final UIScene parent, final Transform3D transform, final Anchor obj,
-			final Anchor tar, final float margin, final float value) {
+	public AnchoredProgressBarUIObject(
+			final String str,
+			final UIScene parent,
+			final Transform3D transform,
+			final Anchor obj,
+			final Anchor tar,
+			final float margin,
+			final float value) {
 		super(str, parent, transform, margin, value);
 		this.objectAnchor = obj;
 		this.targetAnchor = tar;

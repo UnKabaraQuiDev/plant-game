@@ -23,7 +23,11 @@ public class ScrollContainerUIObjectGroup extends OffsetUIObjectGroup implements
 	private ScrollBarUIObject scrollBar;
 
 	@Deprecated
-	public ScrollContainerUIObjectGroup(final String str, final Transform3D transform, final Direction dir, final float margin,
+	public ScrollContainerUIObjectGroup(
+			final String str,
+			final Transform3D transform,
+			final Direction dir,
+			final float margin,
 			final UIObject... values) {
 		super(str, transform, values);
 		this.scrollContent = new ScrollDrivenUIObjectGroup(str
@@ -38,7 +42,11 @@ public class ScrollContainerUIObjectGroup extends OffsetUIObjectGroup implements
 	}
 
 	@Deprecated
-	public ScrollContainerUIObjectGroup(final String str, final Vector3fc pos, final Direction dir, final float margin,
+	public ScrollContainerUIObjectGroup(
+			final String str,
+			final Vector3fc pos,
+			final Direction dir,
+			final float margin,
 			final UIObject... values) {
 		super(str, new Transform3D(pos), values);
 		this.scrollContent = new ScrollDrivenUIObjectGroup(str
@@ -46,7 +54,11 @@ public class ScrollContainerUIObjectGroup extends OffsetUIObjectGroup implements
 	}
 
 	@Deprecated
-	public ScrollContainerUIObjectGroup(final String str, final UIObjectGroup parent, final Direction dir, final float margin,
+	public ScrollContainerUIObjectGroup(
+			final String str,
+			final UIObjectGroup parent,
+			final Direction dir,
+			final float margin,
 			final UIObject... values) {
 		super(str, parent, values);
 		this.scrollContent = new ScrollDrivenUIObjectGroup(str
@@ -54,15 +66,24 @@ public class ScrollContainerUIObjectGroup extends OffsetUIObjectGroup implements
 	}
 
 	@Deprecated
-	public ScrollContainerUIObjectGroup(final String str, final Transform3D transform, final Direction dir, final float margin,
-			final Layout layout, final UIObject... values) {
+	public ScrollContainerUIObjectGroup(
+			final String str,
+			final Transform3D transform,
+			final Direction dir,
+			final float margin,
+			final Layout layout,
+			final UIObject... values) {
 		super(str, transform, values);
 		this.scrollContent = new LayoutScrollDrivenUIObjectGroup(str
 				+ ".scroll-content", this, () -> this.scrollBar == null ? 0 : this.scrollBar.getScrollRatio(), dir, margin, layout, values);
 	}
 
 	@Deprecated
-	public ScrollContainerUIObjectGroup(final String str, final Direction dir, final float margin, final Layout layout,
+	public ScrollContainerUIObjectGroup(
+			final String str,
+			final Direction dir,
+			final float margin,
+			final Layout layout,
 			final UIObject... values) {
 		super(str, values);
 		this.scrollContent = new LayoutScrollDrivenUIObjectGroup(str
@@ -70,7 +91,12 @@ public class ScrollContainerUIObjectGroup extends OffsetUIObjectGroup implements
 	}
 
 	@Deprecated
-	public ScrollContainerUIObjectGroup(final String str, final Vector3fc pos, final Direction dir, final float margin, final Layout layout,
+	public ScrollContainerUIObjectGroup(
+			final String str,
+			final Vector3fc pos,
+			final Direction dir,
+			final float margin,
+			final Layout layout,
 			final UIObject... values) {
 		super(str, new Transform3D(pos), values);
 		this.scrollContent = new LayoutScrollDrivenUIObjectGroup(str
@@ -78,8 +104,13 @@ public class ScrollContainerUIObjectGroup extends OffsetUIObjectGroup implements
 	}
 
 	@Deprecated
-	public ScrollContainerUIObjectGroup(final String str, final UIObjectGroup parent, final Direction dir, final float margin,
-			final Layout layout, final UIObject... values) {
+	public ScrollContainerUIObjectGroup(
+			final String str,
+			final UIObjectGroup parent,
+			final Direction dir,
+			final float margin,
+			final Layout layout,
+			final UIObject... values) {
 		super(str, parent, values);
 		this.scrollContent = new LayoutScrollDrivenUIObjectGroup(str
 				+ ".scroll-content", this, () -> this.scrollBar == null ? 0 : this.scrollBar.getScrollRatio(), dir, margin, layout, values);

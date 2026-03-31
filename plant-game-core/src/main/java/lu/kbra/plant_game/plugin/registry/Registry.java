@@ -8,7 +8,7 @@ public interface Registry {
 	PluginDescriptor getPluginDescriptor();
 
 	void register() throws RegistryFailedException;
-	
+
 	int getPriority();
 
 }

@@ -19,7 +19,7 @@ public abstract class PluginRegistry implements Registry, NeedsPostConstruct {
 	public PluginDescriptor getPluginDescriptor() {
 		return this.pluginDescriptor;
 	}
-	
+
 	public int getPriority() {
 		return 1000;
 	}

@@ -16,32 +16,59 @@ public class AnchoredMarginBoundedUIObjectGroup extends BoundedUIObjectGroup imp
 	protected Anchor targetAnchor;
 	protected float margin;
 
-	public AnchoredMarginBoundedUIObjectGroup(final String str, final Layout layout, final Direction2d dir, final Anchor objectAnchor,
-			final Anchor targetAnchor, final float margin, final UIObject... values) {
+	public AnchoredMarginBoundedUIObjectGroup(
+			final String str,
+			final Layout layout,
+			final Direction2d dir,
+			final Anchor objectAnchor,
+			final Anchor targetAnchor,
+			final float margin,
+			final UIObject... values) {
 		super(str, layout, dir, values);
 		this.objectAnchor = objectAnchor;
 		this.targetAnchor = targetAnchor;
 		this.margin = margin;
 	}
 
-	public AnchoredMarginBoundedUIObjectGroup(final String str, final Layout layout, final Transform3D transform, final Direction2d dir,
-			final Anchor objectAnchor, final Anchor targetAnchor, final float margin, final UIObject... values) {
+	public AnchoredMarginBoundedUIObjectGroup(
+			final String str,
+			final Layout layout,
+			final Transform3D transform,
+			final Direction2d dir,
+			final Anchor objectAnchor,
+			final Anchor targetAnchor,
+			final float margin,
+			final UIObject... values) {
 		super(str, layout, transform, dir, values);
 		this.objectAnchor = objectAnchor;
 		this.targetAnchor = targetAnchor;
 		this.margin = margin;
 	}
 
-	public AnchoredMarginBoundedUIObjectGroup(final String str, final Layout layout, final UIObjectGroup parent, final Direction2d dir,
-			final Anchor objectAnchor, final Anchor targetAnchor, final float margin, final UIObject... values) {
+	public AnchoredMarginBoundedUIObjectGroup(
+			final String str,
+			final Layout layout,
+			final UIObjectGroup parent,
+			final Direction2d dir,
+			final Anchor objectAnchor,
+			final Anchor targetAnchor,
+			final float margin,
+			final UIObject... values) {
 		super(str, layout, parent, dir, values);
 		this.objectAnchor = objectAnchor;
 		this.targetAnchor = targetAnchor;
 		this.margin = margin;
 	}
 
-	public AnchoredMarginBoundedUIObjectGroup(final String str, final Layout layout, final UIObjectGroup parent,
-			final Transform3D transform, final Direction2d dir, final Anchor objectAnchor, final Anchor targetAnchor, final float margin,
+	public AnchoredMarginBoundedUIObjectGroup(
+			final String str,
+			final Layout layout,
+			final UIObjectGroup parent,
+			final Transform3D transform,
+			final Direction2d dir,
+			final Anchor objectAnchor,
+			final Anchor targetAnchor,
+			final float margin,
 			final UIObject... values) {
 		super(str, layout, parent, transform, dir, values);
 		this.objectAnchor = objectAnchor;

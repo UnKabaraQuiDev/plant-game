@@ -11,7 +11,11 @@ public class MarginAnchoredUIObjectGroup extends AnchoredLayoutUIObjectGroup imp
 
 	protected float margin;
 
-	public MarginAnchoredUIObjectGroup(final String str, final Layout layout, final Anchor obj, final Anchor tar,
+	public MarginAnchoredUIObjectGroup(
+			final String str,
+			final Layout layout,
+			final Anchor obj,
+			final Anchor tar,
 			final UIObject... values) {
 		super(str, layout, obj, tar, values);
 	}
@@ -20,8 +24,13 @@ public class MarginAnchoredUIObjectGroup extends AnchoredLayoutUIObjectGroup imp
 		super(str, layout, transform, values);
 	}
 
-	public MarginAnchoredUIObjectGroup(final String str, final Layout layout, final UIObjectGroup parent, final Anchor obj,
-			final Anchor tar, final UIObject... values) {
+	public MarginAnchoredUIObjectGroup(
+			final String str,
+			final Layout layout,
+			final UIObjectGroup parent,
+			final Anchor obj,
+			final Anchor tar,
+			final UIObject... values) {
 		super(str, layout, parent, obj, tar, values);
 	}
 
@@ -34,8 +43,13 @@ public class MarginAnchoredUIObjectGroup extends AnchoredLayoutUIObjectGroup imp
 		this.margin = margin;
 	}
 
-	public MarginAnchoredUIObjectGroup(final String str, final Layout layout, final UIObjectGroup parent, final Anchor obj,
-			final Anchor tar, final float margin) {
+	public MarginAnchoredUIObjectGroup(
+			final String str,
+			final Layout layout,
+			final UIObjectGroup parent,
+			final Anchor obj,
+			final Anchor tar,
+			final float margin) {
 		super(str, layout, parent, obj, tar);
 		this.margin = margin;
 	}

@@ -19,22 +19,39 @@ public class LayoutScrollDrivenUIObjectGroup extends ScrollDrivenUIObjectGroup i
 	protected Layout layout;
 
 	@Deprecated
-	public LayoutScrollDrivenUIObjectGroup(final String str, final Transform3D transform, final Supplier<Float> scrollRatio,
-			final Direction dir, final float margin, final Layout layout, final UIObject... values) {
+	public LayoutScrollDrivenUIObjectGroup(
+			final String str,
+			final Transform3D transform,
+			final Supplier<Float> scrollRatio,
+			final Direction dir,
+			final float margin,
+			final Layout layout,
+			final UIObject... values) {
 		super(str, transform, scrollRatio, dir, margin, values);
 		this.setLayout(layout);
 	}
 
 	@Deprecated
-	public LayoutScrollDrivenUIObjectGroup(final String str, final UIObjectGroup parent, final Supplier<Float> scrollRatio,
-			final Direction dir, final float margin, final Layout layout, final UIObject... values) {
+	public LayoutScrollDrivenUIObjectGroup(
+			final String str,
+			final UIObjectGroup parent,
+			final Supplier<Float> scrollRatio,
+			final Direction dir,
+			final float margin,
+			final Layout layout,
+			final UIObject... values) {
 		super(str, parent, scrollRatio, dir, margin, values);
 		this.setLayout(layout);
 	}
 
 	@Deprecated
-	public LayoutScrollDrivenUIObjectGroup(final String str, final Supplier<Float> scrollRatio, final Direction dir, final float margin,
-			final Layout layout, final UIObject... values) {
+	public LayoutScrollDrivenUIObjectGroup(
+			final String str,
+			final Supplier<Float> scrollRatio,
+			final Direction dir,
+			final float margin,
+			final Layout layout,
+			final UIObject... values) {
 		super(str, scrollRatio, dir, margin, values);
 		this.setLayout(layout);
 	}

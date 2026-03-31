@@ -25,22 +25,36 @@ public class FixedBoundsUIObjectGroup extends LayoutOffsetUIObjectGroup implemen
 	protected Rectangle2D.Float bounds = new Rectangle2D.Float();
 	protected float size;
 
-	public FixedBoundsUIObjectGroup(final String str, final Layout layout, final Direction2d dir, final float size,
+	public FixedBoundsUIObjectGroup(
+			final String str,
+			final Layout layout,
+			final Direction2d dir,
+			final float size,
 			final UIObject... values) {
 		super(str, layout, values);
 		this.dir = dir;
 		this.size = size;
 	}
 
-	public FixedBoundsUIObjectGroup(final String str, final Layout layout, final Transform3D transform, final Direction2d dir,
-			final float size, final UIObject... values) {
+	public FixedBoundsUIObjectGroup(
+			final String str,
+			final Layout layout,
+			final Transform3D transform,
+			final Direction2d dir,
+			final float size,
+			final UIObject... values) {
 		super(str, layout, transform, values);
 		this.dir = dir;
 		this.size = size;
 	}
 
-	public FixedBoundsUIObjectGroup(final String str, final Layout layout, final UIObjectGroup parent, final Direction2d dir,
-			final float size, final UIObject... values) {
+	public FixedBoundsUIObjectGroup(
+			final String str,
+			final Layout layout,
+			final UIObjectGroup parent,
+			final Direction2d dir,
+			final float size,
+			final UIObject... values) {
 		super(str, layout, parent, values);
 		this.dir = dir;
 		this.size = size;

@@ -209,7 +209,9 @@ public class LevelData {
 			public BuildingOverride() {
 			}
 
-			public BuildingOverride(final Map<ResourceType, Integer> prices, final List<BuildingRequirement> unlockRequirements,
+			public BuildingOverride(
+					final Map<ResourceType, Integer> prices,
+					final List<BuildingRequirement> unlockRequirements,
 					final List<BuildingRequirement> buildRequirements) {
 				this.prices = prices;
 				this.unlockRequirements = unlockRequirements;

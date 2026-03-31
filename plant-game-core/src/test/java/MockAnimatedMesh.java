@@ -21,7 +21,11 @@ public class MockAnimatedMesh implements AnimatedMesh {
 		this.bb = bb;
 	}
 
-	public MockAnimatedMesh(final String id, final int vertexCount, final int indexsCount, final BoundingBox bb,
+	public MockAnimatedMesh(
+			final String id,
+			final int vertexCount,
+			final int indexsCount,
+			final BoundingBox bb,
 			final AnimationData animationData) {
 		this.id = id;
 		this.vertexCount = vertexCount;

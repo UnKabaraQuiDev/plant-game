@@ -5,7 +5,8 @@ import lu.kbra.plant_game.generated.ColorMaterial;
 
 public enum DefaultBuildingCategories implements BuildingCategory {
 
-	ENERGY(ColorMaterial.YELLOW, 10), WATER(ColorMaterial.CYAN, 20);
+	ENERGY(ColorMaterial.YELLOW, 10),
+	WATER(ColorMaterial.CYAN, 20);
 
 	protected final String localizationKey;
 	protected final ColorMaterial accentColor;

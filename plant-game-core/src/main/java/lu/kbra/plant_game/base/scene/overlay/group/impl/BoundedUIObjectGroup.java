@@ -31,20 +31,33 @@ public class BoundedUIObjectGroup extends LayoutOffsetUIObjectGroup implements B
 		this.dir = dir;
 	}
 
-	public BoundedUIObjectGroup(final String str, final Layout layout, final Transform3D transform, final Direction2d dir,
+	public BoundedUIObjectGroup(
+			final String str,
+			final Layout layout,
+			final Transform3D transform,
+			final Direction2d dir,
 			final UIObject... values) {
 		super(str, layout, transform, values);
 		this.dir = dir;
 	}
 
-	public BoundedUIObjectGroup(final String str, final Layout layout, final UIObjectGroup parent, final Direction2d dir,
+	public BoundedUIObjectGroup(
+			final String str,
+			final Layout layout,
+			final UIObjectGroup parent,
+			final Direction2d dir,
 			final UIObject... values) {
 		super(str, layout, parent, values);
 		this.dir = dir;
 	}
 
-	public BoundedUIObjectGroup(final String str, final Layout layout, final UIObjectGroup parent, final Transform3D transform,
-			final Direction2d dir, final UIObject... values) {
+	public BoundedUIObjectGroup(
+			final String str,
+			final Layout layout,
+			final UIObjectGroup parent,
+			final Transform3D transform,
+			final Direction2d dir,
+			final UIObject... values) {
 		super(str, layout, parent, transform, values);
 		this.dir = dir;
 	}

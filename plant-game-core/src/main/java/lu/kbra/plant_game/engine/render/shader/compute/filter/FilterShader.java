@@ -26,7 +26,9 @@ public abstract class FilterShader<T extends FilterShader<T>> extends RenderShad
 		public String name;
 		public String uniformName;
 
-		public TextureDependencyConfig(final Class<? extends FilterShader<?>> filterShaderSource, final String name,
+		public TextureDependencyConfig(
+				final Class<? extends FilterShader<?>> filterShaderSource,
+				final String name,
 				final String uniformName) {
 			this.filterShaderSource = filterShaderSource;
 			this.name = name;
@@ -53,8 +55,15 @@ public abstract class FilterShader<T extends FilterShader<T>> extends RenderShad
 		public TexelFormat texelFormat;
 		public TexelInternalFormat texelInternalFormat;
 
-		public TextureOutputConfig(final String name, final OptionalInt loc, final String targetName, final TextureFilter filter,
-				final Optional<Vector2i> textureSize, final TextureWrap wrap, final DataType dataType, final TexelFormat texelFormat,
+		public TextureOutputConfig(
+				final String name,
+				final OptionalInt loc,
+				final String targetName,
+				final TextureFilter filter,
+				final Optional<Vector2i> textureSize,
+				final TextureWrap wrap,
+				final DataType dataType,
+				final TexelFormat texelFormat,
 				final TexelInternalFormat texelInternalFormat) {
 			this.name = name;
 			this.loc = loc;

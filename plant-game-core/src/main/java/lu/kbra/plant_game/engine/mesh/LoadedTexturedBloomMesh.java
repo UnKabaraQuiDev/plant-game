@@ -13,8 +13,15 @@ public class LoadedTexturedBloomMesh extends LoadedTexturedMesh implements Textu
 	protected SingleTexture bloomTexture;
 	protected float bloomStrength;
 
-	public LoadedTexturedBloomMesh(final String name, final Material material, final Vector3f origin, final SingleTexture texture,
-			final SingleTexture bloomTexture, final float bloomStrength, final Vec3fAttribArray vertices, final UIntAttribArray indices,
+	public LoadedTexturedBloomMesh(
+			final String name,
+			final Material material,
+			final Vector3f origin,
+			final SingleTexture texture,
+			final SingleTexture bloomTexture,
+			final float bloomStrength,
+			final Vec3fAttribArray vertices,
+			final UIntAttribArray indices,
 			final JavaAttribArray... attribs) {
 		super(name, material, origin, texture, vertices, indices, attribs);
 		this.bloomTexture = bloomTexture;

@@ -18,8 +18,7 @@ import lu.kbra.pclib.PCUtils;
 @Mojo(name = "gen-ui-registry", defaultPhase = LifecyclePhase.PROCESS_CLASSES, requiresDependencyResolution = ResolutionScope.COMPILE)
 public class UIAutogenMojo extends AutogenDefaults {
 
-	private static final RegistrySpec SPEC = new RegistrySpec(
-			"lu.kbra.plant_game.engine.entity.ui.UIObject",
+	private static final RegistrySpec SPEC = new RegistrySpec("lu.kbra.plant_game.engine.entity.ui.UIObject",
 			"lu.kbra.plant_game.plugin.registry.UIObjectRegistry",
 			"GenUIRegistry",
 			PCUtils.camelCaseToConstant("uiObjectConstructors"));
@@ -51,8 +50,8 @@ public class UIAutogenMojo extends AutogenDefaults {
 
 		try {
 			this.generateRegistry(cl, packageIn, packageOut, generatedSourcesDir, SPEC);
-		} catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException
-				| IOException | RuntimeException e) {
+		} catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException | IOException
+				| RuntimeException e) {
 			e.printStackTrace();
 			throw new MojoExecutionException("Error generating UI registry: ", e);
 		}

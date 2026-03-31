@@ -8,7 +8,9 @@ import lu.kbra.plant_game.engine.scene.world.data.resource.ResourceType;
 
 public enum DefaultResourceType implements ResourceType {
 
-	WATER(WaterIconUIObject.class), ENERGY(EnergyIconUIObject.class), MONEY(MoneyIconUIObject.class);
+	WATER(WaterIconUIObject.class),
+	ENERGY(EnergyIconUIObject.class),
+	MONEY(MoneyIconUIObject.class);
 
 	public static DefaultResourceType byName(final String name) {
 		return valueOf(name.toUpperCase());

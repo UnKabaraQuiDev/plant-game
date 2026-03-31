@@ -31,8 +31,13 @@ public abstract class LevelRegistry extends PluginRegistry {
 			this.levelData = levelData;
 		}
 
-		public LevelDefinition(final int idx, final String levelId, final LevelData levelData, final LevelState levelState,
-				final byte progress, final Optional<GameData> gameData) {
+		public LevelDefinition(
+				final int idx,
+				final String levelId,
+				final LevelData levelData,
+				final LevelState levelState,
+				final byte progress,
+				final Optional<GameData> gameData) {
 			this.idx = idx;
 			this.levelData = levelData;
 			this.levelState = levelState;

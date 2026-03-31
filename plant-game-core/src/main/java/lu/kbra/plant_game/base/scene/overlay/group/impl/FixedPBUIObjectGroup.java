@@ -16,12 +16,22 @@ public class FixedPBUIObjectGroup extends FixedBoundsUIObjectGroup {
 		super(str, layout, dir, size, values);
 	}
 
-	public FixedPBUIObjectGroup(final String str, final Layout layout, final Transform3D transform, final Direction2d dir, final float size,
+	public FixedPBUIObjectGroup(
+			final String str,
+			final Layout layout,
+			final Transform3D transform,
+			final Direction2d dir,
+			final float size,
 			final UIObject... values) {
 		super(str, layout, transform, dir, size, values);
 	}
 
-	public FixedPBUIObjectGroup(final String str, final Layout layout, final UIObjectGroup parent, final Direction2d dir, final float size,
+	public FixedPBUIObjectGroup(
+			final String str,
+			final Layout layout,
+			final UIObjectGroup parent,
+			final Direction2d dir,
+			final float size,
 			final UIObject... values) {
 		super(str, layout, parent, dir, size, values);
 	}
