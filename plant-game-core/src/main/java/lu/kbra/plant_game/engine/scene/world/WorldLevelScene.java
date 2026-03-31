@@ -31,6 +31,7 @@ import lu.kbra.plant_game.base.data.DefaultResourceType;
 import lu.kbra.plant_game.base.entity.go.obj.energy.ResourceProducer;
 import lu.kbra.plant_game.base.entity.go.obj.water.NeedsRandomTick;
 import lu.kbra.plant_game.engine.UpdateFrameState;
+import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.entity.go.GenericGameObject;
 import lu.kbra.plant_game.engine.entity.go.MeshGameObject;
 import lu.kbra.plant_game.engine.entity.go.data.AttributeLocation;
@@ -80,7 +81,7 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController, S
 
 	private final CacheManager worldCache;
 
-	private GenericGameObject waterLevel;
+	private GameObject waterLevel;
 	private TerrainGameObject terrain;
 
 	private Vector3f lightColor = new Vector3f(1);
@@ -365,8 +366,8 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController, S
 						(Function<Vector3i, Optional<PlaceableObject>>) ids -> super.getEntities().values()
 								.parallelStream()
 								.filter(e -> e instanceof GenericGameObject && e instanceof PlaceableObject
-										&& ((GenericGameObject) e).getObjectIdLocation() == AttributeLocation.ENTITY)
-								.filter(e -> ids.equals(((GenericGameObject) e).getObjectId()))
+										&& ((GameObject) e).getObjectIdLocation() == AttributeLocation.ENTITY)
+								.filter(e -> ids.equals(((GameObject) e).getObjectId()))
 								.map(PlaceableObject.class::cast)
 								.findFirst());
 	}
@@ -500,7 +501,7 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController, S
 		this.activeModal = activeModal;
 	}
 
-	public GenericGameObject getWaterLevel() {
+	public GameObject getWaterLevel() {
 		return this.waterLevel;
 	}
 
@@ -616,7 +617,6 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController, S
 
 	@Override
 	public void cleanup() {
-		new Exception(this.name).fillInStackTrace().printStackTrace();
 		this.worldCache.cleanup();
 		super.cleanup();
 	}

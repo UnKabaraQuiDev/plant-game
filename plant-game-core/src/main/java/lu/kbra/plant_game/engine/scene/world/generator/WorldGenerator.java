@@ -14,7 +14,7 @@ import org.joml.Vector3fc;
 
 import lu.kbra.pclib.PCUtils;
 import lu.kbra.pclib.pointer.prim.IntPointer;
-import lu.kbra.plant_game.engine.entity.go.GenericGameObject;
+import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.entity.go.mesh.terrain.TerrainEdgeMesh;
 import lu.kbra.plant_game.engine.entity.go.mesh.terrain.TerrainMesh;
 import lu.kbra.plant_game.generated.ColorMaterial;
@@ -90,8 +90,8 @@ public abstract class WorldGenerator {
 				new Vec3fAttribArray(Mesh.ATTRIB_VERTICES_NAME, Mesh.ATTRIB_VERTICES_ID, this.verts),
 				new UIntAttribArray(Mesh.ATTRIB_INDICES_NAME, Mesh.ATTRIB_INDICES_ID, this.indices, BufferType.ELEMENT_ARRAY),
 				new Vec3fAttribArray(Mesh.ATTRIB_NORMALS_NAME, Mesh.ATTRIB_NORMALS_ID, this.normals),
-				new UByteAttribArray(GenericGameObject.MESH_ATTRIB_MATERIAL_ID_NAME,
-						GenericGameObject.MESH_ATTRIB_MATERIAL_ID_ID,
+				new UByteAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_NAME,
+						GameObject.MESH_ATTRIB_MATERIAL_ID_ID,
 						this.materialIds,
 						BufferType.ARRAY,
 						false));
@@ -156,7 +156,7 @@ public abstract class WorldGenerator {
 				"terrain-edges-" + this.width + "x" + this.length + "@" + System.identityHashCode(this),
 				new Vec3fAttribArray(Mesh.ATTRIB_VERTICES_NAME, Mesh.ATTRIB_VERTICES_ID, this.edgeVertices),
 				new UIntAttribArray(Mesh.ATTRIB_INDICES_NAME, Mesh.ATTRIB_INDICES_ID, this.edgeIndices, BufferType.ELEMENT_ARRAY),
-				new UByteAttribArray(GenericGameObject.MESH_ATTRIB_MATERIAL_ID_NAME, GenericGameObject.MESH_ATTRIB_MATERIAL_ID_ID, this.edgeMaterialIds));
+				new UByteAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_NAME, GameObject.MESH_ATTRIB_MATERIAL_ID_ID, this.edgeMaterialIds));
 
 		cache.addMesh(mesh);
 

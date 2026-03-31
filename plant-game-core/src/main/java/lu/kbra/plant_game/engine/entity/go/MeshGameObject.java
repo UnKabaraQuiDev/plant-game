@@ -19,8 +19,6 @@ public class MeshGameObject extends GenericGameObject implements MeshOwner, Mate
 
 	protected short materialId = -1;
 	protected boolean isEntityMaterialId = false;
-	protected Vector3ic objectId = getRandomObjectId();
-	protected AttributeLocation objectIdLocation = AttributeLocation.ENTITY;
 
 	protected Mesh mesh;
 

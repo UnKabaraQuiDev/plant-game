@@ -1,6 +1,5 @@
 package lu.kbra.plant_game.engine.entity.go;
 
-import org.joml.Vector3i;
 import org.joml.Vector3ic;
 
 import lu.kbra.plant_game.engine.entity.go.data.AttributeLocation;
@@ -9,19 +8,10 @@ import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 public class GenericGameObject extends Entity implements GameObject {
 
-	public static final int MESH_ATTRIB_MATERIAL_ID_ID = 3;
-	public static final int MESH_ATTRIB_OBJECT_ID_ID = 4;
-	public static final String MESH_ATTRIB_MATERIAL_ID_NAME = "materialId";
-	public static final String MESH_ATTRIB_OBJECT_ID_NAME = "objectId";
-
-	protected Vector3ic objectId = getRandomObjectId();
+	protected Vector3ic objectId = GameObject.getRandomObjectId();
 	protected AttributeLocation objectIdLocation = AttributeLocation.ENTITY;
 
 	protected Transform3D transform;
-
-	public static Vector3ic getRandomObjectId() {
-		return new Vector3i((int) System.nanoTime(), (int) System.nanoTime() % 20056, (int) System.nanoTime() % 255);
-	}
 
 	public GenericGameObject(final String str) {
 		super(str);

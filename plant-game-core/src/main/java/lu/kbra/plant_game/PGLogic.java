@@ -168,12 +168,12 @@ public class PGLogic extends GameLogic {
 
 	public void startLevel(final LevelDefinition currentLevelDefinition) {
 		renderCleanup(this.gameWorldScene);
-		renderCleanup(this.worldScene);
-		renderCleanup(this.overlayUIScene);
-		renderCleanup(this.uiScene);
 		this.gameWorldScene = null;
+		renderCleanup(this.worldScene);
 		this.worldScene = null;
+		renderCleanup(this.overlayUIScene);
 		this.overlayUIScene = null;
+		renderCleanup(this.uiScene);
 		this.uiScene = null;
 
 		final LevelData levelData = currentLevelDefinition.getLevelData();

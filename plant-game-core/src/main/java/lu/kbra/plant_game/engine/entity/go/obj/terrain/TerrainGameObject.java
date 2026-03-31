@@ -6,18 +6,18 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.stream.IntStream;
 
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
+import org.joml.Vector2ic;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
 import lu.kbra.pclib.PCUtils;
 import lu.kbra.pclib.concurrency.ObjectTriggerLatch;
-import lu.kbra.pclib.logger.GlobalLogger;
 import lu.kbra.plant_game.base.entity.go.obj.water.NeedsRandomTick;
+import lu.kbra.plant_game.base.entity.go.obj_inst.grass.GrowingInstanceGameObject;
 import lu.kbra.plant_game.base.entity.go.obj_inst.grass.InstanceLargeGrassObject;
 import lu.kbra.plant_game.base.entity.go.obj_inst.grass.InstanceMediumGrassObject;
 import lu.kbra.plant_game.base.entity.go.obj_inst.grass.InstanceSmallGrassObject;
@@ -42,25 +42,20 @@ import lu.kbra.standalone.gameengine.utils.transform.Transform3DPivot;
 public class TerrainGameObject extends VariationMeshGameObject
 		implements SynchronizedEntityContainer<GameObject>, AbsoluteTransform3DOwner, Transform3DPivotOwner, NeedsRandomTick {
 
-	/**
-	 * Moisture system: Stored as byte (0–127 safe range to avoid overflow issues).
-	 */
+// ===== CONFIG =====
 	private static final int MAX_MOISTURE = 100;
+	private static final int WET_LEVEL_ON_WATER = 8;
 
-	/**
-	 * Moisture thresholds for growth stages.
-	 */
 	private static final int MOISTURE_GROWN = 10;
 	private static final int MOISTURE_SMALL = 20;
 	private static final int MOISTURE_MEDIUM = 40;
 	private static final int MOISTURE_LARGE = 60;
 	private static final int MOISTURE_FLOWER = 80;
 
-	/**
-	 * Moisture decay per decayTick().
-	 */
 	public static final int MOISTURE_DECAY = 2;
+	public static final int WATER_GROW_SPEED = 1;
 
+// ===== BIT LAYOUT =====
 	private static final int GREEN_BIT = 1 << 0;
 	private static final int SMALL_GRASS_BIT = 1 << 1;
 	private static final int MEDIUM_GRASS_BIT = 1 << 2;
@@ -68,64 +63,55 @@ public class TerrainGameObject extends VariationMeshGameObject
 
 	private static final int FLOWER_BIT = 1 << 4;
 	private static final int BUILT_BIT = 1 << 5;
-	private static final int A_ = 1 << 6;
-	private static final int B_ = 1 << 7;
 
-	private static final int FLOWER_TYPE_BIT_1 = 1 << 8;
-	private static final int FLOWER_TYPE_BIT_2 = 1 << 9;
-	private static final int FLOWER_TYPE_BIT_3 = 1 << 10;
-	private static final int FLOWER_TYPE_BIT_4 = 1 << 11;
-
-	private static final int GRASS_ID_BIT_1 = 1 << 12;
-	private static final int GRASS_ID_BIT_2 = 1 << 13;
-	private static final int GRASS_ID_BIT_3 = 1 << 14;
-	private static final int GRASS_ID_BIT_4 = 1 << 15;
-
-	private static final int GRASS_ID_BIT_5 = 1 << 16;
-	private static final int GRASS_ID_BIT_6 = 1 << 17;
-	private static final int GRASS_ID_BIT_7 = 1 << 18;
-	private static final int GRASS_ID_BIT_8 = 1 << 19;
-
-	private static final int GRASS_BIT_MASK = SMALL_GRASS_BIT | MEDIUM_GRASS_BIT | LARGE_GRASS_BIT;
-	private static final int FLOWER_TYPE_BIT_MASK = FLOWER_TYPE_BIT_1 | FLOWER_TYPE_BIT_2 | FLOWER_TYPE_BIT_3 | FLOWER_TYPE_BIT_4;
 	private static final int FLOWER_TYPE_FIRST_BIT_INDEX = 8;
-	private static final int GRASS_ID_FIRST_BIT_INDEX = 12;
-	private static final int GRASS_ID_MAX = 0xFF;
-	private static final int GRASS_ID_BIT_MASK = IntStream.range(GRASS_ID_FIRST_BIT_INDEX, GRASS_ID_FIRST_BIT_INDEX + 8)
-			.map(c -> 1 << c)
-			.reduce(0, (a, b) -> a | b);
+	private static final int FLOWER_TYPE_BIT_MASK = 0xF << FLOWER_TYPE_FIRST_BIT_INDEX;
 
+	private static final int GRASS_ID_FIRST_BIT_INDEX = 12;
+	private static final int GRASS_ID_BITS = 8;
+	private static final int GRASS_ID_MAX = (1 << GRASS_ID_BITS) - 1;
+	private static final int GRASS_ID_BIT_MASK = GRASS_ID_MAX << GRASS_ID_FIRST_BIT_INDEX;
+
+	private static final int DRY_GRASS_BIT = 1 << 20;
+
+	private static final int WET_BIT_INDEX = 21;
+	private static final int WET_BITS = 4;
+	private static final int WET_MASK = ((1 << WET_BITS) - 1) << WET_BIT_INDEX;
+// ===== GRASS =====
 	private static final int SMALL_GRASS_LEVEL = 0;
 	private static final int MEDIUM_GRASS_LEVEL = 1;
 	private static final int LARGE_GRASS_LEVEL = 2;
 
-	public static final String WATER_FACTOR_PROPERTY = TerrainGameObject.class.getSimpleName() + ".water_factor";
-	public static float WATER_GROW_SPEED = PCUtils.getFloat(WATER_FACTOR_PROPERTY, 1f);
+// ===== DATA =====
+	protected final int width;
+	protected final int length;
+
+	protected final byte[] moisture;
+	protected final int[] population;
+
+	protected WeakReference<InstanceSmallGrassObject> smallGrass;
+	protected WeakReference<InstanceMediumGrassObject> mediumGrass;
+	protected WeakReference<InstanceLargeGrassObject> largeGrass;
+	protected WeakReference<InstanceSmallGrassObject> deadSmallGrass;
+	protected WeakReference<InstanceMediumGrassObject> deadMediumGrass;
+	protected WeakReference<InstanceLargeGrassObject> deadLargeGrass;
 
 	protected Object subEntitiesLock = new Object();
 	protected List<GameObject> subEntities = Collections.synchronizedList(new ArrayList<>());
-
 	protected WorldLevelScene parent;
-
 	protected TerrainEdgeObject terrainEdgeObject;
 	protected TerrainHighlightObject terrainHighlightObject;
 	protected MeshGameObject terrainWaterObject;
 
-	protected final byte[][] moisture;
-	protected final int[][] population;
-
-	protected WeakReference<InstanceSmallGrassObject> deadGrass;
-	protected WeakReference<InstanceSmallGrassObject> smallGrass;
-	protected WeakReference<InstanceMediumGrassObject> mediumGrass;
-	protected WeakReference<InstanceLargeGrassObject> largeGrass;
-
 	public TerrainGameObject(final String str, final TerrainMesh mesh) {
 		super(str, mesh);
-		this.setIsEntityMaterialId(false);
-		this.setTransform(new Transform3DPivot());
+		super.setTransform(new Transform3DPivot());
 
-		this.moisture = new byte[mesh.getWidth()][mesh.getLength()];
-		this.population = new int[mesh.getWidth()][mesh.getLength()];
+		this.width = mesh.getWidth();
+		this.length = mesh.getLength();
+
+		this.moisture = new byte[this.width * this.length];
+		this.population = new int[this.width * this.length];
 	}
 
 	public ObjectTriggerLatch<TerrainGameObject> init() {
@@ -135,16 +121,14 @@ public class TerrainGameObject extends VariationMeshGameObject
 			}
 		}
 
-		final ObjectTriggerLatch<TerrainGameObject> latch = new ObjectTriggerLatch<>(4, this);
+		final ObjectTriggerLatch<TerrainGameObject> latch = new ObjectTriggerLatch<>(6, this);
 
 		synchronized (this) {
-			System.err.println("created grass instances");
 			GameObjectFactory.createInstances(InstanceSmallGrassObject.class, i -> new Transform3D(), OptionalInt.of(128), Optional.empty())
 					.set(i -> i.setColorMaterial(ColorMaterial.GREEN))
 					.set(i -> i.setTransform(new Transform3D(this.getTransform().getTranslation().negate(new Vector3f()))))
 					.add(this)
 					.postInit(i -> this.smallGrass = new WeakReference<>(i))
-					.postInit(i -> System.err.println("grass instance set."))
 					.latch(latch)
 					.push();
 
@@ -169,7 +153,24 @@ public class TerrainGameObject extends VariationMeshGameObject
 					.set(i -> i.setColorMaterial(ColorMaterial.LIGHT_BROWN))
 					.set(i -> i.setTransform(new Transform3D(this.getTransform().getTranslation().negate(new Vector3f()))))
 					.add(this)
-					.postInit(i -> this.deadGrass = new WeakReference<>(i))
+					.postInit(i -> this.deadSmallGrass = new WeakReference<>(i))
+					.latch(latch)
+					.push();
+
+			GameObjectFactory
+					.createInstances(InstanceMediumGrassObject.class, i -> new Transform3D(), OptionalInt.of(128), Optional.empty())
+					.set(i -> i.setColorMaterial(ColorMaterial.LIGHT_BROWN))
+					.set(i -> i.setTransform(new Transform3D(this.getTransform().getTranslation().negate(new Vector3f()))))
+					.add(this)
+					.postInit(i -> this.deadMediumGrass = new WeakReference<>(i))
+					.latch(latch)
+					.push();
+
+			GameObjectFactory.createInstances(InstanceLargeGrassObject.class, i -> new Transform3D(), OptionalInt.of(128), Optional.empty())
+					.set(i -> i.setColorMaterial(ColorMaterial.LIGHT_BROWN))
+					.set(i -> i.setTransform(new Transform3D(this.getTransform().getTranslation().negate(new Vector3f()))))
+					.add(this)
+					.postInit(i -> this.deadLargeGrass = new WeakReference<>(i))
 					.latch(latch)
 					.push();
 		}
@@ -183,54 +184,66 @@ public class TerrainGameObject extends VariationMeshGameObject
 		this.decayTick();
 	}
 
+	private int idx(final int x, final int y) {
+		return x + y * this.width;
+	}
+
+	private int idx(final Vector2ic tile) {
+		return tile.x() + tile.y() * this.width;
+	}
+
+	// ===== TICK =====
 	public void decayTick() {
 		final TerrainMesh mesh = this.getMesh();
 
-		for (int x = 0; x < mesh.getWidth(); x++) {
-			for (int y = 0; y < mesh.getLength(); y++) {
+		for (int i = 0; i < this.population.length; i++) {
 
-				int current = this.moisture[x][y] & 0xFF;
-				if (current == 0) {
+			final int p = this.population[i];
+
+			final int wet = getWet(p);
+			if (wet > 0) {
+				this.population[i] = setWet(p, wet - 1);
+				continue;
+			}
+
+			int m = this.moisture[i] & 0xFF;
+			if (m == 0) {
+				continue;
+			}
+
+			m = Math.max(0, m - MOISTURE_DECAY);
+			this.moisture[i] = (byte) m;
+
+			final int x = i % this.width;
+			final int y = i / this.width;
+			final Vector2i tile = new Vector2i(x, y);
+
+			if (m < MOISTURE_FLOWER) {
+				this.removeFlower(tile);
+			}
+
+			final OptionalInt grass = this.getGrassLevel(i);
+
+			if (grass.isPresent()) {
+				if ((p & DRY_GRASS_BIT) == 0) {
+					this.convertGrassToDry(tile);
 					continue;
 				}
 
-				current = Math.max(0, current - MOISTURE_DECAY * 4);
-				this.moisture[x][y] = (byte) current;
-
-				final Vector2i tile = new Vector2i(x, y);
-
-				// 1. Flower disappears first
-				if (current < MOISTURE_FLOWER) {
-					this.removeFlower(tile);
+				switch (grass.getAsInt()) {
+				case LARGE_GRASS_LEVEL -> this.addGrass(tile, MEDIUM_GRASS_LEVEL);
+				case MEDIUM_GRASS_LEVEL -> this.addGrass(tile, SMALL_GRASS_LEVEL);
+				case SMALL_GRASS_LEVEL -> this.removeGrass(tile);
 				}
+				continue;
+			}
 
-				// 2. Grass stages
-				if (current >= MOISTURE_LARGE) {
-					this.addGrass(tile, LARGE_GRASS_LEVEL);
-					continue;
-				}
-
-				if (current >= MOISTURE_MEDIUM) {
-					this.addGrass(tile, MEDIUM_GRASS_LEVEL);
-					continue;
-				}
-
-				if (current >= MOISTURE_SMALL) {
-					this.addGrass(tile, SMALL_GRASS_LEVEL);
-					continue;
-				}
-
-				// 3. No more grass
-				this.removeGrass(tile);
-
-				// 4. Terrain color stages
-				if (current >= MOISTURE_GROWN) {
-//					mesh.setGrown(tile, true);
-					continue;
-				}
-
+			if (m >= MOISTURE_GROWN) {
+				mesh.setGrown(tile, true);
+				this.population[i] |= GREEN_BIT;
+			} else {
 				mesh.setGrown(tile, false);
-				this.population[x][y] &= ~GREEN_BIT;
+				this.population[i] &= ~GREEN_BIT;
 			}
 		}
 	}
@@ -238,205 +251,272 @@ public class TerrainGameObject extends VariationMeshGameObject
 	public void place(final Optional<Vector2i> source, final Optional<Direction> sourceDir, final PlaceableObject obj) {
 		if (source.isPresent() && sourceDir.isPresent()) {
 			obj.getFootprint().forEachCell(source.get(), sourceDir.get(), i -> {
-				this.population[i.x()][i.y()] &= ~BUILT_BIT;
+				this.population[this.idx(i)] &= ~BUILT_BIT;
 				this.removeGrass(i);
 				this.removeFlower(i);
 			});
 		}
 
-		obj.forEachCell(i -> this.population[i.x()][i.y()] |= BUILT_BIT);
+		obj.forEachCell(i -> this.population[this.idx(i)] |= BUILT_BIT);
 	}
 
 	private void removeFlower(final Vector2i tile) {
-		final TerrainMesh mesh = this.getMesh();
-		if (!isInBounds(mesh, tile)) {
+		final int i = this.idx(tile);
+
+		if ((this.population[i] & FLOWER_BIT) == 0) {
 			return;
 		}
 
-		if (this.getFlower(tile).isPresent()) {
-			this.population[tile.x()][tile.y()] &= ~FLOWER_BIT;
-			this.population[tile.x()][tile.y()] &= ~FLOWER_TYPE_BIT_MASK;
-		}
+		this.population[i] &= ~FLOWER_BIT;
+		this.population[i] &= ~FLOWER_TYPE_BIT_MASK;
 	}
 
 	private void removeGrass(final Vector2i tile) {
-		final TerrainMesh mesh = this.getMesh();
-		if (!isInBounds(mesh, tile)) {
-			return;
-		}
+		final int i = this.idx(tile);
 
-		final OptionalInt grass = this.getGrassLevel(tile);
+		final OptionalInt grass = this.getGrassLevel(i);
 		if (grass.isEmpty()) {
 			return;
 		}
 
-		final int instanceIndex = (this.population[tile.x()][tile.y()] & GRASS_ID_BIT_MASK) >> GRASS_ID_FIRST_BIT_INDEX;
+		final int p = this.population[i];
 
-		switch (grass.getAsInt()) {
-		case SMALL_GRASS_LEVEL -> {
-			final InstanceSmallGrassObject obj = this.getSmallGrassObject();
-			if (obj != null) {
-				obj.removeInstance(instanceIndex);
-			}
-		}
-		case MEDIUM_GRASS_LEVEL -> {
-			final InstanceMediumGrassObject obj = this.getMediumGrassObject();
-			if (obj != null) {
-				obj.removeInstance(instanceIndex);
-			}
-		}
-		case LARGE_GRASS_LEVEL -> {
-			final InstanceLargeGrassObject obj = this.getLargeGrassObject();
-			if (obj != null) {
-				obj.removeInstance(instanceIndex);
-			}
-		}
-		default -> {
-			return;
-		}
+		final int instanceIndex = (p & GRASS_ID_BIT_MASK) >>> GRASS_ID_FIRST_BIT_INDEX;
+		final boolean isDry = (p & DRY_GRASS_BIT) != 0;
+
+		final GrowingInstanceGameObject obj = switch (grass.getAsInt()) {
+		case SMALL_GRASS_LEVEL -> isDry ? this.getDeadSmallGrassObject() : this.getSmallGrassObject();
+		case MEDIUM_GRASS_LEVEL -> isDry ? this.getDeadMediumGrassObject() : this.getMediumGrassObject();
+		case LARGE_GRASS_LEVEL -> isDry ? this.getDeadLargeGrassObject() : this.getLargeGrassObject();
+		default -> null;
+		};
+
+		if (obj != null) {
+			obj.removeInstance(instanceIndex);
 		}
 
-		this.population[tile.x()][tile.y()] &= ~GRASS_ID_BIT_MASK;
-		this.population[tile.x()][tile.y()] &= ~GRASS_BIT_MASK;
+		int np = p;
+		np &= ~GRASS_ID_BIT_MASK;
+		np &= ~(SMALL_GRASS_BIT | MEDIUM_GRASS_BIT | LARGE_GRASS_BIT);
+		np &= ~DRY_GRASS_BIT;
+
+		this.population[i] = np;
 	}
 
 	public void addWater(final Vector2i tile, final float amount) {
-		final TerrainMesh mesh = this.getMesh();
+		final int i = this.idx(tile.x(), tile.y());
 
-		if (tile.x() < 0 || tile.x() >= mesh.getWidth() || tile.y() < 0 || tile.y() >= mesh.getLength()) {
-			System.err.println(tile + " oob");
-			return;
-		}
+		this.population[i] = setWet(this.population[i], WET_LEVEL_ON_WATER);
 
-		int current = this.moisture[tile.x()][tile.y()] & 0xFF;
-		current += (int) (amount * WATER_GROW_SPEED);
-		current = Math.min(current, MAX_MOISTURE);
+		int m = this.moisture[i] & 0xFF;
+		m = Math.min(MAX_MOISTURE, m + (int) (amount * WATER_GROW_SPEED));
+		this.moisture[i] = (byte) m;
 
-		this.moisture[tile.x()][tile.y()] = (byte) current;
-		System.err.println(current);
-
-		if (current >= MOISTURE_FLOWER) {
+		if (m >= MOISTURE_FLOWER) {
 			this.addFlower(tile);
-		} else if (current >= MOISTURE_LARGE) {
+		} else if (m >= MOISTURE_LARGE) {
 			this.addGrass(tile, LARGE_GRASS_LEVEL);
-		} else if (current >= MOISTURE_MEDIUM) {
+		} else if (m >= MOISTURE_MEDIUM) {
 			this.addGrass(tile, MEDIUM_GRASS_LEVEL);
-		} else if (current >= MOISTURE_SMALL) {
+		} else if (m >= MOISTURE_SMALL) {
 			this.addGrass(tile, SMALL_GRASS_LEVEL);
-		} else if (current >= MOISTURE_GROWN) {
-			mesh.setGrown(tile, true);
-			this.population[tile.x()][tile.y()] |= GREEN_BIT;
+		} else if (m >= MOISTURE_GROWN) {
+			this.getMesh().setGrown(tile, true);
+			this.population[i] |= GREEN_BIT;
 		}
 	}
 
 	private void addFlower(final Vector2i tile) {
-		final TerrainMesh mesh = this.getMesh();
-		if (!isInBounds(mesh, tile)) {
+		final int i = this.idx(tile);
+
+		if ((this.population[i] & BUILT_BIT) != 0) {
+			return;
+		}
+		if ((this.population[i] & FLOWER_BIT) != 0) {
 			return;
 		}
 
-		if ((this.population[tile.x()][tile.y()] & BUILT_BIT) != 0) {
+		if (Math.random() >= 0.5) {
 			return;
 		}
 
-		if (this.getFlower(tile).isPresent()) {
-			GlobalLogger.info("Not adding any flower to: " + tile);
-			return;
-		}
+		int p = this.population[i];
 
-		final boolean addFlower = Math.random() < 0.5;
-		if (!addFlower) {
-			return;
-		}
+		p &= ~FLOWER_TYPE_BIT_MASK;
+		p |= FLOWER_BIT;
+		p |= (1 << FLOWER_TYPE_FIRST_BIT_INDEX) & FLOWER_TYPE_BIT_MASK;
 
-		final int flowerIndex = 1;
-
-		this.population[tile.x()][tile.y()] &= ~FLOWER_TYPE_BIT_MASK;
-		this.population[tile.x()][tile.y()] |= FLOWER_BIT;
-		this.population[tile.x()][tile.y()] |= (PCUtils.clamp(0, 15, flowerIndex) << FLOWER_TYPE_FIRST_BIT_INDEX) & FLOWER_TYPE_BIT_MASK;
+		this.population[i] = p;
 	}
 
 	private OptionalInt getFlower(final Vector2i tile) {
-		if ((this.population[tile.x()][tile.y()] & FLOWER_BIT) == 0) {
+		if ((this.population[this.idx(tile)] & FLOWER_BIT) == 0) {
 			return OptionalInt.empty();
 		}
 
-		return OptionalInt.of((this.population[tile.x()][tile.y()] & FLOWER_TYPE_BIT_MASK) >> FLOWER_TYPE_FIRST_BIT_INDEX);
+		return OptionalInt.of((this.population[this.idx(tile)] & FLOWER_TYPE_BIT_MASK) >> FLOWER_TYPE_FIRST_BIT_INDEX);
 	}
 
-	private OptionalInt getGrassLevel(final Vector2i tile) {
-		return (this.population[tile.x()][tile.y()] & SMALL_GRASS_BIT) != 0 ? OptionalInt.of(SMALL_GRASS_LEVEL)
-				: (this.population[tile.x()][tile.y()] & MEDIUM_GRASS_BIT) != 0 ? OptionalInt.of(MEDIUM_GRASS_LEVEL)
-				: (this.population[tile.x()][tile.y()] & LARGE_GRASS_BIT) != 0 ? OptionalInt.of(LARGE_GRASS_LEVEL)
-				: OptionalInt.empty();
+	private OptionalInt getGrassLevel(final Vector2ic tile) {
+		return this.getGrassLevel(this.idx(tile));
+	}
+
+	private OptionalInt getGrassLevel(final int i) {
+		final int p = this.population[i];
+		if ((p & SMALL_GRASS_BIT) != 0) {
+			return OptionalInt.of(SMALL_GRASS_LEVEL);
+		}
+		if ((p & MEDIUM_GRASS_BIT) != 0) {
+			return OptionalInt.of(MEDIUM_GRASS_LEVEL);
+		}
+		if ((p & LARGE_GRASS_BIT) != 0) {
+			return OptionalInt.of(LARGE_GRASS_LEVEL);
+		}
+		return OptionalInt.empty();
 	}
 
 	private void addGrass(final Vector2i tile, final int level) {
-		final TerrainMesh mesh = this.getMesh();
-		if (!isInBounds(mesh, tile)) {
-			return;
-		}
+		final int i = this.idx(tile);
 
 		if (level < SMALL_GRASS_LEVEL || level > LARGE_GRASS_LEVEL) {
-			throw new IllegalArgumentException(
-					"Grass level: " + level + " not in range [" + SMALL_GRASS_LEVEL + ".." + LARGE_GRASS_LEVEL + "].");
+			throw new IllegalArgumentException("Invalid grass level: " + level);
 		}
 
-		if ((this.population[tile.x()][tile.y()] & BUILT_BIT) != 0) {
-			GlobalLogger.info("Not adding grass to built tile: " + tile);
+		if ((this.population[i] & BUILT_BIT) != 0) {
 			return;
 		}
 
-		final OptionalInt grass = this.getGrassLevel(tile);
-		if (grass.isPresent() && grass.getAsInt() >= level) {
-			GlobalLogger.info("Not adding any grass to: " + tile + " " + grass.getAsInt());
+		final OptionalInt current = this.getGrassLevel(i);
+		if (current.isPresent() && current.getAsInt() >= level) {
 			return;
 		}
 
-		if (grass.isPresent()) {
+		if (current.isPresent()) {
 			this.removeGrass(tile);
 		}
 
-		final Vector3f position = this.getTilePosition(tile);
+		final Vector3f pos = this.getTilePosition(tile);
 		final int instanceId;
 
 		switch (level) {
 		case SMALL_GRASS_LEVEL -> {
-			final InstanceSmallGrassObject obj = this.getSmallGrassObject();
+			final var obj = this.getSmallGrassObject();
 			if (obj == null) {
-				GlobalLogger.warning("Small grass object is not initialized.");
 				return;
 			}
-			instanceId = obj.addInstance(position);
+			instanceId = obj.addInstance(pos);
 		}
 		case MEDIUM_GRASS_LEVEL -> {
-			final InstanceMediumGrassObject obj = this.getMediumGrassObject();
+			final var obj = this.getMediumGrassObject();
 			if (obj == null) {
-				GlobalLogger.warning("Medium grass object is not initialized.");
 				return;
 			}
-			instanceId = obj.addInstance(position);
+			instanceId = obj.addInstance(pos);
 		}
 		case LARGE_GRASS_LEVEL -> {
-			final InstanceLargeGrassObject obj = this.getLargeGrassObject();
+			final var obj = this.getLargeGrassObject();
 			if (obj == null) {
-				GlobalLogger.warning("Large grass object is not initialized.");
 				return;
 			}
-			instanceId = obj.addInstance(position);
+			instanceId = obj.addInstance(pos);
 		}
-		default -> throw new IllegalStateException("Unexpected grass level: " + level);
+		default -> throw new IllegalStateException();
 		}
 
-		this.population[tile.x()][tile.y()] &= ~GRASS_BIT_MASK;
-		this.population[tile.x()][tile.y()] |= grassLevelToBit(level);
+		int p = this.population[i];
 
-		this.population[tile.x()][tile.y()] &= ~GRASS_ID_BIT_MASK;
-		this.population[tile.x()][tile.y()] |= (PCUtils.clamp(0, GRASS_ID_MAX, instanceId) << GRASS_ID_FIRST_BIT_INDEX) & GRASS_ID_BIT_MASK;
+		// clear dry flag
+		p &= ~DRY_GRASS_BIT;
+
+		// clear grass level
+		p &= ~(SMALL_GRASS_BIT | MEDIUM_GRASS_BIT | LARGE_GRASS_BIT);
+		p |= grassLevelToBit(level);
+
+		// set instance id (FIXED precedence)
+		p &= ~GRASS_ID_BIT_MASK;
+		p |= (PCUtils.clamp(0, GRASS_ID_MAX, instanceId) << GRASS_ID_FIRST_BIT_INDEX) & GRASS_ID_BIT_MASK;
+
+		this.population[i] = p;
+	}
+
+	private void convertGrassToDry(final Vector2i tile) {
+		final int i = this.idx(tile);
+
+		final OptionalInt grass = this.getGrassLevel(i);
+		if (grass.isEmpty()) {
+			return;
+		}
+
+		final int p = this.population[i];
+		final int instanceIndex = (p & GRASS_ID_BIT_MASK) >>> GRASS_ID_FIRST_BIT_INDEX;
+
+		final Vector3f pos = this.getTilePosition(tile);
+
+		// remove green
+		switch (grass.getAsInt()) {
+		case SMALL_GRASS_LEVEL -> {
+			var o = this.getSmallGrassObject();
+			if (o != null) {
+				o.removeInstance(instanceIndex);
+			}
+		}
+		case MEDIUM_GRASS_LEVEL -> {
+			var o = this.getMediumGrassObject();
+			if (o != null) {
+				o.removeInstance(instanceIndex);
+			}
+		}
+		case LARGE_GRASS_LEVEL -> {
+			var o = this.getLargeGrassObject();
+			if (o != null) {
+				o.removeInstance(instanceIndex);
+			}
+		}
+		}
+
+		// add dry
+		int newId = -1;
+
+		switch (grass.getAsInt()) {
+		case SMALL_GRASS_LEVEL -> {
+			var o = this.getDeadSmallGrassObject();
+			if (o != null) {
+				newId = o.addInstance(pos);
+			}
+		}
+		case MEDIUM_GRASS_LEVEL -> {
+			var o = this.getDeadMediumGrassObject();
+			if (o != null) {
+				newId = o.addInstance(pos);
+			}
+		}
+		case LARGE_GRASS_LEVEL -> {
+			var o = this.getDeadLargeGrassObject();
+			if (o != null) {
+				newId = o.addInstance(pos);
+			}
+		}
+		}
+
+		int np = p;
+		np |= DRY_GRASS_BIT;
+
+		np &= ~GRASS_ID_BIT_MASK;
+		np |= (PCUtils.clamp(0, GRASS_ID_MAX, newId) << GRASS_ID_FIRST_BIT_INDEX) & GRASS_ID_BIT_MASK;
+
+		this.population[i] = np;
 	}
 
 	private static boolean isInBounds(final TerrainMesh mesh, final Vector2i tile) {
 		return tile.x() >= 0 && tile.x() < mesh.getWidth() && tile.y() >= 0 && tile.y() < mesh.getLength();
+	}
+
+	private static int getWet(final int p) {
+		return (p & WET_MASK) >> WET_BIT_INDEX;
+	}
+
+	private static int setWet(final int p, final int v) {
+		return p & ~WET_MASK | (v & (1 << WET_BITS) - 1) << WET_BIT_INDEX;
 	}
 
 	private InstanceSmallGrassObject getSmallGrassObject() {
@@ -449,6 +529,18 @@ public class TerrainGameObject extends VariationMeshGameObject
 
 	private InstanceLargeGrassObject getLargeGrassObject() {
 		return this.largeGrass != null ? this.largeGrass.get() : null;
+	}
+
+	private InstanceSmallGrassObject getDeadSmallGrassObject() {
+		return this.deadSmallGrass != null ? this.deadSmallGrass.get() : null;
+	}
+
+	private InstanceMediumGrassObject getDeadMediumGrassObject() {
+		return this.deadMediumGrass != null ? this.deadMediumGrass.get() : null;
+	}
+
+	private InstanceLargeGrassObject getDeadLargeGrassObject() {
+		return this.deadLargeGrass != null ? this.deadLargeGrass.get() : null;
 	}
 
 	private static int grassLevelToBit(final int level) {
@@ -465,8 +557,8 @@ public class TerrainGameObject extends VariationMeshGameObject
 		final float cellSize = 1f;
 
 		// 1. Convert mouse to NDC [-1,1]
-		final float ndcX = (mousePos.x / windowWidth) * 2f - 1f;
-		final float ndcY = 1f - (mousePos.y / windowHeight) * 2f;
+		final float ndcX = mousePos.x / windowWidth * 2f - 1f;
+		final float ndcY = 1f - mousePos.y / windowHeight * 2f;
 
 		// 2. Unproject to world space
 		final Matrix4f invProj = new Matrix4f(cam.getProjection().getProjectionMatrix()).invert();
@@ -623,7 +715,7 @@ public class TerrainGameObject extends VariationMeshGameObject
 
 	@Override
 	public int getRandomTickDuration() {
-		return 2_000;
+		return 3_500;
 	}
 
 	@Override

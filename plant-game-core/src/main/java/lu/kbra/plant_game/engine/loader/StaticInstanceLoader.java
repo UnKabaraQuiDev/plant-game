@@ -90,13 +90,7 @@ public class StaticInstanceLoader {
 				mesh,
 				PCUtils.clamp(MIN_INSTANCE_BUFFER_LENGTH, MAX_INSTANCE_BUFFER_LENGTH, bufferSize),
 				transform,
-				attribs.toArray(JavaAttribArray[]::new)) {
-			@Override
-			public void cleanup() {
-				new Exception("Cleaned up: " + this.getId()).fillInStackTrace().printStackTrace();
-				super.cleanup();
-			};
-		};
+				attribs.toArray(JavaAttribArray[]::new));
 		if (cache.hasInstanceEmitter(name)) {
 			throw new IllegalStateException("InstanceEmitter: " + name + " already exists.");
 		}

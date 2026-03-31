@@ -4,7 +4,7 @@ import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.standalone.gameengine.geom.instance.InstanceEmitter;
 
 @DataPath("classpath:/models/grass-small.json")
-public class InstanceSmallGrassObject extends ResizableInstanceSwayGameObject {
+public class InstanceSmallGrassObject extends GrowingInstanceGameObject {
 
 	public InstanceSmallGrassObject(final String str, final InstanceEmitter ie) {
 		super(str, ie);

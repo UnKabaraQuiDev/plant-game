@@ -6,7 +6,6 @@ import org.joml.Vector2i;
 import lu.kbra.pclib.PCUtils;
 import lu.kbra.plant_game.base.data.DefaultResourceType;
 import lu.kbra.plant_game.engine.entity.go.obj.PlaceableAnimatedGameObject;
-import lu.kbra.plant_game.engine.entity.go.obj.terrain.TerrainGameObject;
 import lu.kbra.plant_game.engine.mesh.AnimatedMesh;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
@@ -27,7 +26,7 @@ public class WaterSprinklerObject3x3 extends PlaceableAnimatedGameObject impleme
 		if (this.tile == null) {
 			return;
 		}
-		final float amount = PCUtils.randomFloatRange(TerrainGameObject.MOISTURE_DECAY + 1, TerrainGameObject.MOISTURE_DECAY * 2f + 1);
+		final float amount = PCUtils.randomFloatRange(2, 5);
 		if (!worldLevelScene.getResourceBuffer().tryConsume(DefaultResourceType.WATER, amount)) {
 			return;
 		}

@@ -18,6 +18,11 @@ import lu.kbra.standalone.gameengine.scene.EntityContainer;
 
 public class GOCreatingTaskFuture<T extends GameObject> extends TaskFuture<List<Object>, T> {
 
+	public static final String KEEP_SOURCE_PROPERTY = GOCreatingTaskFuture.class.getSimpleName() + ".keep_source";
+	public static boolean KEEP_SOURCE = Boolean.getBoolean(KEEP_SOURCE_PROPERTY);
+
+	protected Throwable source;
+
 	protected Class<T> clazz;
 
 	protected List<Consumer<T>> postCreateHooks = new ArrayList<>();
@@ -26,16 +31,22 @@ public class GOCreatingTaskFuture<T extends GameObject> extends TaskFuture<List<
 	public GOCreatingTaskFuture(final Dispatcher dispatcher, final Class<T> clazz) {
 		super(dispatcher);
 		this.clazz = clazz;
+		this.source = new Throwable().fillInStackTrace();
 		super.task = list -> {
-			final T instance = GameObjectRegistry.create(clazz,
-					PCUtils.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime() },
-							list == null ? new Object[0] : list.toArray()));
-			this.postCreateHooks.forEach(pch -> pch.accept(instance));
-			if (instance instanceof final NeedsPostConstruct npc) {
-				npc.postConstruct();
+			try {
+				final T instance = GameObjectRegistry.create(clazz,
+						PCUtils.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime() },
+								list == null ? new Object[0] : list.toArray()));
+				this.postCreateHooks.forEach(pch -> pch.accept(instance));
+				if (instance instanceof final NeedsPostConstruct npc) {
+					npc.postConstruct();
+				}
+				this.postInitHooks.forEach(pch -> pch.accept(instance));
+				return instance;
+			} catch (Throwable t) {
+				t.addSuppressed(this.source);
+				throw t;
 			}
-			this.postInitHooks.forEach(pch -> pch.accept(instance));
-			return instance;
 		};
 	}
 
