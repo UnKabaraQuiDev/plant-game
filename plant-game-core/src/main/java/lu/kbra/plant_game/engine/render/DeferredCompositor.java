@@ -832,7 +832,6 @@ public class DeferredCompositor extends AutoCleanupable {
 		} else if (entity instanceof GameObject go && go.getObjectIdLocation() == AttributeLocation.ENTITY
 				&& entity instanceof VariationOwner variationOwner) {
 			this.materialComputeShader.bind();
-			System.err.println("variation: " + go.getId());
 
 			this.materialComputeShader.setUniform(MaterialComputeShader.COLOR_VARIATION, true);
 			this.materialComputeShader.setUniform(MaterialComputeShader.VARIATION_MIN, variationOwner.getMinVariation());

@@ -38,9 +38,18 @@ public class TerrainMesh extends LoadedMesh {
 
 	protected List<Pair<Vector2i, ColorMaterial>> updateColorMaterial = Collections.synchronizedList(new ArrayList<>());
 
-	public TerrainMesh(final String name, final int objectId, final int width, final int length, final int maxHeight,
-			final Integer[][] cellHeight, final ColorMaterial[][] materialType, final int[][] faceIndices, final Vec3fAttribArray vertices,
-			final UIntAttribArray indices, final JavaAttribArray... attribs) {
+	public TerrainMesh(
+			final String name,
+			final int objectId,
+			final int width,
+			final int length,
+			final int maxHeight,
+			final Integer[][] cellHeight,
+			final ColorMaterial[][] materialType,
+			final int[][] faceIndices,
+			final Vec3fAttribArray vertices,
+			final UIntAttribArray indices,
+			final JavaAttribArray... attribs) {
 		super(name, null, vertices, indices, attribs);
 		this.objectId = objectId;
 		this.width = width;
@@ -64,7 +73,6 @@ public class TerrainMesh extends LoadedMesh {
 			default -> ColorMaterial.BROWN;
 			case 1 -> ColorMaterial.LIGHT_BROWN;
 			case 2 -> ColorMaterial.DARK_BROWN;
-			case 3 -> ColorMaterial.DARK_GRAY;
 			});
 		}
 		this.grown[tile.x()][tile.y()] = a;

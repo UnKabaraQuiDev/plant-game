@@ -76,18 +76,18 @@ public class TerrainGameObject extends VariationMeshGameObject
 
 	private static final int WET_BIT_INDEX = 21;
 	private static final int WET_BITS = 4;
-	private static final int WET_MASK = ((1 << WET_BITS) - 1) << WET_BIT_INDEX;
+	private static final int WET_MASK = (1 << WET_BITS) - 1 << WET_BIT_INDEX;
 // ===== GRASS =====
 	private static final int SMALL_GRASS_LEVEL = 0;
 	private static final int MEDIUM_GRASS_LEVEL = 1;
 	private static final int LARGE_GRASS_LEVEL = 2;
 
 // ===== DATA =====
-	protected final int width;
-	protected final int length;
+	protected int width;
+	protected int length;
 
-	protected final byte[] moisture;
-	protected final int[] population;
+	protected byte[] moisture;
+	protected int[] population;
 
 	protected WeakReference<InstanceSmallGrassObject> smallGrass;
 	protected WeakReference<InstanceMediumGrassObject> mediumGrass;
@@ -106,19 +106,20 @@ public class TerrainGameObject extends VariationMeshGameObject
 	public TerrainGameObject(final String str, final TerrainMesh mesh) {
 		super(str, mesh);
 		super.setTransform(new Transform3DPivot());
-
-		this.width = mesh.getWidth();
-		this.length = mesh.getLength();
-
-		this.moisture = new byte[this.width * this.length];
-		this.population = new int[this.width * this.length];
 	}
 
 	public ObjectTriggerLatch<TerrainGameObject> init() {
 		synchronized (this) {
-			if (this.getSmallGrassObject() != null && this.getMediumGrassObject() != null && this.getLargeGrassObject() != null) {
-				return new ObjectTriggerLatch<>(0, this);
+			if (this.moisture != null) {
+				throw new IllegalStateException("This TerrainGameObject was already initialized.");
 			}
+
+			final TerrainMesh mesh = this.getMesh();
+			this.width = mesh.getWidth();
+			this.length = mesh.getLength();
+
+			this.moisture = new byte[this.width * this.length + 1];
+			this.population = new int[this.width * this.length + 1];
 		}
 
 		final ObjectTriggerLatch<TerrainGameObject> latch = new ObjectTriggerLatch<>(6, this);
@@ -180,70 +181,92 @@ public class TerrainGameObject extends VariationMeshGameObject
 
 	@Override
 	public void randomTick(final WindowInputHandler inputHandler, final WorldLevelScene worldLevelScene) {
-		System.err.println("random tick terrain");
 		this.decayTick();
 	}
 
 	private int idx(final int x, final int y) {
-		return x + y * this.width;
+		assert !(x < 0 || x >= this.width || y < 0 || y >= this.length) : "(" + x + ", " + y + ")";
+		return x < 0 || x >= this.width || y < 0 || y >= this.length ? this.width * this.length : x + y * this.width;
 	}
 
 	private int idx(final Vector2ic tile) {
-		return tile.x() + tile.y() * this.width;
+		assert !(tile.x() < 0 || tile.x() >= this.width || tile.y() < 0 || tile.y() >= this.length) : tile;
+		return tile.x() < 0 || tile.x() >= this.width || tile.y() < 0 || tile.y() >= this.length ? this.width * this.length
+				: tile.x() + tile.y() * this.width;
 	}
 
-	// ===== TICK =====
 	public void decayTick() {
 		final TerrainMesh mesh = this.getMesh();
 
-		for (int i = 0; i < this.population.length; i++) {
+		for (int i = 0; i < this.length * this.width; i++) {
+			int p = this.population[i];
 
-			final int p = this.population[i];
-
-			final int wet = getWet(p);
+			// ===== WET HANDLING =====
+			int wet = getWet(p);
 			if (wet > 0) {
 				this.population[i] = setWet(p, wet - 1);
 				continue;
 			}
 
+			// ===== MOISTURE DECAY =====
 			int m = this.moisture[i] & 0xFF;
-			if (m == 0) {
-				continue;
+			if (m > 0) {
+				m = Math.max(0, m - MOISTURE_DECAY);
+				this.moisture[i] = (byte) m;
 			}
-
-			m = Math.max(0, m - MOISTURE_DECAY);
-			this.moisture[i] = (byte) m;
 
 			final int x = i % this.width;
 			final int y = i / this.width;
 			final Vector2i tile = new Vector2i(x, y);
 
+			// ===== FLOWER =====
 			if (m < MOISTURE_FLOWER) {
 				this.removeFlower(tile);
 			}
 
-			final OptionalInt grass = this.getGrassLevel(i);
+			// ===== GROUND COLOR =====
+			/*
+			 * if (m >= MOISTURE_GROWN) { mesh.setGrown(tile, true); this.population[i] |= GREEN_BIT; } else
+			 */ {
+				mesh.setGrown(tile, false);
+				this.population[i] &= ~GREEN_BIT;
+			}
 
-			if (grass.isPresent()) {
-				if ((p & DRY_GRASS_BIT) == 0) {
-					this.convertGrassToDry(tile);
-					continue;
-				}
+			// ===== GRASS HANDLING =====
+			OptionalInt grass = this.getGrassLevel(i);
 
-				switch (grass.getAsInt()) {
-				case LARGE_GRASS_LEVEL -> this.addGrass(tile, MEDIUM_GRASS_LEVEL);
-				case MEDIUM_GRASS_LEVEL -> this.addGrass(tile, SMALL_GRASS_LEVEL);
-				case SMALL_GRASS_LEVEL -> this.removeGrass(tile);
-				}
+			// --- NO GRASS CASE ---
+			if (grass.isEmpty()) {
+//				if (m >= MOISTURE_SMALL) {
+//					if (m >= MOISTURE_LARGE) {
+//						this.addGrass(tile, LARGE_GRASS_LEVEL);
+//					} else if (m >= MOISTURE_MEDIUM) {
+//						this.addGrass(tile, MEDIUM_GRASS_LEVEL);
+//					} else {
+//						this.addGrass(tile, SMALL_GRASS_LEVEL);
+//					}
+//				}
 				continue;
 			}
 
-			if (m >= MOISTURE_GROWN) {
-				mesh.setGrown(tile, true);
-				this.population[i] |= GREEN_BIT;
-			} else {
-				mesh.setGrown(tile, false);
-				this.population[i] &= ~GREEN_BIT;
+			// --- GRASS EXISTS ---
+			boolean isDry = (this.population[i] & DRY_GRASS_BIT) != 0;
+
+			// Step 1: convert to dry when too little moisture
+			if (!isDry && m < MOISTURE_SMALL) {
+				this.convertGrassToDry(tile);
+				continue;
+			}
+
+			// Step 2: shrink based on moisture
+			if (isDry) {
+				if (m < MOISTURE_SMALL) {
+					this.removeGrass(tile);
+				} /*
+					 * else if (m < MOISTURE_MEDIUM) { this.addGrass(tile, SMALL_GRASS_LEVEL); } else if (m <
+					 * MOISTURE_LARGE) { this.addGrass(tile, MEDIUM_GRASS_LEVEL); } else { this.addGrass(tile,
+					 * LARGE_GRASS_LEVEL); }
+					 */
 			}
 		}
 	}
@@ -257,10 +280,18 @@ public class TerrainGameObject extends VariationMeshGameObject
 			});
 		}
 
-		obj.forEachCell(i -> this.population[this.idx(i)] |= BUILT_BIT);
+		final TerrainMesh mesh = this.getMesh();
+		obj.forEachCell(i -> {
+			this.population[this.idx(i)] |= BUILT_BIT;
+			mesh.setColorMaterial(i, ColorMaterial.DARK_GRAY);
+		});
 	}
 
 	private void removeFlower(final Vector2i tile) {
+		if (tile.x() < 0 || tile.x() >= this.width || tile.y() < 0 || tile.y() >= this.length) {
+			return;
+		}
+
 		final int i = this.idx(tile);
 
 		if ((this.population[i] & FLOWER_BIT) == 0) {
@@ -272,6 +303,10 @@ public class TerrainGameObject extends VariationMeshGameObject
 	}
 
 	private void removeGrass(final Vector2i tile) {
+		if (tile.x() < 0 || tile.x() >= this.width || tile.y() < 0 || tile.y() >= this.length) {
+			return;
+		}
+
 		final int i = this.idx(tile);
 
 		final OptionalInt grass = this.getGrassLevel(i);
@@ -304,9 +339,17 @@ public class TerrainGameObject extends VariationMeshGameObject
 	}
 
 	public void addWater(final Vector2i tile, final float amount) {
+		if (tile.x() < 0 || tile.x() >= this.width || tile.y() < 0 || tile.y() >= this.length) {
+			return;
+		}
+
 		final int i = this.idx(tile.x(), tile.y());
 
 		this.population[i] = setWet(this.population[i], WET_LEVEL_ON_WATER);
+
+		if ((this.population[i] & BUILT_BIT) != 0) {
+			return;
+		}
 
 		int m = this.moisture[i] & 0xFF;
 		m = Math.min(MAX_MOISTURE, m + (int) (amount * WATER_GROW_SPEED));
@@ -327,16 +370,13 @@ public class TerrainGameObject extends VariationMeshGameObject
 	}
 
 	private void addFlower(final Vector2i tile) {
+		if (tile.x() < 0 || tile.x() >= this.width || tile.y() < 0 || tile.y() >= this.length) {
+			return;
+		}
+
 		final int i = this.idx(tile);
 
-		if ((this.population[i] & BUILT_BIT) != 0) {
-			return;
-		}
-		if ((this.population[i] & FLOWER_BIT) != 0) {
-			return;
-		}
-
-		if (Math.random() >= 0.5) {
+		if (((this.population[i] & BUILT_BIT) != 0) || ((this.population[i] & FLOWER_BIT) != 0) || (Math.random() >= 0.5)) {
 			return;
 		}
 
@@ -344,21 +384,11 @@ public class TerrainGameObject extends VariationMeshGameObject
 
 		p &= ~FLOWER_TYPE_BIT_MASK;
 		p |= FLOWER_BIT;
-		p |= (1 << FLOWER_TYPE_FIRST_BIT_INDEX) & FLOWER_TYPE_BIT_MASK;
+
+		final int flowerType = PCUtils.randomIntRange(0, 16);
+		p |= (flowerType << FLOWER_TYPE_FIRST_BIT_INDEX) & FLOWER_TYPE_BIT_MASK;
 
 		this.population[i] = p;
-	}
-
-	private OptionalInt getFlower(final Vector2i tile) {
-		if ((this.population[this.idx(tile)] & FLOWER_BIT) == 0) {
-			return OptionalInt.empty();
-		}
-
-		return OptionalInt.of((this.population[this.idx(tile)] & FLOWER_TYPE_BIT_MASK) >> FLOWER_TYPE_FIRST_BIT_INDEX);
-	}
-
-	private OptionalInt getGrassLevel(final Vector2ic tile) {
-		return this.getGrassLevel(this.idx(tile));
 	}
 
 	private OptionalInt getGrassLevel(final int i) {
@@ -376,6 +406,10 @@ public class TerrainGameObject extends VariationMeshGameObject
 	}
 
 	private void addGrass(final Vector2i tile, final int level) {
+		if (tile.x() < 0 || tile.x() >= this.width || tile.y() < 0 || tile.y() >= this.length) {
+			return;
+		}
+
 		final int i = this.idx(tile);
 
 		if (level < SMALL_GRASS_LEVEL || level > LARGE_GRASS_LEVEL) {
@@ -434,12 +468,16 @@ public class TerrainGameObject extends VariationMeshGameObject
 
 		// set instance id (FIXED precedence)
 		p &= ~GRASS_ID_BIT_MASK;
-		p |= (PCUtils.clamp(0, GRASS_ID_MAX, instanceId) << GRASS_ID_FIRST_BIT_INDEX) & GRASS_ID_BIT_MASK;
+		p |= PCUtils.clamp(0, GRASS_ID_MAX, instanceId) << GRASS_ID_FIRST_BIT_INDEX & GRASS_ID_BIT_MASK;
 
 		this.population[i] = p;
 	}
 
 	private void convertGrassToDry(final Vector2i tile) {
+		if (tile.x() < 0 || tile.x() >= this.width || tile.y() < 0 || tile.y() >= this.length) {
+			return;
+		}
+
 		final int i = this.idx(tile);
 
 		final OptionalInt grass = this.getGrassLevel(i);
@@ -455,19 +493,19 @@ public class TerrainGameObject extends VariationMeshGameObject
 		// remove green
 		switch (grass.getAsInt()) {
 		case SMALL_GRASS_LEVEL -> {
-			var o = this.getSmallGrassObject();
+			final var o = this.getSmallGrassObject();
 			if (o != null) {
 				o.removeInstance(instanceIndex);
 			}
 		}
 		case MEDIUM_GRASS_LEVEL -> {
-			var o = this.getMediumGrassObject();
+			final var o = this.getMediumGrassObject();
 			if (o != null) {
 				o.removeInstance(instanceIndex);
 			}
 		}
 		case LARGE_GRASS_LEVEL -> {
-			var o = this.getLargeGrassObject();
+			final var o = this.getLargeGrassObject();
 			if (o != null) {
 				o.removeInstance(instanceIndex);
 			}
@@ -479,19 +517,19 @@ public class TerrainGameObject extends VariationMeshGameObject
 
 		switch (grass.getAsInt()) {
 		case SMALL_GRASS_LEVEL -> {
-			var o = this.getDeadSmallGrassObject();
+			final var o = this.getDeadSmallGrassObject();
 			if (o != null) {
 				newId = o.addInstance(pos);
 			}
 		}
 		case MEDIUM_GRASS_LEVEL -> {
-			var o = this.getDeadMediumGrassObject();
+			final var o = this.getDeadMediumGrassObject();
 			if (o != null) {
 				newId = o.addInstance(pos);
 			}
 		}
 		case LARGE_GRASS_LEVEL -> {
-			var o = this.getDeadLargeGrassObject();
+			final var o = this.getDeadLargeGrassObject();
 			if (o != null) {
 				newId = o.addInstance(pos);
 			}
@@ -502,13 +540,9 @@ public class TerrainGameObject extends VariationMeshGameObject
 		np |= DRY_GRASS_BIT;
 
 		np &= ~GRASS_ID_BIT_MASK;
-		np |= (PCUtils.clamp(0, GRASS_ID_MAX, newId) << GRASS_ID_FIRST_BIT_INDEX) & GRASS_ID_BIT_MASK;
+		np |= PCUtils.clamp(0, GRASS_ID_MAX, newId) << GRASS_ID_FIRST_BIT_INDEX & GRASS_ID_BIT_MASK;
 
 		this.population[i] = np;
-	}
-
-	private static boolean isInBounds(final TerrainMesh mesh, final Vector2i tile) {
-		return tile.x() >= 0 && tile.x() < mesh.getWidth() && tile.y() >= 0 && tile.y() < mesh.getLength();
 	}
 
 	private static int getWet(final int p) {
