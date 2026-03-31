@@ -171,6 +171,10 @@ public class PGLogic extends GameLogic {
 		renderCleanup(this.worldScene);
 		renderCleanup(this.overlayUIScene);
 		renderCleanup(this.uiScene);
+		this.gameWorldScene = null;
+		this.worldScene = null;
+		this.overlayUIScene = null;
+		this.uiScene = null;
 
 		final LevelData levelData = currentLevelDefinition.getLevelData();
 		final IntPointer progress = new IntPointer(0);
@@ -193,6 +197,7 @@ public class PGLogic extends GameLogic {
 
 	public void resumeLevel(final LevelDefinition currentLevelDefinition) {
 		System.err.println("not supported");
+		throw new UnsupportedOperationException();
 	}
 
 	@Override

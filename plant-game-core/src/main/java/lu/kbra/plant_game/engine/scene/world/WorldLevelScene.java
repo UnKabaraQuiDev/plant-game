@@ -616,6 +616,7 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController, S
 
 	@Override
 	public void cleanup() {
+		new Exception(this.name).fillInStackTrace().printStackTrace();
 		this.worldCache.cleanup();
 		super.cleanup();
 	}
