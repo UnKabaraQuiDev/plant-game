@@ -43,7 +43,7 @@ public interface SprinklerObject extends NeedsRandomTick, PlaceableObject, Water
 
 	default Vector2ic[] getOffsets(final Direction rotation) {
 		final Vector2ic[][] cachedOffsets = this.getCachedOffsets();
-		System.err.println(getClass().getSimpleName() + ": " + Arrays.deepToString(cachedOffsets));
+
 		if (cachedOffsets[rotation.getIndex()] != null) {
 			return cachedOffsets[rotation.getIndex()];
 		}

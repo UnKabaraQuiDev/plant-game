@@ -198,13 +198,22 @@ public class TerrainGameObject extends VariationMeshGameObject
 	public void decayTick() {
 		final TerrainMesh mesh = this.getMesh();
 
-		for (int i = 0; i < this.length * this.width; i++) {
+		int completed = 0;
+		final int total = this.length * this.width;
+
+		for (int i = 0; i < total; i++) {
 			int p = this.population[i];
 
 			// ===== WET HANDLING =====
-			int wet = getWet(p);
+			final int wet = getWet(p);
 			if (wet > 0) {
-				this.population[i] = setWet(p, wet - 1);
+				p = setWet(p, wet - 1);
+				this.population[i] = p;
+
+				// even if wet, still count progress
+				if ((p & BUILT_BIT) != 0 || ((this.moisture[i] & 0xFF) >= MOISTURE_MEDIUM)) {
+					completed++;
+				}
 				continue;
 			}
 
@@ -225,50 +234,38 @@ public class TerrainGameObject extends VariationMeshGameObject
 			}
 
 			// ===== GROUND COLOR =====
-			/*
-			 * if (m >= MOISTURE_GROWN) { mesh.setGrown(tile, true); this.population[i] |= GREEN_BIT; } else
-			 */ {
-				mesh.setGrown(tile, false);
-				this.population[i] &= ~GREEN_BIT;
-			}
+			mesh.setGrown(tile, false);
+			p &= ~GREEN_BIT;
 
 			// ===== GRASS HANDLING =====
-			OptionalInt grass = this.getGrassLevel(i);
+			final OptionalInt grass = this.getGrassLevel(i);
 
-			// --- NO GRASS CASE ---
-			if (grass.isEmpty()) {
-//				if (m >= MOISTURE_SMALL) {
-//					if (m >= MOISTURE_LARGE) {
-//						this.addGrass(tile, LARGE_GRASS_LEVEL);
-//					} else if (m >= MOISTURE_MEDIUM) {
-//						this.addGrass(tile, MEDIUM_GRASS_LEVEL);
-//					} else {
-//						this.addGrass(tile, SMALL_GRASS_LEVEL);
-//					}
-//				}
-				continue;
-			}
+			if (grass.isPresent()) {
+				final boolean isDry = (p & DRY_GRASS_BIT) != 0;
 
-			// --- GRASS EXISTS ---
-			boolean isDry = (this.population[i] & DRY_GRASS_BIT) != 0;
-
-			// Step 1: convert to dry when too little moisture
-			if (!isDry && m < MOISTURE_SMALL) {
-				this.convertGrassToDry(tile);
-				continue;
-			}
-
-			// Step 2: shrink based on moisture
-			if (isDry) {
-				if (m < MOISTURE_SMALL) {
+				// Step 1: convert to dry
+				if (!isDry && m < MOISTURE_SMALL) {
+					this.convertGrassToDry(tile);
+					p = this.population[i]; // refresh after mutation
+				}
+				// Step 2: remove dry grass
+				else if (isDry && m < MOISTURE_SMALL) {
 					this.removeGrass(tile);
-				} /*
-					 * else if (m < MOISTURE_MEDIUM) { this.addGrass(tile, SMALL_GRASS_LEVEL); } else if (m <
-					 * MOISTURE_LARGE) { this.addGrass(tile, MEDIUM_GRASS_LEVEL); } else { this.addGrass(tile,
-					 * LARGE_GRASS_LEVEL); }
-					 */
+					p = this.population[i]; // refresh
+				}
+			}
+
+			this.population[i] = p;
+
+			// ===== PROGRESS COUNT =====
+			if ((p & BUILT_BIT) != 0 || m >= MOISTURE_MEDIUM) {
+				completed++;
 			}
 		}
+
+		System.err.println(completed + " / " + total + " = " + (byte) (completed * 100 / total));
+
+		this.getParent().getGameData().setProgress((byte) (completed * 100 / total));
 	}
 
 	public void place(final Optional<Vector2i> source, final Optional<Direction> sourceDir, final PlaceableObject obj) {
@@ -378,7 +375,7 @@ public class TerrainGameObject extends VariationMeshGameObject
 
 		final int i = this.idx(tile);
 
-		if (((this.population[i] & BUILT_BIT) != 0) || ((this.population[i] & FLOWER_BIT) != 0) || (Math.random() >= 0.5)) {
+		if ((this.population[i] & BUILT_BIT) != 0 || (this.population[i] & FLOWER_BIT) != 0 || Math.random() >= 0.5) {
 			return;
 		}
 
@@ -388,7 +385,7 @@ public class TerrainGameObject extends VariationMeshGameObject
 		p |= FLOWER_BIT;
 
 		final int flowerType = PCUtils.randomIntRange(0, 16);
-		p |= (flowerType << FLOWER_TYPE_FIRST_BIT_INDEX) & FLOWER_TYPE_BIT_MASK;
+		p |= flowerType << FLOWER_TYPE_FIRST_BIT_INDEX & FLOWER_TYPE_BIT_MASK;
 
 		this.population[i] = p;
 	}

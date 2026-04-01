@@ -1,5 +1,7 @@
 package lu.kbra.plant_game.engine.entity.ui.text;
 
+import java.util.function.Function;
+
 import lu.kbra.pclib.PCUtils;
 import lu.kbra.plant_game.PGLogic;
 import lu.kbra.plant_game.engine.entity.impl.NeedsPostConstruct;
@@ -33,10 +35,44 @@ public class IntegerTextUIObject extends ProgrammaticTextUIObject implements Nee
 		}
 	}
 
+	public void updateTextContent(final String suffix) {
+		super.getTextEmitter().setText(this.buildText(suffix));
+		if (this.colorMaterial != null) {
+			this.getTextEmitter().setForegroundColor(this.colorMaterial.getColor());
+		}
+	}
+
+	public void updateTextContent(final Function<String, String> transformer) {
+		super.getTextEmitter().setText(transformer.apply(this.buildText()));
+		if (this.colorMaterial != null) {
+			this.getTextEmitter().setForegroundColor(this.colorMaterial.getColor());
+		}
+	}
+
 	public String buildText() {
-		return (this.forceSign && this.value >= 0 ? "+" : "") + (this.padding ? PCUtils
-				.leftPadString(Integer.toString(this.value), this.paddingZero ? "0" : " ", this.paddingLength + (this.forceSign ? -1 : 0))
-				: Integer.toString(this.value));
+		return this.buildText(null);
+	}
+
+	public String buildText(final String suffix) {
+		final String sign = (this.forceSign && this.value >= 0) ? "+" : "";
+		final String number = Integer.toString(this.value);
+		final String fullSuffix = suffix == null ? "" : suffix;
+
+		if (!this.padding) {
+			return sign + number + fullSuffix;
+		}
+
+		final int availableLength = this.paddingLength - fullSuffix.length() - sign.length();
+
+		String trimmedNumber = number;
+
+		if (trimmedNumber.length() > availableLength) {
+			trimmedNumber = trimmedNumber.substring(trimmedNumber.length() - availableLength);
+		}
+
+		final String padded = PCUtils.leftPadString(trimmedNumber, this.paddingZero ? "0" : " ", Math.max(0, availableLength));
+
+		return sign + padded + fullSuffix;
 	}
 
 	public int getValue() {
@@ -50,9 +86,13 @@ public class IntegerTextUIObject extends ProgrammaticTextUIObject implements Nee
 
 	public void flushValue() {
 		this.updateTextContent();
-		PGLogic.INSTANCE.RENDER_DISPATCHER.post(() -> {
-			this.updateText();
-		});
+		PGLogic.INSTANCE.RENDER_DISPATCHER.post(this::updateText);
+	}
+
+	public void flushValue(final String suffix) {
+		this.updateTextContent(suffix);
+		System.err.println("text: " + this.getTextEmitter().getText());
+		PGLogic.INSTANCE.RENDER_DISPATCHER.post(this::updateText);
 	}
 
 	public boolean isForceSign() {

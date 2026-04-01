@@ -41,7 +41,6 @@ import lu.kbra.plant_game.plugin.registry.LevelRegistry;
 import lu.kbra.plant_game.plugin.registry.LevelRegistry.LevelDefinition;
 import lu.kbra.standalone.gameengine.impl.Cleanupable;
 import lu.kbra.standalone.gameengine.impl.GameLogic;
-import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
 import lu.kbra.standalone.gameengine.impl.future.WorkerDispatcher;
 
 public class PGLogic extends GameLogic {
@@ -184,17 +183,12 @@ public class PGLogic extends GameLogic {
 
 		this.overlayUIScene = new OverlayUIScene(this.cache);
 		UIObjectFactory.INSTANCE = new UIObjectFactory(this.overlayUIScene.getCache(), this.WORKERS, this.RENDER_DISPATCHER);
-		new TaskFuture<>(this.WORKERS, (Runnable) () -> {
-			this.overlayUIScene.init(this.WORKERS, this.WORKERS, this.gameData).thenOther(OverlayUIScene::doLayout);
-			this.uiScene = this.overlayUIScene;
-		}).push();
+		this.overlayUIScene.init(this.WORKERS, this.WORKERS, this.gameData).then(o -> this.uiScene = this.overlayUIScene);
 
 		this.gameWorldScene = new WorldLevelScene(levelData.getInternalName(), this.cache);
 		GameObjectFactory.INSTANCE = new GameObjectFactory(this.gameWorldScene.getCache(), this.WORKERS, this.RENDER_DISPATCHER);
-		new TaskFuture<>(this.WORKERS, (Runnable) () -> {
-			this.gameWorldScene.init(this.WORKERS, this.RENDER_DISPATCHER, this.gameData, progress);
-			this.worldScene = this.gameWorldScene;
-		}).push();
+		this.gameWorldScene.init(this.WORKERS, this.RENDER_DISPATCHER, this.gameData, progress)
+				.then(o -> this.worldScene = this.gameWorldScene);
 	}
 
 	public void resumeLevel(final LevelDefinition currentLevelDefinition) {

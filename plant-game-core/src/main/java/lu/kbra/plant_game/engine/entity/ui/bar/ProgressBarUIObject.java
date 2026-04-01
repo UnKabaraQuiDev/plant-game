@@ -108,7 +108,6 @@ public class ProgressBarUIObject extends OffsetUIObjectGroup implements LimitedO
 
 	public ProgressBarUIObject setValue(final float value) {
 		this.value = PCUtils.clamp(0, 1, value);
-		// this.updateScaling();
 		return this;
 	}
 

@@ -13,7 +13,6 @@ import lu.kbra.plant_game.base.scene.overlay.group.building.BuildingTabUIObjectG
 import lu.kbra.plant_game.base.scene.overlay.group.impl.AnchoredLayoutUIObjectGroup;
 import lu.kbra.plant_game.base.scene.overlay.stat_line.integer.ExtAnchoredIntegerStatLine;
 import lu.kbra.plant_game.base.scene.overlay.stat_line.integer.IntegerStatLine;
-import lu.kbra.plant_game.engine.UpdateFrameState;
 import lu.kbra.plant_game.engine.entity.ui.FlatQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.bar.AnchoredProgressBarUIObject;
@@ -24,8 +23,6 @@ import lu.kbra.plant_game.engine.entity.ui.icon.WaterIconUIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.PaddingOwner;
 import lu.kbra.plant_game.engine.entity.ui.prim.BuildingItemUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.text.IntegerTextUIObject;
-import lu.kbra.plant_game.engine.entity.ui.text.PercentageIntTextUIObject;
-import lu.kbra.plant_game.engine.entity.ui.text.PercentageSignedIntTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.SignedIntegerTextUIObject;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
@@ -68,15 +65,19 @@ public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner
 
 	protected Layout layout;
 
+	protected GameData gameData;
+
 	public OverlayUIScene(final CacheManager parent) {
 		super("game-overlay", parent);
 		this.setLayout(new AnchorLayout());
 	}
 
 	public ObjectTriggerLatch<OverlayUIScene> init(final Dispatcher workers, final Dispatcher renderDispatcher, final GameData gameData) {
+		this.gameData = gameData;
+
 		super.addAll(this.statsGroup);
 
-		final ObjectTriggerLatch<OverlayUIScene> latch = new ObjectTriggerLatch<>(8, this);
+		final ObjectTriggerLatch<OverlayUIScene> latch = new ObjectTriggerLatch<>(7, this);
 		latch.thenOther(OverlayUIScene::doLayout);
 
 		final float height = 0.2f * STATS_GROUP_SCALE;
@@ -154,14 +155,7 @@ public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner
 		this.progressBar.init(FlatQuadUIObject.class, FlatQuadUIObject.class).then(pb -> {
 			this.progressGroup = new ExtAnchoredIntegerStatLine("level-progress-counter");
 			this.progressGroup
-					.init(workers,
-							renderDispatcher,
-							height,
-							4,
-							3,
-							null,
-							PercentageIntTextUIObject.class,
-							PercentageSignedIntTextUIObject.class)
+					.init(workers, renderDispatcher, height, 4, 3, null, IntegerTextUIObject.class, SignedIntegerTextUIObject.class, true)
 					.then(obj -> {
 						obj.getValue().setValue(0).flushValue();
 						obj.getPopup().setValue(0).flushValue();
@@ -177,18 +171,6 @@ public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner
 		return latch;
 	}
 
-	@Override
-	public void input(final WindowInputHandler inputHandler, final UpdateFrameState frameState) {
-		super.input(inputHandler, frameState);
-
-//		if (this.progressGroup != null && this.progressBar != null) {
-//			this.progressBar.setForegroundColor(GameEngineUtils.hsvToColorToVec4f((float) Math.sin(PGLogic.TOTAL_TIME()), 1, 1, 1));
-//			this.progressBar.setValue((float) Math.sin(PGLogic.TOTAL_TIME()) / 2 + 0.5f).updateScaling();
-//
-//			this.progressGroup.set((int) (this.progressBar.getValue() * 101)).flushValue();
-//		}
-	}
-
 	int frameCounter = 0;
 
 	@Override
@@ -202,6 +184,9 @@ public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner
 		this.waterGroup.setTarget((int) Math.ceil(PGLogic.INSTANCE.getGameData().getResources().get(DefaultResourceType.WATER)));
 		this.energyGroup.setTarget((int) Math.ceil(PGLogic.INSTANCE.getGameData().getResources().get(DefaultResourceType.ENERGY)));
 		this.moneyGroup.setTarget((int) Math.ceil(PGLogic.INSTANCE.getGameData().getResources().get(DefaultResourceType.MONEY)));
+
+		this.progressBar.setValue(this.gameData.getProgress() / 100f).updateScaling();
+		this.progressGroup.setTarget(this.gameData.getProgress());
 	}
 
 	public BuildingInfoUIObjectGroup getBuildingInfo() {

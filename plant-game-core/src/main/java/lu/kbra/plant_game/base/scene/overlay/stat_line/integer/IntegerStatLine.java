@@ -40,6 +40,7 @@ public class IntegerStatLine extends LayoutOffsetUIObjectGroup implements Limite
 	protected float popupStayDuration = 1 - 2 * this.popupSpawnDuration;
 	protected float progress = 100;
 	protected Interpolator popupSpawnInterpolator = Interpolators.CUBIC_IN;
+	protected boolean percentageMode = false;
 
 	protected int targetValue;
 	protected int lastTargetValue;
@@ -89,7 +90,10 @@ public class IntegerStatLine extends LayoutOffsetUIObjectGroup implements Limite
 			final int popupLength,
 			final Class<T> iconClazz,
 			final Class<V> valueClazz,
-			final Class<P> popupClazz) {
+			final Class<P> popupClazz,
+			final boolean percentage) {
+
+		this.percentageMode = percentage;
 
 		final float iconHeightRatio = height / (float) TexturedQuadMeshUIObject.SQUARE_1_UNIT.getBounds2D().getHeight();
 		final float textHeightRatio = height / UIObjectFactory.DEFAULT_CHAR_SIZE.y();
@@ -149,13 +153,24 @@ public class IntegerStatLine extends LayoutOffsetUIObjectGroup implements Limite
 			final float height,
 			final Class<T> iconClazz,
 			final Class<V> valueClazz,
-			final Class<P> popupClazz) {
-		return this.init(workers, render, height, VALUE_LENGTH, POPUP_LENGTH, iconClazz, valueClazz, popupClazz);
+			final Class<P> popupClazz,
+			final boolean percentage) {
+		return this.init(workers, render, height, VALUE_LENGTH, POPUP_LENGTH, iconClazz, valueClazz, popupClazz, percentage);
 	}
 
-	public void setTarget(final int value) {
+	public <T extends TexturedQuadMeshUIObject, V extends IntegerTextUIObject, P extends SignedIntegerTextUIObject> ObjectTriggerLatch<? extends IntegerStatLine> init(
+			final Dispatcher workers,
+			final Dispatcher render,
+			final float height,
+			final Class<T> iconClazz,
+			final Class<V> valueClazz,
+			final Class<P> popupClazz) {
+		return this.init(workers, render, height, VALUE_LENGTH, POPUP_LENGTH, iconClazz, valueClazz, popupClazz, false);
+	}
+
+	public IntegerStatLine setTarget(final int value) {
 		if (value == this.targetValue) {
-			return;
+			return this;
 		}
 
 		final long now = System.nanoTime();
@@ -178,8 +193,11 @@ public class IntegerStatLine extends LayoutOffsetUIObjectGroup implements Limite
 						? this.popupSpawnDuration
 				: this.progress > 2 * this.popupSpawnDuration + this.popupStayDuration ? 0
 				: this.progress;
+
+		return this;
 	}
 
+	@Deprecated
 	public IntegerStatLine add(final int value) {
 		if (this.getPopup() != null) {
 			this.getPopup().setValue(this.getPopup().getValue() + value);
@@ -187,6 +205,7 @@ public class IntegerStatLine extends LayoutOffsetUIObjectGroup implements Limite
 		return this;
 	}
 
+	@Deprecated
 	public IntegerStatLine set(final int value) {
 		if (this.getPopup() != null && this.getValue() != null) {
 			this.getPopup().setValue(value);
@@ -195,6 +214,7 @@ public class IntegerStatLine extends LayoutOffsetUIObjectGroup implements Limite
 		return this;
 	}
 
+	@Deprecated
 	public IntegerStatLine flushValue() {
 		if (this.getPopup() == null || this.getValue() == null) {
 			return this;
@@ -209,10 +229,6 @@ public class IntegerStatLine extends LayoutOffsetUIObjectGroup implements Limite
 	@Override
 	public void update(final WindowInputHandler input) {
 		if (this.popup == null || this.value == null) {
-			return;
-		}
-
-		if (this.popup.getTextEmitter().getText().contains("%")) {
 			return;
 		}
 
@@ -235,14 +251,18 @@ public class IntegerStatLine extends LayoutOffsetUIObjectGroup implements Limite
 			}
 
 			this.value.setValue(next);
-			this.value.flushValue();
 			this.popup.setValue(step);
-			this.popup.flushValue();
+			if (this.percentageMode) {
+				this.value.flushValue("%");
+				this.popup.flushValue("%");
+			} else {
+				this.value.flushValue();
+				this.popup.flushValue();
+			}
+			this.popup.setActive(true);
 		}
 
 		final float dTime = input.dTime();
-
-//		System.err.println("prog: " + this.progress + " " + this.popupSpawnDuration + " " + this.popupStayDuration);
 
 		if (this.progress < this.popupSpawnDuration) {
 			final float interpol = this.popupSpawnInterpolator.evaluate(this.progress / this.popupSpawnDuration);
@@ -298,6 +318,10 @@ public class IntegerStatLine extends LayoutOffsetUIObjectGroup implements Limite
 
 	public SignedIntegerTextUIObject getPopup() {
 		return this.popup;
+	}
+
+	public boolean isPercentageMode() {
+		return this.percentageMode;
 	}
 
 	@Override

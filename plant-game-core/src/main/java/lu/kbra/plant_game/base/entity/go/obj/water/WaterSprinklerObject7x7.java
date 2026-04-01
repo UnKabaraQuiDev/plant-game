@@ -67,12 +67,17 @@ public class WaterSprinklerObject7x7 extends PlaceableAnimatedGameObject impleme
 
 	@Override
 	public int getMinSprinkledWater() {
-		return 12;
+		return 8;
 	}
 
 	@Override
 	public int getMaxSprinkledWater() {
-		return 22;
+		return 16;
+	}
+
+	@Override
+	public int getRandomTickDuration() {
+		return DEFAULT_RANDOM_TICK_DURATION / 2;
 	}
 
 }

@@ -54,6 +54,18 @@ public class ExtAnchoredIntegerStatLine extends IntegerStatLine implements ExtAn
 	}
 
 	@Override
+	public <T extends TexturedQuadMeshUIObject, V extends IntegerTextUIObject, P extends SignedIntegerTextUIObject> ObjectTriggerLatch<? extends IntegerStatLine> init(
+			final Dispatcher workers,
+			final Dispatcher render,
+			final float height,
+			final Class<T> iconClazz,
+			final Class<V> valueClazz,
+			final Class<P> popupClazz,
+			final boolean percentage) {
+		return super.init(workers, render, height, VALUE_LENGTH, POPUP_LENGTH, iconClazz, valueClazz, popupClazz, percentage);
+	}
+
+	@Override
 	public <T extends TexturedQuadMeshUIObject, V extends IntegerTextUIObject, P extends SignedIntegerTextUIObject> ObjectTriggerLatch<ExtAnchoredIntegerStatLine> init(
 			final Dispatcher workers,
 			final Dispatcher render,
@@ -62,7 +74,8 @@ public class ExtAnchoredIntegerStatLine extends IntegerStatLine implements ExtAn
 			final int popupLength,
 			final Class<T> iconClazz,
 			final Class<V> valueClazz,
-			final Class<P> popupClazz) {
+			final Class<P> popupClazz,
+			final boolean percentage) {
 		return (ObjectTriggerLatch<ExtAnchoredIntegerStatLine>) super.init(workers,
 				render,
 				height,
@@ -70,7 +83,8 @@ public class ExtAnchoredIntegerStatLine extends IntegerStatLine implements ExtAn
 				popupLength,
 				iconClazz,
 				valueClazz,
-				popupClazz);
+				popupClazz,
+				percentage);
 	}
 
 	@Override
