@@ -324,8 +324,6 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController, S
 			}
 		}
 
-		this.resourceBuffer.clear();
-
 		synchronized (this.resourceProducing) {
 			this.resourceProducing.forEach(c -> c.produce(dTime, this.resourceBuffer));
 		}

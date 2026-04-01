@@ -18,6 +18,7 @@ public class ResourceBuffer {
 		this.beginning.clear();
 		this.beginning.putAll(p);
 		this.produced.clear();
+		this.beginning.keySet().forEach(k -> this.produced.put(k, 0f));
 	}
 
 	public void copyFrom(final ResourceBuffer rb) {
@@ -44,6 +45,20 @@ public class ResourceBuffer {
 		}
 
 		this.produced.merge(type, -amount, Float::sum);
+		return true;
+	}
+
+	public boolean tryConsume(final Map<ResourceType, Float> consumedRate, final float multiplier) {
+
+		for (Entry<ResourceType, Float> e : consumedRate.entrySet()) {
+			final float current = this.get(e.getKey());
+			if (current < e.getValue() * multiplier) {
+				return false;
+			}
+		}
+
+		consumedRate.forEach((k, v) -> this.produced.merge(k, -v * multiplier, Float::sum));
+
 		return true;
 	}
 

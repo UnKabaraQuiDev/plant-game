@@ -22,6 +22,7 @@ public class WaterSprinklerObject7x7 extends PlaceableAnimatedGameObject impleme
 	private static final int ROTATION_SPEED = 12;
 
 	protected int currentTileIndex = PCUtils.randomIntRange(0, wateringFootprint.getCellCount());
+	protected boolean working = false;
 
 	public WaterSprinklerObject7x7(final String str, final Mesh mesh, final AnimatedMesh animatedMesh) {
 		super(str, mesh, animatedMesh);
@@ -41,7 +42,8 @@ public class WaterSprinklerObject7x7 extends PlaceableAnimatedGameObject impleme
 	public Matrix4f computeAnimatedTransform(final float t) {
 		this.getTransform()
 				.getMatrix()
-				.mul(this.animatedTransform.identity().rotateY((float) Math.toRadians(t * 12)), this.animatedTransform);
+				.mul(this.animatedTransform.identity().rotateY(this.working ? (float) Math.toRadians(t * ROTATION_SPEED) : 0),
+						this.animatedTransform);
 		return this.animatedTransform;
 	}
 
@@ -66,18 +68,33 @@ public class WaterSprinklerObject7x7 extends PlaceableAnimatedGameObject impleme
 	}
 
 	@Override
-	public int getMinSprinkledWater() {
+	public float getMinSprinkledWater() {
 		return 8;
 	}
 
 	@Override
-	public int getMaxSprinkledWater() {
+	public float getMaxSprinkledWater() {
 		return 16;
 	}
 
 	@Override
 	public int getRandomTickDuration() {
 		return DEFAULT_RANDOM_TICK_DURATION / 2;
+	}
+
+	@Override
+	public float getConsumedEnergy() {
+		return 10;
+	}
+
+	@Override
+	public boolean isWorking() {
+		return this.working;
+	}
+
+	@Override
+	public void setWorking(final boolean working) {
+		this.working = working;
 	}
 
 }

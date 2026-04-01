@@ -1,6 +1,7 @@
 package lu.kbra.plant_game.base.entity.go.obj.water;
 
 import java.util.Arrays;
+import java.util.Map;
 
 import org.joml.Vector2i;
 import org.joml.Vector2ic;
@@ -8,22 +9,29 @@ import org.joml.Vector2ic;
 import lu.kbra.pclib.PCUtils;
 import lu.kbra.pclib.logger.GlobalLogger;
 import lu.kbra.plant_game.base.data.DefaultResourceType;
+import lu.kbra.plant_game.engine.entity.go.impl.EnergyConsumer;
 import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
+import lu.kbra.plant_game.engine.entity.go.impl.WaterConsumer;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
+import lu.kbra.plant_game.engine.scene.world.data.resource.ResourceType;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.utils.consts.Direction;
 
-public interface SprinklerObject extends NeedsRandomTick, PlaceableObject, WateringFootprintOwner {
+public interface SprinklerObject extends NeedsRandomTick, PlaceableObject, WateringFootprintOwner, EnergyConsumer, WaterConsumer {
 
 	@Override
 	default void randomTick(final WindowInputHandler inputHandler, final WorldLevelScene worldLevelScene) {
 		if (this.getTile() == null) {
 			return;
 		}
-		final float amount = PCUtils.randomFloatRange(this.getMinSprinkledWater(), this.getMaxSprinkledWater());
-		if (!worldLevelScene.getResourceBuffer().tryConsume(DefaultResourceType.WATER, amount)) {
+
+		final Map<ResourceType, Float> neededResources = this.getConsumedRate();
+		// TODO: Maybe set the multiplier to 1
+		if (!worldLevelScene.getResourceBuffer().tryConsume(neededResources, this.getRandomTickDuration() / 1_000f)) {
+			this.setWorking(false);
 			return;
 		}
+		this.setWorking(true);
 
 		final int currentTileIndex = this.getCurrentTileIndex();
 		final Vector2ic[] offsets = this.getOffsets(this.getRotation());
@@ -38,7 +46,8 @@ public interface SprinklerObject extends NeedsRandomTick, PlaceableObject, Water
 		}
 		this.setCurrentTileIndex((currentTileIndex + 1) % offsets.length);
 
-		worldLevelScene.getTerrain().addWater(this.getTile().add(offset.x(), offset.y(), new Vector2i()), amount);
+		worldLevelScene.getTerrain()
+				.addWater(this.getTile().add(offset.x(), offset.y(), new Vector2i()), neededResources.get(DefaultResourceType.WATER));
 	}
 
 	default Vector2ic[] getOffsets(final Direction rotation) {
@@ -56,8 +65,18 @@ public interface SprinklerObject extends NeedsRandomTick, PlaceableObject, Water
 
 	int getCurrentTileIndex();
 
-	int getMinSprinkledWater();
+	float getMinSprinkledWater();
 
-	int getMaxSprinkledWater();
+	float getMaxSprinkledWater();
+
+	@Override
+	default float getConsumedWater() {
+		return PCUtils.randomFloatRange(this.getMinSprinkledWater(), this.getMaxSprinkledWater());
+	}
+
+	@Override
+	default Map<ResourceType, Float> getConsumedRate() {
+		return Map.of(DefaultResourceType.WATER, this.getConsumedWater(), DefaultResourceType.ENERGY, this.getConsumedEnergy());
+	}
 
 }
