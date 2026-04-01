@@ -1,3 +1,4 @@
 steamworks-sdk/
 target/
 data/
+!src/**/data/
