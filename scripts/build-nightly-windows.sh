@@ -55,7 +55,7 @@ echo "Cleaning workspace"
 mvn -B "${COMMON_ARGS[@]}" clean
 
 echo "Building Linux native + deploy"
-mvn -B -U -up -Pall,native-build,native-windows "${COMMON_ARGS[@]}" deploy
+mvn -B -up -Pall,native-build,native-windows "${COMMON_ARGS[@]}" deploy
 
 echo "Deploying to Steam"
 mvn -B -up -pl plant-game-core -Psteam-deploy "${COMMON_ARGS[@]}" lu.kbra:steam-deploy:deploy
