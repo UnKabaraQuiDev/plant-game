@@ -49,6 +49,13 @@ public abstract class ResourceRegistry extends PluginRegistry {
 		return RESOURCE_NAMES.get(resource);
 	}
 
+	public static ResourceType getResourceType(final String resource) {
+		if (!RESOURCE_TYPE_DEFS.containsKey(resource)) {
+			throw new NoSuchElementException("Class: " + resource + " isn't registered.");
+		}
+		return RESOURCE_TYPE_DEFS.get(resource);
+	}
+
 	@Override
 	public int getPriority() {
 		return 200;

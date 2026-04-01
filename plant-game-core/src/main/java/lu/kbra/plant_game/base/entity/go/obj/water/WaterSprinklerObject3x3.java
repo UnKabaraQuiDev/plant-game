@@ -4,36 +4,22 @@ import org.joml.Matrix4f;
 import org.joml.Vector2i;
 
 import lu.kbra.pclib.PCUtils;
-import lu.kbra.plant_game.base.data.DefaultResourceType;
+import lu.kbra.plant_game.engine.entity.go.data.Footprint;
 import lu.kbra.plant_game.engine.entity.go.obj.PlaceableAnimatedGameObject;
 import lu.kbra.plant_game.engine.mesh.AnimatedMesh;
-import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
-import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 
 @DataPath("classpath:/models/water-sprinkler-3x3.json")
-public class WaterSprinklerObject3x3 extends PlaceableAnimatedGameObject implements NeedsRandomTick {
+public class WaterSprinklerObject3x3 extends PlaceableAnimatedGameObject implements SprinklerObject {
 
+	protected static Footprint wateringFootprint = new Footprint(new Vector2i(-2, -2), new Vector2i(2, 2));
 	private static final int ROTATION_SPEED = 12;
+
+	protected int currentTileIndex = PCUtils.randomIntRange(0, OFFSETS.length);
 
 	public WaterSprinklerObject3x3(final String str, final Mesh mesh, final AnimatedMesh animatedMesh) {
 		super(str, mesh, animatedMesh);
-	}
-
-	@Override
-	public void randomTick(final WindowInputHandler inputHandler, final WorldLevelScene worldLevelScene) {
-		if (this.tile == null) {
-			return;
-		}
-		final float amount = PCUtils.randomFloatRange(2, 5);
-		if (!worldLevelScene.getResourceBuffer().tryConsume(DefaultResourceType.WATER, amount)) {
-			return;
-		}
-
-		final int x = PCUtils.randomIntRange(-2, 2);
-		final int z = PCUtils.randomIntRange(-2, 2);
-		worldLevelScene.getTerrain().addWater(this.getTile().add(x, z, new Vector2i()), amount);
 	}
 
 	@Override
@@ -42,6 +28,21 @@ public class WaterSprinklerObject3x3 extends PlaceableAnimatedGameObject impleme
 				.getMatrix()
 				.mul(this.animatedTransform.identity().rotateY((float) Math.toRadians(t * ROTATION_SPEED)), this.animatedTransform);
 		return this.animatedTransform;
+	}
+
+	@Override
+	public Vector2i[] getOffsets() {
+		return OFFSETS;
+	}
+
+	@Override
+	public int getCurrentTileIndex() {
+		return this.currentTileIndex;
+	}
+
+	@Override
+	public void setCurrentTileIndex(final int currentTileIndex) {
+		this.currentTileIndex = currentTileIndex;
 	}
 
 }

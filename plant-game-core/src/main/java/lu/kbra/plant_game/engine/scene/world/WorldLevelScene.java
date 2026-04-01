@@ -28,6 +28,7 @@ import lu.kbra.pclib.pointer.prim.IntPointer;
 import lu.kbra.plant_game.PGLogic;
 import lu.kbra.plant_game.base.data.DefaultKeyOption;
 import lu.kbra.plant_game.base.data.DefaultResourceType;
+import lu.kbra.plant_game.base.entity.go.obj.StarterPodObject;
 import lu.kbra.plant_game.base.entity.go.obj.energy.ResourceProducer;
 import lu.kbra.plant_game.base.entity.go.obj.water.NeedsRandomTick;
 import lu.kbra.plant_game.engine.UpdateFrameState;
@@ -35,6 +36,7 @@ import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.entity.go.GenericGameObject;
 import lu.kbra.plant_game.engine.entity.go.MeshGameObject;
 import lu.kbra.plant_game.engine.entity.go.data.AttributeLocation;
+import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory;
 import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
 import lu.kbra.plant_game.engine.entity.go.impl.ResourceContainer;
 import lu.kbra.plant_game.engine.entity.go.mesh.terrain.TerrainEdgeMesh;
@@ -59,6 +61,7 @@ import lu.kbra.plant_game.engine.scene.world.modal.MoveBuildingModal;
 import lu.kbra.plant_game.engine.scene.world.particle.ParticleManager;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.plant_game.generated.ColorMaterial;
+import lu.kbra.plant_game.plugin.registry.GameObjectRegistry;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.geom.BoundingBox;
 import lu.kbra.standalone.gameengine.geom.Mesh;
@@ -192,7 +195,7 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController, S
 			data.get()
 					.getTerrainWaterObject()
 					.setTransform(new Transform3D(new Vector3f(mesh.getSize().x() / 2,
-							gameData.map(c -> c.getCurrentWaterLevel()).orElse(levelData.getWorld().getWaterLevel().getMin()),
+							gameData.map(GameData::getCurrentWaterLevel).orElse(levelData.getWorld().getWaterLevel().getMin()),
 							mesh.getSize().y() / 2)));
 			data.get().getTerrainWaterObject().setObjectId(WATER_ID);
 			data.get().getTerrainWaterObject().setColorMaterial(ColorMaterial.BLUE);
@@ -203,20 +206,18 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController, S
 
 			this.setTerrain(data.get());
 
-//			GameObjectFactory.create(GameObjectRegistry.<StarterPodObject>getClass(pod.getPodClass()))
-//					.set(i -> i.setTransform(new Transform3D()))
-//					.postInit(c -> data.get().add(c))
-//					.postInit(c -> c.placeDown(this.terrain, pod.getTile(), pod.getDirection()))
-//					.postInit(c -> c.getTransform()
-//							.translationAdd(data.get().getMesh().getBoundingBox().getSize().x() / 2,
-//									0,
-//									data.get().getMesh().getBoundingBox().getSize().z() / 2)
-//							.updateMatrix())
-//					.postInit(c -> worldProgress.add(100))
-//					.latch(latch)
-//					.push();
-
-			latch.countDown();
+			GameObjectFactory.create(GameObjectRegistry.<StarterPodObject>getClass(pod.getPodClass()))
+					.set(i -> i.setTransform(new Transform3D()))
+					.add(data.get())
+					.postInit(c -> c.placeDown(this.terrain, pod.getTile(), pod.getDirection()))
+					.postInit(c -> c.getTransform()
+							.translationAdd(data.get().getMesh().getBoundingBox().getSize().x() / 2,
+									0,
+									data.get().getMesh().getBoundingBox().getSize().z() / 2)
+							.updateMatrix())
+					.postInit(c -> worldProgress.add(100))
+					.latch(latch)
+					.push();
 		}).push();
 
 		return latch;

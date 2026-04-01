@@ -50,7 +50,7 @@ public class MinResourceUnlockRequirement extends AbstractLocalizationString imp
 
 	@Override
 	public boolean isFulfilled(final WorldLevelScene scene) {
-		return false;
+		return scene.getGameData().getResources().getOrDefault(ResourceRegistry.getResourceType(this.resource), 0f) >= this.count;
 	}
 
 	@Override

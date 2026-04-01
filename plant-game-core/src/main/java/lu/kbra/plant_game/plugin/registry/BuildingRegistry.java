@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
 
 import lu.kbra.pclib.PCUtils;
@@ -68,9 +67,10 @@ public abstract class BuildingRegistry extends PluginRegistry {
 		BUILDING_NAMES.put(def.getClazz(), def.getInternalName());
 	}
 
-	public static String getInternalName(final Class<? extends GameObject> clazz) {
+	public static <T extends GameObject & PlaceableObject> String getInternalName(final Class<T> clazz) {
 		if (!BUILDING_NAMES.containsKey(clazz)) {
-			throw new NoSuchElementException("Class: " + clazz + " isn't registered.");
+//			throw new NoSuchElementException("Class: " + clazz + " isn't registered.");
+			return null;
 		}
 		return BUILDING_NAMES.get(clazz);
 	}

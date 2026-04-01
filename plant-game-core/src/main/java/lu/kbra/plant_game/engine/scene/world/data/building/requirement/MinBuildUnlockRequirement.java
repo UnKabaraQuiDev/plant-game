@@ -59,7 +59,10 @@ public class MinBuildUnlockRequirement extends AbstractLocalizationString implem
 
 	@Override
 	public boolean isFulfilled(final WorldLevelScene scene) {
-		return false;
+		return scene.parallelStream()
+				.filter(PlaceableObject.class::isInstance)
+				.filter(c -> this.building.equals(BuildingRegistry.getInternalName((Class) c.getClass())))
+				.count() >= this.count;
 	}
 
 	@Override

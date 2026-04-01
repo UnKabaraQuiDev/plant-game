@@ -183,6 +183,11 @@ public class DeferredCompositor extends AutoCleanupable {
 			+ ".debug_footprints.line_width";
 	public static float DEBUG_FOOTPRINTS_LINE_WIDTH = Float.parseFloat(System.getProperty(DEBUG_FOOTPRINTS_LINE_WIDTH_PROPERTY, "5"));
 
+	public static final String FAIL_ON_INVALID_COMPONENT_PROPERTY = DeferredCompositor.class.getSimpleName() + ".fail_invalid_component";
+	public static boolean FAIL_ON_INVALID_COMPONENT = Boolean.getBoolean(FAIL_ON_INVALID_COMPONENT_PROPERTY);
+	public static final String SYNC_COMPONENT_CHECK_PROPERTY = DeferredCompositor.class.getSimpleName() + ".sync_component_check";
+	public static boolean SYNC_COMPONENT_CHECK = Boolean.getBoolean(SYNC_COMPONENT_CHECK_PROPERTY);
+
 	public static final String GL_LINE_SMOOTHING_PROPERTY = DeferredCompositor.class.getSimpleName() + ".gl_line_smoothing";
 	public static final boolean GL_LINE_SMOOTHING = Boolean.getBoolean(GL_LINE_SMOOTHING_PROPERTY);
 
@@ -535,15 +540,37 @@ public class DeferredCompositor extends AutoCleanupable {
 		}
 	}
 
-	private void checkComponent(final GLObject mesh, final SceneEntity entity) {
+	/**
+	 * @return true if the rendering should be skipped.
+	 */
+	private boolean checkComponent(final GLObject mesh, final SceneEntity entity) {
 		if (mesh == null) {
-			throw new NullPointerException("Mesh is null in " + entity.getId());
+			if (FAIL_ON_INVALID_COMPONENT) {
+				throw new NullPointerException("Mesh is null in " + entity.getId());
+			}
+			GlobalLogger.info("Mesh is null in: " + entity.getId());
+			return true;
 		}
-		synchronized (mesh) {
+		if (SYNC_COMPONENT_CHECK) {
+			synchronized (mesh) {
+				if (mesh == null || !mesh.isValid()) {
+					if (FAIL_ON_INVALID_COMPONENT) {
+						throw new IllegalStateException("Mesh: " + Objects.toString(mesh) + " in " + entity.getId() + " isn't valid.");
+					}
+					GlobalLogger.info("Mesh " + Objects.toString(mesh) + " in " + entity.getId() + " isn't valid.");
+					return true;
+				}
+			}
+		} else {
 			if (mesh == null || !mesh.isValid()) {
-				throw new IllegalStateException("Mesh: " + Objects.toString(mesh) + " in " + entity.getId() + " isn't valid.");
+				if (FAIL_ON_INVALID_COMPONENT) {
+					throw new IllegalStateException("Mesh: " + Objects.toString(mesh) + " in " + entity.getId() + " isn't valid.");
+				}
+				GlobalLogger.info("Mesh " + Objects.toString(mesh) + " in " + entity.getId() + " isn't valid.");
+				return true;
 			}
 		}
+		return false;
 	}
 
 	protected void renderOutlines(final Vector2i resolution, final boolean needRegen) {
@@ -738,7 +765,9 @@ public class DeferredCompositor extends AutoCleanupable {
 
 		if (entity instanceof final MeshOwner mo) {
 			final Mesh mesh = mo.getMesh();
-			this.checkComponent(mesh, entity);
+			if (this.checkComponent(mesh, entity)) {
+				return;
+			}
 
 			this.renderTextureMesh(mesh,
 					alreadyRendered,
@@ -764,7 +793,9 @@ public class DeferredCompositor extends AutoCleanupable {
 
 		if (entity instanceof final InstanceEmitterOwner ieo) {
 			final InstanceEmitter instances = ieo.getInstanceEmitter();
-			this.checkComponent(instances, entity);
+			if (this.checkComponent(instances, entity)) {
+				return;
+			}
 			final Mesh mesh = instances.getParticleMesh();
 
 			this.renderTextureMesh(mesh,
@@ -1111,7 +1142,9 @@ public class DeferredCompositor extends AutoCleanupable {
 			final SceneEntity entity,
 			final Matrix4f transformationMatrix,
 			final RenderShader shader) {
-		this.checkComponent(obj, entity);
+		if (this.checkComponent(obj, entity)) {
+			return;
+		}
 		final Mesh mesh = obj.getParticleMesh();
 		obj.bind();
 		shader.bind();
@@ -1227,7 +1260,9 @@ public class DeferredCompositor extends AutoCleanupable {
 			final SceneEntity entity,
 			final Matrix4f transformationMatrix,
 			final RenderShader shader) {
-		this.checkComponent(obj, entity);
+		if (this.checkComponent(obj, entity)) {
+			return;
+		}
 		final InstanceEmitter instances = obj.getInstances();
 		final Mesh mesh = instances.getParticleMesh();
 		shader.bind();
@@ -1275,7 +1310,9 @@ public class DeferredCompositor extends AutoCleanupable {
 	}
 
 	private void renderMesh(final Mesh mesh, final SceneEntity entity, final Matrix4f transformationMatrix, final RenderShader shader) {
-		this.checkComponent(mesh, entity);
+		if (this.checkComponent(mesh, entity)) {
+			return;
+		}
 		mesh.bind();
 		shader.bind();
 
