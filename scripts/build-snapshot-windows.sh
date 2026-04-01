@@ -42,7 +42,7 @@ COMMON_ARGS=(
   -DaltDeploymentRepository=nexus.kbra.lu-nightly::default::https://nexus.kbra.lu/repository/maven-nightly/
 )
 
-if [ ! -d "${HOME}/.steam" ]; then
+if [ ! -d "C:/steamcmd" ]; then
   if id -u steam >/dev/null 2>&1; then
     COMMON_ARGS+=(-Dsteam.user=steam)
   else
