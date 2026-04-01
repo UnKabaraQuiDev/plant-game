@@ -17,7 +17,7 @@ public abstract class PlaceableAnimatedGameObject extends AnimatedMeshGameObject
 	protected Footprint animatedMeshFootprint;
 	protected Footprint footprint;
 
-	protected Direction rotation = Direction.DEFAULT();
+	protected Direction rotation = Direction.DEFAULT;
 	protected Vector2i tile;
 
 	public PlaceableAnimatedGameObject(final String str, final Mesh mesh, final AnimatedMesh animatedMesh) {

@@ -4,6 +4,7 @@ import org.joml.Vector2i;
 import org.joml.Vector3f;
 
 import lu.kbra.plant_game.engine.entity.go.data.Footprint;
+import lu.kbra.plant_game.engine.entity.go.data.QuadFootprint;
 import lu.kbra.plant_game.engine.entity.impl.FootprintOwner;
 import lu.kbra.plant_game.engine.entity.impl.MeshOwner;
 import lu.kbra.standalone.gameengine.geom.BoundingBox;
@@ -56,16 +57,8 @@ public interface StaticMeshFootprintOwner extends MeshOwner, FootprintOwner {
 			maxZ = minZ + 1;
 		}
 
-		return new Footprint(new Vector2i(minX, minZ), new Vector2i(maxX, maxZ));
+		return new QuadFootprint(new Vector2i(minX, minZ), new Vector2i(maxX, maxZ));
 	}
-
-//	static int min(final float x) {
-//		return x < 0 ? awayFromZero(x) : towardsZero(x);
-//	}
-//
-//	static int max(final float x) {
-//		return x > 0 ? awayFromZero(x) : towardsZero(x);
-//	}
 
 	static int floor(final float x) {
 		return (int) Math.floor(x);
@@ -74,13 +67,5 @@ public interface StaticMeshFootprintOwner extends MeshOwner, FootprintOwner {
 	static int ceil(final float x) {
 		return (int) Math.ceil(x);
 	}
-
-//	static int towardsZero(final float x) {
-//		return (int) x;
-//	}
-//
-//	static int awayFromZero(final float x) {
-//		return (int) Math.copySign(Math.ceil(Math.abs(x)), x);
-//	}
 
 }

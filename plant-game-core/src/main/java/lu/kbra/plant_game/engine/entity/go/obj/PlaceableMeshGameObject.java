@@ -14,7 +14,7 @@ public abstract class PlaceableMeshGameObject extends MeshGameObject
 
 	protected Footprint footprint;
 
-	protected Direction rotation = Direction.DEFAULT();
+	protected Direction rotation = Direction.DEFAULT;
 	protected Vector2i tile;
 
 	public PlaceableMeshGameObject(final String str, final Mesh mesh) {

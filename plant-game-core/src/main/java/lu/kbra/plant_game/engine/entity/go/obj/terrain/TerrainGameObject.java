@@ -357,13 +357,15 @@ public class TerrainGameObject extends VariationMeshGameObject
 
 		if (m >= MOISTURE_FLOWER) {
 			this.addFlower(tile);
-		} else if (m >= MOISTURE_LARGE) {
+		}
+		if (m >= MOISTURE_LARGE) {
 			this.addGrass(tile, LARGE_GRASS_LEVEL);
 		} else if (m >= MOISTURE_MEDIUM) {
 			this.addGrass(tile, MEDIUM_GRASS_LEVEL);
 		} else if (m >= MOISTURE_SMALL) {
 			this.addGrass(tile, SMALL_GRASS_LEVEL);
-		} else if (m >= MOISTURE_GROWN) {
+		}
+		if (m >= MOISTURE_GROWN) {
 			this.getMesh().setGrown(tile, true);
 			this.population[i] |= GREEN_BIT;
 		}

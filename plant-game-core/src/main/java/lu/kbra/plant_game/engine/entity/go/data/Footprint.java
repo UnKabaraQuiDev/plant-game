@@ -1,5 +1,12 @@
 package lu.kbra.plant_game.engine.entity.go.data;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -10,160 +17,280 @@ import org.joml.Vector2ic;
 
 import lu.kbra.standalone.gameengine.utils.consts.Direction;
 
-public class Footprint {
+public abstract class Footprint {
 
-	private final Vector2i min;
-	private final Vector2i max;
-
-	private final Vector2f center;
-	private final Vector2i centerTile;
-	private final Vector2i size;
-
-	public Footprint(final Vector2ic min, final Vector2ic max) {
-		this.min = new Vector2i(min);
-		this.max = new Vector2i(max);
-
-		this.size = new Vector2i();
-		this.centerTile = new Vector2i();
-		this.center = new Vector2f();
-
-		this.recompute();
+	public record Line(Vector2fc a, Vector2fc b) {
 	}
 
-	private void recompute() {
-		this.size.set(this.max.x() - this.min.x(), this.max.y() - this.min.y());
+	protected Set<Vector2ic> cachedCells;
+	protected Set<Line> cachedLines;
+	protected List<List<Vector2fc>> cachedPolygons;
 
-		this.center.set(this.min.x() + this.size.x() * 0.5f, this.min.y() + this.size.y() * 0.5f);
+	public abstract void forEachCell(Vector2ic pivotPos, Direction rotation, Consumer<Vector2i> action);
 
-		this.centerTile.set((int) Math.floor(this.min.x()), (int) Math.floor(this.min.y()));
+	public abstract boolean contains(Direction rotation, Vector2i cell);
+
+	public abstract QuadFootprint toQuad();
+
+	public Set<Vector2ic> computeLocalCells(final Direction rotation) {
+		final Set<Vector2ic> cells = new HashSet<>();
+
+		this.forEachCell(new Vector2i(0), rotation, c -> cells.add(new Vector2i(c)));
+
+		return cells;
 	}
 
-	public Vector2ic getMin() {
-		return this.min;
-	}
+	protected final Set<Vector2ic> getLocalCells() {
+		if (this.cachedCells == null) {
+			final Set<Vector2ic> raw = this.computeLocalCells(Direction.DEFAULT);
 
-	public Vector2ic getMax() {
-		return this.max;
-	}
-
-	public Vector2ic getSize() {
-		return this.size;
-	}
-
-	public Vector2fc getCenter() {
-		return this.center;
-	}
-
-	public Vector2ic getCenterTile() {
-		return this.centerTile;
-	}
-
-	public void setMin(final Vector2ic min) {
-		this.min.set(min);
-		this.recompute();
-	}
-
-	public void setMax(final Vector2ic max) {
-		this.max.set(max);
-		this.recompute();
-	}
-
-	public Footprint getAbsolute(final Direction rotation) {
-		if (rotation == Direction.NONE || rotation == Direction.SOUTH) {
-			return new Footprint(this.min, this.max);
+			this.cachedCells = Set.copyOf(raw);
 		}
-
-		final Vector2i a = rotate(this.min, rotation);
-		final Vector2i b = rotate(this.max, rotation);
-
-		final Vector2i outMin = new Vector2i(Math.min(a.x, b.x), Math.min(a.y, b.y));
-		final Vector2i outMax = new Vector2i(Math.max(a.x, b.x), Math.max(a.y, b.y));
-
-		return new Footprint(outMin, outMax);
-	}
-
-	public boolean intersects(
-			final Direction thisRotation,
-			final Direction otherRotation,
-			final Footprint other,
-			final Vector2ic pivotsOffset) {
-
-		final Footprint a = this.getAbsolute(thisRotation);
-		final Footprint b = other.getAbsolute(otherRotation);
-
-		final Vector2i bMin = new Vector2i(b.min).add(pivotsOffset);
-		final Vector2i bMax = new Vector2i(b.max).add(pivotsOffset);
-
-		return a.min.x < bMax.x && a.max.x > bMin.x && a.min.y < bMax.y && a.max.y > bMin.y;
-	}
-
-	public boolean contains(final Direction rotation, final Vector2i cell) {
-		final Footprint abs = this.getAbsolute(rotation);
-
-		return cell.x >= abs.min.x && cell.y >= abs.min.y && cell.x < abs.max.x && cell.y < abs.max.y;
-	}
-
-	public void forEachCell(final Vector2ic pivotPos, final Direction rotation, final Consumer<Vector2i> action) {
-		final Vector2i tmp = new Vector2i();
-		for (int y = this.min.y(); y < this.max.y(); y++) {
-			for (int x = this.min.x(); x < this.max.x(); x++) {
-				tmp.set(x, y); // local cell
-				rotation.rotate(tmp); // rotate
-				tmp.add(pivotPos); // pivot offset
-				action.accept(tmp);
-			}
-		}
+		return this.cachedCells;
 	}
 
 	public boolean anyCellMatch(final Vector2ic pivotPos, final Direction rotation, final Predicate<Vector2i> predicate) {
-		final Vector2i tmp = new Vector2i();
-		for (int y = this.min.y(); y < this.max.y(); y++) {
-			for (int x = this.min.x(); x < this.max.x(); x++) {
-				tmp.set(x, y);
-				rotation.rotate(tmp);
-				tmp.add(pivotPos);
-				if (predicate.test(tmp)) {
-					return true;
-				}
+		final boolean[] found = { false };
+
+		this.forEachCell(pivotPos, rotation, cell -> {
+			if (!found[0] && predicate.test(cell)) {
+				found[0] = true;
 			}
-		}
-		return false;
+		});
+
+		return found[0];
 	}
 
 	public boolean allCellsMatch(final Vector2ic pivotPos, final Direction rotation, final Predicate<Vector2i> predicate) {
-		final Vector2i tmp = new Vector2i();
-		for (int y = this.min.y(); y < this.max.y(); y++) {
-			for (int x = this.min.x(); x < this.max.x(); x++) {
-				tmp.set(x, y);
-				rotation.rotate(tmp);
-				tmp.add(pivotPos);
-				if (!predicate.test(tmp)) {
-					return false;
-				}
+		final boolean[] all = { true };
+
+		this.forEachCell(pivotPos, rotation, cell -> {
+			if (all[0] && !predicate.test(cell)) {
+				all[0] = false;
 			}
+		});
+
+		return all[0];
+	}
+
+	public boolean intersects(final Direction thisRotation, final Direction otherRotation, final Footprint other, final Vector2ic offset) {
+		return this.anyCellMatch(new Vector2i(), thisRotation, cell -> other.contains(otherRotation, new Vector2i(cell).sub(offset)));
+	}
+
+	public int getCellCount() {
+		if (this.cachedCells == null) {
+			this.cachedCells = this.computeLocalCells(Direction.DEFAULT);
 		}
-		return true;
+		return this.cachedCells.size();
 	}
 
 	@Override
 	public String toString() {
-		return "Footprint [min=" + this.min + ", max=" + this.max + ", center=" + this.center + ", centerTile=" + this.centerTile
-				+ ", size=" + this.size + "]";
+		return "Footprint@" + System.identityHashCode(this) + " []";
+	}
+
+	public final Set<Line> getLineBounds() {
+		if (this.cachedLines != null) {
+			return this.cachedLines;
+		}
+
+		final Set<Vector2ic> cells = this.getLocalCells();
+		final Set<Line> lines = new HashSet<>();
+
+		for (final Vector2ic c : cells) {
+			final int x = c.x();
+			final int y = c.y();
+
+			checkEdge(cells, lines, x, y + 1, x, y + 1, x + 1, y + 1); // top
+			checkEdge(cells, lines, x, y, x, y, x + 1, y); // bottom
+			checkEdge(cells, lines, x - 1, y, x, y, x, y + 1); // left
+			checkEdge(cells, lines, x + 1, y, x + 1, y, x + 1, y + 1); // right
+		}
+
+		this.cachedLines = Set.copyOf(lines);
+		return this.cachedLines;
+	}
+
+	public final List<List<Vector2fc>> getOutlinePolygons() {
+		if (this.cachedPolygons != null) {
+			return this.cachedPolygons;
+		}
+
+		final Set<Line> merged = mergeCollinear(this.getLineBounds());
+		this.cachedPolygons = List.copyOf(buildLoops(merged));
+
+		return this.cachedPolygons;
+	}
+
+	private static void checkEdge(
+			final Set<Vector2ic> cells,
+			final Set<Line> lines,
+			final int nx,
+			final int ny,
+			final int x1,
+			final int y1,
+			final int x2,
+			final int y2) {
+		// if neighbor is NOT inside → this edge is boundary
+		if (!cells.contains(new Vector2i(nx, ny))) {
+			lines.add(new Line(new Vector2f(x1, y1), new Vector2f(x2, y2)));
+		}
+	}
+
+	private static Line normalize(final Line l) {
+		if (l.a().x() < l.b().x()) {
+			return l;
+		}
+		if (l.a().x() > l.b().x()) {
+			return new Line(l.b(), l.a());
+		}
+
+		return l.a().y() <= l.b().y() ? l : new Line(l.b(), l.a());
+	}
+
+	public static List<List<Vector2fc>> buildLoops(final Set<Line> lines) {
+		final Map<Vector2fc, List<Vector2fc>> graph = new HashMap<>();
+
+		for (final Line l : lines) {
+			graph.computeIfAbsent(l.a(), k -> new ArrayList<>()).add(l.b());
+			graph.computeIfAbsent(l.b(), k -> new ArrayList<>()).add(l.a());
+		}
+
+		final List<List<Vector2fc>> loops = new ArrayList<>();
+		final Set<Vector2fc> visited = new HashSet<>();
+
+		for (final Vector2fc start : graph.keySet()) {
+			if (visited.contains(start)) {
+				continue;
+			}
+
+			final List<Vector2fc> loop = new ArrayList<>();
+			Vector2fc current = start;
+			Vector2fc prev = null;
+
+			do {
+				loop.add(current);
+				visited.add(current);
+
+				final List<Vector2fc> neighbors = graph.get(current);
+
+				Vector2fc next = null;
+				for (final Vector2fc n : neighbors) {
+					if (!n.equals(prev)) {
+						next = n;
+						break;
+					}
+				}
+
+				prev = current;
+				current = next;
+
+			} while (current != null && !current.equals(start));
+
+			if (!loop.isEmpty()) {
+				loops.add(loop);
+			}
+		}
+
+		return loops;
+	}
+
+	public static Set<Line> mergeCollinear(final Set<Line> input) {
+		final Map<String, List<Line>> groups = new HashMap<>();
+
+		for (Line l : input) {
+			l = normalize(l);
+
+			final boolean horizontal = l.a().y() == l.b().y();
+			final String key = horizontal ? "H:" + l.a().y() : "V:" + l.a().x();
+
+			groups.computeIfAbsent(key, k -> new ArrayList<>()).add(l);
+		}
+
+		final Set<Line> result = new HashSet<>();
+
+		for (final List<Line> group : groups.values()) {
+			group.sort(Comparator.comparingDouble(l -> l.a().x() + l.a().y()));
+
+			Line current = group.get(0);
+
+			for (int i = 1; i < group.size(); i++) {
+				final Line next = group.get(i);
+
+				if (touching(current, next)) {
+					current = new Line(current.a(), next.b());
+				} else {
+					result.add(current);
+					current = next;
+				}
+			}
+
+			result.add(current);
+		}
+
+		return result;
+	}
+
+	private static boolean touching(final Line a, final Line b) {
+		return a.b().equals(b.a());
+	}
+
+	public static float polygonArea(final List<Vector2f> poly) {
+		float area = 0;
+
+		for (int i = 0; i < poly.size(); i++) {
+			final Vector2f a = poly.get(i);
+			final Vector2f b = poly.get((i + 1) % poly.size());
+
+			area += a.x * b.y - b.x * a.y;
+		}
+
+		return area * 0.5f;
 	}
 
 	public static Footprint union(final Footprint a, final Footprint b) {
-		final Vector2i min = new Vector2i(Math.min(a.min.x, b.min.x), Math.min(a.min.y, b.min.y));
-		final Vector2i max = new Vector2i(Math.max(a.max.x, b.max.x), Math.max(a.max.y, b.max.y));
-
-		return new Footprint(min, max);
+		final Set<Vector2ic> cells = new HashSet<>(a.getLocalCells());
+		cells.addAll(b.getLocalCells());
+		return buildBestFootprint(cells);
 	}
 
-	private static Vector2i rotate(final Vector2ic v, final Direction d) {
-		return switch (d) {
-		case EAST -> new Vector2i(v.y(), -v.x());
-		case WEST -> new Vector2i(-v.y(), v.x());
-		case NORTH -> new Vector2i(-v.x(), -v.y());
-		default -> new Vector2i(v);
-		};
+	public static Footprint intersect(final Footprint a, final Footprint b) {
+		final Set<Vector2ic> cells = new HashSet<>(a.getLocalCells());
+		cells.retainAll(b.getLocalCells());
+		return buildBestFootprint(cells);
 	}
+
+	public static Footprint difference(final Footprint a, final Footprint b) {
+		final Set<Vector2ic> cells = new HashSet<>(a.getLocalCells());
+		cells.removeAll(b.getLocalCells());
+		return buildBestFootprint(cells);
+	}
+
+	private static Footprint buildBestFootprint(final Set<Vector2ic> cells) {
+		if (cells.isEmpty()) {
+			return new FreeformFootprint(new HashSet<>());
+		}
+
+		int minX = Integer.MAX_VALUE;
+		int minY = Integer.MAX_VALUE;
+		int maxX = Integer.MIN_VALUE;
+		int maxY = Integer.MIN_VALUE;
+
+		for (final Vector2ic c : cells) {
+			minX = Math.min(minX, c.x());
+			minY = Math.min(minY, c.y());
+			maxX = Math.max(maxX, c.x());
+			maxY = Math.max(maxY, c.y());
+		}
+
+		final int width = maxX - minX + 1;
+		final int height = maxY - minY + 1;
+
+		if (cells.size() == width * height) {
+			return new QuadFootprint(new Vector2i(minX, minY), new Vector2i(maxX + 1, maxY + 1));
+		}
+
+		return new FreeformFootprint(cells);
+	}
+
 }

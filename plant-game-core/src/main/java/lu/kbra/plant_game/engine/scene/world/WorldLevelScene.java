@@ -23,6 +23,7 @@ import lu.kbra.pclib.datastructure.list.WeakArrayList;
 import lu.kbra.pclib.datastructure.list.WeakList;
 import lu.kbra.pclib.datastructure.pair.Pair;
 import lu.kbra.pclib.datastructure.pair.Pairs;
+import lu.kbra.pclib.logger.GlobalLogger;
 import lu.kbra.pclib.pointer.ObjectPointer;
 import lu.kbra.pclib.pointer.prim.IntPointer;
 import lu.kbra.plant_game.PGLogic;
@@ -618,6 +619,7 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController, S
 
 	@Override
 	public void cleanup() {
+		GlobalLogger.info("Cleaning up: " + this.name);
 		this.worldCache.cleanup();
 		super.cleanup();
 	}

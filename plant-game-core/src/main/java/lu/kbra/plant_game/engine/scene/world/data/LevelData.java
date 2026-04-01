@@ -42,7 +42,7 @@ public class LevelData {
 
 			protected String podClass = StarterPodSmallObject.class.getName();
 			protected Vector2i tile;
-			protected Direction direction = Direction.DEFAULT();
+			protected Direction direction = Direction.DEFAULT;
 
 			public String getPodClass() {
 				return this.podClass;

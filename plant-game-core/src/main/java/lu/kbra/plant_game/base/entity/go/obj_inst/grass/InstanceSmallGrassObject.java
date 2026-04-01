@@ -8,6 +8,7 @@ public class InstanceSmallGrassObject extends GrowingInstanceGameObject {
 
 	public InstanceSmallGrassObject(final String str, final InstanceEmitter ie) {
 		super(str, ie);
+		System.err.println("small grass got: " + ie);
 	}
 
 	@Override

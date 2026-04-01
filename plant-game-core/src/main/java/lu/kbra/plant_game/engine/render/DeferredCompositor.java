@@ -38,10 +38,12 @@ import lu.kbra.pclib.PCUtils;
 import lu.kbra.pclib.logger.GlobalLogger;
 import lu.kbra.pclib.pointer.prim.BooleanPointer;
 import lu.kbra.plant_game.PGLogic;
+import lu.kbra.plant_game.base.entity.go.obj.water.WateringFootprintOwner;
 import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.entity.go.VariationOwner;
 import lu.kbra.plant_game.engine.entity.go.data.AttributeLocation;
 import lu.kbra.plant_game.engine.entity.go.data.Footprint;
+import lu.kbra.plant_game.engine.entity.go.data.QuadFootprint;
 import lu.kbra.plant_game.engine.entity.go.obj.AnimatedMeshFootprintOwner;
 import lu.kbra.plant_game.engine.entity.go.obj.StaticMeshFootprintOwner;
 import lu.kbra.plant_game.engine.entity.impl.AnimatedMeshOwner;
@@ -1056,6 +1058,9 @@ public class DeferredCompositor extends AutoCleanupable {
 		if (entity instanceof final FootprintOwner fo) {
 			this.drawDebugFootprint(parentTransformMatrix, localTransformMatrix, fo.getFootprint(), ColorMaterial.YELLOW);
 		}
+		if (entity instanceof final WateringFootprintOwner fo) {
+			this.drawDebugFootprint(parentTransformMatrix, localTransformMatrix, fo.getWateringFootprint(), ColorMaterial.BLUE);
+		}
 
 		if (entity instanceof final EntityContainer<?> ec) {
 			ec.forEach(child -> this.renderEntityRecursive(child,
@@ -1074,11 +1079,15 @@ public class DeferredCompositor extends AutoCleanupable {
 			final Footprint footprint,
 			final ColorMaterial color) {
 		if (this.deferredPass && DEBUG_FOOTPRINTS && this.deferredTransferShader != null) {
+			if (!(footprint instanceof QuadFootprint)) {
+				this.drawDebugFootprint(parentTransform, localTransform, footprint.toQuad(), color);
+				return;
+			}
 			this.QUAD.bind();
 			this.deferredTransferShader.bind();
 
-			final Vector2fc center = footprint.getCenter();
-			final Vector2ic size = footprint.getSize();
+			final Vector2fc center = ((QuadFootprint) footprint).getCenter();
+			final Vector2ic size = ((QuadFootprint) footprint).getSize();
 
 			final Matrix4f localOffset = new Matrix4f()
 					.translate(center.x() - 0.5f, (float) color.ordinal() / ColorMaterial.values().length, center.y() - 0.5f)
