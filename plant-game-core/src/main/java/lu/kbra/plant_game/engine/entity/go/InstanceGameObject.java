@@ -1,5 +1,7 @@
 package lu.kbra.plant_game.engine.entity.go;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lu.kbra.plant_game.engine.entity.impl.InstanceEmitterOwner;
 import lu.kbra.plant_game.engine.entity.impl.MaterialIdOwner;
 import lu.kbra.standalone.gameengine.geom.instance.InstanceEmitter;
@@ -8,6 +10,8 @@ public class InstanceGameObject extends GenericGameObject implements InstanceEmi
 
 	protected short materialId;
 	protected boolean isEntityMaterialId = true;
+
+	@JsonIgnore
 	protected InstanceEmitter instanceEmitter;
 
 	public InstanceGameObject(final String str, final InstanceEmitter ie) {

@@ -20,6 +20,7 @@ import lu.kbra.plant_game.base.scene.menu.main.MainMenuUIScene;
 import lu.kbra.plant_game.base.scene.overlay.OverlayUIScene;
 import lu.kbra.plant_game.base.scene.world.MainMenuWorldScene;
 import lu.kbra.plant_game.engine.UpdateFrameState;
+import lu.kbra.plant_game.engine.data.json.GameObjectModule;
 import lu.kbra.plant_game.engine.data.json.LevelDataModule;
 import lu.kbra.plant_game.engine.data.json.OrgJOMLModule;
 import lu.kbra.plant_game.engine.data.json.OrgJSONModule;
@@ -42,6 +43,7 @@ import lu.kbra.plant_game.plugin.registry.LevelRegistry.LevelDefinition;
 import lu.kbra.standalone.gameengine.impl.Cleanupable;
 import lu.kbra.standalone.gameengine.impl.GameLogic;
 import lu.kbra.standalone.gameengine.impl.future.WorkerDispatcher;
+import lu.kbra.standalone.gameengine.utils.json.PostDeserializeModule;
 
 public class PGLogic extends GameLogic {
 
@@ -59,6 +61,9 @@ public class PGLogic extends GameLogic {
 		OBJECT_MAPPER.registerModule(new VersionMatcherModule());
 		OBJECT_MAPPER.registerModule(new ResourceTypeModule());
 		OBJECT_MAPPER.registerModule(new LevelDataModule());
+		OBJECT_MAPPER.registerModule(new GameObjectModule());
+
+		OBJECT_MAPPER.registerModule(new PostDeserializeModule());
 	}
 
 	public final WorkerDispatcher WORKERS = new WorkerDispatcher("WORKERS", 8);

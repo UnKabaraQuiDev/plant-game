@@ -2,6 +2,8 @@ package lu.kbra.plant_game.engine.entity.go;
 
 import org.joml.Vector3ic;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lu.kbra.plant_game.engine.entity.go.data.AttributeLocation;
 import lu.kbra.plant_game.engine.entity.impl.MaterialIdOwner;
 import lu.kbra.plant_game.engine.entity.impl.MeshOwner;
@@ -20,6 +22,7 @@ public class MeshGameObject extends GenericGameObject implements MeshOwner, Mate
 	protected short materialId = -1;
 	protected boolean isEntityMaterialId = false;
 
+	@JsonIgnore
 	protected Mesh mesh;
 
 	public MeshGameObject(final String str, final Mesh mesh) {

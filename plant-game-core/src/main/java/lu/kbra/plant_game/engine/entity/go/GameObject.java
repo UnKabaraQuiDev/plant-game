@@ -3,10 +3,13 @@ package lu.kbra.plant_game.engine.entity.go;
 import org.joml.Vector3i;
 import org.joml.Vector3ic;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
 import lu.kbra.plant_game.engine.entity.impl.ObjectIdOwner;
 import lu.kbra.plant_game.engine.entity.impl.Transform3DOwner;
 import lu.kbra.standalone.gameengine.objs.entity.SceneEntity;
 
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "_type")
 public interface GameObject extends SceneEntity, Transform3DOwner, ObjectIdOwner {
 
 	int MESH_ATTRIB_MATERIAL_ID_ID = 3;

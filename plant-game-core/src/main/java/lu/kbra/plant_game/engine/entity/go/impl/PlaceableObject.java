@@ -12,7 +12,7 @@ import lu.kbra.plant_game.engine.entity.go.obj.terrain.TerrainGameObject;
 import lu.kbra.plant_game.engine.entity.impl.FootprintOwner;
 import lu.kbra.plant_game.engine.entity.impl.Transform3DOwner;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
-import lu.kbra.plant_game.plugin.registry.BuildingRegistry;
+import lu.kbra.plant_game.plugin.registry.GameObjectRegistry;
 import lu.kbra.standalone.gameengine.impl.UniqueID;
 import lu.kbra.standalone.gameengine.objs.entity.SceneEntity;
 import lu.kbra.standalone.gameengine.utils.consts.Direction;
@@ -95,7 +95,7 @@ public interface PlaceableObject extends Transform3DOwner, UniqueID, SceneEntity
 	}
 
 	static <T extends GameObject & PlaceableObject> String getLocalizableKey(final Class<T> building) {
-		return LOCALIZATION_KEY + BuildingRegistry.getInternalName(building).replace(":", ".");
+		return LOCALIZATION_KEY + GameObjectRegistry.getInternalName(building).replace(":", ".");
 	}
 
 }

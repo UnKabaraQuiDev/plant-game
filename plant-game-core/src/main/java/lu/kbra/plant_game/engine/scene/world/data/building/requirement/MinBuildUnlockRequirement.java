@@ -8,7 +8,7 @@ import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.plant_game.engine.scene.world.data.building.BuildingDefinition;
-import lu.kbra.plant_game.plugin.registry.BuildingRegistry;
+import lu.kbra.plant_game.plugin.registry.GameObjectRegistry;
 
 @JsonTypeName("MIN_BUILD")
 public class MinBuildUnlockRequirement extends AbstractLocalizationString implements BuildingRequirement {
@@ -29,7 +29,7 @@ public class MinBuildUnlockRequirement extends AbstractLocalizationString implem
 
 	public <T extends GameObject & PlaceableObject> MinBuildUnlockRequirement(final int count, final Class<T> building) {
 		this.count = count;
-		this.building = BuildingRegistry.getInternalName(building);
+		this.building = GameObjectRegistry.getInternalName(building);
 		this.addParam(Localizable.raw(count));
 		this.addParam(PlaceableObject.getLocalizable(building));
 	}
@@ -61,7 +61,7 @@ public class MinBuildUnlockRequirement extends AbstractLocalizationString implem
 	public boolean isFulfilled(final WorldLevelScene scene) {
 		return scene.parallelStream()
 				.filter(PlaceableObject.class::isInstance)
-				.filter(c -> this.building.equals(BuildingRegistry.getInternalName((Class) c.getClass())))
+				.filter(c -> this.building.equals(GameObjectRegistry.getInternalName((Class) c.getClass())))
 				.count() >= this.count;
 	}
 

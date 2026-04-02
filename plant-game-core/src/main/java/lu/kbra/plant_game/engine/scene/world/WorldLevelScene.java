@@ -207,7 +207,7 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController, S
 
 			this.setTerrain(data.get());
 
-			GameObjectFactory.create(GameObjectRegistry.<StarterPodObject>getClass(pod.getPodClass()))
+			GameObjectFactory.create(GameObjectRegistry.<StarterPodObject>findClass(pod.getPodClass()))
 					.set(i -> i.setTransform(new Transform3D()))
 					.add(data.get())
 					.postInit(c -> c.placeDown(this.terrain, pod.getTile(), pod.getDirection()))
