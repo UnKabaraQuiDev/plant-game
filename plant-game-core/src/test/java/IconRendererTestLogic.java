@@ -32,7 +32,6 @@ import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
 import lu.kbra.standalone.gameengine.impl.future.WorkerDispatcher;
 import lu.kbra.standalone.gameengine.utils.file.FileUtils;
-import lu.kbra.standalone.gameengine.utils.gl.consts.Consts;
 import lu.kbra.standalone.gameengine.utils.mem.img.MemImage;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
@@ -71,6 +70,8 @@ public class IconRendererTestLogic extends GameLogic {
 					.push();
 			this.awaitingCount++;
 		}
+
+		GlobalLogger.info("Awaiting: " + this.awaitingCount + " objects.");
 	}
 
 	@Override
@@ -97,14 +98,16 @@ public class IconRendererTestLogic extends GameLogic {
 		final int size = 1024;
 
 		GlobalLogger.info("Starting rendering.");
-		final MemImage img = this.iconRenderer
+		final MemImage img16f = this.iconRenderer
 				.renderIcon(this.engine, obj.getValue(), size, new Vector3f(1), new Vector3f(1, 1, 1).normalize(), 0.1f);
 		GlobalLogger.info("Rendering done.");
-		final File outFile = new File(Consts.ICONS_BAKES_RES_DIR, obj.getKey().getInternalPath() + ".png");
-		FileUtils.STBISave(outFile, img);
+		final MemImage img8 = img16f.toRGBA8();
+		final File outFile = new File("./src/main/resources/bakes/icons/", obj.getKey().getInternalPath() + ".png");
+		FileUtils.STBISave(outFile, img8);
 		GlobalLogger.info("Saved to: " + outFile.getAbsolutePath());
 
-		img.cleanup();
+		img8.cleanup();
+		img16f.cleanup();
 
 		this.renderedCount++;
 	}

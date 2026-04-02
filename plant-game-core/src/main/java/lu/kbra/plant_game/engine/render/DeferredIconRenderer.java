@@ -87,6 +87,8 @@ public class DeferredIconRenderer extends DeferredCompositor {
 
 		this.renderOutlines(this.renderResolution, true);
 
+		this.renderBloom(this.renderResolution, true);
+
 		this.blitToScreen(engine.getWindow().getSize(), true);
 
 		return this.outputTxt.getStoredImage();

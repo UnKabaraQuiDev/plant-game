@@ -337,21 +337,21 @@ public class DeferredCompositor extends AutoCleanupable {
 		this.cache.addTexture(this.variationMap);
 
 		this.outputTxt = new SingleTexture(WORLD_FRAMEBUFFER_NAME + ".output", engine.getWindow().getSize());
-		this.outputTxt.setColorFormat(DataType.FLOAT, TexelFormat.RGBA, TexelInternalFormat.RGBA16F);
+		this.outputTxt.setColorFormat(DataType.HALF_FLOAT, TexelFormat.RGBA, TexelInternalFormat.RGBA16F);
 		this.outputTxt.setFilters(TextureFilter.NEAREST);
 		this.outputTxt.setGenerateMipmaps(false);
 		this.outputTxt.setup();
 		this.cache.addTexture(this.outputTxt);
 
 		this.outputBloomTxt = new SingleTexture(WORLD_FRAMEBUFFER_NAME + ".outputBloom", engine.getWindow().getSize());
-		this.outputBloomTxt.setColorFormat(DataType.FLOAT, TexelFormat.RGBA, TexelInternalFormat.RGBA16F);
+		this.outputBloomTxt.setColorFormat(DataType.HALF_FLOAT, TexelFormat.RGBA, TexelInternalFormat.RGBA16F);
 		this.outputBloomTxt.setFilters(TextureFilter.LINEAR);
 		this.outputBloomTxt.setGenerateMipmaps(false);
 		this.outputBloomTxt.setup();
 		this.cache.addTexture(this.outputBloomTxt);
 
 		this.blurBloomTxt = new SingleTexture(WORLD_FRAMEBUFFER_NAME + ".blurBloom", engine.getWindow().getSize());
-		this.blurBloomTxt.setColorFormat(DataType.FLOAT, TexelFormat.RGBA, TexelInternalFormat.RGBA16F);
+		this.blurBloomTxt.setColorFormat(DataType.HALF_FLOAT, TexelFormat.RGBA, TexelInternalFormat.RGBA16F);
 		this.blurBloomTxt.setFilters(TextureFilter.LINEAR);
 		this.blurBloomTxt.setGenerateMipmaps(false);
 		this.blurBloomTxt.setup();
@@ -437,7 +437,7 @@ public class DeferredCompositor extends AutoCleanupable {
 		this.shadowFramebuffer.unbind();
 	}
 
-	private void renderBloom(final Vector2i resolution, final boolean needRegen) {
+	protected void renderBloom(final Vector2i resolution, final boolean needRegen) {
 		this.blurComputeShader.bind();
 
 		this.blurComputeShader.setUniform(BlurComputeShader.RADIUS, BLUR_RADIUS);

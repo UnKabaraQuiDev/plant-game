@@ -93,7 +93,7 @@ public final class PluginManager {
 						final Registry reg = resourceDefClazz.getDeclaredConstructor(PluginDescriptor.class).newInstance(c.descriptor());
 						registries.add(reg);
 
-						GlobalLogger.info("Found: " + c.toString() + " with priority: " + reg.getPriority());
+//						GlobalLogger.info("Found: " + c.toString() + " with priority: " + reg.getPriority());
 					} catch (final ClassNotFoundException e) {
 						GlobalLogger.info("Couldn't find " + c.toString() + "'s Resources registry.");
 						if (FAIL_ON_REGISTRY_NOT_FOUND) {
@@ -112,8 +112,8 @@ public final class PluginManager {
 
 		for (final Registry r : registries) {
 			try {
-				GlobalLogger.info("Registering: " + PCUtils.leftPadString(Integer.toString(r.getPriority()), " ", 5) + " | "
-						+ r.getClass().getSimpleName() + " | " + r.getPluginDescriptor().getLoadId());
+				GlobalLogger.info("Registering: " + PCUtils.leftPadString(Integer.toString(r.getPluginDescriptor().getLoadId()), " ", 2)
+						+ " | " + PCUtils.leftPadString(Integer.toString(r.getPriority()), " ", 5) + " | " + r.getClass().getSimpleName());
 
 				r.register();
 
