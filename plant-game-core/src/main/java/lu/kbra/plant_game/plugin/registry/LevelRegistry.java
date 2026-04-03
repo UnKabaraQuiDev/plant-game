@@ -156,6 +156,7 @@ public abstract class LevelRegistry extends PluginRegistry {
 		}
 		final GameData obj = PGLogic.OBJECT_MAPPER.readValue(dataFile, GameData.class);
 		obj.setLevelData(ld.levelData);
+		obj.setDataDir(dataFile.getParentFile());
 		return Optional.of(obj);
 	}
 

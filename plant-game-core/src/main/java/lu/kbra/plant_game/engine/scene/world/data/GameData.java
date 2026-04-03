@@ -1,5 +1,6 @@
 package lu.kbra.plant_game.engine.scene.world.data;
 
+import java.io.File;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -15,6 +16,8 @@ public class GameData {
 
 	@JsonIgnore
 	protected LevelData levelData;
+	@JsonIgnore
+	protected File dataDir;
 
 	protected byte progress = 0;
 	protected LevelState levelState = LevelState.NOT_STARTED;
@@ -72,6 +75,14 @@ public class GameData {
 		this.levelData = levelData;
 	}
 
+	public File getDataDir() {
+		return this.dataDir;
+	}
+
+	public void setDataDir(final File dataDir) {
+		this.dataDir = dataDir;
+	}
+
 	public static GameData fromBlankLevel(final LevelData levelData) {
 		final GameData gd = new GameData(levelData);
 		levelData.getGame().getStartResources().forEach((k, v) -> gd.getResources().put(k, (float) v));
@@ -80,8 +91,8 @@ public class GameData {
 
 	@Override
 	public String toString() {
-		return "GameData@" + System.identityHashCode(this) + " [levelData=" + this.levelData + ", progress=" + this.progress
-				+ ", levelState=" + this.levelState + ", resources=" + this.resources + "]";
+		return "GameData@" + System.identityHashCode(this) + " [levelData=" + this.levelData + ", dataDir=" + this.dataDir + ", progress="
+				+ this.progress + ", levelState=" + this.levelState + ", resources=" + this.resources + "]";
 	}
 
 }

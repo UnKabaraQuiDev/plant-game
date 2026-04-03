@@ -2,6 +2,7 @@ package lu.kbra.plant_game;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Locale;
 
 import org.lwjgl.glfw.GLFW;
@@ -12,8 +13,11 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.StreamReadFeature;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import lu.kbra.pclib.concurrency.CountTriggerLatch;
+import lu.kbra.pclib.impl.ThrowingConsumer;
 import lu.kbra.pclib.logger.GlobalLogger;
 import lu.kbra.pclib.pointer.prim.IntPointer;
 import lu.kbra.plant_game.base.scene.menu.main.MainMenuUIScene;
@@ -27,6 +31,7 @@ import lu.kbra.plant_game.engine.data.json.OrgJSONModule;
 import lu.kbra.plant_game.engine.data.json.ResourceTypeModule;
 import lu.kbra.plant_game.engine.data.json.VersionMatcherModule;
 import lu.kbra.plant_game.engine.data.locale.LocalizationService;
+import lu.kbra.plant_game.engine.entity.go.factory.GOCreatingTaskFuture;
 import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
@@ -171,14 +176,7 @@ public class PGLogic extends GameLogic {
 	}
 
 	public void startLevel(final LevelDefinition currentLevelDefinition) {
-		renderCleanup(this.gameWorldScene);
-		this.gameWorldScene = null;
-		renderCleanup(this.worldScene);
-		this.worldScene = null;
-		renderCleanup(this.overlayUIScene);
-		this.overlayUIScene = null;
-		renderCleanup(this.uiScene);
-		this.uiScene = null;
+		this.prepareGameStart();
 
 		final LevelData levelData = currentLevelDefinition.getLevelData();
 		final IntPointer progress = new IntPointer(0);
@@ -196,9 +194,46 @@ public class PGLogic extends GameLogic {
 				.then(o -> this.worldScene = this.gameWorldScene);
 	}
 
+	private void prepareGameStart() {
+		renderCleanup(this.gameWorldScene);
+		this.gameWorldScene = null;
+		renderCleanup(this.worldScene);
+		this.worldScene = null;
+		renderCleanup(this.overlayUIScene);
+		this.overlayUIScene = null;
+		renderCleanup(this.uiScene);
+		this.uiScene = null;
+	}
+
 	public void resumeLevel(final LevelDefinition currentLevelDefinition) {
-		System.err.println("not supported");
-		throw new UnsupportedOperationException();
+		this.prepareGameStart();
+
+		final LevelData levelData = currentLevelDefinition.getLevelData();
+		final IntPointer progress = new IntPointer(0);
+
+		this.gameData = currentLevelDefinition.getGameData().get();
+
+		this.overlayUIScene = new OverlayUIScene(this.cache);
+		UIObjectFactory.INSTANCE = new UIObjectFactory(this.overlayUIScene.getCache(), this.WORKERS, this.RENDER_DISPATCHER);
+		this.overlayUIScene.init(this.WORKERS, this.WORKERS, this.gameData).then(o -> this.uiScene = this.overlayUIScene);
+
+		this.gameWorldScene = new WorldLevelScene(levelData.getInternalName(), this.cache);
+		GameObjectFactory.INSTANCE = new GameObjectFactory(this.gameWorldScene.getCache(), this.WORKERS, this.RENDER_DISPATCHER);
+		this.gameWorldScene.init(this.WORKERS, this.RENDER_DISPATCHER, this.gameData, progress)
+				.then((ThrowingConsumer<WorldLevelScene, IOException>) o -> {
+					final File dataFile = new File(this.gameData.getDataDir(), "dat.json");
+
+					final List<GOCreatingTaskFuture<?>> list = OBJECT_MAPPER.readValue(dataFile,
+							new TypeReference<List<GOCreatingTaskFuture<?>>>() {
+							});
+					progress.add(100);
+					final CountTriggerLatch latch = new CountTriggerLatch(list.size(), () -> {
+						progress.add(100);
+						this.worldScene = this.gameWorldScene;
+					});
+					list.forEach(c -> c.add(o).latch(latch).push());
+				});
+
 	}
 
 	@Override

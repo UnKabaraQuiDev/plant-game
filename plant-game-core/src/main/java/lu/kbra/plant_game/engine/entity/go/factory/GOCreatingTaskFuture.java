@@ -56,14 +56,16 @@ public class GOCreatingTaskFuture<T extends GameObject> extends TaskFuture<List<
 	}
 
 	public GOCreatingTaskFuture<T> add(final EntityContainer<? super T> parent) {
-		Objects.requireNonNull(parent);
-		this.postInitHooks.add(v -> parent.add(v));
+		if (parent == null) {
+			return this;
+		}
+		this.postInitHooks.add(parent::add);
 		return this;
 	}
 
 	public GOCreatingTaskFuture<T> get(final ObjectPointer<? super T> ptr) {
 		Objects.requireNonNull(ptr);
-		this.postInitHooks.add(v -> ptr.set(v));
+		this.postInitHooks.add(ptr::set);
 		return this;
 	}
 
@@ -73,8 +75,10 @@ public class GOCreatingTaskFuture<T extends GameObject> extends TaskFuture<List<
 	}
 
 	public GOCreatingTaskFuture<T> latch(final GenericTriggerLatch<? super T> latch) {
-		Objects.requireNonNull(latch);
-		this.postInitHooks.add((final T v) -> latch.trigger(v));
+		if (latch == null) {
+			return this;
+		}
+		this.postInitHooks.add(latch::trigger);
 		return this;
 	}
 

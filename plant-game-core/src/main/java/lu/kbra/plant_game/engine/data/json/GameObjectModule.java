@@ -14,10 +14,13 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import lu.kbra.pclib.concurrency.GenericTriggerLatch;
+import lu.kbra.pclib.pointer.prim.IntPointer;
 import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.entity.go.factory.GOCreatingTaskFuture;
 import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory;
 import lu.kbra.plant_game.plugin.registry.GameObjectRegistry;
+import lu.kbra.standalone.gameengine.scene.EntityContainer;
 import lu.kbra.standalone.gameengine.utils.json.PostDeserialize;
 
 public class GameObjectModule extends SimpleModule {
@@ -35,7 +38,17 @@ public class GameObjectModule extends SimpleModule {
 		public GOCreatingTaskFuture<? extends GameObject>.TaskState<? extends GameObject> deserialize(
 				final JsonParser p,
 				final DeserializationContext ctxt) throws IOException {
-			return ctxt.readValue(p, GOCreatingTaskFuture.class).push();
+
+			final EntityContainer<? extends GameObject> parent = (EntityContainer<? extends GameObject>) ctxt.getAttribute("parent");
+
+			final IntPointer count = (IntPointer) ctxt.getAttribute("count");
+			if (count != null) {
+				count.increment();
+			}
+
+			final GenericTriggerLatch<?> latch = (GenericTriggerLatch<?>) ctxt.getAttribute("latch");
+
+			return ctxt.readValue(p, GOCreatingTaskFuture.class).add(parent).latch(latch).push();
 		}
 
 	}
