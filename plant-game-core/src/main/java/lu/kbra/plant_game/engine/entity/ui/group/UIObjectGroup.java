@@ -11,7 +11,6 @@ import java.util.function.ToDoubleFunction;
 
 import lu.kbra.plant_game.base.scene.overlay.group.building.MinBoundsOwner;
 import lu.kbra.plant_game.engine.entity.impl.NoMeshObject;
-import lu.kbra.plant_game.engine.entity.impl.SynchronizedEntityContainer;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.impl.IgnoreBounds;
 import lu.kbra.plant_game.engine.entity.ui.impl.IndexOwner;
@@ -21,6 +20,7 @@ import lu.kbra.plant_game.engine.entity.ui.impl.ObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.impl.Padding2DOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.PaddingOwner;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
+import lu.kbra.standalone.gameengine.scene.SynchronizedEntityContainer;
 
 public class UIObjectGroup extends UIObject implements ObjectGroup<UIObject>, NoMeshObject, SynchronizedEntityContainer<UIObject> {
 

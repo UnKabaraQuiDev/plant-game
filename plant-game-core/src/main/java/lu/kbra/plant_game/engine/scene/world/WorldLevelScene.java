@@ -17,6 +17,7 @@ import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 import org.joml.Vector3ic;
+import org.lwjgl.glfw.GLFW;
 
 import lu.kbra.pclib.concurrency.ObjectTriggerLatch;
 import lu.kbra.pclib.datastructure.list.WeakArrayList;
@@ -253,6 +254,11 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController, S
 			}
 			if (inputHandler.isKeyHeld(DefaultKeyOption.ROTATE_RIGHT)) {
 				this.rotation += 1;
+			}
+
+			if (inputHandler.isKeyHeld(GLFW.GLFW_KEY_V)) {
+				PGLogic.INSTANCE.saveLevel();
+				System.err.println("Saved to : " + this.gameData.getDataDir());
 			}
 
 		}

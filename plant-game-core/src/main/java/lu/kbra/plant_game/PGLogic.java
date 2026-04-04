@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import org.lwjgl.glfw.GLFW;
 
@@ -16,6 +17,7 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.StreamReadFeature;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 import lu.kbra.pclib.concurrency.CountTriggerLatch;
 import lu.kbra.pclib.impl.ThrowingConsumer;
@@ -32,8 +34,10 @@ import lu.kbra.plant_game.engine.data.json.OrgJSONModule;
 import lu.kbra.plant_game.engine.data.json.ResourceTypeModule;
 import lu.kbra.plant_game.engine.data.json.VersionMatcherModule;
 import lu.kbra.plant_game.engine.data.locale.LocalizationService;
+import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.entity.go.factory.GOCreatingTaskFuture;
 import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory;
+import lu.kbra.plant_game.engine.entity.go.obj.terrain.TerrainGameObject;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.render.shader.compute.filter.VignetteShader;
@@ -59,6 +63,7 @@ public class PGLogic extends GameLogic {
 	static {
 		OBJECT_MAPPER = new ObjectMapper(JsonFactory.builder().configure(StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION, true).build());
 
+		OBJECT_MAPPER.enable(SerializationFeature.INDENT_OUTPUT);
 		OBJECT_MAPPER.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
 		OBJECT_MAPPER.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
 
@@ -182,13 +187,14 @@ public class PGLogic extends GameLogic {
 		final LevelData levelData = currentLevelDefinition.getLevelData();
 		final IntPointer progress = new IntPointer(0);
 
-		this.gameData = GameData.fromBlankLevel(levelData);
-		currentLevelDefinition.setGameData(this.gameData);
+		this.gameData = currentLevelDefinition.newGameData();
 
 		this.overlayUIScene = new OverlayUIScene(this.cache);
 		UIObjectFactory.INSTANCE = new UIObjectFactory(this.overlayUIScene.getCache(), this.WORKERS, this.RENDER_DISPATCHER);
-		this.overlayUIScene.init(this.WORKERS, this.WORKERS, this.gameData)
-				.then((Consumer<OverlayUIScene>) o -> this.uiScene = this.overlayUIScene);
+		this.overlayUIScene.init(this.WORKERS, this.WORKERS, this.gameData).then((Consumer<OverlayUIScene>) o -> {
+			System.err.println("overlayuiscene released");
+			this.uiScene = this.overlayUIScene;
+		});
 
 		this.gameWorldScene = new WorldLevelScene(levelData.getInternalName(), this.cache);
 		GameObjectFactory.INSTANCE = new GameObjectFactory(this.gameWorldScene.getCache(), this.WORKERS, this.RENDER_DISPATCHER);
@@ -237,6 +243,21 @@ public class PGLogic extends GameLogic {
 					list.forEach(c -> c.add(o).latch(latch).push());
 				});
 
+	}
+
+	public void saveLevel() {
+		final File dataFile = new File(this.gameData.getDataDir(), "dat.json");
+
+		final List<GameObject> gos = this.gameWorldScene.stream()
+				.filter(Predicate.not(TerrainGameObject.class::isInstance))
+				.filter(GameObject.class::isInstance)
+				.map(GameObject.class::cast)
+				.toList();
+		try {
+			OBJECT_MAPPER.writeValue(dataFile, gos);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override

@@ -1,18 +1,19 @@
 package lu.kbra.plant_game.engine.data.json;
 
 import java.io.IOException;
-import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.ser.BeanSerializerModifier;
 
 import lu.kbra.pclib.concurrency.GenericTriggerLatch;
 import lu.kbra.pclib.pointer.prim.IntPointer;
@@ -28,7 +29,26 @@ public class GameObjectModule extends SimpleModule {
 	public GameObjectModule() {
 		super.addDeserializer(GOCreatingTaskFuture.TaskState.class, new GameObjectTaskFutureStateDeserializer());
 		super.addDeserializer(GOCreatingTaskFuture.class, new GameObjectTaskFutureDeserializer());
-		super.addSerializer(GameObject.class, new GameObjectSerializer());
+//		super.addSerializer(GameObject.class, new GameObjectSerializer());
+	}
+
+	@Override
+	public void setupModule(final SetupContext context) {
+		context.addBeanSerializerModifier(new BeanSerializerModifier() {
+
+			@Override
+			public JsonSerializer<?> modifySerializer(
+					final SerializationConfig config,
+					final BeanDescription beanDesc,
+					final JsonSerializer<?> serializer) {
+
+				if (GameObject.class.isAssignableFrom(beanDesc.getBeanClass())) {
+					return new GameObjectSerializer((JsonSerializer<Object>) serializer);
+				}
+
+				return serializer;
+			}
+		});
 	}
 
 	public class GameObjectTaskFutureStateDeserializer
@@ -72,7 +92,7 @@ public class GameObjectModule extends SimpleModule {
 					throw new RuntimeException("Exception while updating: " + type + " = " + clazz.getName(), e);
 				}
 			}).postInit(i -> {
-				if (i instanceof PostDeserialize pd) {
+				if (i instanceof final PostDeserialize pd) {
 					pd.postDeserialize();
 				}
 			});
@@ -82,26 +102,24 @@ public class GameObjectModule extends SimpleModule {
 
 	public class GameObjectSerializer extends JsonSerializer<GameObject> {
 
+		protected JsonSerializer<Object> delegate;
+
+		public GameObjectSerializer(final JsonSerializer<Object> delegate) {
+			this.delegate = delegate;
+		}
+
 		@Override
 		public void serialize(final GameObject obj, final JsonGenerator gen, final SerializerProvider serializers) throws IOException {
 			gen.writeStartObject();
 
-			final String type = GameObjectRegistry.getInternalName((Class) obj.getClass());
-			gen.writeStringField("_type", type);
+			gen.writeStringField("_type", GameObjectRegistry.getInternalName((Class) obj.getClass()));
 
-			final ObjectMapper mapper = (ObjectMapper) gen.getCodec();
-
-			final ObjectNode node = mapper.valueToTree(obj);
-
-			node.remove("_type");
-
-			for (Map.Entry<String, JsonNode> entry : node.properties()) {
-				gen.writeFieldName(entry.getKey());
-				gen.writeTree(entry.getValue());
-			}
+			gen.writeFieldName("_data");
+			this.delegate.serialize(obj, gen, serializers);
 
 			gen.writeEndObject();
 		}
+
 	}
 
 }

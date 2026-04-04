@@ -25,6 +25,7 @@ public abstract class LevelRegistry extends PluginRegistry {
 		protected LevelState levelState = LevelState.NOT_STARTED;
 		protected byte progress = 0;
 		protected Optional<GameData> gameData;
+		protected File dataDir;
 
 		public LevelDefinition(final int idx, final LevelData levelData) {
 			this.idx = idx;
@@ -33,16 +34,17 @@ public abstract class LevelRegistry extends PluginRegistry {
 
 		public LevelDefinition(
 				final int idx,
-				final String levelId,
 				final LevelData levelData,
 				final LevelState levelState,
 				final byte progress,
-				final Optional<GameData> gameData) {
+				final Optional<GameData> gameData,
+				final File dataDir) {
 			this.idx = idx;
 			this.levelData = levelData;
 			this.levelState = levelState;
 			this.progress = progress;
 			this.gameData = gameData;
+			this.dataDir = dataDir;
 		}
 
 		public String getInternalName() {
@@ -106,11 +108,26 @@ public abstract class LevelRegistry extends PluginRegistry {
 			});
 		}
 
+		public File getDataDir() {
+			return this.dataDir;
+		}
+
+		public void setDataDir(final File dataDir) {
+			this.dataDir = dataDir;
+		}
+
+		public GameData newGameData() {
+			final GameData gameData = new GameData(this.levelData);
+			gameData.setDataDir(this.dataDir);
+			this.dataDir.mkdirs();
+			return gameData;
+		}
+
 		@Override
 		public String toString() {
 			return "LevelDefinition@" + System.identityHashCode(this) + " [idx=" + this.idx + ", levelData=" + this.levelData
-					+ ", levelState=" + this.levelState + ", progress=" + this.progress + ", gameData=" + this.gameData
-					+ ", getInternalName()=" + this.getInternalName() + "]";
+					+ ", levelState=" + this.levelState + ", progress=" + this.progress + ", gameData=" + this.gameData + ", dataDir="
+					+ this.dataDir + "]";
 		}
 
 	}
@@ -131,6 +148,7 @@ public abstract class LevelRegistry extends PluginRegistry {
 			levelData.setPluginDescriptor(this.pluginDescriptor);
 			levelData.setLevelId(id);
 			final LevelDefinition ld = new LevelDefinition(idx, levelData);
+			ld.setDataDir(new File(PGMain.APP_DATA_DIR, "/games/" + ld.getInternalName() + "/"));
 			final Optional<GameData> gd = this.readProgress(ld);
 			gd.ifPresent(c -> {
 				ld.levelState = c.getLevelState();
@@ -150,13 +168,12 @@ public abstract class LevelRegistry extends PluginRegistry {
 	}
 
 	protected Optional<GameData> readProgress(final LevelDefinition ld) throws IOException {
-		final File dataFile = new File(PGMain.APP_DATA_DIR, "/games/" + ld.getInternalName() + "/game.json");
+		final File dataFile = new File(ld.getDataDir(), "game.json");
 		if (!dataFile.exists()) {
 			return Optional.empty();
 		}
 		final GameData obj = PGLogic.OBJECT_MAPPER.readValue(dataFile, GameData.class);
 		obj.setLevelData(ld.levelData);
-		obj.setDataDir(dataFile.getParentFile());
 		return Optional.of(obj);
 	}
 

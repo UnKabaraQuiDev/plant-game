@@ -1,9 +1,12 @@
 package lu.kbra.plant_game.engine.entity.go.obj.terrain;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreType;
+
 import lu.kbra.plant_game.engine.entity.go.MeshGameObject;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
+@JsonIgnoreType
 public class TerrainHighlightObject extends MeshGameObject {
 
 	public TerrainHighlightObject(final String str, final Mesh mesh) {

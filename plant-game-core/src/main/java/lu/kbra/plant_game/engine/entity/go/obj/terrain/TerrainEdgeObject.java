@@ -1,10 +1,13 @@
 package lu.kbra.plant_game.engine.entity.go.obj.terrain;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreType;
+
 import lu.kbra.plant_game.engine.entity.go.MeshGameObject;
 import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
+@JsonIgnoreType
 public class TerrainEdgeObject extends MeshGameObject {
 
 	public TerrainEdgeObject(final String str, final Mesh mesh) {

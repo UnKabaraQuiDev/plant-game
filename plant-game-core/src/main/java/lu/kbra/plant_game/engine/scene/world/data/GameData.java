@@ -8,7 +8,6 @@ import org.joml.Math;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import lu.kbra.plant_game.base.data.DefaultResourceType;
 import lu.kbra.plant_game.engine.scene.world.data.building.BuildingDefinition;
 import lu.kbra.plant_game.engine.scene.world.data.resource.ResourceType;
 
@@ -32,9 +31,7 @@ public class GameData {
 
 	public GameData(final LevelData levelData) {
 		this.levelData = levelData;
-		this.resources.put(DefaultResourceType.WATER, 0f);
-		this.resources.put(DefaultResourceType.ENERGY, 0f);
-		this.resources.put(DefaultResourceType.MONEY, 0f);
+		this.levelData.getGame().getStartResources().forEach((k, v) -> this.getResources().put(k, (float) v));
 	}
 
 	public LevelData getLevelData() {
@@ -83,6 +80,7 @@ public class GameData {
 		this.dataDir = dataDir;
 	}
 
+	@Deprecated
 	public static GameData fromBlankLevel(final LevelData levelData) {
 		final GameData gd = new GameData(levelData);
 		levelData.getGame().getStartResources().forEach((k, v) -> gd.getResources().put(k, (float) v));

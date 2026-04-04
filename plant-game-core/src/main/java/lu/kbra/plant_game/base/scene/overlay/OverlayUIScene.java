@@ -36,7 +36,6 @@ import lu.kbra.plant_game.engine.scene.ui.layout.LayoutOwner;
 import lu.kbra.plant_game.engine.scene.world.data.GameData;
 import lu.kbra.plant_game.engine.scene.world.data.LevelData;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
-import lu.kbra.plant_game.plugin.registry.BuildingRegistry;
 import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.impl.future.WorkerDispatcher;
@@ -99,12 +98,13 @@ public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner
 			this.add(c);
 		}).latch(latch);
 
-		final CountTriggerLatch latch2 = new CountTriggerLatch(BuildingRegistry.BUILDING_DEFS.size(), () -> latch.trigger(null));
-
 		final LevelData levelData = gameData.getLevelData();
 
+		final CountTriggerLatch buildingTabsLatch = new CountTriggerLatch(levelData.getBuildingRegistry().getBuildingDefinitions().size(),
+				() -> latch.trigger(null));
+
 		levelData.getBuildingRegistry().getBuildingDefinitions().forEach((k, v) -> {
-			final CountTriggerLatch latch3 = new CountTriggerLatch(v.size(), () -> latch2.trigger(null));
+			final CountTriggerLatch buildingTabElementsLatch = new CountTriggerLatch(v.size(), () -> buildingTabsLatch.trigger(null));
 
 			this.buildingPanel.addTab(new BuildingTabUIObjectGroup(k.getLocalizationKey(), k.getIndex(), k.getAccentColor()))
 					.then((Consumer<BuildingTabUIObjectGroup>) tab -> v
@@ -112,7 +112,7 @@ public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner
 								obj.setTransform(new Transform3D(0.3f));
 								obj.setIndex(f.getIndex());
 								tab.getContent().add(obj);
-							}).latch(latch3)));
+							}).latch(buildingTabElementsLatch)));
 		});
 
 		this.waterGroup = new IntegerStatLine("water-counter");

@@ -2,6 +2,7 @@ package lu.kbra.plant_game.engine.entity.go.obj.terrain;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -13,6 +14,8 @@ import org.joml.Vector2i;
 import org.joml.Vector2ic;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreType;
 
 import lu.kbra.pclib.PCUtils;
 import lu.kbra.pclib.concurrency.ObjectTriggerLatch;
@@ -27,18 +30,19 @@ import lu.kbra.plant_game.engine.entity.go.VariationMeshGameObject;
 import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory;
 import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
 import lu.kbra.plant_game.engine.entity.go.mesh.terrain.TerrainMesh;
-import lu.kbra.plant_game.engine.entity.impl.SynchronizedEntityContainer;
 import lu.kbra.plant_game.engine.entity.impl.Transform3DPivotOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.AbsoluteTransform3DOwner;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.standalone.gameengine.objs.entity.ParentAwareComponent;
+import lu.kbra.standalone.gameengine.scene.SynchronizedEntityContainer;
 import lu.kbra.standalone.gameengine.scene.camera.Camera3D;
 import lu.kbra.standalone.gameengine.utils.consts.Direction;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3DPivot;
 
+@JsonIgnoreType
 public class TerrainGameObject extends VariationMeshGameObject
 		implements SynchronizedEntityContainer<GameObject>, AbsoluteTransform3DOwner, Transform3DPivotOwner, NeedsRandomTick {
 
@@ -753,13 +757,16 @@ public class TerrainGameObject extends VariationMeshGameObject
 
 	@Override
 	public String toString() {
-		return "TerrainGameObject@" + System.identityHashCode(this) + " [subEntitiesLock=" + this.subEntitiesLock + ", subEntities="
-				+ this.subEntities + ", parent=" + this.parent + ", terrainEdgeObject=" + this.terrainEdgeObject
+		return "TerrainGameObject@" + System.identityHashCode(this) + " [width=" + this.width + ", length=" + this.length + ", moisture="
+				+ Arrays.toString(this.moisture) + ", population=" + Arrays.toString(this.population) + ", smallGrass=" + this.smallGrass
+				+ ", mediumGrass=" + this.mediumGrass + ", largeGrass=" + this.largeGrass + ", deadSmallGrass=" + this.deadSmallGrass
+				+ ", deadMediumGrass=" + this.deadMediumGrass + ", deadLargeGrass=" + this.deadLargeGrass + ", subEntitiesLock="
+				+ this.subEntitiesLock + ", subEntities=" + this.subEntities + ", terrainEdgeObject=" + this.terrainEdgeObject
 				+ ", terrainHighlightObject=" + this.terrainHighlightObject + ", terrainWaterObject=" + this.terrainWaterObject
 				+ ", minVariation=" + this.minVariation + ", maxVariation=" + this.maxVariation + ", variationCellSize="
 				+ this.variationCellSize + ", hasVariation=" + this.hasVariation + ", materialId=" + this.materialId
-				+ ", isEntityMaterialId=" + this.isEntityMaterialId + ", objectId=" + this.objectId + ", objectIdLocation="
-				+ this.objectIdLocation + ", mesh=" + this.mesh + ", transform=" + this.transform + ", active=" + this.active + ", name="
+				+ ", isEntityMaterialId=" + this.isEntityMaterialId + ", mesh=" + this.mesh + ", objectId=" + this.objectId
+				+ ", objectIdLocation=" + this.objectIdLocation + ", transform=" + this.transform + ", active=" + this.active + ", name="
 				+ this.name + "]";
 	}
 

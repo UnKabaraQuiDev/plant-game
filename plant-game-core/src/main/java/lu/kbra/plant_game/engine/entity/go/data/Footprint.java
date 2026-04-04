@@ -15,6 +15,8 @@ import org.joml.Vector2fc;
 import org.joml.Vector2i;
 import org.joml.Vector2ic;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lu.kbra.standalone.gameengine.utils.consts.Direction;
 
 public abstract class Footprint {
@@ -22,8 +24,11 @@ public abstract class Footprint {
 	public record Line(Vector2fc a, Vector2fc b) {
 	}
 
+	@JsonIgnore
 	protected Set<Vector2ic> cachedCells;
+	@JsonIgnore
 	protected Set<Line> cachedLines;
+	@JsonIgnore
 	protected List<List<Vector2fc>> cachedPolygons;
 
 	public abstract void forEachCell(Vector2ic pivotPos, Direction rotation, Consumer<Vector2i> action);
