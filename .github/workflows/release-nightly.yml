@@ -31,17 +31,18 @@ jobs:
         id: changes
         if: github.event_name == 'schedule'
         run: |
-          if git log \
+          LOG_OUTPUT=$(git log \
             --since='26 hours ago' \
-            -1 \
             --oneline \
-            --invert-grep \
-            --grep='^\[NIGHTLY\]' \
-            --author='github-actions' \
-            --author='.*\[bot\]' \
-            --all-match \
-            -- . ':(exclude).github/**' | grep -q .; then
+            -- . ':(exclude).github/**' \
+            | grep -v '\[bot\]' \
+            | grep -v 'github-actions' \
+            | grep -v '^\[NIGHTLY\]')
 
+          echo "Git log output:"
+          echo "$LOG_OUTPUT"
+          
+          if echo "$LOG_OUTPUT" | grep -q .; then
             echo "has_changes=true" >> $GITHUB_OUTPUT
           else
             echo "has_changes=false" >> $GITHUB_OUTPUT
@@ -51,6 +52,7 @@ jobs:
         id: snapshot
         run: |
           VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          echo "Detected version: $VERSION"
           if [[ "$VERSION" == *"-SNAPSHOT" ]]; then
             echo "is_snapshot=true" >> $GITHUB_OUTPUT
           else
