@@ -16,6 +16,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.StreamReadFeature;
+import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -60,23 +61,26 @@ import lu.kbra.standalone.gameengine.utils.json.PostDeserializeModule;
 public class PGLogic extends GameLogic {
 
 	public static PGLogic INSTANCE;
-	public static final ObjectMapper OBJECT_MAPPER;
+	public static final ObjectMapper OBJECT_MAPPER = PGLogic.createMapper();
 
-	static {
-		OBJECT_MAPPER = new ObjectMapper(JsonFactory.builder().configure(StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION, true).build());
+	private static ObjectMapper createMapper() {
+		final ObjectMapper mapper = new ObjectMapper(
+				JsonFactory.builder().configure(StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION, true).build());
 
-		PGLogic.OBJECT_MAPPER.enable(SerializationFeature.INDENT_OUTPUT);
-		PGLogic.OBJECT_MAPPER.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
-		PGLogic.OBJECT_MAPPER.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+		mapper.enable(SerializationFeature.INDENT_OUTPUT);
 
-		PGLogic.OBJECT_MAPPER.registerModule(new OrgJSONModule());
-		PGLogic.OBJECT_MAPPER.registerModule(new OrgJOMLModule());
-		PGLogic.OBJECT_MAPPER.registerModule(new VersionMatcherModule());
-		PGLogic.OBJECT_MAPPER.registerModule(new ResourceTypeModule());
-		PGLogic.OBJECT_MAPPER.registerModule(new LevelDataModule());
-		PGLogic.OBJECT_MAPPER.registerModule(new GameObjectModule());
+		mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
+		mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
 
-		PGLogic.OBJECT_MAPPER.registerModule(new PostDeserializeModule());
+		mapper.registerModule(new OrgJSONModule());
+		mapper.registerModule(new OrgJOMLModule());
+		mapper.registerModule(new VersionMatcherModule());
+		mapper.registerModule(new ResourceTypeModule());
+		mapper.registerModule(new LevelDataModule());
+		mapper.registerModule(new GameObjectModule());
+		mapper.registerModule(new PostDeserializeModule());
+
+		return mapper;
 	}
 
 	public final WorkerDispatcher WORKERS = new WorkerDispatcher("WORKERS", 8);
@@ -193,9 +197,7 @@ public class PGLogic extends GameLogic {
 
 		this.overlayUIScene = new OverlayUIScene(this.cache);
 		UIObjectFactory.INSTANCE = new UIObjectFactory(this.overlayUIScene.getCache(), this.WORKERS, this.RENDER_DISPATCHER);
-		this.overlayUIScene.init(this.gameData).then((Consumer<OverlayUIScene>) o -> {
-			this.uiScene = this.overlayUIScene;
-		});
+		this.overlayUIScene.init(this.gameData).then((Consumer<OverlayUIScene>) o -> this.uiScene = this.overlayUIScene);
 
 		this.gameWorldScene = new WorldLevelScene(levelData.getInternalName(), this.cache);
 		GameObjectFactory.INSTANCE = new GameObjectFactory(this.gameWorldScene.getCache(), this.WORKERS, this.RENDER_DISPATCHER);
@@ -232,13 +234,12 @@ public class PGLogic extends GameLogic {
 				.then((ThrowingConsumer<WorldLevelScene, IOException>) o -> {
 					final File dataFile = new File(this.gameData.getDataDir(), "dat.json");
 
-					JsonNode root = OBJECT_MAPPER.readTree(dataFile);
-
-					List<GOCreatingTaskFuture<?>> list = new ArrayList<>();
-
-					for (JsonNode node : root) {
-						list.add(new GameObjectTaskFutureDeserializer().deserialize(node.traverse(OBJECT_MAPPER),
-								OBJECT_MAPPER.getDeserializationContext()));
+					final JsonNode root = PGLogic.OBJECT_MAPPER.readTree(dataFile);
+					final List<GOCreatingTaskFuture<?>> list = new ArrayList<>();
+					final JsonDeserializer<GOCreatingTaskFuture<?>> deserializer = new GameObjectTaskFutureDeserializer();
+					for (final JsonNode node : root) {
+						list.add(deserializer.deserialize(node.traverse(PGLogic.OBJECT_MAPPER),
+								PGLogic.OBJECT_MAPPER.getDeserializationContext()));
 					}
 					progress.add(100);
 					final CountTriggerLatch latch = new CountTriggerLatch(list.size(), () -> {
