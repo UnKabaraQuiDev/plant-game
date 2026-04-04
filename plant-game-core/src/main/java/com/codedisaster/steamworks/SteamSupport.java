@@ -9,29 +9,39 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import org.lwjgl.system.Platform;
+
 public final class SteamSupport {
 
 	public static boolean STEAM_LAUCHED = false;
 	public static Map<Class<? extends SteamInterface>, SteamInterface> STEAM_INTERFACES = new HashMap<>();
 
 	public static File getAppDataDir(final String appName) {
-		final String os = System.getProperty("os.name").toLowerCase();
+		final String userHome = System.getProperty("user.home");
 
-		if (os.contains("win")) {
+		return switch (Platform.get()) {
+		case WINDOWS -> {
 			String base = System.getenv("APPDATA");
 
 			if (base == null || base.isBlank()) {
-				base = Paths.get(System.getProperty("user.home"), "AppData", "Roaming").toString();
+				base = Paths.get(userHome, "AppData", "Roaming").toString();
 			}
 
-			return Paths.get(base, appName).toFile();
+			yield Paths.get(base, appName).toFile();
 		}
 
-		if (os.contains("mac")) {
-			return Paths.get(System.getProperty("user.home"), "Library", "Application Support", appName).toFile();
+		case MACOSX -> Paths.get(userHome, "Library", "Application Support", appName).toFile();
+
+		case LINUX -> {
+			String xdg = System.getenv("XDG_DATA_HOME");
+			if (xdg == null || xdg.isBlank()) {
+				xdg = Paths.get(userHome, ".local", "share").toString();
+			}
+			yield Paths.get(xdg, appName).toFile();
 		}
 
-		return Paths.get(System.getProperty("user.home"), "." + appName.toLowerCase()).toFile();
+		default -> Paths.get(userHome, "." + appName.toLowerCase()).toFile();
+		};
 	}
 
 	public static void init(final boolean skipSteam, final String appId) throws SteamException {

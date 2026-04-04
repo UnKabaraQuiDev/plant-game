@@ -1456,7 +1456,7 @@ public class DeferredCompositor extends AutoCleanupable {
 					GlobalLogger.severe("Width out of range: " + lineMesh.getLineWidth() + " [" + min + ", " + max + "].");
 				}
 			}
-			GL_W.glLineWidth(lineMesh.getLineWidth());
+			GL_W.glLineWidth(lineMesh.getLineWidth() <= 0 ? 1 : lineMesh.getLineWidth());
 		} else if (GL_LINE_SMOOTHING) {
 			GL_W.glDisable(GL_W.GL_LINE_SMOOTH);
 		}
@@ -1653,6 +1653,8 @@ public class DeferredCompositor extends AutoCleanupable {
 
 		final int width = resolution.x;
 		final int height = resolution.y;
+
+		assert width > 0 && height > 0 : "Invalid size: " + width + "x" + height + ".";
 
 		this.depthTexture = new SingleTexture(WORLD_FRAMEBUFFER_NAME + ".depth", width, height);
 		this.depthTexture.setDataType(DataType.FLOAT);

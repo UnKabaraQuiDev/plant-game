@@ -38,6 +38,7 @@ COMMON_ARGS=(
   -Dsteam.platform=linux
   -Dsteam.depotId=${DEPOT_ID}
   -DappVersion=${APP_VERSION}
+  -Dwindow.debug=true
   -DaltDeploymentRepository=nexus.kbra.lu-nightly::default::https://nexus.kbra.lu/repository/maven-nightly/
 )
 

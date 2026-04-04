@@ -1,0 +1,8 @@
+[
+  {
+    "name": "org.lwjgl.opengl.GL"
+  },
+  {
+    "name": "org.lwjgl.system.MemoryUtil"
+  }
+]

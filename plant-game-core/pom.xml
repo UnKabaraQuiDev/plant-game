@@ -1,31 +1,25 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-
 	<parent>
 		<groupId>lu.kbra</groupId>
 		<artifactId>plant-game-plugin-parent</artifactId>
 		<version>${revision}</version>
 		<relativePath>../plant-game-plugin-parent/pom.xml</relativePath>
 	</parent>
-
 	<artifactId>plant-game-core</artifactId>
-
 	<name>Plant Game (Core)</name>
 	<description>The core of a game about plants</description>
-
 	<properties>
 		<mainClass>lu.kbra.plant_game.PGMain</mainClass>
-
 		<plugin.name>Satisplantory Base</plugin.name>
 		<plugin.internalName>base</plugin.internalName>
 		<plugin.mainName>BaseMain</plugin.mainName>
 		<plugin.package>${project.groupId}.plant_game.${plugin.internalName}</plugin.package>
-
 		<lwjgl.natives>natives-${os.detected.classifier}</lwjgl.natives>
+		<plugin.support>true</plugin.support>
+		<window.debug>false</window.debug>
+		<window.logging>false</window.logging>
 	</properties>
-
 	<dependencies>
 		<dependency>
 			<groupId>lu.kbra</groupId>
@@ -35,17 +29,14 @@
 			<groupId>lu.kbra</groupId>
 			<artifactId>pclib-datastruct</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>lu.kbra</groupId>
 			<artifactId>gameengine</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>com.squareup</groupId>
 			<artifactId>javapoet</artifactId>
@@ -55,7 +46,6 @@
 			<artifactId>reflections</artifactId>
 		</dependency>
 	</dependencies>
-
 	<build>
 		<plugins>
 			<plugin>
@@ -75,7 +65,6 @@
 			</plugin>
 		</plugins>
 	</build>
-
 	<profiles>
 		<profile>
 			<id>steam-deploy</id>
@@ -98,20 +87,16 @@
 							<user>${steam.user}</user>
 							<steamcmdPath>${steam.cmdPath}</steamcmdPath>
 							<serverId>steam</serverId>
-							<buildScript>
-								${project.basedir}/../steam/app_build_generic.vdf</buildScript>
+							<buildScript>${project.basedir}/../steam/app_build_generic.vdf</buildScript>
 							<defaultBranch>${steam.defaultBranch}</defaultBranch>
-
 							<filterVdfs>true</filterVdfs>
 							<filters>
 								<appId>${steam.appId}</appId>
 								<appName>${steam.appName}</appName>
 								<description>${project.version}</description>
 								<branch>${steam.branch}</branch>
-								<contentRoot>
-									${project.build.directory}/dist/</contentRoot>
-								<buildOutput>
-									${project.build.directory}/steam-output</buildOutput>
+								<contentRoot>${project.build.directory}/dist/</contentRoot>
+								<buildOutput>${project.build.directory}/steam-output</buildOutput>
 								<depotId>${steam.depotId}</depotId>
 								<platform>${steam.platform}</platform>
 							</filters>
@@ -120,7 +105,6 @@
 				</plugins>
 			</build>
 		</profile>
-
 		<profile>
 			<id>shade-package</id>
 			<build>
@@ -137,14 +121,11 @@
 								</goals>
 								<configuration>
 									<transformers>
-										<transformer
-											implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+										<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
 											<mainClass>${mainClass}</mainClass>
 										</transformer>
-										<transformer
-											implementation="org.apache.maven.plugins.shade.resource.ApacheLicenseResourceTransformer" />
-										<transformer
-											implementation="org.apache.maven.plugins.shade.resource.ApacheNoticeResourceTransformer" />
+										<transformer implementation="org.apache.maven.plugins.shade.resource.ApacheLicenseResourceTransformer"/>
+										<transformer implementation="org.apache.maven.plugins.shade.resource.ApacheNoticeResourceTransformer"/>
 									</transformers>
 								</configuration>
 							</execution>
@@ -153,7 +134,6 @@
 				</plugins>
 			</build>
 		</profile>
-
 		<profile>
 			<id>all</id>
 			<build>
@@ -171,7 +151,6 @@
 							</execution>
 						</executions>
 					</plugin>
-
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-javadoc-plugin</artifactId>
@@ -189,7 +168,6 @@
 							<doclint>all,-reference,-missing,-accessibility</doclint>
 						</configuration>
 					</plugin>
-
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-deploy-plugin</artifactId>
@@ -202,17 +180,80 @@
 				</plugins>
 			</build>
 		</profile>
+		<profile>
+			<id>native</id>
+			<properties>
+				<plugin.support>false</plugin.support>
+			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>lu.kbra</groupId>
+						<artifactId>plant-game-autogen</artifactId>
+						<version>${revision}</version>
+						<executions>
+							<execution>
+								<phase>compile</phase>
+								<goals>
+									<goal>gen-go-registry</goal>
+									<goal>gen-ui-registry</goal>
+									<goal>gen-plugin-registries</goal>
+									<goal>gen-reflect-config</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
 
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-shade-plugin</artifactId>
+						<version>3.5.0</version>
+						<executions>
+							<execution>
+								<phase>package</phase>
+								<goals>
+									<goal>shade</goal>
+								</goals>
+								<configuration>
+									<transformers>
+										<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+											<mainClass>${mainClass}</mainClass>
+										</transformer>
+									</transformers>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+
+					<plugin>
+						<groupId>org.graalvm.buildtools</groupId>
+						<artifactId>native-maven-plugin</artifactId>
+						<version>0.10.2</version>
+						<executions>
+							<execution>
+								<goals>
+									<goal>compile-no-fork</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<mainClass>${mainClass}</mainClass>
+						    <configurationFileDirectories>
+						        <directory>src/main/resources/META-INF/native-image</directory>
+						    </configurationFileDirectories>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
 		<profile>
 			<id>native-windows</id>
-
 			<build>
 				<plugins>
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>exec-maven-plugin</artifactId>
 						<version>3.1.0</version>
-
 						<executions>
 							<execution>
 								<id>package-windows</id>
@@ -220,38 +261,25 @@
 								<goals>
 									<goal>exec</goal>
 								</goals>
-
 								<configuration>
 									<executable>jpackage</executable>
 									<arguments>
 										<argument>--type</argument>
 										<argument>app-image</argument>
-
 										<argument>--name</argument>
 										<argument>${steam.appName}</argument>
-
 										<argument>--app-version</argument>
 										<argument>${appVersion}</argument>
-
 										<argument>--input</argument>
-										<argument>
-											${project.build.directory}/jpackage-input</argument>
-
+										<argument>${project.build.directory}/jpackage-input</argument>
 										<argument>--main-jar</argument>
 										<argument>${project.build.finalName}.jar</argument>
-
 										<argument>--main-class</argument>
 										<argument>${mainClass}</argument>
-
 										<argument>--dest</argument>
-										<argument>
-											${project.build.directory}/dist/windows</argument>
-
+										<argument>${project.build.directory}/dist/windows</argument>
 										<argument>--add-modules</argument>
-										<argument>
-											java.base,java.desktop,java.logging,jdk.unsupported</argument>
-
-										<argument>--win-console</argument>
+										<argument>java.base,java.desktop,java.logging,jdk.unsupported</argument>
 									</arguments>
 								</configuration>
 							</execution>
@@ -260,10 +288,8 @@
 				</plugins>
 			</build>
 		</profile>
-
 		<profile>
 			<id>native-build</id>
-
 			<build>
 				<plugins>
 					<plugin>
@@ -277,14 +303,12 @@
 									<goal>copy-dependencies</goal>
 								</goals>
 								<configuration>
-									<outputDirectory>
-										${project.build.directory}/jpackage-input</outputDirectory>
+									<outputDirectory>${project.build.directory}/jpackage-input</outputDirectory>
 									<includeScope>runtime</includeScope>
 								</configuration>
 							</execution>
 						</executions>
 					</plugin>
-
 					<plugin>
 						<artifactId>maven-resources-plugin</artifactId>
 						<version>3.3.1</version>
@@ -296,15 +320,12 @@
 									<goal>copy-resources</goal>
 								</goals>
 								<configuration>
-									<outputDirectory>
-										${project.build.directory}/jpackage-input</outputDirectory>
+									<outputDirectory>${project.build.directory}/jpackage-input</outputDirectory>
 									<resources>
 										<resource>
-											<directory>
-												${project.build.directory}</directory>
+											<directory>${project.build.directory}</directory>
 											<includes>
-												<include>
-													${project.build.finalName}.jar</include>
+												<include>${project.build.finalName}.jar</include>
 											</includes>
 										</resource>
 									</resources>
@@ -315,17 +336,14 @@
 				</plugins>
 			</build>
 		</profile>
-
 		<profile>
 			<id>native-linux</id>
-
 			<build>
 				<plugins>
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>exec-maven-plugin</artifactId>
 						<version>3.1.0</version>
-
 						<executions>
 							<execution>
 								<id>package-linux</id>
@@ -333,36 +351,25 @@
 								<goals>
 									<goal>exec</goal>
 								</goals>
-
 								<configuration>
 									<executable>jpackage</executable>
 									<arguments>
 										<argument>--type</argument>
 										<argument>app-image</argument>
-
 										<argument>--name</argument>
 										<argument>${steam.appName}</argument>
-
 										<argument>--app-version</argument>
 										<argument>${appVersion}</argument>
-
 										<argument>--input</argument>
-										<argument>
-											${project.build.directory}/jpackage-input/</argument>
-
+										<argument>${project.build.directory}/jpackage-input/</argument>
 										<argument>--main-jar</argument>
 										<argument>${project.build.finalName}.jar</argument>
-
 										<argument>--main-class</argument>
 										<argument>${mainClass}</argument>
-
 										<argument>--dest</argument>
-										<argument>
-											${project.build.directory}/dist/linux</argument>
-
+										<argument>${project.build.directory}/dist/linux</argument>
 										<argument>--add-modules</argument>
-										<argument>
-											java.base,java.desktop,java.logging,jdk.unsupported</argument>
+										<argument>java.base,java.desktop,java.logging,jdk.unsupported</argument>
 									</arguments>
 								</configuration>
 							</execution>
@@ -371,7 +378,5 @@
 				</plugins>
 			</build>
 		</profile>
-
 	</profiles>
-
 </project>

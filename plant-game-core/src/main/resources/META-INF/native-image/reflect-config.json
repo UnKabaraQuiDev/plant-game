@@ -1,0 +1,10 @@
+[
+  {
+    "name": "lu.kbra.plant_game.engine.entity.GameObject",
+    "allDeclaredFields": true
+  },
+  {
+    "name": "lu.kbra.plant_game.engine.entity.UIObject",
+    "allDeclaredFields": true
+  }
+]

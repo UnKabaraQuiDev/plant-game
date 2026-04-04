@@ -1,0 +1,12 @@
+{
+  "resources": {
+    "includes": [
+      { "pattern": ".*\\.json" },
+      { "pattern": ".*\\.png" },
+      { "pattern": ".*\\.frag" },
+      { "pattern": ".*\\.comp" },
+      { "pattern": ".*\\.vert" },
+      { "pattern": ".*\\.obj" }
+    ]
+  }
+}

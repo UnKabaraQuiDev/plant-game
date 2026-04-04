@@ -297,7 +297,7 @@ public abstract class AutogenDefaults extends AbstractMojo {
 							.toArray());
 		}
 	}
-
+	
 	public Enum<?> getEnumValue(final Annotation annotation, final String method) {
 		try {
 			final Class<?> clazz = annotation.getClass();
