@@ -4,22 +4,39 @@ import java.io.IOException;
 import java.util.List;
 
 import org.joml.Matrix3d;
+import org.joml.Matrix3dc;
 import org.joml.Matrix3f;
+import org.joml.Matrix3fc;
 import org.joml.Matrix4d;
+import org.joml.Matrix4dc;
 import org.joml.Matrix4f;
+import org.joml.Matrix4fc;
 import org.joml.Matrix4x3d;
+import org.joml.Matrix4x3dc;
 import org.joml.Matrix4x3f;
+import org.joml.Matrix4x3fc;
 import org.joml.Quaterniond;
+import org.joml.Quaterniondc;
 import org.joml.Quaternionf;
+import org.joml.Quaternionfc;
 import org.joml.Vector2d;
+import org.joml.Vector2dc;
 import org.joml.Vector2f;
+import org.joml.Vector2fc;
 import org.joml.Vector2i;
+import org.joml.Vector2ic;
 import org.joml.Vector3d;
+import org.joml.Vector3dc;
 import org.joml.Vector3f;
+import org.joml.Vector3fc;
 import org.joml.Vector3i;
+import org.joml.Vector3ic;
 import org.joml.Vector4d;
+import org.joml.Vector4dc;
 import org.joml.Vector4f;
+import org.joml.Vector4fc;
 import org.joml.Vector4i;
+import org.joml.Vector4ic;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -42,6 +59,7 @@ public final class OrgJOMLModule extends SimpleModule {
 	public OrgJOMLModule() {
 		super("OrgJOMLModule");
 
+		// == SERIALIZERS ==
 		// Vectors
 		this.addSerializer(Vector2i.class, new Vector2iSerializer());
 		this.addSerializer(Vector3i.class, new Vector3iSerializer());
@@ -65,6 +83,7 @@ public final class OrgJOMLModule extends SimpleModule {
 		this.addSerializer(Matrix4x3f.class, new Matrix4x3fSerializer());
 		this.addSerializer(Matrix4x3d.class, new Matrix4x3dSerializer());
 
+		// == DESERIALIZERS ==
 		// Vectors
 		this.addDeserializer(Vector2i.class, new Vector2iDeserializer());
 		this.addDeserializer(Vector3i.class, new Vector3iDeserializer());
@@ -87,6 +106,30 @@ public final class OrgJOMLModule extends SimpleModule {
 		this.addDeserializer(Matrix4d.class, new Matrix4dDeserializer());
 		this.addDeserializer(Matrix4x3f.class, new Matrix4x3fDeserializer());
 		this.addDeserializer(Matrix4x3d.class, new Matrix4x3dDeserializer());
+
+		// == MAPPINGS ==
+		// Vectors
+		this.addAbstractTypeMapping(Vector2ic.class, Vector2i.class);
+		this.addAbstractTypeMapping(Vector3ic.class, Vector3i.class);
+		this.addAbstractTypeMapping(Vector4ic.class, Vector4i.class);
+		this.addAbstractTypeMapping(Vector2fc.class, Vector2f.class);
+		this.addAbstractTypeMapping(Vector3fc.class, Vector3f.class);
+		this.addAbstractTypeMapping(Vector4fc.class, Vector4f.class);
+		this.addAbstractTypeMapping(Vector2dc.class, Vector2d.class);
+		this.addAbstractTypeMapping(Vector3dc.class, Vector3d.class);
+		this.addAbstractTypeMapping(Vector4dc.class, Vector4d.class);
+
+		// Quaternions
+		this.addAbstractTypeMapping(Quaternionfc.class, Quaternionf.class);
+		this.addAbstractTypeMapping(Quaterniondc.class, Quaterniond.class);
+
+		// Matrices
+		this.addAbstractTypeMapping(Matrix3fc.class, Matrix3f.class);
+		this.addAbstractTypeMapping(Matrix3dc.class, Matrix3d.class);
+		this.addAbstractTypeMapping(Matrix4fc.class, Matrix4f.class);
+		this.addAbstractTypeMapping(Matrix4dc.class, Matrix4d.class);
+		this.addAbstractTypeMapping(Matrix4x3fc.class, Matrix4x3f.class);
+		this.addAbstractTypeMapping(Matrix4x3dc.class, Matrix4x3d.class);
 	}
 
 	/* -- SERIALIZERS -- */

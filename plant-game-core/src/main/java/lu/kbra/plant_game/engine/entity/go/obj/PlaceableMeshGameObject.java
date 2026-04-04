@@ -2,6 +2,8 @@ package lu.kbra.plant_game.engine.entity.go.obj;
 
 import org.joml.Vector2i;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lu.kbra.plant_game.engine.entity.go.MeshGameObject;
 import lu.kbra.plant_game.engine.entity.go.data.Footprint;
 import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
@@ -12,6 +14,7 @@ import lu.kbra.standalone.gameengine.utils.consts.Direction;
 public abstract class PlaceableMeshGameObject extends MeshGameObject
 		implements PlaceableObject, NeedsPostConstruct, StaticMeshFootprintOwner {
 
+	@JsonIgnore
 	protected Footprint footprint;
 
 	protected Direction rotation = Direction.DEFAULT;

@@ -2,6 +2,7 @@ package lu.kbra.plant_game;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
@@ -15,7 +16,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.StreamReadFeature;
-import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
@@ -28,6 +29,7 @@ import lu.kbra.plant_game.base.scene.overlay.OverlayUIScene;
 import lu.kbra.plant_game.base.scene.world.MainMenuWorldScene;
 import lu.kbra.plant_game.engine.UpdateFrameState;
 import lu.kbra.plant_game.engine.data.json.GameObjectModule;
+import lu.kbra.plant_game.engine.data.json.GameObjectModule.GameObjectTaskFutureDeserializer;
 import lu.kbra.plant_game.engine.data.json.LevelDataModule;
 import lu.kbra.plant_game.engine.data.json.OrgJOMLModule;
 import lu.kbra.plant_game.engine.data.json.OrgJSONModule;
@@ -63,18 +65,18 @@ public class PGLogic extends GameLogic {
 	static {
 		OBJECT_MAPPER = new ObjectMapper(JsonFactory.builder().configure(StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION, true).build());
 
-		OBJECT_MAPPER.enable(SerializationFeature.INDENT_OUTPUT);
-		OBJECT_MAPPER.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
-		OBJECT_MAPPER.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+		PGLogic.OBJECT_MAPPER.enable(SerializationFeature.INDENT_OUTPUT);
+		PGLogic.OBJECT_MAPPER.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
+		PGLogic.OBJECT_MAPPER.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
 
-		OBJECT_MAPPER.registerModule(new OrgJSONModule());
-		OBJECT_MAPPER.registerModule(new OrgJOMLModule());
-		OBJECT_MAPPER.registerModule(new VersionMatcherModule());
-		OBJECT_MAPPER.registerModule(new ResourceTypeModule());
-		OBJECT_MAPPER.registerModule(new LevelDataModule());
-		OBJECT_MAPPER.registerModule(new GameObjectModule());
+		PGLogic.OBJECT_MAPPER.registerModule(new OrgJSONModule());
+		PGLogic.OBJECT_MAPPER.registerModule(new OrgJOMLModule());
+		PGLogic.OBJECT_MAPPER.registerModule(new VersionMatcherModule());
+		PGLogic.OBJECT_MAPPER.registerModule(new ResourceTypeModule());
+		PGLogic.OBJECT_MAPPER.registerModule(new LevelDataModule());
+		PGLogic.OBJECT_MAPPER.registerModule(new GameObjectModule());
 
-		OBJECT_MAPPER.registerModule(new PostDeserializeModule());
+		PGLogic.OBJECT_MAPPER.registerModule(new PostDeserializeModule());
 	}
 
 	public final WorkerDispatcher WORKERS = new WorkerDispatcher("WORKERS", 8);
@@ -95,7 +97,7 @@ public class PGLogic extends GameLogic {
 	private final PluginManager pluginManager = new PluginManager();
 
 	public PGLogic() {
-		INSTANCE = this;
+		PGLogic.INSTANCE = this;
 	}
 
 	@Override
@@ -192,7 +194,6 @@ public class PGLogic extends GameLogic {
 		this.overlayUIScene = new OverlayUIScene(this.cache);
 		UIObjectFactory.INSTANCE = new UIObjectFactory(this.overlayUIScene.getCache(), this.WORKERS, this.RENDER_DISPATCHER);
 		this.overlayUIScene.init(this.gameData).then((Consumer<OverlayUIScene>) o -> {
-			System.err.println("overlayuiscene released");
 			this.uiScene = this.overlayUIScene;
 		});
 
@@ -203,13 +204,13 @@ public class PGLogic extends GameLogic {
 	}
 
 	private void prepareGameStart() {
-		renderCleanup(this.gameWorldScene);
+		PGLogic.renderCleanup(this.gameWorldScene);
 		this.gameWorldScene = null;
-		renderCleanup(this.worldScene);
+		PGLogic.renderCleanup(this.worldScene);
 		this.worldScene = null;
-		renderCleanup(this.overlayUIScene);
+		PGLogic.renderCleanup(this.overlayUIScene);
 		this.overlayUIScene = null;
-		renderCleanup(this.uiScene);
+		PGLogic.renderCleanup(this.uiScene);
 		this.uiScene = null;
 	}
 
@@ -231,9 +232,14 @@ public class PGLogic extends GameLogic {
 				.then((ThrowingConsumer<WorldLevelScene, IOException>) o -> {
 					final File dataFile = new File(this.gameData.getDataDir(), "dat.json");
 
-					final List<GOCreatingTaskFuture<?>> list = OBJECT_MAPPER.readValue(dataFile,
-							new TypeReference<List<GOCreatingTaskFuture<?>>>() {
-							});
+					JsonNode root = OBJECT_MAPPER.readTree(dataFile);
+
+					List<GOCreatingTaskFuture<?>> list = new ArrayList<>();
+
+					for (JsonNode node : root) {
+						list.add(new GameObjectTaskFutureDeserializer().deserialize(node.traverse(OBJECT_MAPPER),
+								OBJECT_MAPPER.getDeserializationContext()));
+					}
 					progress.add(100);
 					final CountTriggerLatch latch = new CountTriggerLatch(list.size(), () -> {
 						progress.add(100);
@@ -245,17 +251,29 @@ public class PGLogic extends GameLogic {
 	}
 
 	public void saveLevel() {
-		final File dataFile = new File(this.gameData.getDataDir(), "dat.json");
+		{
+			final File dataFile = new File(this.gameData.getDataDir(), "dat.json");
 
-		final List<GameObject> gos = this.gameWorldScene.stream()
-				.filter(Predicate.not(TerrainGameObject.class::isInstance))
-				.filter(GameObject.class::isInstance)
-				.map(GameObject.class::cast)
-				.toList();
-		try {
-			OBJECT_MAPPER.writeValue(dataFile, gos);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
+			final List<GameObject> gos = this.gameWorldScene.stream()
+					.filter(Predicate.not(TerrainGameObject.class::isInstance))
+					.filter(GameObject.class::isInstance)
+					.map(GameObject.class::cast)
+					.toList();
+			try {
+				PGLogic.OBJECT_MAPPER.writeValue(dataFile, gos);
+			} catch (final IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+		{
+			final File dataFile = new File(this.gameData.getDataDir(), "game.json");
+
+			try {
+				PGLogic.OBJECT_MAPPER.writeValue(dataFile, this.gameData);
+			} catch (final IOException e) {
+				throw new RuntimeException(e);
+			}
 		}
 	}
 
@@ -263,7 +281,7 @@ public class PGLogic extends GameLogic {
 	public void cleanup() {
 		try {
 			this.inputHandler.saveMappings();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			GlobalLogger.severe("Couldn't save InputHandler mappings.", e);
 		}
 
@@ -278,7 +296,7 @@ public class PGLogic extends GameLogic {
 		if (c == null) {
 			return;
 		}
-		INSTANCE.RENDER_DISPATCHER.post(c::cleanup);
+		PGLogic.INSTANCE.RENDER_DISPATCHER.post(c::cleanup);
 	}
 
 	public WorldLevelScene getWorldScene() {
@@ -306,7 +324,7 @@ public class PGLogic extends GameLogic {
 	}
 
 	public static double TOTAL_TIME() {
-		return INSTANCE.engine.getTotalTime();
+		return PGLogic.INSTANCE.engine.getTotalTime();
 	}
 
 	public GameData getGameData() {

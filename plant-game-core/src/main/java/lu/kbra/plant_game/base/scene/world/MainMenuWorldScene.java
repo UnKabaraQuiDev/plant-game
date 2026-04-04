@@ -130,13 +130,10 @@ public class MainMenuWorldScene extends WorldLevelScene implements Consumer<Leve
 					t.getGameData(),
 					t.getLevelData(),
 					new IntPointer(0)).then((Consumer<ObjectPointer<TerrainGameObject>>) c -> {
-						System.err.println(c);
 						c.get().getTransform().translationSet(RESUME_POSITION).updateMatrix();
 						this.targets[MainMenuUIScene.RESUME] = c.get();
 						this.levelObjects.put(t.getInternalName(), c.get());
 						this.add(c.get());
-						System.err.println(this.getEntities().values().stream().map(SceneEntity::getId).toList());
-//						this.startTransition(MainMenuUIScene.RESUME);
 					});
 		}
 	}

@@ -91,7 +91,6 @@ public class IntegerTextUIObject extends ProgrammaticTextUIObject implements Nee
 
 	public void flushValue(final String suffix) {
 		this.updateTextContent(suffix);
-		System.err.println("text: " + this.getTextEmitter().getText());
 		PGLogic.INSTANCE.RENDER_DISPATCHER.post(this::updateText);
 	}
 

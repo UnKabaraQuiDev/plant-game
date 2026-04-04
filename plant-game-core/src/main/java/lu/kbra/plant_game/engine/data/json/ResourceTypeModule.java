@@ -19,8 +19,9 @@ import lu.kbra.plant_game.plugin.registry.ResourceRegistry;
 public class ResourceTypeModule extends SimpleModule {
 
 	public ResourceTypeModule() {
-		this.addKeySerializer(ResourceType.class, new ResourceTypeSerializer());
+		this.addKeySerializer(ResourceType.class, new ResourceTypeKeySerializer());
 		this.addKeyDeserializer(ResourceType.class, new ResourceTypeKeyDeserializer());
+
 		this.addSerializer(ResourceType.class, new ResourceTypeSerializer());
 		this.addDeserializer(ResourceType.class, new ResourceTypeDeserializer());
 	}
@@ -41,6 +42,20 @@ public class ResourceTypeModule extends SimpleModule {
 			return resourceType;
 		}
 
+	}
+
+	public static final class ResourceTypeKeySerializer extends JsonSerializer<ResourceType> {
+
+		@Override
+		public void serialize(final ResourceType value, final JsonGenerator gen, final SerializerProvider serializers) throws IOException {
+			for (Map.Entry<String, ResourceType> entry : ResourceRegistry.RESOURCE_TYPE_DEFS.entrySet()) {
+				if (Objects.equals(value, entry.getValue())) {
+					gen.writeFieldName(entry.getKey());
+					return;
+				}
+			}
+			throw new IllegalArgumentException("Unsupported ResourceType instance");
+		}
 	}
 
 	static final class ResourceTypeDeserializer extends JsonDeserializer<ResourceType> {

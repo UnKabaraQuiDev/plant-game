@@ -42,22 +42,11 @@ public class OptionKeyUIObjectGroup extends BoundedUIObjectGroup implements Grow
 	protected ObjectPointer<TextUIObject> value = new ObjectPointer<>();
 
 	protected boolean focused;
-//	protected ScheduledTask updateTask;
 
 	public OptionKeyUIObjectGroup(final KeyOption keyOption, final UIObjectGroup parent) {
 		super("option" + keyOption.toString(), new AnchorLayout(), parent, new Transform3D(), Direction2d.VERTICAL);
 		this.keyOption = keyOption;
 	}
-
-//	@Override
-//	public boolean recomputeBounds() {
-//		final boolean changed = super.recomputeBounds();
-////		if (changed) {
-////			System.err.println(super.getBounds().getBounds2D().getMinX());
-////			((Transform3DPivot) this.getTransform()).scalePivotSetX(0).updateMatrix();
-////		}
-//		return changed;
-//	}
 
 	@Override
 	public boolean focusInput(final WindowInputHandler inputHandler) {
@@ -109,7 +98,7 @@ public class OptionKeyUIObjectGroup extends BoundedUIObjectGroup implements Grow
 	public ObjectTriggerLatch<OptionKeyUIObjectGroup> init(final WindowInputHandler inputHandler, final float charSize) {
 		final ObjectTriggerLatch<OptionKeyUIObjectGroup> latch = new ObjectTriggerLatch<>(2, this);
 
-		UIObjectFactory.createText(AnchoredProgrammaticTextUIObject.class, charSize, KeyRegistry.getLocalizationKey(keyOption))
+		UIObjectFactory.createText(AnchoredProgrammaticTextUIObject.class, charSize, KeyRegistry.getLocalizationKey(this.keyOption))
 				.set(i -> i.setTransform(new Transform3D()))
 				.set(i -> i.setAnchors(Anchor.CENTER_LEFT, Anchor.CENTER_LEFT))
 				.add(this)

@@ -267,8 +267,6 @@ public class TerrainGameObject extends VariationMeshGameObject
 			}
 		}
 
-		System.err.println(completed + " / " + total + " = " + (byte) (completed * 100 / total));
-
 		this.getParent().getGameData().setProgress((byte) (completed * 100 / total));
 	}
 

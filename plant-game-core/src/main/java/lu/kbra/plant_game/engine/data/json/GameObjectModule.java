@@ -7,6 +7,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationConfig;
@@ -29,7 +30,6 @@ public class GameObjectModule extends SimpleModule {
 	public GameObjectModule() {
 		super.addDeserializer(GOCreatingTaskFuture.TaskState.class, new GameObjectTaskFutureStateDeserializer());
 		super.addDeserializer(GOCreatingTaskFuture.class, new GameObjectTaskFutureDeserializer());
-//		super.addSerializer(GameObject.class, new GameObjectSerializer());
 	}
 
 	@Override
@@ -51,9 +51,11 @@ public class GameObjectModule extends SimpleModule {
 		});
 	}
 
-	public class GameObjectTaskFutureStateDeserializer
+	@Deprecated
+	public static class GameObjectTaskFutureStateDeserializer
 			extends JsonDeserializer<GOCreatingTaskFuture<? extends GameObject>.TaskState<? extends GameObject>> {
 
+		@Deprecated
 		@Override
 		public GOCreatingTaskFuture<? extends GameObject>.TaskState<? extends GameObject> deserialize(
 				final JsonParser p,
@@ -73,7 +75,7 @@ public class GameObjectModule extends SimpleModule {
 
 	}
 
-	public class GameObjectTaskFutureDeserializer extends JsonDeserializer<GOCreatingTaskFuture<? extends GameObject>> {
+	public static class GameObjectTaskFutureDeserializer extends JsonDeserializer<GOCreatingTaskFuture<?>> {
 
 		@Override
 		public GOCreatingTaskFuture<? extends GameObject> deserialize(final JsonParser p, final DeserializationContext ctxt)
@@ -84,10 +86,11 @@ public class GameObjectModule extends SimpleModule {
 			final String type = root.get("_type").asText();
 
 			final Class<? extends GameObject> clazz = GameObjectRegistry.findInternalName(type);
+			final JsonNode dataRoot = root.get("_data");
 
 			return GameObjectFactory.create(clazz).set((i) -> {
 				try {
-					mapper.readerForUpdating(i).readValue(root);
+					mapper.readerForUpdating(i).readValue(dataRoot);
 				} catch (final IOException e) {
 					throw new RuntimeException("Exception while updating: " + type + " = " + clazz.getName(), e);
 				}
@@ -100,7 +103,7 @@ public class GameObjectModule extends SimpleModule {
 
 	}
 
-	public class GameObjectSerializer extends JsonSerializer<GameObject> {
+	public static class GameObjectSerializer extends JsonSerializer<GameObject> {
 
 		protected JsonSerializer<Object> delegate;
 

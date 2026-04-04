@@ -118,6 +118,7 @@ public abstract class LevelRegistry extends PluginRegistry {
 
 		public GameData newGameData() {
 			final GameData gameData = new GameData(this.levelData);
+			gameData.setLevelState(LevelState.STARTED);
 			gameData.setDataDir(this.dataDir);
 			this.dataDir.mkdirs();
 			return gameData;
@@ -153,6 +154,7 @@ public abstract class LevelRegistry extends PluginRegistry {
 			gd.ifPresent(c -> {
 				ld.levelState = c.getLevelState();
 				ld.progress = c.getProgress();
+				c.setDataDir(ld.dataDir);
 			});
 			ld.gameData = gd;
 			LEVELS.add(ld);
@@ -172,9 +174,14 @@ public abstract class LevelRegistry extends PluginRegistry {
 		if (!dataFile.exists()) {
 			return Optional.empty();
 		}
-		final GameData obj = PGLogic.OBJECT_MAPPER.readValue(dataFile, GameData.class);
-		obj.setLevelData(ld.levelData);
-		return Optional.of(obj);
+		try {
+			final GameData obj = PGLogic.OBJECT_MAPPER.readValue(dataFile, GameData.class);
+			obj.setLevelData(ld.levelData);
+			return Optional.of(obj);
+		} catch (Exception e) {
+			// file is corrupted :(
+			return Optional.empty();
+		}
 	}
 
 	@Override

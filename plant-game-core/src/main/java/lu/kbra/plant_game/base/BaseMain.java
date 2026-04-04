@@ -18,7 +18,6 @@ public class BaseMain extends PluginMain {
 	@Override
 	public void onEnable() {
 		System.err.println("Base plugin enabled 👍");
-//		PGLogic.INSTANCE.getCompositor().enableFilter(new VignetteShaderConfiguration());
 	}
 
 	@Override
