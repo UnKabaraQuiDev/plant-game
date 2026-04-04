@@ -97,7 +97,7 @@ public class PlayInfoUIObjectGroup extends AnchoredLayoutUIObjectGroup implement
 				.latch(latch)
 				.push();
 
-		this.progressBar.init(FlatQuadUIObject.class, FlatQuadUIObject.class).then(c -> {
+		this.progressBar.init(FlatQuadUIObject.class, FlatQuadUIObject.class).then((Consumer<ProgressBarUIObject>) c -> {
 			final float maxWidth = SIZE.get().x() * 10; // NAME_LENGTH.getAsInt();
 			c.getTransform()
 					.scaleSet(maxWidth / (float) c.getBounds().getBounds2D().getWidth())

@@ -1,5 +1,6 @@
 package lu.kbra.plant_game.base.scene.overlay;
 
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import lu.kbra.pclib.concurrency.CountTriggerLatch;
@@ -16,6 +17,7 @@ import lu.kbra.plant_game.base.scene.overlay.stat_line.integer.IntegerStatLine;
 import lu.kbra.plant_game.engine.entity.ui.FlatQuadUIObject;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.bar.AnchoredProgressBarUIObject;
+import lu.kbra.plant_game.engine.entity.ui.bar.ProgressBarUIObject;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
 import lu.kbra.plant_game.engine.entity.ui.icon.EnergyIconUIObject;
 import lu.kbra.plant_game.engine.entity.ui.icon.MoneyIconUIObject;
@@ -78,11 +80,11 @@ public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner
 		super.addAll(this.statsGroup);
 
 		final ObjectTriggerLatch<OverlayUIScene> latch = new ObjectTriggerLatch<>(7, this);
-		latch.thenOther(OverlayUIScene::doLayout);
+		latch.then((Consumer<OverlayUIScene>) OverlayUIScene::doLayout);
 
 		final float height = 0.2f * STATS_GROUP_SCALE;
 
-		this.buildingPanel.init().then(c -> {
+		this.buildingPanel.init().then((Consumer<BuildingPanelUIObjectGroup>) c -> {
 			this.add(c);
 			UIObjectFactory.create(BuildingPanelToggleButtonUIObject.class)
 					.set(i -> i.setTransform(new Transform3D(0.2f).rotationSet(0, 0, 0).update()))
@@ -91,7 +93,7 @@ public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner
 					.push();
 		}).latch(latch);
 
-		this.buildingInfo.init().then(c -> {
+		this.buildingInfo.init().then((Consumer<BuildingInfoUIObjectGroup>) c -> {
 			c.getTransform().translationAddY(0.5f);
 			c.setActive(false);
 			this.add(c);
@@ -105,11 +107,12 @@ public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner
 			final CountTriggerLatch latch3 = new CountTriggerLatch(v.size(), () -> latch2.trigger(null));
 
 			this.buildingPanel.addTab(new BuildingTabUIObjectGroup(k.getLocalizationKey(), k.getIndex(), k.getAccentColor()))
-					.then(tab -> v.forEach(f -> new BuildingItemUIObjectGroup(f).init().then(obj -> {
-						obj.setTransform(new Transform3D(0.3f));
-						obj.setIndex(f.getIndex());
-						tab.getContent().add(obj);
-					}).latch(latch3)));
+					.then((Consumer<BuildingTabUIObjectGroup>) tab -> v
+							.forEach(f -> new BuildingItemUIObjectGroup(f).init().then((Consumer<BuildingItemUIObjectGroup>) obj -> {
+								obj.setTransform(new Transform3D(0.3f));
+								obj.setIndex(f.getIndex());
+								tab.getContent().add(obj);
+							}).latch(latch3)));
 		});
 
 		this.waterGroup = new IntegerStatLine("water-counter");
@@ -152,11 +155,11 @@ public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner
 				Anchor.TOP_RIGHT,
 				0.01f,
 				0.5f);
-		this.progressBar.init(FlatQuadUIObject.class, FlatQuadUIObject.class).then(pb -> {
+		this.progressBar.init(FlatQuadUIObject.class, FlatQuadUIObject.class).then((Consumer<ProgressBarUIObject>) pb -> {
 			this.progressGroup = new ExtAnchoredIntegerStatLine("level-progress-counter");
 			this.progressGroup
 					.init(workers, renderDispatcher, height, 4, 3, null, IntegerTextUIObject.class, SignedIntegerTextUIObject.class, true)
-					.then(obj -> {
+					.then((Consumer<ExtAnchoredIntegerStatLine>) obj -> {
 						obj.getValue().setValue(0).flushValue();
 						obj.getPopup().setValue(0).flushValue();
 						obj.getPopup().setPadding(false);

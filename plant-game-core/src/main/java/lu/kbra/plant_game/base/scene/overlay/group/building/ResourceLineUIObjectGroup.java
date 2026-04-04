@@ -1,6 +1,7 @@
 package lu.kbra.plant_game.base.scene.overlay.group.building;
 
 import java.awt.geom.Rectangle2D;
+import java.util.function.Consumer;
 
 import org.joml.Vector3f;
 
@@ -57,7 +58,7 @@ public class ResourceLineUIObjectGroup extends LayoutOffsetUIObjectGroup impleme
 
 		this.valueObject.init(FONT_HEIGHT, this.getResourceType().getIconClass(), IntegerTextUIObject.class)
 				.latch(latch)
-				.then(AnchoredFixedIntegerStatLine::flushValue);
+				.then((Consumer<AnchoredFixedIntegerStatLine>) AnchoredFixedIntegerStatLine::flushValue);
 
 		return latch;
 	}
@@ -79,7 +80,7 @@ public class ResourceLineUIObjectGroup extends LayoutOffsetUIObjectGroup impleme
 
 		this.valueObject.init(FONT_HEIGHT, this.getResourceType().getIconClass(), IntegerTextUIObject.class)
 				.latch(latch)
-				.then(AnchoredFixedIntegerStatLine::flushValue);
+				.then((Consumer<AnchoredFixedIntegerStatLine>) AnchoredFixedIntegerStatLine::flushValue);
 
 		return latch;
 	}

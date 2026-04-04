@@ -4,6 +4,7 @@ import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -69,8 +70,10 @@ public class BuildingPanelUIObjectGroup extends AnchoredLayoutUIObjectGroup
 				.latch(latch)
 				.push();
 
-		latch.thenOther(BuildingPanelUIObjectGroup::doLayout);
-		latch.thenOther(c -> c.setActive(false));
+		latch.then((Consumer<BuildingPanelUIObjectGroup>) c -> {
+			c.doLayout();
+			c.setActive(false);
+		});
 
 		return latch;
 	}
@@ -113,25 +116,26 @@ public class BuildingPanelUIObjectGroup extends AnchoredLayoutUIObjectGroup
 	public <T extends BuildingTabUIObjectGroup> ObjectTriggerLatch<T> addTab(final T tab) {
 		final ObjectTriggerLatch<T> latch = new ObjectTriggerLatch<>(1, tab);
 
-		new BuildingTabButtonUIObjectGroup(new Transform3D(new Vector3f(0, -0.5f, 0)), tab).init().then(obj -> {
-			obj.getTransform().scaleMul(this.tabList.getFixedHeight() / (float) obj.getBounds().getBounds2D().getHeight()).update();
+		new BuildingTabButtonUIObjectGroup(new Transform3D(new Vector3f(0, -0.5f, 0)), tab).init()
+				.then((Consumer<BuildingTabButtonUIObjectGroup>) obj -> {
+					obj.getTransform().scaleMul(this.tabList.getFixedHeight() / (float) obj.getBounds().getBounds2D().getHeight()).update();
 
-			this.tabList.add(obj);
-			this.buildingTabs.put(tab.getTitleKey(), tab);
-			this.add(tab);
+					this.tabList.add(obj);
+					this.buildingTabs.put(tab.getTitleKey(), tab);
+					this.add(tab);
 
-			synchronized (this.tabLock) {
-				if (this.activeBuildingTabKey == null) {
-					this.setClickedTab(tab.getTitleKey(), true);
-					this.activeBuildingTabKey = tab.getTitleKey();
-				} else {
-					this.setClickedTab(tab.getTitleKey(), false);
-				}
-			}
+					synchronized (this.tabLock) {
+						if (this.activeBuildingTabKey == null) {
+							this.setClickedTab(tab.getTitleKey(), true);
+							this.activeBuildingTabKey = tab.getTitleKey();
+						} else {
+							this.setClickedTab(tab.getTitleKey(), false);
+						}
+					}
 
-			this.getFirstParentMatching(LayoutOwner.class, true).ifPresent(LayoutOwner::doLayout);
-			latch.trigger(obj);
-		});
+					this.getFirstParentMatching(LayoutOwner.class, true).ifPresent(LayoutOwner::doLayout);
+					latch.trigger(obj);
+				});
 
 		return latch;
 	}

@@ -43,18 +43,23 @@ public class ExtAnchoredIntegerStatLine extends IntegerStatLine implements ExtAn
 	}
 
 	@Override
-	public <T extends TexturedQuadMeshUIObject, V extends IntegerTextUIObject, P extends SignedIntegerTextUIObject> ObjectTriggerLatch<ExtAnchoredIntegerStatLine> init(
+	public <T extends TexturedQuadMeshUIObject, V extends IntegerTextUIObject, P extends SignedIntegerTextUIObject> ObjectTriggerLatch<? extends ExtAnchoredIntegerStatLine> init(
 			final Dispatcher workers,
 			final Dispatcher render,
 			final float height,
 			final Class<T> iconClazz,
 			final Class<V> valueClazz,
 			final Class<P> popupClazz) {
-		return (ObjectTriggerLatch<ExtAnchoredIntegerStatLine>) super.init(workers, render, height, iconClazz, valueClazz, popupClazz);
+		return (ObjectTriggerLatch<? extends ExtAnchoredIntegerStatLine>) super.init(workers,
+				render,
+				height,
+				iconClazz,
+				valueClazz,
+				popupClazz);
 	}
 
 	@Override
-	public <T extends TexturedQuadMeshUIObject, V extends IntegerTextUIObject, P extends SignedIntegerTextUIObject> ObjectTriggerLatch<? extends IntegerStatLine> init(
+	public <T extends TexturedQuadMeshUIObject, V extends IntegerTextUIObject, P extends SignedIntegerTextUIObject> ObjectTriggerLatch<? extends ExtAnchoredIntegerStatLine> init(
 			final Dispatcher workers,
 			final Dispatcher render,
 			final float height,
@@ -62,11 +67,19 @@ public class ExtAnchoredIntegerStatLine extends IntegerStatLine implements ExtAn
 			final Class<V> valueClazz,
 			final Class<P> popupClazz,
 			final boolean percentage) {
-		return super.init(workers, render, height, VALUE_LENGTH, POPUP_LENGTH, iconClazz, valueClazz, popupClazz, percentage);
+		return (ObjectTriggerLatch<? extends ExtAnchoredIntegerStatLine>) super.init(workers,
+				render,
+				height,
+				VALUE_LENGTH,
+				POPUP_LENGTH,
+				iconClazz,
+				valueClazz,
+				popupClazz,
+				percentage);
 	}
 
 	@Override
-	public <T extends TexturedQuadMeshUIObject, V extends IntegerTextUIObject, P extends SignedIntegerTextUIObject> ObjectTriggerLatch<ExtAnchoredIntegerStatLine> init(
+	public <T extends TexturedQuadMeshUIObject, V extends IntegerTextUIObject, P extends SignedIntegerTextUIObject> ObjectTriggerLatch<? extends ExtAnchoredIntegerStatLine> init(
 			final Dispatcher workers,
 			final Dispatcher render,
 			final float height,
@@ -76,7 +89,7 @@ public class ExtAnchoredIntegerStatLine extends IntegerStatLine implements ExtAn
 			final Class<V> valueClazz,
 			final Class<P> popupClazz,
 			final boolean percentage) {
-		return (ObjectTriggerLatch<ExtAnchoredIntegerStatLine>) super.init(workers,
+		return (ObjectTriggerLatch<? extends ExtAnchoredIntegerStatLine>) super.init(workers,
 				render,
 				height,
 				valueLength,

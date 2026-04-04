@@ -106,8 +106,9 @@ public class ResumeResourcesUIObjectGroup extends AnchoredFBUIObjectGroup
 				.latch(latch)
 				.push();
 
-		ResourceRegistry.RESOURCE_TYPE_DEFS
-				.forEach((k, rt) -> new ResourceLineUIObjectGroup("res-" + k, rt).init().then(this::add).latch(latch));
+		ResourceRegistry.RESOURCE_TYPE_DEFS.forEach((k, rt) -> new ResourceLineUIObjectGroup("res-" + k, rt).init()
+				.then((Consumer<ResourceLineUIObjectGroup>) this::add)
+				.latch(latch));
 
 		return latch;
 	}

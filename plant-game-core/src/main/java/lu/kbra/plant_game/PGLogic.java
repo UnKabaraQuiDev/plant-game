@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Consumer;
 
 import org.lwjgl.glfw.GLFW;
 
@@ -186,12 +187,13 @@ public class PGLogic extends GameLogic {
 
 		this.overlayUIScene = new OverlayUIScene(this.cache);
 		UIObjectFactory.INSTANCE = new UIObjectFactory(this.overlayUIScene.getCache(), this.WORKERS, this.RENDER_DISPATCHER);
-		this.overlayUIScene.init(this.WORKERS, this.WORKERS, this.gameData).then(o -> this.uiScene = this.overlayUIScene);
+		this.overlayUIScene.init(this.WORKERS, this.WORKERS, this.gameData)
+				.then((Consumer<OverlayUIScene>) o -> this.uiScene = this.overlayUIScene);
 
 		this.gameWorldScene = new WorldLevelScene(levelData.getInternalName(), this.cache);
 		GameObjectFactory.INSTANCE = new GameObjectFactory(this.gameWorldScene.getCache(), this.WORKERS, this.RENDER_DISPATCHER);
 		this.gameWorldScene.init(this.WORKERS, this.RENDER_DISPATCHER, this.gameData, progress)
-				.then(o -> this.worldScene = this.gameWorldScene);
+				.then((Consumer<WorldLevelScene>) o -> this.worldScene = this.gameWorldScene);
 	}
 
 	private void prepareGameStart() {
@@ -215,7 +217,8 @@ public class PGLogic extends GameLogic {
 
 		this.overlayUIScene = new OverlayUIScene(this.cache);
 		UIObjectFactory.INSTANCE = new UIObjectFactory(this.overlayUIScene.getCache(), this.WORKERS, this.RENDER_DISPATCHER);
-		this.overlayUIScene.init(this.WORKERS, this.WORKERS, this.gameData).then(o -> this.uiScene = this.overlayUIScene);
+		this.overlayUIScene.init(this.WORKERS, this.WORKERS, this.gameData)
+				.then((Consumer<OverlayUIScene>) o -> this.uiScene = this.overlayUIScene);
 
 		this.gameWorldScene = new WorldLevelScene(levelData.getInternalName(), this.cache);
 		GameObjectFactory.INSTANCE = new GameObjectFactory(this.gameWorldScene.getCache(), this.WORKERS, this.RENDER_DISPATCHER);

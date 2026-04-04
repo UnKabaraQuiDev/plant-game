@@ -48,15 +48,22 @@ jobs:
             echo "has_changes=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Detect SNAPSHOT
-        id: snapshot
+      - name: Decide if pipeline should run
+        id: decision
         run: |
-          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-          echo "Detected version: $VERSION"
-          if [[ "$VERSION" == *"-SNAPSHOT" ]]; then
-            echo "is_snapshot=true" >> $GITHUB_OUTPUT
+          HAS_CHANGES="${{ steps.changes.outputs.has_changes }}"
+          IS_SNAPSHOT="${{ steps.snapshot.outputs.is_snapshot }}"
+
+          echo "has_changes=$HAS_CHANGES"
+          echo "is_snapshot=$IS_SNAPSHOT"
+          echo "event=${{ github.event_name }}"
+
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "should_run=true" >> $GITHUB_OUTPUT
+          elif [[ "$IS_SNAPSHOT" == "true" && "$HAS_CHANGES" == "true" ]]; then
+            echo "should_run=true" >> $GITHUB_OUTPUT
           else
-            echo "is_snapshot=false" >> $GITHUB_OUTPUT
+            echo "should_run=false" >> $GITHUB_OUTPUT
           fi
 
   format:
@@ -66,7 +73,7 @@ jobs:
     if: >
       needs.prepare.outputs.is_snapshot == 'true' &&
       (
-        github.event_name != 'schedule' ||
+        github.event_name == 'workflow_dispatch' ||
         needs.prepare.outputs.has_changes == 'true'
       )
 
@@ -94,13 +101,13 @@ jobs:
           git push || echo "Push failed, continuing..."
 
   linux:
-    needs: format
+    needs: [prepare, format]
     runs-on: [self-hosted, linux]
 
     if: >
       needs.prepare.outputs.is_snapshot == 'true' &&
       (
-        github.event_name != 'schedule' ||
+        github.event_name == 'workflow_dispatch' ||
         needs.prepare.outputs.has_changes == 'true'
       )
 
@@ -144,13 +151,13 @@ jobs:
         run: bash ./scripts/build-nightly-linux.sh
 
   windows:
-    needs: format
+    needs: [prepare, format]
     runs-on: [self-hosted, windows]
 
     if: >
       needs.prepare.outputs.is_snapshot == 'true' &&
       (
-        github.event_name != 'schedule' ||
+        github.event_name == 'workflow_dispatch' ||
         needs.prepare.outputs.has_changes == 'true'
       )
 

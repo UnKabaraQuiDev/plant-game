@@ -9,6 +9,7 @@ import org.joml.Vector3fc;
 
 import lu.kbra.pclib.PCUtils;
 import lu.kbra.pclib.concurrency.ObjectTriggerLatch;
+import lu.kbra.pclib.pointer.ObjectPointer;
 import lu.kbra.pclib.pointer.prim.IntPointer;
 import lu.kbra.plant_game.PGLogic;
 import lu.kbra.plant_game.base.entity.go.obj.water.WaterTowerMediumObject;
@@ -128,7 +129,7 @@ public class MainMenuWorldScene extends WorldLevelScene implements Consumer<Leve
 					PGLogic.INSTANCE.RENDER_DISPATCHER,
 					t.getGameData(),
 					t.getLevelData(),
-					new IntPointer(0)).then(c -> {
+					new IntPointer(0)).then((Consumer<ObjectPointer<TerrainGameObject>>) c -> {
 						System.err.println(c);
 						c.get().getTransform().translationSet(RESUME_POSITION).updateMatrix();
 						this.targets[MainMenuUIScene.RESUME] = c.get();
@@ -153,13 +154,7 @@ public class MainMenuWorldScene extends WorldLevelScene implements Consumer<Leve
 				.postInit(i -> this.targets[MainMenuUIScene.OPTIONS] = i)
 				.push();
 
-//		GameObjectFactory.create(WaterWheelObject.class)
-//				.set(i -> i.setTransform(new Transform3D(new Vector3f(0, 100, 0))))
-//				.add(this)
-//				.postInit(i -> this.targets[MainMenuUIScene.PLAY] = i)
-//				.push();
-
-		return super.init(workers, render, gameData, worldProgress).thenOther(c -> {
+		return super.init(workers, render, gameData, worldProgress).then((Consumer<WorldLevelScene>) c -> {
 			this.targets[MainMenuUIScene.MAIN] = c.getTerrain();
 			this.currentOffset.set(this.offsets[MainMenuUIScene.MAIN]);
 			this.currentCenter.set(this.targets[MainMenuUIScene.MAIN].getTransform().getTranslation())
