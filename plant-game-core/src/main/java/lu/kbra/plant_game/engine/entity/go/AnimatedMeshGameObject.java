@@ -2,6 +2,8 @@ package lu.kbra.plant_game.engine.entity.go;
 
 import org.joml.Matrix4f;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lu.kbra.plant_game.engine.entity.impl.AnimatedMeshOwner;
 import lu.kbra.plant_game.engine.entity.impl.AnimatedTransformOwner;
 import lu.kbra.plant_game.engine.mesh.AnimatedMesh;
@@ -9,9 +11,11 @@ import lu.kbra.standalone.gameengine.geom.Mesh;
 
 public class AnimatedMeshGameObject extends MeshGameObject implements AnimatedTransformOwner, AnimatedMeshOwner {
 
-	protected Matrix4f animatedTransform = new Matrix4f().identity();
-
+	@JsonIgnore
 	protected AnimatedMesh animatedMesh;
+
+	@JsonIgnore
+	protected Matrix4f animatedTransform = new Matrix4f().identity();
 
 	public AnimatedMeshGameObject(final String str, final Mesh mesh, final AnimatedMesh animatedMesh) {
 		super(str, mesh);

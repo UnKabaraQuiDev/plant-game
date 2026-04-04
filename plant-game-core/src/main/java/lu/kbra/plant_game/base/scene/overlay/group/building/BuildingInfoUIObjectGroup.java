@@ -152,7 +152,7 @@ public class BuildingInfoUIObjectGroup extends LayoutOffsetUIObjectGroup impleme
 				.latch(latch)
 				.push();
 
-		latch.thenOther(BuildingInfoUIObjectGroup::recomputeBounds);
+		latch.then((Consumer<BuildingInfoUIObjectGroup>) BuildingInfoUIObjectGroup::recomputeBounds);
 
 		return latch;
 	}
@@ -177,7 +177,7 @@ public class BuildingInfoUIObjectGroup extends LayoutOffsetUIObjectGroup impleme
 
 	public ObjectTriggerLatch<? extends ResourceLineUIObjectGroup> addIntLine(final String id, final ResourceType rt) {
 		final ResourceLineUIObjectGroup newLine = new ResourceLineUIObjectGroup(id, rt);
-		return newLine.init(MEDIUM_FONT_SIZE).thenOther(c -> {
+		return newLine.init(MEDIUM_FONT_SIZE).then((Consumer<ResourceLineUIObjectGroup>) c -> {
 			this.content.add(c);
 			this.resourceLines.add(c);
 		});

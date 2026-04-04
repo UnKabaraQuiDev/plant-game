@@ -12,7 +12,6 @@ import lu.kbra.plant_game.engine.entity.ui.text.IntegerTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.SignedIntegerTextUIObject;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
-import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.objs.entity.ParentAwareNode;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
@@ -44,32 +43,21 @@ public class ExtAnchoredIntegerStatLine extends IntegerStatLine implements ExtAn
 
 	@Override
 	public <T extends TexturedQuadMeshUIObject, V extends IntegerTextUIObject, P extends SignedIntegerTextUIObject> ObjectTriggerLatch<? extends ExtAnchoredIntegerStatLine> init(
-			final Dispatcher workers,
-			final Dispatcher render,
 			final float height,
 			final Class<T> iconClazz,
 			final Class<V> valueClazz,
 			final Class<P> popupClazz) {
-		return (ObjectTriggerLatch<? extends ExtAnchoredIntegerStatLine>) super.init(workers,
-				render,
-				height,
-				iconClazz,
-				valueClazz,
-				popupClazz);
+		return (ObjectTriggerLatch<? extends ExtAnchoredIntegerStatLine>) super.init(height, iconClazz, valueClazz, popupClazz);
 	}
 
 	@Override
 	public <T extends TexturedQuadMeshUIObject, V extends IntegerTextUIObject, P extends SignedIntegerTextUIObject> ObjectTriggerLatch<? extends ExtAnchoredIntegerStatLine> init(
-			final Dispatcher workers,
-			final Dispatcher render,
 			final float height,
 			final Class<T> iconClazz,
 			final Class<V> valueClazz,
 			final Class<P> popupClazz,
 			final boolean percentage) {
-		return (ObjectTriggerLatch<? extends ExtAnchoredIntegerStatLine>) super.init(workers,
-				render,
-				height,
+		return (ObjectTriggerLatch<? extends ExtAnchoredIntegerStatLine>) super.init(height,
 				VALUE_LENGTH,
 				POPUP_LENGTH,
 				iconClazz,
@@ -80,8 +68,6 @@ public class ExtAnchoredIntegerStatLine extends IntegerStatLine implements ExtAn
 
 	@Override
 	public <T extends TexturedQuadMeshUIObject, V extends IntegerTextUIObject, P extends SignedIntegerTextUIObject> ObjectTriggerLatch<? extends ExtAnchoredIntegerStatLine> init(
-			final Dispatcher workers,
-			final Dispatcher render,
 			final float height,
 			final int valueLength,
 			final int popupLength,
@@ -89,9 +75,7 @@ public class ExtAnchoredIntegerStatLine extends IntegerStatLine implements ExtAn
 			final Class<V> valueClazz,
 			final Class<P> popupClazz,
 			final boolean percentage) {
-		return (ObjectTriggerLatch<? extends ExtAnchoredIntegerStatLine>) super.init(workers,
-				render,
-				height,
+		return (ObjectTriggerLatch<? extends ExtAnchoredIntegerStatLine>) super.init(height,
 				valueLength,
 				popupLength,
 				iconClazz,

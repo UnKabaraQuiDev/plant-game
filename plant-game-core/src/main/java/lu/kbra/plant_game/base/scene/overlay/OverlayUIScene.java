@@ -73,12 +73,20 @@ public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner
 		this.setLayout(new AnchorLayout());
 	}
 
-	public ObjectTriggerLatch<OverlayUIScene> init(final Dispatcher workers, final Dispatcher renderDispatcher, final GameData gameData) {
+	public ObjectTriggerLatch<OverlayUIScene> init(final GameData gameData) {
 		this.gameData = gameData;
 
 		super.addAll(this.statsGroup);
 
-		final ObjectTriggerLatch<OverlayUIScene> latch = new ObjectTriggerLatch<>(7, this);
+		final ObjectTriggerLatch<OverlayUIScene> latch = new ObjectTriggerLatch<>(7, this) {
+
+			@Override
+			public void trigger(final Object value) {
+				new Exception(Integer.toString(this.getValue())).fillInStackTrace().printStackTrace();
+				super.trigger(value);
+			}
+
+		};
 		latch.then((Consumer<OverlayUIScene>) OverlayUIScene::doLayout);
 
 		final float height = 0.2f * STATS_GROUP_SCALE;
@@ -116,36 +124,15 @@ public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner
 		});
 
 		this.waterGroup = new IntegerStatLine("water-counter");
-		this.waterGroup
-				.init(workers,
-						renderDispatcher,
-						height,
-						WaterIconUIObject.class,
-						IntegerTextUIObject.class,
-						SignedIntegerTextUIObject.class)
-				.latch(latch);
+		this.waterGroup.init(height, WaterIconUIObject.class, IntegerTextUIObject.class, SignedIntegerTextUIObject.class).latch(latch);
 		this.statsGroup.add(this.waterGroup);
 
 		this.moneyGroup = new IntegerStatLine("money-counter");
-		this.moneyGroup
-				.init(workers,
-						renderDispatcher,
-						height,
-						MoneyIconUIObject.class,
-						IntegerTextUIObject.class,
-						SignedIntegerTextUIObject.class)
-				.latch(latch);
+		this.moneyGroup.init(height, MoneyIconUIObject.class, IntegerTextUIObject.class, SignedIntegerTextUIObject.class).latch(latch);
 		this.statsGroup.add(this.moneyGroup);
 
 		this.energyGroup = new IntegerStatLine("energy-counter");
-		this.energyGroup
-				.init(workers,
-						renderDispatcher,
-						height,
-						EnergyIconUIObject.class,
-						IntegerTextUIObject.class,
-						SignedIntegerTextUIObject.class)
-				.latch(latch);
+		this.energyGroup.init(height, EnergyIconUIObject.class, IntegerTextUIObject.class, SignedIntegerTextUIObject.class).latch(latch);
 		this.statsGroup.add(this.energyGroup);
 
 		this.progressBar = new AnchoredProgressBarUIObject("level-progress-bar",
@@ -157,8 +144,7 @@ public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner
 				0.5f);
 		this.progressBar.init(FlatQuadUIObject.class, FlatQuadUIObject.class).then((Consumer<ProgressBarUIObject>) pb -> {
 			this.progressGroup = new ExtAnchoredIntegerStatLine("level-progress-counter");
-			this.progressGroup
-					.init(workers, renderDispatcher, height, 4, 3, null, IntegerTextUIObject.class, SignedIntegerTextUIObject.class, true)
+			this.progressGroup.init(height, 4, 3, null, IntegerTextUIObject.class, SignedIntegerTextUIObject.class, true)
 					.then((Consumer<ExtAnchoredIntegerStatLine>) obj -> {
 						obj.getValue().setValue(0).flushValue();
 						obj.getPopup().setValue(0).flushValue();

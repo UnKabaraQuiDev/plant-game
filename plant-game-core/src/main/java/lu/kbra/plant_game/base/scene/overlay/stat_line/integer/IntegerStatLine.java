@@ -18,7 +18,6 @@ import lu.kbra.plant_game.engine.entity.ui.text.SignedIntegerTextUIObject;
 import lu.kbra.plant_game.engine.scene.ui.layout.FlowLayout;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.plant_game.generated.ColorMaterial;
-import lu.kbra.standalone.gameengine.impl.future.Dispatcher;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
 import lu.kbra.standalone.gameengine.utils.consts.Direction;
 import lu.kbra.standalone.gameengine.utils.interpolation.Interpolator;
@@ -83,8 +82,6 @@ public class IntegerStatLine extends LayoutOffsetUIObjectGroup implements Limite
 	}
 
 	public <T extends TexturedQuadMeshUIObject, V extends IntegerTextUIObject, P extends SignedIntegerTextUIObject> ObjectTriggerLatch<? extends IntegerStatLine> init(
-			final Dispatcher workers,
-			final Dispatcher render,
 			final float height,
 			final int valueLength,
 			final int popupLength,
@@ -148,24 +145,20 @@ public class IntegerStatLine extends LayoutOffsetUIObjectGroup implements Limite
 	}
 
 	public <T extends TexturedQuadMeshUIObject, V extends IntegerTextUIObject, P extends SignedIntegerTextUIObject> ObjectTriggerLatch<? extends IntegerStatLine> init(
-			final Dispatcher workers,
-			final Dispatcher render,
 			final float height,
 			final Class<T> iconClazz,
 			final Class<V> valueClazz,
 			final Class<P> popupClazz,
 			final boolean percentage) {
-		return this.init(workers, render, height, VALUE_LENGTH, POPUP_LENGTH, iconClazz, valueClazz, popupClazz, percentage);
+		return this.init(height, VALUE_LENGTH, POPUP_LENGTH, iconClazz, valueClazz, popupClazz, percentage);
 	}
 
 	public <T extends TexturedQuadMeshUIObject, V extends IntegerTextUIObject, P extends SignedIntegerTextUIObject> ObjectTriggerLatch<? extends IntegerStatLine> init(
-			final Dispatcher workers,
-			final Dispatcher render,
 			final float height,
 			final Class<T> iconClazz,
 			final Class<V> valueClazz,
 			final Class<P> popupClazz) {
-		return this.init(workers, render, height, VALUE_LENGTH, POPUP_LENGTH, iconClazz, valueClazz, popupClazz, false);
+		return this.init(height, VALUE_LENGTH, POPUP_LENGTH, iconClazz, valueClazz, popupClazz, false);
 	}
 
 	public IntegerStatLine setTarget(final int value) {

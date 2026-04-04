@@ -191,7 +191,7 @@ public class PGLogic extends GameLogic {
 
 		this.overlayUIScene = new OverlayUIScene(this.cache);
 		UIObjectFactory.INSTANCE = new UIObjectFactory(this.overlayUIScene.getCache(), this.WORKERS, this.RENDER_DISPATCHER);
-		this.overlayUIScene.init(this.WORKERS, this.WORKERS, this.gameData).then((Consumer<OverlayUIScene>) o -> {
+		this.overlayUIScene.init(this.gameData).then((Consumer<OverlayUIScene>) o -> {
 			System.err.println("overlayuiscene released");
 			this.uiScene = this.overlayUIScene;
 		});
@@ -223,8 +223,7 @@ public class PGLogic extends GameLogic {
 
 		this.overlayUIScene = new OverlayUIScene(this.cache);
 		UIObjectFactory.INSTANCE = new UIObjectFactory(this.overlayUIScene.getCache(), this.WORKERS, this.RENDER_DISPATCHER);
-		this.overlayUIScene.init(this.WORKERS, this.WORKERS, this.gameData)
-				.then((Consumer<OverlayUIScene>) o -> this.uiScene = this.overlayUIScene);
+		this.overlayUIScene.init(this.gameData).then((Consumer<OverlayUIScene>) o -> this.uiScene = this.overlayUIScene);
 
 		this.gameWorldScene = new WorldLevelScene(levelData.getInternalName(), this.cache);
 		GameObjectFactory.INSTANCE = new GameObjectFactory(this.gameWorldScene.getCache(), this.WORKERS, this.RENDER_DISPATCHER);

@@ -63,12 +63,12 @@ public class WaterSprinklerObject3x3 extends PlaceableAnimatedGameObject impleme
 
 	@Override
 	public float getMaxSprinkledWater() {
-		return 8;
+		return 5.5f;
 	}
 
 	@Override
 	public float getConsumedEnergy() {
-		return 5;
+		return 2.5f;
 	}
 
 	@Override

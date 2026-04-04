@@ -70,6 +70,11 @@ public interface SprinklerObject extends NeedsRandomTick, PlaceableObject, Water
 	float getMaxSprinkledWater();
 
 	@Override
+	default int getRandomTickDuration() {
+		return 1000;
+	}
+
+	@Override
 	default float getConsumedWater() {
 		return PCUtils.randomFloatRange(this.getMinSprinkledWater(), this.getMaxSprinkledWater());
 	}
