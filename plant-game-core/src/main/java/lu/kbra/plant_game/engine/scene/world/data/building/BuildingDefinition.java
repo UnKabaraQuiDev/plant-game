@@ -61,8 +61,11 @@ public class BuildingDefinition<T extends GameObject & PlaceableObject>
 
 	@Override
 	public void accept(final BuildingInfoUIObjectGroup t) {
-		final GameData gameData = PGLogic.INSTANCE.getGameData();
 		final WorldLevelScene worldScene = PGLogic.INSTANCE.getWorldScene();
+		if (worldScene == null) {
+			return;
+		}
+		final GameData gameData = worldScene.getGameData();
 
 		{
 			t.getTitle().ifSet(s -> {

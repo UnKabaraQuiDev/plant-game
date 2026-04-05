@@ -45,6 +45,7 @@ import lu.kbra.plant_game.engine.entity.go.mesh.terrain.TerrainEdgeMesh;
 import lu.kbra.plant_game.engine.entity.go.mesh.terrain.TerrainMesh;
 import lu.kbra.plant_game.engine.entity.go.obj.terrain.TerrainEdgeObject;
 import lu.kbra.plant_game.engine.entity.go.obj.terrain.TerrainGameObject;
+import lu.kbra.plant_game.engine.entity.go.obj.terrain.TerrainGameObject.TerrainData;
 import lu.kbra.plant_game.engine.entity.go.obj.terrain.TerrainHighlightObject;
 import lu.kbra.plant_game.engine.entity.impl.AnimatedTransformOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.NeedsUpdate;
@@ -132,6 +133,7 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController, S
 			final Dispatcher workers,
 			final Dispatcher render,
 			final GameData gameData,
+			final Optional<TerrainData> terrainData,
 			final IntPointer worldProgress) {
 		this.gameData = gameData;
 
@@ -145,7 +147,7 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController, S
 			latch.trigger(null);
 		}).push();
 
-		this.initTerrain(workers, render, Optional.of(gameData), gameData.getLevelData(), worldProgress).latch(latch);
+		this.initTerrain(workers, render, Optional.of(gameData), gameData.getLevelData(), terrainData, worldProgress).latch(latch);
 		return latch;
 	}
 
@@ -154,6 +156,7 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController, S
 			final Dispatcher render,
 			final Optional<GameData> gameData,
 			final LevelData levelData,
+			final Optional<TerrainData> terrainData,
 			final IntPointer worldProgress) {
 		final ObjectPointer<TerrainGameObject> data = new ObjectPointer<>();
 		final ObjectTriggerLatch<ObjectPointer<TerrainGameObject>> latch = new ObjectTriggerLatch<>(2, data);
@@ -166,7 +169,7 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController, S
 			return Pairs.readOnly(wg, wg.generateMesh(worldProgress, this.getCache()));
 		}).then(workers, (Function<Pair<WorldGenerator, TerrainMesh>, WorldGenerator>) pair -> {
 			data.set(new TerrainGameObject("terrain-" + levelData.getInternalName(), pair.getValue()));
-			data.get().init().latch(latch);
+			data.get().init(terrainData).latch(latch);
 			data.get().getTransform().translationSet(-pair.getValue().getWidth() / 2, 0, -pair.getValue().getLength() / 2);
 			data.get().getTransform().rotationPivotSub(data.get().getTransform().getTranslation());
 			data.get().getTransform().scalePivotSub(data.get().getTransform().getTranslation());
@@ -197,7 +200,7 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController, S
 			data.get()
 					.getTerrainWaterObject()
 					.setTransform(new Transform3D(new Vector3f(mesh.getSize().x() / 2,
-							gameData.map(GameData::getCurrentWaterLevel).orElse(levelData.getWorld().getWaterLevel().getMin()),
+							gameData.map(gd -> gd.getCurrentWaterLevel()).orElse(levelData.getWorld().getWaterLevel().getMin()),
 							mesh.getSize().y() / 2)));
 			data.get().getTerrainWaterObject().setObjectId(WATER_ID);
 			data.get().getTerrainWaterObject().setColorMaterial(ColorMaterial.BLUE);
@@ -595,11 +598,8 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController, S
 		this.windDirection = windDirection;
 	}
 
-	@Deprecated
 	public float getWaterHeight() {
-		return this.getWaterLevel() == null ? 0
-				: (this.getWaterLevel().getTransform().getTranslation().y() + this.getTerrain().getTransform().getTranslation().y())
-						/ this.getTerrain().getTransform().getScale().y();
+		return this.gameData.getCurrentWaterLevel();
 	}
 
 	public GameData getGameData() {

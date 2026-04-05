@@ -97,7 +97,10 @@ public class BuildingPanelUIObjectGroup extends AnchoredLayoutUIObjectGroup
 	@Override
 	public void update(final WindowInputHandler input) {
 		final WorldLevelScene world = PGLogic.INSTANCE.getWorldScene();
-		final GameData gameData = PGLogic.INSTANCE.getGameData();
+		if (world == null) {
+			return;
+		}
+		final GameData gameData = world.getGameData();
 
 		final BuildingTabUIObjectGroup buildingTab = this.buildingTabs.get(this.activeBuildingTabKey);
 		if (buildingTab == null) {

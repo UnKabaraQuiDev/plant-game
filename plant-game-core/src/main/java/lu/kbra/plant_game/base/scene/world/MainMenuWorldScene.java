@@ -2,6 +2,7 @@ package lu.kbra.plant_game.base.scene.world;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import org.joml.Vector3f;
@@ -17,6 +18,7 @@ import lu.kbra.plant_game.base.scene.menu.main.MainMenuUIScene;
 import lu.kbra.plant_game.engine.UpdateFrameState;
 import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory;
 import lu.kbra.plant_game.engine.entity.go.obj.terrain.TerrainGameObject;
+import lu.kbra.plant_game.engine.entity.go.obj.terrain.TerrainGameObject.TerrainData;
 import lu.kbra.plant_game.engine.entity.impl.Transform3DOwner;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
@@ -129,6 +131,7 @@ public class MainMenuWorldScene extends WorldLevelScene implements Consumer<Leve
 					PGLogic.INSTANCE.RENDER_DISPATCHER,
 					t.getGameData(),
 					t.getLevelData(),
+					Optional.<TerrainData>empty(),
 					new IntPointer(0)).then((Consumer<ObjectPointer<TerrainGameObject>>) c -> {
 						c.get().getTransform().translationSet(RESUME_POSITION).updateMatrix();
 						this.targets[MainMenuUIScene.RESUME] = c.get();
@@ -143,6 +146,7 @@ public class MainMenuWorldScene extends WorldLevelScene implements Consumer<Leve
 			final Dispatcher workers,
 			final Dispatcher render,
 			final GameData gameData,
+			final Optional<TerrainData> terrainData,
 			final IntPointer worldProgress) {
 		GameObjectFactory.create(WaterTowerMediumObject.class)
 				.set(i -> i.setTransform(new Transform3D(new Vector3f(0, -100, 0))))
@@ -151,7 +155,7 @@ public class MainMenuWorldScene extends WorldLevelScene implements Consumer<Leve
 				.postInit(i -> this.targets[MainMenuUIScene.OPTIONS] = i)
 				.push();
 
-		return super.init(workers, render, gameData, worldProgress).then((Consumer<WorldLevelScene>) c -> {
+		return super.init(workers, render, gameData, terrainData, worldProgress).then((Consumer<WorldLevelScene>) c -> {
 			this.targets[MainMenuUIScene.MAIN] = c.getTerrain();
 			this.currentOffset.set(this.offsets[MainMenuUIScene.MAIN]);
 			this.currentCenter.set(this.targets[MainMenuUIScene.MAIN].getTransform().getTranslation())

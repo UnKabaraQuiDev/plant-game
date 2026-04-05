@@ -82,7 +82,7 @@ public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner
 
 			@Override
 			public void trigger(final Object value) {
-				new Exception(Integer.toString(this.getValue())).fillInStackTrace().printStackTrace();
+//				new Exception(Integer.toString(this.getValue())).fillInStackTrace().printStackTrace();
 				super.trigger(value);
 			}
 

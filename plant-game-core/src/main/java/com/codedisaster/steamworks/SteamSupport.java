@@ -102,7 +102,7 @@ public final class SteamSupport {
 
 	public static void dispose() {
 		if (STEAM_LAUCHED) {
-			STEAM_INTERFACES.values().forEach(e -> e.dispose());
+			STEAM_INTERFACES.values().forEach(SteamInterface::dispose);
 
 			SteamAPI.shutdown();
 		}

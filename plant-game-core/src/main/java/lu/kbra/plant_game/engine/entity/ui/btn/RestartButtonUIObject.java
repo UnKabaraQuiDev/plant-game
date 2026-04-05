@@ -1,5 +1,6 @@
 package lu.kbra.plant_game.engine.entity.ui.btn;
 
+import lu.kbra.plant_game.PGLogic;
 import lu.kbra.plant_game.base.scene.menu.main.MainMenuUIScene;
 import lu.kbra.plant_game.engine.entity.ui.impl.AnimatedOnHover;
 import lu.kbra.plant_game.engine.entity.ui.impl.IndexOwner;
@@ -21,7 +22,7 @@ public class RestartButtonUIObject extends MainMenuItemTextUIObject implements N
 		this.getUISceneParent()
 				.filter(MainMenuUIScene.class::isInstance)
 				.map(MainMenuUIScene.class::cast)
-				.ifPresent(c -> c.startTransition(MainMenuUIScene.PLAY));
+				.ifPresent(c -> PGLogic.INSTANCE.startLevel(c.getResumeInfoGroup().getCurrentLevelDefinition()));
 	}
 
 	@Override

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -41,6 +42,7 @@ import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.entity.go.factory.GOCreatingTaskFuture;
 import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory;
 import lu.kbra.plant_game.engine.entity.go.obj.terrain.TerrainGameObject;
+import lu.kbra.plant_game.engine.entity.go.obj.terrain.TerrainGameObject.TerrainData;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.render.shader.compute.filter.VignetteShader;
@@ -130,7 +132,7 @@ public class PGLogic extends GameLogic {
 		this.gameData = GameData.fromBlankLevel(levelData);
 
 		this.mainMenuUIScene.init(this.WORKERS, this.RENDER_DISPATCHER);
-		this.mainMenuWorldScene.init(this.WORKERS, this.RENDER_DISPATCHER, this.gameData, new IntPointer(0));
+		this.mainMenuWorldScene.init(this.WORKERS, this.RENDER_DISPATCHER, this.gameData, Optional.empty(), new IntPointer(0));
 
 		this.pluginManager.onEnable();
 
@@ -201,7 +203,7 @@ public class PGLogic extends GameLogic {
 
 		this.gameWorldScene = new WorldLevelScene(levelData.getInternalName(), this.cache);
 		GameObjectFactory.INSTANCE = new GameObjectFactory(this.gameWorldScene.getCache(), this.WORKERS, this.RENDER_DISPATCHER);
-		this.gameWorldScene.init(this.WORKERS, this.RENDER_DISPATCHER, this.gameData, progress)
+		this.gameWorldScene.init(this.WORKERS, this.RENDER_DISPATCHER, this.gameData, Optional.empty(), progress)
 				.then((Consumer<WorldLevelScene>) o -> this.worldScene = this.gameWorldScene);
 	}
 
@@ -228,26 +230,36 @@ public class PGLogic extends GameLogic {
 		UIObjectFactory.INSTANCE = new UIObjectFactory(this.overlayUIScene.getCache(), this.WORKERS, this.RENDER_DISPATCHER);
 		this.overlayUIScene.init(this.gameData).then((Consumer<OverlayUIScene>) o -> this.uiScene = this.overlayUIScene);
 
-		this.gameWorldScene = new WorldLevelScene(levelData.getInternalName(), this.cache);
-		GameObjectFactory.INSTANCE = new GameObjectFactory(this.gameWorldScene.getCache(), this.WORKERS, this.RENDER_DISPATCHER);
-		this.gameWorldScene.init(this.WORKERS, this.RENDER_DISPATCHER, this.gameData, progress)
-				.then((ThrowingConsumer<WorldLevelScene, IOException>) o -> {
-					final File dataFile = new File(this.gameData.getDataDir(), "dat.json");
+		try {
+			this.gameWorldScene = new WorldLevelScene(levelData.getInternalName(), this.cache);
+			GameObjectFactory.INSTANCE = new GameObjectFactory(this.gameWorldScene.getCache(), this.WORKERS, this.RENDER_DISPATCHER);
+			final File terFile = new File(this.gameData.getDataDir(), "ter.json");
+			final Optional<TerrainData> terrainData = terFile.exists() ? Optional.of(OBJECT_MAPPER.readValue(terFile, TerrainData.class))
+					: Optional.empty();
 
-					final JsonNode root = PGLogic.OBJECT_MAPPER.readTree(dataFile);
-					final List<GOCreatingTaskFuture<?>> list = new ArrayList<>();
-					final JsonDeserializer<GOCreatingTaskFuture<?>> deserializer = new GameObjectTaskFutureDeserializer();
-					for (final JsonNode node : root) {
-						list.add(deserializer.deserialize(node.traverse(PGLogic.OBJECT_MAPPER),
-								PGLogic.OBJECT_MAPPER.getDeserializationContext()));
-					}
-					progress.add(100);
-					final CountTriggerLatch latch = new CountTriggerLatch(list.size(), () -> {
-						progress.add(100);
-						this.worldScene = this.gameWorldScene;
+			this.gameWorldScene.init(this.WORKERS, this.RENDER_DISPATCHER, this.gameData, terrainData, progress)
+					.then((ThrowingConsumer<WorldLevelScene, IOException>) o -> {
+						{
+							final File dataFile = new File(this.gameData.getDataDir(), "dat.json");
+
+							final JsonNode root = PGLogic.OBJECT_MAPPER.readTree(dataFile);
+							final List<GOCreatingTaskFuture<?>> list = new ArrayList<>();
+							final JsonDeserializer<GOCreatingTaskFuture<?>> deserializer = new GameObjectTaskFutureDeserializer();
+							for (final JsonNode node : root) {
+								list.add(deserializer.deserialize(node.traverse(PGLogic.OBJECT_MAPPER),
+										OBJECT_MAPPER.getDeserializationContext()));
+							}
+							progress.add(100);
+							final CountTriggerLatch latch = new CountTriggerLatch(list.size(), () -> {
+								progress.add(100);
+								this.worldScene = this.gameWorldScene;
+							});
+							list.forEach(c -> c.add(o).latch(latch).push());
+						}
 					});
-					list.forEach(c -> c.add(o).latch(latch).push());
-				});
+		} catch (IOException e) {
+			throw new RuntimeException("Exception when loading level: " + currentLevelDefinition, e);
+		}
 
 	}
 
@@ -262,6 +274,18 @@ public class PGLogic extends GameLogic {
 					.toList();
 			try {
 				PGLogic.OBJECT_MAPPER.writeValue(dataFile, gos);
+			} catch (final IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+		{
+			final File dataFile = new File(this.gameData.getDataDir(), "ter.json");
+
+			final TerrainGameObject terrain = this.gameWorldScene.getTerrain();
+
+			try {
+				PGLogic.OBJECT_MAPPER.writeValue(dataFile, terrain.getData());
 			} catch (final IOException e) {
 				throw new RuntimeException(e);
 			}
