@@ -1,4 +1,4 @@
-package lu.kbra.plant_game.base.entity.go_inst.champi;
+package lu.kbra.plant_game.engine.entity.impl;
 
 public interface SizeOwner {
 

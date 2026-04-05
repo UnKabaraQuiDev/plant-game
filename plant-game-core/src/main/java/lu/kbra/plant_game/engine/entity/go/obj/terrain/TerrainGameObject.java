@@ -1,6 +1,5 @@
 package lu.kbra.plant_game.engine.entity.go.obj.terrain;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -24,21 +23,27 @@ import lu.kbra.pclib.concurrency.ObjectTriggerLatch;
 import lu.kbra.pclib.datastructure.list.WeakArrayList;
 import lu.kbra.pclib.datastructure.list.WeakList;
 import lu.kbra.pclib.logger.GlobalLogger;
+import lu.kbra.pclib.pointer.JavaPointer;
+import lu.kbra.pclib.pointer.WeakObjectPointer;
 import lu.kbra.plant_game.base.entity.go.obj.water.NeedsRandomTick;
-import lu.kbra.plant_game.base.entity.go.obj_inst.grass.GrowingInstanceGameObject;
-import lu.kbra.plant_game.base.entity.go.obj_inst.grass.InstanceLargeGrassObject;
-import lu.kbra.plant_game.base.entity.go.obj_inst.grass.InstanceMediumGrassObject;
-import lu.kbra.plant_game.base.entity.go.obj_inst.grass.InstanceSmallGrassObject;
-import lu.kbra.plant_game.base.entity.go.obj_inst.round.GrownObject;
-import lu.kbra.plant_game.base.entity.go.obj_inst.round.InstanceMediumRoundFlowerObject;
-import lu.kbra.plant_game.base.entity.go_inst.champi.InstanceSmallChampiFlowerObject;
-import lu.kbra.plant_game.base.entity.go_inst.champi.SizeOwner;
+import lu.kbra.plant_game.base.entity.go.obj_inst.InstanceChampiObject.InstanceLargeChampiObject;
+import lu.kbra.plant_game.base.entity.go.obj_inst.InstanceChampiObject.InstanceMediumChampiObject;
+import lu.kbra.plant_game.base.entity.go.obj_inst.InstanceChampiObject.InstanceSmallChampiObject;
+import lu.kbra.plant_game.base.entity.go.obj_inst.InstanceGrassObject.InstanceLargeGrassObject;
+import lu.kbra.plant_game.base.entity.go.obj_inst.InstanceGrassObject.InstanceMediumGrassObject;
+import lu.kbra.plant_game.base.entity.go.obj_inst.InstanceGrassObject.InstanceSmallGrassObject;
+import lu.kbra.plant_game.base.entity.go.obj_inst.InstanceRoundFlowerObject.InstanceLargeRoundFlowerObject;
+import lu.kbra.plant_game.base.entity.go.obj_inst.InstanceRoundFlowerObject.InstanceMediumRoundFlowerObject;
+import lu.kbra.plant_game.base.entity.go.obj_inst.InstanceRoundFlowerObject.InstanceSmallRoundFlowerObject;
 import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.entity.go.MeshGameObject;
 import lu.kbra.plant_game.engine.entity.go.VariationMeshGameObject;
 import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory;
 import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
 import lu.kbra.plant_game.engine.entity.go.mesh.terrain.TerrainMesh;
+import lu.kbra.plant_game.engine.entity.go.obj_inst.GrowingInstanceGameObject;
+import lu.kbra.plant_game.engine.entity.impl.GrownObject;
+import lu.kbra.plant_game.engine.entity.impl.SizeOwner;
 import lu.kbra.plant_game.engine.entity.impl.Transform3DPivotOwner;
 import lu.kbra.plant_game.engine.entity.ui.impl.AbsoluteTransform3DOwner;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
@@ -98,7 +103,7 @@ public class TerrainGameObject extends VariationMeshGameObject
 	private static final int FLOWER_TYPE_PROHIBIT = 1;
 	private static final int FLOWER_TYPE_OFFSET = -2;
 
-	private static final int FLOWER_TYPE_MAX_COUNT = (1 << FLOWER_TYPE_BITS) - 2;
+	private static final int FLOWER_TYPE_MAX_COUNT = (1 << TerrainGameObject.FLOWER_TYPE_BITS) - 2;
 
 	// ===== GRASS INSTANCE ID =====
 	private static final int GRASS_ID_FIRST_BIT_INDEX = 8;
@@ -170,12 +175,12 @@ public class TerrainGameObject extends VariationMeshGameObject
 	 */
 	protected int[] population;
 
-	protected WeakReference<InstanceSmallGrassObject> smallGrass;
-	protected WeakReference<InstanceMediumGrassObject> mediumGrass;
-	protected WeakReference<InstanceLargeGrassObject> largeGrass;
-	protected WeakReference<InstanceSmallGrassObject> deadSmallGrass;
-	protected WeakReference<InstanceMediumGrassObject> deadMediumGrass;
-	protected WeakReference<InstanceLargeGrassObject> deadLargeGrass;
+	protected WeakObjectPointer<InstanceSmallGrassObject> smallGrass = new WeakObjectPointer<>();
+	protected WeakObjectPointer<InstanceMediumGrassObject> mediumGrass = new WeakObjectPointer<>();
+	protected WeakObjectPointer<InstanceLargeGrassObject> largeGrass = new WeakObjectPointer<>();
+	protected WeakObjectPointer<InstanceSmallGrassObject> deadSmallGrass = new WeakObjectPointer<>();
+	protected WeakObjectPointer<InstanceMediumGrassObject> deadMediumGrass = new WeakObjectPointer<>();
+	protected WeakObjectPointer<InstanceLargeGrassObject> deadLargeGrass = new WeakObjectPointer<>();
 	protected WeakList<GrowingInstanceGameObject> flowerTypes = new WeakArrayList<>();
 
 	protected Object subEntitiesLock = new Object();
@@ -214,11 +219,11 @@ public class TerrainGameObject extends VariationMeshGameObject
 			}
 		}
 
-		final ObjectTriggerLatch<TerrainGameObject> latch = new ObjectTriggerLatch<>(8, this);
+		final ObjectTriggerLatch<TerrainGameObject> latch = new ObjectTriggerLatch<>(12, this);
 		latch.then((Consumer<TerrainGameObject>) tgo -> {
 			if (this.flowerTypes.isEmpty()) {
 				GlobalLogger.warning("No flower type available.");
-			} else if (this.flowerTypes.size() > FLOWER_TYPE_MAX_COUNT) {
+			} else if (this.flowerTypes.size() > TerrainGameObject.FLOWER_TYPE_MAX_COUNT) {
 				GlobalLogger.warning("Too many flower types available: " + this.flowerTypes.size());
 			}
 			this.flowerTypes
@@ -227,34 +232,21 @@ public class TerrainGameObject extends VariationMeshGameObject
 		});
 
 		synchronized (this) {
-			this.registerGrassType(InstanceSmallGrassObject.class,
-					ColorMaterial.GREEN,
-					i -> this.smallGrass = new WeakReference<>(i),
-					latch);
-			this.registerGrassType(InstanceMediumGrassObject.class,
-					ColorMaterial.GREEN,
-					i -> this.mediumGrass = new WeakReference<>(i),
-					latch);
-			this.registerGrassType(InstanceLargeGrassObject.class,
-					ColorMaterial.GREEN,
-					i -> this.largeGrass = new WeakReference<>(i),
-					latch);
+			this.registerGrassType(InstanceSmallGrassObject.class, ColorMaterial.GREEN, this.smallGrass, latch);
+			this.registerGrassType(InstanceMediumGrassObject.class, ColorMaterial.GREEN, this.mediumGrass, latch);
+			this.registerGrassType(InstanceLargeGrassObject.class, ColorMaterial.GREEN, this.largeGrass, latch);
 
-			this.registerGrassType(InstanceSmallGrassObject.class,
-					ColorMaterial.BROWN,
-					i -> this.deadSmallGrass = new WeakReference<>(i),
-					latch);
-			this.registerGrassType(InstanceMediumGrassObject.class,
-					ColorMaterial.BROWN,
-					i -> this.deadMediumGrass = new WeakReference<>(i),
-					latch);
-			this.registerGrassType(InstanceLargeGrassObject.class,
-					ColorMaterial.BROWN,
-					i -> this.deadLargeGrass = new WeakReference<>(i),
-					latch);
+			this.registerGrassType(InstanceSmallGrassObject.class, ColorMaterial.BROWN, this.deadSmallGrass, latch);
+			this.registerGrassType(InstanceMediumGrassObject.class, ColorMaterial.BROWN, this.deadMediumGrass, latch);
+			this.registerGrassType(InstanceLargeGrassObject.class, ColorMaterial.BROWN, this.deadLargeGrass, latch);
 
-			this.registerFlowerType(InstanceSmallChampiFlowerObject.class, ColorMaterial.LIGHT_CYAN, latch);
-			this.registerFlowerType(InstanceMediumRoundFlowerObject.class, ColorMaterial.DARK_PINK, latch);
+			this.registerFlowerType(InstanceSmallChampiObject.class, ColorMaterial.LIGHT_CYAN, latch);
+			this.registerFlowerType(InstanceMediumChampiObject.class, ColorMaterial.LIGHT_MAGENTA, latch);
+			this.registerFlowerType(InstanceLargeChampiObject.class, ColorMaterial.RED, latch);
+
+			this.registerFlowerType(InstanceSmallRoundFlowerObject.class, ColorMaterial.DARK_PINK, latch);
+			this.registerFlowerType(InstanceMediumRoundFlowerObject.class, ColorMaterial.DARK_RED, latch);
+			this.registerFlowerType(InstanceLargeRoundFlowerObject.class, ColorMaterial.ORANGE, latch);
 		}
 
 		return latch;
@@ -263,13 +255,13 @@ public class TerrainGameObject extends VariationMeshGameObject
 	private <T extends GrowingInstanceGameObject> void registerGrassType(
 			final Class<T> class1,
 			final ColorMaterial green,
-			final Consumer<T> object,
+			final JavaPointer<T> object,
 			final ObjectTriggerLatch<TerrainGameObject> latch) {
 		GameObjectFactory.createInstances(class1, i -> new Transform3D(), OptionalInt.of(128), Optional.empty())
 				.set(i -> i.setColorMaterial(green))
 				.set(i -> i.setTransform(new Transform3D(this.getTransform().getTranslation().negate(new Vector3f()))))
 				.add(this)
-				.postInit(object)
+				.get(object)
 				.latch(latch)
 				.push();
 	}
@@ -282,7 +274,7 @@ public class TerrainGameObject extends VariationMeshGameObject
 				.set(i -> i.setColorMaterial(darkPink))
 				.set(i -> i.setTransform(new Transform3D(this.getTransform().getTranslation().negate(new Vector3f()))))
 				.add(this)
-				.postInit(i -> this.flowerTypes.add(i))
+				.postInit(this.flowerTypes::add)
 				.latch(latch)
 				.push();
 	}
@@ -299,7 +291,6 @@ public class TerrainGameObject extends VariationMeshGameObject
 			final Vector2i tile = new Vector2i(x, y);
 			final Vector3f pos = this.getTilePosition(tile);
 
-			// ===== GREEN =====
 			if ((p & TerrainGameObject.GREEN_BIT) != 0) {
 				mesh.setGrown(tile, true);
 			}
@@ -307,34 +298,25 @@ public class TerrainGameObject extends VariationMeshGameObject
 				mesh.setColorMaterial(tile, TerrainGameObject.BUILT_GROUND_COLOR);
 			}
 
-			// ===== GRASS =====
 			final int level = TerrainGameObject.getGrassLevelDirect(p);
 
 			if (level != TerrainGameObject.GRASS_LEVEL_NONE && (p & TerrainGameObject.BUILT_BIT) == 0) {
 				final boolean isDry = (p & TerrainGameObject.DRY_GRASS_BIT) != 0;
 
-				final GrowingInstanceGameObject obj = switch (level) {
-				case GRASS_LEVEL_SMALL -> isDry ? this.getDeadSmallGrassObject() : this.getSmallGrassObject();
-				case GRASS_LEVEL_MEDIUM -> isDry ? this.getDeadMediumGrassObject() : this.getMediumGrassObject();
-				case GRASS_LEVEL_LARGE -> isDry ? this.getDeadLargeGrassObject() : this.getLargeGrassObject();
-				default -> null;
-				};
+				final GrowingInstanceGameObject obj = isDry ? this.getDeadGrassObject(level) : this.getLivingGrassObject(level);
 
 				if (obj != null) {
 					final int newId = obj.addInstance(pos);
 
-					// rewrite GRASS_ID
 					p &= ~TerrainGameObject.GRASS_ID_MASK;
 					p |= PCUtils.clamp(0, TerrainGameObject.GRASS_ID_MAX, newId) << TerrainGameObject.GRASS_ID_FIRST_BIT_INDEX
 							& TerrainGameObject.GRASS_ID_MASK;
 				}
 			} else {
-				// ensure no stale ID
 				p &= ~TerrainGameObject.GRASS_ID_MASK;
 				p &= ~TerrainGameObject.GRASS_LEVEL_MASK;
 			}
 
-			// ===== FLOWER =====
 			final int flowerTypeEncoded = TerrainGameObject.getFlowerTypeDirect(p);
 
 			if (flowerTypeEncoded != TerrainGameObject.FLOWER_TYPE_NONE && (p & TerrainGameObject.BUILT_BIT) == 0) {
@@ -346,7 +328,6 @@ public class TerrainGameObject extends VariationMeshGameObject
 					if (obj != null) {
 						final int newId = obj.addInstance(pos);
 
-						// rewrite FLOWER_ID
 						p &= ~TerrainGameObject.FLOWER_ID_MASK;
 						p |= PCUtils.clamp(0, TerrainGameObject.FLOWER_ID_MAX, newId) << TerrainGameObject.FLOWER_ID_FIRST_BIT_INDEX
 								& TerrainGameObject.FLOWER_ID_MASK;
@@ -354,12 +335,10 @@ public class TerrainGameObject extends VariationMeshGameObject
 						System.err.println("No flower: " + flowerIndex);
 					}
 				} else {
-					// invalid → remove flower
 					p &= ~TerrainGameObject.FLOWER_TYPE_MASK;
 					p &= ~TerrainGameObject.FLOWER_ID_MASK;
 				}
-			} else { // ensure no stale flower
-				// ensure no stale flower
+			} else {
 				p &= ~TerrainGameObject.FLOWER_ID_MASK;
 			}
 
@@ -392,20 +371,17 @@ public class TerrainGameObject extends VariationMeshGameObject
 		for (int i = 0; i < total; i++) {
 			int p = this.population[i];
 
-			// ===== WET HANDLING =====
 			final int wet = TerrainGameObject.getWet(p);
 			if (wet > 0) {
 				p = TerrainGameObject.setWet(p, wet - 1);
 				this.population[i] = p;
 
-				// even if wet, still count progress
 				if ((p & TerrainGameObject.BUILT_BIT) != 0 || (this.moisture[i] & 0xFF) >= TerrainGameObject.MOISTURE_MEDIUM) {
 					completed++;
 				}
 				continue;
 			}
 
-			// ===== MOISTURE DECAY =====
 			int m = this.moisture[i] & 0xFF;
 			if (m > 0) {
 				m = Math.max(0, m - TerrainGameObject.MOISTURE_DECAY);
@@ -416,36 +392,29 @@ public class TerrainGameObject extends VariationMeshGameObject
 			final int y = i / this.width;
 			final Vector2i tile = new Vector2i(x, y);
 
-			// ===== FLOWER =====
 			if (m < TerrainGameObject.MOISTURE_FLOWER) {
 				this.removeFlower(tile);
 			}
 
-			// ===== GROUND COLOR =====
 			mesh.setGrown(tile, false);
 			p &= ~TerrainGameObject.GREEN_BIT;
 
-			// ===== GRASS HANDLING =====
 			final OptionalInt grass = this.getGrassLevel(i);
 
 			if (grass.isPresent()) {
 				final boolean isDry = (p & TerrainGameObject.DRY_GRASS_BIT) != 0;
 
-				// Step 1: convert to dry
 				if (!isDry && m < TerrainGameObject.MOISTURE_SMALL) {
 					this.convertGrassToDry(tile);
-					p = this.population[i]; // refresh after mutation
-				}
-				// Step 2: remove dry grass
-				else if (isDry && m < TerrainGameObject.MOISTURE_SMALL) {
+					p = this.population[i];
+				} else if (isDry && m < TerrainGameObject.MOISTURE_SMALL) {
 					this.removeGrass(tile);
-					p = this.population[i]; // refresh
+					p = this.population[i];
 				}
 			}
 
 			this.population[i] = p;
 
-			// ===== PROGRESS COUNT =====
 			if ((p & TerrainGameObject.BUILT_BIT) != 0 || m >= TerrainGameObject.MOISTURE_MEDIUM) {
 				completed++;
 			}
@@ -475,12 +444,12 @@ public class TerrainGameObject extends VariationMeshGameObject
 		int p = this.population[i];
 
 		final int type = TerrainGameObject.getFlowerTypeDirect(p);
-		if (type == TerrainGameObject.FLOWER_TYPE_NONE || type == FLOWER_TYPE_PROHIBIT) {
+		if (type == TerrainGameObject.FLOWER_TYPE_NONE || type == TerrainGameObject.FLOWER_TYPE_PROHIBIT) {
 			return;
 		}
 
 		final int id = (p & TerrainGameObject.FLOWER_ID_MASK) >>> TerrainGameObject.FLOWER_ID_FIRST_BIT_INDEX;
-		final int index = type + FLOWER_TYPE_OFFSET;
+		final int index = type + TerrainGameObject.FLOWER_TYPE_OFFSET;
 
 		if (index < 0 || index >= this.flowerTypes.size()) {
 			GlobalLogger.warning("Invalid flower index: " + index + " (type=" + type + ")");
@@ -522,12 +491,7 @@ public class TerrainGameObject extends VariationMeshGameObject
 
 		final boolean isDry = (p & TerrainGameObject.DRY_GRASS_BIT) != 0;
 
-		final GrowingInstanceGameObject obj = switch (level) {
-		case GRASS_LEVEL_SMALL -> isDry ? this.getDeadSmallGrassObject() : this.getSmallGrassObject();
-		case GRASS_LEVEL_MEDIUM -> isDry ? this.getDeadMediumGrassObject() : this.getMediumGrassObject();
-		case GRASS_LEVEL_LARGE -> isDry ? this.getDeadLargeGrassObject() : this.getLargeGrassObject();
-		default -> null;
-		};
+		final GrowingInstanceGameObject obj = isDry ? this.getDeadGrassObject(level) : this.getLivingGrassObject(level);
 
 		if (obj != null) {
 			obj.removeInstance(instanceIndex);
@@ -582,17 +546,15 @@ public class TerrainGameObject extends VariationMeshGameObject
 		final int i = this.idx(tile);
 		int p = this.population[i];
 
-		if ((p & TerrainGameObject.BUILT_BIT) != 0 || TerrainGameObject.getFlowerTypeDirect(p) != 0 || Math.random() >= 0.5) {
-			return;
-		}
-
-		if (this.flowerTypes.isEmpty()) {
+		if ((p & TerrainGameObject.BUILT_BIT) != 0 || TerrainGameObject.getFlowerTypeDirect(p) != 0 || Math.random() >= 0.5
+				|| this.flowerTypes.isEmpty()) {
 			return;
 		}
 
 		if (Math.random() < 0.4) {
-			p &= ~FLOWER_TYPE_MASK;
-			p |= (FLOWER_TYPE_PROHIBIT << FLOWER_TYPE_FIRST_BIT_INDEX) & FLOWER_TYPE_MASK;
+			p &= ~TerrainGameObject.FLOWER_TYPE_MASK;
+			p |= TerrainGameObject.FLOWER_TYPE_PROHIBIT << TerrainGameObject.FLOWER_TYPE_FIRST_BIT_INDEX
+					& TerrainGameObject.FLOWER_TYPE_MASK;
 
 			this.population[i] = p;
 			return;
@@ -601,7 +563,7 @@ public class TerrainGameObject extends VariationMeshGameObject
 			return;
 		}
 
-		final int flowerType = PCUtils.randomIntRange(0, Math.min(FLOWER_TYPE_MAX_COUNT, this.flowerTypes.size()));
+		final int flowerType = PCUtils.randomIntRange(0, Math.min(TerrainGameObject.FLOWER_TYPE_MAX_COUNT, this.flowerTypes.size()));
 		final GrowingInstanceGameObject obj = this.flowerTypes.get(flowerType);
 		if (obj == null) {
 			return;
@@ -611,7 +573,7 @@ public class TerrainGameObject extends VariationMeshGameObject
 
 		// store flower type
 		p &= ~TerrainGameObject.FLOWER_TYPE_MASK;
-		p |= ((flowerType - FLOWER_TYPE_OFFSET) << FLOWER_TYPE_FIRST_BIT_INDEX);
+		p |= flowerType - TerrainGameObject.FLOWER_TYPE_OFFSET << TerrainGameObject.FLOWER_TYPE_FIRST_BIT_INDEX;
 
 		// store instance id
 		p &= ~TerrainGameObject.FLOWER_ID_MASK;
@@ -665,30 +627,8 @@ public class TerrainGameObject extends VariationMeshGameObject
 		final Vector3f pos = this.getTilePosition(tile);
 		final int instanceId;
 
-		switch (level) {
-		case GRASS_LEVEL_SMALL -> {
-			final var obj = this.getSmallGrassObject();
-			if (obj == null) {
-				return;
-			}
-			instanceId = obj.addInstance(pos);
-		}
-		case GRASS_LEVEL_MEDIUM -> {
-			final var obj = this.getMediumGrassObject();
-			if (obj == null) {
-				return;
-			}
-			instanceId = obj.addInstance(pos);
-		}
-		case GRASS_LEVEL_LARGE -> {
-			final var obj = this.getLargeGrassObject();
-			if (obj == null) {
-				return;
-			}
-			instanceId = obj.addInstance(pos);
-		}
-		default -> throw new IllegalStateException();
-		}
+		final GrowingInstanceGameObject obj = this.getLivingGrassObject(level);
+		instanceId = obj.addInstance(pos);
 
 		int p = this.population[i];
 
@@ -720,65 +660,42 @@ public class TerrainGameObject extends VariationMeshGameObject
 			return;
 		}
 
-		final int p = this.population[i];
+		int p = this.population[i];
 		final int instanceIndex = (p & TerrainGameObject.GRASS_ID_MASK) >>> TerrainGameObject.GRASS_ID_FIRST_BIT_INDEX;
 
-		final Vector3f pos = this.getTilePosition(tile);
-
 		// remove green
-		switch (grass.getAsInt()) {
-		case GRASS_LEVEL_SMALL -> {
-			final var o = this.getSmallGrassObject();
-			if (o != null) {
-				o.removeInstance(instanceIndex);
-			}
-		}
-		case GRASS_LEVEL_MEDIUM -> {
-			final var o = this.getMediumGrassObject();
-			if (o != null) {
-				o.removeInstance(instanceIndex);
-			}
-		}
-		case GRASS_LEVEL_LARGE -> {
-			final var o = this.getLargeGrassObject();
-			if (o != null) {
-				o.removeInstance(instanceIndex);
-			}
-		}
-		}
+		GrowingInstanceGameObject grassObj = this.getLivingGrassObject(grass.getAsInt());
+		grassObj.removeInstance(instanceIndex);
 
 		// add dry
-		int newId = -1;
+		grassObj = this.getDeadGrassObject(grass.getAsInt());
+		final int newId = grassObj.addInstance(this.getTilePosition(tile));
 
-		switch (grass.getAsInt()) {
-		case GRASS_LEVEL_SMALL -> {
-			final var o = this.getDeadSmallGrassObject();
-			if (o != null) {
-				newId = o.addInstance(pos);
-			}
-		}
-		case GRASS_LEVEL_MEDIUM -> {
-			final var o = this.getDeadMediumGrassObject();
-			if (o != null) {
-				newId = o.addInstance(pos);
-			}
-		}
-		case GRASS_LEVEL_LARGE -> {
-			final var o = this.getDeadLargeGrassObject();
-			if (o != null) {
-				newId = o.addInstance(pos);
-			}
-		}
-		}
+		p |= TerrainGameObject.DRY_GRASS_BIT;
 
-		int np = p;
-		np |= TerrainGameObject.DRY_GRASS_BIT;
-
-		np &= ~TerrainGameObject.GRASS_ID_MASK;
-		np |= PCUtils.clamp(0, TerrainGameObject.GRASS_ID_MAX, newId) << TerrainGameObject.GRASS_ID_FIRST_BIT_INDEX
+		p &= ~TerrainGameObject.GRASS_ID_MASK;
+		p |= PCUtils.clamp(0, TerrainGameObject.GRASS_ID_MAX, newId) << TerrainGameObject.GRASS_ID_FIRST_BIT_INDEX
 				& TerrainGameObject.GRASS_ID_MASK;
 
-		this.population[i] = np;
+		this.population[i] = p;
+	}
+
+	private GrowingInstanceGameObject getDeadGrassObject(final int asInt) {
+		return switch (asInt) {
+		case GRASS_LEVEL_SMALL -> this.getDeadSmallGrassObject();
+		case GRASS_LEVEL_MEDIUM -> this.getDeadMediumGrassObject();
+		case GRASS_LEVEL_LARGE -> this.getDeadLargeGrassObject();
+		default -> null;
+		};
+	}
+
+	private GrowingInstanceGameObject getLivingGrassObject(final int asInt) {
+		return switch (asInt) {
+		case GRASS_LEVEL_SMALL -> this.getSmallGrassObject();
+		case GRASS_LEVEL_MEDIUM -> this.getMediumGrassObject();
+		case GRASS_LEVEL_LARGE -> this.getLargeGrassObject();
+		default -> null;
+		};
 	}
 
 	private static int getWet(final int p) {

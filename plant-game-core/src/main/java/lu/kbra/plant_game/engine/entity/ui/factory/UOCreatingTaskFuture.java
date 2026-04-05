@@ -8,7 +8,7 @@ import java.util.function.Consumer;
 import lu.kbra.pclib.PCUtils;
 import lu.kbra.pclib.concurrency.DeferredTriggerLatch;
 import lu.kbra.pclib.concurrency.GenericTriggerLatch;
-import lu.kbra.pclib.pointer.ObjectPointer;
+import lu.kbra.pclib.pointer.JavaPointer;
 import lu.kbra.plant_game.engine.entity.impl.NeedsPostConstruct;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.plugin.registry.UIObjectRegistry;
@@ -18,10 +18,10 @@ import lu.kbra.standalone.gameengine.scene.EntityContainer;
 
 public class UOCreatingTaskFuture<T extends UIObject> extends TaskFuture<List<Object>, T> {
 
-	public static final String KEEP_SOURCE_PROPERTY = UOCreatingTaskFuture.class.getSimpleName() + ".keep_source";
-	public static boolean KEEP_SOURCE = Boolean.getBoolean(KEEP_SOURCE_PROPERTY);
+//	public static final String KEEP_SOURCE_PROPERTY = UOCreatingTaskFuture.class.getSimpleName() + ".keep_source";
+//	public static boolean KEEP_SOURCE = Boolean.getBoolean(UOCreatingTaskFuture.KEEP_SOURCE_PROPERTY);
 
-	protected Throwable source;
+//	protected Throwable source;
 
 	protected Class<T> clazz;
 
@@ -31,22 +31,17 @@ public class UOCreatingTaskFuture<T extends UIObject> extends TaskFuture<List<Ob
 	public UOCreatingTaskFuture(final Dispatcher dispatcher, final Class<T> clazz) {
 		super(dispatcher);
 		this.clazz = clazz;
-		this.source = new Throwable().fillInStackTrace();
+//		this.source = new Throwable().fillInStackTrace();
 		super.task = list -> {
-			try {
-				final T instance = UIObjectRegistry.create(clazz,
-						PCUtils.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime() },
-								list == null ? new Object[0] : list.toArray()));
-				this.postCreateHooks.forEach(pch -> pch.accept(instance));
-				if (instance instanceof final NeedsPostConstruct npc) {
-					npc.postConstruct();
-				}
-				this.postInitHooks.forEach(pch -> pch.accept(instance));
-				return instance;
-			} catch (Throwable t) {
-				t.addSuppressed(this.source);
-				throw t;
+			final T instance = UIObjectRegistry.create(clazz,
+					PCUtils.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime() },
+							list == null ? new Object[0] : list.toArray()));
+			this.postCreateHooks.forEach(pch -> pch.accept(instance));
+			if (instance instanceof final NeedsPostConstruct npc) {
+				npc.postConstruct();
 			}
+			this.postInitHooks.forEach(pch -> pch.accept(instance));
+			return instance;
 		};
 	}
 
@@ -57,13 +52,13 @@ public class UOCreatingTaskFuture<T extends UIObject> extends TaskFuture<List<Ob
 
 	public UOCreatingTaskFuture<T> add(final EntityContainer<? super T> parent) {
 		Objects.requireNonNull(parent);
-		this.postInitHooks.add(v -> parent.add(v));
+		this.postInitHooks.add(parent::add);
 		return this;
 	}
 
-	public UOCreatingTaskFuture<T> get(final ObjectPointer<? super T> ptr) {
+	public UOCreatingTaskFuture<T> get(final JavaPointer<? super T> ptr) {
 		Objects.requireNonNull(ptr);
-		this.postInitHooks.add(v -> ptr.set(v));
+		this.postInitHooks.add(ptr::set);
 		return this;
 	}
 
@@ -74,7 +69,7 @@ public class UOCreatingTaskFuture<T extends UIObject> extends TaskFuture<List<Ob
 
 	public UOCreatingTaskFuture<T> latch(final GenericTriggerLatch<? super T> latch) {
 		Objects.requireNonNull(latch);
-		this.postInitHooks.add((final T v) -> latch.trigger(v));
+		this.postInitHooks.add(latch::trigger);
 		return this;
 	}
 

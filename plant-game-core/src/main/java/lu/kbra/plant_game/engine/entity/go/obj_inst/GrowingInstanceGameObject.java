@@ -1,4 +1,4 @@
-package lu.kbra.plant_game.base.entity.go.obj_inst.grass;
+package lu.kbra.plant_game.engine.entity.go.obj_inst;
 
 import java.util.Arrays;
 import java.util.Queue;
@@ -11,11 +11,11 @@ import org.joml.Vector3f;
 import lu.kbra.pclib.datastructure.pair.Pair;
 import lu.kbra.pclib.datastructure.pair.Pairs;
 import lu.kbra.plant_game.PGLogic;
-import lu.kbra.plant_game.base.entity.go.obj_inst.round.GrownObject;
-import lu.kbra.plant_game.base.entity.go_inst.champi.SizeOwner;
 import lu.kbra.plant_game.engine.entity.go.InstanceSwayGameObject;
 import lu.kbra.plant_game.engine.entity.go.VariationOwner;
+import lu.kbra.plant_game.engine.entity.impl.GrownObject;
 import lu.kbra.plant_game.engine.entity.impl.ParticleCountOwner;
+import lu.kbra.plant_game.engine.entity.impl.SizeOwner;
 import lu.kbra.standalone.gameengine.geom.instance.InstanceEmitter;
 import lu.kbra.standalone.gameengine.impl.future.TaskFuture;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;

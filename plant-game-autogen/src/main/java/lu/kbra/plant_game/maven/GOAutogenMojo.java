@@ -19,8 +19,7 @@ import lu.kbra.pclib.PCUtils;
 public class GOAutogenMojo extends AutogenDefaults {
 
 	private static final RegistrySpec SPEC = new RegistrySpec("lu.kbra.plant_game.engine.entity.go.GameObject",
-			"lu.kbra.plant_game.plugin.registry.GameObjectRegistry",
-			"GenGORegistry",
+			"lu.kbra.plant_game.plugin.registry.GameObjectRegistry", "GenGORegistry",
 			PCUtils.camelCaseToConstant("gameObjectConstructors"));
 
 	@Parameter(defaultValue = "${project}", required = true, readonly = true)
@@ -50,10 +49,11 @@ public class GOAutogenMojo extends AutogenDefaults {
 
 		try {
 			this.generateRegistry(cl, packageIn, packageOut, generatedSourcesDir, SPEC);
-		} catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException | IOException
-				| RuntimeException e) {
+		} catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException
+				| IOException | RuntimeException e) {
 			e.printStackTrace();
 			throw new MojoExecutionException("Error generating GO registry: ", e);
 		}
 	}
+
 }

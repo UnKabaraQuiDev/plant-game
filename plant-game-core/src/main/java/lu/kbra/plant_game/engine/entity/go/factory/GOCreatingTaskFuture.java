@@ -8,7 +8,7 @@ import java.util.function.Consumer;
 import lu.kbra.pclib.PCUtils;
 import lu.kbra.pclib.concurrency.DeferredTriggerLatch;
 import lu.kbra.pclib.concurrency.GenericTriggerLatch;
-import lu.kbra.pclib.pointer.ObjectPointer;
+import lu.kbra.pclib.pointer.JavaPointer;
 import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.entity.impl.NeedsPostConstruct;
 import lu.kbra.plant_game.plugin.registry.GameObjectRegistry;
@@ -18,10 +18,10 @@ import lu.kbra.standalone.gameengine.scene.EntityContainer;
 
 public class GOCreatingTaskFuture<T extends GameObject> extends TaskFuture<List<Object>, T> {
 
-	public static final String KEEP_SOURCE_PROPERTY = GOCreatingTaskFuture.class.getSimpleName() + ".keep_source";
-	public static boolean KEEP_SOURCE = Boolean.getBoolean(KEEP_SOURCE_PROPERTY);
+//	public static final String KEEP_SOURCE_PROPERTY = GOCreatingTaskFuture.class.getSimpleName() + ".keep_source";
+//	public static boolean KEEP_SOURCE = Boolean.getBoolean(KEEP_SOURCE_PROPERTY);
 
-	protected Throwable source;
+//	protected Throwable source;
 
 	protected Class<T> clazz;
 
@@ -31,23 +31,19 @@ public class GOCreatingTaskFuture<T extends GameObject> extends TaskFuture<List<
 	public GOCreatingTaskFuture(final Dispatcher dispatcher, final Class<T> clazz) {
 		super(dispatcher);
 		this.clazz = clazz;
-		this.source = new Throwable().fillInStackTrace();
+//		this.source = new Throwable().fillInStackTrace();
 		super.task = list -> {
-			try {
-				final T instance = GameObjectRegistry.create(clazz,
-						PCUtils.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime() },
-								list == null ? new Object[0] : list.toArray()));
-				this.postCreateHooks.forEach(pch -> pch.accept(instance));
-				if (instance instanceof final NeedsPostConstruct npc) {
-					npc.postConstruct();
-				}
-				this.postInitHooks.forEach(pch -> pch.accept(instance));
-				return instance;
-			} catch (Throwable t) {
-				t.addSuppressed(this.source);
-				throw t;
+			final T instance = GameObjectRegistry.create(clazz,
+					PCUtils.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime() },
+							list == null ? new Object[0] : list.toArray()));
+			this.postCreateHooks.forEach(pch -> pch.accept(instance));
+			if (instance instanceof final NeedsPostConstruct npc) {
+				npc.postConstruct();
 			}
+			this.postInitHooks.forEach(pch -> pch.accept(instance));
+			return instance;
 		};
+
 	}
 
 	public GOCreatingTaskFuture<T> set(final Consumer<T> setter) {
@@ -63,7 +59,7 @@ public class GOCreatingTaskFuture<T extends GameObject> extends TaskFuture<List<
 		return this;
 	}
 
-	public GOCreatingTaskFuture<T> get(final ObjectPointer<? super T> ptr) {
+	public GOCreatingTaskFuture<T> get(final JavaPointer<? super T> ptr) {
 		Objects.requireNonNull(ptr);
 		this.postInitHooks.add(ptr::set);
 		return this;

@@ -4,6 +4,7 @@ import static lu.kbra.plant_game.engine.loader.MeshLoaderLocks.releaseLock;
 import static lu.kbra.plant_game.engine.loader.MeshLoaderLocks.waitOrCreateLock;
 
 import java.net.URI;
+import java.util.Objects;
 import java.util.function.Function;
 
 import org.joml.Vector3f;
@@ -30,6 +31,8 @@ public class StaticMeshLoader {
 	}
 
 	public static GenericMeshData getStaticMeshData(final String path) {
+		Objects.requireNonNull(path);
+
 		try {
 			final URI baseURI = URI.create(path);
 

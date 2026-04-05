@@ -73,10 +73,7 @@ public abstract class AutogenDefaults extends AbstractMojo {
 		private final String generatedClassName;
 		private final String constructorsMapName;
 
-		public RegistrySpec(
-				final String baseClassName,
-				final String registryClassName,
-				final String generatedClassName,
+		public RegistrySpec(final String baseClassName, final String registryClassName, final String generatedClassName,
 				final String constructorsMapName) {
 			this.baseClassName = baseClassName;
 			this.registryClassName = registryClassName;
@@ -102,9 +99,9 @@ public abstract class AutogenDefaults extends AbstractMojo {
 
 		@Override
 		public String toString() {
-			return "RegistrySpec@" + System.identityHashCode(this) + " [baseClassName=" + this.baseClassName + ", registryClassName="
-					+ this.registryClassName + ", generatedClassName=" + this.generatedClassName + ", constructorsMapName="
-					+ this.constructorsMapName + "]";
+			return "RegistrySpec@" + System.identityHashCode(this) + " [baseClassName=" + this.baseClassName
+					+ ", registryClassName=" + this.registryClassName + ", generatedClassName="
+					+ this.generatedClassName + ", constructorsMapName=" + this.constructorsMapName + "]";
 		}
 
 	}
@@ -117,7 +114,8 @@ public abstract class AutogenDefaults extends AbstractMojo {
 				return Optional.empty();
 			}
 
-			final JSONObject pluginsObj = new JSONObject(new String(Files.readAllBytes(Paths.get(pluginJson.getPath()))));
+			final JSONObject pluginsObj = new JSONObject(
+					new String(Files.readAllBytes(Paths.get(pluginJson.getPath()))));
 
 			return Optional.of(pluginsObj);
 		} catch (final IOException e) {
@@ -149,7 +147,8 @@ public abstract class AutogenDefaults extends AbstractMojo {
 			urlList.add(outputUrl);
 
 			for (final Artifact artifact : (Set<Artifact>) project.getArtifacts()) {
-				if (Artifact.SCOPE_COMPILE.equals(artifact.getScope()) || Artifact.SCOPE_RUNTIME.equals(artifact.getScope())) {
+				if (Artifact.SCOPE_COMPILE.equals(artifact.getScope())
+						|| Artifact.SCOPE_RUNTIME.equals(artifact.getScope())) {
 					urlList.add(artifact.getFile().toURI().toURL());
 				}
 			}
@@ -172,41 +171,37 @@ public abstract class AutogenDefaults extends AbstractMojo {
 				throw new MojoExecutionException("plugin.json file not found in resources directory!");
 			}
 
-			this.getLog().warn("plugin.json file not found, skipping. Use failOnMissingFiles=true to fail at this point");
+			this.getLog()
+					.warn("plugin.json file not found, skipping. Use failOnMissingFiles=true to fail at this point");
 			return Optional.empty();
 		}
 
 		return Optional.of(pluginReg.get().getString("package"));
 	}
 
-	protected void generateRegistry(
-			final ClassLoader scanClassLoader,
-			final String scanPackage,
-			final String outputPackage,
-			final File outputDir,
-			final RegistrySpec spec)
-			throws IOException, ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+	protected void generateRegistry(final ClassLoader scanClassLoader, final String scanPackage,
+			final String outputPackage, final File outputDir, final RegistrySpec spec) throws IOException,
+			ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 
 		final Class<?> baseClass = scanClassLoader.loadClass(spec.baseClassName());
-		final Class<?> internalConstructorFunctionClass = scanClassLoader.loadClass(INTERNAL_CONSTRUCTOR_FUNCTION_CLASS);
-		final Class<? extends Annotation> dataPathClass = (Class<? extends Annotation>) scanClassLoader.loadClass(DATA_PATH_ANNOTATION);
+		final Class<?> internalConstructorFunctionClass = scanClassLoader
+				.loadClass(INTERNAL_CONSTRUCTOR_FUNCTION_CLASS);
+		final Class<? extends Annotation> dataPathClass = (Class<? extends Annotation>) scanClassLoader
+				.loadClass(DATA_PATH_ANNOTATION);
 		final Class<?> registryClass = scanClassLoader.loadClass(spec.registryClassName());
-		final Class<? extends Annotation> bufferSizeClass = (Class<? extends Annotation>) scanClassLoader.loadClass(BUFFER_SIZE_ANNOTATION);
+		final Class<? extends Annotation> bufferSizeClass = (Class<? extends Annotation>) scanClassLoader
+				.loadClass(BUFFER_SIZE_ANNOTATION);
 		final Class<? extends Annotation> textureOptionClass = (Class<? extends Annotation>) scanClassLoader
 				.loadClass(TEXTURE_OPTION_ANNOTATION);
 		final Class<?> pluginDescriptorClass = scanClassLoader.loadClass(PLUGIN_DESCRIPTOR_CLASS);
 		final Class<?> textureFilterClass = scanClassLoader.loadClass(TEXTURE_FILTER_CLASS);
 		final Class<?> textureWrapClass = scanClassLoader.loadClass(TEXTURE_WRAP_CLASS);
 
-		final TypeSpec.Builder registry = TypeSpec.classBuilder(spec.generatedClassName())
-				.superclass(registryClass)
+		final TypeSpec.Builder registry = TypeSpec.classBuilder(spec.generatedClassName()).superclass(registryClass)
 				.addModifiers(Modifier.PUBLIC);
 
-		registry.addMethod(MethodSpec.constructorBuilder()
-				.addModifiers(Modifier.PUBLIC)
-				.addParameter(pluginDescriptorClass, "pd")
-				.addStatement("super($N)", "pd")
-				.build());
+		registry.addMethod(MethodSpec.constructorBuilder().addModifiers(Modifier.PUBLIC)
+				.addParameter(pluginDescriptorClass, "pd").addStatement("super($N)", "pd").build());
 
 		final ConfigurationBuilder builder = new ConfigurationBuilder();
 		builder.addClassLoaders(scanClassLoader);
@@ -215,10 +210,8 @@ public abstract class AutogenDefaults extends AbstractMojo {
 		final Reflections reflections = new Reflections(builder);
 		final Set<? extends Class<?>> classes = reflections.getSubTypesOf((Class<Object>) baseClass);
 
-		final Builder initMethod = MethodSpec.methodBuilder(REGISTER_METHOD_NAME)
-				.returns(TypeName.VOID)
-				.addModifiers(Modifier.PUBLIC)
-				.addAnnotation(Override.class);
+		final Builder initMethod = MethodSpec.methodBuilder(REGISTER_METHOD_NAME).returns(TypeName.VOID)
+				.addModifiers(Modifier.PUBLIC).addAnnotation(Override.class);
 
 		for (final Class<?> c : classes) {
 			if (!c.isAnnotationPresent(dataPathClass)) {
@@ -227,7 +220,7 @@ public abstract class AutogenDefaults extends AbstractMojo {
 			if (java.lang.reflect.Modifier.isAbstract(c.getModifiers())) {
 				continue;
 			}
-			if (c.getName().contains("$")) {
+			if (c.isAnonymousClass()) {
 				System.err.println("Skipping anonymous class: " + c.getName());
 				continue;
 			}
@@ -242,7 +235,8 @@ public abstract class AutogenDefaults extends AbstractMojo {
 			final String listName = "list" + c.getSimpleName();
 
 			final TypeName specificSubListType = ParameterizedTypeName.get(ClassName.get(List.class),
-					ParameterizedTypeName.get(ClassName.get(internalConstructorFunctionClass), ClassName.get(baseClass)));
+					ParameterizedTypeName.get(ClassName.get(internalConstructorFunctionClass),
+							ClassName.get(baseClass)));
 
 			initMethod.addCode("/* $L $T $L */\n", SPACER, TypeName.get(c), SPACER);
 			initMethod.addStatement("final $T $L = new $T<>()", specificSubListType, listName, ArrayList.class);
@@ -253,15 +247,9 @@ public abstract class AutogenDefaults extends AbstractMojo {
 			bufferSize.ifPresent(i -> initMethod.addStatement("$L.put($T.class, $L)", BUFFER_SIZE_MAP, c, i));
 			dataPath.ifPresent(t -> initMethod.addStatement("$L.put($T.class, $S)", DATA_PATH_MAP, c, t));
 			textureOption.ifPresent(t -> {
-				initMethod.addStatement("$L.put($T.class, $T.$L)",
-						TEXTURE_FILTER_MAP,
-						c,
-						textureFilterClass,
+				initMethod.addStatement("$L.put($T.class, $T.$L)", TEXTURE_FILTER_MAP, c, textureFilterClass,
 						this.getEnumValue(t, "textureFilter"));
-				initMethod.addStatement("$L.put($T.class, $T.$L)",
-						TEXTURE_WRAP_MAP,
-						c,
-						textureWrapClass,
+				initMethod.addStatement("$L.put($T.class, $T.$L)", TEXTURE_WRAP_MAP, c, textureWrapClass,
 						this.getEnumValue(t, "textureWrap"));
 			});
 
@@ -270,45 +258,49 @@ public abstract class AutogenDefaults extends AbstractMojo {
 
 		registry.addMethod(initMethod.build());
 
-		JavaFile.builder(outputPackage, registry.build()).addFileComment("@formatter:off").indent("\t").build().writeTo(outputDir);
+		JavaFile.builder(outputPackage, registry.build()).addFileComment("@formatter:off").indent("\t").build()
+				.writeTo(outputDir);
 	}
 
-	protected void addConstructors(
-			final MethodSpec.Builder initMethod,
-			final Class<?> targetClass,
-			final String listName,
-			final Class<?> internalConstructorFunctionClass,
-			final Class<?> baseClass) {
+	protected void addConstructors(final MethodSpec.Builder initMethod, final Class<?> targetClass,
+			final String listName, final Class<?> internalConstructorFunctionClass, final Class<?> baseClass) {
 
 		for (final Constructor<?> con : Arrays.stream(targetClass.getConstructors())
-				.sorted(Comparator.comparing(Constructor<?>::getParameterCount))
-				.collect(Collectors.toList())) {
+				.sorted(Comparator.comparing(Constructor<?>::getParameterCount)).collect(Collectors.toList())) {
 
-			initMethod.addStatement("$L.add(new $T<>(new $T {"
-					+ IntStream.range(0, con.getParameterCount()).mapToObj(i -> "$T.class").collect(Collectors.joining(", "))
-					+ "}, ($T[] arr) -> ($T) new $T("
-					+ IntStream.range(0, con.getParameterCount()).mapToObj(i -> "($T) $L").collect(Collectors.joining(", ")) + ")))",
-					PCUtils.concatStreams(Stream.of(listName, internalConstructorFunctionClass, ArrayTypeName.of(Class.class)),
+			initMethod.addStatement(
+					"$L.add(new $T<>(new $T {"
+							+ IntStream.range(0, con.getParameterCount()).mapToObj(i -> "$T.class").collect(
+									Collectors.joining(", "))
+							+ "}, ($T[] arr) -> ($T) new $T("
+							+ IntStream.range(0, con.getParameterCount()).mapToObj(i -> "($T) $L")
+									.collect(Collectors.joining(", "))
+							+ ")))",
+					PCUtils.concatStreams(
+							Stream.of(listName, internalConstructorFunctionClass, ArrayTypeName.of(Class.class)),
 							Arrays.stream(con.getParameterTypes()).map(TypeName::get),
 							Stream.of(Object.class, baseClass, targetClass),
 							IntStream.range(0, con.getParameterCount())
-									.mapToObj(i -> Pairs.readOnly(TypeName.get(con.getParameters()[i].getType()), "arr[" + i + "]"))
+									.mapToObj(i -> Pairs.readOnly(TypeName.get(con.getParameters()[i].getType()),
+											"arr[" + i + "]"))
 									.flatMap(z -> Stream.of(z.getKey(), z.getValue())))
 							.toArray());
 		}
 	}
-	
+
 	public Enum<?> getEnumValue(final Annotation annotation, final String method) {
 		try {
 			final Class<?> clazz = annotation.getClass();
 			final Method meth = clazz.getMethod(method);
 			return (Enum<?>) meth.invoke(annotation);
-		} catch (IllegalAccessException | NoSuchMethodException | IllegalArgumentException | InvocationTargetException e) {
+		} catch (IllegalAccessException | NoSuchMethodException | IllegalArgumentException
+				| InvocationTargetException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	public int getIntValue(final Annotation annotation) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+	public int getIntValue(final Annotation annotation)
+			throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 		final Class<?> clazz = annotation.getClass();
 		final Method meth = clazz.getMethod("value");
 		return (int) meth.invoke(annotation);
