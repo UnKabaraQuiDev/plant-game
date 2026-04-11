@@ -19,7 +19,7 @@ jobs:
     runs-on: [self-hosted, linux]
 
     outputs:
-      has_changes: ${{ steps.changes.outputs.has_changes }}
+      should_run: ${{ steps.changes.outputs.should_run }}
 
     steps:
       - uses: actions/checkout@v6
