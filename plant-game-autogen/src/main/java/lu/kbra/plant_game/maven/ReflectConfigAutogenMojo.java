@@ -98,9 +98,11 @@ public class ReflectConfigAutogenMojo extends AutogenDefaults {
 		final Set<Class<?>> classes = reflections.getSubTypesOf((Class<Object>) marker);
 
 		// ===== Filter =====
-		final Set<Class<?>> filtered = classes.stream().filter(c -> !c.isInterface())
+		final Set<Class<?>> filtered = classes.stream()
+				.filter(c -> !c.isInterface())
 				.filter(c -> !java.lang.reflect.Modifier.isAbstract(c.getModifiers()))
-				.filter(c -> !c.getName().contains("$")).collect(Collectors.toSet());
+				.filter(c -> !c.getName().contains("$"))
+				.collect(Collectors.toSet());
 
 		int added = 0;
 
