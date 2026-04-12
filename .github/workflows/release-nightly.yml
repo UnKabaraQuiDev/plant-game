@@ -20,6 +20,7 @@ jobs:
 
     outputs:
       should_run: ${{ steps.decision.outputs.should_run }}
+      version: ${{ steps.snapshot.output.version }}
 
     steps:
       - uses: actions/checkout@v6
@@ -46,6 +47,19 @@ jobs:
             echo "has_changes=true" >> $GITHUB_OUTPUT
           else
             echo "has_changes=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Detect SNAPSHOT version
+        id: snapshot
+        run: |
+          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          echo "version=$VERSION"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          
+          if [[ "$VERSION" == *"-SNAPSHOT" ]]; then
+            echo "is_snapshot=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_snapshot=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Decide if pipeline should run
@@ -184,7 +198,7 @@ jobs:
         run: bash ./scripts/build-nightly-windows.sh
 
   release:
-    needs: [linux, windows]
+    needs: [prepare, linux, windows]
     runs-on: [self-hosted, linux]
 
     if: needs.prepare.outputs.should_run == 'true'
@@ -207,7 +221,7 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          name: Nightly ${{ steps.date.outputs.date }}
-          tag_name: nightly-${{ steps.date.outputs.date }}
+          name: Nightly ${{ needs.prepare.outputs.version }} ${{ steps.date.outputs.date }}
+          tag_name: ${{ needs.prepare.outputs.version }}-NIGHTLY-${{ steps.date.outputs.date }}
           make_latest: false
           prerelease: true
