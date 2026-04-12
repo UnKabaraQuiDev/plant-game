@@ -18,7 +18,7 @@ import lu.kbra.pclib.logger.GlobalLogger;
 import lu.kbra.plant_game.engine.entity.go.GameObject;
 import lu.kbra.plant_game.engine.entity.go.MeshGameObject;
 import lu.kbra.plant_game.engine.entity.go.factory.GameObjectFactory;
-import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
+import lu.kbra.plant_game.engine.entity.impl.PlaceableObject;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.render.DeferredIconRenderer;

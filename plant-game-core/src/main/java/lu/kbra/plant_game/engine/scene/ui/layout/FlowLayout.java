@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.Optional;
 
 import lu.kbra.pclib.logger.GlobalLogger;
+import lu.kbra.plant_game.engine.entity.impl.BoundsOwner;
+import lu.kbra.plant_game.engine.entity.impl.BoundsOwnerParentAware;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
-import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwner;
-import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwnerParentAware;
 import lu.kbra.standalone.gameengine.objs.entity.ParentAwareComponent;
 
 public class FlowLayout implements Layout, BoundsOwnerParentAware {

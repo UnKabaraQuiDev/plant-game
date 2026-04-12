@@ -5,10 +5,10 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 
 import lu.kbra.plant_game.PGLogic;
-import lu.kbra.plant_game.engine.entity.ui.TexturedQuadMeshUIObject;
+import lu.kbra.plant_game.engine.entity.impl.AbsoluteTransform3DOwner;
+import lu.kbra.plant_game.engine.entity.impl.NeedsUpdate;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
-import lu.kbra.plant_game.engine.entity.ui.impl.AbsoluteTransform3DOwner;
-import lu.kbra.plant_game.engine.entity.ui.impl.NeedsUpdate;
+import lu.kbra.plant_game.engine.entity.ui.prim.TexturedQuadMeshUIObject;
 import lu.kbra.plant_game.engine.mesh.TexturedQuadMesh;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;

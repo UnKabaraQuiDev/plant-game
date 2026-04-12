@@ -7,10 +7,10 @@ import org.joml.Vector2f;
 import org.joml.Vector3fc;
 
 import lu.kbra.pclib.concurrency.ObjectTriggerLatch;
+import lu.kbra.plant_game.engine.entity.impl.BoundsSceneParentAware;
 import lu.kbra.plant_game.engine.entity.impl.SceneBoundsOwner;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
-import lu.kbra.plant_game.engine.entity.ui.impl.BoundsSceneParentAware;
 import lu.kbra.plant_game.engine.entity.ui.scroller.ScrollBarUIObject;
 import lu.kbra.plant_game.engine.scene.ui.layout.Layout;
 import lu.kbra.standalone.gameengine.utils.consts.Direction;

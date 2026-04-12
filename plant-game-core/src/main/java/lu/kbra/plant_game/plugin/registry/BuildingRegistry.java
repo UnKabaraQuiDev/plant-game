@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import lu.kbra.plant_game.base.data.DefaultResourceType;
 import lu.kbra.plant_game.engine.entity.go.GameObject;
-import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
+import lu.kbra.plant_game.engine.entity.impl.PlaceableObject;
 import lu.kbra.plant_game.engine.scene.world.data.building.BuildingCategory;
 import lu.kbra.plant_game.engine.scene.world.data.building.BuildingDefinition;
 import lu.kbra.plant_game.engine.scene.world.data.building.requirement.BuildingRequirement;

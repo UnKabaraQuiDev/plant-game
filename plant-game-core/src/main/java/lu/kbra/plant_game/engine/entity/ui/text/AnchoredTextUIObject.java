@@ -1,6 +1,6 @@
 package lu.kbra.plant_game.engine.entity.ui.text;
 
-import lu.kbra.plant_game.engine.entity.ui.impl.AnchorOwner;
+import lu.kbra.plant_game.engine.entity.impl.AnchorOwner;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
 

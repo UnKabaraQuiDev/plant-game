@@ -9,20 +9,21 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.function.ToDoubleFunction;
 
-import lu.kbra.plant_game.base.scene.overlay.group.building.MinBoundsOwner;
+import lu.kbra.plant_game.engine.entity.impl.IgnoreBounds;
+import lu.kbra.plant_game.engine.entity.impl.IndexOwner;
+import lu.kbra.plant_game.engine.entity.impl.Margin2DOwner;
+import lu.kbra.plant_game.engine.entity.impl.MarginOwner;
+import lu.kbra.plant_game.engine.entity.impl.MinBoundsOwner;
 import lu.kbra.plant_game.engine.entity.impl.NoMeshObject;
+import lu.kbra.plant_game.engine.entity.impl.ObjectGroup;
+import lu.kbra.plant_game.engine.entity.impl.Padding2DOwner;
+import lu.kbra.plant_game.engine.entity.impl.PaddingOwner;
+import lu.kbra.plant_game.engine.entity.ui.GenericUIObject;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
-import lu.kbra.plant_game.engine.entity.ui.impl.IgnoreBounds;
-import lu.kbra.plant_game.engine.entity.ui.impl.IndexOwner;
-import lu.kbra.plant_game.engine.entity.ui.impl.Margin2DOwner;
-import lu.kbra.plant_game.engine.entity.ui.impl.MarginOwner;
-import lu.kbra.plant_game.engine.entity.ui.impl.ObjectGroup;
-import lu.kbra.plant_game.engine.entity.ui.impl.Padding2DOwner;
-import lu.kbra.plant_game.engine.entity.ui.impl.PaddingOwner;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
 import lu.kbra.standalone.gameengine.scene.SynchronizedEntityContainer;
 
-public class UIObjectGroup extends UIObject implements ObjectGroup<UIObject>, NoMeshObject, SynchronizedEntityContainer<UIObject> {
+public class UIObjectGroup extends GenericUIObject implements ObjectGroup<UIObject>, NoMeshObject, SynchronizedEntityContainer<UIObject> {
 
 	public static final Comparator<UIObject> INDEX_COMPARATOR = Comparator.comparingInt(b -> {
 		if (b instanceof final IndexOwner ime) {

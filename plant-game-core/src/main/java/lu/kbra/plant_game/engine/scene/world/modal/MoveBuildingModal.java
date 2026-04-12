@@ -9,8 +9,8 @@ import org.joml.Vector4fc;
 
 import lu.kbra.plant_game.base.data.DefaultKeyOption;
 import lu.kbra.plant_game.engine.UpdateFrameState;
-import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
 import lu.kbra.plant_game.engine.entity.go.obj.terrain.TerrainGameObject;
+import lu.kbra.plant_game.engine.entity.impl.PlaceableObject;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;

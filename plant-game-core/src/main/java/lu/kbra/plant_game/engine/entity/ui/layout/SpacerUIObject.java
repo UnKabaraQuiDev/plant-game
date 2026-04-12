@@ -7,18 +7,18 @@ import javax.swing.GroupLayout.Alignment;
 import org.joml.Vector2f;
 import org.joml.Vector2fc;
 
+import lu.kbra.plant_game.engine.entity.impl.DebugBoundsColor;
 import lu.kbra.plant_game.engine.entity.impl.NoMeshObject;
-import lu.kbra.plant_game.engine.entity.ui.UIObject;
+import lu.kbra.plant_game.engine.entity.ui.GenericUIObject;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
 import lu.kbra.plant_game.engine.entity.ui.factory.UOCreatingTaskFuture;
-import lu.kbra.plant_game.engine.entity.ui.impl.DebugBoundsColor;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 @DataPath("")
-public class SpacerUIObject extends UIObject implements NoMeshObject, DebugBoundsColor {
+public class SpacerUIObject extends GenericUIObject implements NoMeshObject, DebugBoundsColor {
 
 	protected Rectangle2D.Float bounds = new Rectangle2D.Float(0, 0, 0, 0);
 	private Vector2f size;

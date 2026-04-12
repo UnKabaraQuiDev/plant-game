@@ -2,8 +2,8 @@ package lu.kbra.plant_game.engine.entity.ui.text;
 
 import org.joml.Vector3fc;
 
+import lu.kbra.plant_game.engine.entity.impl.GrowOnHover;
 import lu.kbra.plant_game.engine.entity.ui.data.Scale2dDir;
-import lu.kbra.plant_game.engine.entity.ui.impl.GrowOnHover;
 import lu.kbra.standalone.gameengine.GameEngine;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
 

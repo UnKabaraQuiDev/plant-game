@@ -1,6 +1,6 @@
 package lu.kbra.plant_game.engine.window.input;
 
-import lu.kbra.plant_game.engine.entity.ui.impl.IndexOwner;
+import lu.kbra.plant_game.engine.entity.impl.IndexOwner;
 
 public interface KeyOption extends IndexOwner {
 

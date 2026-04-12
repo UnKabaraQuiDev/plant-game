@@ -1,9 +1,9 @@
 package lu.kbra.plant_game.base.data;
 
-import lu.kbra.plant_game.engine.entity.ui.TexturedQuadMeshUIObject;
 import lu.kbra.plant_game.engine.entity.ui.icon.EnergyIconUIObject;
 import lu.kbra.plant_game.engine.entity.ui.icon.MoneyIconUIObject;
 import lu.kbra.plant_game.engine.entity.ui.icon.WaterIconUIObject;
+import lu.kbra.plant_game.engine.entity.ui.prim.TexturedQuadMeshUIObject;
 import lu.kbra.plant_game.engine.scene.world.data.resource.ResourceType;
 
 public enum DefaultResourceType implements ResourceType {

@@ -9,6 +9,7 @@ import lu.kbra.pclib.PCUtils;
 import lu.kbra.pclib.concurrency.ObjectTriggerLatch;
 import lu.kbra.pclib.logger.GlobalLogger;
 import lu.kbra.plant_game.engine.entity.impl.ColorMaterialOwner;
+import lu.kbra.plant_game.engine.entity.impl.LimitedObjectGroup;
 import lu.kbra.plant_game.engine.entity.impl.TintOwner;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
@@ -60,7 +61,7 @@ public class ProgressBarUIObject extends OffsetUIObjectGroup implements LimitedO
 		this.value = value;
 	}
 
-	public <T extends UIObject & ColorMaterialOwner, V extends UIObject & ColorMaterialOwner> ObjectTriggerLatch<ProgressBarUIObject> init(
+	public <T extends  UIObject & ColorMaterialOwner, V extends  UIObject & ColorMaterialOwner> ObjectTriggerLatch<ProgressBarUIObject> init(
 			final Class<T> bgClazz,
 			final Class<V> fgClazz,
 			final ColorMaterial bg,
@@ -96,7 +97,7 @@ public class ProgressBarUIObject extends OffsetUIObjectGroup implements LimitedO
 		return latch;
 	}
 
-	public <T extends UIObject & ColorMaterialOwner, V extends UIObject & ColorMaterialOwner> ObjectTriggerLatch<ProgressBarUIObject> init(
+	public <T extends  UIObject & ColorMaterialOwner, V extends  UIObject & ColorMaterialOwner> ObjectTriggerLatch<ProgressBarUIObject> init(
 			final Class<T> bgClazz,
 			final Class<V> fgClazz) {
 		return this.init(bgClazz, fgClazz, DEFAULT_BG_COLOR, DEFAULT_FG_COLOR);

@@ -1,6 +1,6 @@
 package lu.kbra.plant_game.engine.entity.ui.icon;
 
-import lu.kbra.plant_game.engine.entity.ui.TexturedQuadMeshUIObject;
+import lu.kbra.plant_game.engine.entity.ui.prim.TexturedQuadMeshUIObject;
 import lu.kbra.plant_game.engine.mesh.TexturedQuadMesh;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
 

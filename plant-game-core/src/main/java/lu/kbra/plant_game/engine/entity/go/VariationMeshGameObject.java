@@ -3,6 +3,7 @@ package lu.kbra.plant_game.engine.entity.go;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
+import lu.kbra.plant_game.engine.entity.impl.VariationOwner;
 import lu.kbra.standalone.gameengine.GameEngine;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lu.kbra.plant_game.engine.entity.impl.AnimatedMeshOwner;
 import lu.kbra.plant_game.engine.entity.impl.AnimatedTransformOwner;
+import lu.kbra.plant_game.engine.entity.impl.FixedAnimationOwner;
 import lu.kbra.plant_game.engine.mesh.AnimatedMesh;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 

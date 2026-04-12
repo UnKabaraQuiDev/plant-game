@@ -1,9 +1,9 @@
 package lu.kbra.plant_game.engine.entity.ui.btn;
 
-import lu.kbra.plant_game.engine.entity.ui.impl.AnimatedOnHover;
-import lu.kbra.plant_game.engine.entity.ui.impl.IndexOwner;
-import lu.kbra.plant_game.engine.entity.ui.impl.NeedsClick;
-import lu.kbra.plant_game.engine.entity.ui.impl.UISceneParentAware;
+import lu.kbra.plant_game.engine.entity.impl.AnimatedOnHover;
+import lu.kbra.plant_game.engine.entity.impl.IndexOwner;
+import lu.kbra.plant_game.engine.entity.impl.NeedsClick;
+import lu.kbra.plant_game.engine.entity.impl.UISceneParentAware;
 import lu.kbra.plant_game.engine.entity.ui.text.TextUIObject;
 import lu.kbra.plant_game.engine.scene.ui.layout.LayoutOwner;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;

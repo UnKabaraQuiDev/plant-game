@@ -6,13 +6,13 @@ import javax.swing.GroupLayout.Alignment;
 
 import lu.kbra.pclib.impl.ThrowingRunnable;
 import lu.kbra.plant_game.PGLogic;
-import lu.kbra.plant_game.engine.entity.ui.UIObject;
-import lu.kbra.plant_game.engine.entity.ui.impl.TransparentEntity;
+import lu.kbra.plant_game.engine.entity.impl.TransparentEntity;
+import lu.kbra.plant_game.engine.entity.ui.GenericUIObject;
 import lu.kbra.standalone.gameengine.impl.future.YieldExecutionThrowable;
 import lu.kbra.standalone.gameengine.objs.text.TextEmitter;
 import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
 
-public class TextUIObject extends UIObject implements TextEmitterOwner, TransparentEntity {
+public class TextUIObject extends GenericUIObject implements TextEmitterOwner, TransparentEntity {
 
 	private TextEmitter textEmitter;
 

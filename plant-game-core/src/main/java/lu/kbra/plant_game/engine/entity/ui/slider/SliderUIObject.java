@@ -8,10 +8,10 @@ import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
 
 import lu.kbra.plant_game.PGLogic;
+import lu.kbra.plant_game.engine.entity.impl.AbsoluteTransformedBoundsOwner;
+import lu.kbra.plant_game.engine.entity.impl.NeedsBoundsInput;
 import lu.kbra.plant_game.engine.entity.impl.NeedsPostConstruct;
-import lu.kbra.plant_game.engine.entity.ui.impl.AbsoluteTransformedBoundsOwner;
-import lu.kbra.plant_game.engine.entity.ui.impl.NeedsBoundsInput;
-import lu.kbra.plant_game.engine.entity.ui.impl.UISceneParentAware;
+import lu.kbra.plant_game.engine.entity.impl.UISceneParentAware;
 import lu.kbra.plant_game.engine.entity.ui.text.TextUIObject;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;

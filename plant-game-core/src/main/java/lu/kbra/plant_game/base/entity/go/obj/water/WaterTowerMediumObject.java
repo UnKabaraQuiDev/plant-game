@@ -1,8 +1,8 @@
 package lu.kbra.plant_game.base.entity.go.obj.water;
 
-import lu.kbra.plant_game.engine.entity.go.impl.WaterContainer;
 import lu.kbra.plant_game.engine.entity.go.obj.FootprintComputeMethod;
 import lu.kbra.plant_game.engine.entity.go.obj.PlaceableMeshGameObject;
+import lu.kbra.plant_game.engine.entity.impl.WaterContainer;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 

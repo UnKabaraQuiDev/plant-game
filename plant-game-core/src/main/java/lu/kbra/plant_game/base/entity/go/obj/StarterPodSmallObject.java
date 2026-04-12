@@ -4,10 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import lu.kbra.plant_game.base.data.DefaultResourceType;
-import lu.kbra.plant_game.engine.entity.go.impl.EnergyContainer;
-import lu.kbra.plant_game.engine.entity.go.impl.WaterContainer;
 import lu.kbra.plant_game.engine.entity.go.obj.PlaceableAnimatedGameObject;
+import lu.kbra.plant_game.engine.entity.impl.EnergyContainer;
 import lu.kbra.plant_game.engine.entity.impl.StarterPodObject;
+import lu.kbra.plant_game.engine.entity.impl.WaterContainer;
 import lu.kbra.plant_game.engine.mesh.AnimatedMesh;
 import lu.kbra.plant_game.engine.scene.world.data.LevelData;
 import lu.kbra.plant_game.engine.scene.world.data.resource.ResourceType;

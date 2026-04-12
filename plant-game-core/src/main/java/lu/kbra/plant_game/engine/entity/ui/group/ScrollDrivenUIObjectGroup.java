@@ -5,10 +5,10 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import lu.kbra.pclib.PCUtils;
+import lu.kbra.plant_game.engine.entity.impl.BoundsOwner;
+import lu.kbra.plant_game.engine.entity.impl.NeedsUpdate;
+import lu.kbra.plant_game.engine.entity.impl.UISceneParentAware;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
-import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwner;
-import lu.kbra.plant_game.engine.entity.ui.impl.NeedsUpdate;
-import lu.kbra.plant_game.engine.entity.ui.impl.UISceneParentAware;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
 import lu.kbra.plant_game.engine.window.input.WindowInputHandler;
 import lu.kbra.standalone.gameengine.utils.consts.Direction;

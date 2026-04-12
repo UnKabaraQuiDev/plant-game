@@ -7,9 +7,9 @@ import org.joml.Vector4fc;
 
 import lu.kbra.plant_game.engine.entity.impl.GradientOwner;
 import lu.kbra.plant_game.engine.entity.impl.TintOwner;
-import lu.kbra.plant_game.engine.entity.ui.QuadMeshUIObject;
+import lu.kbra.plant_game.engine.entity.impl.TransparentEntity;
 import lu.kbra.plant_game.engine.entity.ui.data.GradientDirection;
-import lu.kbra.plant_game.engine.entity.ui.impl.TransparentEntity;
+import lu.kbra.plant_game.engine.entity.ui.prim.QuadMeshUIObject;
 import lu.kbra.standalone.gameengine.geom.QuadMesh;
 import lu.kbra.standalone.gameengine.utils.GameEngineUtils;
 

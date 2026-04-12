@@ -5,8 +5,8 @@ import java.awt.geom.Rectangle2D;
 import java.util.List;
 import java.util.Optional;
 
+import lu.kbra.plant_game.engine.entity.impl.BoundsOwner;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
-import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwner;
 import lu.kbra.standalone.gameengine.objs.entity.ParentAwareComponent;
 import lu.kbra.standalone.gameengine.objs.entity.SceneParentAware;
 import lu.kbra.standalone.gameengine.scene.Scene;

@@ -18,11 +18,6 @@ import lu.kbra.standalone.gameengine.scene.EntityContainer;
 
 public class UOCreatingTaskFuture<T extends UIObject> extends TaskFuture<List<Object>, T> {
 
-//	public static final String KEEP_SOURCE_PROPERTY = UOCreatingTaskFuture.class.getSimpleName() + ".keep_source";
-//	public static boolean KEEP_SOURCE = Boolean.getBoolean(UOCreatingTaskFuture.KEEP_SOURCE_PROPERTY);
-
-//	protected Throwable source;
-
 	protected Class<T> clazz;
 
 	protected List<Consumer<T>> postCreateHooks = new ArrayList<>();
@@ -31,7 +26,6 @@ public class UOCreatingTaskFuture<T extends UIObject> extends TaskFuture<List<Ob
 	public UOCreatingTaskFuture(final Dispatcher dispatcher, final Class<T> clazz) {
 		super(dispatcher);
 		this.clazz = clazz;
-//		this.source = new Throwable().fillInStackTrace();
 		super.task = list -> {
 			final T instance = UIObjectRegistry.create(clazz,
 					PCUtils.combineArrays(new Object[] { clazz.getSimpleName() + "#" + System.nanoTime() },

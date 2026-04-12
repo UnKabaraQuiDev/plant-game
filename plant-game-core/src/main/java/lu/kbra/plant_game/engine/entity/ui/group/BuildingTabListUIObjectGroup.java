@@ -4,10 +4,9 @@ import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
 import java.util.Optional;
 
-import lu.kbra.plant_game.base.scene.overlay.group.building.BuildingTabButtonUIObjectGroup;
-import lu.kbra.plant_game.base.scene.overlay.group.impl.AnchoredLayoutUIObjectGroup;
-import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwner;
-import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwnerParentAware;
+import lu.kbra.plant_game.engine.entity.impl.BoundsOwner;
+import lu.kbra.plant_game.engine.entity.impl.BoundsOwnerParentAware;
+import lu.kbra.plant_game.engine.entity.ui.building.BuildingTabButtonUIObjectGroup;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
 import lu.kbra.plant_game.engine.scene.ui.layout.FlowLayout;
 

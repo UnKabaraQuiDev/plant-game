@@ -6,7 +6,7 @@ import org.joml.Vector4fc;
 import lu.kbra.plant_game.PGLogic;
 import lu.kbra.plant_game.base.data.DefaultKeyOption;
 import lu.kbra.plant_game.engine.UpdateFrameState;
-import lu.kbra.plant_game.engine.entity.go.impl.PlaceableObject;
+import lu.kbra.plant_game.engine.entity.impl.PlaceableObject;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;

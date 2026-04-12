@@ -1,8 +1,8 @@
 package lu.kbra.plant_game.engine.entity.ui.icon;
 
-import lu.kbra.plant_game.engine.entity.ui.TexturedQuadMeshUIObject;
-import lu.kbra.plant_game.engine.entity.ui.impl.AnchorOwner;
-import lu.kbra.plant_game.engine.entity.ui.impl.MarginOwner;
+import lu.kbra.plant_game.engine.entity.impl.AnchorOwner;
+import lu.kbra.plant_game.engine.entity.impl.MarginOwner;
+import lu.kbra.plant_game.engine.entity.ui.prim.TexturedQuadMeshUIObject;
 import lu.kbra.plant_game.engine.mesh.TexturedQuadMesh;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;

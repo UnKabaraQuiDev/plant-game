@@ -1,7 +1,7 @@
 package lu.kbra.plant_game.engine.entity.ui.gradient;
 
+import lu.kbra.plant_game.engine.entity.impl.ExtAnchorOwner;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
-import lu.kbra.plant_game.engine.entity.ui.impl.ExtAnchorOwner;
 import lu.kbra.standalone.gameengine.geom.QuadMesh;
 
 public class ExtAnchoredGradientQuadUIObject extends AnchoredGradientQuadUIObject implements ExtAnchorOwner {

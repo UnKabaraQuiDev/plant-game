@@ -1,6 +1,6 @@
 package lu.kbra.plant_game.engine.entity.ui.prim;
 
-import lu.kbra.plant_game.engine.entity.ui.impl.IgnoreBounds;
+import lu.kbra.plant_game.engine.entity.impl.IgnoreBounds;
 import lu.kbra.plant_game.engine.mesh.TexturedQuadMesh;
 
 public class IBAnchoredFlatQuadUIObject extends AnchoredFlatQuadUIObject implements IgnoreBounds {

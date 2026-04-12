@@ -6,15 +6,15 @@ import java.util.Objects;
 import java.util.Optional;
 
 import lu.kbra.pclib.logger.GlobalLogger;
+import lu.kbra.plant_game.engine.entity.impl.AnchorOwner;
+import lu.kbra.plant_game.engine.entity.impl.BoundsOwner;
+import lu.kbra.plant_game.engine.entity.impl.BoundsOwnerParentAware;
+import lu.kbra.plant_game.engine.entity.impl.ExtAnchorOwner;
+import lu.kbra.plant_game.engine.entity.impl.Margin2DOwner;
+import lu.kbra.plant_game.engine.entity.impl.MarginOwner;
+import lu.kbra.plant_game.engine.entity.impl.Padding2DOwner;
+import lu.kbra.plant_game.engine.entity.impl.PaddingOwner;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
-import lu.kbra.plant_game.engine.entity.ui.impl.AnchorOwner;
-import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwner;
-import lu.kbra.plant_game.engine.entity.ui.impl.BoundsOwnerParentAware;
-import lu.kbra.plant_game.engine.entity.ui.impl.ExtAnchorOwner;
-import lu.kbra.plant_game.engine.entity.ui.impl.Margin2DOwner;
-import lu.kbra.plant_game.engine.entity.ui.impl.MarginOwner;
-import lu.kbra.plant_game.engine.entity.ui.impl.Padding2DOwner;
-import lu.kbra.plant_game.engine.entity.ui.impl.PaddingOwner;
 import lu.kbra.standalone.gameengine.objs.entity.ParentAwareComponent;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 

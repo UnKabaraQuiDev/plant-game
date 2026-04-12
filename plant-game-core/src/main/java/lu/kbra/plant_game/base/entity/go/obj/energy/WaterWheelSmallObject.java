@@ -3,9 +3,9 @@ package lu.kbra.plant_game.base.entity.go.obj.energy;
 import org.joml.Matrix4f;
 import org.joml.Vector2i;
 
-import lu.kbra.plant_game.engine.entity.go.impl.EnergyProducer;
 import lu.kbra.plant_game.engine.entity.go.obj.FootprintComputeMethod;
 import lu.kbra.plant_game.engine.entity.go.obj.PlaceableAnimatedGameObject;
+import lu.kbra.plant_game.engine.entity.impl.EnergyProducer;
 import lu.kbra.plant_game.engine.mesh.AnimatedMesh;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.plant_game.engine.util.annotation.DataPath;
