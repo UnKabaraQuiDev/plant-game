@@ -21,8 +21,8 @@ jobs:
     outputs:
       should_run: ${{ steps.decision.outputs.should_run }}
       version: ${{ steps.snapshot.outputs.version }}
-      date: ${{ needs.prepare.outputs.date }}
-      tag: ${{ needs.decision.outputs.tag }}
+      date: ${{ steps.prepare.outputs.date }}
+      tag: ${{ steps.decision.outputs.tag }}
 
     steps:
       - uses: actions/checkout@v6
@@ -76,7 +76,7 @@ jobs:
           echo "has_changes=$HAS_CHANGES"
           echo "event=${{ github.event_name }}"
 
-          echo "tag=${{ needs.prepare.outputs.version }}-NIGHTLY-${{ needs.prepare.outputs.date }}" >> $GITHUB_OUTPUT
+          echo "tag=${{ steps.snapshot.outputs.version }}-NIGHTLY-${{ steps.date.outputs.date }}" >> $GITHUB_OUTPUT
 
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             echo "should_run=true" >> $GITHUB_OUTPUT
