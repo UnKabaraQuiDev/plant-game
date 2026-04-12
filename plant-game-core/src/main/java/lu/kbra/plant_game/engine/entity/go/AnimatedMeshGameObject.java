@@ -9,13 +9,15 @@ import lu.kbra.plant_game.engine.entity.impl.AnimatedTransformOwner;
 import lu.kbra.plant_game.engine.mesh.AnimatedMesh;
 import lu.kbra.standalone.gameengine.geom.Mesh;
 
-public class AnimatedMeshGameObject extends MeshGameObject implements AnimatedTransformOwner, AnimatedMeshOwner {
+public class AnimatedMeshGameObject extends MeshGameObject implements AnimatedTransformOwner, AnimatedMeshOwner, FixedAnimationOwner {
 
 	@JsonIgnore
 	protected AnimatedMesh animatedMesh;
 
 	@JsonIgnore
 	protected Matrix4f animatedTransform = new Matrix4f().identity();
+
+	protected float animationTime = 0;
 
 	public AnimatedMeshGameObject(final String str, final Mesh mesh, final AnimatedMesh animatedMesh) {
 		super(str, mesh);
@@ -24,9 +26,7 @@ public class AnimatedMeshGameObject extends MeshGameObject implements AnimatedTr
 
 	@Override
 	public Matrix4f computeAnimatedTransform(final float t) {
-		final AnimatedMesh animatedMesh = this.getAnimatedMesh();
-		this.getTransform().getMatrix().mul(animatedMesh.computeTransform(this.animatedTransform, t), this.animatedTransform);
-		return this.animatedTransform;
+		return FixedAnimationOwner.super.computeAnimatedTransform(t);
 	}
 
 	@Override
@@ -47,6 +47,26 @@ public class AnimatedMeshGameObject extends MeshGameObject implements AnimatedTr
 	@Override
 	public void setAnimatedMesh(final AnimatedMesh ie) {
 		this.animatedMesh = ie;
+	}
+
+	@Override
+	public float getAnimationTime() {
+		return this.animationTime;
+	}
+
+	@Override
+	public void setAnimationTime(final float animationTime) {
+		this.animationTime = animationTime;
+	}
+
+	@Override
+	public float getAnimationDuration() {
+		return 1;
+	}
+
+	@Override
+	public boolean isAnimationPingPong() {
+		return true;
 	}
 
 	@Override
