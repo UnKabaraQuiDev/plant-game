@@ -181,3 +181,32 @@ jobs:
 
       - name: Build Windows
         run: bash ./scripts/build-release-windows.sh
+
+  release:
+    needs: [linux, windows]
+    runs-on: [self-hosted, linux]
+
+    if: always()
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.inputs.tag || github.ref }}
+
+      - name: Get tag name
+        id: tag
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "tag=${{ github.event.inputs.tag }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Snapshot ${{ steps.tag.outputs.tag }}
+          tag_name: ${{ steps.tag.outputs.tag }}
+          make_latest: true
+          prerelease: false
