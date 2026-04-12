@@ -9,8 +9,8 @@
                 0.0,
                 0.0
             ],
-            "texture_material": false,
-            "texture_path": null
+            "texture_material": true,
+            "texture_path": "textures/water_pump_small_base.png"
         },
         "animated": {
             "file": "models/water-pump-small_animated.obj",
@@ -19,8 +19,8 @@
                 0.0,
                 2.701598882675171
             ],
-            "texture_material": false,
-            "texture_path": null,
+            "texture_material": true,
+            "texture_path": "textures/water_pump_small_base.png",
             "animation": {
                 "start_position": [
                     0.0,

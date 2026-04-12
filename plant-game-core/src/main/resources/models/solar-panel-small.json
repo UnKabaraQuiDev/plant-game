@@ -9,8 +9,8 @@
                 0.0,
                 0.0
             ],
-            "texture_material": false,
-            "texture_path": null
+            "texture_material": true,
+            "texture_path": "textures/solar_panel_base.png"
         }
     }
 }

@@ -26,8 +26,8 @@ public interface SprinklerObject extends NeedsRandomTick, PlaceableObject, Water
 		}
 
 		final Map<ResourceType, Float> neededResources = this.getConsumedRate();
-		// TODO: Maybe set the multiplier to 1
-		if (!worldLevelScene.getResourceBuffer().tryConsume(neededResources, this.getRandomTickDuration() / 1_000f)) {
+//		final float timeFactor = this.getRandomTickDuration() / 1_000f;
+		if (!worldLevelScene.getResourceBuffer().tryConsume(neededResources, 1)) {
 			this.setWorking(false);
 			return;
 		}

@@ -16,7 +16,7 @@ public class WaterPumpSmallObject extends PlaceableAnimatedGameObject implements
 
 	@Override
 	public float getProductionRate() {
-		return 11;
+		return 3;
 	}
 
 	@Override

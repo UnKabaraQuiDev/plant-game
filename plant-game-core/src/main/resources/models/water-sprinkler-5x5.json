@@ -9,28 +9,28 @@
                 0.0,
                 0.0
             ],
-            "texture_material": false,
-            "texture_path": null
+            "texture_material": true,
+            "texture_path": "textures/water_sprinkler_5x5_base.png"
         },
         "animated": {
             "file": "models/water-sprinkler-5x5_animated.obj",
             "offset_from_origin": [
                 0.0,
                 0.0,
-                1.0156269073486328
+                0.9191751480102539
             ],
-            "texture_material": false,
-            "texture_path": null,
+            "texture_material": true,
+            "texture_path": "textures/water_sprinkler_5x5_base.png",
             "animation": {
                 "start_position": [
                     0.0,
                     0.0,
-                    1.0156269073486328
+                    0.9191751480102539
                 ],
                 "end_position": [
                     0.0,
                     0.0,
-                    1.0156269073486328
+                    0.9191751480102539
                 ],
                 "start_rotation": [
                     0.0,

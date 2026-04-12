@@ -117,7 +117,10 @@ public class BuildingItemUIObjectGroup extends OffsetUIObjectGroup
 						return;
 					}
 					modal.setAttachedObject(po);
-					modal.setPlaceHook(() -> gameData.buyBuilding(this.buildingDefinition));
+					modal.setPlaceHook(() -> {
+						gameData.buyBuilding(this.buildingDefinition);
+						worldScene.registerHooks(go);
+					});
 					modal.setCancelHook(() -> worldScene.remove(go));
 					worldScene.startModal(modal);
 				})

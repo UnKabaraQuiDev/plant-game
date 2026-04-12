@@ -5,10 +5,10 @@ import java.lang.ref.Cleaner.Cleanable;
 import org.joml.Vector3f;
 
 import lu.kbra.plant_game.engine.entity.go.MeshGameObject;
+import lu.kbra.plant_game.engine.entity.impl.AnimatedMeshOwner;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.plant_game.engine.scene.world.modal.ActiveModalController;
 import lu.kbra.standalone.gameengine.GameEngine;
-import lu.kbra.standalone.gameengine.cache.CacheManager;
 import lu.kbra.standalone.gameengine.generated.gl_wrapper.GL_W;
 import lu.kbra.standalone.gameengine.geom.BoundingBox;
 import lu.kbra.standalone.gameengine.geom.Mesh;
@@ -37,10 +37,17 @@ public class DeferredIconRenderer extends DeferredCompositor {
 			final Vector3f lightColor,
 			final Vector3f lightDir,
 			final float ambientLight) {
-		final CacheManager cache = engine.getCache();
+
+		final BoundingBox bb;
 
 		final Mesh mesh = obj.getMesh();
-		final BoundingBox bb = mesh.getBoundingBox();
+
+		if (obj instanceof AnimatedMeshOwner amo) {
+			final BoundingBox animatedBb = amo.getAnimatedMesh().getBoundingBox().transformed(amo.computeAnimatedTransform(0));
+			bb = BoundingBox.union(mesh.getBoundingBox(), animatedBb);
+		} else {
+			bb = mesh.getBoundingBox();
+		}
 
 		final float radius = new Vector3f(bb.getMax()).sub(bb.getMin()).length() / 2;
 		final float distance = radius * 2;
@@ -87,7 +94,7 @@ public class DeferredIconRenderer extends DeferredCompositor {
 
 		this.renderOutlines(this.renderResolution, true);
 
-		this.renderBloom(this.renderResolution, true);
+//		this.renderBloom(this.renderResolution, true);
 
 		this.blitToScreen(engine.getWindow().getSize(), true);
 

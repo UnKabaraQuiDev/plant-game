@@ -15,7 +15,7 @@ public class SolarPanelSmallObject extends PlaceableMeshGameObject implements En
 
 	@Override
 	public float getProductionRate() {
-		return 4f;
+		return 4.15f;
 	}
 
 	@Override

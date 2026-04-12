@@ -4,9 +4,11 @@ import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -244,7 +246,9 @@ public class DeferredCompositor extends AutoCleanupable {
 	protected BlitShader blitShader;
 
 	// filters
+	@Deprecated
 	protected Map<Class<? extends FilterShader<?>>, FilterShader<?>> filterShaders = new HashMap<>();
+	@Deprecated
 	protected List<FilterShaderConfiguration<?>> enabledFilters = new ArrayList<>();
 
 	// debug
@@ -401,7 +405,7 @@ public class DeferredCompositor extends AutoCleanupable {
 			needRegen = false;
 		}
 
-		this.renderFilters(cache, this.outputResolution, needRegen);
+//		this.renderFilters(cache, this.outputResolution, needRegen);
 
 		this.blitToScreen(this.outputResolution, needRegen);
 
@@ -487,6 +491,7 @@ public class DeferredCompositor extends AutoCleanupable {
 
 	}
 
+	@Deprecated
 	protected void renderFilters(final CacheManager cache, final Vector2i outputResolution, final boolean needRegen) {
 		if (this.enabledFilters.isEmpty()) {
 			return;
@@ -980,13 +985,12 @@ public class DeferredCompositor extends AutoCleanupable {
 
 	}
 
-	private void renderEntityRecursive(final SceneEntity entity, final RenderShader meshShader,
-//			final RenderShader animatedMeshShader,
+	private void renderEntityRecursive(
+			final SceneEntity entity,
+			final RenderShader meshShader,
 			final RenderShader textEmitterShader,
 			final RenderShader instanceEmitterShader,
 			final RenderShader gradientMeshShader,
-//			final RenderShader swayMeshShader,
-//			final RenderShader swayInstanceEmitterShader,
 			final Method method,
 			final Matrix4fc parentTransformMatrix) {
 
@@ -994,7 +998,7 @@ public class DeferredCompositor extends AutoCleanupable {
 			return;
 		}
 
-		if (entity instanceof final RenderConditionOwner rco && !rco.fullFillsRenderConditions()) {
+		if (entity instanceof final RenderConditionOwner rco && !rco.fullfillsRenderConditions()) {
 			return;
 		}
 
@@ -1005,7 +1009,7 @@ public class DeferredCompositor extends AutoCleanupable {
 			localTransformMatrix = GameEngine.IDENTITY_MATRIX4F;
 		}
 
-		final Matrix4f worldTransform = new Matrix4f(parentTransformMatrix).mulAffine(localTransformMatrix);
+		final Matrix4f worldTransform = this.popMatrix().set(parentTransformMatrix).mulAffine(localTransformMatrix);
 
 		if (entity instanceof final GradientOwner go && method != Method.DIRECT) {
 			GlobalLogger.warning("Gradient only supported for direct rendered meshes.");
@@ -1031,9 +1035,11 @@ public class DeferredCompositor extends AutoCleanupable {
 			}
 
 			if (entity instanceof final AnimatedMeshOwner amo) {
-				final Matrix4f animatedTransform = entity instanceof final AnimatedTransformOwner ago ? ago.getAnimatedTransform()
+				final Matrix4f animatedTransform = entity instanceof final AnimatedTransformOwner ago
+						? worldTransform.mulAffine(ago.getAnimatedTransform(), this.popMatrix().identity())
 						: worldTransform;
 				this.renderMesh(amo.getAnimatedMesh(), entity, animatedTransform, meshShader);
+				this.pushMatrix();
 			}
 
 			if (entity instanceof final InstanceEmitterOwner teo) {
@@ -1071,6 +1077,8 @@ public class DeferredCompositor extends AutoCleanupable {
 					method,
 					worldTransform));
 		}
+
+		this.pushMatrix();
 	}
 
 	private void drawDebugFootprint(
@@ -1089,11 +1097,12 @@ public class DeferredCompositor extends AutoCleanupable {
 			final Vector2fc center = ((QuadFootprint) footprint).getCenter();
 			final Vector2ic size = ((QuadFootprint) footprint).getSize();
 
-			final Matrix4f localOffset = new Matrix4f()
+			final Matrix4f localOffset = this.popMatrix()
+					.identity()
 					.translate(center.x() - 0.5f, (float) color.ordinal() / ColorMaterial.values().length, center.y() - 0.5f)
 					.scale(size.x(), 1f, size.y());
 
-			final Matrix4f mat = new Matrix4f(parentTransform).mul(new Matrix4f(localTransform)).mul(localOffset);
+			final Matrix4f mat = this.popMatrix().set(parentTransform).mulAffine(localTransform).mulAffine(localOffset);
 
 			this.deferredTransferShader.setUniform(RenderShader.TRANSFORMATION_MATRIX, mat);
 			GL_W.glDisableVertexAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_ID);
@@ -1110,6 +1119,8 @@ public class DeferredCompositor extends AutoCleanupable {
 
 			GL_W.glPolygonMode(GL_W.GL_FRONT_AND_BACK, GL_W.GL_FILL);
 			GL_W.glEnableVertexAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_ID);
+
+			this.pushMatrix(2);
 		}
 	}
 
@@ -1593,7 +1604,7 @@ public class DeferredCompositor extends AutoCleanupable {
 			final float width = (float) bounds.getWidth();
 			final float height = (float) bounds.getHeight();
 
-			final Matrix4f transform = new Matrix4f().identity().translate(centerX, 0, centerY).scale(width, 1, height);
+			final Matrix4f transform = this.popMatrix().identity().translate(centerX, 0, centerY).scale(width, 1, height);
 
 			this.lineDirectShader.setUniform(RenderShader.TRANSFORMATION_MATRIX, transform);
 			this.lineDirectShader.setUniform(LineDirectShader.TINT,
@@ -1615,6 +1626,8 @@ public class DeferredCompositor extends AutoCleanupable {
 				GL_W.glEnable(GL_W.GL_DEPTH_TEST);
 			}
 			GL_W.glPolygonMode(GL_W.GL_FRONT_AND_BACK, GL_W.GL_FILL);
+
+			this.pushMatrix();
 		}
 	}
 
@@ -1832,20 +1845,50 @@ public class DeferredCompositor extends AutoCleanupable {
 		return this.outlinedObjects.containsKey(go.getObjectId());
 	}
 
+	@Deprecated
 	public <T extends FilterShader<T>> void enableFilter(final FilterShaderConfiguration<T> config) {
 		Objects.requireNonNull(config);
 
 		this.enabledFilters.add(config);
 	}
 
+	@Deprecated
 	public <T extends FilterShader<T>> void disableFilter(final FilterShaderConfiguration<T> config) {
 		Objects.requireNonNull(config);
 
 		this.enabledFilters.remove(config);
 	}
 
+	@Deprecated
 	public void disableFilters() {
 		this.enabledFilters.clear();
+	}
+
+	private final Deque<Matrix4f> free = new ArrayDeque<>();
+	private final Deque<Matrix4f> used = new ArrayDeque<>();
+
+	protected Matrix4f popMatrix() {
+		Matrix4f m = this.free.pollLast();
+		if (m == null) {
+			m = new Matrix4f();
+		}
+
+		this.used.push(m);
+		return m;
+	}
+
+	protected void pushMatrix() {
+		if (this.used.isEmpty()) {
+			return;
+		}
+
+		this.free.addLast(this.used.pop());
+	}
+
+	protected void pushMatrix(final int count) {
+		for (int i = 0; i < count && !this.used.isEmpty(); i++) {
+			this.free.addLast(this.used.pop());
+		}
 	}
 
 	public Window getWindow() {

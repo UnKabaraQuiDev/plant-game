@@ -295,6 +295,8 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController, S
 
 			this.getClickedObject(workers, compositor).then(workers, (Consumer<Optional<PlaceableObject>>) obj -> obj.ifPresent(o -> {
 				modal.setAttachedObject(o);
+				modal.setPlaceHook(() -> this.registerHooks(o));
+				this.unregisterHooks(o);
 				this.startModal(modal);
 			})).push();
 
@@ -318,7 +320,7 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController, S
 		// this also clears
 		this.resourceBuffer.copyFrom(this.gameData);
 
-		this.forEach(e -> this.updateEntity(inputHandler, e, time));
+		this.forEach(e -> this.updateEntity(inputHandler, e, dTime));
 
 		synchronized (this.needsRandomTick) {
 			final long now = System.currentTimeMillis();
@@ -415,16 +417,7 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController, S
 		}
 	}
 
-	@Deprecated
-	public <T extends NeedsRandomTick> T addRandomTick(final T obj) {
-		synchronized (this.needsRandomTick) {
-			this.needsRandomTick.put(obj, System.currentTimeMillis() + obj.getRandomTickDuration());
-		}
-		return obj;
-	}
-
-	@Override
-	protected <T extends SceneEntity> void onAdd(final T entity) {
+	public <T extends SceneEntity> void registerHooks(final T entity) {
 		if (entity instanceof final NeedsRandomTick nrt) {
 			synchronized (this.needsRandomTick) {
 				this.needsRandomTick.put(nrt, System.currentTimeMillis() + nrt.getRandomTickDuration());
@@ -442,8 +435,7 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController, S
 		}
 	}
 
-	@Override
-	protected <T extends SceneEntity> void onRemove(final T entity) {
+	public <T extends SceneEntity> void unregisterHooks(final T entity) {
 		if (entity instanceof final NeedsRandomTick nrt) {
 			synchronized (this.needsRandomTick) {
 				this.needsRandomTick.remove(nrt);
@@ -474,7 +466,7 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController, S
 		});
 	}
 
-	public void recomputeResourceProducer() {
+	public void recomputeResourceProducers() {
 		synchronized (this.resourceProducing) {
 			this.resourceProducing.clear();
 		}

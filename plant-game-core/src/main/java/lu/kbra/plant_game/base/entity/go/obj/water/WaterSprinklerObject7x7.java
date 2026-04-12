@@ -19,7 +19,7 @@ public class WaterSprinklerObject7x7 extends PlaceableAnimatedGameObject impleme
 
 	protected static Footprint wateringFootprint = new QuadFootprint(new Vector2i(-3, -3), new Vector2i(3, 3), true);
 	protected static Vector2ic[][] cachedOffsets = new Vector2ic[Direction.COUNT][];
-	private static final int ROTATION_SPEED = 12;
+	private static final int ROTATION_SPEED = 70;
 
 	protected int currentTileIndex = PCUtils.randomIntRange(0, wateringFootprint.getCellCount());
 	protected boolean working = false;
@@ -40,10 +40,7 @@ public class WaterSprinklerObject7x7 extends PlaceableAnimatedGameObject impleme
 
 	@Override
 	public Matrix4f computeAnimatedTransform(final float t) {
-		this.getTransform()
-				.getMatrix()
-				.mul(this.animatedTransform.identity().rotateY(this.working ? (float) Math.toRadians(t * ROTATION_SPEED) : 0),
-						this.animatedTransform);
+		this.animatedTransform.rotateY(this.working ? (float) Math.toRadians(t * ROTATION_SPEED) : 0);
 		return this.animatedTransform;
 	}
 
@@ -69,22 +66,22 @@ public class WaterSprinklerObject7x7 extends PlaceableAnimatedGameObject impleme
 
 	@Override
 	public float getMinSprinkledWater() {
-		return 8;
+		return 6f;
 	}
 
 	@Override
 	public float getMaxSprinkledWater() {
-		return 16;
+		return 12f;
 	}
 
 	@Override
 	public int getRandomTickDuration() {
-		return DEFAULT_RANDOM_TICK_DURATION / 2;
+		return DEFAULT_RANDOM_TICK_DURATION / 3;
 	}
 
 	@Override
 	public float getConsumedEnergy() {
-		return 10;
+		return 5.4f;
 	}
 
 	@Override

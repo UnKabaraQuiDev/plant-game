@@ -1,6 +1,7 @@
 package lu.kbra.plant_game.engine.entity.go.factory;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -56,6 +57,12 @@ public class GOCreatingTaskFuture<T extends GameObject> extends TaskFuture<List<
 			return this;
 		}
 		this.postInitHooks.add(parent::add);
+		return this;
+	}
+
+	public GOCreatingTaskFuture<T> add(final Collection<? super T> list) {
+		Objects.requireNonNull(list);
+		this.postInitHooks.add(list::add);
 		return this;
 	}
 

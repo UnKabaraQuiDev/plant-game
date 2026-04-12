@@ -17,6 +17,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.StreamReadFeature;
+import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -66,8 +67,10 @@ public class PGLogic extends GameLogic {
 	public static final ObjectMapper OBJECT_MAPPER = PGLogic.createMapper();
 
 	private static ObjectMapper createMapper() {
-		final ObjectMapper mapper = new ObjectMapper(
-				JsonFactory.builder().configure(StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION, true).build());
+		final ObjectMapper mapper = new ObjectMapper(JsonFactory.builder()
+				.configure(StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION, true)
+				.configure(JsonReadFeature.ALLOW_JAVA_COMMENTS, true)
+				.build());
 
 		mapper.enable(SerializationFeature.INDENT_OUTPUT);
 
@@ -250,11 +253,13 @@ public class PGLogic extends GameLogic {
 										OBJECT_MAPPER.getDeserializationContext()));
 							}
 							progress.add(100);
+							final List<GameObject> objects = new ArrayList<>(list.size());
 							final CountTriggerLatch latch = new CountTriggerLatch(list.size(), () -> {
 								progress.add(100);
+								objects.forEach(this.gameWorldScene::registerHooks);
 								this.worldScene = this.gameWorldScene;
 							});
-							list.forEach(c -> c.add(o).latch(latch).push());
+							list.forEach(c -> c.add(o).add(objects).latch(latch).push());
 						}
 					});
 		} catch (IOException e) {
