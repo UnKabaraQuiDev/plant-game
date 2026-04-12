@@ -61,7 +61,7 @@ public class ProgressBarUIObject extends OffsetUIObjectGroup implements LimitedO
 		this.value = value;
 	}
 
-	public <T extends  UIObject & ColorMaterialOwner, V extends  UIObject & ColorMaterialOwner> ObjectTriggerLatch<ProgressBarUIObject> init(
+	public <T extends UIObject & ColorMaterialOwner, V extends UIObject & ColorMaterialOwner> ObjectTriggerLatch<ProgressBarUIObject> init(
 			final Class<T> bgClazz,
 			final Class<V> fgClazz,
 			final ColorMaterial bg,
@@ -97,7 +97,7 @@ public class ProgressBarUIObject extends OffsetUIObjectGroup implements LimitedO
 		return latch;
 	}
 
-	public <T extends  UIObject & ColorMaterialOwner, V extends  UIObject & ColorMaterialOwner> ObjectTriggerLatch<ProgressBarUIObject> init(
+	public <T extends UIObject & ColorMaterialOwner, V extends UIObject & ColorMaterialOwner> ObjectTriggerLatch<ProgressBarUIObject> init(
 			final Class<T> bgClazz,
 			final Class<V> fgClazz) {
 		return this.init(bgClazz, fgClazz, DEFAULT_BG_COLOR, DEFAULT_FG_COLOR);

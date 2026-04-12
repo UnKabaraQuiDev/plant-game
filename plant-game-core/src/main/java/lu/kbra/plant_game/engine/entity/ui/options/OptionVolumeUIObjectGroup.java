@@ -22,7 +22,7 @@ public class OptionVolumeUIObjectGroup extends BoundedUIObjectGroup {
 		super("options.volume", new AnchorLayout(), Direction2d.VERTICAL);
 	}
 
-	public <T extends  UIObject & TextEmitterOwner & AnchorOwner, S extends  UIObject & TextEmitterOwner & AnchorOwner> ObjectTriggerLatch<? extends OptionVolumeUIObjectGroup> init(
+	public <T extends UIObject & TextEmitterOwner & AnchorOwner, S extends UIObject & TextEmitterOwner & AnchorOwner> ObjectTriggerLatch<? extends OptionVolumeUIObjectGroup> init(
 			final Class<T> textClazz,
 			final Class<S> sliderClazz,
 			final float charSize) {
