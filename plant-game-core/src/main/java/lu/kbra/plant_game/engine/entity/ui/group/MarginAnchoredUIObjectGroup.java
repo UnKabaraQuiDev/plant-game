@@ -4,6 +4,7 @@ import lu.kbra.plant_game.engine.entity.impl.MarginOwner;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
 import lu.kbra.plant_game.engine.scene.ui.layout.Layout;
+import lu.kbra.standalone.gameengine.scene.EntityContainer;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 public class MarginAnchoredUIObjectGroup extends AnchoredLayoutUIObjectGroup implements MarginOwner {
@@ -26,14 +27,18 @@ public class MarginAnchoredUIObjectGroup extends AnchoredLayoutUIObjectGroup imp
 	public MarginAnchoredUIObjectGroup(
 			final String str,
 			final Layout layout,
-			final UIObjectGroup parent,
+			final EntityContainer<UIObject> parent,
 			final Anchor obj,
 			final Anchor tar,
 			final UIObject... values) {
 		super(str, layout, parent, obj, tar, values);
 	}
 
-	public MarginAnchoredUIObjectGroup(final String str, final Layout layout, final UIObjectGroup parent, final UIObject... values) {
+	public MarginAnchoredUIObjectGroup(
+			final String str,
+			final Layout layout,
+			final EntityContainer<UIObject> parent,
+			final UIObject... values) {
 		super(str, layout, parent, values);
 	}
 
@@ -45,7 +50,7 @@ public class MarginAnchoredUIObjectGroup extends AnchoredLayoutUIObjectGroup imp
 	public MarginAnchoredUIObjectGroup(
 			final String str,
 			final Layout layout,
-			final UIObjectGroup parent,
+			final EntityContainer<UIObject> parent,
 			final Anchor obj,
 			final Anchor tar,
 			final float margin) {

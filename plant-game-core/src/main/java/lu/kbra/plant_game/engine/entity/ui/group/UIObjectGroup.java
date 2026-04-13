@@ -21,6 +21,7 @@ import lu.kbra.plant_game.engine.entity.impl.PaddingOwner;
 import lu.kbra.plant_game.engine.entity.ui.GenericUIObject;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.scene.ui.UIScene;
+import lu.kbra.standalone.gameengine.scene.EntityContainer;
 import lu.kbra.standalone.gameengine.scene.SynchronizedEntityContainer;
 
 public class UIObjectGroup extends GenericUIObject implements ObjectGroup<UIObject>, NoMeshObject, SynchronizedEntityContainer<UIObject> {
@@ -91,7 +92,7 @@ public class UIObjectGroup extends GenericUIObject implements ObjectGroup<UIObje
 		this.addAll(values);
 	}
 
-	public UIObjectGroup(final String str, final UIObjectGroup parent, final UIObject... values) {
+	public <T extends UIObject> UIObjectGroup(final String str, final EntityContainer<UIObject> parent, final UIObject... values) {
 		this(str, values);
 		parent.add(this);
 	}

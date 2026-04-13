@@ -133,7 +133,7 @@ public class DeferredCompositor extends AutoCleanupable {
 	private static final int BLUR_RADIUS = 5;
 	public static final int BLOOM_TID_OFFSET = 10000;
 
-	protected static enum Method {
+	protected enum Method {
 		DIRECT,
 		DEFERRED,
 		SHADOW;
@@ -164,43 +164,47 @@ public class DeferredCompositor extends AutoCleanupable {
 	public static final String SCREEN_HEIGHT = "screen_height";
 
 	public static final String DEBUG_TRIANGLES_PROPERTY = DeferredCompositor.class.getSimpleName() + ".debug_triangles";
-	public static boolean DEBUG_TRIANGLES = Boolean.getBoolean(DEBUG_TRIANGLES_PROPERTY);
+	public static boolean DEBUG_TRIANGLES = Boolean.getBoolean(DeferredCompositor.DEBUG_TRIANGLES_PROPERTY);
 	public static final Vector4f DEBUG_TRIANGLE_COLOR = new Vector4f(1, 0, 0, 1);
 	public static final String DEBUG_TRIANGLES_LINE_WIDTH_PROPERTY = DeferredCompositor.class.getSimpleName()
 			+ ".debug_triangles.line_width";
-	public static float DEBUG_TRIANGLES_LINE_WIDTH = Float.parseFloat(System.getProperty(DEBUG_TRIANGLES_LINE_WIDTH_PROPERTY, "2"));
+	public static float DEBUG_TRIANGLES_LINE_WIDTH = Float
+			.parseFloat(System.getProperty(DeferredCompositor.DEBUG_TRIANGLES_LINE_WIDTH_PROPERTY, "2"));
 
 	public static final String DEBUG_BOUNDS_PROPERTY = DeferredCompositor.class.getSimpleName() + ".debug_bounds";
-	public static boolean DEBUG_BOUNDS = Boolean.getBoolean(DEBUG_BOUNDS_PROPERTY);
+	public static boolean DEBUG_BOUNDS = Boolean.getBoolean(DeferredCompositor.DEBUG_BOUNDS_PROPERTY);
 	public static final Vector4f DEBUG_BOUNDS_COLOR = new Vector4f(0, 1, 1, 1);
 	public static final String DEBUG_BOUNDS_LINE_WIDTH_PROPERTY = DeferredCompositor.class.getSimpleName() + ".debug_bounds.line_width";
-	public static float DEBUG_BOUNDS_LINE_WIDTH = Float.parseFloat(System.getProperty(DEBUG_BOUNDS_LINE_WIDTH_PROPERTY, "1"));
+	public static float DEBUG_BOUNDS_LINE_WIDTH = Float
+			.parseFloat(System.getProperty(DeferredCompositor.DEBUG_BOUNDS_LINE_WIDTH_PROPERTY, "1"));
 	public static final String DEBUG_BOUNDS_IGNORE_DEPTH_PROPERTY = DeferredCompositor.class.getSimpleName() + ".debug_bounds.ignore_depth";
-	public static boolean DEBUG_BOUNDS_IGNORE_DEPTH = Boolean.getBoolean(DEBUG_BOUNDS_IGNORE_DEPTH_PROPERTY);
+	public static boolean DEBUG_BOUNDS_IGNORE_DEPTH = Boolean.getBoolean(DeferredCompositor.DEBUG_BOUNDS_IGNORE_DEPTH_PROPERTY);
 
 	public static final String DEBUG_FOOTPRINTS_PROPERTY = DeferredCompositor.class.getSimpleName() + ".debug_footprints";
-	public static boolean DEBUG_FOOTPRINTS = Boolean.getBoolean(DEBUG_FOOTPRINTS_PROPERTY);
+	public static boolean DEBUG_FOOTPRINTS = Boolean.getBoolean(DeferredCompositor.DEBUG_FOOTPRINTS_PROPERTY);
 	public static final Vector4f DEBUG_FOOTPRINTS_COLOR = new Vector4f(0.8f, 0.2f, 0.8f, 1);
 	public static final Vector4f DEBUG_STATIC_FOOTPRINTS_COLOR = new Vector4f(0.0f, 0.2f, 0.8f, 1);
 	public static final Vector4f DEBUG_ANIMATED_FOOTPRINTS_COLOR = new Vector4f(0.0f, 0.8f, 0.2f, 1);
 	public static final String DEBUG_FOOTPRINTS_LINE_WIDTH_PROPERTY = DeferredCompositor.class.getSimpleName()
 			+ ".debug_footprints.line_width";
-	public static float DEBUG_FOOTPRINTS_LINE_WIDTH = Float.parseFloat(System.getProperty(DEBUG_FOOTPRINTS_LINE_WIDTH_PROPERTY, "5"));
+	public static float DEBUG_FOOTPRINTS_LINE_WIDTH = Float
+			.parseFloat(System.getProperty(DeferredCompositor.DEBUG_FOOTPRINTS_LINE_WIDTH_PROPERTY, "5"));
 
 	public static final String FAIL_ON_INVALID_COMPONENT_PROPERTY = DeferredCompositor.class.getSimpleName() + ".fail_invalid_component";
-	public static boolean FAIL_ON_INVALID_COMPONENT = Boolean.getBoolean(FAIL_ON_INVALID_COMPONENT_PROPERTY);
+	public static boolean FAIL_ON_INVALID_COMPONENT = Boolean.getBoolean(DeferredCompositor.FAIL_ON_INVALID_COMPONENT_PROPERTY);
 	public static final String SYNC_COMPONENT_CHECK_PROPERTY = DeferredCompositor.class.getSimpleName() + ".sync_component_check";
-	public static boolean SYNC_COMPONENT_CHECK = Boolean.getBoolean(SYNC_COMPONENT_CHECK_PROPERTY);
+	public static boolean SYNC_COMPONENT_CHECK = Boolean.getBoolean(DeferredCompositor.SYNC_COMPONENT_CHECK_PROPERTY);
 
 	public static final String GL_LINE_SMOOTHING_PROPERTY = DeferredCompositor.class.getSimpleName() + ".gl_line_smoothing";
-	public static final boolean GL_LINE_SMOOTHING = Boolean.getBoolean(GL_LINE_SMOOTHING_PROPERTY);
+	public static final boolean GL_LINE_SMOOTHING = Boolean.getBoolean(DeferredCompositor.GL_LINE_SMOOTHING_PROPERTY);
 
 	public static final String GL_LINE_WIDTH_CHECK_PROPERTY = DeferredCompositor.class.getSimpleName() + ".gl_line_width_check";
-	public static final boolean GL_LINE_WIDTH_CHECK = Boolean.getBoolean(GL_LINE_WIDTH_CHECK_PROPERTY);
+	public static final boolean GL_LINE_WIDTH_CHECK = Boolean.getBoolean(DeferredCompositor.GL_LINE_WIDTH_CHECK_PROPERTY);
 
 	public static final String GL_FORCE_SYNC_COMPUTE_SHADERS_PROPERTY = DeferredCompositor.class.getSimpleName()
 			+ ".gl_force_sync_compute_shaders";
-	public static final boolean GL_FORCE_SYNC_COMPUTE_SHADERS = Boolean.getBoolean(GL_FORCE_SYNC_COMPUTE_SHADERS_PROPERTY);
+	public static final boolean GL_FORCE_SYNC_COMPUTE_SHADERS = Boolean
+			.getBoolean(DeferredCompositor.GL_FORCE_SYNC_COMPUTE_SHADERS_PROPERTY);
 
 	private Mesh SCREEN;
 	private QuadMesh QUAD;
@@ -276,7 +280,7 @@ public class DeferredCompositor extends AutoCleanupable {
 		this.ownerThread = ownerThread;
 		this.window = engine.getWindow();
 
-		this.cache.addMesh(this.SCREEN = new LoadedMesh(PASS_SCREEN,
+		this.cache.addMesh(this.SCREEN = new LoadedMesh(DeferredCompositor.PASS_SCREEN,
 				null,
 				new Vec3fAttribArray("pos",
 						0,
@@ -285,7 +289,7 @@ public class DeferredCompositor extends AutoCleanupable {
 				new Vec2fAttribArray("uv",
 						1,
 						new Vector2f[] { new Vector2f(0, 1), new Vector2f(1, 1), new Vector2f(1, 0), new Vector2f(0, 0) })));
-		this.cache.addMesh(this.QUAD = new QuadLoadedMesh(PASS_BOUNDS,
+		this.cache.addMesh(this.QUAD = new QuadLoadedMesh(DeferredCompositor.PASS_BOUNDS,
 				null,
 				new Vector2f(1),
 				new UByteAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_NAME, GameObject.MESH_ATTRIB_MATERIAL_ID_ID, new byte[4])));
@@ -315,14 +319,14 @@ public class DeferredCompositor extends AutoCleanupable {
 		});
 
 		this.fontTexture = SingleTexture
-				.loadSingleTexture(this.cache, TextDirectShader.FONT_TEXTURE_NAME, FONT_PATH, TextureFilter.NEAREST);
+				.loadSingleTexture(this.cache, TextDirectShader.FONT_TEXTURE_NAME, DeferredCompositor.FONT_PATH, TextureFilter.NEAREST);
 		this.fontTexture.setGenerateMipmaps(true);
 		this.fontTexture.genMipMaps();
 		this.cache.addTexture(this.fontTexture);
 
 		this.swayMap = SingleTexture.loadSingleTexture(this.cache,
 				TransferShader.SWAY_MAP_TEXTURE_NAME,
-				SWAY_NOISE_PATH,
+				DeferredCompositor.SWAY_NOISE_PATH,
 				TextureFilter.LINEAR,
 				TextureType.TXT2D,
 				TextureWrap.REPEAT);
@@ -332,7 +336,7 @@ public class DeferredCompositor extends AutoCleanupable {
 
 		this.variationMap = SingleTexture.loadSingleTexture(this.cache,
 				MaterialComputeShader.VARIATION_MAP_TEXTURE_NAME,
-				VARIATION_NOISE_PATH,
+				DeferredCompositor.VARIATION_NOISE_PATH,
 				TextureFilter.LINEAR,
 				TextureType.TXT2D,
 				TextureWrap.REPEAT);
@@ -340,21 +344,21 @@ public class DeferredCompositor extends AutoCleanupable {
 		this.variationMap.genMipMaps();
 		this.cache.addTexture(this.variationMap);
 
-		this.outputTxt = new SingleTexture(WORLD_FRAMEBUFFER_NAME + ".output", engine.getWindow().getSize());
+		this.outputTxt = new SingleTexture(DeferredCompositor.WORLD_FRAMEBUFFER_NAME + ".output", engine.getWindow().getSize());
 		this.outputTxt.setColorFormat(DataType.HALF_FLOAT, TexelFormat.RGBA, TexelInternalFormat.RGBA16F);
 		this.outputTxt.setFilters(TextureFilter.NEAREST);
 		this.outputTxt.setGenerateMipmaps(false);
 		this.outputTxt.setup();
 		this.cache.addTexture(this.outputTxt);
 
-		this.outputBloomTxt = new SingleTexture(WORLD_FRAMEBUFFER_NAME + ".outputBloom", engine.getWindow().getSize());
+		this.outputBloomTxt = new SingleTexture(DeferredCompositor.WORLD_FRAMEBUFFER_NAME + ".outputBloom", engine.getWindow().getSize());
 		this.outputBloomTxt.setColorFormat(DataType.HALF_FLOAT, TexelFormat.RGBA, TexelInternalFormat.RGBA16F);
 		this.outputBloomTxt.setFilters(TextureFilter.LINEAR);
 		this.outputBloomTxt.setGenerateMipmaps(false);
 		this.outputBloomTxt.setup();
 		this.cache.addTexture(this.outputBloomTxt);
 
-		this.blurBloomTxt = new SingleTexture(WORLD_FRAMEBUFFER_NAME + ".blurBloom", engine.getWindow().getSize());
+		this.blurBloomTxt = new SingleTexture(DeferredCompositor.WORLD_FRAMEBUFFER_NAME + ".blurBloom", engine.getWindow().getSize());
 		this.blurBloomTxt.setColorFormat(DataType.HALF_FLOAT, TexelFormat.RGBA, TexelInternalFormat.RGBA16F);
 		this.blurBloomTxt.setFilters(TextureFilter.LINEAR);
 		this.blurBloomTxt.setGenerateMipmaps(false);
@@ -444,15 +448,15 @@ public class DeferredCompositor extends AutoCleanupable {
 	protected void renderBloom(final Vector2i resolution, final boolean needRegen) {
 		this.blurComputeShader.bind();
 
-		this.blurComputeShader.setUniform(BlurComputeShader.RADIUS, BLUR_RADIUS);
-		if (this.blurWeights == null || this.blurWeights.length != BLUR_RADIUS + 1) {
-			this.blurWeights = PCUtils.computeGaussianWeights(BLUR_RADIUS);
+		this.blurComputeShader.setUniform(BlurComputeShader.RADIUS, DeferredCompositor.BLUR_RADIUS);
+		if (this.blurWeights == null || this.blurWeights.length != DeferredCompositor.BLUR_RADIUS + 1) {
+			this.blurWeights = PCUtils.computeGaussianWeights(DeferredCompositor.BLUR_RADIUS);
 			this.blurComputeShader.setUniform(BlurComputeShader.WEIGHTS, this.blurWeights);
 		}
 
 		if (needRegen) {
-			this.blurComputeShader.setUniform(BlurComputeShader.INPUT_SIZE, resolution);
-			this.blurComputeShader.setUniform(BlurComputeShader.OUTPUT_SIZE, resolution);
+			this.blurComputeShader.setUniform(ComputeShader.INPUT_SIZE, resolution);
+			this.blurComputeShader.setUniform(ComputeShader.OUTPUT_SIZE, resolution);
 			this.blurBloomTxt.resize(resolution);
 		}
 		this.blurBloomTxt.clear(this.backgroundColor);
@@ -508,7 +512,7 @@ public class DeferredCompositor extends AutoCleanupable {
 		GL_W.glBindFramebuffer(GL_W.GL_FRAMEBUFFER, 0);
 		GL_W.glViewport(0, 0, outputResolution.x, outputResolution.y);
 
-		for (FilterShaderConfiguration fsc : this.enabledFilters) {
+		for (final FilterShaderConfiguration fsc : this.enabledFilters) {
 			if (!this.filterShaders.containsKey(fsc.getShaderClass())) {
 				GlobalLogger.warning("FilterShader not found for class: " + fsc.getShaderClass());
 				continue;
@@ -552,30 +556,28 @@ public class DeferredCompositor extends AutoCleanupable {
 	 */
 	private boolean checkComponent(final GLObject mesh, final SceneEntity entity) {
 		if (mesh == null) {
-			if (FAIL_ON_INVALID_COMPONENT) {
+			if (DeferredCompositor.FAIL_ON_INVALID_COMPONENT) {
 				throw new NullPointerException("Mesh is null in " + entity.getId());
 			}
 			GlobalLogger.info("Mesh is null in: " + entity.getId());
 			return true;
 		}
-		if (SYNC_COMPONENT_CHECK) {
+		if (DeferredCompositor.SYNC_COMPONENT_CHECK) {
 			synchronized (mesh) {
 				if (mesh == null || !mesh.isValid()) {
-					if (FAIL_ON_INVALID_COMPONENT) {
+					if (DeferredCompositor.FAIL_ON_INVALID_COMPONENT) {
 						throw new IllegalStateException("Mesh: " + Objects.toString(mesh) + " in " + entity.getId() + " isn't valid.");
 					}
 					GlobalLogger.info("Mesh " + Objects.toString(mesh) + " in " + entity.getId() + " isn't valid.");
 					return true;
 				}
 			}
-		} else {
-			if (mesh == null || !mesh.isValid()) {
-				if (FAIL_ON_INVALID_COMPONENT) {
-					throw new IllegalStateException("Mesh: " + Objects.toString(mesh) + " in " + entity.getId() + " isn't valid.");
-				}
-				GlobalLogger.info("Mesh " + Objects.toString(mesh) + " in " + entity.getId() + " isn't valid.");
-				return true;
+		} else if (mesh == null || !mesh.isValid()) {
+			if (DeferredCompositor.FAIL_ON_INVALID_COMPONENT) {
+				throw new IllegalStateException("Mesh: " + Objects.toString(mesh) + " in " + entity.getId() + " isn't valid.");
 			}
+			GlobalLogger.info("Mesh " + Objects.toString(mesh) + " in " + entity.getId() + " isn't valid.");
+			return true;
 		}
 		return false;
 	}
@@ -753,7 +755,7 @@ public class DeferredCompositor extends AutoCleanupable {
 
 		}
 
-		if (!GL_FORCE_SYNC_COMPUTE_SHADERS) {
+		if (!DeferredCompositor.GL_FORCE_SYNC_COMPUTE_SHADERS) {
 			GL_W.glMemoryBarrier(GL_W.GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 		}
 
@@ -833,7 +835,7 @@ public class DeferredCompositor extends AutoCleanupable {
 			final SingleTexture txtDiffuse = txtBloomMesh.getDiffuseTexture();
 			final int tid = ColorMaterial.values().length + txtDiffuse.getGlId();
 
-			if (!alreadyRendered.contains(BLOOM_TID_OFFSET + tid)) {
+			if (!alreadyRendered.contains(DeferredCompositor.BLOOM_TID_OFFSET + tid)) {
 				this.textureMaterialComputeShader.bind();
 				txtDiffuse.bindUniform(txtDiffuseUniformLoc, 6);
 				txtBloom.bindUniform(txtBloomUniformLoc, 7);
@@ -843,9 +845,9 @@ public class DeferredCompositor extends AutoCleanupable {
 
 				GL_W.glDispatchCompute(groupsX, groupsY, 1);
 
-				alreadyRendered.add(BLOOM_TID_OFFSET + tid);
+				alreadyRendered.add(DeferredCompositor.BLOOM_TID_OFFSET + tid);
 
-				if (GL_FORCE_SYNC_COMPUTE_SHADERS) {
+				if (DeferredCompositor.GL_FORCE_SYNC_COMPUTE_SHADERS) {
 					GL_W.glMemoryBarrier(GL_W.GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 				}
 			}
@@ -863,12 +865,12 @@ public class DeferredCompositor extends AutoCleanupable {
 
 				alreadyRendered.add(tid);
 
-				if (GL_FORCE_SYNC_COMPUTE_SHADERS) {
+				if (DeferredCompositor.GL_FORCE_SYNC_COMPUTE_SHADERS) {
 					GL_W.glMemoryBarrier(GL_W.GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 				}
 			}
-		} else if (entity instanceof GameObject go && go.getObjectIdLocation() == AttributeLocation.ENTITY
-				&& entity instanceof VariationOwner variationOwner) {
+		} else if (entity instanceof final GameObject go && go.getObjectIdLocation() == AttributeLocation.ENTITY
+				&& entity instanceof final VariationOwner variationOwner) {
 			this.materialComputeShader.bind();
 
 			this.materialComputeShader.setUniform(MaterialComputeShader.COLOR_VARIATION, true);
@@ -878,7 +880,7 @@ public class DeferredCompositor extends AutoCleanupable {
 			this.materialComputeShader.setUniform(MaterialComputeShader.SINGLE_OBJECT, true);
 			this.materialComputeShader.setUniformUnsigned(MaterialComputeShader.SINGLE_OBJECT_ID, go.getObjectId());
 			this.materialComputeShader.setUniform(MaterialComputeShader.VARIATION_MAP_SCALE, 0.05f);
-			if (variationOwner.useObjectTransform() && go instanceof AbsoluteTransform3DOwner ato) {
+			if (variationOwner.useObjectTransform() && go instanceof final AbsoluteTransform3DOwner ato) {
 				this.materialComputeShader.setUniform(MaterialComputeShader.USE_OBJECT_TRANSFORM, true);
 				this.materialComputeShader.setUniform(MaterialComputeShader.INVERSE_OBJECT_TRANSFORM, ato.getAbsoluteTransform().invert());
 			}
@@ -887,7 +889,7 @@ public class DeferredCompositor extends AutoCleanupable {
 
 			GL_W.glDispatchCompute(groupsX, groupsY, 1);
 
-			if (GL_FORCE_SYNC_COMPUTE_SHADERS) {
+			if (DeferredCompositor.GL_FORCE_SYNC_COMPUTE_SHADERS) {
 				GL_W.glMemoryBarrier(GL_W.GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 			}
 		}
@@ -945,7 +947,7 @@ public class DeferredCompositor extends AutoCleanupable {
 		this.worldFramebuffer.unbind();
 	}
 
-	protected void renderScene(final Scene scene, final Method method) {
+	protected void renderScene(final Scene<?> scene, final Method method) {
 		final RenderShader meshShader;
 		final RenderShader textEmitterShader;
 		final RenderShader instanceEmitterShader;
@@ -975,7 +977,7 @@ public class DeferredCompositor extends AutoCleanupable {
 				this.lineDirectShader,
 				this.lineInstanceDirectShader), scene, method);
 
-		scene.forEach(entity -> this.renderEntityRecursive(entity,
+		scene.forEach((final SceneEntity entity) -> this.renderEntityRecursive(entity,
 				meshShader,
 				textEmitterShader,
 				instanceEmitterShader,
@@ -994,11 +996,7 @@ public class DeferredCompositor extends AutoCleanupable {
 			final Method method,
 			final Matrix4fc parentTransformMatrix) {
 
-		if (!entity.isActive()) {
-			return;
-		}
-
-		if (entity instanceof final RenderConditionOwner rco && !rco.fullfillsRenderConditions()) {
+		if (!entity.isActive() || (entity instanceof final RenderConditionOwner rco && !rco.fullfillsRenderConditions())) {
 			return;
 		}
 
@@ -1086,7 +1084,7 @@ public class DeferredCompositor extends AutoCleanupable {
 			final Matrix4fc localTransform,
 			final Footprint footprint,
 			final ColorMaterial color) {
-		if (this.deferredPass && DEBUG_FOOTPRINTS && this.deferredTransferShader != null) {
+		if (this.deferredPass && DeferredCompositor.DEBUG_FOOTPRINTS && this.deferredTransferShader != null) {
 			if (!(footprint instanceof QuadFootprint)) {
 				this.drawDebugFootprint(parentTransform, localTransform, footprint.toQuad(), color);
 				return;
@@ -1108,10 +1106,10 @@ public class DeferredCompositor extends AutoCleanupable {
 			GL_W.glDisableVertexAttribArray(GameObject.MESH_ATTRIB_MATERIAL_ID_ID);
 			GL_W.glVertexAttribI1ui(GameObject.MESH_ATTRIB_MATERIAL_ID_ID, color.getId());
 
-			if (GL_LINE_SMOOTHING) {
+			if (DeferredCompositor.GL_LINE_SMOOTHING) {
 				GL_W.glEnable(GL_W.GL_LINE_SMOOTH);
 			}
-			GL_W.glLineWidth(DEBUG_FOOTPRINTS_LINE_WIDTH);
+			GL_W.glLineWidth(DeferredCompositor.DEBUG_FOOTPRINTS_LINE_WIDTH);
 
 			GL_W.glPolygonMode(PolygonMode.FRONT_AND_BACK.getGlId(), PolygonDrawMode.LINE.getGlId());
 
@@ -1124,7 +1122,7 @@ public class DeferredCompositor extends AutoCleanupable {
 		}
 	}
 
-	private void setupSceneUniforms(final Collection<RenderShader> collection, final Scene scene, final Method method) {
+	private void setupSceneUniforms(final Collection<RenderShader> collection, final Scene<?> scene, final Method method) {
 		final Camera cam = scene.getCamera();
 		cam.getProjection().update(this.outputResolution);
 		final Matrix4fc viewMatrix;
@@ -1196,7 +1194,7 @@ public class DeferredCompositor extends AutoCleanupable {
 			}
 
 			shader.setUniform(DirectShader.TINT,
-					(tintOwner == null || tintOwner.getTint() == null) ? DirectShader.DEFAULT_TINT : tintOwner.getTint());
+					tintOwner == null || tintOwner.getTint() == null ? DirectShader.DEFAULT_TINT : tintOwner.getTint());
 		}
 
 		if (shader.createUniform(TransferShader.DEFORM_RATIO)) {
@@ -1255,7 +1253,7 @@ public class DeferredCompositor extends AutoCleanupable {
 		GL_W.glPolygonMode(PolygonMode.FRONT_AND_BACK.getGlId(), PolygonDrawMode.FILL.getGlId());
 
 		if (mesh instanceof final LineMesh lineMesh) {
-			if (GL_LINE_SMOOTHING) {
+			if (DeferredCompositor.GL_LINE_SMOOTHING) {
 				if (lineMesh.isLineSmooth()) {
 					GL_W.glEnable(GL_W.GL_LINE_SMOOTH);
 				} else {
@@ -1265,7 +1263,7 @@ public class DeferredCompositor extends AutoCleanupable {
 			GL_W.glLineWidth(lineMesh.getLineWidth());
 		}
 
-		final int particleCount = entity instanceof ParticleCountOwner pco ? pco.getParticleCount() : obj.getParticleCount();
+		final int particleCount = entity instanceof final ParticleCountOwner pco ? pco.getParticleCount() : obj.getParticleCount();
 		GL_W.glDrawElementsInstanced(shader.getBeginMode().getGlId(), mesh.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0, particleCount);
 
 		this.drawDebugTrianglesInstanced(mesh, transformationMatrix, obj, particleCount);
@@ -1299,7 +1297,7 @@ public class DeferredCompositor extends AutoCleanupable {
 			GlobalLogger.warning("Text rendering not compatible with sway.");
 		}
 
-		this.fontTexture.bindUniform(shader.getUniformLocation(TextDirectShader.TXT0), 1);
+		this.fontTexture.bindUniform(shader.getUniformLocation(DirectShader.TXT0), 1);
 
 		shader.setUniform(TextDirectShader.FG_COLOR,
 				(obj.getForegroundColor() != null ? obj.getForegroundColor() : TextEmitter.DEFAULT_FG_COLOR)
@@ -1340,7 +1338,7 @@ public class DeferredCompositor extends AutoCleanupable {
 			shader.setUniform(RenderShader.TRANSFORMATION_MATRIX, transformationMatrix);
 		}
 
-		if (entity instanceof TransparentEntity te) {
+		if (entity instanceof final TransparentEntity te) {
 			GL_W.glEnable(GL_W.GL_BLEND);
 			GL_W.glBlendFunc(GL_W.GL_SRC_ALPHA, GL_W.GL_ONE_MINUS_SRC_ALPHA);
 		} else {
@@ -1365,7 +1363,7 @@ public class DeferredCompositor extends AutoCleanupable {
 			}
 
 			shader.setUniform(DirectShader.TINT,
-					(tintOwner == null || tintOwner.getTint() == null) ? DirectShader.DEFAULT_TINT : tintOwner.getTint());
+					tintOwner == null || tintOwner.getTint() == null ? DirectShader.DEFAULT_TINT : tintOwner.getTint());
 		}
 
 		if (shader.createUniform(TransferShader.APPLY_SWAY)) {
@@ -1401,15 +1399,15 @@ public class DeferredCompositor extends AutoCleanupable {
 			}
 
 			shader.setUniformUnsigned(GradientShader.GRADIENT_DIRECTION,
-					((gradientOwner == null || gradientOwner.getDirection() == null) ? GradientShader.DEFAULT_DIRECTION
+					(gradientOwner == null || gradientOwner.getDirection() == null ? GradientShader.DEFAULT_DIRECTION
 							: gradientOwner.getDirection()).getId());
 			shader.setUniform(GradientShader.GRADIENT_RANGE,
-					(gradientOwner == null || gradientOwner.getRange() == null) ? GradientShader.DEFAULT_RANGE : gradientOwner.getRange());
+					gradientOwner == null || gradientOwner.getRange() == null ? GradientShader.DEFAULT_RANGE : gradientOwner.getRange());
 			shader.setUniform(GradientShader.START_COLOR,
-					(gradientOwner == null || gradientOwner.getStartColor() == null) ? GradientShader.DEFAULT_START_COLOR
+					gradientOwner == null || gradientOwner.getStartColor() == null ? GradientShader.DEFAULT_START_COLOR
 							: gradientOwner.getStartColor());
 			shader.setUniform(GradientShader.END_COLOR,
-					(gradientOwner == null || gradientOwner.getEndColor() == null) ? GradientShader.DEFAULT_END_COLOR
+					gradientOwner == null || gradientOwner.getEndColor() == null ? GradientShader.DEFAULT_END_COLOR
 							: gradientOwner.getEndColor());
 		}
 
@@ -1449,14 +1447,14 @@ public class DeferredCompositor extends AutoCleanupable {
 		}
 
 		if (mesh instanceof final LineMesh lineMesh) {
-			if (GL_LINE_SMOOTHING) {
+			if (DeferredCompositor.GL_LINE_SMOOTHING) {
 				if (lineMesh.isLineSmooth()) {
 					GL_W.glEnable(GL_W.GL_LINE_SMOOTH);
 				} else {
 					GL_W.glDisable(GL_W.GL_LINE_SMOOTH);
 				}
 			}
-			if (GL_LINE_WIDTH_CHECK) {
+			if (DeferredCompositor.GL_LINE_WIDTH_CHECK) {
 				final FloatBuffer range = BufferUtils.createFloatBuffer(2);
 				GL_W.glGetFloatv(GL_W.GL_ALIASED_LINE_WIDTH_RANGE, range);
 
@@ -1468,7 +1466,7 @@ public class DeferredCompositor extends AutoCleanupable {
 				}
 			}
 			GL_W.glLineWidth(lineMesh.getLineWidth() <= 0 ? 1 : lineMesh.getLineWidth());
-		} else if (GL_LINE_SMOOTHING) {
+		} else if (DeferredCompositor.GL_LINE_SMOOTHING) {
 			GL_W.glDisable(GL_W.GL_LINE_SMOOTH);
 		}
 
@@ -1488,16 +1486,16 @@ public class DeferredCompositor extends AutoCleanupable {
 	}
 
 	private void drawDebugTriangles(final Mesh mesh, final Matrix4f transformationMatrix) {
-		if (!this.deferredPass && DEBUG_TRIANGLES && this.lineDirectShader != null) {
+		if (!this.deferredPass && DeferredCompositor.DEBUG_TRIANGLES && this.lineDirectShader != null) {
 			this.lineDirectShader.bind();
 
-			this.lineDirectShader.setUniform(LineDirectShader.TINT, DEBUG_TRIANGLE_COLOR);
+			this.lineDirectShader.setUniform(DirectShader.TINT, DeferredCompositor.DEBUG_TRIANGLE_COLOR);
 			this.lineDirectShader.setUniform(RenderShader.TRANSFORMATION_MATRIX, transformationMatrix);
 
-			if (GL_LINE_SMOOTHING) {
+			if (DeferredCompositor.GL_LINE_SMOOTHING) {
 				GL_W.glEnable(GL_W.GL_LINE_SMOOTH);
 			}
-			GL_W.glLineWidth(DEBUG_TRIANGLES_LINE_WIDTH);
+			GL_W.glLineWidth(DeferredCompositor.DEBUG_TRIANGLES_LINE_WIDTH);
 
 			GL_W.glPolygonMode(PolygonMode.FRONT_AND_BACK.getGlId(), PolygonDrawMode.LINE.getGlId());
 
@@ -1508,7 +1506,7 @@ public class DeferredCompositor extends AutoCleanupable {
 			}
 
 			GL_W.glPolygonMode(GL_W.GL_FRONT_AND_BACK, GL_W.GL_FILL);
-		} else if (this.deferredPass && DEBUG_TRIANGLES && this.deferredTransferShader != null) {
+		} else if (this.deferredPass && DeferredCompositor.DEBUG_TRIANGLES && this.deferredTransferShader != null) {
 			this.deferredTransferShader.bind();
 
 			if (mesh.getVbo().containsKey(GameObject.MESH_ATTRIB_MATERIAL_ID_ID)) {
@@ -1517,10 +1515,10 @@ public class DeferredCompositor extends AutoCleanupable {
 			GL_W.glVertexAttribI1ui(GameObject.MESH_ATTRIB_MATERIAL_ID_ID, ColorMaterial.LIGHT_GREEN.getId());
 			this.deferredTransferShader.setUniform(RenderShader.TRANSFORMATION_MATRIX, transformationMatrix);
 
-			if (GL_LINE_SMOOTHING) {
+			if (DeferredCompositor.GL_LINE_SMOOTHING) {
 				GL_W.glEnable(GL_W.GL_LINE_SMOOTH);
 			}
-			GL_W.glLineWidth(DEBUG_TRIANGLES_LINE_WIDTH);
+			GL_W.glLineWidth(DeferredCompositor.DEBUG_TRIANGLES_LINE_WIDTH);
 			GL_W.glDisable(GL_W.GL_DEPTH_TEST);
 
 			GL_W.glPolygonMode(PolygonMode.FRONT_AND_BACK.getGlId(), PolygonDrawMode.LINE.getGlId());
@@ -1544,16 +1542,16 @@ public class DeferredCompositor extends AutoCleanupable {
 			final Matrix4f transformationMatrix,
 			final InstanceEmitter instances,
 			final int count) {
-		if (!this.deferredPass && DEBUG_TRIANGLES && this.lineInstanceDirectShader != null) {
+		if (!this.deferredPass && DeferredCompositor.DEBUG_TRIANGLES && this.lineInstanceDirectShader != null) {
 			this.lineInstanceDirectShader.bind();
 
-			this.lineInstanceDirectShader.setUniform(LineDirectShader.TINT, DEBUG_TRIANGLE_COLOR);
+			this.lineInstanceDirectShader.setUniform(DirectShader.TINT, DeferredCompositor.DEBUG_TRIANGLE_COLOR);
 			this.lineInstanceDirectShader.setUniform(RenderShader.TRANSFORMATION_MATRIX, transformationMatrix);
 
-			if (GL_LINE_SMOOTHING) {
+			if (DeferredCompositor.GL_LINE_SMOOTHING) {
 				GL_W.glEnable(GL_W.GL_LINE_SMOOTH);
 			}
-			GL_W.glLineWidth(DEBUG_TRIANGLES_LINE_WIDTH);
+			GL_W.glLineWidth(DeferredCompositor.DEBUG_TRIANGLES_LINE_WIDTH);
 //			GL_W.glDisable(GL_W.GL_DEPTH_TEST);
 
 			GL_W.glPolygonMode(GL_W.GL_FRONT_AND_BACK, GL_W.GL_LINE);
@@ -1567,16 +1565,16 @@ public class DeferredCompositor extends AutoCleanupable {
 	}
 
 	private void drawDebugTrianglesText(final Mesh mesh, final Matrix4f transformationMatrix, final TextEmitter emitter) {
-		if (!this.deferredPass && DEBUG_TRIANGLES && this.lineInstanceDirectShader != null) {
+		if (!this.deferredPass && DeferredCompositor.DEBUG_TRIANGLES && this.lineInstanceDirectShader != null) {
 			this.lineInstanceDirectShader.bind();
 
-			this.lineInstanceDirectShader.setUniform(LineDirectShader.TINT, DEBUG_TRIANGLE_COLOR);
+			this.lineInstanceDirectShader.setUniform(DirectShader.TINT, DeferredCompositor.DEBUG_TRIANGLE_COLOR);
 			this.lineInstanceDirectShader.setUniform(RenderShader.TRANSFORMATION_MATRIX, transformationMatrix);
 
-			if (GL_LINE_SMOOTHING) {
+			if (DeferredCompositor.GL_LINE_SMOOTHING) {
 				GL_W.glEnable(GL_W.GL_LINE_SMOOTH);
 			}
-			GL_W.glLineWidth(DEBUG_TRIANGLES_LINE_WIDTH);
+			GL_W.glLineWidth(DeferredCompositor.DEBUG_TRIANGLES_LINE_WIDTH);
 //			GL_W.glDisable(GL_W.GL_DEPTH_TEST);
 
 			GL_W.glPolygonMode(GL_W.GL_FRONT_AND_BACK, GL_W.GL_LINE);
@@ -1593,7 +1591,7 @@ public class DeferredCompositor extends AutoCleanupable {
 		if (shape == null) {
 			GlobalLogger.warning("Entity: " + entity.getId() + " has no/invalid bounds.");
 		}
-		if (!this.deferredPass && DEBUG_BOUNDS && this.lineDirectShader != null && shape != null) {
+		if (!this.deferredPass && DeferredCompositor.DEBUG_BOUNDS && this.lineDirectShader != null && shape != null) {
 			this.QUAD.bind();
 			this.lineDirectShader.bind();
 
@@ -1607,14 +1605,14 @@ public class DeferredCompositor extends AutoCleanupable {
 			final Matrix4f transform = this.popMatrix().identity().translate(centerX, 0, centerY).scale(width, 1, height);
 
 			this.lineDirectShader.setUniform(RenderShader.TRANSFORMATION_MATRIX, transform);
-			this.lineDirectShader.setUniform(LineDirectShader.TINT,
-					entity instanceof DebugBoundsColor dbc ? dbc.getBoundsColor().getColor() : DEBUG_BOUNDS_COLOR);
+			this.lineDirectShader.setUniform(DirectShader.TINT,
+					entity instanceof final DebugBoundsColor dbc ? dbc.getBoundsColor().getColor() : DeferredCompositor.DEBUG_BOUNDS_COLOR);
 
-			if (GL_LINE_SMOOTHING) {
+			if (DeferredCompositor.GL_LINE_SMOOTHING) {
 				GL_W.glEnable(GL_W.GL_LINE_SMOOTH);
 			}
-			GL_W.glLineWidth(DEBUG_BOUNDS_LINE_WIDTH);
-			if (DEBUG_BOUNDS_IGNORE_DEPTH) {
+			GL_W.glLineWidth(DeferredCompositor.DEBUG_BOUNDS_LINE_WIDTH);
+			if (DeferredCompositor.DEBUG_BOUNDS_IGNORE_DEPTH) {
 				GL_W.glDisable(GL_W.GL_DEPTH_TEST);
 			}
 
@@ -1622,7 +1620,7 @@ public class DeferredCompositor extends AutoCleanupable {
 
 			GL_W.glDrawElements(this.lineDirectShader.getBeginMode().getGlId(), this.QUAD.getIndicesCount(), GL_W.GL_UNSIGNED_INT, 0);
 
-			if (DEBUG_BOUNDS_IGNORE_DEPTH) {
+			if (DeferredCompositor.DEBUG_BOUNDS_IGNORE_DEPTH) {
 				GL_W.glEnable(GL_W.GL_DEPTH_TEST);
 			}
 			GL_W.glPolygonMode(GL_W.GL_FRONT_AND_BACK, GL_W.GL_FILL);
@@ -1639,18 +1637,18 @@ public class DeferredCompositor extends AutoCleanupable {
 	}
 
 	private Framebuffer genShadowFramebuffer() {
-		final Framebuffer framebuffer = new Framebuffer(SHADOW_FRAMEBUFFER_NAME);
+		final Framebuffer framebuffer = new Framebuffer(DeferredCompositor.SHADOW_FRAMEBUFFER_NAME);
 		framebuffer.gen();
 		framebuffer.bind();
 
-		this.shadowMap = new SingleTexture(SHADOW_FRAMEBUFFER_NAME + ".shadows", new Vector2i(1024));
+		this.shadowMap = new SingleTexture(DeferredCompositor.SHADOW_FRAMEBUFFER_NAME + ".shadows", new Vector2i(1024));
 		this.shadowMap.setColorFormat(DataType.FLOAT, TexelFormat.DEPTH, TexelInternalFormat.DEPTH_COMPONENT24);
 		this.shadowMap.setFilters(TextureFilter.NEAREST);
 		this.shadowMap.setGenerateMipmaps(false);
 		this.shadowMap.setup();
 		this.cache.addTexture(this.shadowMap);
 
-		framebuffer.attachTexture(FrameBufferAttachment.DEPTH, SHADOW_FRAMEBUFFER_SHADOW_IDX, this.shadowMap);
+		framebuffer.attachTexture(FrameBufferAttachment.DEPTH, DeferredCompositor.SHADOW_FRAMEBUFFER_SHADOW_IDX, this.shadowMap);
 
 		framebuffer.setup();
 
@@ -1660,7 +1658,7 @@ public class DeferredCompositor extends AutoCleanupable {
 	}
 
 	private Framebuffer genWorldFramebuffer(final Vector2i resolution) {
-		final Framebuffer framebuffer = new Framebuffer(WORLD_FRAMEBUFFER_NAME);
+		final Framebuffer framebuffer = new Framebuffer(DeferredCompositor.WORLD_FRAMEBUFFER_NAME);
 		framebuffer.gen();
 		framebuffer.bind();
 
@@ -1669,7 +1667,7 @@ public class DeferredCompositor extends AutoCleanupable {
 
 		assert width > 0 && height > 0 : "Invalid size: " + width + "x" + height + ".";
 
-		this.depthTexture = new SingleTexture(WORLD_FRAMEBUFFER_NAME + ".depth", width, height);
+		this.depthTexture = new SingleTexture(DeferredCompositor.WORLD_FRAMEBUFFER_NAME + ".depth", width, height);
 		this.depthTexture.setDataType(DataType.FLOAT);
 		this.depthTexture.setTexelFormat(TexelFormat.DEPTH);
 		this.depthTexture.setTexelInternalFormat(TexelInternalFormat.DEPTH_COMPONENT24);
@@ -1680,7 +1678,7 @@ public class DeferredCompositor extends AutoCleanupable {
 		this.cache.addTexture(this.depthTexture);
 		framebuffer.attachTexture(FrameBufferAttachment.DEPTH, this.depthTexture);
 
-		this.posTexture = new SingleTexture(WORLD_FRAMEBUFFER_NAME + ".pos", width, height);
+		this.posTexture = new SingleTexture(DeferredCompositor.WORLD_FRAMEBUFFER_NAME + ".pos", width, height);
 		this.posTexture.setDataType(DataType.FLOAT);
 		this.posTexture.setTexelFormat(TexelFormat.RGB);
 		this.posTexture.setTexelInternalFormat(TexelInternalFormat.RGB32F);
@@ -1688,9 +1686,9 @@ public class DeferredCompositor extends AutoCleanupable {
 		this.posTexture.setGenerateMipmaps(false);
 		this.posTexture.setup();
 		this.cache.addTexture(this.posTexture);
-		framebuffer.attachTexture(FrameBufferAttachment.COLOR_FIRST, WORLD_FRAMEBUFFER_POS_IDX, this.posTexture);
+		framebuffer.attachTexture(FrameBufferAttachment.COLOR_FIRST, DeferredCompositor.WORLD_FRAMEBUFFER_POS_IDX, this.posTexture);
 
-		this.normalTexture = new SingleTexture(WORLD_FRAMEBUFFER_NAME + ".normal", width, height);
+		this.normalTexture = new SingleTexture(DeferredCompositor.WORLD_FRAMEBUFFER_NAME + ".normal", width, height);
 		this.normalTexture.setDataType(DataType.FLOAT);
 		this.normalTexture.setTexelFormat(TexelFormat.RGB);
 		this.normalTexture.setTexelInternalFormat(TexelInternalFormat.RGB16F);
@@ -1698,9 +1696,9 @@ public class DeferredCompositor extends AutoCleanupable {
 		this.normalTexture.setGenerateMipmaps(false);
 		this.normalTexture.setup();
 		this.cache.addTexture(this.normalTexture);
-		framebuffer.attachTexture(FrameBufferAttachment.COLOR_FIRST, WORLD_FRAMEBUFFER_NORMAL_IDX, this.normalTexture);
+		framebuffer.attachTexture(FrameBufferAttachment.COLOR_FIRST, DeferredCompositor.WORLD_FRAMEBUFFER_NORMAL_IDX, this.normalTexture);
 
-		this.uvTexture = new SingleTexture(WORLD_FRAMEBUFFER_NAME + ".uv", width, height);
+		this.uvTexture = new SingleTexture(DeferredCompositor.WORLD_FRAMEBUFFER_NAME + ".uv", width, height);
 		this.uvTexture.setDataType(DataType.FLOAT);
 		this.uvTexture.setTexelFormat(TexelFormat.RG);
 		this.uvTexture.setTexelInternalFormat(TexelInternalFormat.RG16F);
@@ -1708,9 +1706,9 @@ public class DeferredCompositor extends AutoCleanupable {
 		this.uvTexture.setGenerateMipmaps(false);
 		this.uvTexture.setup();
 		this.cache.addTexture(this.uvTexture);
-		framebuffer.attachTexture(FrameBufferAttachment.COLOR_FIRST, WORLD_FRAMEBUFFER_UV_IDX, this.uvTexture);
+		framebuffer.attachTexture(FrameBufferAttachment.COLOR_FIRST, DeferredCompositor.WORLD_FRAMEBUFFER_UV_IDX, this.uvTexture);
 
-		this.idsTexture = new SingleTexture(WORLD_FRAMEBUFFER_NAME + ".ids", width, height);
+		this.idsTexture = new SingleTexture(DeferredCompositor.WORLD_FRAMEBUFFER_NAME + ".ids", width, height);
 		this.idsTexture.setDataType(DataType.UINT);
 		this.idsTexture.setTexelFormat(TexelFormat.RGBA_INTEGER);
 		this.idsTexture.setTexelInternalFormat(TexelInternalFormat.RGBA32UI);
@@ -1718,7 +1716,7 @@ public class DeferredCompositor extends AutoCleanupable {
 		this.idsTexture.setGenerateMipmaps(false);
 		this.idsTexture.setup();
 		this.cache.addTexture(this.idsTexture);
-		framebuffer.attachTexture(FrameBufferAttachment.COLOR_FIRST, WORLD_FRAMEBUFFER_IDS_IDX, this.idsTexture);
+		framebuffer.attachTexture(FrameBufferAttachment.COLOR_FIRST, DeferredCompositor.WORLD_FRAMEBUFFER_IDS_IDX, this.idsTexture);
 
 		framebuffer.setup();
 		framebuffer.unbind();
@@ -1755,7 +1753,7 @@ public class DeferredCompositor extends AutoCleanupable {
 	}
 
 	public boolean awaitObjectId() {
-		this.isAwaitingObjectId.waitForFalse(POLL_OBJECT_ID_TIMEOUT);
+		this.isAwaitingObjectId.waitForFalse(DeferredCompositor.POLL_OBJECT_ID_TIMEOUT);
 		return !this.isAwaitingObjectId.getValue();
 	}
 
@@ -1772,11 +1770,11 @@ public class DeferredCompositor extends AutoCleanupable {
 		final Vector2f mousePosition = window.getMousePosition();
 		final Vector2i windowSize = window.getSize();
 
-		final int x = (int) ((mousePosition.x / windowSize.x) * this.idsTexture.getWidth());
-		final int y = (int) ((1 - (mousePosition.y / windowSize.y)) * this.idsTexture.getHeight());
+		final int x = (int) (mousePosition.x / windowSize.x * this.idsTexture.getWidth());
+		final int y = (int) ((1 - mousePosition.y / windowSize.y) * this.idsTexture.getHeight());
 
 		this.worldFramebuffer.bind(GL_W.GL_READ_FRAMEBUFFER);
-		GL_W.glReadBuffer(FrameBufferAttachment.COLOR_FIRST.getGlId() + WORLD_FRAMEBUFFER_IDS_IDX);
+		GL_W.glReadBuffer(FrameBufferAttachment.COLOR_FIRST.getGlId() + DeferredCompositor.WORLD_FRAMEBUFFER_IDS_IDX);
 		final IntBuffer pixel = BufferUtils.createIntBuffer(4);
 		GL11.glReadPixels(x, y, 1, 1, this.idsTexture.getTexelFormat().getGlId(), this.idsTexture.getDataType().getGlId(), pixel);
 		assert GL_W.checkError(
@@ -1832,10 +1830,7 @@ public class DeferredCompositor extends AutoCleanupable {
 	}
 
 	public boolean hasOutline(final SceneEntity e) {
-		if (e == null) {
-			return false;
-		}
-		if (!(e instanceof final GameObject go)) {
+		if ((e == null) || !(e instanceof final GameObject go)) {
 			return false;
 		}
 		if (go.getObjectIdLocation() != AttributeLocation.ENTITY) {

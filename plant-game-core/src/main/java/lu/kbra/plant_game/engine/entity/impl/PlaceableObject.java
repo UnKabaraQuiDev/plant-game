@@ -11,12 +11,12 @@ import lu.kbra.plant_game.engine.entity.go.mesh.terrain.TerrainMesh;
 import lu.kbra.plant_game.engine.entity.go.obj.terrain.TerrainGameObject;
 import lu.kbra.plant_game.engine.scene.world.WorldLevelScene;
 import lu.kbra.plant_game.plugin.registry.GameObjectRegistry;
-import lu.kbra.standalone.gameengine.impl.UniqueID;
+import lu.kbra.standalone.gameengine.impl.IdOwner;
 import lu.kbra.standalone.gameengine.objs.entity.SceneEntity;
 import lu.kbra.standalone.gameengine.utils.consts.Direction;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
-public interface PlaceableObject extends Transform3DOwner, UniqueID, SceneEntity, FootprintOwner {
+public interface PlaceableObject extends Transform3DOwner, IdOwner, SceneEntity, FootprintOwner {
 
 	String LOCALIZATION_KEY = "placeable.";
 

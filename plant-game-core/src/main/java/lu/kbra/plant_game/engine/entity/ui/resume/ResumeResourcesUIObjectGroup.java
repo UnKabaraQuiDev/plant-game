@@ -8,10 +8,10 @@ import lu.kbra.pclib.logger.GlobalLogger;
 import lu.kbra.pclib.pointer.ObjectPointer;
 import lu.kbra.plant_game.engine.entity.impl.DebugBoundsColor;
 import lu.kbra.plant_game.engine.entity.impl.MarginOwner;
+import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.data.Direction2d;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
 import lu.kbra.plant_game.engine.entity.ui.group.AnchoredFBUIObjectGroup;
-import lu.kbra.plant_game.engine.entity.ui.group.UIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.stat_line.integer.ResourceLineUIObjectGroup;
 import lu.kbra.plant_game.engine.entity.ui.text.ProgrammaticTextUIObject;
 import lu.kbra.plant_game.engine.entity.ui.text.TextUIObject;
@@ -22,6 +22,7 @@ import lu.kbra.plant_game.engine.scene.world.data.GameData;
 import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.plant_game.plugin.registry.LevelRegistry.LevelDefinition;
 import lu.kbra.plant_game.plugin.registry.ResourceRegistry;
+import lu.kbra.standalone.gameengine.scene.EntityContainer;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 public class ResumeResourcesUIObjectGroup extends AnchoredFBUIObjectGroup
@@ -32,7 +33,7 @@ public class ResumeResourcesUIObjectGroup extends AnchoredFBUIObjectGroup
 
 	protected float margin;
 
-	public ResumeResourcesUIObjectGroup(final UIObjectGroup parent) {
+	public ResumeResourcesUIObjectGroup(final EntityContainer<UIObject> parent) {
 		super(parent.getId() + "-resources",
 				new FlowLayout(true, 0.05f, Anchor2D.TRAILING),
 				parent,

@@ -78,15 +78,7 @@ public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner
 
 		super.addAll(this.statsGroup);
 
-		final ObjectTriggerLatch<OverlayUIScene> latch = new ObjectTriggerLatch<>(7, this) {
-
-			@Override
-			public void trigger(final Object value) {
-//				new Exception(Integer.toString(this.getValue())).fillInStackTrace().printStackTrace();
-				super.trigger(value);
-			}
-
-		};
+		final ObjectTriggerLatch<OverlayUIScene> latch = new ObjectTriggerLatch<>(7, this);
 		latch.then((Consumer<OverlayUIScene>) OverlayUIScene::doLayout);
 
 		final float height = 0.2f * STATS_GROUP_SCALE;
@@ -159,8 +151,6 @@ public class OverlayUIScene extends UIScene implements LayoutOwner, PaddingOwner
 
 		return latch;
 	}
-
-	int frameCounter = 0;
 
 	@Override
 	public void update(

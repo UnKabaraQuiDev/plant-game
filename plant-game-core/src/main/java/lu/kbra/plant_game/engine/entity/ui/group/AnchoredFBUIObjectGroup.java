@@ -5,6 +5,7 @@ import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.data.Direction2d;
 import lu.kbra.plant_game.engine.scene.ui.layout.Anchor;
 import lu.kbra.plant_game.engine.scene.ui.layout.Layout;
+import lu.kbra.standalone.gameengine.scene.EntityContainer;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 public class AnchoredFBUIObjectGroup extends FixedBoundsUIObjectGroup implements AnchorOwner {
@@ -42,7 +43,7 @@ public class AnchoredFBUIObjectGroup extends FixedBoundsUIObjectGroup implements
 	public AnchoredFBUIObjectGroup(
 			final String str,
 			final Layout layout,
-			final UIObjectGroup parent,
+			final EntityContainer<UIObject> parent,
 			final Direction2d dir,
 			final float size,
 			final Anchor objectAnchor,

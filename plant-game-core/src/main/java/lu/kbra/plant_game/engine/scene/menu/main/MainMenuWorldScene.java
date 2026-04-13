@@ -64,7 +64,7 @@ public class MainMenuWorldScene extends WorldLevelScene implements Consumer<Leve
 
 	private float progress = 1f;
 
-	private final Vector3fc axis = GameEngine.Y_POS;
+	private final Vector3fc upAxis = GameEngine.Y_POS;
 
 	private final Vector3f transitionStart = new Vector3f();
 	private final Vector3f transitionEnd = new Vector3f();
@@ -197,15 +197,12 @@ public class MainMenuWorldScene extends WorldLevelScene implements Consumer<Leve
 				this.currentCameraOffset.set(this.cameraOffsetStart).lerp(this.cameraOffsetEnd, t);
 			}
 		}
-		/*
-		 * else { this.currentCenter.set(this.targets[this.currentIndex].getTransform().getTranslation()); }
-		 */
 
 		this.applyRotation(dTime, this.targetIndex);
 		this.applyRotation(dTime, this.currentIndex);
 
 		this.camera.positionSet(this.currentCenter).positionAdd(this.currentCameraOffset);
-		this.camera.lookAt(this.camera.getPosition(), this.currentCenter, this.axis);
+		this.camera.lookAt(this.camera.getPosition(), this.currentCenter, this.upAxis);
 		this.camera.updateMatrix();
 	}
 

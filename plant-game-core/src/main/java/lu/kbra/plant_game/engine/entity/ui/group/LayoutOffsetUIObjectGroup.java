@@ -9,6 +9,7 @@ import lu.kbra.plant_game.engine.scene.ui.layout.LayoutOwner;
 import lu.kbra.standalone.gameengine.objs.entity.ParentAwareComponent;
 import lu.kbra.standalone.gameengine.objs.entity.ParentAwareNode;
 import lu.kbra.standalone.gameengine.objs.entity.SceneParentAware;
+import lu.kbra.standalone.gameengine.scene.EntityContainer;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
 public class LayoutOffsetUIObjectGroup extends OffsetUIObjectGroup implements LayoutOwner, SceneParentAware {
@@ -25,7 +26,11 @@ public class LayoutOffsetUIObjectGroup extends OffsetUIObjectGroup implements La
 		this.setLayout(layout);
 	}
 
-	public LayoutOffsetUIObjectGroup(final String str, final Layout layout, final UIObjectGroup parent, final UIObject... values) {
+	public LayoutOffsetUIObjectGroup(
+			final String str,
+			final Layout layout,
+			final EntityContainer<UIObject> parent,
+			final UIObject... values) {
 		super(str, parent, values);
 		this.setLayout(layout);
 	}
@@ -33,7 +38,7 @@ public class LayoutOffsetUIObjectGroup extends OffsetUIObjectGroup implements La
 	public LayoutOffsetUIObjectGroup(
 			final String str,
 			final Layout layout,
-			final UIObjectGroup parent,
+			final EntityContainer<UIObject> parent,
 			final Transform3D transform,
 			final UIObject... values) {
 		super(str, parent, transform, values);

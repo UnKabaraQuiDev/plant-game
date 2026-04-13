@@ -27,9 +27,9 @@ import lu.kbra.plant_game.engine.entity.impl.NeedsFocusInput;
 import lu.kbra.plant_game.engine.entity.impl.NeedsHover;
 import lu.kbra.plant_game.engine.entity.impl.NeedsInput;
 import lu.kbra.plant_game.engine.entity.impl.NeedsUpdate;
-import lu.kbra.plant_game.engine.entity.impl.SceneBoundsOwner;
 import lu.kbra.plant_game.engine.entity.impl.Transform3DOwner;
 import lu.kbra.plant_game.engine.entity.impl.TransformOwner;
+import lu.kbra.plant_game.engine.entity.impl.UISceneBoundsOwner;
 import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.data.HoverState;
 import lu.kbra.plant_game.engine.render.DeferredCompositor;
@@ -42,10 +42,10 @@ import lu.kbra.standalone.gameengine.impl.future.WorkerDispatcher;
 import lu.kbra.standalone.gameengine.objs.entity.Entity;
 import lu.kbra.standalone.gameengine.objs.entity.SceneEntity;
 import lu.kbra.standalone.gameengine.scene.EntityContainer;
-import lu.kbra.standalone.gameengine.scene.Scene3D;
+import lu.kbra.standalone.gameengine.scene.GenericScene;
 import lu.kbra.standalone.gameengine.scene.camera.Camera;
 
-public class UIScene extends Scene3D implements SceneBoundsOwner {
+public class UIScene extends GenericScene<UIObject> implements UISceneBoundsOwner {
 
 	public static final String PROJECTION_SIZE_PROPERTY = UIScene.class.getSimpleName() + ".projection_size";
 	public static float PROJECTION_SIZE = PCUtils.getFloat(PROJECTION_SIZE_PROPERTY, 0.75f);
@@ -91,7 +91,7 @@ public class UIScene extends Scene3D implements SceneBoundsOwner {
 
 		final Set<UIObject> newHovered = new HashSet<>();
 
-		this.forEach((final SceneEntity e) -> this
+		this.forEach((final UIObject e) -> this
 				.checkInput(e, inputHandler, frameState, mouseWorld2DPoint, newHovered, GameEngine.IDENTITY_MATRIX4F));
 
 		this.hovering.removeAll(newHovered);
@@ -132,7 +132,7 @@ public class UIScene extends Scene3D implements SceneBoundsOwner {
 			final Point2D.Float mousePos,
 			final Set<UIObject> newHovered,
 			final Matrix4fc parentTransform) {
-		if (!e.isActive()) {
+		if (!(e instanceof UIObject) || !e.isActive()) {
 			return;
 		}
 
@@ -197,13 +197,17 @@ public class UIScene extends Scene3D implements SceneBoundsOwner {
 		}
 
 		synchronized (super.getEntitiesLock()) {
-			for (final SceneEntity e : this) {
+			for (final UIObject e : this) {
 				this.updateEntity(inputHandler, e);
 			}
 		}
 	}
 
 	protected void updateEntity(final WindowInputHandler inputHandler, final SceneEntity e) {
+		if (!(e instanceof SceneEntity) || !e.isActive()) {
+			return;
+		}
+
 		if (e instanceof final EntityContainer<?> ec) {
 			ec.forEach(e2 -> this.updateEntity(inputHandler, e2));
 		}
@@ -237,7 +241,7 @@ public class UIScene extends Scene3D implements SceneBoundsOwner {
 	}
 
 	@Override
-	public void setEntities(final Map<String, SceneEntity> entities) {
+	public void setEntities(final Map<String, UIObject> entities) {
 		super.setEntities(entities);
 		if (this instanceof LayoutOwner lo) {
 			lo.doLayout();
@@ -245,7 +249,7 @@ public class UIScene extends Scene3D implements SceneBoundsOwner {
 	}
 
 	@Override
-	public <T extends SceneEntity> T add(final T entity) {
+	public <T extends UIObject> T add(final T entity) {
 		final T re = super.add(entity);
 		if (this instanceof LayoutOwner lo) {
 			lo.doLayout();
@@ -254,7 +258,7 @@ public class UIScene extends Scene3D implements SceneBoundsOwner {
 	}
 
 	@Override
-	public <T extends SceneEntity> T[] addAll(final T... entities) {
+	public <T extends UIObject> T[] addAll(final T... entities) {
 		final T[] re = super.addAll(entities);
 		if (this instanceof LayoutOwner lo) {
 			lo.doLayout();
@@ -263,7 +267,7 @@ public class UIScene extends Scene3D implements SceneBoundsOwner {
 	}
 
 	@Override
-	public <T extends SceneEntity> Optional<T> remove(final T e) {
+	public <T extends UIObject> Optional<T> remove(final T e) {
 		final Optional<T> o = super.remove(e);
 		if (this instanceof LayoutOwner lo) {
 			lo.doLayout();
@@ -272,7 +276,7 @@ public class UIScene extends Scene3D implements SceneBoundsOwner {
 	}
 
 	@Override
-	public <T extends SceneEntity, O extends SceneEntity> Optional<O> replace(final O old, final T new_) {
+	public <T extends UIObject, O extends UIObject> Optional<O> replace(final O old, final T new_) {
 		final Optional<O> o = super.replace(old, new_);
 		if (this instanceof LayoutOwner lo) {
 			lo.doLayout();
@@ -281,7 +285,7 @@ public class UIScene extends Scene3D implements SceneBoundsOwner {
 	}
 
 	@Override
-	public <T extends SceneEntity> boolean addAll(final Collection<? extends T> entities) {
+	public <T extends UIObject> boolean addAll(final Collection<? extends T> entities) {
 		final boolean b = super.addAll(entities);
 		if (this instanceof LayoutOwner lo) {
 			lo.doLayout();

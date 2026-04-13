@@ -12,6 +12,7 @@ import lu.kbra.pclib.concurrency.ObjectTriggerLatch;
 import lu.kbra.pclib.logger.GlobalLogger;
 import lu.kbra.pclib.pointer.ObjectPointer;
 import lu.kbra.plant_game.engine.entity.impl.MarginOwner;
+import lu.kbra.plant_game.engine.entity.ui.UIObject;
 import lu.kbra.plant_game.engine.entity.ui.bar.IndexedProgressBarUIObject;
 import lu.kbra.plant_game.engine.entity.ui.bar.ProgressBarUIObject;
 import lu.kbra.plant_game.engine.entity.ui.factory.UIObjectFactory;
@@ -26,6 +27,7 @@ import lu.kbra.plant_game.engine.scene.ui.layout.FlowLayout;
 import lu.kbra.plant_game.engine.scene.ui.layout.LayoutOwner;
 import lu.kbra.plant_game.generated.ColorMaterial;
 import lu.kbra.plant_game.plugin.registry.LevelRegistry.LevelDefinition;
+import lu.kbra.standalone.gameengine.scene.EntityContainer;
 import lu.kbra.standalone.gameengine.utils.gl.consts.TextAlignment;
 import lu.kbra.standalone.gameengine.utils.transform.Transform3D;
 
@@ -39,9 +41,13 @@ public class PlayInfoUIObjectGroup extends AnchoredLayoutUIObjectGroup implement
 
 	protected float margin = 0.1f;
 
-	public PlayInfoUIObjectGroup(final UIObjectGroup playMenuGroup) {
-		super(playMenuGroup
-				.getId(), new FlowLayout(true, 0.02f, Anchor2D.TRAILING), playMenuGroup, Anchor.BOTTOM_RIGHT, Anchor.BOTTOM_RIGHT);
+	public PlayInfoUIObjectGroup(final UIObjectGroup parent) {
+		super(parent.getId()
+				+ "-play-info", new FlowLayout(true, 0.02f, Anchor2D.TRAILING), parent, Anchor.BOTTOM_RIGHT, Anchor.BOTTOM_RIGHT);
+	}
+
+	public PlayInfoUIObjectGroup(final EntityContainer<UIObject> parent) {
+		super("play-info", new FlowLayout(true, 0.02f, Anchor2D.TRAILING), parent, Anchor.BOTTOM_RIGHT, Anchor.BOTTOM_RIGHT);
 	}
 
 	@Override
