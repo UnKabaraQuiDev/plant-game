@@ -39,7 +39,7 @@ public abstract class GenericUIObject extends Entity implements UIObject {
 
 	@Override
 	public String toString() {
-		return "GenericUIObject@" + System.identityHashCode(this) + " [transform=" + this.transform + ", parent=" + this.parent + "]";
+		return "GenericUIObject [transform=" + transform + "]";
 	}
 
 }
