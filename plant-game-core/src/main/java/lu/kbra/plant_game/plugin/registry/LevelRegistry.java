@@ -186,7 +186,7 @@ public abstract class LevelRegistry extends PluginRegistry {
 
 	@Override
 	public int getPriority() {
-		return 500;
+		return 600;
 	}
 
 }

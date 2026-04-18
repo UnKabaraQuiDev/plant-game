@@ -62,7 +62,7 @@ public abstract class FilterShaderRegistry extends PluginRegistry {
 
 	@Override
 	public int getPriority() {
-		return 600;
+		return 700;
 	}
 
 }
