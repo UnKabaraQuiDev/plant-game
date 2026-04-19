@@ -518,8 +518,9 @@ public class WorldLevelScene extends Scene3D implements ActiveModalController, S
 	}
 
 	public void setTerrain(final TerrainGameObject terrain) {
-		super.replace(this.terrain, terrain);
+		super.replace(this.terrain, terrain).ifPresent(c -> this.unregisterHooks(c));
 		this.terrain = terrain;
+		this.registerHooks(terrain);
 		this.recomputeLightMatrices(terrain.getMesh().getBoundingBox(), terrain.getAbsoluteTransform().getTranslation(new Vector3f()));
 	}
 
